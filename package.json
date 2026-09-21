@@ -1,0 +1,72 @@
+{
+  "name": "catalyst-skeleton",
+  "version": "5.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:GabrielCirqueira/Catalyst-Skeleton.git",
+  "author": "Desenvolvedor Gabriel Cirquiera",
+  "license": "proprietary",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host --config .tooling/frontend/vite.config.js",
+    "build": "vite build --config .tooling/frontend/vite.config.js",
+    "lint": "biome lint web",
+    "lint:fix": "biome lint --write web",
+    "format": "biome format --write web",
+    "format:check": "biome format web",
+    "check": "biome check web",
+    "check:fix": "biome check --write web",
+    "lint:php": "composer lint:php:cs",
+    "lint:php:fix": "composer fix:php",
+    "type-check": "tsc --noEmit --project tsconfig.json",
+    "validate": "npm run type-check && npm run check",
+    "watch": "vite build --watch --mode development --config .tooling/frontend/vite.config.js",
+    "preview": "vite preview --config .tooling/frontend/vite.config.js",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "dependencies": {
+    "@fontsource/lato": "^5.2.7",
+    "@fontsource/poppins": "^5.2.7",
+    "@heroui/react": "^3.2.4",
+    "@heroui/styles": "^3.2.4",
+    "@react-aria/i18n": "^3.13.1",
+    "@react-aria/ssr": "^3.10.1",
+    "@react-aria/utils": "^3.34.1",
+    "@tanstack/react-query": "^5.90.21",
+    "axios": "^1.12.2",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.544.0",
+    "react": "^19.2.4",
+    "react-aria": "^3.52.1",
+    "react-aria-components": "^1.21.1",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.9.3",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-motion": "^1.1.0",
+    "zod": "^4.1.13",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "globals": "^16.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "tailwindcss": "^4.1.11",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-symfony": "^8.0.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}

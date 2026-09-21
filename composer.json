@@ -1,0 +1,121 @@
+{
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.4",
+        "ext-ctype": "*",
+        "ext-iconv": "*",
+        "doctrine/dbal": "^3.10.6",
+        "doctrine/doctrine-bundle": "^2.19.1",
+        "doctrine/doctrine-migrations-bundle": "^3.7.1",
+        "doctrine/orm": "^3.7.0",
+        "gesdinet/jwt-refresh-token-bundle": "^1.5.1",
+        "lexik/jwt-authentication-bundle": "^3.2",
+        "nelmio/cors-bundle": ">=2.6.1",
+        "pentatrion/vite-bundle": "^8.2.4",
+        "phpdocumentor/reflection-docblock": "^5.6.7",
+        "phpstan/phpdoc-parser": "^2.3.5",
+        "symfony/asset": "7.3.*",
+        "symfony/console": "7.3.*",
+        "symfony/dotenv": "7.3.*",
+        "symfony/expression-language": "7.3.*",
+        "symfony/flex": "^2.11.0",
+        "symfony/framework-bundle": "7.3.*",
+        "symfony/http-client": "7.3.*",
+        "symfony/mailer": "7.3.*",
+        "symfony/mime": "7.3.*",
+        "symfony/monolog-bundle": "^3.11.2",
+        "symfony/process": "7.3.*",
+        "symfony/property-access": "7.3.*",
+        "symfony/property-info": "7.3.*",
+        "symfony/rate-limiter": "7.3.*",
+        "symfony/runtime": "7.3.*",
+        "symfony/security-bundle": "7.3.*",
+        "symfony/serializer": "7.3.*",
+        "symfony/string": "7.3.*",
+        "symfony/translation": "7.3.*",
+        "symfony/twig-bundle": "7.3.*",
+        "symfony/validator": "7.3.*",
+        "symfony/yaml": "7.3.*",
+        "twig/extra-bundle": "^2.12|^3.24",
+        "twig/twig": "^2.12|^3.28.0"
+    },
+    "suggest": {
+        "sentry/sentry-symfony": "Módulo observability: rastreamento de erros em produção (ative com --observability no setup).",
+        "symfony/doctrine-messenger": "Módulo async: processamento de filas via Doctrine transport (ative com --async no setup).",
+        "symfony/scheduler": "Módulo async: tarefas agendadas nativas (ative com --async no setup).",
+        "symfony/notifier": "Módulo async: notificações via e-mail, SMS e chat (ative com --async no setup).",
+        "symfony/form": "Opcional: formulários server-side (não necessário em projetos pure API).",
+        "symfony/asset-mapper": "Opcional: apenas se usar Stimulus/Turbo em vez de Vite+React."
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "symfony/flex": true,
+            "symfony/runtime": true
+        },
+        "bump-after-update": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "replace": {
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php72": "*",
+        "symfony/polyfill-php73": "*",
+        "symfony/polyfill-php74": "*",
+        "symfony/polyfill-php80": "*",
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php82": "*"
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd",
+            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "@auto-scripts",
+            "@hooks:install"
+        ],
+        "post-update-cmd": [
+            "@auto-scripts",
+            "@hooks:install"
+        ],
+        "lint:php:stan": "./cli/phpstan.sh",
+        "lint:php:cs": "./cli/phpcs.sh src",
+        "lint:frontend": "./cli/frontend-lint.sh",
+        "fix:php": "./cli/phpcbf.sh",
+        "fix:php:diff": "./cli/phpcbf-diff.sh",
+        "fix:frontend": "./cli/frontend-fix.sh",
+        "hooks:install": "./cli/install-hooks.sh",
+        "qa": [
+            "@lint:php:stan",
+            "@lint:php:cs",
+            "@lint:frontend"
+        ]
+    },
+    "conflict": {
+        "symfony/symfony": "*"
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": true,
+            "require": "7.3.*"
+        }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.12.34",
+        "friendsofphp/php-cs-fixer": "^3.95.25",
+        "squizlabs/php_codesniffer": "^4.0.4",
+        "symfony/debug-bundle": "7.3.*",
+        "symfony/maker-bundle": "^1.67",
+        "symfony/stopwatch": "7.3.*",
+        "symfony/web-profiler-bundle": "7.3.*"
+    }
+}
