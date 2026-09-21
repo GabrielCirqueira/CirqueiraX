@@ -1,10 +1,10 @@
-# Roadmap — Fundação do cirqueiraX v5
+# Roadmap — Feature 1: Infraestrutura e Fundação do CirqueiraX
 
 > Backlog e planejamento do projeto. Cada tópico descreve o que existe (ou faltava), por que importa e o que precisa acontecer. Marque `[x]` no checklist ao concluir.
 
-**Numeração:** tópicos 1–20.
+**Numeração:** tópicos 21–40.
 
-**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_1.md](documentation/progresso/PROGRESSO_ROADMAP_1.md)
+**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_2.md](documentation/progresso/PROGRESSO_ROADMAP_2.md)
 
 ---
 
@@ -12,250 +12,250 @@
 
 | # | Tópico |
 |---|---|
-| 1 | Stack núcleo PHP 8.4 + Symfony 7.3 + Docker Compose |
-| 2 | Autenticação JWT RS256 com refresh token |
-| 3 | Entidade Usuario, Repository e migration |
-| 4 | AuthController — login, registro, me e refresh |
-| 5 | Frontend React 19 + TypeScript 5.9 + Vite 7 |
-| 6 | HeroUI v3 + Tailwind CSS 4 + cor brand |
-| 7 | ThemeProvider (claro / escuro) |
-| 8 | Primitivos de layout e texto |
-| 9 | Header e Footer globais no MainLayout |
-| 10 | Landing Home com showcase de componentes |
-| 11 | Modal de autenticação (login / cadastro) |
-| 12 | Páginas Login e Cadastro |
-| 13 | RotaProtegida e store Zustand de auth |
-| 14 | TanStack Query + Axios com interceptores JWT |
-| 15 | ErrorBoundary e página 404 |
-| 16 | Documentação técnica do cirqueirax |
-| 17 | Makefile, Biome, PHPStan e PHP-CS-Fixer |
-| 18 | Módulos opt-in (async, observability, ui-extra) |
-| 19 | PHPUnit e pasta tests/ removidos |
-| 20 | Sistema de progresso, roadmap e melhorias |
+| 21 | Ativação do módulo async (Messenger + Scheduler) |
+| 22 | Configuração do transport Doctrine e messenger.yaml |
+| 23 | Supervisor com workers dedicados do Messenger |
+| 24 | Ativação do módulo ui-extra (Recharts) |
+| 25 | Ativação do módulo observability (Sentry) |
+| 26 | Canais de log dedicados no Monolog |
+| 27 | Volume Docker compartilhado com o Syncthing |
+| 28 | Enum TipoCliente e entidade TokenAgente |
+| 29 | Authenticator customizado para tokens de agente |
+| 30 | Comando CLI de geração de token por agente |
+| 31 | Entidade ContaGoogleFotos |
+| 32 | Serviço de criptografia do refresh token |
+| 33 | Comando CLI de autorização OAuth por conta Google Fotos |
+| 34 | Entidade MediaItem (UUID v7) |
+| 35 | Entidade Categoria |
+| 36 | Entidade OrigemRegra |
+| 37 | Enums StatusMediaItem e OrigemMedia |
+| 38 | Migrations das entidades do motor de mídia |
+| 39 | Rate limiter dedicado para endpoints de ingestão |
+| 40 | Atualização do guia de padrões (decisão de UI HeroUI) |
 
 ---
 
 ## Checklist
 
-- [x] **1. Stack núcleo PHP 8.4 + Symfony 7.3 + Docker Compose**
-- [x] **2. Autenticação JWT RS256 com refresh token**
-- [x] **3. Entidade Usuario, Repository e migration**
-- [x] **4. AuthController — login, registro, me e refresh**
-- [x] **5. Frontend React 19 + TypeScript 5.9 + Vite 7**
-- [x] **6. HeroUI v3 + Tailwind CSS 4 + cor brand**
-- [x] **7. ThemeProvider (claro / escuro)**
-- [x] **8. Primitivos de layout e texto**
-- [x] **9. Header e Footer globais no MainLayout**
-- [x] **10. Landing Home com showcase de componentes**
-- [x] **11. Modal de autenticação (login / cadastro)**
-- [x] **12. Páginas Login e Cadastro**
-- [x] **13. RotaProtegida e store Zustand de auth**
-- [x] **14. TanStack Query + Axios com interceptores JWT**
-- [x] **15. ErrorBoundary e página 404**
-- [x] **16. Documentação técnica do cirqueirax**
-- [x] **17. Makefile, Biome, PHPStan e PHP-CS-Fixer**
-- [x] **18. Módulos opt-in (async, observability, ui-extra)**
-- [x] **19. PHPUnit e pasta tests/ removidos**
-- [x] **20. Sistema de progresso, roadmap e melhorias**
+- [ ] **21. Ativação do módulo async (Messenger + Scheduler)**
+- [ ] **22. Configuração do transport Doctrine e messenger.yaml**
+- [ ] **23. Supervisor com workers dedicados do Messenger**
+- [ ] **24. Ativação do módulo ui-extra (Recharts)**
+- [ ] **25. Ativação do módulo observability (Sentry)**
+- [ ] **26. Canais de log dedicados no Monolog**
+- [ ] **27. Volume Docker compartilhado com o Syncthing**
+- [ ] **28. Enum TipoCliente e entidade TokenAgente**
+- [ ] **29. Authenticator customizado para tokens de agente**
+- [ ] **30. Comando CLI de geração de token por agente**
+- [ ] **31. Entidade ContaGoogleFotos**
+- [ ] **32. Serviço de criptografia do refresh token**
+- [ ] **33. Comando CLI de autorização OAuth por conta Google Fotos**
+- [ ] **34. Entidade MediaItem (UUID v7)**
+- [ ] **35. Entidade Categoria**
+- [ ] **36. Entidade OrigemRegra**
+- [ ] **37. Enums StatusMediaItem e OrigemMedia**
+- [ ] **38. Migrations das entidades do motor de mídia**
+- [ ] **39. Rate limiter dedicado para endpoints de ingestão**
+- [ ] **40. Atualização do guia de padrões (decisão de UI HeroUI)**
 
 ---
 
 ## Detalhamento
 
-### Tópico 1 — Stack núcleo PHP 8.4 + Symfony 7.3 + Docker Compose
+### Tópico 21 — Ativação do módulo async (Messenger + Scheduler)
 
-**O que existe hoje:** stack containerizada com Symfony 7.3, PHP 8.4, MySQL 8.3, Nginx/Apache e Vite.
+**O que existe hoje:** módulo `async` ignorado no setup (`async=0` no log de instalação). Nenhuma fila, nenhum worker.
 
-**Por que importa:** é a base de todo projeto gerado a partir do cirqueirax.
+**Por que importa:** todo o motor de classificação e roteamento (Feature 2) depende de processamento assíncrono. Sem isso, download/upload/distribuição rodam de forma síncrona no request HTTP.
 
-**O que precisa acontecer:** manter o núcleo enxuto; módulos extras entram só via `setup.sh`.
-
----
-
-### Tópico 2 — Autenticação JWT RS256 com refresh token
-
-**O que existe hoje:** Lexik JWT + Gesdinet Refresh, chaves RS256 geradas no setup.
-
-**Por que importa:** autenticação stateless pronta para produção sem reinventar o fluxo.
-
-**O que precisa acontecer:** login, refresh e logout padronizados em `/api/v1/auth/*`.
+**O que precisa acontecer:** rodar `composer require symfony/doctrine-messenger symfony/scheduler`, copiar as configs de `.cirqueirax-modules/async/` pro projeto.
 
 ---
 
-### Tópico 3 — Entidade Usuario, Repository e migration
+### Tópico 22 — Configuração do transport Doctrine e messenger.yaml
 
-**O que existe hoje:** `Usuario` com UUID, `UsuarioRepository` e migration inicial.
+**O que existe hoje:** sem `config/packages/messenger.yaml`, sem tabela `messenger_messages`.
 
-**Por que importa:** persistência de contas sem `EntityManager` nos services.
+**Por que importa:** o roteamento de cada tipo de mensagem (ingestão, distribuição local, upload Google Fotos) precisa estar definido antes de qualquer handler existir.
 
-**O que precisa acontecer:** CRUD de usuário passa sempre pelo repository.
-
----
-
-### Tópico 4 — AuthController — login, registro, me e refresh
-
-**O que existe hoje:** endpoints de autenticação com DTOs e envelope `{ success, data }` via `DefaultController`.
-
-**Por que importa:** contrato HTTP único para o frontend.
-
-**O que precisa acontecer:** controller só orquestra; regra de negócio fica no service.
+**O que precisa acontecer:** transport padrão Doctrine configurado, roteamento por classe de mensagem, migration da tabela `messenger_messages` aplicada.
 
 ---
 
-### Tópico 5 — Frontend React 19 + TypeScript 5.9 + Vite 7
+### Tópico 23 — Supervisor com workers dedicados do Messenger
 
-**O que existe hoje:** SPA em `web/` com Vite 7, TypeScript strict e lazy routes.
+**O que existe hoje:** Supervisor instalado na stack (porta documentada), mas sem processo de worker configurado.
 
-**Por que importa:** HMR rápido e tipagem sem `any`.
+**Por que importa:** sem worker rodando, mensagens ficam na fila e nunca são consumidas.
 
-**O que precisa acontecer:** features em `web/features/`, sem `useEffect` em pages.
-
----
-
-### Tópico 6 — HeroUI v3 + Tailwind CSS 4 + cor brand
-
-**O que existe hoje:** `@heroui/react` + `@heroui/styles`, paleta brand violeta no `index.css`.
-
-**Por que importa:** UI acessível sem editar `node_modules`.
-
-**O que precisa acontecer:** customizar só via `className`, CSS variables e slots.
+**O que precisa acontecer:** `supervisord.conf` com processo `messenger:consume async`, `autostart=true`, `autorestart=true`, 2+ processos.
 
 ---
 
-### Tópico 7 — ThemeProvider (claro / escuro)
+### Tópico 24 — Ativação do módulo ui-extra (Recharts)
 
-**O que existe hoje:** `ThemeContext` com classe `dark` no `<html>` e toggle no Header.
+**O que existe hoje:** módulo `ui-extra` ignorado no setup (`ui-extra=0`). Sem Recharts disponível.
 
-**Por que importa:** tema consistente em todas as páginas do MainLayout.
+**Por que importa:** o dashboard (Feature 5) precisa de gráficos por categoria/origem — decidido usar HeroUI + tailwindcss-motion pra UI/animação, mas Recharts continua necessário só pra gráficos.
 
-**O que precisa acontecer:** persistir preferência e não duplicar o toggle nas pages.
-
----
-
-### Tópico 8 — Primitivos de layout e texto
-
-**O que existe hoje:** `Box`, `HStack`, `VStack`, `Flex`, `Grid`, `Container` e `Text` em `web/shared/ui/layout.tsx`.
-
-**Por que importa:** proíbe `<div>`, `<p>`, `<h1>`–`<h6>` e `<span>` brutos.
-
-**O que precisa acontecer:** sempre importar de `@/shared/ui/layout`.
+**O que precisa acontecer:** ativar o módulo pontualmente, sem adotar o Framer Motion que vem junto (ver tópico 40).
 
 ---
 
-### Tópico 9 — Header e Footer globais no MainLayout
+### Tópico 25 — Ativação do módulo observability (Sentry)
 
-**O que existe hoje:** `web/layouts/Header.tsx` e `Footer.tsx` renderizados pelo `MainLayout`.
+**O que existe hoje:** módulo `observability` ignorado no setup (`observability=0`). Só Monolog em arquivo/stderr.
 
-**Por que importa:** navbar e rodapé não devem ser recriados em cada página.
+**Por que importa:** o pipeline depende de três integrações externas com falha possível (Syncthing, Google Photos API, yt-dlp) — sem rastreamento estruturado, falha silenciosa passa despercebida.
 
-**O que precisa acontecer:** páginas usam só o `Outlet`; modal de auth vive no layout.
-
----
-
-### Tópico 10 — Landing Home com showcase de componentes
-
-**O que existe hoje:** `web/features/home/Home.tsx` com hero, cards HeroUI, stack e CTA.
-
-**Por que importa:** demonstra o design system no primeiro acesso.
-
-**O que precisa acontecer:** Home não duplica Header/Footer.
+**O que precisa acontecer:** ativar o módulo, configurar `SENTRY_DSN` em produção.
 
 ---
 
-### Tópico 11 — Modal de autenticação (login / cadastro)
+### Tópico 26 — Canais de log dedicados no Monolog
 
-**O que existe hoje:** `ModalAuth` aberto pelo Header via contexto do `MainLayout`.
+**O que existe hoje:** configuração padrão do Monolog (`dev`/`prod`), sem canais específicos do domínio de mídia.
 
-**Por que importa:** login sem sair da landing.
+**Por que importa:** facilita filtrar e depurar cada integração externa separadamente.
 
-**O que precisa acontecer:** estado do modal no layout, conteúdo da Home memoizado.
-
----
-
-### Tópico 12 — Páginas Login e Cadastro
-
-**O que existe hoje:** rotas `/login` e `/cadastro` com validação Zod.
-
-**Por que importa:** fluxo de auth também funciona sem o modal.
-
-**O que precisa acontecer:** Header esconde o botão Entrar nessas rotas.
+**O que precisa acontecer:** canais `ingestao`, `google_fotos` e `syncthing` configurados em `config/packages/monolog.yaml`.
 
 ---
 
-### Tópico 13 — RotaProtegida e store Zustand de auth
+### Tópico 27 — Volume Docker compartilhado com o Syncthing
 
-**O que existe hoje:** `useAuthStore` com persist e `RotaProtegida` redirecionando para `/login`.
+**O que existe hoje:** nenhum bind mount entre o container Symfony e a pasta observada pelo Syncthing na VPS.
 
-**Por que importa:** área `/app` só para usuário autenticado.
+**Por que importa:** o worker de distribuição local (Feature 2) precisa escrever arquivos exatamente onde o Syncthing lê, senão a sincronização com o celular nunca acontece.
 
-**O que precisa acontecer:** não espalhar checagem de token nas pages.
-
----
-
-### Tópico 14 — TanStack Query + Axios com interceptores JWT
-
-**O que existe hoje:** `web/config/api.ts` injeta Bearer e faz refresh em 401.
-
-**Por que importa:** fila de retry evita refresh concorrente.
-
-**O que precisa acontecer:** hooks de feature consomem `api.ts`, nunca axios solto.
+**O que precisa acontecer:** volume adicionado em `docker-compose.yaml` (dev) e `docker-compose.prod.yaml`, variável `MEDIA_STORAGE_PATH` apontando pro path montado.
 
 ---
 
-### Tópico 15 — ErrorBoundary e página 404
+### Tópico 28 — Enum TipoCliente e entidade TokenAgente
 
-**O que existe hoje:** `ErrorBoundary` e `features/not-found/NotFound.tsx`.
+**O que existe hoje:** `security.yaml` só cobre login humano via JWT. Nenhum conceito de cliente-máquina.
 
-**Por que importa:** falha de render e rota inexistente têm UI própria.
+**Por que importa:** agentes de print e o bot de download não são usuários logando — são processos automatizados que precisam de credencial própria.
 
-**O que precisa acontecer:** 404 preenche o espaço entre Header e Footer.
-
----
-
-### Tópico 16 — Documentação técnica do cirqueirax
-
-**O que existe hoje:** `documentation/stack/FRONTEND.md`, `documentation/stack/BACKEND.md`, `documentation/referencia/DOCUMENTACAO_TECNICA.md`, `documentation/guias/Estruturação.md`.
-
-**Por que importa:** IAs e o time seguem o mesmo contrato.
-
-**O que precisa acontecer:** mudanças de regra atualizam esses arquivos em cadeia.
+**O que precisa acontecer:** enum `TipoCliente` (`usuario`, `agente`), entidade `TokenAgente` (UUID v7, hash do token, `origem`, `criado_em`, `revogado_em`).
 
 ---
 
-### Tópico 17 — Makefile, Biome, PHPStan e PHP-CS-Fixer
+### Tópico 29 — Authenticator customizado para tokens de agente
 
-**O que existe hoje:** `make lint-all`, `fix-tsx`, `phpstan`, testes e Docker.
+**O que existe hoje:** nenhum mecanismo de autenticação além do firewall JWT de usuário.
 
-**Por que importa:** qualidade reproduzível no container.
+**Por que importa:** os endpoints de ingestão (Feature 3 e 4) precisam aceitar chamadas autenticadas por token de serviço, sem depender do fluxo de refresh token de 30 dias pensado pro usuário humano.
 
-**O que precisa acontecer:** não pular hooks; `make lint-all` antes de PR.
-
----
-
-### Tópico 18 — Módulos opt-in (async, observability, ui-extra)
-
-**O que existe hoje:** `.cirqueirax-modules/` copiados só quando o setup ativa o módulo.
-
-**Por que importa:** núcleo sem Messenger/Sentry/Framer até haver necessidade.
-
-**O que precisa acontecer:** não instalar módulo “por precaução”.
+**O que precisa acontecer:** Authenticator do Symfony Security validando o header `X-Agent-Token` contra `TokenAgente`.
 
 ---
 
-### Tópico 19 — PHPUnit e pasta tests/ removidos
+### Tópico 30 — Comando CLI de geração de token por agente
 
-**O que existe hoje:** sem suite PHPUnit, sem pasta `tests/`.
+**O que existe hoje:** nenhuma forma de emitir token pra um agente novo.
 
-**Por que importa:** o cirqueirax não carrega fluxo de testes automatizados.
+**Por que importa:** cada agente (print-empresa, print-pessoal, bot) precisa do próprio token, gerado uma vez e configurado no agente.
 
-**O que precisa acontecer:** qualidade via `make phpstan` e `make lint-all`.
+**O que precisa acontecer:** comando `app:agente:gerar-token` que cria o `TokenAgente` e imprime o valor uma única vez.
 
 ---
 
-### Tópico 20 — Sistema de progresso, roadmap e melhorias
+### Tópico 31 — Entidade ContaGoogleFotos
 
-**O que existe hoje:** `ROADMAP.md`, `documentation/progresso/PROGRESSO_ROADMAP.md`, arquivos paginados e scripts.
+**O que existe hoje:** nenhuma estrutura pra guardar credenciais OAuth do Google Fotos.
 
-**Por que importa:** histórico navegável sem um markdown gigante.
+**Por que importa:** PC empresa e PC pessoal usam contas Google diferentes — cada uma precisa de credencial própria, renovável.
 
-**O que precisa acontecer:** `make progresso` após marcar o checklist ou ao abrir um lote novo.
+**O que precisa acontecer:** entidade `ContaGoogleFotos` (`email`, `refresh_token` criptografado, `access_token_cache`, `expira_em`).
+
+---
+
+### Tópico 32 — Serviço de criptografia do refresh token
+
+**O que existe hoje:** nenhuma estratégia de criptografia de dado sensível no banco.
+
+**Por que importa:** refresh token do Google Fotos é uma credencial de longa duração — não pode ficar em texto plano no banco.
+
+**O que precisa acontecer:** serviço de criptografia simétrica (ex: sodium) usado ao persistir/ler o campo `refresh_token`.
+
+---
+
+### Tópico 33 — Comando CLI de autorização OAuth por conta Google Fotos
+
+**O que existe hoje:** nenhum fluxo de autorização OAuth implementado.
+
+**Por que importa:** autorizar uma conta Google Fotos é uma ação manual feita uma vez por conta (empresa e pessoal), não algo que passa por tela de usuário final.
+
+**O que precisa acontecer:** comando `app:google-fotos:autorizar-conta` guiando o fluxo authorization code e salvando o resultado via `ContaGoogleFotos`.
+
+---
+
+### Tópico 34 — Entidade MediaItem (UUID v7)
+
+**O que existe hoje:** nenhuma entidade de domínio de mídia — só o desenho no `CIRQUEIRAX.md`.
+
+**Por que importa:** é a entidade central de todo o sistema — representa cada vídeo, print ou upload passando pelo pipeline.
+
+**O que precisa acontecer:** entidade com UUID v7, campos de `hash`, `origem`, `status`, `categoria_id`, `caminho_local`, `google_photos_media_id`, `metadata`, `erro_motivo`, seguindo `fromDTO()` e getters sem prefixo.
+
+---
+
+### Tópico 35 — Entidade Categoria
+
+**O que existe hoje:** nenhuma entidade — categorias hoje só existem como conceito no bot atual.
+
+**Por que importa:** é o que carrega o mapeamento pasta local + álbum Google Fotos usado pelo motor de roteamento.
+
+**O que precisa acontecer:** entidade `Categoria` (`nome`, `pasta_local`, `google_photos_album_id`).
+
+---
+
+### Tópico 36 — Entidade OrigemRegra
+
+**O que existe hoje:** nenhuma entidade — regra de categoria automática por origem ainda não existe.
+
+**Por que importa:** os agentes de print (Feature 4) precisam de categoria automática sem decisão manual a cada captura.
+
+**O que precisa acontecer:** entidade `OrigemRegra` mapeando origem fixa (`print_empresa`, `print_pessoal`) → `categoria_id`.
+
+---
+
+### Tópico 37 — Enums StatusMediaItem e OrigemMedia
+
+**O que existe hoje:** nenhum enum de domínio criado — estados descritos só em texto no `CIRQUEIRAX.md`.
+
+**Por que importa:** garante que só os valores válidos (`recebido`, `em_fila`, `classificado`, `distribuindo`, `distribuido_local`, `enviando_google_fotos`, `concluido`, `erro`) sejam usados em `MediaItem.status`.
+
+**O que precisa acontecer:** dois enums PHP em `src/Enum/`, tipados na entidade e nos DTOs.
+
+---
+
+### Tópico 38 — Migrations das entidades do motor de mídia
+
+**O que existe hoje:** banco só com o schema padrão do skeleton (usuário/auth).
+
+**Por que importa:** sem migration, nenhuma das entidades acima existe de fato no banco.
+
+**O que precisa acontecer:** `make new-migration` gerando o diff de `MediaItem`, `Categoria`, `OrigemRegra`, `TokenAgente`, `ContaGoogleFotos`; revisão manual antes de `make migrate`.
+
+---
+
+### Tópico 39 — Rate limiter dedicado para endpoints de ingestão
+
+**O que existe hoje:** só os limitadores `login` (5/min) e `api` (60/min) genéricos.
+
+**Por que importa:** uma rajada de screenshots dos agentes ou um upload manual em lote pode ultrapassar 60 req/min e ser bloqueado sem necessidade.
+
+**O que precisa acontecer:** limitador `ingestao` próprio em `config/packages/rate_limiter.yaml`, aplicado só nas rotas de ingestão.
+
+---
+
+### Tópico 40 — Atualização do guia de padrões (decisão de UI HeroUI)
+
+**O que existe hoje:** o guia de padrões do time ainda descreve Shadcn UI + Framer Motion como stack "oficial obrigatória", conflitando com o `DOCUMENTACAO_TECNICA.md` (HeroUI v3 + tailwindcss-motion).
+
+**Por que importa:** decisão já fechada em favor de HeroUI — deixar o guia desatualizado é abrir espaço pra alguém instalar as duas bibliotecas por engano.
+
+**O que precisa acontecer:** guia de padrões corrigido: HeroUI v3 + tailwindcss-motion como UI/animação oficiais; Recharts (tópico 24) citado como única peça do `ui-extra` em uso.

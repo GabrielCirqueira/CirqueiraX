@@ -6,6 +6,7 @@
 
 > Os detalhes de cada tópico estão nos arquivos paginados desta pasta:
 > - **Tópicos 1+** → [PROGRESSO_ROADMAP_1.md](PROGRESSO_ROADMAP_1.md)
+> - **Tópicos 21+** → [PROGRESSO_ROADMAP_2.md](PROGRESSO_ROADMAP_2.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -29,3 +30,23 @@
 | 18 | Módulos opt-in (async, observability, ui-extra) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 19 | PHPUnit e pasta tests/ removidos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 20 | Sistema de progresso, roadmap e melhorias | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
+| 21 | Ativação do módulo async (Messenger + Scheduler) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 22 | Configuração do transport Doctrine e messenger.yaml | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 23 | Supervisor com workers dedicados do Messenger | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 24 | Ativação do módulo ui-extra (Recharts) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 25 | Ativação do módulo observability (Sentry) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 26 | Canais de log dedicados no Monolog | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 27 | Volume Docker compartilhado com o Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 28 | Enum TipoCliente e entidade TokenAgente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 29 | Authenticator customizado para tokens de agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 30 | Comando CLI de geração de token por agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 31 | Entidade ContaGoogleFotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 32 | Serviço de criptografia do refresh token | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 33 | Comando CLI de autorização OAuth por conta Google Fotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 34 | Entidade MediaItem (UUID v7) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 35 | Entidade Categoria | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 36 | Entidade OrigemRegra | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 37 | Enums StatusMediaItem e OrigemMedia | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 38 | Migrations das entidades do motor de mídia | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 39 | Rate limiter dedicado para endpoints de ingestão | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 40 | Atualização do guia de padrões (decisão de UI HeroUI) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
