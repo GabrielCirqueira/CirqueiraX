@@ -318,7 +318,7 @@ setup-prod-env: ## Criar .env de produção a partir do exemplo
 
 push: ## Commitar e enviar alterações para o repositório remoto (ARGS="mensagem")
 	git add .
-	git commit -m "$(if $(ARGS),$(ARGS),feat: updates)"
+	repomind commit --no-verify
 	git push
 
 # ══════════════════════════════════════════════════
