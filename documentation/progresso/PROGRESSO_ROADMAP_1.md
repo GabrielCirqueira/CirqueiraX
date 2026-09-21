@@ -1,4 +1,4 @@
-# Progresso do Roadmap — Feature 1 (Fundação do Catalyst Skeleton v5)
+# Progresso do Roadmap — Feature 1 (Fundação do cirqueiraX v5)
 
 > Detalhamento dos tópicos 1 ao 20.
 
@@ -124,7 +124,7 @@
 
 ---
 
-### ✅ Tópico 16 — Documentação técnica do skeleton
+### ✅ Tópico 16 — Documentação técnica do cirqueirax
 
 - **Status**: Concluído
 - **Implementação**: Guias de frontend, backend, auth, testes, Docker e estruturação.
@@ -144,7 +144,7 @@
 
 - **Status**: Concluído
 - **Implementação**: Messenger/Sentry/Framer só entram pelo `setup.sh`.
-- **Arquivos**: `.skeleton-modules/async/`, `.skeleton-modules/observability/`, `.skeleton-modules/ui-extra/`
+- **Arquivos**: `.cirqueirax-modules/async/`, `.cirqueirax-modules/observability/`, `.cirqueirax-modules/ui-extra/`
 
 ---
 

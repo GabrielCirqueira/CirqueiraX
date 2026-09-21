@@ -111,7 +111,7 @@ shared/                 ← tudo que é global e sem feature
 
 #### 3.4 O Banimento do `useEffect`
 
-No Catalyst, o uso direto do `useEffect` em páginas e features é **proibido**.
+No cirqueiraX, o uso direto do `useEffect` em páginas e features é **proibido**.
 
 *   **Estado Derivado:** Calcule diretamente no corpo do componente ou use `useMemo`.
 *   **Event Handlers:** Toda lógica de "quando isso acontecer" deve estar em funções de evento (`onClick`, `onSubmit`).

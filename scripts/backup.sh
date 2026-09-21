@@ -5,7 +5,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-BACKUP_DIR="/var/backups/catalyst-skeleton"
+BACKUP_DIR="/var/backups/cirqueirax"
 RETENTION_DAYS=7
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 FILENAME="$BACKUP_DIR/db_$TIMESTAMP.sql.gz"

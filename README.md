@@ -1,22 +1,22 @@
-# 🚀 Catalyst Skeleton v5.0.0 — Symfony 7.3 & React 19
+# 🚀 cirqueiraX v5.0.0 — Symfony 7.3 & React 19
 
 **O ponto de partida definitivo para aplicações empresariais sólidas, escaláveis e resilientes.**
 
-Catalyst Skeleton é uma suite completa de engenharia que impõe padrões de **Clean Architecture**, **DDD** e **SOLID**. Backend PHP 8.4 + Symfony 7.3 com JSON API. Frontend React 19 + TypeScript como SPA. Tudo containerizado, production-ready desde o primeiro commit.
+cirqueiraX é uma suite completa de engenharia que impõe padrões de **Clean Architecture**, **DDD** e **SOLID**. Backend PHP 8.4 + Symfony 7.3 com JSON API. Frontend React 19 + TypeScript como SPA. Tudo containerizado, production-ready desde o primeiro commit.
 
 ---
 
 ## 📅 Histórico de Versões
 
-O roadmap do Catalyst Skeleton é focado em estabilidade e modernização constante da stack.
+O roadmap do cirqueiraX é focado em estabilidade e modernização constante da stack.
 
 | Versão | Data de Lançamento | Destaque Principal |
 | :--- | :--- | :--- |
-| **Skeleton V5** | 9 de setembro 2026 | **Atual** — Núcleo enxuto + módulos opt-in. Rotas padronizadas `/api/v1/`. |
-| **Skeleton V4** | 23 de março 2026 | Estável — Symfony 7.3, React 19, Biome. |
-| **Skeleton V3** | 6 de outubro 2025 | Estabilização de Message Bus e Workers. |
-| **Skeleton V2** | 1 de junho 2025 | Introdução de Shadcn UI e Lucide Icons. |
-| **Skeleton V1** | 30 de janeiro 2025 | Release inicial (Symfony 6.4 + React 18). |
+| **CirqueiraX V5** | 9 de setembro 2026 | **Atual** — Núcleo enxuto + módulos opt-in. Rotas padronizadas `/api/v1/`. |
+| **CirqueiraX V4** | 23 de março 2026 | Estável — Symfony 7.3, React 19, Biome. |
+| **CirqueiraX V3** | 6 de outubro 2025 | Estabilização de Message Bus e Workers. |
+| **CirqueiraX V2** | 1 de junho 2025 | Introdução de Shadcn UI e Lucide Icons. |
+| **CirqueiraX V1** | 30 de janeiro 2025 | Release inicial (Symfony 6.4 + React 18). |
 
 ---
 
@@ -38,7 +38,7 @@ O roadmap do Catalyst Skeleton é focado em estabilidade e modernização consta
 
 ## 🛠️ Setup Inicial (The Magic Script)
 
-O Catalyst Skeleton possui um orquestrador de setup altamente sofisticado que prepara todo o seu ambiente profissional em minutos.
+O cirqueiraX possui um orquestrador de setup altamente sofisticado que prepara todo o seu ambiente profissional em minutos.
 
 ```bash
 bash scripts/setup.sh
@@ -88,7 +88,7 @@ bash scripts/setup.sh
 
 ## 🏗️ Arquitetura (Visão Rápida)
 
-O Catalyst Skeleton impõe uma separação rigorosa de interesses:
+O cirqueiraX impõe uma separação rigorosa de interesses:
 
 - **Backend**: Baseado em **Services Atômicos** e **DTOs**. A lógica de negócio nunca vaza para o Controller.
 - **Frontend**: Organizado por **Features**. Cada funcionalidade (Auth, User, etc) é um módulo autossucedido.

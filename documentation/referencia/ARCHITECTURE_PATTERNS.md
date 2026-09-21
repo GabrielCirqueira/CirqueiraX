@@ -1,6 +1,6 @@
 # Padrões Arquiteturais e Boas Práticas
 
-O Catalyst Skeleton v5 é orientado por princípios de **Clean Code**, **SOLID** e **DRY**, aplicados de forma pragmática para Symfony e React.
+O cirqueiraX v5 é orientado por princípios de **Clean Code**, **SOLID** e **DRY**, aplicados de forma pragmática para Symfony e React.
 
 ---
 

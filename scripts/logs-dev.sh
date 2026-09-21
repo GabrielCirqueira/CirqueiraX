@@ -2,14 +2,14 @@
 # scripts/logs-dev.sh — Visualizador de logs do ambiente de desenvolvimento
 #
 # Arquitetura de logs em dev:
-#   - skeleton_nginx      → container Nginx separado (proxy reverso HTTP)
-#   - skeleton_symfony    → PHP-FPM + Supervisord (workers/cron)
-#   - skeleton_database   → MySQL
-#   - skeleton_vite_react → Vite dev server
+#   - cirqueirax_nginx      → container Nginx separado (proxy reverso HTTP)
+#   - cirqueirax_symfony    → PHP-FPM + Supervisord (workers/cron)
+#   - cirqueirax_database   → MySQL
+#   - cirqueirax_vite_react → Vite dev server
 #
 #   Symfony/Monolog dev   → /var/www/html/var/log/dev.log (arquivo, volume montado)
-#   Nginx access/error    → docker logs skeleton_nginx
-#   PHP-FPM eventos       → docker logs skeleton_symfony (stderr)
+#   Nginx access/error    → docker logs cirqueirax_nginx
+#   PHP-FPM eventos       → docker logs cirqueirax_symfony (stderr)
 #
 # Uso:
 #   bash scripts/logs-dev.sh          menu interativo
@@ -18,10 +18,10 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 COMPOSE="docker compose -f $PROJECT_ROOT/devops/docker-compose.yaml"
-SYMFONY="skeleton_symfony"
-NGINX="skeleton_nginx"
-DATABASE="skeleton_database"
-VITE="skeleton_vite_react"
+SYMFONY="cirqueirax_symfony"
+NGINX="cirqueirax_nginx"
+DATABASE="cirqueirax_database"
+VITE="cirqueirax_vite_react"
 TAIL="${LOG_TAIL:-100}"
 FOLLOW="-f"
 

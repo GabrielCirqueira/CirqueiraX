@@ -6,5 +6,5 @@ cd "$ROOT_DIR"
 
 COMPOSE_DEV_CMD=${COMPOSE_DEV_CMD:-"docker compose --env-file ports.env -f devops/docker-compose.yaml"}
 
-echo "🐚 Opening MySQL shell for 'skeleton' database..."
-$COMPOSE_DEV_CMD exec database mysql -u skeleton -pskeleton skeleton
+echo "🐚 Opening MySQL shell for 'cirqueirax' database..."
+$COMPOSE_DEV_CMD exec database mysql -u cirqueirax -pcirqueirax cirqueirax

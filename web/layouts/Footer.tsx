@@ -19,7 +19,7 @@ export const Footer = memo(function Footer() {
               <Code2 className="size-3.5 text-white" strokeWidth={2.5} />
             </Box>
             <Text as="span" className="font-black font-sans text-xs tracking-tight">
-              Catalyst{' '}
+              cirqueiraX{' '}
               <Text as="span" className="text-brand-500">
                 Skeleton
               </Text>

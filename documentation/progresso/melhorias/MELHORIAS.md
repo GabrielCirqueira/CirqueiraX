@@ -1,6 +1,6 @@
 # Registro de Melhorias e Correções
 
-> Histórico de melhorias pontuais, refinamentos de UI/UX e correções do Catalyst Skeleton.
+> Histórico de melhorias pontuais, refinamentos de UI/UX e correções do cirqueiraX.
 
 > [!IMPORTANT]
 > Para registrar uma nova melhoria, siga o fluxo descrito em [README.md](README.md).

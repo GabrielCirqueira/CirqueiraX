@@ -32,7 +32,7 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
               <Code2 className="size-4 text-white" strokeWidth={2.5} />
             </Box>
             <Text as="span" className="font-black font-sans text-sm tracking-tight">
-              Catalyst{' '}
+              cirqueiraX{' '}
               <Text as="span" className="text-brand-500">
                 Skeleton
               </Text>

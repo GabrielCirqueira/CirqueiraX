@@ -1,6 +1,6 @@
 # Documentação
 
-Índice da documentação do Catalyst Skeleton. IA: comece por [guias/PARA-IA.md](guias/PARA-IA.md).
+Índice da documentação do cirqueiraX. IA: comece por [guias/PARA-IA.md](guias/PARA-IA.md).
 
 | Pasta | Para quê |
 | :--- | :--- |

@@ -1,6 +1,6 @@
 # Backend (src/)
 
-Este documento descreve a API/backend Symfony. O Catalyst Skeleton v5 segue uma arquitetura orientada a serviços e lógica de negócio desacoplada, com um **núcleo enxuto** e módulos opcionais ativados conforme a necessidade do projeto.
+Este documento descreve a API/backend Symfony. O cirqueiraX v5 segue uma arquitetura orientada a serviços e lógica de negócio desacoplada, com um **núcleo enxuto** e módulos opcionais ativados conforme a necessidade do projeto.
 
 ## Tecnologias e Stack
 

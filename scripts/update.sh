@@ -22,7 +22,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 COMPOSE="docker compose -f $PROJECT_ROOT/devops/docker-compose.prod.yaml"
-APP_CONTAINER="skeleton_symfony_prod"
+APP_CONTAINER="cirqueirax_symfony_prod"
 LOG_DIR="/var/log/deploys"
 LOG_FILE="$LOG_DIR/update-$(date +%Y%m%d-%H%M%S).log"
 
@@ -50,7 +50,7 @@ die() {
 # ─── Banner ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${BLUE}  ╔══════════════════════════════════════════════════╗${RESET}"
-echo -e "${BOLD}${BLUE}  ║      Catalyst Skeleton — Update Produção         ║${RESET}"
+echo -e "${BOLD}${BLUE}  ║      cirqueiraX — Update Produção         ║${RESET}"
 echo -e "${BOLD}${BLUE}  ╚══════════════════════════════════════════════════╝${RESET}"
 echo ""
 

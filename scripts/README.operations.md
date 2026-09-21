@@ -71,7 +71,7 @@ bash devops/update.sh
 
 ### `backup.sh` — Backup do banco de dados
 
-Gera um dump comprimido (`.sql.gz`) do banco MySQL de produção em `/var/backups/catalyst-skeleton/`.
+Gera um dump comprimido (`.sql.gz`) do banco MySQL de produção em `/var/backups/cirqueirax/`.
 Retém apenas os backups dos últimos **7 dias** (configurável via `RETENTION_DAYS`).
 
 ```bash

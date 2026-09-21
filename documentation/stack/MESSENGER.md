@@ -22,13 +22,13 @@
 composer require symfony/messenger symfony/scheduler
 
 # 2. Copiar arquivos do módulo
-cp -r .skeleton-modules/async/src/Message      src/
-cp -r .skeleton-modules/async/src/MessageHandler src/
-cp -r .skeleton-modules/async/src/Schedule     src/
-cp .skeleton-modules/async/messenger.yaml      config/packages/messenger.yaml
+cp -r .cirqueirax-modules/async/src/Message      src/
+cp -r .cirqueirax-modules/async/src/MessageHandler src/
+cp -r .cirqueirax-modules/async/src/Schedule     src/
+cp .cirqueirax-modules/async/messenger.yaml      config/packages/messenger.yaml
 
 # 3. Adicionar workers ao Supervisor (produção)
-cat .skeleton-modules/async/supervisord-messenger.conf >> devops/php/supervisord-prod.conf
+cat .cirqueirax-modules/async/supervisord-messenger.conf >> devops/php/supervisord-prod.conf
 ```
 
 ---

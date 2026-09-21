@@ -1,6 +1,6 @@
 # Como registrar melhorias
 
-Este diretório concentra o histórico de melhorias pontuais do Catalyst Skeleton (correções, refinamentos de UI/UX, ajustes de DevOps etc.).
+Este diretório concentra o histórico de melhorias pontuais do cirqueiraX (correções, refinamentos de UI/UX, ajustes de DevOps etc.).
 
 Grandes features, épicos e migrações estruturais **não** entram aqui — vão para o [ROADMAP.md](../../../ROADMAP.md).
 

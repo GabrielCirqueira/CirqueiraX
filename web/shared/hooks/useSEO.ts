@@ -21,7 +21,7 @@ interface UseSEOProps {
  * @example
  * export function Component() {
  *   useSEO({
- *     title: 'Dashboard — Catalyst',
+ *     title: 'Dashboard — cirqueiraX',
  *     description: 'Visão geral das métricas e indicadores principais do sistema.',
  *     keywords: 'dashboard, métricas, indicadores',
  *     noindex: true,

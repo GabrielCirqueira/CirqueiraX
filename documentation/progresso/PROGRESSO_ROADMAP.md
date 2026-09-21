@@ -24,7 +24,7 @@
 | 13 | RotaProtegida e store Zustand de auth | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 14 | TanStack Query + Axios com interceptores JWT | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 15 | ErrorBoundary e página 404 | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
-| 16 | Documentação técnica do skeleton | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
+| 16 | Documentação técnica do cirqueirax | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 17 | Makefile, Biome, PHPStan e PHP-CS-Fixer | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 18 | Módulos opt-in (async, observability, ui-extra) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 19 | PHPUnit e pasta tests/ removidos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |

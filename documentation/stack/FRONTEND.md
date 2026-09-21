@@ -176,6 +176,6 @@ npm run validate   # type-check + lint Biome
 | :--- | :--- | :--- |
 | Vitest + RTL | Primeira lógica que dói quebrar | `npm i -D vitest @testing-library/react` |
 | Motion (Framer) | Primeira necessidade real de `AnimatePresence` | módulo `ui-extra` no setup.sh |
-| Husky + lint-staged | Time cresce além de 1 pessoa | já incluso no skeleton |
+| Husky + lint-staged | Time cresce além de 1 pessoa | já incluso no cirqueirax |
 | Playwright | Primeiro fluxo crítico de negócio | `npm i -D @playwright/test` |
 | Storybook | Mais de uma pessoa nos mesmos componentes | `npm i -D storybook` |

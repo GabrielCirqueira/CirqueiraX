@@ -10,7 +10,7 @@ export function AuthLayout() {
           <Box className="size-8 rounded-xl bg-accent flex items-center justify-center shadow group-hover:scale-105 transition-transform">
             <Code2 className="size-4 text-white" strokeWidth={2.5} />
           </Box>
-          <Text as="span" className="font-sans font-bold text-xl">Catalyst</Text>
+          <Text as="span" className="font-sans font-bold text-xl">cirqueiraX</Text>
         </HStack>
       </Link>
 

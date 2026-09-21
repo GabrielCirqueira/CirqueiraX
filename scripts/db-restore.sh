@@ -19,10 +19,10 @@ if [[ ! -f "$FILE" ]]; then
 fi
 
 echo "⚠️  Restoring database from '$FILE'... This will OVERWRITE existing data!"
-echo "Dropping and recreating 'skeleton' database..."
-$COMPOSE_DEV_CMD exec -T database mysql -u root -proot -e "DROP DATABASE IF EXISTS skeleton; CREATE DATABASE skeleton;"
+echo "Dropping and recreating 'cirqueirax' database..."
+$COMPOSE_DEV_CMD exec -T database mysql -u root -proot -e "DROP DATABASE IF EXISTS cirqueirax; CREATE DATABASE cirqueirax;"
 
 echo "Running SQL dump..."
-cat "$FILE" | $COMPOSE_DEV_CMD exec -T database mysql -u skeleton -pskeleton skeleton
+cat "$FILE" | $COMPOSE_DEV_CMD exec -T database mysql -u cirqueirax -pcirqueirax cirqueirax
 
 echo "✅ Database restore complete!"

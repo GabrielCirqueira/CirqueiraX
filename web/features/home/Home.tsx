@@ -163,7 +163,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
               as="h1"
               className="text-5xl sm:text-7xl font-black font-sans tracking-tight leading-none"
             >
-              Catalyst{' '}
+              cirqueiraX{' '}
               <Text as="span" className="text-brand-500">
                 Skeleton
               </Text>
@@ -655,7 +655,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
               $
             </Text>
             <Text as="span" className="text-foreground">
-              git clone catalyst-skeleton && ./setup.sh
+              git clone cirqueirax && ./setup.sh
             </Text>
           </HStack>
 

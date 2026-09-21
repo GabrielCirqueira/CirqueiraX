@@ -143,7 +143,7 @@ fi
 
 # Lê o slug do projeto a partir do docker-compose (nome da DB) para montar o COMPOSE
 PROJECT_SLUG=$(grep "MYSQL_DATABASE:" devops/docker-compose.yaml 2>/dev/null | awk '{print $NF}' | tr -d '"' | head -1)
-PROJECT_SLUG=${PROJECT_SLUG:-skeleton}
+PROJECT_SLUG=${PROJECT_SLUG:-cirqueirax}
 
 COMPOSE="$COMPOSE_BIN -p ${PROJECT_SLUG} --env-file devops/ports.env -f devops/docker-compose.yaml"
 

@@ -1,8 +1,8 @@
 {
-  "name": "catalyst-skeleton",
+  "name": "cirqueirax",
   "version": "5.0.0",
   "main": "index.js",
-  "repository": "git@github.com:GabrielCirqueira/Catalyst-Skeleton.git",
+  "repository": "git@github.com:GabrielCirqueira/cirqueiraX-CirqueiraX.git",
   "author": "Desenvolvedor Gabriel Cirquiera",
   "license": "proprietary",
   "private": false,

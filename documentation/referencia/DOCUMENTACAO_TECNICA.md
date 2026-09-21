@@ -1,6 +1,6 @@
-# Catalyst Skeleton — Documentação Técnica
+# cirqueiraX — Documentação Técnica
 
-Referência técnica completa do **Catalyst Skeleton** — fundação opinativa para aplicações full-stack construídas com **PHP 8.4 + Symfony 7.3** no backend e **React 19 + TypeScript 5.9** no frontend.
+Referência técnica completa do **cirqueiraX** — fundação opinativa para aplicações full-stack construídas com **PHP 8.4 + Symfony 7.3** no backend e **React 19 + TypeScript 5.9** no frontend.
 
 ---
 
@@ -21,7 +21,7 @@ Referência técnica completa do **Catalyst Skeleton** — fundação opinativa 
 11. [DevOps e Produção](#11-devops-e-produção)
 12. [Logs e Observabilidade](#12-logs-e-observabilidade)
 13. [Nomenclatura e Padrões](#13-nomenclatura-e-padrões)
-14. [Versionamento do Skeleton](#14-versionamento-do-skeleton)
+14. [Versionamento do CirqueiraX](#14-versionamento-do-cirqueirax)
 15. [Progresso e Roadmap](#15-progresso-e-roadmap)
 
 ---
@@ -180,7 +180,7 @@ Referência técnica completa do **Catalyst Skeleton** — fundação opinativa 
 ├── ports.env                 # Mapeamento de portas do ambiente local
 ├── documentation/            # Índice em README.md — guias, stack, ops, referencia, progresso
 ├── scripts/setup.sh          # Script de bootstrap inicial completo
-├── .skeleton-modules/        # Módulos opcionais (async, observability, ui-extra)
+├── .cirqueirax-modules/        # Módulos opcionais (async, observability, ui-extra)
 └── ROADMAP.md                # Backlog do lote atual
 ```
 
@@ -677,7 +677,7 @@ Token expira (401)
 
 ### 1. O Banimento do `useEffect`
 
-No Catalyst, o uso direto do `useEffect` é proibido. Efeitos colaterais descontrolados são a fonte número 1 de loops infinitos, race conditions e bugs de dessincronização.
+No cirqueiraX, o uso direto do `useEffect` é proibido. Efeitos colaterais descontrolados são a fonte número 1 de loops infinitos, race conditions e bugs de dessincronização.
 
 **O que fazer em vez disso?**
 
@@ -825,7 +825,7 @@ export function useProdutos(pagina: number) {
 
 ## 8. Mensageria Assíncrona
 
-> **Módulo Opcional:** Messenger + Scheduler são opt-in na v5. Ative com `--async` no `setup.sh` ou instale manualmente: `composer require symfony/doctrine-messenger symfony/scheduler`. Arquivos de configuração disponíveis em `.skeleton-modules/async/`.
+> **Módulo Opcional:** Messenger + Scheduler são opt-in na v5. Ative com `--async` no `setup.sh` ou instale manualmente: `composer require symfony/doctrine-messenger symfony/scheduler`. Arquivos de configuração disponíveis em `.cirqueirax-modules/async/`.
 
 ### Symfony Messenger
 
@@ -1277,17 +1277,17 @@ Tipos aceitos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `per
 
 ---
 
-## 14. Versionamento do Skeleton
+## 14. Versionamento do CirqueiraX
 
-O Catalyst Skeleton é versionado via **branches Git** no mesmo repositório. Cada versão maior vive em uma branch própria e permanece estável (sem novos commits após o lançamento da próxima versão).
+O cirqueiraX é versionado via **branches Git** no mesmo repositório. Cada versão maior vive em uma branch própria e permanece estável (sem novos commits após o lançamento da próxima versão).
 
 | Branch | Versão | Status |
 | :--- | :--- | :--- |
 | `main` | **v5** (atual) | Desenvolvimento ativo — núcleo enxuto + módulos opt-in |
-| `skeleton-V4` | v4 | Estável — Symfony 7.3, React 19, stack monolítica |
-| `skeleton-v3` | v3 | Estável — somente bugfixes críticos |
-| `skeleton-v2` | v2 | Legado — sem manutenção |
-| `skeleton-v1` | v1 | Legado — sem manutenção |
+| `cirqueirax-V4` | v4 | Estável — Symfony 7.3, React 19, stack monolítica |
+| `cirqueirax-v3` | v3 | Estável — somente bugfixes críticos |
+| `cirqueirax-v2` | v2 | Legado — sem manutenção |
+| `cirqueirax-v1` | v1 | Legado — sem manutenção |
 
 ### Como iniciar um projeto novo
 
@@ -1296,31 +1296,31 @@ Sempre use `main` como base:
 ```bash
 git clone <repo> meu-projeto
 cd meu-projeto
-git checkout -b main-meu-projeto main  # branch local isolada do skeleton
+git checkout -b main-meu-projeto main  # branch local isolada do cirqueirax
 ```
 
-### Como propagar melhorias do skeleton para um projeto existente
+### Como propagar melhorias do cirqueirax para um projeto existente
 
-A propagação é **manual e intencional** — esse é o trade-off aceito ao usar o modelo de branches. Projetos existentes divergem do skeleton, e isso é esperado.
+A propagação é **manual e intencional** — esse é o trade-off aceito ao usar o modelo de branches. Projetos existentes divergem do cirqueirax, e isso é esperado.
 
 Fluxo recomendado:
 
-1. Identifique o commit/PR no skeleton que contém a melhoria
+1. Identifique o commit/PR no cirqueirax que contém a melhoria
 2. Use `git cherry-pick <hash>` ou aplique manualmente no projeto destino
 3. Resolva conflitos caso o projeto já tenha divergido naquela área
 
 ```bash
 # No repositório do projeto existente:
-git remote add skeleton <repo-skeleton>
-git fetch skeleton main
-git cherry-pick <hash-do-commit-no-skeleton>
+git remote add cirqueirax <repo-cirqueirax>
+git fetch cirqueirax main
+git cherry-pick <hash-do-commit-no-cirqueirax>
 ```
 
 ### Política de breaking changes
 
 - Mudanças de interface (contrato de API, estrutura de pastas, padrões obrigatórios) só ocorrem em versões maiores (nova branch)
 - `main` pode receber adições retrocompatíveis a qualquer momento
-- Projetos derivados **nunca** devem fazer merge de `main` do skeleton diretamente — usam cherry-pick seletivo
+- Projetos derivados **nunca** devem fazer merge de `main` do cirqueirax diretamente — usam cherry-pick seletivo
 
 ---
 
@@ -1341,4 +1341,4 @@ Se o tópico mudar contrato técnico: frontend → `documentation/stack/FRONTEND
 
 ---
 
-*Catalyst Skeleton — mantido com rigor de engenharia Symfony & React.*
+*cirqueiraX — mantido com rigor de engenharia Symfony & React.*

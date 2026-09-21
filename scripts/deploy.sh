@@ -136,7 +136,7 @@ wait_for_container() {
 # ─── Banner ───────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${BLUE}  ╔══════════════════════════════════════════════════╗${RESET}"
-echo -e "${BOLD}${BLUE}  ║      Catalyst Skeleton — Deploy Produção         ║${RESET}"
+echo -e "${BOLD}${BLUE}  ║      cirqueiraX — Deploy Produção         ║${RESET}"
 echo -e "${BOLD}${BLUE}  ╚══════════════════════════════════════════════════╝${RESET}"
 echo ""
 log "Deploy iniciado (PID: $$, Log: $LOG_FILE)"

@@ -1,14 +1,14 @@
 # Estrutura do Projeto
 
-Este documento descreve a organização de diretórios e arquivos do **Catalyst Skeleton v5**.
+Este documento descreve a organização de diretórios e arquivos do **cirqueiraX v5**.
 
 ---
 
 ## Raiz do Projeto
 
 ```
-catalyst-skeleton/
-??? .skeleton-modules/      # Módulos opcionais (async, observability, ui-extra)
+cirqueirax/
+??? .cirqueirax-modules/      # Módulos opcionais (async, observability, ui-extra)
 ??? .tooling/               # Todas as configurações de ferramentas centralizadas
 ??? bin/                    # Executáveis (console)
 ??? cli/                    # Comandos rápidos (uso diário)
@@ -29,12 +29,12 @@ catalyst-skeleton/
 
 ---
 
-## Pasta `.skeleton-modules/`
+## Pasta `.cirqueirax-modules/`
 
-Contém os **módulos opcionais** do skeleton. Nenhum destes arquivos é carregado automaticamente ? eles só são copiados/instalados quando o módulo é ativado via `setup.sh`.
+Contém os **módulos opcionais** do cirqueirax. Nenhum destes arquivos é carregado automaticamente ? eles só são copiados/instalados quando o módulo é ativado via `setup.sh`.
 
 ```
-.skeleton-modules/
+.cirqueirax-modules/
 ??? async/
 ?   ??? README.md
 ?   ??? messenger.yaml                    # config/packages/messenger.yaml

@@ -162,7 +162,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
               <Box className="size-7 rounded-lg bg-accent flex items-center justify-center">
                 <Code2 className="size-4 text-white" strokeWidth={2.5} />
               </Box>
-              <ModalHeading>Catalyst Skeleton</ModalHeading>
+              <ModalHeading>cirqueiraX</ModalHeading>
             </ModalHeader>
 
             <ModalBody className="pb-6">

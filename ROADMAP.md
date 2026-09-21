@@ -1,4 +1,4 @@
-# Roadmap — Fundação do Catalyst Skeleton v5
+# Roadmap — Fundação do cirqueiraX v5
 
 > Backlog e planejamento do projeto. Cada tópico descreve o que existe (ou faltava), por que importa e o que precisa acontecer. Marque `[x]` no checklist ao concluir.
 
@@ -27,7 +27,7 @@
 | 13 | RotaProtegida e store Zustand de auth |
 | 14 | TanStack Query + Axios com interceptores JWT |
 | 15 | ErrorBoundary e página 404 |
-| 16 | Documentação técnica do skeleton |
+| 16 | Documentação técnica do cirqueirax |
 | 17 | Makefile, Biome, PHPStan e PHP-CS-Fixer |
 | 18 | Módulos opt-in (async, observability, ui-extra) |
 | 19 | PHPUnit e pasta tests/ removidos |
@@ -52,7 +52,7 @@
 - [x] **13. RotaProtegida e store Zustand de auth**
 - [x] **14. TanStack Query + Axios com interceptores JWT**
 - [x] **15. ErrorBoundary e página 404**
-- [x] **16. Documentação técnica do skeleton**
+- [x] **16. Documentação técnica do cirqueirax**
 - [x] **17. Makefile, Biome, PHPStan e PHP-CS-Fixer**
 - [x] **18. Módulos opt-in (async, observability, ui-extra)**
 - [x] **19. PHPUnit e pasta tests/ removidos**
@@ -66,7 +66,7 @@
 
 **O que existe hoje:** stack containerizada com Symfony 7.3, PHP 8.4, MySQL 8.3, Nginx/Apache e Vite.
 
-**Por que importa:** é a base de todo projeto gerado a partir do skeleton.
+**Por que importa:** é a base de todo projeto gerado a partir do cirqueirax.
 
 **O que precisa acontecer:** manter o núcleo enxuto; módulos extras entram só via `setup.sh`.
 
@@ -212,7 +212,7 @@
 
 ---
 
-### Tópico 16 — Documentação técnica do skeleton
+### Tópico 16 — Documentação técnica do cirqueirax
 
 **O que existe hoje:** `documentation/stack/FRONTEND.md`, `documentation/stack/BACKEND.md`, `documentation/referencia/DOCUMENTACAO_TECNICA.md`, `documentation/guias/Estruturação.md`.
 
@@ -234,7 +234,7 @@
 
 ### Tópico 18 — Módulos opt-in (async, observability, ui-extra)
 
-**O que existe hoje:** `.skeleton-modules/` copiados só quando o setup ativa o módulo.
+**O que existe hoje:** `.cirqueirax-modules/` copiados só quando o setup ativa o módulo.
 
 **Por que importa:** núcleo sem Messenger/Sentry/Framer até haver necessidade.
 
@@ -246,7 +246,7 @@
 
 **O que existe hoje:** sem suite PHPUnit, sem pasta `tests/`.
 
-**Por que importa:** o skeleton não carrega fluxo de testes automatizados.
+**Por que importa:** o cirqueirax não carrega fluxo de testes automatizados.
 
 **O que precisa acontecer:** qualidade via `make phpstan` e `make lint-all`.
 
