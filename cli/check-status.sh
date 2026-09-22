@@ -11,7 +11,7 @@ if [ -f "$PORTS_ENV_FILE" ]; then
   set +a
 fi
 
-BACKEND_PORT="${BACKEND_PORT:-4040}"
+BACKEND_PORT="${BACKEND_PORT:-4010}"
 FRONTEND_PORT="${FRONTEND_PORT:-4012}"
 COMPOSE_DEV_CMD=${COMPOSE_DEV_CMD:-"docker compose --env-file devops/ports.env -f devops/docker-compose.yaml"}
 

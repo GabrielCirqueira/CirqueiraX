@@ -50,7 +50,7 @@ Detalhamento completo de cada módulo em `CIRQUEIRAX.md`.
 
 | Serviço | Porta (Host) | Destino |
 | :--- | :--- | :--- |
-| **API Symfony** | `BACKEND_PORT` | [http://localhost:4040](http://localhost:4040) |
+| **API Symfony** | `BACKEND_PORT` | [http://localhost:4010](http://localhost:4010) |
 | **Frontend Vite** | `FRONTEND_PORT` | [http://localhost:4012](http://localhost:4012) |
 | **MySQL** | `DATABASE_PORT` | `localhost:4013` |
 | **Supervisor** | `SUPERVISOR_PORT` | [http://localhost:4011](http://localhost:4011) |
