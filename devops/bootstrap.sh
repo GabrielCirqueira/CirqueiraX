@@ -66,7 +66,7 @@ if [[ ! -f /var/www/html/.env ]]; then
 fi
 
 # ── 3. Migrations ────────────────────────────────────────────────────────────
-if [[ -f /var/www/html/bin/console ]]; then
+if [[ -f /var/www/html/bin/console ]] && [[ -f /var/www/html/vendor/autoload.php ]]; then
   # Aguarda o banco ficar realmente acessível via Doctrine
   log "Waiting for Database to be ready for connections..."
   count=0
@@ -90,7 +90,7 @@ if [[ -f /var/www/html/bin/console ]]; then
 fi
 
 # ── 4. Cache warmup (prod) ───────────────────────────────────────────────────
-if [[ -f /var/www/html/bin/console ]]; then
+if [[ -f /var/www/html/bin/console ]] && [[ -f /var/www/html/vendor/autoload.php ]]; then
   if [[ "${APP_ENV:-dev}" == "prod" ]]; then
     log "Warming up Symfony cache (prod)."
     WARMUP_OUT=$(su -s /bin/sh www-data -c "php /var/www/html/bin/console cache:warmup" 2>&1) || {
