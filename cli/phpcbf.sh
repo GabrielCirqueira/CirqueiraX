@@ -6,8 +6,8 @@ cd "$ROOT_DIR"
 
 # Use Docker Compose symfony service to ensure correct PHP version (>=8.4)
 COMPOSE_BIN=${COMPOSE:-"docker compose"}
-COMPOSE_FILE=${COMPOSE_FILE:-"docker-compose.yaml"}
-COMPOSE_ENV_FILE=${COMPOSE_ENV_FILE:-"ports.env"}
+COMPOSE_FILE=${COMPOSE_FILE:-"devops/docker-compose.yaml"}
+COMPOSE_ENV_FILE=${COMPOSE_ENV_FILE:-"devops/ports.env"}
 COMPOSE_CMD=( $COMPOSE_BIN --env-file "$COMPOSE_ENV_FILE" -f "$COMPOSE_FILE" )
 
 STANDARD_FILE_HOST="$ROOT_DIR/.tooling/quality/phpcs.xml"
