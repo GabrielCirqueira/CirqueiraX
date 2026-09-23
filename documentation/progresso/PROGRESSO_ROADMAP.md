@@ -30,11 +30,11 @@
 | 18 | Módulos opt-in (async, observability, ui-extra) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 19 | PHPUnit e pasta tests/ removidos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
 | 20 | Sistema de progresso, roadmap e melhorias | ✅ Concluído | [ver](PROGRESSO_ROADMAP_1.md) |
-| 21 | Ativação do módulo async (Messenger + Scheduler) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 22 | Configuração do transport Doctrine e messenger.yaml | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 23 | Supervisor com workers dedicados do Messenger | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 24 | Ativação do módulo ui-extra (Recharts) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 25 | Ativação do módulo observability (Sentry) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 21 | Ativação do módulo async (Messenger + Scheduler) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 22 | Configuração do transport Doctrine e messenger.yaml | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 23 | Supervisor com workers dedicados do Messenger | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 24 | Ativação do módulo ui-extra (Recharts) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 25 | Ativação do módulo observability (Sentry) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 26 | Canais de log dedicados no Monolog | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
 | 27 | Volume Docker compartilhado com o Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
 | 28 | Enum TipoCliente e entidade TokenAgente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |

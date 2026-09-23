@@ -37,11 +37,11 @@
 
 ## Checklist
 
-- [ ] **21. Ativação do módulo async (Messenger + Scheduler)**
-- [ ] **22. Configuração do transport Doctrine e messenger.yaml**
-- [ ] **23. Supervisor com workers dedicados do Messenger**
-- [ ] **24. Ativação do módulo ui-extra (Recharts)**
-- [ ] **25. Ativação do módulo observability (Sentry)**
+- [x] **21. Ativação do módulo async (Messenger + Scheduler)**
+- [x] **22. Configuração do transport Doctrine e messenger.yaml**
+- [x] **23. Supervisor com workers dedicados do Messenger**
+- [x] **24. Ativação do módulo ui-extra (Recharts)**
+- [x] **25. Ativação do módulo observability (Sentry)**
 - [ ] **26. Canais de log dedicados no Monolog**
 - [ ] **27. Volume Docker compartilhado com o Syncthing**
 - [ ] **28. Enum TipoCliente e entidade TokenAgente**
