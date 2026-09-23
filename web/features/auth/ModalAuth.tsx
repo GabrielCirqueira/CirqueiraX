@@ -1,4 +1,5 @@
 import { api } from '@/config/api'
+import type { RespostaApi } from '@/shared/types/api'
 import { Box } from '@/shared/ui/layout'
 import { useAuthStore } from '@/stores'
 import { toast } from '@heroui/react'
@@ -26,7 +27,6 @@ import axios from 'axios'
 import { Code2 } from 'lucide-react'
 import { useState } from 'react'
 import { z } from 'zod'
-import type { RespostaApi } from '@/shared/types/api'
 import type {
   CadastroInput,
   LoginInput,

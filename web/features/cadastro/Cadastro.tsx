@@ -66,8 +66,12 @@ export function Component() {
   return (
     <Card className="w-full max-w-sm shadow-md">
       <CardHeader className="flex flex-col items-center gap-1 pb-0 pt-6">
-        <Text as="h1" className="text-2xl font-bold font-sans">Criar conta</Text>
-        <Text className="text-sm text-center text-muted">Preencha os dados abaixo para se cadastrar</Text>
+        <Text as="h1" className="text-2xl font-bold font-sans">
+          Criar conta
+        </Text>
+        <Text className="text-sm text-center text-muted">
+          Preencha os dados abaixo para se cadastrar
+        </Text>
       </CardHeader>
 
       <CardContent className="px-6 py-6">

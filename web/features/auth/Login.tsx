@@ -46,8 +46,12 @@ export function Component() {
   return (
     <Card className="w-full max-w-sm shadow-md">
       <CardHeader className="flex flex-col items-center gap-1 pb-0 pt-6">
-        <Text as="h1" className="text-2xl font-bold font-sans">Entrar</Text>
-        <Text className="text-sm text-center text-muted">Acesse sua conta com seu usuário e senha</Text>
+        <Text as="h1" className="text-2xl font-bold font-sans">
+          Entrar
+        </Text>
+        <Text className="text-sm text-center text-muted">
+          Acesse sua conta com seu usuário e senha
+        </Text>
       </CardHeader>
 
       <CardContent className="px-6 py-6">

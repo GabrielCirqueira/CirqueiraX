@@ -40,8 +40,18 @@ export const Container = ({ size = 'xl', className, ...props }: ContainerProps) 
   <div className={cn('mx-auto w-full px-4', containerSizes[size], className)} {...props} />
 )
 
-
-type TextElement = 'p' | 'span' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'strong' | 'em' | 'small'
+type TextElement =
+  | 'p'
+  | 'span'
+  | 'h1'
+  | 'h2'
+  | 'h3'
+  | 'h4'
+  | 'h5'
+  | 'h6'
+  | 'strong'
+  | 'em'
+  | 'small'
 
 interface TextProps extends ComponentProps<'p'> {
   as?: TextElement
