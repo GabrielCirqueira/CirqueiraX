@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Entity\Usuario;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -32,7 +31,7 @@ final class JwtMasterCommand extends Command
         $io->title('Gerador de Token JWT Master (Full Access)');
 
         $io->section('Passo 1: Verificações de Configuração');
-        
+
         if (!$this->verificarConfiguracao($io)) {
             return Command::FAILURE;
         }
@@ -53,11 +52,11 @@ final class JwtMasterCommand extends Command
             ];
 
             $token = $this->jwtEncoder->encode($payload);
-            
+
             $io->info('Identificador: master-cli');
             $io->info('Roles: ROLE_ADMIN, ROLE_SUPER_ADMIN');
-            $io->info('Validade: 30 minutos (Expira em: ' . date('H:i:s', $exp) . ')');
-            
+            $io->info('Validade: 30 minutos (Expira em: '.date('H:i:s', $exp).')');
+
             $io->success('Token gerado com sucesso!');
             $io->writeln($token);
             $io->newLine();
@@ -65,7 +64,8 @@ final class JwtMasterCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $io->error('Erro ao gerar o token: ' . $e->getMessage());
+            $io->error('Erro ao gerar o token: '.$e->getMessage());
+
             return Command::FAILURE;
         }
     }
@@ -100,6 +100,7 @@ final class JwtMasterCommand extends Command
             foreach ($erros as $erro) {
                 $io->error($erro);
             }
+
             return false;
         }
 
