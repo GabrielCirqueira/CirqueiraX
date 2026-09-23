@@ -32,6 +32,7 @@ services:
       - "${SUPERVISOR_PORT:-9001}:9001"
     volumes:
       - ..:/var/www/html
+      - "${MEDIA_STORAGE_PATH:-./var/storage}:/var/www/html/var/storage"
     depends_on:
       - database
 

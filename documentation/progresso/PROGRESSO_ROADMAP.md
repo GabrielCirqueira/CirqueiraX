@@ -35,9 +35,9 @@
 | 23 | Supervisor com workers dedicados do Messenger | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 24 | Ativação do módulo ui-extra (Recharts) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 25 | Ativação do módulo observability (Sentry) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
-| 26 | Canais de log dedicados no Monolog | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 27 | Volume Docker compartilhado com o Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 28 | Enum TipoCliente e entidade TokenAgente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 26 | Canais de log dedicados no Monolog | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 27 | Volume Docker compartilhado com o Syncthing | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 28 | Enum TipoCliente e entidade TokenAgente | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 29 | Authenticator customizado para tokens de agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
 | 30 | Comando CLI de geração de token por agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
 | 31 | Entidade ContaGoogleFotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |

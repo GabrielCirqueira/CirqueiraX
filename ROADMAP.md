@@ -42,9 +42,9 @@
 - [x] **23. Supervisor com workers dedicados do Messenger**
 - [x] **24. Ativação do módulo ui-extra (Recharts)**
 - [x] **25. Ativação do módulo observability (Sentry)**
-- [ ] **26. Canais de log dedicados no Monolog**
-- [ ] **27. Volume Docker compartilhado com o Syncthing**
-- [ ] **28. Enum TipoCliente e entidade TokenAgente**
+- [x] **26. Canais de log dedicados no Monolog**
+- [x] **27. Volume Docker compartilhado com o Syncthing**
+- [x] **28. Enum TipoCliente e entidade TokenAgente**
 - [ ] **29. Authenticator customizado para tokens de agente**
 - [ ] **30. Comando CLI de geração de token por agente**
 - [ ] **31. Entidade ContaGoogleFotos**

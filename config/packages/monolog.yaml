@@ -1,6 +1,9 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - ingestao
+        - google_fotos
+        - syncthing
 
 when@dev:
     monolog:
@@ -9,15 +12,22 @@ when@dev:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
-                channels: ["!event"]
-            # uncomment to get logging in your browser
-            # you may have to allow bigger header sizes in your Web server configuration
-            #firephp:
-            #    type: firephp
-            #    level: info
-            #chromephp:
-            #    type: chromephp
-            #    level: info
+                channels: ["!event", "!ingestao", "!google_fotos", "!syncthing"]
+            ingestao:
+                type: stream
+                path: "%kernel.logs_dir%/ingestao.log"
+                level: debug
+                channels: ["ingestao"]
+            google_fotos:
+                type: stream
+                path: "%kernel.logs_dir%/google_fotos.log"
+                level: debug
+                channels: ["google_fotos"]
+            syncthing:
+                type: stream
+                path: "%kernel.logs_dir%/syncthing.log"
+                level: debug
+                channels: ["syncthing"]
             console:
                 type: console
                 process_psr_3_messages: false

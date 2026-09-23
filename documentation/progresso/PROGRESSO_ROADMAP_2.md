@@ -66,14 +66,40 @@
   - [`config/packages/sentry.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/sentry.yaml)
   - [`.env`](file:///home/gabriel/dev/pessoal/CirqueiraX/.env)
 
-### ⏳ Tópico 26 — Canais de log dedicados no Monolog
-- **Status**: Pendente
+### ✅ Tópico 26 — Canais de log dedicados no Monolog
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Canais de Log Registrados**: Adicionados os canais dedicados `ingestao`, `google_fotos` e `syncthing` na seção `monolog.channels` de [`config/packages/monolog.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/monolog.yaml).
+  - **Handlers em Ambiente Dev**: Configurados handlers de arquivo dedicados no ambiente `dev` (`var/log/ingestao.log`, `var/log/google_fotos.log`, `var/log/syncthing.log`), separando os registros de integrações externas do log padrão do Symfony (`dev.log`).
+  - **Injeção de Loggers Específicos**: Habilitado o autowiring do Symfony para injeção direta de loggers direcionados (ex: `LoggerInterface $ingestaoLogger`, `LoggerInterface $googleFotosLogger`, `LoggerInterface $syncthingLogger`).
+- **Arquivos envolvidos**:
+  - [`config/packages/monolog.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/monolog.yaml)
 
-### ⏳ Tópico 27 — Volume Docker compartilhado com o Syncthing
-- **Status**: Pendente
+### ✅ Tópico 27 — Volume Docker compartilhado com o Syncthing
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Mapeamento de Volume em Dev**: Configurado o bind mount do diretório de armazenamento no serviço `symfony` (`${MEDIA_STORAGE_PATH:-./var/storage}:/var/www/html/var/storage`) em [`devops/docker-compose.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/devops/docker-compose.yaml).
+  - **Mapeamento de Volume em Prod**: Adicionada a montagem equivalente para o ambiente de produção (`${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}:/var/www/html/var/storage`) em [`devops/docker-compose.prod.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/devops/docker-compose.prod.yaml).
+  - **Padronização de Variável de Ambiente**: Registrada a variável `MEDIA_STORAGE_PATH=./var/storage` nos arquivos [`.env`](file:///home/gabriel/dev/pessoal/CirqueiraX/.env) e [`.tooling/env/.env.example`](file:///home/gabriel/dev/pessoal/CirqueiraX/.tooling/env/.env.example), garantindo acesso direto da distribuição local às pastas do Syncthing.
+- **Arquivos envolvidos**:
+  - [`devops/docker-compose.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/devops/docker-compose.yaml)
+  - [`devops/docker-compose.prod.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/devops/docker-compose.prod.yaml)
+  - [`.env`](file:///home/gabriel/dev/pessoal/CirqueiraX/.env)
+  - [`.tooling/env/.env.example`](file:///home/gabriel/dev/pessoal/CirqueiraX/.tooling/env/.env.example)
 
-### ⏳ Tópico 28 — Enum TipoCliente e entidade TokenAgente
-- **Status**: Pendente
+### ✅ Tópico 28 — Enum TipoCliente e entidade TokenAgente
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Criação do Enum `TipoCliente`**: Desenvolvido o enum nativo PHP 8.4 [`src/Enum/TipoCliente.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Enum/TipoCliente.php) (`enum TipoCliente: string`), encapsulando os tipos `USUARIO = 'usuario'` e `AGENTE = 'agente'`, além do método `descricao()` para legibilidade dos tipos de clientes da plataforma.
+  - **Modelagem da Entidade `TokenAgente`**: Criada a entidade Doctrine [`src/Entity/TokenAgente.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/TokenAgente.php) em `token_agente` com chave primária UUID v7 gerada no construtor via `Symfony\Component\Uid\Uuid::v7()`, garantindo ordenação temporal e identificação única.
+  - **Conformidade com Guia do Projeto**: Implementados getters sem prefixo `get` (`uuid()`, `nome()`, `tokenHash()`, `origem()`, `tipoCliente()`, `ativo()`, `criadoEm()`, `atualizadoEm()`, `revogadoEm()`), setters com proteção de invariante retornando `self`, e método de negócio `revogar()` para desativação com carimbo de data/hora (`revogadoEm`).
+  - **Repositório de Persistência**: Criado o repositório [`src/Repository/TokenAgenteRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/TokenAgenteRepository.php) estendendo `ServiceEntityRepository`, contendo métodos de persistência e consultas otimizadas (`salvar()`, `remover()`, `buscarPorHash()`, `buscarPorUuid()`).
+  - **Configuração DBAL do Doctrine**: Registrado o tipo customizado `uuid` (`Symfony\Bridge\Doctrine\Types\UuidType`) em [`config/packages/doctrine.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/doctrine.yaml) para mapeamento correto de colunas UUID.
+- **Arquivos envolvidos**:
+  - [`src/Enum/TipoCliente.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Enum/TipoCliente.php)
+  - [`src/Entity/TokenAgente.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/TokenAgente.php)
+  - [`src/Repository/TokenAgenteRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/TokenAgenteRepository.php)
+  - [`config/packages/doctrine.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/doctrine.yaml)
 
 ### ⏳ Tópico 29 — Authenticator customizado para tokens de agente
 - **Status**: Pendente

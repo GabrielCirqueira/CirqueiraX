@@ -14,6 +14,8 @@ services:
     env_file: ../.env
     ports:
       - "127.0.0.1:${DEPLOY_PORT:-8080}:80"
+    volumes:
+      - "${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}:/var/www/html/var/storage"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
       interval: 30s
