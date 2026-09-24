@@ -206,6 +206,9 @@ agente-token: ## Gerar token de acesso para agente de serviço (ARGS="nome orige
 google-fotos-autorizar: ## Autorizar conta do Google Fotos via OAuth2 CLI
 	$(EXEC_BACKEND) php bin/console app:google-fotos:autorizar-conta $(ARGS)
 
+media-retentar: ## Retentar processamento de mídia em erro (ARGS="<uuid>" ou ARGS="--todos")
+	$(EXEC_BACKEND) php bin/console app:media:retentar $(ARGS)
+
 # ══════════════════════════════════════════════════
 # SHELLS E ACESSO AOS CONTAINERS
 # ══════════════════════════════════════════════════
@@ -324,7 +327,7 @@ setup-prod-env: ## Criar .env de produção a partir do exemplo
 
 push: ## Commitar e enviar alterações para o repositório remoto (ARGS="mensagem")
 	git add .
-	repomind commit --no-verify
+	commit-wizard
 	git push
 
 # ══════════════════════════════════════════════════

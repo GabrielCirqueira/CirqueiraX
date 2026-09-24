@@ -11,10 +11,8 @@ final readonly class AtualizarCategoriaDTO
     public function __construct(
         #[Assert\Length(max: 100)]
         public ?string $nome = null,
-
         #[Assert\Length(max: 255)]
         public ?string $pastaLocal = null,
-
         public ?string $googlePhotosAlbumId = null,
     ) {
     }

@@ -12,11 +12,9 @@ final readonly class CriarCategoriaDTO
         #[Assert\NotBlank]
         #[Assert\Length(max: 100)]
         public string $nome,
-
         #[Assert\NotBlank]
         #[Assert\Length(max: 255)]
         public string $pastaLocal,
-
         public ?string $googlePhotosAlbumId = null,
     ) {
     }

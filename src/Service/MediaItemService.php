@@ -7,6 +7,7 @@ namespace App\Service;
 use App\DataObject\ClassificarManualDTO;
 use App\Entity\MediaItem;
 use App\Enum\StatusMediaItem;
+use App\Message\ClassificarMediaMessage;
 use App\Message\DistribuirLocalMessage;
 use App\Message\EnviarGoogleFotosMessage;
 use App\Repository\MediaItemRepository;
@@ -56,5 +57,51 @@ final readonly class MediaItemService
         }
 
         return $mediaItem;
+    }
+
+    public function retentar(string|Uuid $uuid): MediaItem
+    {
+        $mediaItem = $this->buscarPorUuid($uuid);
+        $this->retentarMediaItem($mediaItem);
+
+        return $mediaItem;
+    }
+
+    /**
+     * @return list<MediaItem>
+     */
+    public function retentarTodosComErro(): array
+    {
+        $itensComErro = $this->mediaItemRepository->buscarPorStatus(StatusMediaItem::ERRO);
+        foreach ($itensComErro as $mediaItem) {
+            $this->retentarMediaItem($mediaItem);
+        }
+
+        return $itensComErro;
+    }
+
+    private function retentarMediaItem(MediaItem $mediaItem): void
+    {
+        $mediaItem->setErroMotivo(null);
+
+        if (null !== $mediaItem->categoriaId()) {
+            $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);
+            $this->mediaItemRepository->salvar($mediaItem);
+
+            if (null !== $mediaItem->uuid()) {
+                $mediaUuidStr = $mediaItem->uuid()->toString();
+                $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
+                $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+            }
+
+            return;
+        }
+
+        $mediaItem->transicionarPara(StatusMediaItem::RECEBIDO);
+        $this->mediaItemRepository->salvar($mediaItem);
+
+        if (null !== $mediaItem->uuid()) {
+            $this->messageBus->dispatch(new ClassificarMediaMessage($mediaItem->uuid()->toString()));
+        }
     }
 }

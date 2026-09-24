@@ -41,7 +41,7 @@ final readonly class GoogleFotosAlbumService
 
         $response = $this->httpClient->request('POST', self::GOOGLE_ALBUMS_URL, [
             'headers' => [
-                'Authorization' => 'Bearer '.$token,
+                'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
             ],
             'json' => [

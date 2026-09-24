@@ -28,7 +28,7 @@ class TokenAgenteAuthenticator extends AbstractAuthenticator
     public function supports(Request $request): ?bool
     {
         return $request->headers->has(self::HEADER_NAME)
-            && !empty($request->headers->get(self::HEADER_NAME));
+        && !empty($request->headers->get(self::HEADER_NAME));
     }
 
     public function authenticate(Request $request): Passport

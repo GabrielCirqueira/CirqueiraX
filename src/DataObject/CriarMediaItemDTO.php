@@ -20,17 +20,11 @@ final readonly class CriarMediaItemDTO
         #[Assert\NotBlank]
         #[Assert\Length(max: 64)]
         public string $hash,
-
         OrigemMedia|string $origem,
-
         StatusMediaItem|string $status = StatusMediaItem::RECEBIDO,
-
         public ?string $caminhoLocal = null,
-
         public ?string $googlePhotosMediaId = null,
-
         public ?string $categoriaId = null,
-
         public array $metadata = [],
     ) {
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;

@@ -163,14 +163,36 @@
   - [`src/Service/EnviarGoogleFotosService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/EnviarGoogleFotosService.php)
   - [`src/MessageHandler/EnviarGoogleFotosMessageHandler.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/MessageHandler/EnviarGoogleFotosMessageHandler.php)
 
-### ⏳ Tópico 56 — Gravação do google_photos_media_id após upload
-- **Status**: Pendente
+### ✅ Tópico 56 — Gravação do google_photos_media_id após upload
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Validação de Resposta da API**: Atualizado [`src/Service/EnviarGoogleFotosService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/EnviarGoogleFotosService.php) para validar a resposta do endpoint `mediaItems:batchCreate` da API do Google Photos (`newMediaItemResults` e código de status).
+  - **Tratamento de Falhas e Gravação Estrita**: Caso a chamada em lote falhe ou o `mediaItem.id` não seja retornado, lança exceções de domínio tratadas (`erro_resposta_lote_google_fotos`, `falha_upload_batch_google`, `erro_gravar_media_id_google`).
+  - **Persistência do ID**: Grava obrigatoriamente o `googlePhotosMediaId` na entidade `MediaItem` através do método `setGooglePhotosMediaId()` antes de efetuar a transição de estado para `CONCLUIDO` e salvar no banco de dados.
+- **Arquivos envolvidos**:
+  - [`src/Service/EnviarGoogleFotosService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/EnviarGoogleFotosService.php)
 
-### ⏳ Tópico 57 — Captura de exceção nos handlers — erro_motivo e status erro
-- **Status**: Pendente
+### ✅ Tópico 57 — Captura de exceção nos handlers — erro_motivo e status erro
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Interceptação de Falhas em Handlers**: Atualizados os handlers do Messenger ([`ClassificarMediaMessageHandler.php`](file:///home/gabriel/dev/CirqueiraX/src/MessageHandler/ClassificarMediaMessageHandler.php), [`DistribuirLocalMessageHandler.php`](file:///home/gabriel/dev/CirqueiraX/src/MessageHandler/DistribuirLocalMessageHandler.php) e [`EnviarGoogleFotosMessageHandler.php`](file:///home/gabriel/dev/CirqueiraX/src/MessageHandler/EnviarGoogleFotosMessageHandler.php)) com blocos `try-catch` para captura de exceção durante a execução.
+  - **Gravação de Motivo e Transição de Estado**: Em caso de falha, busca o `MediaItem`, grava o texto da exceção no campo `erroMotivo` (`setErroMotivo()`), efetua a transição de estado para `ERRO` (`transicionarPara(StatusMediaItem::ERRO)`) e re-dispara a exceção para integração com loggers/Sentry.
+- **Arquivos envolvidos**:
+  - [`src/MessageHandler/ClassificarMediaMessageHandler.php`](file:///home/gabriel/dev/CirqueiraX/src/MessageHandler/ClassificarMediaMessageHandler.php)
+  - [`src/MessageHandler/DistribuirLocalMessageHandler.php`](file:///home/gabriel/dev/CirqueiraX/src/MessageHandler/DistribuirLocalMessageHandler.php)
+  - [`src/MessageHandler/EnviarGoogleFotosMessageHandler.php`](file:///home/gabriel/dev/CirqueiraX/src/MessageHandler/EnviarGoogleFotosMessageHandler.php)
 
-### ⏳ Tópico 58 — Comando CLI app:media:retentar
-- **Status**: Pendente
+### ✅ Tópico 58 — Comando CLI app:media:retentar
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Regra de Negócio no Service**: Adicionados os métodos `retentar(string|Uuid $uuid)` e `retentarTodosComErro()` em [`src/Service/MediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItemService.php) para limpeza de `erroMotivo`, transição de status (`CLASSIFICADO` se houver categoria definida ou `RECEBIDO` para re-classificação) e dispatch das mensagens no barramento.
+  - **Comando Console (`RetentarMediaCommand`)**: Criado o comando Symfony Console [`src/Command/RetentarMediaCommand.php`](file:///home/gabriel/dev/CirqueiraX/src/Command/RetentarMediaCommand.php) registrado com a assinatura `app:media:retentar`. Aceita o parâmetro opcional `uuid` e a opção `--todos` (`-t`), permitindo reprocessamento interativo ou em lote.
+  - **Atalho no Makefile**: Adicionada a regra `media-retentar` no [`Makefile`](file:///home/gabriel/dev/CirqueiraX/Makefile) (`make media-retentar ARGS="<uuid>"` ou `make media-retentar ARGS="--todos"`).
+- **Arquivos envolvidos**:
+  - [`src/Service/MediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItemService.php)
+  - [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/CirqueiraX/src/Repository/MediaItemRepository.php)
+  - [`src/Command/RetentarMediaCommand.php`](file:///home/gabriel/dev/CirqueiraX/src/Command/RetentarMediaCommand.php)
+  - [`Makefile`](file:///home/gabriel/dev/CirqueiraX/Makefile)
 
 ### ⏳ Tópico 59 — Endpoint de retry — individual e em lote
 - **Status**: Pendente

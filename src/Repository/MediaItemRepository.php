@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\MediaItem;
+use App\Enum\StatusMediaItem;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -52,9 +53,11 @@ class MediaItemRepository extends ServiceEntityRepository
     /**
      * @return list<MediaItem>
      */
-    public function buscarPorStatus(string $status): array
+    public function buscarPorStatus(StatusMediaItem|string $status): array
     {
-        return $this->findBy(['status' => $status], ['criadoEm' => 'ASC']);
+        $statusStr = is_string($status) ? $status : $status->value;
+
+        return $this->findBy(['status' => $statusStr], ['criadoEm' => 'ASC']);
     }
 
     /**

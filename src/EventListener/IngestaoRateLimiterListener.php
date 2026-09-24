@@ -33,8 +33,8 @@ final class IngestaoRateLimiterListener
         }
 
         $identificador = $request->headers->get('X-Agent-Token')
-            ?? $request->getClientIp()
-            ?? 'anonimo';
+        ?? $request->getClientIp()
+        ?? 'anonimo';
 
         $limiter = $this->ingestaoLimiter->create($identificador);
         $limit = $limiter->consume(1);

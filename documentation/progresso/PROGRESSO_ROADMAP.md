@@ -62,12 +62,12 @@
 | 49 | ClassificarMediaMessageHandler — aplicação de OrigemRegra automática | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 50 | Fluxo de classificação manual (categoria pendente) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 51 | Dispatch paralelo — DistribuirLocalMessage e EnviarGoogleFotosMessage | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
-| 52 | DistribuirLocalMessageHandler e DistribuirLocalService | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 53 | GoogleFotosOAuthService — renovação automática de access token | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 54 | GoogleFotosAlbumService — criarOuObter() via albums.create | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 55 | EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 56 | Gravação do google_photos_media_id após upload | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 57 | Captura de exceção nos handlers — erro_motivo e status erro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 58 | Comando CLI app:media:retentar | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 52 | DistribuirLocalMessageHandler e DistribuirLocalService | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 53 | GoogleFotosOAuthService — renovação automática de access token | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 54 | GoogleFotosAlbumService — criarOuObter() via albums.create | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 55 | EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 56 | Gravação do google_photos_media_id após upload | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 57 | Captura de exceção nos handlers — erro_motivo e status erro | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 58 | Comando CLI app:media:retentar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 59 | Endpoint de retry — individual e em lote | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
 | 60 | Teste end-to-end do motor completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |

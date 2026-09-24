@@ -13,7 +13,6 @@ final readonly class AtualizarOrigemRegraDTO
 
     public function __construct(
         OrigemMedia|string|null $origem = null,
-
         #[Assert\Length(max: 36)]
         public ?string $categoriaId = null,
     ) {

@@ -13,7 +13,6 @@ final readonly class CriarOrigemRegraDTO
 
     public function __construct(
         OrigemMedia|string $origem,
-
         #[Assert\NotBlank]
         #[Assert\Length(max: 36)]
         public string $categoriaId,

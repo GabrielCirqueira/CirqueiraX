@@ -17,9 +17,7 @@ final readonly class IngestarMediaDTO
     public function __construct(
         #[Assert\NotBlank(message: 'O caminho do arquivo é obrigatório.')]
         public string $caminhoArquivo,
-
         OrigemMedia|string $origem,
-
         public array $metadata = [],
     ) {
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;

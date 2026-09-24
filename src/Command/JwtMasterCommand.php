@@ -55,7 +55,7 @@ final class JwtMasterCommand extends Command
 
             $io->info('Identificador: master-cli');
             $io->info('Roles: ROLE_ADMIN, ROLE_SUPER_ADMIN');
-            $io->info('Validade: 30 minutos (Expira em: '.date('H:i:s', $exp).')');
+            $io->info('Validade: 30 minutos (Expira em: ' . date('H:i:s', $exp) . ')');
 
             $io->success('Token gerado com sucesso!');
             $io->writeln($token);
@@ -64,7 +64,7 @@ final class JwtMasterCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $io->error('Erro ao gerar o token: '.$e->getMessage());
+            $io->error('Erro ao gerar o token: ' . $e->getMessage());
 
             return Command::FAILURE;
         }

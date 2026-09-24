@@ -126,7 +126,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
                 try {
                     $userInfoResponse = $this->httpClient->request('GET', self::GOOGLE_USERINFO_URL, [
                         'headers' => [
-                            'Authorization' => 'Bearer '.$accessToken,
+                            'Authorization' => 'Bearer ' . $accessToken,
                         ],
                     ]);
                     $userInfo = $userInfoResponse->toArray();
@@ -168,7 +168,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Throwable $e) {
-            $io->error('Erro ao processar autorização OAuth: '.$e->getMessage());
+            $io->error('Erro ao processar autorização OAuth: ' . $e->getMessage());
 
             return Command::FAILURE;
         }

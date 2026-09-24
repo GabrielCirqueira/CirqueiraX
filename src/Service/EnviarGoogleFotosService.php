@@ -68,7 +68,7 @@ final readonly class EnviarGoogleFotosService
 
         $uploadResponse = $this->httpClient->request('POST', self::UPLOAD_BYTES_URL, [
             'headers' => [
-                'Authorization' => 'Bearer '.$token,
+                'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/octet-stream',
                 'X-Goog-Upload-Content-Type' => $mimeType,
                 'X-Goog-Upload-Protocol' => 'raw',
@@ -83,7 +83,7 @@ final readonly class EnviarGoogleFotosService
 
         $batchResponse = $this->httpClient->request('POST', self::BATCH_CREATE_URL, [
             'headers' => [
-                'Authorization' => 'Bearer '.$token,
+                'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
             ],
             'json' => [
@@ -100,12 +100,23 @@ final readonly class EnviarGoogleFotosService
         ]);
 
         $dadosBatch = $batchResponse->toArray();
-        $mediaId = $dadosBatch['newMediaItemResults'][0]['mediaItem']['id'] ?? null;
+        $resultadoItem = $dadosBatch['newMediaItemResults'][0] ?? null;
 
-        if (!empty($mediaId) && is_string($mediaId)) {
-            $mediaItem->setGooglePhotosMediaId($mediaId);
+        if (null === $resultadoItem) {
+            throw new \DomainException('erro_resposta_lote_google_fotos', 400);
         }
 
+        $statusCodigo = $resultadoItem['status']['code'] ?? 0;
+        if (0 !== $statusCodigo) {
+            throw new \DomainException('falha_upload_batch_google', 400);
+        }
+
+        $mediaId = $resultadoItem['mediaItem']['id'] ?? null;
+        if (empty($mediaId) || !is_string($mediaId)) {
+            throw new \DomainException('erro_gravar_media_id_google', 400);
+        }
+
+        $mediaItem->setGooglePhotosMediaId($mediaId);
         $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
         $this->mediaItemRepository->salvar($mediaItem);
 

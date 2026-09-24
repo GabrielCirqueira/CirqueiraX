@@ -25,25 +25,35 @@ final readonly class ClassificarMediaMessageHandler
 
     public function __invoke(ClassificarMediaMessage $message): void
     {
-        $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
-        if (null === $mediaItem || $mediaItem->status()->isFinal()) {
-            return;
-        }
+        try {
+            $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
+            if (null === $mediaItem || $mediaItem->status()->isFinal()) {
+                return;
+            }
 
-        $regra = $this->origemRegraRepository->buscarPorOrigem($mediaItem->origem());
-        if (null !== $regra) {
-            $mediaItem->setCategoriaId($regra->categoriaId());
-            $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);
+            $regra = $this->origemRegraRepository->buscarPorOrigem($mediaItem->origem());
+            if (null !== $regra) {
+                $mediaItem->setCategoriaId($regra->categoriaId());
+                $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);
+                $this->mediaItemRepository->salvar($mediaItem);
+
+                $mediaUuidStr = $message->mediaItemUuid();
+                $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
+                $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+
+                return;
+            }
+
+            $mediaItem->transicionarPara(StatusMediaItem::EM_FILA);
             $this->mediaItemRepository->salvar($mediaItem);
-
-            $mediaUuidStr = $message->mediaItemUuid();
-            $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
-            $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
-
-            return;
+        } catch (\Throwable $e) {
+            $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
+            if (null !== $mediaItem && !$mediaItem->status()->isFinal()) {
+                $mediaItem->setErroMotivo($e->getMessage());
+                $mediaItem->transicionarPara(StatusMediaItem::ERRO);
+                $this->mediaItemRepository->salvar($mediaItem);
+            }
+            throw $e;
         }
-
-        $mediaItem->transicionarPara(StatusMediaItem::EM_FILA);
-        $this->mediaItemRepository->salvar($mediaItem);
     }
 }
