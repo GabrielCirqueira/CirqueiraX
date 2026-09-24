@@ -39,7 +39,7 @@ PROD_SYMFONY  = $(COMPOSE_PROD_CMD) exec -T symfony
   migrate rollback db-create db-drop db-reset db-shell db-restore \
   cache-clear cache-warmup \
   routes debug-container debug-env debug-event \
-  jwt-master \
+  jwt-master agente-token google-fotos-autorizar \
   check-status fix-permissions \
   docker-clean system-info dev-logs monitor \
   deploy update-prod migrate-prod rollback-prod \
@@ -199,6 +199,12 @@ db-restore: ## Restaurar backup SQL (ARGS="arquivo.sql")
 
 jwt-master: ## Gerar token JWT com acesso total (Master)
 	bash $(CLI_DIR)/jwt-full-access.sh
+
+agente-token: ## Gerar token de acesso para agente de serviço (ARGS="nome origem")
+	$(EXEC_BACKEND) php bin/console app:agente:gerar-token $(ARGS)
+
+google-fotos-autorizar: ## Autorizar conta do Google Fotos via OAuth2 CLI
+	$(EXEC_BACKEND) php bin/console app:google-fotos:autorizar-conta $(ARGS)
 
 # ══════════════════════════════════════════════════
 # SHELLS E ACESSO AOS CONTAINERS
