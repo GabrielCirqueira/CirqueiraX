@@ -36,4 +36,22 @@ enum StatusMediaItem: string
             default => false,
         };
     }
+
+    public function podeTransicionarPara(self $novoStatus): bool
+    {
+        if ($this === $novoStatus) {
+            return true;
+        }
+
+        return match ($this) {
+            self::RECEBIDO => in_array($novoStatus, [self::EM_FILA, self::CLASSIFICADO, self::ERRO], true),
+            self::EM_FILA => in_array($novoStatus, [self::CLASSIFICADO, self::ERRO], true),
+            self::CLASSIFICADO => in_array($novoStatus, [self::DISTRIBUINDO, self::DISTRIBUIDO_LOCAL, self::ENVIANDO_GOOGLE_FOTOS, self::CONCLUIDO, self::ERRO], true),
+            self::DISTRIBUINDO => in_array($novoStatus, [self::DISTRIBUIDO_LOCAL, self::CONCLUIDO, self::ERRO], true),
+            self::DISTRIBUIDO_LOCAL => in_array($novoStatus, [self::ENVIANDO_GOOGLE_FOTOS, self::CONCLUIDO, self::ERRO], true),
+            self::ENVIANDO_GOOGLE_FOTOS => in_array($novoStatus, [self::DISTRIBUIDO_LOCAL, self::CONCLUIDO, self::ERRO], true),
+            self::CONCLUIDO => in_array($novoStatus, [self::CLASSIFICADO, self::RECEBIDO], true),
+            self::ERRO => in_array($novoStatus, [self::CLASSIFICADO, self::RECEBIDO, self::EM_FILA], true),
+        };
+    }
 }

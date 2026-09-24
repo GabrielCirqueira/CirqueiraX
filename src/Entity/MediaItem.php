@@ -48,6 +48,12 @@ class MediaItem
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $erroMotivo = null;
 
+    /**
+     * @var array<int, array{de?: string, para: string, em: string}>
+     */
+    #[ORM\Column(type: 'json')]
+    private array $historicoStatus = [];
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $criadoEm;
 
@@ -68,8 +74,15 @@ class MediaItem
         $this->categoriaId = null;
         $this->metadata = [];
         $this->erroMotivo = null;
-        $this->criadoEm = new \DateTimeImmutable();
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $agora = new \DateTimeImmutable();
+        $this->criadoEm = $agora;
+        $this->atualizadoEm = $agora;
+        $this->historicoStatus = [
+            [
+                'para' => $this->status->value,
+                'em' => $agora->format(\DateTimeInterface::ATOM),
+            ],
+        ];
     }
 
     public static function fromDTO(CriarMediaItemDTO $dto): self
@@ -135,12 +148,39 @@ class MediaItem
         return $this->status;
     }
 
-    public function setStatus(StatusMediaItem|string $status): self
+    public function transicionarPara(StatusMediaItem|string $novoStatus): self
     {
-        $this->status = is_string($status) ? (StatusMediaItem::tryFrom($status) ?? StatusMediaItem::RECEBIDO) : $status;
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $statusAlvo = is_string($novoStatus) ? (StatusMediaItem::tryFrom($novoStatus) ?? StatusMediaItem::ERRO) : $novoStatus;
+
+        if (!$this->status->podeTransicionarPara($statusAlvo)) {
+            throw new \DomainException(sprintf('Transição de status inválida de "%s" para "%s".', $this->status->value, $statusAlvo->value), 422);
+        }
+
+        $deStatus = $this->status->value;
+        $this->status = $statusAlvo;
+        $agora = new \DateTimeImmutable();
+        $this->atualizadoEm = $agora;
+
+        $this->historicoStatus[] = [
+            'de' => $deStatus,
+            'para' => $statusAlvo->value,
+            'em' => $agora->format(\DateTimeInterface::ATOM),
+        ];
 
         return $this;
+    }
+
+    /**
+     * @return array<int, array{de?: string, para: string, em: string}>
+     */
+    public function historicoStatus(): array
+    {
+        return $this->historicoStatus;
+    }
+
+    public function setStatus(StatusMediaItem|string $status): self
+    {
+        return $this->transicionarPara($status);
     }
 
     public function caminhoLocal(): ?string
