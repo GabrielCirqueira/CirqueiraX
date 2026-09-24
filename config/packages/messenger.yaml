@@ -20,9 +20,6 @@ framework:
 
         routing:
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
-            # Symfony\Component\Notifier\Message\ChatMessage: async
-            # Symfony\Component\Notifier\Message\SmsMessage: async
+            'App\Message\*': async
 
-            # Adicione suas mensagens aqui:
-            # 'App\Message\SuaMensagem': async
 

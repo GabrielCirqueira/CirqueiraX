@@ -48,4 +48,30 @@ class CategoriaRepository extends ServiceEntityRepository
 
         return $this->find($uuid);
     }
+
+    /**
+     * @return array{itens: array<int, Categoria>, total: int}
+     */
+    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+    {
+        $offset = ($pagina - 1) * $limite;
+
+        $qb = $this->createQueryBuilder('c')
+            ->orderBy('c.criadoEm', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limite);
+
+        /** @var array<int, Categoria> $itens */
+        $itens = $qb->getQuery()->getResult();
+
+        $totalQb = $this->createQueryBuilder('c')
+            ->select('COUNT(c.uuid)');
+
+        $total = (int) $totalQb->getQuery()->getSingleScalarResult();
+
+        return [
+            'itens' => $itens,
+            'total' => $total,
+        ];
+    }
 }

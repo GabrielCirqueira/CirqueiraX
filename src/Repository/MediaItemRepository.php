@@ -56,4 +56,30 @@ class MediaItemRepository extends ServiceEntityRepository
     {
         return $this->findBy(['status' => $status], ['criadoEm' => 'ASC']);
     }
+
+    /**
+     * @return array{itens: array<int, MediaItem>, total: int}
+     */
+    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+    {
+        $offset = ($pagina - 1) * $limite;
+
+        $qb = $this->createQueryBuilder('m')
+            ->orderBy('m.criadoEm', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limite);
+
+        /** @var array<int, MediaItem> $itens */
+        $itens = $qb->getQuery()->getResult();
+
+        $totalQb = $this->createQueryBuilder('m')
+            ->select('COUNT(m.uuid)');
+
+        $total = (int) $totalQb->getQuery()->getSingleScalarResult();
+
+        return [
+            'itens' => $itens,
+            'total' => $total,
+        ];
+    }
 }

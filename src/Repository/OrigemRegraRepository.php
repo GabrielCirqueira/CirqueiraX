@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\OrigemRegra;
+use App\Enum\OrigemMedia;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -35,9 +36,11 @@ class OrigemRegraRepository extends ServiceEntityRepository
         }
     }
 
-    public function buscarPorOrigem(string $origem): ?OrigemRegra
+    public function buscarPorOrigem(OrigemMedia|string $origem): ?OrigemRegra
     {
-        return $this->findOneBy(['origem' => $origem]);
+        $valor = $origem instanceof OrigemMedia ? $origem->value : $origem;
+
+        return $this->findOneBy(['origem' => $valor]);
     }
 
     public function buscarPorUuid(Uuid|string $uuid): ?OrigemRegra
@@ -47,5 +50,31 @@ class OrigemRegraRepository extends ServiceEntityRepository
         }
 
         return $this->find($uuid);
+    }
+
+    /**
+     * @return array{itens: array<int, OrigemRegra>, total: int}
+     */
+    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+    {
+        $offset = ($pagina - 1) * $limite;
+
+        $qb = $this->createQueryBuilder('r')
+            ->orderBy('r.criadoEm', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limite);
+
+        /** @var array<int, OrigemRegra> $itens */
+        $itens = $qb->getQuery()->getResult();
+
+        $totalQb = $this->createQueryBuilder('r')
+            ->select('COUNT(r.uuid)');
+
+        $total = (int) $totalQb->getQuery()->getSingleScalarResult();
+
+        return [
+            'itens' => $itens,
+            'total' => $total,
+        ];
     }
 }
