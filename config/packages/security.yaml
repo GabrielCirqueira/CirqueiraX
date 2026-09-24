@@ -48,6 +48,8 @@ security:
             pattern: ^/api
             stateless: true
             provider: app_chained_provider
+            custom_authenticators:
+                - App\Security\TokenAgenteAuthenticator
             jwt: ~
 
         main:
