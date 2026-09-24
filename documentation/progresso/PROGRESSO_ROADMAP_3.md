@@ -144,11 +144,24 @@
 - **Arquivos envolvidos**:
   - [`src/Service/GoogleFotosOAuthService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/GoogleFotosOAuthService.php)
 
-### ⏳ Tópico 54 — GoogleFotosAlbumService — criarOuObter() via albums.create
-- **Status**: Pendente
+### ✅ Tópico 54 — GoogleFotosAlbumService — criarOuObter() via albums.create
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Serviço de Gestão de Álbuns**: Criado [`src/Service/GoogleFotosAlbumService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/GoogleFotosAlbumService.php) com o método `criarOuObter(Categoria $categoria, ?ContaGoogleFotos $conta = null)`.
+  - **Criação sob Demanda no Google Fotos**: Se a `Categoria` já possui um `googlePhotosAlbumId`, retorna o ID existente imediatamente; caso contrário, obtém um token OAuth válido, invoca a API `POST https://photoslibrary.googleapis.com/v1/albums` enviando o nome da categoria como título do álbum, associa o `googlePhotosAlbumId` retornado à entidade `Categoria` e persiste no banco.
+- **Arquivos envolvidos**:
+  - [`src/Service/GoogleFotosAlbumService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/GoogleFotosAlbumService.php)
+  - [`src/Repository/ContaGoogleFotosRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/ContaGoogleFotosRepository.php)
 
-### ⏳ Tópico 55 — EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService
-- **Status**: Pendente
+### ✅ Tópico 55 — EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Serviço de Upload de Mídia**: Criado [`src/Service/EnviarGoogleFotosService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/EnviarGoogleFotosService.php) realizando o pipeline completo de envio de mídia para o Google Fotos.
+  - **Upload em 2 Etapas e Gravação de ID**: Transiciona o status para `ENVIANDO_GOOGLE_FOTOS`, faz o envio de bytes via `POST https://photoslibrary.googleapis.com/v1/uploads` com `Content-Type: application/octet-stream`, efetua a chamada `POST https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate` vinculando a mídia ao álbum da categoria, grava o `googlePhotosMediaId` retornado na entidade `MediaItem`, transiciona o status para `CONCLUIDO` e persiste as alterações.
+  - **Handler Assíncrono Desacoplado**: Criado [`src/MessageHandler/EnviarGoogleFotosMessageHandler.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/MessageHandler/EnviarGoogleFotosMessageHandler.php) anotado com `#[AsMessageHandler]` para consumir `EnviarGoogleFotosMessage` delegando a execução para `EnviarGoogleFotosService`.
+- **Arquivos envolvidos**:
+  - [`src/Service/EnviarGoogleFotosService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/EnviarGoogleFotosService.php)
+  - [`src/MessageHandler/EnviarGoogleFotosMessageHandler.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/MessageHandler/EnviarGoogleFotosMessageHandler.php)
 
 ### ⏳ Tópico 56 — Gravação do google_photos_media_id após upload
 - **Status**: Pendente

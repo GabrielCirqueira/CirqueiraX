@@ -48,4 +48,9 @@ class ContaGoogleFotosRepository extends ServiceEntityRepository
 
         return $this->find($uuid);
     }
+
+    public function buscarContaPrincipal(): ?ContaGoogleFotos
+    {
+        return $this->findOneBy([]);
+    }
 }
