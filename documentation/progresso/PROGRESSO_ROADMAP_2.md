@@ -160,23 +160,89 @@
   - [`src/Command/AutorizarContaGoogleFotosCommand.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Command/AutorizarContaGoogleFotosCommand.php)
   - [`Makefile`](file:///home/gabriel/dev/pessoal/CirqueiraX/Makefile)
 
-### ⏳ Tópico 34 — Entidade MediaItem (UUID v7)
-- **Status**: Pendente
+### ✅ Tópico 34 — Entidade MediaItem (UUID v7)
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Modelagem Central do Domínio de Mídia (`MediaItem`)**: Criada a entidade central [`src/Entity/MediaItem.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/MediaItem.php) em `media_item` com chave primária UUID v7 gerada no construtor via `Symfony\Component\Uid\Uuid::v7()`.
+  - **Data Transfer Object (`CriarMediaItemDTO`)**: Desenvolvido o DTO imutável [`src/DataObject/CriarMediaItemDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarMediaItemDTO.php) com validações Symfony (`Assert\NotBlank`, `Assert\Length`) para entrada estruturada de novos itens no pipeline de mídia.
+  - **Atributos do Pipeline e Métodos de Domínio**: Mapeados os campos `hash` (SHA-256 único do arquivo), `origem`, `status`, `caminhoLocal`, `googlePhotosMediaId`, `categoriaId`, `metadata` (JSON) e `erroMotivo`. Implementada fábrica estática `MediaItem::fromDTO()`, getters sem prefixo `get` e setters encadeáveis (`self`).
+  - **Repositório de Persistência (`MediaItemRepository`)**: Criado o repositório [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/MediaItemRepository.php) estendendo `ServiceEntityRepository`, contendo métodos `salvar()`, `remover()`, `buscarPorHash()`, `buscarPorUuid()` e `buscarPorStatus()`.
+- **Arquivos envolvidos**:
+  - [`src/Entity/MediaItem.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/MediaItem.php)
+  - [`src/DataObject/CriarMediaItemDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarMediaItemDTO.php)
+  - [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/MediaItemRepository.php)
 
-### ⏳ Tópico 35 — Entidade Categoria
-- **Status**: Pendente
+### ✅ Tópico 35 — Entidade Categoria
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Modelagem da Entidade `Categoria`**: Criada a entidade Doctrine [`src/Entity/Categoria.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/Categoria.php) em `categoria` com chave primária UUID v7 gerada no construtor via `Symfony\Component\Uid\Uuid::v7()`.
+  - **Mapeamento de Roteamento de Mídia**: Mapeia a associação entre `nome` (único), `pastaLocal` (diretório físico no volume do Syncthing) e `googlePhotosAlbumId` (identificador do álbum no Google Fotos).
+  - **Data Transfer Object (`CriarCategoriaDTO`)**: Desenvolvido o DTO imutável [`src/DataObject/CriarCategoriaDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarCategoriaDTO.php) com validações Symfony (`Assert\NotBlank`, `Assert\Length`).
+  - **Métodos de Domínio e Standard Getters**: Fábrica estática `Categoria::fromDTO()`, getters sem prefixo `get` (`uuid()`, `nome()`, `pastaLocal()`, `googlePhotosAlbumId()`, `criadoEm()`, `atualizadoEm()`) e setters fluidores encadeáveis (`self`).
+  - **Repositório de Persistência (`CategoriaRepository`)**: Criado o repositório [`src/Repository/CategoriaRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/CategoriaRepository.php) estendendo `ServiceEntityRepository`, com métodos `salvar()`, `remover()`, `buscarPorNome()` e `buscarPorUuid()`.
+- **Arquivos envolvidos**:
+  - [`src/Entity/Categoria.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/Categoria.php)
+  - [`src/DataObject/CriarCategoriaDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarCategoriaDTO.php)
+  - [`src/Repository/CategoriaRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/CategoriaRepository.php)
 
-### ⏳ Tópico 36 — Entidade OrigemRegra
-- **Status**: Pendente
+### ✅ Tópico 36 — Entidade OrigemRegra
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Modelagem da Entidade `OrigemRegra`**: Criada a entidade Doctrine [`src/Entity/OrigemRegra.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/OrigemRegra.php) na tabela `origem_regra` com chave primária UUID v7 gerada via `Symfony\Component\Uid\Uuid::v7()`.
+  - **Mapeamento de Regras Automáticas por Origem**: Mapeia o vínculo direto entre a origem do agente (ex: `print_empresa`, `print_pessoal`) e a categoria padrão (`categoriaId`), permitindo classificação automatizada sem intervenção manual.
+  - **Data Transfer Object (`CriarOrigemRegraDTO`)**: Criado o DTO imutável [`src/DataObject/CriarOrigemRegraDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarOrigemRegraDTO.php) com validações Symfony (`Assert\NotBlank`, `Assert\Length`).
+  - **Métodos de Domínio e Standard Getters**: Fábrica estática `OrigemRegra::fromDTO()`, getters sem prefixo `get` (`uuid()`, `origem()`, `categoriaId()`, `criadoEm()`, `atualizadoEm()`) e setters encadeáveis (`self`).
+  - **Repositório de Persistência (`OrigemRegraRepository`)**: Criado o repositório [`src/Repository/OrigemRegraRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/OrigemRegraRepository.php) estendendo `ServiceEntityRepository`, contendo métodos `salvar()`, `remover()`, `buscarPorOrigem()` e `buscarPorUuid()`.
+- **Arquivos envolvidos**:
+  - [`src/Entity/OrigemRegra.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/OrigemRegra.php)
+  - [`src/DataObject/CriarOrigemRegraDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarOrigemRegraDTO.php)
+  - [`src/Repository/OrigemRegraRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/OrigemRegraRepository.php)
 
-### ⏳ Tópico 37 — Enums StatusMediaItem e OrigemMedia
-- **Status**: Pendente
+### ✅ Tópico 37 — Enums StatusMediaItem e OrigemMedia
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Enum `StatusMediaItem`**: Criado o enum fortemente tipado [`src/Enum/StatusMediaItem.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Enum/StatusMediaItem.php) (`enum StatusMediaItem: string`), cobrindo os estados do ciclo de vida de mídia: `RECEBIDO`, `EM_FILA`, `CLASSIFICADO`, `DISTRIBUINDO`, `DISTRIBUIDO_LOCAL`, `ENVIANDO_GOOGLE_FOTOS`, `CONCLUIDO` e `ERRO`. Inclui métodos `descricao()` e `isFinal()`.
+  - **Enum `OrigemMedia`**: Criado o enum fortemente tipado [`src/Enum/OrigemMedia.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Enum/OrigemMedia.php) (`enum OrigemMedia: string`), encapsulando as origens válidas: `PRINT_EMPRESA`, `PRINT_PESSOAL`, `BOT_TELEGRAM` e `MANUAL`, com método helper `descricao()`.
+  - **Refatoração de Entidades e DTOs**: Atualizadas as entidades [`MediaItem`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/MediaItem.php) e [`OrigemRegra`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/OrigemRegra.php) e os DTOs [`CriarMediaItemDTO`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarMediaItemDTO.php) e [`CriarOrigemRegraDTO`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarOrigemRegraDTO.php) para utilizarem os novos enums via atributo Doctrine `enumType`, eliminando strings puras e garantindo integridade de tipos.
+- **Arquivos envolvidos**:
+  - [`src/Enum/StatusMediaItem.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Enum/StatusMediaItem.php)
+  - [`src/Enum/OrigemMedia.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Enum/OrigemMedia.php)
+  - [`src/Entity/MediaItem.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/MediaItem.php)
+  - [`src/Entity/OrigemRegra.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/OrigemRegra.php)
+  - [`src/DataObject/CriarMediaItemDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarMediaItemDTO.php)
+  - [`src/DataObject/CriarOrigemRegraDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/CriarOrigemRegraDTO.php)
 
-### ⏳ Tópico 38 — Migrations das entidades do motor de mídia
-- **Status**: Pendente
+### ✅ Tópico 38 — Migrations das entidades do motor de mídia
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Geração de Migrations do Motor de Mídia**: Geradas e validadas as classes de migration via `doctrine:migrations:diff` para estruturação física das tabelas do motor de mídia no MySQL.
+  - **Estruturação de Tabelas**: Criadas as tabelas `token_agente` ([`Version20260923104631.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260923104631.php)), `conta_google_fotos` e `media_item` ([`Version20260924103732.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260924103732.php)), `categoria` e `origem_regra` ([`Version20260924105230.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260924105230.php)), além do ajuste de tipos enum ([`Version20260924113344.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260924113344.php)).
+  - **Execução e Sincronização do Banco**: Executadas as migrations via `make migrate`, garantindo 100% de sincronismo entre o mapeamento ORM e o esquema do banco (`doctrine:schema:validate`).
+- **Arquivos envolvidos**:
+  - [`migrations/Version20260923104631.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260923104631.php)
+  - [`migrations/Version20260924103732.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260924103732.php)
+  - [`migrations/Version20260924105230.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260924105230.php)
+  - [`migrations/Version20260924113344.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/migrations/Version20260924113344.php)
 
-### ⏳ Tópico 39 — Rate limiter dedicado para endpoints de ingestão
-- **Status**: Pendente
+### ✅ Tópico 39 — Rate limiter dedicado para endpoints de ingestão
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Configuração do Limitador `ingestao`**: Adicionada a política `token_bucket` com limite de 300 requisições por minuto (`limit: 300`, `rate: { interval: '1 minute' }`) no arquivo [`config/packages/rate_limiter.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/rate_limiter.yaml).
+  - **Criação do Listener `IngestaoRateLimiterListener`**: Implementado o listener de evento [`src/EventListener/IngestaoRateLimiterListener.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/EventListener/IngestaoRateLimiterListener.php) escutando `KernelEvents::REQUEST` com prioridade 10.
+  - **Filtro por Rota e Identificador**: O listener intercepta apenas requisições para rotas de ingestão (`/api/v1/ingestao` e `/api/v1/midia/ingestao`), extraindo a chave de rate limit via header `X-Agent-Token` ou IP do cliente.
+  - **Tratamento de Excesso de Requisições**: Ao exceder o limite (`$limiter->consume(1)` não aceito), dispara resposta HTTP `429 Too Many Requests` estruturada em JSON com headers `Retry-After` e `X-RateLimit-Reset`.
+- **Arquivos envolvidos**:
+  - [`config/packages/rate_limiter.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/rate_limiter.yaml)
+  - [`src/EventListener/IngestaoRateLimiterListener.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/EventListener/IngestaoRateLimiterListener.php)
 
-### ⏳ Tópico 40 — Atualização do guia de padrões (decisão de UI HeroUI)
-- **Status**: Pendente
+### ✅ Tópico 40 — Atualização do guia de padrões (decisão de UI HeroUI)
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Alinhamento do Guia de Padrões**: Atualizada a documentação de arquitetura e funcionalidades em [`documentation/funcionalidades/CIRQUEIRAX.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX.md) e [`documentation/funcionalidades/CIRQUEIRAX_FEATURES.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX_FEATURES.md) para confirmar HeroUI v3 + Tailwind CSS v4 + `tailwindcss-motion` como a stack oficial de UI e animação.
+  - **Eliminação de Conflitos**: Removidas e marcadas como resolvidas as ambiguidades que citavam Shadcn UI ou Framer Motion como componentes obrigatórios do core.
+  - **Esclarecimento do Módulo `ui-extra`**: Documentado explicitamente que a ativação do módulo `ui-extra` tem como único propósito o uso da biblioteca Recharts para gráficos no Dashboard (Feature 5), permanecendo o Framer Motion opcional apenas para `AnimatePresence`.
+- **Arquivos envolvidos**:
+  - [`documentation/funcionalidades/CIRQUEIRAX.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX.md)
+  - [`documentation/funcionalidades/CIRQUEIRAX_FEATURES.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX_FEATURES.md)
+  - [`documentation/stack/FRONTEND.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/stack/FRONTEND.md)
+  - [`documentation/guias/PARA-IA.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/guias/PARA-IA.md)

@@ -43,10 +43,10 @@
 | 31 | Entidade ContaGoogleFotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 32 | Serviço de criptografia do refresh token | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 33 | Comando CLI de autorização OAuth por conta Google Fotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
-| 34 | Entidade MediaItem (UUID v7) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 35 | Entidade Categoria | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 36 | Entidade OrigemRegra | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 37 | Enums StatusMediaItem e OrigemMedia | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 38 | Migrations das entidades do motor de mídia | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 39 | Rate limiter dedicado para endpoints de ingestão | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 40 | Atualização do guia de padrões (decisão de UI HeroUI) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 34 | Entidade MediaItem (UUID v7) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 35 | Entidade Categoria | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 36 | Entidade OrigemRegra | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 37 | Enums StatusMediaItem e OrigemMedia | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 38 | Migrations das entidades do motor de mídia | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 39 | Rate limiter dedicado para endpoints de ingestão | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 40 | Atualização do guia de padrões (decisão de UI HeroUI) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |

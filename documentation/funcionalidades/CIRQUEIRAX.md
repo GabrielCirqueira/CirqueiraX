@@ -253,13 +253,13 @@ Visão geral, por categoria, status de sync, erros/retry, reclassificação manu
 
 Revisão feita em cima do setup real (`scripts/setup.sh` já rodado), `DOCUMENTACAO_TECNICA.md`, o guia de padrões do time e o `README.md` do cirqueiraX v5. Registrado aqui para não perder o levantamento — resolução fica para quando a implementação começar.
 
-### 9.1 Conflitos entre documentos (decidir antes de codar)
+### 9.1 Conflitos entre documentos (resolvido no Tópico 40 do Roadmap)
 
-| Conflito | Documento A | Documento B |
+| Conflito | Estado Inicial | Resolução Definitiva |
 |---|---|---|
-| Biblioteca de UI | `DOCUMENTACAO_TECNICA.md`: HeroUI v3 + Tailwind v4 + tailwindcss-motion como core | Guia de padrões: Shadcn UI + Framer Motion como stack oficial obrigatória |
-| Animação | tailwindcss-motion (core) vs Framer Motion (módulo `ui-extra`, hoje desativado) | Guia de padrões trata Framer Motion como obrigatório, não opcional |
-| Gráficos | Recharts no módulo `ui-extra` (desativado) | Dashboard do CirqueiraX depende de gráficos por categoria/origem (seção 3.5) |
+| Biblioteca de UI | Conflito HeroUI vs Shadcn UI | HeroUI v3 + Tailwind CSS v4 como stack oficial obrigatória de UI |
+| Animação | Conflito tailwindcss-motion vs Framer Motion | `tailwindcss-motion` como padrão oficial de animação; Framer Motion opcional via `ui-extra` apenas para `AnimatePresence` |
+| Gráficos | Recharts no módulo `ui-extra` | Recharts ativado (Tópico 24) como única biblioteca adicional do `ui-extra` em uso |
 
 ### 9.2 Módulos opcionais desativados no setup atual
 
@@ -278,7 +278,7 @@ Confirmado no log de setup: `async=0 | observability=0 | ui-extra=0`.
 
 ### 9.4 Ordem recomendada para destravar a implementação
 
-1. Resolver o conflito de UI (HeroUI vs Shadcn/Framer Motion)
+1. Resolver o conflito de UI (HeroUI vs Shadcn/Framer Motion) ✅ Concluído (Tópico 40)
 2. Ativar o módulo `async` (pré-requisito estrutural, não opcional para este projeto)
 3. Definir autenticação dos agentes/bot (separada do JWT de usuário)
 4. Adicionar volume Docker compartilhado com o Syncthing

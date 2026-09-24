@@ -50,13 +50,13 @@
 - [x] **31. Entidade ContaGoogleFotos**
 - [x] **32. Serviço de criptografia do refresh token**
 - [x] **33. Comando CLI de autorização OAuth por conta Google Fotos**
-- [ ] **34. Entidade MediaItem (UUID v7)**
-- [ ] **35. Entidade Categoria**
-- [ ] **36. Entidade OrigemRegra**
-- [ ] **37. Enums StatusMediaItem e OrigemMedia**
-- [ ] **38. Migrations das entidades do motor de mídia**
-- [ ] **39. Rate limiter dedicado para endpoints de ingestão**
-- [ ] **40. Atualização do guia de padrões (decisão de UI HeroUI)**
+- [x] **34. Entidade MediaItem (UUID v7)**
+- [x] **35. Entidade Categoria**
+- [x] **36. Entidade OrigemRegra**
+- [x] **37. Enums StatusMediaItem e OrigemMedia**
+- [x] **38. Migrations das entidades do motor de mídia**
+- [x] **39. Rate limiter dedicado para endpoints de ingestão**
+- [x] **40. Atualização do guia de padrões (decisão de UI HeroUI)**
 
 ---
 

@@ -12,7 +12,7 @@ Este documento descreve a API/backend Symfony. O cirqueiraX v5 segue uma arquite
 | **Lexik JWT** | Emissão e validação de access tokens (RS256, TTL 1h) |
 | **Gesdinet Refresh Token** | Refresh tokens persistidos no banco (TTL 30 dias) |
 | **Nelmio CORS** | Configuração CORS para `/api/*` |
-| **Symfony Rate Limiter** | Proteção contra brute-force no login (5/min) |
+| **Symfony Rate Limiter** | Proteção contra brute-force no login (5/min) e limitador de ingestão (300/min) |
 | **Monolog** | Logs estruturados (texto em dev, JSON em prod) |
 | **PHPStan 2** | Análise estática — nível 6 |
 

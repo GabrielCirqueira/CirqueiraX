@@ -13,10 +13,10 @@ Nada do resto funciona sem isso. É a feature que resolve as pendências levanta
 - Migration da tabela `messenger_messages`
 - Configurar `supervisord.conf` com processos dedicados (2+ workers, `autorestart=true`)
 - Criar `src/Schedule/` com tarefa recorrente inicial (ex: processar retries pendentes a cada N minutos)
-**1.2 Biblioteca de UI — decisão fechada: HeroUI**
+**1.2 Biblioteca de UI — decisão fechada: HeroUI** ✅ Concluído (Tópico 40)
 - Stack de UI: **HeroUI v3 + Tailwind CSS v4 + tailwindcss-motion** (o que já vem como core no setup atual)
-- Guia de padrões do time deve ser atualizado pra remover a menção a Shadcn UI/Framer Motion como obrigatórios (ver seção 9.1) — evita builder confundir e instalar as duas bibliotecas
-- Recharts continua necessário pros gráficos da Feature 5 — ativar módulo `ui-extra` só por esse motivo (Framer Motion do módulo não é necessário, já que a animação fica com tailwindcss-motion)
+- Guia de padrões do time atualizado (HeroUI v3 + tailwindcss-motion como oficiais); menções a Shadcn UI / Framer Motion como obrigatórios removidas (ver seção 9.1) — evita builder confundir e instalar as duas bibliotecas
+- Recharts ativado (Tópico 24) para os gráficos da Feature 5 — única biblioteca do módulo `ui-extra` em uso (Framer Motion do módulo não é necessário, já que a animação padrão fica com tailwindcss-motion)
 **1.3 Observabilidade**
 - Ativar módulo `observability`, configurar `SENTRY_DSN`
 - Definir canais de log dedicados no Monolog (`ingestao`, `google_fotos`, `syncthing`) para facilitar filtragem depois
