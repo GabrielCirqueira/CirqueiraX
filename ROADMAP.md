@@ -1,10 +1,10 @@
-# Roadmap — Feature 1: Infraestrutura e Fundação do CirqueiraX
+# Roadmap — Feature 2: Motor de Classificação e Roteamento
 
 > Backlog e planejamento do projeto. Cada tópico descreve o que existe (ou faltava), por que importa e o que precisa acontecer. Marque `[x]` no checklist ao concluir.
 
-**Numeração:** tópicos 21–40.
+**Numeração:** tópicos 41–60.
 
-**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_2.md](documentation/progresso/PROGRESSO_ROADMAP_2.md)
+**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_3.md](documentation/progresso/PROGRESSO_ROADMAP_3.md)
 
 ---
 
@@ -12,250 +12,250 @@
 
 | # | Tópico |
 |---|---|
-| 21 | Ativação do módulo async (Messenger + Scheduler) |
-| 22 | Configuração do transport Doctrine e messenger.yaml |
-| 23 | Supervisor com workers dedicados do Messenger |
-| 24 | Ativação do módulo ui-extra (Recharts) |
-| 25 | Ativação do módulo observability (Sentry) |
-| 26 | Canais de log dedicados no Monolog |
-| 27 | Volume Docker compartilhado com o Syncthing |
-| 28 | Enum TipoCliente e entidade TokenAgente |
-| 29 | Authenticator customizado para tokens de agente |
-| 30 | Comando CLI de geração de token por agente |
-| 31 | Entidade ContaGoogleFotos |
-| 32 | Serviço de criptografia do refresh token |
-| 33 | Comando CLI de autorização OAuth por conta Google Fotos |
-| 34 | Entidade MediaItem (UUID v7) |
-| 35 | Entidade Categoria |
-| 36 | Entidade OrigemRegra |
-| 37 | Enums StatusMediaItem e OrigemMedia |
-| 38 | Migrations das entidades do motor de mídia |
-| 39 | Rate limiter dedicado para endpoints de ingestão |
-| 40 | Atualização do guia de padrões (decisão de UI HeroUI) |
+| 41 | CRUD completo de Categoria (Service, Controller, Serializer) |
+| 42 | Endpoints REST de Categoria (`/api/v1/categorias`) |
+| 43 | CRUD completo de OrigemRegra (Service, Controller, Serializer) |
+| 44 | DTO de ingestão e cálculo de hash do arquivo |
+| 45 | IngestarMediaService — deduplicação e criação do MediaItem |
+| 46 | Mensagem ClassificarMediaMessage e dispatch da ingestão |
+| 47 | Máquina de estados — método transicionarPara() no MediaItem |
+| 48 | Histórico de transições de status (auditoria) |
+| 49 | ClassificarMediaMessageHandler — aplicação de OrigemRegra automática |
+| 50 | Fluxo de classificação manual (categoria pendente) |
+| 51 | Dispatch paralelo — DistribuirLocalMessage e EnviarGoogleFotosMessage |
+| 52 | DistribuirLocalMessageHandler e DistribuirLocalService |
+| 53 | GoogleFotosOAuthService — renovação automática de access token |
+| 54 | GoogleFotosAlbumService — criarOuObter() via albums.create |
+| 55 | EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService |
+| 56 | Gravação do google_photos_media_id após upload |
+| 57 | Captura de exceção nos handlers — erro_motivo e status erro |
+| 58 | Comando CLI app:media:retentar |
+| 59 | Endpoint de retry — individual e em lote |
+| 60 | Teste end-to-end do motor completo e documentação atualizada |
 
 ---
 
 ## Checklist
 
-- [x] **21. Ativação do módulo async (Messenger + Scheduler)**
-- [x] **22. Configuração do transport Doctrine e messenger.yaml**
-- [x] **23. Supervisor com workers dedicados do Messenger**
-- [x] **24. Ativação do módulo ui-extra (Recharts)**
-- [x] **25. Ativação do módulo observability (Sentry)**
-- [x] **26. Canais de log dedicados no Monolog**
-- [x] **27. Volume Docker compartilhado com o Syncthing**
-- [x] **28. Enum TipoCliente e entidade TokenAgente**
-- [x] **29. Authenticator customizado para tokens de agente**
-- [x] **30. Comando CLI de geração de token por agente**
-- [x] **31. Entidade ContaGoogleFotos**
-- [x] **32. Serviço de criptografia do refresh token**
-- [x] **33. Comando CLI de autorização OAuth por conta Google Fotos**
-- [x] **34. Entidade MediaItem (UUID v7)**
-- [x] **35. Entidade Categoria**
-- [x] **36. Entidade OrigemRegra**
-- [x] **37. Enums StatusMediaItem e OrigemMedia**
-- [x] **38. Migrations das entidades do motor de mídia**
-- [x] **39. Rate limiter dedicado para endpoints de ingestão**
-- [x] **40. Atualização do guia de padrões (decisão de UI HeroUI)**
+- [x] **41. CRUD completo de Categoria (Service, Controller, Serializer)**
+- [x] **42. Endpoints REST de Categoria (`/api/v1/categorias`)**
+- [x] **43. CRUD completo de OrigemRegra (Service, Controller, Serializer)**
+- [x] **44. DTO de ingestão e cálculo de hash do arquivo**
+- [x] **45. IngestarMediaService — deduplicação e criação do MediaItem**
+- [x] **46. Mensagem ClassificarMediaMessage e dispatch da ingestão**
+- [x] **47. Máquina de estados — método transicionarPara() no MediaItem**
+- [x] **48. Histórico de transições de status (auditoria)**
+- [x] **49. ClassificarMediaMessageHandler — aplicação de OrigemRegra automática**
+- [x] **50. Fluxo de classificação manual (categoria pendente)**
+- [x] **51. Dispatch paralelo — DistribuirLocalMessage e EnviarGoogleFotosMessage**
+- [ ] **52. DistribuirLocalMessageHandler e DistribuirLocalService**
+- [ ] **53. GoogleFotosOAuthService — renovação automática de access token**
+- [ ] **54. GoogleFotosAlbumService — criarOuObter() via albums.create**
+- [ ] **55. EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService**
+- [ ] **56. Gravação do google_photos_media_id após upload**
+- [ ] **57. Captura de exceção nos handlers — erro_motivo e status erro**
+- [ ] **58. Comando CLI app:media:retentar**
+- [ ] **59. Endpoint de retry — individual e em lote**
+- [ ] **60. Teste end-to-end do motor completo e documentação atualizada**
 
 ---
 
 ## Detalhamento
 
-### Tópico 21 — Ativação do módulo async (Messenger + Scheduler)
+### Tópico 41 — CRUD completo de Categoria (Service, Controller, Serializer)
 
-**O que existe hoje:** módulo `async` ignorado no setup (`async=0` no log de instalação). Nenhuma fila, nenhum worker.
+**O que existe hoje:** entidade `Categoria`, `CriarCategoriaDTO` e `CategoriaRepository` já criados na Feature 1 (tópico 35), mas sem camada de aplicação nem exposição via API.
 
-**Por que importa:** todo o motor de classificação e roteamento (Feature 2) depende de processamento assíncrono. Sem isso, download/upload/distribuição rodam de forma síncrona no request HTTP.
+**Por que importa:** o motor de roteamento não tem como funcionar sem categorias cadastráveis — é o registro que liga origem → pasta local → álbum Google Fotos.
 
-**O que precisa acontecer:** rodar `composer require symfony/doctrine-messenger symfony/scheduler`, copiar as configs de `.cirqueirax-modules/async/` pro projeto.
-
----
-
-### Tópico 22 — Configuração do transport Doctrine e messenger.yaml
-
-**O que existe hoje:** sem `config/packages/messenger.yaml`, sem tabela `messenger_messages`.
-
-**Por que importa:** o roteamento de cada tipo de mensagem (ingestão, distribuição local, upload Google Fotos) precisa estar definido antes de qualquer handler existir.
-
-**O que precisa acontecer:** transport padrão Doctrine configurado, roteamento por classe de mensagem, migration da tabela `messenger_messages` aplicada.
+**O que precisa acontecer:** `AtualizarCategoriaDTO`, `CategoriaService` (`criar`, `atualizar`, `remover`, seguindo `executar()`), `CategoriaSerializer` com `normalizar()`/`normalizarLista()`.
 
 ---
 
-### Tópico 23 — Supervisor com workers dedicados do Messenger
+### Tópico 42 — Endpoints REST de Categoria (`/api/v1/categorias`)
 
-**O que existe hoje:** Supervisor instalado na stack (porta documentada), mas sem processo de worker configurado.
+**O que existe hoje:** nenhum controller de categoria — só a camada de serviço do tópico anterior.
 
-**Por que importa:** sem worker rodando, mensagens ficam na fila e nunca são consumidas.
+**Por que importa:** o dashboard (Feature 5) e o cadastro inicial de categorias (X, Y, Z) precisam de uma API pra existir de fato.
 
-**O que precisa acontecer:** `supervisord.conf` com processo `messenger:consume async`, `autostart=true`, `autorestart=true`, 2+ processos.
-
----
-
-### Tópico 24 — Ativação do módulo ui-extra (Recharts)
-
-**O que existe hoje:** módulo `ui-extra` ignorado no setup (`ui-extra=0`). Sem Recharts disponível.
-
-**Por que importa:** o dashboard (Feature 5) precisa de gráficos por categoria/origem — decidido usar HeroUI + tailwindcss-motion pra UI/animação, mas Recharts continua necessário só pra gráficos.
-
-**O que precisa acontecer:** ativar o módulo pontualmente, sem adotar o Framer Motion que vem junto (ver tópico 40).
+**O que precisa acontecer:** `CategoriaController extends DefaultController` com `GET /api/v1/categorias` (paginado), `POST`, `PATCH /{id}`, `DELETE /{id}`, respeitando o envelope `{success, data}`.
 
 ---
 
-### Tópico 25 — Ativação do módulo observability (Sentry)
+### Tópico 43 — CRUD completo de OrigemRegra (Service, Controller, Serializer)
 
-**O que existe hoje:** módulo `observability` ignorado no setup (`observability=0`). Só Monolog em arquivo/stderr.
+**O que existe hoje:** entidade `OrigemRegra`, `CriarOrigemRegraDTO` e `OrigemRegraRepository` já criados na Feature 1 (tópico 36), sem camada de aplicação.
 
-**Por que importa:** o pipeline depende de três integrações externas com falha possível (Syncthing, Google Photos API, yt-dlp) — sem rastreamento estruturado, falha silenciosa passa despercebida.
+**Por que importa:** é o que os agentes de print (Feature 4) vão consultar pra saber a categoria automática de cada origem — precisa estar gerenciável antes dos agentes existirem.
 
-**O que precisa acontecer:** ativar o módulo, configurar `SENTRY_DSN` em produção.
-
----
-
-### Tópico 26 — Canais de log dedicados no Monolog
-
-**O que existe hoje:** configuração padrão do Monolog (`dev`/`prod`), sem canais específicos do domínio de mídia.
-
-**Por que importa:** facilita filtrar e depurar cada integração externa separadamente.
-
-**O que precisa acontecer:** canais `ingestao`, `google_fotos` e `syncthing` configurados em `config/packages/monolog.yaml`.
+**O que precisa acontecer:** `OrigemRegraService`, `OrigemRegraController`, `OrigemRegraSerializer`, seguindo o mesmo padrão do tópico 41.
 
 ---
 
-### Tópico 27 — Volume Docker compartilhado com o Syncthing
+### Tópico 44 — DTO de ingestão e cálculo de hash do arquivo
 
-**O que existe hoje:** nenhum bind mount entre o container Symfony e a pasta observada pelo Syncthing na VPS.
+**O que existe hoje:** `CriarMediaItemDTO` existe (Feature 1, tópico 34), mas nenhum serviço calcula hash de arquivo real nem valida duplicidade.
 
-**Por que importa:** o worker de distribuição local (Feature 2) precisa escrever arquivos exatamente onde o Syncthing lê, senão a sincronização com o celular nunca acontece.
+**Por que importa:** o hash é a chave de deduplicação de todo o pipeline — sem ele, o mesmo vídeo/print pode ser processado duas vezes.
 
-**O que precisa acontecer:** volume adicionado em `docker-compose.yaml` (dev) e `docker-compose.prod.yaml`, variável `MEDIA_STORAGE_PATH` apontando pro path montado.
-
----
-
-### Tópico 28 — Enum TipoCliente e entidade TokenAgente
-
-**O que existe hoje:** `security.yaml` só cobre login humano via JWT. Nenhum conceito de cliente-máquina.
-
-**Por que importa:** agentes de print e o bot de download não são usuários logando — são processos automatizados que precisam de credencial própria.
-
-**O que precisa acontecer:** enum `TipoCliente` (`usuario`, `agente`), entidade `TokenAgente` (UUID v7, hash do token, `origem`, `criado_em`, `revogado_em`).
+**O que precisa acontecer:** `IngestarMediaDTO` (caminho do arquivo temporário, origem, metadata), função de hash (sha256) aplicada ao conteúdo do arquivo antes de qualquer persistência.
 
 ---
 
-### Tópico 29 — Authenticator customizado para tokens de agente
+### Tópico 45 — IngestarMediaService — deduplicação e criação do MediaItem
 
-**O que existe hoje:** nenhum mecanismo de autenticação além do firewall JWT de usuário.
+**O que existe hoje:** `MediaItemRepository::buscarPorHash()` já existe (Feature 1, tópico 34), mas nenhum service o usa.
 
-**Por que importa:** os endpoints de ingestão (Feature 3 e 4) precisam aceitar chamadas autenticadas por token de serviço, sem depender do fluxo de refresh token de 30 dias pensado pro usuário humano.
+**Por que importa:** é o ponto de entrada único de qualquer mídia no sistema, chamado pelos três módulos de origem (download, print, upload manual).
 
-**O que precisa acontecer:** Authenticator do Symfony Security validando o header `X-Agent-Token` contra `TokenAgente`.
-
----
-
-### Tópico 30 — Comando CLI de geração de token por agente
-
-**O que existe hoje:** nenhuma forma de emitir token pra um agente novo.
-
-**Por que importa:** cada agente (print-empresa, print-pessoal, bot) precisa do próprio token, gerado uma vez e configurado no agente.
-
-**O que precisa acontecer:** comando `app:agente:gerar-token` que cria o `TokenAgente` e imprime o valor uma única vez.
+**O que precisa acontecer:** `IngestarMediaService::executar()` — early return se hash já existir, senão cria `MediaItem` com status `RECEBIDO` e despacha `ClassificarMediaMessage`.
 
 ---
 
-### Tópico 31 — Entidade ContaGoogleFotos
+### Tópico 46 — Mensagem ClassificarMediaMessage e dispatch da ingestão
 
-**O que existe hoje:** nenhuma estrutura pra guardar credenciais OAuth do Google Fotos.
+**O que existe hoje:** infraestrutura do Messenger pronta (Feature 1, tópicos 21–23), mas nenhuma mensagem de domínio criada ainda.
 
-**Por que importa:** PC empresa e PC pessoal usam contas Google diferentes — cada uma precisa de credencial própria, renovável.
+**Por que importa:** é o que desacopla a ingestão (rápida, síncrona) da classificação (pode envolver regra de negócio mais pesada), sem travar quem está enviando o arquivo.
 
-**O que precisa acontecer:** entidade `ContaGoogleFotos` (`email`, `refresh_token` criptografado, `access_token_cache`, `expira_em`).
-
----
-
-### Tópico 32 — Serviço de criptografia do refresh token
-
-**O que existe hoje:** nenhuma estratégia de criptografia de dado sensível no banco.
-
-**Por que importa:** refresh token do Google Fotos é uma credencial de longa duração — não pode ficar em texto plano no banco.
-
-**O que precisa acontecer:** serviço de criptografia simétrica (ex: sodium) usado ao persistir/ler o campo `refresh_token`.
+**O que precisa acontecer:** classe `ClassificarMediaMessage` (payload: UUID do `MediaItem`) em `src/Message/`, dispatch no fim do `IngestarMediaService`.
 
 ---
 
-### Tópico 33 — Comando CLI de autorização OAuth por conta Google Fotos
+### Tópico 47 — Máquina de estados — método transicionarPara() no MediaItem
 
-**O que existe hoje:** nenhum fluxo de autorização OAuth implementado.
+**O que existe hoje:** enum `StatusMediaItem` já existe (Feature 1, tópico 37) com `isFinal()`, mas a entidade `MediaItem` ainda troca de status livremente via setter, sem validação de transição.
 
-**Por que importa:** autorizar uma conta Google Fotos é uma ação manual feita uma vez por conta (empresa e pessoal), não algo que passa por tela de usuário final.
+**Por que importa:** evita bug de concorrência entre workers (ex: um worker marcar `concluido` enquanto outro ainda está processando `distribuindo`).
 
-**O que precisa acontecer:** comando `app:google-fotos:autorizar-conta` guiando o fluxo authorization code e salvando o resultado via `ContaGoogleFotos`.
-
----
-
-### Tópico 34 — Entidade MediaItem (UUID v7)
-
-**O que existe hoje:** nenhuma entidade de domínio de mídia — só o desenho no `CIRQUEIRAX.md`.
-
-**Por que importa:** é a entidade central de todo o sistema — representa cada vídeo, print ou upload passando pelo pipeline.
-
-**O que precisa acontecer:** entidade com UUID v7, campos de `hash`, `origem`, `status`, `categoria_id`, `caminho_local`, `google_photos_media_id`, `metadata`, `erro_motivo`, seguindo `fromDTO()` e getters sem prefixo.
+**O que precisa acontecer:** método `transicionarPara(StatusMediaItem $novoStatus)` na entidade, com mapa de transições permitidas e exceção de domínio se a transição for inválida.
 
 ---
 
-### Tópico 35 — Entidade Categoria
+### Tópico 48 — Histórico de transições de status (auditoria)
 
-**O que existe hoje:** nenhuma entidade — categorias hoje só existem como conceito no bot atual.
+**O que existe hoje:** nenhuma trilha de auditoria — só o `status` atual é guardado.
 
-**Por que importa:** é o que carrega o mapeamento pasta local + álbum Google Fotos usado pelo motor de roteamento.
+**Por que importa:** quando algo dá errado no meio do pipeline, saber quando cada etapa aconteceu é essencial pra depurar (e pro dashboard mostrar "quanto tempo demorou até o Google Fotos").
 
-**O que precisa acontecer:** entidade `Categoria` (`nome`, `pasta_local`, `google_photos_album_id`).
-
----
-
-### Tópico 36 — Entidade OrigemRegra
-
-**O que existe hoje:** nenhuma entidade — regra de categoria automática por origem ainda não existe.
-
-**Por que importa:** os agentes de print (Feature 4) precisam de categoria automática sem decisão manual a cada captura.
-
-**O que precisa acontecer:** entidade `OrigemRegra` mapeando origem fixa (`print_empresa`, `print_pessoal`) → `categoria_id`.
+**O que precisa acontecer:** campo `historico_status` em JSON no `MediaItem` (ou tabela `media_item_transicao` separada, se o volume justificar), populado dentro de `transicionarPara()`.
 
 ---
 
-### Tópico 37 — Enums StatusMediaItem e OrigemMedia
+### Tópico 49 — ClassificarMediaMessageHandler — aplicação de OrigemRegra automática
 
-**O que existe hoje:** nenhum enum de domínio criado — estados descritos só em texto no `CIRQUEIRAX.md`.
+**O que existe hoje:** `OrigemRegra` cadastrável (tópico 43), mas nada consome essa regra ainda.
 
-**Por que importa:** garante que só os valores válidos (`recebido`, `em_fila`, `classificado`, `distribuindo`, `distribuido_local`, `enviando_google_fotos`, `concluido`, `erro`) sejam usados em `MediaItem.status`.
+**Por que importa:** é o que permite prints do PC empresa/pessoal caírem na categoria certa sem decisão manual, como definido no design do sistema.
 
-**O que precisa acontecer:** dois enums PHP em `src/Enum/`, tipados na entidade e nos DTOs.
-
----
-
-### Tópico 38 — Migrations das entidades do motor de mídia
-
-**O que existe hoje:** banco só com o schema padrão do skeleton (usuário/auth).
-
-**Por que importa:** sem migration, nenhuma das entidades acima existe de fato no banco.
-
-**O que precisa acontecer:** `make new-migration` gerando o diff de `MediaItem`, `Categoria`, `OrigemRegra`, `TokenAgente`, `ContaGoogleFotos`; revisão manual antes de `make migrate`.
+**O que precisa acontecer:** handler consome `ClassificarMediaMessage`, busca `OrigemRegra` pela origem do `MediaItem`; se existir, aplica a categoria automaticamente e transiciona pra `CLASSIFICADO`.
 
 ---
 
-### Tópico 39 — Rate limiter dedicado para endpoints de ingestão
+### Tópico 50 — Fluxo de classificação manual (categoria pendente)
 
-**O que existe hoje:** só os limitadores `login` (5/min) e `api` (60/min) genéricos.
+**O que existe hoje:** nenhum tratamento para quando não existe `OrigemRegra` pra aquela origem (caso do bot de download e do upload manual).
 
-**Por que importa:** uma rajada de screenshots dos agentes ou um upload manual em lote pode ultrapassar 60 req/min e ser bloqueado sem necessidade.
+**Por que importa:** vídeo baixado e upload manual não têm categoria automática — precisam ficar visíveis no dashboard aguardando decisão do usuário, sem travar o restante do pipeline.
 
-**O que precisa acontecer:** limitador `ingestao` próprio em `config/packages/rate_limiter.yaml`, aplicado só nas rotas de ingestão.
+**O que precisa acontecer:** quando não há `OrigemRegra`, o `MediaItem` permanece com `categoria_id` nulo e status `EM_FILA`; endpoint `PATCH /api/v1/media-itens/{id}/categoria` (usado manualmente) dispara a transição pra `CLASSIFICADO` e o restante do fluxo.
 
 ---
 
-### Tópico 40 — Atualização do guia de padrões (decisão de UI HeroUI)
+### Tópico 51 — Dispatch paralelo — DistribuirLocalMessage e EnviarGoogleFotosMessage
 
-**O que existe hoje:** o guia de padrões do time ainda descreve Shadcn UI + Framer Motion como stack "oficial obrigatória", conflitando com o `DOCUMENTACAO_TECNICA.md` (HeroUI v3 + tailwindcss-motion).
+**O que existe hoje:** classificação funcional (tópicos 49–50), mas nenhuma mensagem de distribuição criada.
 
-**Por que importa:** decisão já fechada em favor de HeroUI — deixar o guia desatualizado é abrir espaço pra alguém instalar as duas bibliotecas por engano.
+**Por que importa:** distribuição local (Syncthing) e upload (Google Fotos) são independentes entre si — uma não deve esperar a outra pra começar.
 
-**O que precisa acontecer:** guia de padrões corrigido: HeroUI v3 + tailwindcss-motion como UI/animação oficiais; Recharts (tópico 24) citado como única peça do `ui-extra` em uso.
+**O que precisa acontecer:** ao transicionar pra `CLASSIFICADO`, despachar as duas mensagens em paralelo (`DistribuirLocalMessage` e `EnviarGoogleFotosMessage`), cada uma com seu próprio ciclo de retry do Messenger.
+
+---
+
+### Tópico 52 — DistribuirLocalMessageHandler e DistribuirLocalService
+
+**O que existe hoje:** volume Docker compartilhado com o Syncthing já configurado (Feature 1, tópico 27), mas nenhum código escreve nele ainda.
+
+**Por que importa:** é a metade do pipeline que faz o arquivo chegar no celular via Syncthing.
+
+**O que precisa acontecer:** `DistribuirLocalService` copia/move o arquivo pra `categoria.pastaLocal` (dentro de `MEDIA_STORAGE_PATH`), atualiza status pra `DISTRIBUIDO_LOCAL`; handler cuida só de extrair dados da mensagem e delegar ao service (lógica zero no handler).
+
+---
+
+### Tópico 53 — GoogleFotosOAuthService — renovação automática de access token
+
+**O que existe hoje:** `ContaGoogleFotos` com `refresh_token` criptografado e cache de `access_token` (Feature 1, tópicos 31–33), mas nenhum serviço usa esse cache pra renovar automaticamente.
+
+**Por que importa:** o access token do Google expira em ~1h — sem renovação automática, todo upload feito fora dessa janela falharia.
+
+**O que precisa acontecer:** `GoogleFotosOAuthService::obterAccessTokenValido(ContaGoogleFotos $conta)` — retorna o cache se ainda válido (`accessTokenEstaValido()`), senão troca o `refresh_token` por um novo `access_token` via API do Google e atualiza o cache.
+
+---
+
+### Tópico 54 — GoogleFotosAlbumService — criarOuObter() via albums.create
+
+**O que existe hoje:** `Categoria.googlePhotosAlbumId` existe como campo, mas nada preenche esse valor automaticamente.
+
+**Por que importa:** cada categoria precisa de um álbum real no Google Fotos antes do primeiro upload — criar manualmente não escala pra novas categorias.
+
+**O que precisa acontecer:** `GoogleFotosAlbumService::criarOuObter(Categoria $categoria)` — se `googlePhotosAlbumId` já existe, retorna; senão chama `albums.create` e persiste o id retornado na `Categoria`.
+
+---
+
+### Tópico 55 — EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService
+
+**O que existe hoje:** OAuth (tópico 53) e criação de álbum (tópico 54) prontos, mas nenhum upload de mídia implementado ainda.
+
+**Por que importa:** é a outra metade do pipeline — o que efetivamente coloca a mídia no Google Fotos.
+
+**O que precisa acontecer:** `EnviarGoogleFotosService` faz upload de bytes (`photoslibrary.appendonly`), `mediaItems.batchCreate` associando ao álbum da categoria, atualiza status pra `ENVIANDO_GOOGLE_FOTOS` durante o processo e `CONCLUIDO` ao final.
+
+---
+
+### Tópico 56 — Gravação do google_photos_media_id após upload
+
+**O que existe hoje:** campo `googlePhotosMediaId` existe no `MediaItem` (Feature 1, tópico 34), mas nunca é preenchido.
+
+**Por que importa:** sem esse id salvo, a reclassificação manual da Feature 5 (`batchAddMediaItems`/`batchRemoveMediaItems`) é impossível — a API só deixa mover itens que o próprio app enviou.
+
+**O que precisa acontecer:** `EnviarGoogleFotosService` grava o `media_id` retornado pelo `batchCreate` no `MediaItem` antes de marcar como `CONCLUIDO`.
+
+---
+
+### Tópico 57 — Captura de exceção nos handlers — erro_motivo e status erro
+
+**O que existe hoje:** nenhum tratamento de falha nos handlers de distribuição/upload — uma exceção hoje só cairia no retry padrão do Messenger sem registro legível.
+
+**Por que importa:** sem motivo registrado, a fila de erros do dashboard (Feature 5) fica sem informação útil pra você decidir o que fazer.
+
+**O que precisa acontecer:** try/catch nos handlers de distribuição e upload, gravando `erro_motivo` (mensagem da exceção) e transicionando pra `ERRO`; log correspondente no canal certo (`google_fotos` ou `syncthing`, do tópico 26).
+
+---
+
+### Tópico 58 — Comando CLI app:media:retentar
+
+**O que existe hoje:** nenhuma forma de reprocessar um `MediaItem` que ficou em `ERRO`.
+
+**Por que importa:** falhas transitórias (rede, rate limit do Google) não devem exigir reingestão manual do zero.
+
+**O que precisa acontecer:** comando `app:media:retentar {uuid}` que volta o status pra `CLASSIFICADO` e redespacha as mensagens de distribuição/upload pendentes.
+
+---
+
+### Tópico 59 — Endpoint de retry — individual e em lote
+
+**O que existe hoje:** só o comando CLI do tópico anterior — nada acessível pelo dashboard.
+
+**Por que importa:** a fila de erros da Feature 5 precisa de um botão "tentar de novo" funcional, sem precisar entrar no servidor.
+
+**O que precisa acontecer:** `POST /api/v1/media-itens/{id}/retentar` e `POST /api/v1/media-itens/lote/retentar` reaproveitando a lógica do comando CLI (tópico 58) através do mesmo service.
+
+---
+
+### Tópico 60 — Teste end-to-end do motor completo e documentação atualizada
+
+**O que existe hoje:** peças individuais testáveis isoladamente, mas nenhuma validação do fluxo completo (ingestão → classificação → distribuição local → upload Google Fotos → concluído).
+
+**Por que importa:** é o motor que toda Feature seguinte (3, 4 e 5) vai depender — um bug de integração aqui se propaga pra todo o resto do sistema.
+
+**O que precisa acontecer:** teste manual (ou automatizado, se PHPUnit for reativado) simulando um `MediaItem` do início ao fim; `CIRQUEIRAX.md` e `DOCUMENTACAO_TECNICA.md` atualizados com os nomes reais das classes implementadas nesta feature.

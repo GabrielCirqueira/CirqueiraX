@@ -7,6 +7,7 @@
 > Os detalhes de cada tópico estão nos arquivos paginados desta pasta:
 > - **Tópicos 1+** → [PROGRESSO_ROADMAP_1.md](PROGRESSO_ROADMAP_1.md)
 > - **Tópicos 21+** → [PROGRESSO_ROADMAP_2.md](PROGRESSO_ROADMAP_2.md)
+> - **Tópicos 41+** → [PROGRESSO_ROADMAP_3.md](PROGRESSO_ROADMAP_3.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -50,3 +51,23 @@
 | 38 | Migrations das entidades do motor de mídia | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 39 | Rate limiter dedicado para endpoints de ingestão | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 40 | Atualização do guia de padrões (decisão de UI HeroUI) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 41 | CRUD completo de Categoria (Service, Controller, Serializer) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 42 | Endpoints REST de Categoria (`/api/v1/categorias`) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 43 | CRUD completo de OrigemRegra (Service, Controller, Serializer) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 44 | DTO de ingestão e cálculo de hash do arquivo | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 45 | IngestarMediaService — deduplicação e criação do MediaItem | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 46 | Mensagem ClassificarMediaMessage e dispatch da ingestão | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 47 | Máquina de estados — método transicionarPara() no MediaItem | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 48 | Histórico de transições de status (auditoria) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 49 | ClassificarMediaMessageHandler — aplicação de OrigemRegra automática | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 50 | Fluxo de classificação manual (categoria pendente) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 51 | Dispatch paralelo — DistribuirLocalMessage e EnviarGoogleFotosMessage | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 52 | DistribuirLocalMessageHandler e DistribuirLocalService | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 53 | GoogleFotosOAuthService — renovação automática de access token | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 54 | GoogleFotosAlbumService — criarOuObter() via albums.create | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 55 | EnviarGoogleFotosMessageHandler e EnviarGoogleFotosService | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 56 | Gravação do google_photos_media_id após upload | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 57 | Captura de exceção nos handlers — erro_motivo e status erro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 58 | Comando CLI app:media:retentar | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 59 | Endpoint de retry — individual e em lote | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 60 | Teste end-to-end do motor completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
