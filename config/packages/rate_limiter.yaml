@@ -9,3 +9,8 @@ framework:
             policy: 'token_bucket'
             limit: 60
             rate: { interval: '1 minute' }
+
+        ingestao:
+            policy: 'token_bucket'
+            limit: 300
+            rate: { interval: '1 minute' }
