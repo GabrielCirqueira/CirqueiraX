@@ -101,20 +101,64 @@
   - [`src/Repository/TokenAgenteRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/TokenAgenteRepository.php)
   - [`config/packages/doctrine.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/doctrine.yaml)
 
-### ⏳ Tópico 29 — Authenticator customizado para tokens de agente
-- **Status**: Pendente
+### ✅ Tópico 29 — Authenticator customizado para tokens de agente
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Authenticator de Serviço (`TokenAgenteAuthenticator`)**: Desenvolvido o authenticator customizado [`src/Security/TokenAgenteAuthenticator.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Security/TokenAgenteAuthenticator.php) estendendo `AbstractAuthenticator`, responsável por interceptar chamadas HTTP contendo o cabeçalho `X-Agent-Token`.
+  - **Validação de Hash e Estado**: O authenticator calcula o hash SHA-256 (`hash('sha256', $token)`) do valor informado e consulta o repositório [`TokenAgenteRepository`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/TokenAgenteRepository.php). Caso o token seja inexistente ou desativado (`ativo === false`), lança `CustomUserMessageAuthenticationException`.
+  - **Objeto de Usuário Agente (`AgenteUser`)**: Criado a classe de representação de segurança [`src/Security/AgenteUser.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Security/AgenteUser.php) implementando `UserInterface`, retornando a role `ROLE_AGENTE` e encapsulando o `TokenAgente` autenticado.
+  - **Integração no Firewall API (`security.yaml`)**: Configurada a chave `custom_authenticators` no firewall `api` em [`config/packages/security.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/security.yaml), permitindo convivência transparente entre autenticação por JWT humano (`Authorization: Bearer`) e tokens de serviço (`X-Agent-Token`).
+- **Arquivos envolvidos**:
+  - [`src/Security/TokenAgenteAuthenticator.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Security/TokenAgenteAuthenticator.php)
+  - [`src/Security/AgenteUser.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Security/AgenteUser.php)
+  - [`config/packages/security.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/packages/security.yaml)
 
-### ⏳ Tópico 30 — Comando CLI de geração de token por agente
-- **Status**: Pendente
+### ✅ Tópico 30 — Comando CLI de geração de token por agente
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Comando Console (`GerarTokenAgenteCommand`)**: Criado o comando Symfony Console [`src/Command/GerarTokenAgenteCommand.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Command/GerarTokenAgenteCommand.php) registrado com a assinatura `app:agente:gerar-token`.
+  - **Interface Interativa e Parâmetros CLI**: Suporte a passagem direta dos argumentos `nome` e `origem`, além da opção `--tipo` (`agente` ou `usuario`). Se não informados via argumentos CLI, o comando solicita os dados de forma interativa com atalhos e validações.
+  - **Geração Segura e Persistência**: Gera uma chave aleatória com prefixo de domínio (`cx_ag_` + 48 caracteres hexadecimais), calcula o hash SHA-256 e o persiste no banco via [`TokenAgenteRepository`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/TokenAgenteRepository.php).
+  - **Exibição Única de Chave Secreta**: Exibe no terminal os metadados do agente (UUID, Nome, Origem, Tipo e data de criação) e a chave secreta formatada em destaque com aviso de segurança.
+  - **Atalho no Makefile**: Adicionada a regra `agente-token` em [`Makefile`](file:///home/gabriel/dev/pessoal/CirqueiraX/Makefile) facilitando a invocação rápida (`make agente-token ARGS='"Nome Agente" "origem_agente"'`).
+- **Arquivos envolvidos**:
+  - [`src/Command/GerarTokenAgenteCommand.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Command/GerarTokenAgenteCommand.php)
+  - [`Makefile`](file:///home/gabriel/dev/pessoal/CirqueiraX/Makefile)
 
-### ⏳ Tópico 31 — Entidade ContaGoogleFotos
-- **Status**: Pendente
+### ✅ Tópico 31 — Entidade ContaGoogleFotos
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Modelagem da Entidade `ContaGoogleFotos`**: Criada a entidade Doctrine [`src/Entity/ContaGoogleFotos.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/ContaGoogleFotos.php) mapeando a tabela `conta_google_fotos` com chave primária UUID v7 gerada no construtor via `Symfony\Component\Uid\Uuid::v7()`.
+  - **Campos e Atributos de Segurança**: Mapeados os campos `email` (único), `refreshTokenCriptografado` (texto para credencial sensível), `accessTokenCache` (cache de token de acesso), `expiraEm` (timestamp de expiração do cache), `criadoEm` e `atualizadoEm`.
+  - **Métodos de Domínio e Standard Getters**: Implementados getters sem prefixo `get` (`uuid()`, `email()`, `refreshTokenCriptografado()`, `accessTokenCache()`, `expiraEm()`, `criadoEm()`, `atualizadoEm()`), setters encadeáveis (`self`), e o método utilitário `accessTokenEstaValido()` para verificação rápida de expiração de token.
+  - **Repositório de Persistência**: Criado o repositório [`src/Repository/ContaGoogleFotosRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/ContaGoogleFotosRepository.php) estendendo `ServiceEntityRepository`, contendo métodos `salvar()`, `remover()`, `buscarPorEmail()` e `buscarPorUuid()`.
+- **Arquivos envolvidos**:
+  - [`src/Entity/ContaGoogleFotos.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/ContaGoogleFotos.php)
+  - [`src/Repository/ContaGoogleFotosRepository.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/ContaGoogleFotosRepository.php)
 
-### ⏳ Tópico 32 — Serviço de criptografia do refresh token
-- **Status**: Pendente
+### ✅ Tópico 32 — Serviço de criptografia do refresh token
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Interface de Contrato (`CriptografiaInterface`)**: Criada a interface [`src/Interface/CriptografiaInterface.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Interface/CriptografiaInterface.php) definindo o contrato de criptografia simétrica (`criptografar` e `descriptografar`) para desacoplamento de camadas.
+  - **Serviço de Criptografia Simétrica (`CriptografiaService`)**: Implementado o serviço [`src/Service/Seguranca/CriptografiaService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/Seguranca/CriptografiaService.php) utilizando a extensão nativa C Sodium do PHP 8.4 (`sodium_crypto_secretbox` e `sodium_crypto_secretbox_open`).
+  - **Vetor de Inicialização (Nonce) e Autenticação de Conteúdo**: Para cada criptografia, gera um nonce aleatório seguro de 24 bytes (`SODIUM_CRYPTO_SECRETBOX_NONCEBYTES`). O resultado é concatenado e codificado em Base64 para armazenamento seguro em campos texto do MySQL.
+  - **Injeção de Dependência e Configuração (`services.yaml`)**: Configurado o parâmetro `$chaveSecreta` apontando para `%env(APP_SECRET)%` em [`config/services.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/services.yaml), injetando a chave mestre do ambiente dev/prod via container DI.
+- **Arquivos envolvidos**:
+  - [`src/Interface/CriptografiaInterface.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Interface/CriptografiaInterface.php)
+  - [`src/Service/Seguranca/CriptografiaService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/Seguranca/CriptografiaService.php)
+  - [`config/services.yaml`](file:///home/gabriel/dev/pessoal/CirqueiraX/config/services.yaml)
 
-### ⏳ Tópico 33 — Comando CLI de autorização OAuth por conta Google Fotos
-- **Status**: Pendente
+### ✅ Tópico 33 — Comando CLI de autorização OAuth por conta Google Fotos
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Comando Console (`AutorizarContaGoogleFotosCommand`)**: Criado o comando Symfony Console [`src/Command/AutorizarContaGoogleFotosCommand.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Command/AutorizarContaGoogleFotosCommand.php) sob a assinatura `app:google-fotos:autorizar-conta`.
+  - **Guias do Fluxo OAuth2**: Constrói a URL de autorização OAuth2 do Google (`https://accounts.google.com/o/oauth2/v2/auth`) solicitando acesso offline (`access_type=offline`), consentimento explícito (`prompt=consent`) e escopo da API Google Photos (`photoslibrary` + `userinfo.email`).
+  - **Troca de Tokens e Leitura de E-mail**: Realiza requisição POST via `HttpClientInterface` para a API de tokens do Google (`https://oauth2.googleapis.com/token`), obtendo `refresh_token`, `access_token` e tempo de expiração. Coleta automaticamente o e-mail da conta via API UserInfo (`https://www.googleapis.com/oauth2/v2/userinfo`).
+  - **Criptografia e Persistência**: Criptografa o `refresh_token` utilizando [`CriptografiaInterface`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Interface/CriptografiaInterface.php) antes de persisti-lo no banco de dados através da entidade [`ContaGoogleFotos`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Entity/ContaGoogleFotos.php) e repositório [`ContaGoogleFotosRepository`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Repository/ContaGoogleFotosRepository.php).
+  - **Atalho no Makefile**: Adicionada a regra `google-fotos-autorizar` no [`Makefile`](file:///home/gabriel/dev/pessoal/CirqueiraX/Makefile) (`make google-fotos-autorizar`).
+- **Arquivos envolvidos**:
+  - [`src/Command/AutorizarContaGoogleFotosCommand.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Command/AutorizarContaGoogleFotosCommand.php)
+  - [`Makefile`](file:///home/gabriel/dev/pessoal/CirqueiraX/Makefile)
 
 ### ⏳ Tópico 34 — Entidade MediaItem (UUID v7)
 - **Status**: Pendente

@@ -38,11 +38,11 @@
 | 26 | Canais de log dedicados no Monolog | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 27 | Volume Docker compartilhado com o Syncthing | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 28 | Enum TipoCliente e entidade TokenAgente | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
-| 29 | Authenticator customizado para tokens de agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 30 | Comando CLI de geração de token por agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 31 | Entidade ContaGoogleFotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 32 | Serviço de criptografia do refresh token | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
-| 33 | Comando CLI de autorização OAuth por conta Google Fotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
+| 29 | Authenticator customizado para tokens de agente | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 30 | Comando CLI de geração de token por agente | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 31 | Entidade ContaGoogleFotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 32 | Serviço de criptografia do refresh token | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
+| 33 | Comando CLI de autorização OAuth por conta Google Fotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_2.md) |
 | 34 | Entidade MediaItem (UUID v7) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
 | 35 | Entidade Categoria | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |
 | 36 | Entidade OrigemRegra | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_2.md) |

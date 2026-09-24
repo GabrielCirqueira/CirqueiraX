@@ -45,11 +45,11 @@
 - [x] **26. Canais de log dedicados no Monolog**
 - [x] **27. Volume Docker compartilhado com o Syncthing**
 - [x] **28. Enum TipoCliente e entidade TokenAgente**
-- [ ] **29. Authenticator customizado para tokens de agente**
-- [ ] **30. Comando CLI de geração de token por agente**
-- [ ] **31. Entidade ContaGoogleFotos**
-- [ ] **32. Serviço de criptografia do refresh token**
-- [ ] **33. Comando CLI de autorização OAuth por conta Google Fotos**
+- [x] **29. Authenticator customizado para tokens de agente**
+- [x] **30. Comando CLI de geração de token por agente**
+- [x] **31. Entidade ContaGoogleFotos**
+- [x] **32. Serviço de criptografia do refresh token**
+- [x] **33. Comando CLI de autorização OAuth por conta Google Fotos**
 - [ ] **34. Entidade MediaItem (UUID v7)**
 - [ ] **35. Entidade Categoria**
 - [ ] **36. Entidade OrigemRegra**
