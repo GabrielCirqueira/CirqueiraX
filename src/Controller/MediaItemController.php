@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DataObject\ApagarLoteDTO;
+use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
-use App\DataObject\PaginacaoDTO;
+use App\DataObject\FiltrarMediaItemDTO;
+use App\DataObject\RebaixarLoteDTO;
 use App\Serializer\MediaItemSerializer;
 use App\Service\MediaItemService;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,20 +22,60 @@ final class MediaItemController extends DefaultController
     public function __construct(
         private readonly MediaItemService $mediaItemService,
         private readonly MediaItemSerializer $mediaItemSerializer,
-    ) {}
+    ) {
+    }
 
     #[Route('', name: 'listar', methods: ['GET'])]
-    public function listar(#[MapQueryString] ?PaginacaoDTO $paginacao = null): Response
+    public function listar(#[MapQueryString] ?FiltrarMediaItemDTO $filtro = null): Response
     {
-        $paginacao ??= new PaginacaoDTO();
-        $resultado = $this->mediaItemService->listarPaginado($paginacao->pagina(), $paginacao->limite());
+        $filtro ??= new FiltrarMediaItemDTO();
+        $resultado = $this->mediaItemService->paginarComFiltros(
+            $filtro->paraFiltros(),
+            $filtro->pagina(),
+            $filtro->porPagina(),
+        );
 
         return $this->paginated(
             $this->mediaItemSerializer->normalizarLista($resultado['itens']),
             $resultado['total'],
-            $paginacao->pagina(),
-            $paginacao->limite(),
+            $filtro->pagina(),
+            $filtro->porPagina(),
         );
+    }
+
+    #[Route('/lote/categorizar', name: 'categorizar_lote', methods: ['POST'])]
+    public function categorizarLote(#[MapRequestPayload] CategorizarLoteDTO $dto): Response
+    {
+        $itens = $this->mediaItemService->classificarEmLote($dto);
+
+        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+    }
+
+    #[Route('/lote/rebaixar', name: 'rebaixar_lote', methods: ['POST'])]
+    public function rebaixarLote(#[MapRequestPayload] RebaixarLoteDTO $dto): Response
+    {
+        $itens = $this->mediaItemService->rebaixarEmLote($dto);
+
+        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+    }
+
+    #[Route('/lote/apagar', name: 'apagar_lote', methods: ['POST'])]
+    public function apagarLote(#[MapRequestPayload] ApagarLoteDTO $dto): Response
+    {
+        $removidos = $this->mediaItemService->apagarEmLote($dto);
+
+        return $this->success([
+            'removidos' => $removidos,
+            'total' => count($removidos),
+        ]);
+    }
+
+    #[Route('/retentar', name: 'retentar_lote', methods: ['POST'])]
+    public function retentarLote(): Response
+    {
+        $itens = $this->mediaItemService->retentarTodosComErro();
+
+        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
@@ -49,14 +92,6 @@ final class MediaItemController extends DefaultController
         $mediaItem = $this->mediaItemService->classificarManualmente($uuid, $dto);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
-    }
-
-    #[Route('/retentar', name: 'retentar_lote', methods: ['POST'])]
-    public function retentarLote(): Response
-    {
-        $itens = $this->mediaItemService->retentarTodosComErro();
-
-        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/{uuid}/retentar', name: 'retentar_individual', methods: ['POST'])]

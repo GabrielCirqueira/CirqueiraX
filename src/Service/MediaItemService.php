@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\DataObject\ApagarLoteDTO;
+use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
+use App\DataObject\RebaixarLoteDTO;
 use App\Entity\MediaItem;
+use App\Enum\OrigemMedia;
 use App\Enum\StatusMediaItem;
+use App\Message\BaixarVideoMessage;
 use App\Message\ClassificarMediaMessage;
 use App\Message\DistribuirLocalMessage;
 use App\Message\EnviarGoogleFotosMessage;
@@ -20,7 +25,8 @@ final readonly class MediaItemService
         private MediaItemRepository $mediaItemRepository,
         private CategoriaService $categoriaService,
         private MessageBusInterface $messageBus,
-    ) {}
+    ) {
+    }
 
     public function buscarPorUuid(string|Uuid $uuid): MediaItem
     {
@@ -38,6 +44,23 @@ final readonly class MediaItemService
     public function listarPaginado(int $pagina = 1, int $limite = 20): array
     {
         return $this->mediaItemRepository->listarPaginado($pagina, $limite);
+    }
+
+    /**
+     * @param array{
+     *     status?: StatusMediaItem|string|null,
+     *     origem?: OrigemMedia|string|null,
+     *     categoriaId?: string|null,
+     *     busca?: string|null,
+     *     ordenacao?: string|null,
+     *     direcao?: string|null
+     * } $filtros
+     *
+     * @return array{itens: array<int, MediaItem>, total: int}
+     */
+    public function paginarComFiltros(array $filtros = [], int $pagina = 1, int $porPagina = 20): array
+    {
+        return $this->mediaItemRepository->paginarComFiltros($filtros, $pagina, $porPagina);
     }
 
     public function classificarManualmente(string|Uuid $uuid, ClassificarManualDTO $dto): MediaItem
