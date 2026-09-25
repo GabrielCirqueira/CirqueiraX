@@ -7,6 +7,7 @@ import { memo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const navLinks = [
+  { href: '/downloads', label: 'Downloads' },
   { href: '/#showcase', label: 'Componentes' },
   { href: '/#stack', label: 'Stack' },
   { href: '/#steps', label: 'Como funciona' },

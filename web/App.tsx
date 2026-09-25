@@ -19,6 +19,10 @@ const router = createBrowserRouter(
           path="cadastro"
           lazy={() => lazyWithRetry(() => import('@/features/cadastro/Cadastro'))}
         />
+        <Route
+          path="downloads"
+          lazy={() => lazyWithRetry(() => import('@/features/downloads-video/DownloadsVideo'))}
+        />
         <Route path="*" lazy={() => lazyWithRetry(() => import('@/features/not-found/NotFound'))} />
       </Route>
 

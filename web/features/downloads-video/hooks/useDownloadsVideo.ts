@@ -7,6 +7,7 @@ import {
   classificarCategoriaIndividual,
   criarPedidoDownload,
   detalharMediaItem,
+  listarCategorias,
   listarMediaItens,
   rebaixarLote,
   retentarMediaItem,
@@ -20,6 +21,14 @@ import type {
   PedidoDownloadInput,
   RebaixarLoteInput,
 } from '../types'
+
+export function useCategorias() {
+  return useQuery({
+    queryKey: ['categorias'],
+    queryFn: () => listarCategorias(),
+    staleTime: 1000 * 60 * 5,
+  })
+}
 
 export function useMediaItens(filtros: FiltrosMediaItem = {}) {
   return useQuery({

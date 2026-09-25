@@ -1,3 +1,8 @@
 export * from './types'
 export * from './api'
 export * from './hooks/useDownloadsVideo'
+export * from './components/CardVideo'
+export * from './components/GridVideos'
+export * from './components/CampoNovoLink'
+export * from './components/BarraAcoesEmLote'
+export { default as DownloadsVideo } from './DownloadsVideo'

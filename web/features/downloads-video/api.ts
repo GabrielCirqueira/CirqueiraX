@@ -87,3 +87,13 @@ export async function retentarTodos(): Promise<MediaItem[]> {
   const { data } = await api.post<RespostaApi<MediaItem[]>>('/api/v1/media-itens/retentar')
   return data.data
 }
+
+export async function listarCategorias(): Promise<Array<{ uuid: string; nome: string }>> {
+  const { data } = await api.get<RespostaPaginada<{ uuid: string; nome: string }>>(
+    '/api/v1/categorias',
+    {
+      params: { limite: 100 },
+    }
+  )
+  return data.data
+}
