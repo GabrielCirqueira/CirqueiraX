@@ -88,7 +88,7 @@
 | 74 | Endpoint de ações em lote — apagar arquivos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 75 | Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 76 | Frontend — estrutura da feature downloads-video | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
-| 77 | Frontend — componentes CardVideo e GridVideos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 78 | Frontend — CampoNovoLink e BarraAcoesEmLote | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 79 | Frontend — página DownloadsVideo.tsx completa | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 80 | Teste end-to-end do fluxo de download e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
+| 77 | Frontend — componentes CardVideo e GridVideos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 78 | Frontend — CampoNovoLink e BarraAcoesEmLote | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 79 | Frontend — página DownloadsVideo.tsx completa | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 80 | Teste end-to-end do fluxo de download e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |

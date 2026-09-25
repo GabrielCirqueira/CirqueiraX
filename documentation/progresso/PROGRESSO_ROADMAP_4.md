@@ -169,14 +169,51 @@
   - [`web/features/downloads-video/hooks/useDownloadsVideo.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/hooks/useDownloadsVideo.ts)
   - [`web/features/downloads-video/index.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/index.ts)
 
-### ⏳ Tópico 77 — Frontend — componentes CardVideo e GridVideos
-- **Status**: Pendente
+### ✅ Tópico 77 — Frontend — componentes CardVideo e GridVideos
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente CardVideo**: Criado [`web/features/downloads-video/components/CardVideo.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/CardVideo.tsx) com exibição de thumbnail (fallback caso não exista imagem), badge de duração formatada (`hh:mm:ss` ou `mm:ss`), tempo relativo nativo (`tempoRelativoNativo`), título, uploader, categoria vinculada, status com cores e ícones semânticos, checkbox individual para seleção em lote e botões de ação (editar metadados, categorizar, rebaixar, retentar e apagar).
+  - **Componente GridVideos**: Criado [`web/features/downloads-video/components/GridVideos.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/GridVideos.tsx) com layout responsivo em grade (`grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`), estado de carregamento com esqueletos animados (`SkeletonCard`), estado vazio estilizado e cabeçalho de controle para selecionar ou desmarcar todos os itens.
+- **Arquivos envolvidos**:
+  - [`web/features/downloads-video/components/CardVideo.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/CardVideo.tsx)
+  - [`web/features/downloads-video/components/GridVideos.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/GridVideos.tsx)
 
-### ⏳ Tópico 78 — Frontend — CampoNovoLink e BarraAcoesEmLote
-- **Status**: Pendente
+### ✅ Tópico 78 — Frontend — CampoNovoLink e BarraAcoesEmLote
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente CampoNovoLink**: Criado [`web/features/downloads-video/components/CampoNovoLink.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/CampoNovoLink.tsx) com campo de entrada para URLs de vídeos, detecção automática de plataformas (YouTube, TikTok, Twitter/X, Instagram) com badges visuais, botão com atalho de colagem direta da área de transferência (`navigator.clipboard.readText()`), botão de limpeza rápida e botão de envio com estado de loading conectado ao hook `useCriarDownload`.
+  - **Componente BarraAcoesEmLote**: Criado [`web/features/downloads-video/components/BarraAcoesEmLote.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/BarraAcoesEmLote.tsx) com barra flutuante animada exibida quando houver itens selecionados (`totalSelecionados > 0`), badge contador de seleção, botão para desmarcar todos e ações em massa com estados visuais de processamento (Categorizar em lote, Rebaixar/Redownload em lote e Apagar arquivos em lote).
+  - **Exportação no Barrel**: Atualizado [`web/features/downloads-video/index.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/index.ts) para exportar todos os componentes.
+- **Arquivos envolvidos**:
+  - [`web/features/downloads-video/components/CampoNovoLink.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/CampoNovoLink.tsx)
+  - [`web/features/downloads-video/components/BarraAcoesEmLote.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/components/BarraAcoesEmLote.tsx)
+  - [`web/features/downloads-video/index.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/index.ts)
 
-### ⏳ Tópico 79 — Frontend — página DownloadsVideo.tsx completa
-- **Status**: Pendente
+### ✅ Tópico 79 — Frontend — página DownloadsVideo.tsx completa
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Página Principal DownloadsVideo**: Criada em [`web/features/downloads-video/DownloadsVideo.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/DownloadsVideo.tsx) e exposta em [`web/pages/DownloadsVideo/DownloadsVideo.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/pages/DownloadsVideo/DownloadsVideo.tsx), seguindo a hierarquia `MainLayout → AppContainer → Container`.
+  - **Filtros e Busca**: Campo de pesquisa textual em tempo real (título, uploader, hash) com debounce, seleção por status (`baixando`, `recebido`, `em_fila`, `classificado`, `distribuindo`, `distribuido_local`, `enviando_google_fotos`, `concluido`, `erro`) e seleção por origem (`manual`, `bot_telegram`, `print_empresa`, `print_pessoal`).
+  - **Ações em Lote e Modais Interativos**: Modais de categorização (em lote ou individual com listagem de categorias via `useCategorias`), modal de edição de metadados (`AtualizarMetadataInput`), modal de confirmação de exclusão física/lógica e modal de confirmação de rebaixamento/redownload.
+  - **Roteamento e Navegação**: Registrada rota `/downloads` no [`web/App.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/App.tsx) e adicionado item de navegação no [`web/layouts/Header.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/layouts/Header.tsx).
+- **Arquivos envolvidos**:
+  - [`web/features/downloads-video/DownloadsVideo.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/DownloadsVideo.tsx)
+  - [`web/pages/DownloadsVideo/DownloadsVideo.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/pages/DownloadsVideo/DownloadsVideo.tsx)
+  - [`web/App.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/App.tsx)
+  - [`web/layouts/Header.tsx`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/layouts/Header.tsx)
 
-### ⏳ Tópico 80 — Teste end-to-end do fluxo de download e documentação atualizada
-- **Status**: Pendente
+### ✅ Tópico 80 — Teste end-to-end do fluxo de download e documentação atualizada
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Validação de Rotas e Endpoints**: Validada a árvore de rotas no Symfony (`php bin/console debug:router`) com todos os 10 endpoints da Feature 3 (`POST /api/v1/downloads`, `GET /api/v1/media-itens`, `POST /api/v1/media-itens/lote/categorizar`, `POST /api/v1/media-itens/lote/rebaixar`, `POST /api/v1/media-itens/lote/apagar`, `POST /api/v1/media-itens/retentar`, `PATCH /api/v1/media-itens/{uuid}`, `PATCH /api/v1/media-itens/{uuid}/categoria`).
+  - **Validação Estática do Frontend**: Verificada conformidade total com o Biome (`npx biome check web/features/downloads-video web/pages web/App.tsx web/layouts/Header.tsx`), sem erros de lint, formato ou acessibilidade.
+  - **Atualização de Documentação Técnica**:
+    - [`documentation/funcionalidades/CIRQUEIRAX.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX.md): Seção 3.1 documentada com a arquitetura real implementada (DTOs, Services, Handlers, Endpoints e componentes de UI).
+    - [`documentation/stack/FRONTEND.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/stack/FRONTEND.md): Árvore de diretórios atualizada com os novos módulos e páginas de downloads de vídeo.
+- **Arquivos envolvidos**:
+  - [`documentation/funcionalidades/CIRQUEIRAX.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX.md)
+  - [`documentation/stack/FRONTEND.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/stack/FRONTEND.md)
+  - [`documentation/progresso/PROGRESSO_ROADMAP_4.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP_4.md)
+  - [`ROADMAP.md`](file:///home/gabriel/dev/pessoal/CirqueiraX/ROADMAP.md)
+
+

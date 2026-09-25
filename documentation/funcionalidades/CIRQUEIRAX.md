@@ -82,19 +82,26 @@ Cada transição é registrada com timestamp, pra permitir auditoria e retry gra
 
 **Objetivo**: baixar mídia de qualquer plataforma suportada (YouTube, TikTok, Twitter/X, Instagram, + o que o `yt-dlp` cobrir) e roteá-la.
 
-**Funcionalidades**:
-- Campo de input de link com validação de URL suportada
-- Fila de download com status em tempo real (baixando / na VPS / no dashboard / com erro)
-- Grid de itens: thumbnail, título, uploader, plataforma de origem, tamanho, data
-- Seleção múltipla (checkbox por card + "selecionar todos")
-- Filtros: por status (Na VPS, No Dashboard, Baixando, Com erro, Deletados), busca por título/uploader, ordenação (mais recentes, etc)
-- Ações em lote: definir categoria e enviar, rebaixar selecionados, alterar data/metadados, apagar arquivos, remover do histórico
-- Ação individual: rebaixar, baixar MP4, apagar
-- Edição de metadados (data de captura/upload) por item
+**Funcionalidades Implementadas**:
+- Campo de input de link com validação de URL e detecção em tempo real de plataformas (`CampoNovoLink`).
+- Fila de download com status em tempo real via polling automático e mensagens assíncronas no Messenger (`BaixarVideoMessage` -> `BaixarVideoMessageHandler` via `yt-dlp`).
+- Extração de metadados completa (`ExtrairMetadataVideoService`): título, uploader, duração, thumbnail e url original.
+- Ingestão automática pós-download (`IngestarMediaService`) acionando o pipeline de classificação e distribuição.
+- Grid de itens (`GridVideos` e `CardVideo`): thumbnail com fallback, badges de status, duração, uploader, categoria vinculada e data relativa.
+- Seleção múltipla (checkbox por card + selecionar/desmarcar todos).
+- Filtros e busca: por status, origem, busca textual por título/canal/hash e paginação backend integrada.
+- Ações em lote e individuais (`BarraAcoesEmLote` e modais interativos): categorizar, rebaixar (redownload), editar metadados parciais, retentar falhas e apagar arquivos do disco e banco.
 
-**Categorização**: pode acontecer em dois momentos (a definir na implementação):
-- No momento do pedido de download (usuário já escolhe categoria antes de baixar)
-- Depois, no grid, selecionando um ou vários itens e aplicando categoria em lote
+**Estrutura Técnica Real**:
+- **Backend**:
+  - DTOs: `BaixarVideoDTO`, `FiltrarMediaItemDTO`, `CategorizarLoteDTO`, `RebaixarLoteDTO`, `ApagarLoteDTO`, `AtualizarMetadataMediaItemDTO`.
+  - Services: `BaixarVideoService`, `BaixarVideoDownloadService`, `ExtrairMetadataVideoService`, `MediaItemService`, `ValidadorUrlPlataforma`.
+  - Mensagens & Handlers: `BaixarVideoMessage`, `BaixarVideoMessageHandler`.
+  - Controllers & Endpoints: `DownloadController` (`POST /api/v1/downloads`), `MediaItemController` (`GET /api/v1/media-itens`, `POST /api/v1/media-itens/lote/*`, `PATCH /api/v1/media-itens/{uuid}`).
+- **Frontend**:
+  - `web/features/downloads-video/`: `types.ts`, `api.ts`, `hooks/useDownloadsVideo.ts`, `components/CardVideo.tsx`, `components/GridVideos.tsx`, `components/CampoNovoLink.tsx`, `components/BarraAcoesEmLote.tsx`, `DownloadsVideo.tsx`.
+  - `web/pages/DownloadsVideo/DownloadsVideo.tsx`: ponto de entrada da rota `/downloads`.
+
 
 ### 3.2 Prints automáticos
 

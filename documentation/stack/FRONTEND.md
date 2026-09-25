@@ -41,7 +41,12 @@ web/
 ├── App.tsx               Router raiz (createBrowserRouter)
 ├── index.css             @import tailwindcss + @heroui/styles + tailwindcss-motion
 ├── config/api.ts         Instância Axios centralizada com interceptores JWT
-├── features/auth/        hooks, api, types de autenticação
+├── features/
+│   ├── auth/                 hooks, api, types de autenticação
+│   ├── cadastro/             Página e formulário de cadastro
+│   ├── downloads-video/      Feature de downloads: components, hooks, api, types
+│   ├── home/                 Home page
+│   └── not-found/            Página 404
 ├── layouts/
 │   ├── MainLayout.tsx    Header + Outlet + Footer
 │   ├── Header.tsx        Navbar global (tema, auth)
@@ -52,6 +57,7 @@ web/
 │   ├── Home/             Landing page pública
 │   ├── Login/            Página de login
 │   ├── Cadastro/         Página de cadastro
+│   ├── DownloadsVideo/   Página de downloads de vídeo
 │   └── NotFound/         404
 ├── routes/               RotaProtegida.tsx
 ├── shared/

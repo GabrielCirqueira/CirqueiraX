@@ -53,10 +53,10 @@
 - [x] **74. Endpoint de ações em lote — apagar arquivos**
 - [x] **75. Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados**
 - [x] **76. Frontend — estrutura da feature downloads-video**
-- [ ] **77. Frontend — componentes CardVideo e GridVideos**
-- [ ] **78. Frontend — CampoNovoLink e BarraAcoesEmLote**
-- [ ] **79. Frontend — página DownloadsVideo.tsx completa**
-- [ ] **80. Teste end-to-end do fluxo de download e documentação atualizada**
+- [x] **77. Frontend — componentes CardVideo e GridVideos**
+- [x] **78. Frontend — CampoNovoLink e BarraAcoesEmLote**
+- [x] **79. Frontend — página DownloadsVideo.tsx completa**
+- [x] **80. Teste end-to-end do fluxo de download e documentação atualizada**
 
 ---
 
