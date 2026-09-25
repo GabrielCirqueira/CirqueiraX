@@ -22,8 +22,7 @@ class TokenAgenteAuthenticator extends AbstractAuthenticator
 
     public function __construct(
         private readonly TokenAgenteRepository $tokenAgenteRepository,
-    ) {
-    }
+    ) {}
 
     public function supports(Request $request): ?bool
     {
@@ -49,7 +48,7 @@ class TokenAgenteAuthenticator extends AbstractAuthenticator
         return new SelfValidatingPassport(
             new UserBadge(
                 $tokenAgente->uuid()?->toString() ?? $tokenAgente->nome(),
-                static fn (): AgenteUser => new AgenteUser($tokenAgente),
+                static fn(): AgenteUser => new AgenteUser($tokenAgente),
             ),
         );
     }

@@ -12,8 +12,7 @@ final readonly class OrigemRegraSerializer
     public function __construct(
         private CategoriaService $categoriaService,
         private CategoriaSerializer $categoriaSerializer,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -48,7 +47,7 @@ final readonly class OrigemRegraSerializer
     public function normalizarLista(array $regras): array
     {
         return array_map(
-            fn (OrigemRegra $regra): array => $this->normalizar($regra),
+            fn(OrigemRegra $regra): array => $this->normalizar($regra),
             $regras,
         );
     }

@@ -16,8 +16,7 @@ final readonly class IngestarMediaService
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
         private MessageBusInterface $messageBus,
-    ) {
-    }
+    ) {}
 
     public function executar(IngestarMediaDTO $dto): MediaItem
     {

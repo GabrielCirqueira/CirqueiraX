@@ -14,7 +14,7 @@ final class GoogleOAuthAPI extends GoogleOAuthClient
      */
     public function renovarAccessToken(string $clientId, string $clientSecret, string $refreshToken): array
     {
-        $customThrow = static fn (RequestException $e): \Throwable => new GoogleFotosAPIException(
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
             message: sprintf('Erro ao renovar token OAuth do Google: %s', $e->getMessage()),
             code: (int) $e->getCode(),
             previous: $e,
@@ -43,7 +43,7 @@ final class GoogleOAuthAPI extends GoogleOAuthClient
      */
     public function trocarCodigoPorToken(string $clientId, string $clientSecret, string $code, string $redirectUri): array
     {
-        $customThrow = static fn (RequestException $e): \Throwable => new GoogleFotosAPIException(
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
             message: sprintf('Erro ao trocar código por token OAuth do Google: %s', $e->getMessage()),
             code: (int) $e->getCode(),
             previous: $e,
@@ -73,7 +73,7 @@ final class GoogleOAuthAPI extends GoogleOAuthClient
      */
     public function obterUserInfo(string $accessToken): array
     {
-        $customThrow = static fn (RequestException $e): \Throwable => new GoogleFotosAPIException(
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
             message: sprintf('Erro ao buscar dados de usuário do Google: %s', $e->getMessage()),
             code: (int) $e->getCode(),
             previous: $e,
@@ -85,7 +85,7 @@ final class GoogleOAuthAPI extends GoogleOAuthClient
             uri: 'https://www.googleapis.com/oauth2/v2/userinfo',
             options: [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$accessToken,
+                    'Authorization' => 'Bearer ' . $accessToken,
                 ],
             ],
             throw: $customThrow,

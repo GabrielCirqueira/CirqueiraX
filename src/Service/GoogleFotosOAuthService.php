@@ -17,8 +17,7 @@ final readonly class GoogleFotosOAuthService
         private ContaGoogleFotosRepository $contaRepository,
         private string $clientId = '',
         private string $clientSecret = '',
-    ) {
-    }
+    ) {}
 
     public function obterAccessTokenValido(ContaGoogleFotos $conta): string
     {
@@ -40,7 +39,7 @@ final readonly class GoogleFotosOAuthService
             throw new \DomainException('erro_renovar_token_google', 400);
         }
 
-        $expiraEm = (new \DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
+        $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
 
         $conta->setAccessTokenCache($accessToken, $expiraEm);
         $this->contaRepository->salvar($conta);

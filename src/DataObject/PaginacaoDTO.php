@@ -13,8 +13,7 @@ final readonly class PaginacaoDTO
         public int $pagina = 1,
         #[Assert\Range(min: 1, max: 100, notInRangeMessage: 'O limite por página deve estar entre 1 e 100.')]
         public int $limite = 20,
-    ) {
-    }
+    ) {}
 
     public function pagina(): int
     {

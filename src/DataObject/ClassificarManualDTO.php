@@ -12,8 +12,7 @@ final readonly class ClassificarManualDTO
         #[Assert\NotBlank(message: 'A categoria é obrigatória.')]
         #[Assert\Length(max: 36)]
         public string $categoriaId,
-    ) {
-    }
+    ) {}
 
     public function categoriaId(): string
     {

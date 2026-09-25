@@ -16,8 +16,7 @@ final class IngestaoRateLimiterListener
 {
     public function __construct(
         private readonly RateLimiterFactory $ingestaoLimiter,
-    ) {
-    }
+    ) {}
 
     public function __invoke(RequestEvent $event): void
     {

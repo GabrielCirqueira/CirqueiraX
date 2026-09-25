@@ -16,8 +16,7 @@ final readonly class EnviarGoogleFotosMessageHandler
     public function __construct(
         private EnviarGoogleFotosService $enviarGoogleFotosService,
         private MediaItemRepository $mediaItemRepository,
-    ) {
-    }
+    ) {}
 
     public function __invoke(EnviarGoogleFotosMessage $message): void
     {

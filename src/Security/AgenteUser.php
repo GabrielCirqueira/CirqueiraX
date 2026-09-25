@@ -11,8 +11,7 @@ class AgenteUser implements UserInterface
 {
     public function __construct(
         private readonly TokenAgente $tokenAgente,
-    ) {
-    }
+    ) {}
 
     public function tokenAgente(): TokenAgente
     {
@@ -30,7 +29,5 @@ class AgenteUser implements UserInterface
         return ['ROLE_AGENTE'];
     }
 
-    public function eraseCredentials(): void
-    {
-    }
+    public function eraseCredentials(): void {}
 }

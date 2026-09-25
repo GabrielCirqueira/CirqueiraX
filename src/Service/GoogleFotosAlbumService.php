@@ -17,8 +17,7 @@ final readonly class GoogleFotosAlbumService
         private GoogleFotosOAuthService $oauthService,
         private ContaGoogleFotosRepository $contaRepository,
         private CategoriaRepository $categoriaRepository,
-    ) {
-    }
+    ) {}
 
     public function criarOuObter(Categoria $categoria, ?ContaGoogleFotos $conta = null): string
     {

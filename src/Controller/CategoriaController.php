@@ -20,8 +20,7 @@ final class CategoriaController extends DefaultController
     public function __construct(
         private readonly CategoriaService $categoriaService,
         private readonly CategoriaSerializer $categoriaSerializer,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'listar', methods: ['GET'])]
     public function listar(#[MapQueryString] ?PaginacaoDTO $paginacao = null): Response

@@ -133,7 +133,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
                 }
             }
 
-            $expiraEm = (new \DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
+            $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
             $refreshTokenCriptografado = $this->criptografia->criptografar($refreshToken);
 
             $conta = $this->contaRepository->buscarPorEmail($email);
@@ -156,7 +156,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Throwable $e) {
-            $io->error('Erro ao processar autorização OAuth: '.$e->getMessage());
+            $io->error('Erro ao processar autorização OAuth: ' . $e->getMessage());
 
             return Command::FAILURE;
         }

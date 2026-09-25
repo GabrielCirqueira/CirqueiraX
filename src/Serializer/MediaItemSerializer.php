@@ -12,8 +12,7 @@ final readonly class MediaItemSerializer
     public function __construct(
         private CategoriaService $categoriaService,
         private CategoriaSerializer $categoriaSerializer,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>
@@ -59,7 +58,7 @@ final readonly class MediaItemSerializer
     public function normalizarLista(array $itens): array
     {
         return array_map(
-            fn (MediaItem $item): array => $this->normalizar($item),
+            fn(MediaItem $item): array => $this->normalizar($item),
             $itens,
         );
     }

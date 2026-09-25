@@ -21,8 +21,7 @@ final readonly class EnviarGoogleFotosService
         private GoogleFotosOAuthService $oauthService,
         private GoogleFotosAlbumService $albumService,
         private GoogleFotosAPI $googleFotosApi,
-    ) {
-    }
+    ) {}
 
     public function executar(string|Uuid $uuid): MediaItem
     {

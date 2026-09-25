@@ -14,8 +14,7 @@ final readonly class AtualizarCategoriaDTO
         #[Assert\Length(max: 255)]
         public ?string $pastaLocal = null,
         public ?string $googlePhotosAlbumId = null,
-    ) {
-    }
+    ) {}
 
     public function nome(): ?string
     {

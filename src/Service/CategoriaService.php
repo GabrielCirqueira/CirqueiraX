@@ -14,8 +14,7 @@ final readonly class CategoriaService
 {
     public function __construct(
         private CategoriaRepository $categoriaRepository,
-    ) {
-    }
+    ) {}
 
     public function criar(CriarCategoriaDTO $dto): Categoria
     {

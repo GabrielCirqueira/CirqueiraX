@@ -20,8 +20,7 @@ final readonly class ClassificarMediaMessageHandler
         private MediaItemRepository $mediaItemRepository,
         private OrigemRegraRepository $origemRegraRepository,
         private MessageBusInterface $messageBus,
-    ) {
-    }
+    ) {}
 
     public function __invoke(ClassificarMediaMessage $message): void
     {

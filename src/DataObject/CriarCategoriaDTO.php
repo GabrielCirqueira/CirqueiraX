@@ -16,8 +16,7 @@ final readonly class CriarCategoriaDTO
         #[Assert\Length(max: 255)]
         public string $pastaLocal,
         public ?string $googlePhotosAlbumId = null,
-    ) {
-    }
+    ) {}
 
     public function nome(): string
     {

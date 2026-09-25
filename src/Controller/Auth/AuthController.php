@@ -21,8 +21,7 @@ final class AuthController extends DefaultController
         private readonly UsuarioRepository $usuarioRepository,
         private readonly UserPasswordHasherInterface $hasher,
         private readonly ValidatorInterface $validator,
-    ) {
-    }
+    ) {}
 
     #[Route('/registro', name: 'registro', methods: ['POST'])]
     public function registro(Request $request): Response

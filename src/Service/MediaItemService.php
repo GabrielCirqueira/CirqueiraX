@@ -20,8 +20,7 @@ final readonly class MediaItemService
         private MediaItemRepository $mediaItemRepository,
         private CategoriaService $categoriaService,
         private MessageBusInterface $messageBus,
-    ) {
-    }
+    ) {}
 
     public function buscarPorUuid(string|Uuid $uuid): MediaItem
     {

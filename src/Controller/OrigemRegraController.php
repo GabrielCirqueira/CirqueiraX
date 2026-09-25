@@ -20,8 +20,7 @@ final class OrigemRegraController extends DefaultController
     public function __construct(
         private readonly OrigemRegraService $origemRegraService,
         private readonly OrigemRegraSerializer $origemRegraSerializer,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'listar', methods: ['GET'])]
     public function listar(#[MapQueryString] ?PaginacaoDTO $paginacao = null): Response

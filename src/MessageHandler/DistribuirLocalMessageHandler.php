@@ -16,8 +16,7 @@ final readonly class DistribuirLocalMessageHandler
     public function __construct(
         private DistribuirLocalService $distribuirLocalService,
         private MediaItemRepository $mediaItemRepository,
-    ) {
-    }
+    ) {}
 
     public function __invoke(DistribuirLocalMessage $message): void
     {

@@ -17,8 +17,7 @@ abstract class Client
         private readonly ClientInterface $client,
         protected readonly string $baseUrl = '',
         protected readonly ?SerializerInterface $serializer = null,
-    ) {
-    }
+    ) {}
 
     protected function resolverUrl(string $path): string
     {
@@ -26,7 +25,7 @@ abstract class Client
             return $path;
         }
 
-        return rtrim($this->baseUrl, '/').'/'.ltrim($path, '/');
+        return rtrim($this->baseUrl, '/') . '/' . ltrim($path, '/');
     }
 
     /**
@@ -63,7 +62,7 @@ abstract class Client
         }
 
         return $this->serializer?->deserialize($body, $type, 'json', $context)
-            ?? throw new \LogicException('Serializer não configurado para desserializar a resposta.');
+        ?? throw new \LogicException('Serializer não configurado para desserializar a resposta.');
     }
 
     /**
@@ -101,7 +100,7 @@ abstract class Client
      */
     private function excecaoPadrao(string $method, string $uri): callable
     {
-        return static fn (RequestException $exception): \Throwable => new ClienteHTTPException(
+        return static fn(RequestException $exception): \Throwable => new ClienteHTTPException(
             message: sprintf('Erro ao executar requisição HTTP [%s %s]: %s', $method, $uri, $exception->getMessage()),
             code: (int) $exception->getCode(),
             previous: $exception,

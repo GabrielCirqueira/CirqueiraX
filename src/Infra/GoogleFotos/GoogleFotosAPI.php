@@ -14,7 +14,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
      */
     public function criarAlbum(string $accessToken, string $titulo): array
     {
-        $customThrow = static fn (RequestException $e): \Throwable => new GoogleFotosAPIException(
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
             message: sprintf('Erro ao criar álbum no Google Fotos: %s', $e->getMessage()),
             code: (int) $e->getCode(),
             previous: $e,
@@ -26,7 +26,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
             uri: $this->resolverUrl('/v1/albums'),
             options: [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$accessToken,
+                    'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
@@ -48,7 +48,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
             throw new \DomainException('arquivo_origem_nao_encontrado', 404);
         }
 
-        $customThrow = static fn (RequestException $e): \Throwable => new GoogleFotosAPIException(
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
             message: sprintf('Erro ao realizar upload de mídia para o Google Fotos: %s', $e->getMessage()),
             code: (int) $e->getCode(),
             previous: $e,
@@ -59,7 +59,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
             uri: $this->resolverUrl('/v1/uploads'),
             options: [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$accessToken,
+                    'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type' => 'application/octet-stream',
                     'X-Goog-Upload-Content-Type' => $mimeType,
                     'X-Goog-Upload-Protocol' => 'raw',
@@ -75,7 +75,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
      */
     public function batchCreateMediaItems(string $accessToken, string $albumId, string $uploadToken, string $descricao): array
     {
-        $customThrow = static fn (RequestException $e): \Throwable => new GoogleFotosAPIException(
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
             message: sprintf('Erro ao vincular mídia em lote no Google Fotos: %s', $e->getMessage()),
             code: (int) $e->getCode(),
             previous: $e,
@@ -87,7 +87,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
             uri: $this->resolverUrl('/v1/mediaItems:batchCreate'),
             options: [
                 'headers' => [
-                    'Authorization' => 'Bearer '.$accessToken,
+                    'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [

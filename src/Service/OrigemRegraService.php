@@ -16,8 +16,7 @@ final readonly class OrigemRegraService
     public function __construct(
         private OrigemRegraRepository $origemRegraRepository,
         private CategoriaService $categoriaService,
-    ) {
-    }
+    ) {}
 
     public function criar(CriarOrigemRegraDTO $dto): OrigemRegra
     {

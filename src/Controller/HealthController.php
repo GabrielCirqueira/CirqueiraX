@@ -12,8 +12,7 @@ final class HealthController extends DefaultController
 {
     public function __construct(
         private readonly Connection $connection,
-    ) {
-    }
+    ) {}
 
     #[Route('/api/v1/health', name: 'api_health', methods: ['GET'])]
     public function health(): Response
@@ -24,7 +23,7 @@ final class HealthController extends DefaultController
 
         return $this->success([
             'status' => $isHealthy ? 'ok' : 'unhealthy',
-            'timestamp' => (new \DateTime())->format(\DateTimeInterface::ATOM),
+            'timestamp' => new \DateTime()->format(\DateTimeInterface::ATOM),
             'services' => [
                 'database' => $databaseStatus,
                 'disk' => $diskStatus,

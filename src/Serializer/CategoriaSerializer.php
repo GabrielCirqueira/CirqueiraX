@@ -31,7 +31,7 @@ final readonly class CategoriaSerializer
     public function normalizarLista(array $categorias): array
     {
         return array_map(
-            fn (Categoria $categoria): array => $this->normalizar($categoria),
+            fn(Categoria $categoria): array => $this->normalizar($categoria),
             $categorias,
         );
     }

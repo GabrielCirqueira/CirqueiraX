@@ -8,8 +8,7 @@ final readonly class DistribuirLocalMessage
 {
     public function __construct(
         public string $mediaItemUuid,
-    ) {
-    }
+    ) {}
 
     public function mediaItemUuid(): string
     {
