@@ -72,20 +72,20 @@
 | 58 | Comando CLI app:media:retentar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 59 | Endpoint de retry — individual e em lote | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 60 | Teste end-to-end do motor completo e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
-| 61 | DTO BaixarVideoDTO e validação de URL | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 62 | ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 63 | BaixarVideoService — validação e dispatch da mensagem de download | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 64 | Mensagem BaixarVideoMessage e roteamento no Messenger | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 65 | BaixarVideoMessageHandler — execução do yt-dlp via Process | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 66 | Extração de metadata do vídeo (título, uploader, thumbnail, duração) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 67 | Integração do handler de download com IngestarMediaService | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 68 | Endpoint POST /api/v1/downloads (criação de pedido de download) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 69 | Status de download em tempo real | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 70 | MediaItemRepository::paginarComFiltros() | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 71 | Endpoint GET /api/v1/media-itens paginado com filtros | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 72 | Endpoint de ações em lote — categorizar | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 73 | Endpoint de ações em lote — rebaixar (redownload) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 74 | Endpoint de ações em lote — apagar arquivos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
+| 61 | DTO BaixarVideoDTO e validação de URL | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 62 | ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 63 | BaixarVideoService — validação e dispatch da mensagem de download | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 64 | Mensagem BaixarVideoMessage e roteamento no Messenger | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 65 | BaixarVideoMessageHandler — execução do yt-dlp via Process | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 66 | Extração de metadata do vídeo (título, uploader, thumbnail, duração) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 67 | Integração do handler de download com IngestarMediaService | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 68 | Endpoint POST /api/v1/downloads (criação de pedido de download) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 69 | Status de download em tempo real | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 70 | MediaItemRepository::paginarComFiltros() | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 71 | Endpoint GET /api/v1/media-itens paginado com filtros | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 72 | Endpoint de ações em lote — categorizar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 73 | Endpoint de ações em lote — rebaixar (redownload) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 74 | Endpoint de ações em lote — apagar arquivos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 75 | Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
 | 76 | Frontend — estrutura da feature downloads-video | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
 | 77 | Frontend — componentes CardVideo e GridVideos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |

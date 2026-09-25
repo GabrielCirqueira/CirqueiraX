@@ -37,20 +37,20 @@
 
 ## Checklist
 
-- [ ] **61. DTO BaixarVideoDTO e validação de URL**
-- [ ] **62. ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback)**
-- [ ] **63. BaixarVideoService — validação e dispatch da mensagem de download**
-- [ ] **64. Mensagem BaixarVideoMessage e roteamento no Messenger**
-- [ ] **65. BaixarVideoMessageHandler — execução do yt-dlp via Process**
-- [ ] **66. Extração de metadata do vídeo (título, uploader, thumbnail, duração)**
-- [ ] **67. Integração do handler de download com IngestarMediaService**
-- [ ] **68. Endpoint POST /api/v1/downloads (criação de pedido de download)**
-- [ ] **69. Status de download em tempo real**
-- [ ] **70. MediaItemRepository::paginarComFiltros()**
-- [ ] **71. Endpoint GET /api/v1/media-itens paginado com filtros**
-- [ ] **72. Endpoint de ações em lote — categorizar**
-- [ ] **73. Endpoint de ações em lote — rebaixar (redownload)**
-- [ ] **74. Endpoint de ações em lote — apagar arquivos**
+- [x] **61. DTO BaixarVideoDTO e validação de URL**
+- [x] **62. ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback)**
+- [x] **63. BaixarVideoService — validação e dispatch da mensagem de download**
+- [x] **64. Mensagem BaixarVideoMessage e roteamento no Messenger**
+- [x] **65. BaixarVideoMessageHandler — execução do yt-dlp via Process**
+- [x] **66. Extração de metadata do vídeo (título, uploader, thumbnail, duração)**
+- [x] **67. Integração do handler de download com IngestarMediaService**
+- [x] **68. Endpoint POST /api/v1/downloads (criação de pedido de download)**
+- [x] **69. Status de download em tempo real**
+- [x] **70. MediaItemRepository::paginarComFiltros()**
+- [x] **71. Endpoint GET /api/v1/media-itens paginado com filtros**
+- [x] **72. Endpoint de ações em lote — categorizar**
+- [x] **73. Endpoint de ações em lote — rebaixar (redownload)**
+- [x] **74. Endpoint de ações em lote — apagar arquivos**
 - [ ] **75. Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados**
 - [ ] **76. Frontend — estrutura da feature downloads-video**
 - [ ] **77. Frontend — componentes CardVideo e GridVideos**
