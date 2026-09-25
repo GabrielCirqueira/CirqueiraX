@@ -16,8 +16,7 @@ final readonly class BaixarVideoMessageHandler
     public function __construct(
         private BaixarVideoDownloadService $downloadService,
         private IngestarMediaService $ingestarMediaService,
-    ) {
-    }
+    ) {}
 
     public function __invoke(BaixarVideoMessage $message): void
     {

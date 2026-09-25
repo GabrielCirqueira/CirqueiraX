@@ -9,6 +9,7 @@
 > - **Tópicos 21+** → [PROGRESSO_ROADMAP_2.md](PROGRESSO_ROADMAP_2.md)
 > - **Tópicos 41+** → [PROGRESSO_ROADMAP_3.md](PROGRESSO_ROADMAP_3.md)
 > - **Tópicos 61+** → [PROGRESSO_ROADMAP_4.md](PROGRESSO_ROADMAP_4.md)
+> - **Tópicos 81+** → [PROGRESSO_ROADMAP_5.md](PROGRESSO_ROADMAP_5.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -92,3 +93,23 @@
 | 78 | Frontend — CampoNovoLink e BarraAcoesEmLote | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 79 | Frontend — página DownloadsVideo.tsx completa | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 80 | Teste end-to-end do fluxo de download e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 81 | Endpoint de ingestão via agente — POST /api/v1/ingestao/print | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 82 | DTO IngestarPrintDTO e upload multipart do agente | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 83 | IngestarPrintService — aplica OrigemRegra e delega ao motor | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 84 | Script agente — estrutura base | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 85 | Watcher de pasta com debounce (agente) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 86 | Cliente HTTP do agente — envio autenticado e retry | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 87 | Configuração do agente PC empresa | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 88 | Configuração do agente PC pessoal | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 89 | Persistência local do agente — evitar reenvio | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 90 | Execução do agente como serviço do SO | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 91 | Cadastro das OrigemRegra para print_empresa e print_pessoal | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 92 | Endpoint POST /api/v1/media-itens/upload (upload manual) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 93 | UploadManualDTO e validação de tipo de arquivo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 94 | UploadManualService — checagem de duplicidade por hash | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 95 | Resposta de duplicidade (aviso, não bloqueio) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 96 | Frontend — estrutura da feature upload-manual | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 97 | Frontend — componente de dropzone | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 98 | Frontend — fila de triagem pós-upload | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 99 | Frontend — página UploadManual.tsx completa | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 100 | Teste end-to-end de agentes e upload manual, documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |

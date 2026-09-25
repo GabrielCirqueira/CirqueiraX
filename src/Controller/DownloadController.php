@@ -17,8 +17,7 @@ final class DownloadController extends DefaultController
     public function __construct(
         private readonly BaixarVideoService $baixarVideoService,
         private readonly ValidadorUrlPlataforma $validadorUrlPlataforma,
-    ) {
-    }
+    ) {}
 
     #[Route('/api/v1/downloads', name: 'api_downloads_criar', methods: ['POST'])]
     public function criar(#[MapRequestPayload] BaixarVideoDTO $dto): Response

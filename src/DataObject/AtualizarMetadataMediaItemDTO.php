@@ -15,8 +15,7 @@ final readonly class AtualizarMetadataMediaItemDTO
         public ?string $data = null,
         public ?int $duracao = null,
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, mixed>

@@ -19,8 +19,7 @@ final readonly class RebaixarLoteDTO
             new Assert\Uuid(message: 'O formato do UUID é inválido.'),
         ])]
         public array $uuids,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<string>

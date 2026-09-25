@@ -22,8 +22,7 @@ final readonly class CategorizarLoteDTO
         #[Assert\NotBlank(message: 'O identificador da categoria é obrigatório.')]
         #[Assert\Uuid(message: 'O formato do UUID da categoria é inválido.')]
         public string $categoriaId,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<string>

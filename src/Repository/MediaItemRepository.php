@@ -126,7 +126,7 @@ class MediaItemRepository extends ServiceEntityRepository
 
         if (!empty($filtros['busca'])) {
             $qb->andWhere('m.caminhoLocal LIKE :busca OR m.hash LIKE :busca OR m.metadata LIKE :busca')
-                ->setParameter('busca', '%'.$filtros['busca'].'%');
+                ->setParameter('busca', '%' . $filtros['busca'] . '%');
         }
 
         $totalQb = clone $qb;

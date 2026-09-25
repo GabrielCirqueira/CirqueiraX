@@ -25,7 +25,7 @@ final readonly class ExtrairMetadataVideoService
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw new \DomainException('erro_extrair_metadata_video: '.$process->getErrorOutput(), 400);
+            throw new \DomainException('erro_extrair_metadata_video: ' . $process->getErrorOutput(), 400);
         }
 
         $dados = json_decode($process->getOutput(), true);

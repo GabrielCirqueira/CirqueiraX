@@ -23,8 +23,7 @@ final class MediaItemController extends DefaultController
     public function __construct(
         private readonly MediaItemService $mediaItemService,
         private readonly MediaItemSerializer $mediaItemSerializer,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'listar', methods: ['GET'])]
     public function listar(#[MapQueryString] ?FiltrarMediaItemDTO $filtro = null): Response

@@ -1,10 +1,10 @@
-# Roadmap — Feature 3: Downloads de Vídeo
+# Roadmap — Feature 4: Prints Automáticos e Upload Manual
 
 > Backlog e planejamento do projeto. Cada tópico descreve o que existe (ou faltava), por que importa e o que precisa acontecer. Marque `[x]` no checklist ao concluir.
 
-**Numeração:** tópicos 61–80.
+**Numeração:** tópicos 81–100.
 
-**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_4.md](documentation/progresso/PROGRESSO_ROADMAP_4.md)
+**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_5.md](documentation/progresso/PROGRESSO_ROADMAP_5.md)
 
 ---
 
@@ -12,250 +12,250 @@
 
 | # | Tópico |
 |---|---|
-| 61 | DTO BaixarVideoDTO e validação de URL |
-| 62 | ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback) |
-| 63 | BaixarVideoService — validação e dispatch da mensagem de download |
-| 64 | Mensagem BaixarVideoMessage e roteamento no Messenger |
-| 65 | BaixarVideoMessageHandler — execução do yt-dlp via Process |
-| 66 | Extração de metadata do vídeo (título, uploader, thumbnail, duração) |
-| 67 | Integração do handler de download com IngestarMediaService |
-| 68 | Endpoint POST /api/v1/downloads (criação de pedido de download) |
-| 69 | Status de download em tempo real |
-| 70 | MediaItemRepository::paginarComFiltros() |
-| 71 | Endpoint GET /api/v1/media-itens paginado com filtros |
-| 72 | Endpoint de ações em lote — categorizar |
-| 73 | Endpoint de ações em lote — rebaixar (redownload) |
-| 74 | Endpoint de ações em lote — apagar arquivos |
-| 75 | Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados |
-| 76 | Frontend — estrutura da feature downloads-video |
-| 77 | Frontend — componentes CardVideo e GridVideos |
-| 78 | Frontend — CampoNovoLink e BarraAcoesEmLote |
-| 79 | Frontend — página DownloadsVideo.tsx completa |
-| 80 | Teste end-to-end do fluxo de download e documentação atualizada |
+| 81 | Endpoint de ingestão via agente — POST /api/v1/ingestao/print |
+| 82 | DTO IngestarPrintDTO e upload multipart do agente |
+| 83 | IngestarPrintService — aplica OrigemRegra e delega ao motor |
+| 84 | Script agente — estrutura base |
+| 85 | Watcher de pasta com debounce (agente) |
+| 86 | Cliente HTTP do agente — envio autenticado e retry |
+| 87 | Configuração do agente PC empresa |
+| 88 | Configuração do agente PC pessoal |
+| 89 | Persistência local do agente — evitar reenvio |
+| 90 | Execução do agente como serviço do SO |
+| 91 | Cadastro das OrigemRegra para print_empresa e print_pessoal |
+| 92 | Endpoint POST /api/v1/media-itens/upload (upload manual) |
+| 93 | UploadManualDTO e validação de tipo de arquivo |
+| 94 | UploadManualService — checagem de duplicidade por hash |
+| 95 | Resposta de duplicidade (aviso, não bloqueio) |
+| 96 | Frontend — estrutura da feature upload-manual |
+| 97 | Frontend — componente de dropzone |
+| 98 | Frontend — fila de triagem pós-upload |
+| 99 | Frontend — página UploadManual.tsx completa |
+| 100 | Teste end-to-end de agentes e upload manual, documentação atualizada |
 
 ---
 
 ## Checklist
 
-- [x] **61. DTO BaixarVideoDTO e validação de URL**
-- [x] **62. ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback)**
-- [x] **63. BaixarVideoService — validação e dispatch da mensagem de download**
-- [x] **64. Mensagem BaixarVideoMessage e roteamento no Messenger**
-- [x] **65. BaixarVideoMessageHandler — execução do yt-dlp via Process**
-- [x] **66. Extração de metadata do vídeo (título, uploader, thumbnail, duração)**
-- [x] **67. Integração do handler de download com IngestarMediaService**
-- [x] **68. Endpoint POST /api/v1/downloads (criação de pedido de download)**
-- [x] **69. Status de download em tempo real**
-- [x] **70. MediaItemRepository::paginarComFiltros()**
-- [x] **71. Endpoint GET /api/v1/media-itens paginado com filtros**
-- [x] **72. Endpoint de ações em lote — categorizar**
-- [x] **73. Endpoint de ações em lote — rebaixar (redownload)**
-- [x] **74. Endpoint de ações em lote — apagar arquivos**
-- [x] **75. Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados**
-- [x] **76. Frontend — estrutura da feature downloads-video**
-- [x] **77. Frontend — componentes CardVideo e GridVideos**
-- [x] **78. Frontend — CampoNovoLink e BarraAcoesEmLote**
-- [x] **79. Frontend — página DownloadsVideo.tsx completa**
-- [x] **80. Teste end-to-end do fluxo de download e documentação atualizada**
+- [x] **81. Endpoint de ingestão via agente — POST /api/v1/ingestao/print**
+- [x] **82. DTO IngestarPrintDTO e upload multipart do agente**
+- [ ] **83. IngestarPrintService — aplica OrigemRegra e delega ao motor**
+- [ ] **84. Script agente — estrutura base**
+- [ ] **85. Watcher de pasta com debounce (agente)**
+- [ ] **86. Cliente HTTP do agente — envio autenticado e retry**
+- [ ] **87. Configuração do agente PC empresa**
+- [ ] **88. Configuração do agente PC pessoal**
+- [ ] **89. Persistência local do agente — evitar reenvio**
+- [ ] **90. Execução do agente como serviço do SO**
+- [ ] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**
+- [ ] **92. Endpoint POST /api/v1/media-itens/upload (upload manual)**
+- [ ] **93. UploadManualDTO e validação de tipo de arquivo**
+- [ ] **94. UploadManualService — checagem de duplicidade por hash**
+- [ ] **95. Resposta de duplicidade (aviso, não bloqueio)**
+- [ ] **96. Frontend — estrutura da feature upload-manual**
+- [ ] **97. Frontend — componente de dropzone**
+- [ ] **98. Frontend — fila de triagem pós-upload**
+- [ ] **99. Frontend — página UploadManual.tsx completa**
+- [ ] **100. Teste end-to-end de agentes e upload manual, documentação atualizada**
 
 ---
 
 ## Detalhamento
 
-### Tópico 61 — DTO BaixarVideoDTO e validação de URL
+### Tópico 81 — Endpoint de ingestão via agente — POST /api/v1/ingestao/print
 
-**O que existe hoje:** nenhum DTO de entrada pra pedido de download — só o `IngestarMediaDTO` genérico (Feature 2), que espera um arquivo já em disco, não uma URL.
+**O que existe hoje:** `TokenAgenteAuthenticator` e `AgenteUser` já validam o header `X-Agent-Token` no firewall `api` (Feature 1, tópico 29), mas nenhuma rota usa essa autenticação ainda.
 
-**Por que importa:** é o primeiro ponto de contato do usuário com o módulo de downloads — precisa validar a URL antes de qualquer processamento custoso.
+**Por que importa:** é o endpoint que os dois agentes de print (empresa e pessoal) vão chamar — precisa aceitar autenticação de serviço, não JWT de usuário.
 
-**O que precisa acontecer:** `BaixarVideoDTO` (`final readonly class`) com campo `url`, validado com `Assert\NotBlank` e `Assert\Url`.
-
----
-
-### Tópico 62 — ValidadorUrlPlataforma (YouTube/TikTok/Twitter/Instagram + fallback)
-
-**O que existe hoje:** nenhuma checagem de plataforma suportada — qualquer string passaria como URL válida.
-
-**Por que importa:** evita que o worker gaste tempo tentando baixar de um domínio que o `yt-dlp` não suporta, e dá feedback rápido pro usuário.
-
-**O que precisa acontecer:** `ValidadorUrlPlataforma` com whitelist/regex pras plataformas citadas + fallback aceitando qualquer domínio (deixa o `yt-dlp` decidir na prática, mas registra a tentativa).
+**O que precisa acontecer:** `IngestaoController extends DefaultController`, rota `POST /api/v1/ingestao/print` protegida por `ROLE_AGENTE` (role retornada por `AgenteUser`), aplicando também o rate limiter `ingestao` (Feature 1, tópico 39).
 
 ---
 
-### Tópico 63 — BaixarVideoService — validação e dispatch da mensagem de download
+### Tópico 82 — DTO IngestarPrintDTO e upload multipart do agente
 
-**O que existe hoje:** DTO e validador prontos (tópicos 61–62), mas nenhum service orquestrando o pedido.
+**O que existe hoje:** `IngestarMediaDTO` (Feature 2) espera um caminho de arquivo já em disco no servidor — nada trata upload multipart vindo de fora.
 
-**Por que importa:** é o ponto único de entrada do módulo de downloads, seguindo o mesmo padrão `Service::executar()` já usado em `CategoriaService`/`MediaItemService`.
+**Por que importa:** o agente envia o arquivo de print pela rede, não um caminho local — o endpoint precisa receber e salvar o arquivo antes de repassar ao motor.
 
-**O que precisa acontecer:** `BaixarVideoService::executar(BaixarVideoDTO $dto)` — valida a URL via `ValidadorUrlPlataforma`, cria um registro provisório (ou aguarda o handler criar o `MediaItem`), despacha `BaixarVideoMessage`.
-
----
-
-### Tópico 64 — Mensagem BaixarVideoMessage e roteamento no Messenger
-
-**O que existe hoje:** infraestrutura de mensagens já madura (Feature 2 — `ClassificarMediaMessage`, `DistribuirLocalMessage`, `EnviarGoogleFotosMessage`, roteamento `App\Message\*` já configurado no `messenger.yaml`).
-
-**Por que importa:** o download em si pode demorar (arquivo grande, plataforma lenta) — não pode rodar no ciclo de vida do request HTTP.
-
-**O que precisa acontecer:** classe `BaixarVideoMessage` (payload: `url`, `origem`) em `src/Message/` — já cai automaticamente no transport `async` pelo roteamento existente.
+**O que precisa acontecer:** `IngestarPrintDTO` com o arquivo (`UploadedFile`) e metadata mínima (nome original, timestamp de captura); validação de tipo (apenas imagem) e tamanho máximo.
 
 ---
 
-### Tópico 65 — BaixarVideoMessageHandler — execução do yt-dlp via Process
+### Tópico 83 — IngestarPrintService — aplica OrigemRegra e delega ao motor
 
-**O que existe hoje:** `symfony/process` disponível na stack (`DOCUMENTACAO_TECNICA.md`), mas nenhuma chamada real ao `yt-dlp` implementada.
+**O que existe hoje:** `OrigemRegra` cadastrável desde a Feature 2 (tópico 43), mas nenhum fluxo de print a consulta ainda — só `ClassificarMediaMessageHandler` consulta `OrigemRegra` depois que o `MediaItem` já existe.
 
-**Por que importa:** é o núcleo técnico do módulo — sem isso não existe download de fato.
+**Por que importa:** conecta a chegada do print (autenticada por agente) ao pipeline de ingestão já existente, sem duplicar lógica de hash/dedupe.
 
-**O que precisa acontecer:** `BaixarVideoMessageHandler` → `BaixarVideoDownloadService` executando `yt-dlp` via `Process`, salvando o arquivo em diretório temporário antes da ingestão.
-
----
-
-### Tópico 66 — Extração de metadata do vídeo (título, uploader, thumbnail, duração)
-
-**O que existe hoje:** `MediaItem.metadata` existe como campo JSON (Feature 1/2), mas nada popula título/uploader/thumbnail de vídeo.
-
-**Por que importa:** o grid do frontend (tópico 77) depende dessas informações pra exibir os cards como no bot atual.
-
-**O que precisa acontecer:** chamada `yt-dlp --dump-json` (ou flag equivalente) antes/durante o download, parseando título, uploader, duração e thumbnail pro campo `metadata`.
+**O que precisa acontecer:** `IngestarPrintService::executar()` — salva o arquivo recebido em disco temporário, identifica a origem pelo `TokenAgente` autenticado (`origem()` do token), e chama `IngestarMediaService::executar()` (Feature 2, tópico 45) com essa origem.
 
 ---
 
-### Tópico 67 — Integração do handler de download com IngestarMediaService
+### Tópico 84 — Script agente — estrutura base
 
-**O que existe hoje:** `IngestarMediaService` já pronto e testado (Feature 2, tópico 45), mas nenhuma chamada vinda do módulo de downloads.
+**O que existe hoje:** nenhum código de agente — só o design no `CIRQUEIRAX.md` (script standalone, fora do Symfony).
 
-**Por que importa:** é o que conecta a Feature 3 ao motor da Feature 2 — sem essa integração, o vídeo baixado nunca entra no pipeline de classificação/distribuição/upload.
+**Por que importa:** é a peça que roda nos dois PCs (empresa e pessoal), fora da infraestrutura Docker do backend.
 
-**O que precisa acontecer:** ao final do download bem-sucedido, `BaixarVideoMessageHandler` chama `IngestarMediaService::executar()` passando o arquivo baixado, a origem (`BOT_TELEGRAM` ou equivalente) e a metadata extraída.
-
----
-
-### Tópico 68 — Endpoint POST /api/v1/downloads (criação de pedido de download)
-
-**O que existe hoje:** `BaixarVideoService` funcional (tópico 63), mas sem exposição HTTP.
-
-**Por que importa:** é o endpoint que o campo "Cole o link do vídeo" do frontend vai chamar.
-
-**O que precisa acontecer:** `DownloadController extends DefaultController`, rota `POST /api/v1/downloads` com `#[MapRequestPayload] BaixarVideoDTO`, resposta `$this->created()`.
+**O que precisa acontecer:** decidir a linguagem (Python ou Node, conforme o design), estrutura de projeto mínima (config em arquivo `.env`/`.json` com URL do backend, token, pasta observada), dependências de watcher e cliente HTTP.
 
 ---
 
-### Tópico 69 — Status de download em tempo real
+### Tópico 85 — Watcher de pasta com debounce (agente)
 
-**O que existe hoje:** `MediaItemSerializer` já expõe `status` e `historicoStatus` (Feature 2), mas nenhum status específico de "baixando" existe no enum `StatusMediaItem`.
+**O que existe hoje:** nada — o design prevê `watchdog` (Python) ou `chokidar` (Node), mas nenhuma implementação.
 
-**Por que importa:** o usuário precisa ver "baixando" distinto de "em_fila" — são situações diferentes (uma é rede externa, outra é fila interna aguardando classificação).
+**Por que importa:** sem debounce, o agente tentaria enviar um arquivo de print ainda sendo escrito em disco pelo sistema operacional, corrompendo o upload.
 
-**O que precisa acontecer:** avaliar se `StatusMediaItem` precisa de um valor `BAIXANDO` antes de `RECEBIDO`, ou se isso fica só como metadado transitório; ajustar `podeTransicionarPara()` (Feature 2, tópico 47) se o enum mudar.
-
----
-
-### Tópico 70 — MediaItemRepository::paginarComFiltros()
-
-**O que existe hoje:** `MediaItemRepository::buscarPorHash()` e `buscarPorUuid()` existem (Feature 2), mas nenhuma listagem paginada com filtro.
-
-**Por que importa:** o grid de downloads (como no bot atual) precisa filtrar por status, origem, buscar por título/uploader e ordenar por data.
-
-**O que precisa acontecer:** método `paginarComFiltros(array $filtros, int $pagina, int $porPagina)` usando `QueryBuilder`, cobrindo os filtros combinados sem N+1.
+**O que precisa acontecer:** watcher da pasta de screenshots do SO, aguardando estabilização do arquivo (ex: tamanho parado por N segundos) antes de disparar o envio.
 
 ---
 
-### Tópico 71 — Endpoint GET /api/v1/media-itens paginado com filtros
+### Tópico 86 — Cliente HTTP do agente — envio autenticado e retry
 
-**O que existe hoje:** `MediaItemController` já existe (Feature 2, tópicos 50/59) com rotas de classificação e retry, mas sem listagem.
+**O que existe hoje:** endpoint de ingestão pronto (tópico 81), mas nenhum cliente que o consome do lado do agente.
 
-**Por que importa:** é o endpoint que alimenta o grid inteiro do frontend.
+**Por que importa:** a rede pode falhar (VPS fora do ar, sem internet no PC) — o agente precisa lidar com isso sem perder o arquivo capturado.
 
-**O que precisa acontecer:** `GET /api/v1/media-itens` no `MediaItemController`, aceitando query params (`status`, `origem`, `busca`, `ordenacao`, `pagina`, `porPagina`), retornando via `$this->paginated()`.
-
----
-
-### Tópico 72 — Endpoint de ações em lote — categorizar
-
-**O que existe hoje:** classificação manual individual já existe (`PATCH /api/v1/media-itens/{uuid}/categoria`, Feature 2 tópico 50), mas nada em lote.
-
-**Por que importa:** o padrão de UX do bot atual ("Copiar para VPS" com seleção múltipla) exige aplicar a mesma categoria a vários itens de uma vez.
-
-**O que precisa acontecer:** `POST /api/v1/media-itens/lote/categorizar` (lista de UUIDs + `categoriaId`), reaproveitando `MediaItemService::classificarManualmente()` em loop transacional.
+**O que precisa acontecer:** requisição multipart com header `X-Agent-Token`, fila local de retry com backoff quando o backend não responder.
 
 ---
 
-### Tópico 73 — Endpoint de ações em lote — rebaixar (redownload)
+### Tópico 87 — Configuração do agente PC empresa
 
-**O que existe hoje:** nenhum mecanismo de reprocessar o download de um vídeo já existente (diferente do retry de erro da Feature 2, que reprocessa classificação/distribuição/upload, não o download em si).
+**O que existe hoje:** comando `app:agente:gerar-token` já existe (Feature 1, tópico 30), mas nenhum token foi emitido nem configurado em uma máquina real.
 
-**Por que importa:** espelha a ação "Rebaixar Selecionados" do bot atual — útil quando o arquivo original foi corrompido ou removido do storage.
+**Por que importa:** é a primeira instância real do agente rodando, com sua própria identidade e pasta observada.
 
-**O que precisa acontecer:** `POST /api/v1/media-itens/lote/rebaixar` — busca a URL original guardada em `metadata`, redespacha `BaixarVideoMessage` pros itens selecionados.
-
----
-
-### Tópico 74 — Endpoint de ações em lote — apagar arquivos
-
-**O que existe hoje:** nenhuma remoção de `MediaItem`/arquivo físico implementada em nenhuma feature anterior.
-
-**Por que importa:** limpeza de espaço e remoção de itens indesejados, como no botão "Apagar" do bot atual.
-
-**O que precisa acontecer:** `POST /api/v1/media-itens/lote/apagar` (ou `DELETE` com corpo de lista de UUIDs) — remove o arquivo físico do `MEDIA_STORAGE_PATH` e o registro do banco; decidir se soft-delete ou remoção definitiva.
+**O que precisa acontecer:** gerar o token via `app:agente:gerar-token` com origem `print_empresa`, configurar o agente (tópico 84) nesse PC apontando pra pasta de screenshots correta.
 
 ---
 
-### Tópico 75 — Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados
+### Tópico 88 — Configuração do agente PC pessoal
 
-**O que existe hoje:** `metadata` é gravado na ingestão, mas não há endpoint pra editar depois (ex: corrigir a data, como no "Alterar Data" do bot atual).
+**O que existe hoje:** mesma base do tópico anterior, mas pra segunda máquina.
 
-**Por que importa:** metadados extraídos automaticamente às vezes vêm errados ou incompletos — o usuário precisa poder corrigir.
+**Por que importa:** valida que o sistema suporta múltiplos agentes simultâneos com origens diferentes, sem um interferir no outro.
 
-**O que precisa acontecer:** `PATCH /api/v1/media-itens/{uuid}` aceitando campos parciais de `metadata` (data, título), sem tocar em `status`/`categoria_id` (esses têm endpoints próprios).
-
----
-
-### Tópico 76 — Frontend — estrutura da feature downloads-video
-
-**O que existe hoje:** nenhuma pasta de feature de frontend criada ainda — só a estrutura padrão do skeleton (`web/features/`).
-
-**Por que importa:** organiza o código do módulo de downloads isolado, seguindo o padrão feature-based do guia de padrões.
-
-**O que precisa acontecer:** `web/features/downloads-video/{api.ts, types.ts, hooks/, components/}`, com `api.ts` consumindo a instância Axios centralizada (`@config/api`).
+**O que precisa acontecer:** gerar token com origem `print_pessoal`, configurar o agente nesse PC.
 
 ---
 
-### Tópico 77 — Frontend — componentes CardVideo e GridVideos
+### Tópico 89 — Persistência local do agente — evitar reenvio
 
-**O que existe hoje:** nenhum componente visual do módulo — só os primitivos globais de `web/shared/ui/layout.tsx` e o `chart.tsx` do Recharts (Feature 1).
+**O que existe hoje:** nenhum controle de "já enviei esse arquivo" do lado do agente — a deduplicação por hash só acontece no backend (Feature 2, tópico 45).
 
-**Por que importa:** é a réplica, em HeroUI, do grid que você já usa no bot (thumbnail, status, badges, ações).
+**Por que importa:** evita que o agente fique reenviando o mesmo arquivo a cada reinício, mesmo que o backend descarte por hash duplicado — economiza banda e ruído de log.
 
-**O que precisa acontecer:** `CardVideo` (thumbnail, título, uploader, badges de status/origem, ações individuais) e `GridVideos` (grid responsivo consumindo a listagem paginada do tópico 71).
-
----
-
-### Tópico 78 — Frontend — CampoNovoLink e BarraAcoesEmLote
-
-**O que existe hoje:** nenhum componente de input de link nem de ações em lote.
-
-**Por que importa:** são as duas peças de interação principal da tela — colar link pra baixar, e selecionar múltiplos itens pra agir sobre eles.
-
-**O que precisa acontecer:** `CampoNovoLink` (input + botão "Baixar", chamando o endpoint do tópico 68) e `BarraAcoesEmLote` (aparece quando há seleção, com os botões de categorizar/rebaixar/apagar dos tópicos 72–74).
+**O que precisa acontecer:** arquivo local simples (SQLite ou JSON) guardando os arquivos já enviados com sucesso, checado antes de cada tentativa de envio.
 
 ---
 
-### Tópico 79 — Frontend — página DownloadsVideo.tsx completa
+### Tópico 90 — Execução do agente como serviço do SO
 
-**O que existe hoje:** componentes isolados dos tópicos 77–78, mas nenhuma página os integrando.
+**O que existe hoje:** o agente (se implementado até aqui) rodaria manualmente em primeiro plano — não sobrevive a reinício da máquina.
 
-**Por que importa:** é a tela final que fecha a Feature 3 — equivalente à página que você já usa no bot hoje, mas dentro do CirqueiraX.
+**Por que importa:** o agente precisa estar sempre ativo, sem depender de alguém lembrar de rodar o script.
 
-**O que precisa acontecer:** `web/pages/DownloadsVideo/DownloadsVideo.tsx`, hooks TanStack Query (`useMediaItens`, `useBaixarVideo`, `useAcoesEmLote`) consumindo os endpoints das seções anteriores, seguindo a hierarquia `MainLayout → AppContainer → Container`.
+**O que precisa acontecer:** configuração como serviço nativo do SO de cada PC (systemd no Linux, Task Scheduler no Windows, launchd no macOS — conforme o SO real de cada máquina), com reinício automático em caso de crash.
 
 ---
 
-### Tópico 80 — Teste end-to-end do fluxo de download e documentação atualizada
+### Tópico 91 — Cadastro das OrigemRegra para print_empresa e print_pessoal
 
-**O que existe hoje:** peças isoladas testáveis, mas nenhuma validação do fluxo completo (colar link → baixar → ingerir → classificar → distribuir → upload → aparecer no grid).
+**O que existe hoje:** endpoints de `OrigemRegra` prontos desde a Feature 2 (tópico 43), mas nenhum registro cadastrado ainda.
 
-**Por que importa:** é a primeira vez que um fluxo de ponta a ponta do usuário (não só do motor interno) é validado no CirqueiraX.
+**Por que importa:** sem essa regra, prints dos agentes cairiam como `EM_FILA` aguardando classificação manual — quebrando o objetivo de automação total do módulo de prints.
 
-**O que precisa acontecer:** teste manual completo simulando o uso real; `CIRQUEIRAX.md` e `DOCUMENTACAO_TECNICA.md`/`FRONTEND.md` atualizados com os nomes reais das classes e componentes implementados nesta feature.
+**O que precisa acontecer:** criar via API (ou seed) as duas `OrigemRegra` (`print_empresa` → categoria X, `print_pessoal` → categoria Y), decidindo com o usuário quais categorias reais usar.
+
+---
+
+### Tópico 92 — Endpoint POST /api/v1/media-itens/upload (upload manual)
+
+**O que existe hoje:** nenhum endpoint aceita upload direto de arquivo pelo usuário via dashboard — só a ingestão automatizada dos módulos anteriores.
+
+**Por que importa:** cobre mídia que não passa pelo bot nem pelos agentes — arquivo que já existe no dispositivo do usuário.
+
+**O que precisa acontecer:** rota `POST /api/v1/media-itens/upload` (multipart, autenticada via JWT de usuário, não token de agente), aceitando foto ou vídeo.
+
+---
+
+### Tópico 93 — UploadManualDTO e validação de tipo de arquivo
+
+**O que existe hoje:** nenhuma validação de tipo MIME nem tamanho pra upload vindo do usuário.
+
+**Por que importa:** o upload manual aceita "qualquer mídia", mas ainda precisa rejeitar arquivos fora do escopo (documentos, executáveis).
+
+**O que precisa acontecer:** `UploadManualDTO` com `UploadedFile`, validação de MIME type (imagem/vídeo) e tamanho máximo configurável.
+
+---
+
+### Tópico 94 — UploadManualService — checagem de duplicidade por hash
+
+**O que existe hoje:** `MediaItemRepository::buscarPorHash()` já existe (Feature 1/2), mas o upload manual ainda não o consulta antes de aceitar.
+
+**Por que importa:** é o cenário onde duplicidade é mais provável — o usuário pode arrastar o mesmo arquivo duas vezes sem perceber.
+
+**O que precisa acontecer:** `UploadManualService::executar()` calcula o hash antes de salvar definitivamente, consulta duplicidade e decide se segue pra ingestão (tópico 95 trata a resposta ao usuário).
+
+---
+
+### Tópico 95 — Resposta de duplicidade (aviso, não bloqueio)
+
+**O que existe hoje:** nenhum tratamento diferenciado pra arquivo duplicado no upload manual — a Feature 2 já faz *early return* silencioso na ingestão, mas o design pede aviso visível pro usuário nesse fluxo específico.
+
+**Por que importa:** o design do sistema definiu que a duplicidade no upload manual deve **avisar**, não bloquear silenciosamente (diferente da ingestão automática dos outros módulos).
+
+**O que precisa acontecer:** resposta HTTP diferenciada (ex: `200` com `duplicado: true` e referência ao `MediaItem` já existente) em vez do `201` padrão de criação, pro frontend exibir o aviso.
+
+---
+
+### Tópico 96 — Frontend — estrutura da feature upload-manual
+
+**O que existe hoje:** nenhuma pasta de feature de upload manual — só o padrão já estabelecido em `downloads-video` (Feature 3, tópico 76) como referência de estrutura.
+
+**Por que importa:** mantém a mesma organização feature-based usada no resto do projeto.
+
+**O que precisa acontecer:** `web/features/upload-manual/{api.ts, types.ts, hooks/, components/, index.ts}`, reaproveitando tipos já existentes de `MediaItem` onde fizer sentido.
+
+---
+
+### Tópico 97 — Frontend — componente de dropzone
+
+**O que existe hoje:** nenhum componente de arrastar-e-soltar no frontend.
+
+**Por que importa:** é a interação principal do módulo — arrastar múltiplos arquivos de uma vez, misturando foto e vídeo.
+
+**O que precisa acontecer:** componente de dropzone (drag-and-drop + seleção manual de arquivos), com preview de miniatura antes do envio e barra de progresso por arquivo.
+
+---
+
+### Tópico 98 — Frontend — fila de triagem pós-upload
+
+**O que existe hoje:** `GridVideos` e `BarraAcoesEmLote` já existem da Feature 3 (tópicos 77–78), construídos pro contexto de downloads.
+
+**Por que importa:** o upload manual precisa da mesma mecânica de seleção em lote + definição de categoria, mas exibindo itens que chegaram sem categoria nenhuma.
+
+**O que precisa acontecer:** avaliar se `GridVideos`/`BarraAcoesEmLote` são generalizáveis (aceitando também mídia de origem `MANUAL`) ou se precisam de uma variante própria pra fila de triagem.
+
+---
+
+### Tópico 99 — Frontend — página UploadManual.tsx completa
+
+**O que existe hoje:** componentes isolados dos tópicos 97–98, sem página integrando.
+
+**Por que importa:** fecha a experiência do usuário pro módulo de upload manual, análoga à página de downloads da Feature 3.
+
+**O que precisa acontecer:** `web/pages/UploadManual/UploadManual.tsx`, seguindo `MainLayout → AppContainer → Container`, rota registrada em `web/App.tsx` e item de navegação no `Header`.
+
+---
+
+### Tópico 100 — Teste end-to-end de agentes e upload manual, documentação atualizada
+
+**O que existe hoje:** peças isoladas testáveis, mas nenhuma validação do fluxo completo dos dois agentes rodando em paralelo nem do upload manual ponta a ponta.
+
+**Por que importa:** fecha a Feature 4 — a partir daqui, as três fontes de mídia (download, print, upload manual) estão todas plugadas no motor da Feature 2.
+
+**O que precisa acontecer:** teste manual com os dois agentes reais capturando print simultaneamente + teste de upload manual (incluindo o caso de duplicidade do tópico 95); `CIRQUEIRAX.md` e `DOCUMENTACAO_TECNICA.md`/`FRONTEND.md` atualizados com os nomes reais das classes e componentes implementados nesta feature.

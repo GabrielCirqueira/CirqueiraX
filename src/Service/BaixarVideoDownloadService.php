@@ -10,8 +10,7 @@ final readonly class BaixarVideoDownloadService
 {
     public function __construct(
         private ExtrairMetadataVideoService $extrairMetadataVideoService,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{
@@ -21,14 +20,14 @@ final readonly class BaixarVideoDownloadService
      */
     public function executar(string $url, ?string $diretorioDestino = null): array
     {
-        $diretorio = $diretorioDestino ?? sys_get_temp_dir().'/cirqueirax_downloads';
-        if (!is_dir($diretorio) && !mkdir($diretorio, 0755, true) && !is_dir($diretorio)) {
+        $diretorio = $diretorioDestino ?? sys_get_temp_dir() . '/cirqueirax_downloads';
+        if (!is_dir($diretorio) && !mkdir($diretorio, 0o755, true) && !is_dir($diretorio)) {
             throw new \DomainException('erro_criar_diretorio_temp_download', 500);
         }
 
         $metadata = $this->extrairMetadataVideoService->extrair($url);
 
-        $templateSaida = $diretorio.'/%(id)s.%(ext)s';
+        $templateSaida = $diretorio . '/%(id)s.%(ext)s';
         $process = new Process([
             'yt-dlp',
             '--no-playlist',
@@ -44,7 +43,7 @@ final readonly class BaixarVideoDownloadService
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw new \DomainException('falha_download_video: '.$process->getErrorOutput(), 500);
+            throw new \DomainException('falha_download_video: ' . $process->getErrorOutput(), 500);
         }
 
         $linhas = explode("\n", trim($process->getOutput()));

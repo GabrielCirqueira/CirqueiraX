@@ -21,6 +21,9 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/DataObject/'
+            - '../src/Message/'
+            - '../src/Security/AgenteUser.php'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed

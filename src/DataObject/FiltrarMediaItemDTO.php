@@ -19,8 +19,7 @@ final readonly class FiltrarMediaItemDTO
         public int $pagina = 1,
         #[Assert\Range(min: 1, max: 100, notInRangeMessage: 'O limite por página deve estar entre 1 e 100.')]
         public int $porPagina = 20,
-    ) {
-    }
+    ) {}
 
     public function status(): ?string
     {
@@ -81,6 +80,6 @@ final readonly class FiltrarMediaItemDTO
             'busca' => $this->busca,
             'ordenacao' => $this->ordenacao,
             'direcao' => $this->direcao(),
-        ], static fn ($v) => null !== $v);
+        ], static fn($v) => null !== $v);
     }
 }
