@@ -604,6 +604,27 @@
 
   ---
 
+  ### 5.11 Clientes HTTP Externos e Infraestrutura (src/Infra/ e src/Exception/)
+
+  **PROIBIDO**: Fazer requisições HTTP cruas (`HttpClientInterface` ou `$client->request()`) diretamente em Services ou Commands.
+
+  Toda comunicação com APIs e sistemas externos deve ser encapsulada e desacoplada em `src/Infra/{Sistema}/`:
+
+  1. **Base Client Abstrato (`src/Infra/Client.php`)**:
+     - Classe abstrata base gerenciando `GuzzleHttp\ClientInterface`, `baseUrl` e `SerializerInterface`.
+     - Método `protected function request()` executa a chamada HTTP, intercepta `RequestException` via `executarRequisicao()`, valida retornos com `Assert::isArray()` e deserializa respostas JSON diretamente via `SerializerInterface` caso `$type` seja informado.
+     - Método `protected function requestRaw()` para retornos brutos em formato string.
+  2. **Cliente por Sistema (`src/Infra/{Sistema}/{Sistema}Client.php`)**:
+     - Estende `App\Infra\Client` configurando a `$baseUrl` no construtor.
+  3. **API do Sistema (`src/Infra/{Sistema}/{Sistema}API.php`)**:
+     - Estende `{Sistema}Client` e implementa os métodos de ação de negócio da API (ex: `criarAlbum()`, `uploadBytes()`, `renovarAccessToken()`).
+  4. **Injeção via `config/services.yaml`**:
+     - Registra o cliente do Guzzle com a `base_uri` e o injeta na classe `{Sistema}API`.
+  5. **Exceções Personalizadas (`src/Exception/`)**:
+     - Criar exceções personalizadas estendendo `ClienteHTTPException` para lançamento e captura refinada de erros de requisições externas.
+
+  ---
+
   ### 5.10 Domain Events
 
   Eventos de domínio desacoplam o que acontece quando uma entidade muda de estado. O fato vai em `src/EventListener/Event/`; quem reage fica em `src/EventListener/` (mesmo contexto). O Service que cria um usuário não precisa saber que existe um sistema de e-mail — ele dispara um evento e cada listener reage de forma independente:

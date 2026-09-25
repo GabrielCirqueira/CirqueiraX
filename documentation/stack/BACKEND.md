@@ -24,18 +24,19 @@ Este documento descreve a API/backend Symfony. O cirqueiraX v5 segue uma arquite
 
 ```
 src/
-??? Command/        CLI: AppSeedCommand, CronHeartbeatCommand, JwtMasterCommand
-??? Controller/     API REST ? roteamento e orquestração leve
-??? DataObject/     DTOs de entrada tipados (validados por atributos Symfony)
-??? Entity/         Entidades Doctrine (Usuario, RefreshToken)
-??? Enum/           Enums PHP 8.1+
-??? EventListener/  Listeners + Event/ (fatos de domínio)
-??? Feature/        *Feature.php + TaggedIterator (lógica grande em vários services)
-??? Interface/      Contratos PHP (*Interface.php)
-??? Repository/     Acesso ao banco de dados (queries DQL/QueryBuilder)
-??? Serializer/     Contratos JSON de saída (protegem frontend de mudanças internas)
-??? Service/        Lógica de negócio ? um service = uma ação (executar())
-??? Kernel.php
+├── Command/        CLI: AppSeedCommand, CronHeartbeatCommand, JwtMasterCommand
+├── Controller/     API REST — roteamento e orquestração leve
+├── DataObject/     DTOs de entrada tipados (validados por atributos Symfony)
+├── Entity/         Entidades Doctrine (Usuario, RefreshToken)
+├── Enum/           Enums PHP 8.1+
+├── EventListener/  Listeners + Event/ (fatos de domínio)
+├── Feature/        *Feature.php + TaggedIterator (lógica grande em vários services)
+├── Infra/          Clientes HTTP de infraestrutura externa (*Client.php via Guzzle)
+├── Interface/      Contratos PHP (*Interface.php)
+├── Repository/     Acesso ao banco de dados (queries DQL/QueryBuilder)
+├── Serializer/     Contratos JSON de saída (protegem frontend de mudanças internas)
+├── Service/        Lógica de negócio — um service = uma ação (executar())
+└── Kernel.php
 ```
 
 > Se o módulo `async` estiver ativo, o setup adiciona:

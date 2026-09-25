@@ -6,16 +6,14 @@ namespace App\Service;
 
 use App\Entity\Categoria;
 use App\Entity\ContaGoogleFotos;
+use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class GoogleFotosAlbumService
 {
-    private const GOOGLE_ALBUMS_URL = 'https://photoslibrary.googleapis.com/v1/albums';
-
     public function __construct(
-        private HttpClientInterface $httpClient,
+        private GoogleFotosAPI $googleFotosApi,
         private GoogleFotosOAuthService $oauthService,
         private ContaGoogleFotosRepository $contaRepository,
         private CategoriaRepository $categoriaRepository,
@@ -38,22 +36,9 @@ final readonly class GoogleFotosAlbumService
         }
 
         $token = $this->oauthService->obterAccessTokenValido($conta);
+        $dados = $this->googleFotosApi->criarAlbum($token, $categoria->nome());
 
-        $response = $this->httpClient->request('POST', self::GOOGLE_ALBUMS_URL, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                'album' => [
-                    'title' => $categoria->nome(),
-                ],
-            ],
-        ]);
-
-        $dados = $response->toArray();
         $albumId = $dados['id'] ?? null;
-
         if (empty($albumId) || !is_string($albumId)) {
             throw new \DomainException('erro_criar_album_google', 400);
         }

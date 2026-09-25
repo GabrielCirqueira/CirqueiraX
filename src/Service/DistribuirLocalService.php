@@ -43,18 +43,18 @@ final readonly class DistribuirLocalService
 
         $baseStoragePath = $this->mediaStoragePath;
         if (!str_starts_with($baseStoragePath, '/') && '' !== $this->projectDir) {
-            $baseStoragePath = $this->projectDir . '/' . ltrim($baseStoragePath, './');
+            $baseStoragePath = $this->projectDir.'/'.ltrim($baseStoragePath, './');
         }
 
         $pastaLocal = trim($categoria->pastaLocal(), '/');
-        $diretorioDestino = rtrim($baseStoragePath, '/') . '/' . $pastaLocal;
+        $diretorioDestino = rtrim($baseStoragePath, '/').'/'.$pastaLocal;
 
         if (!is_dir($diretorioDestino)) {
             mkdir($diretorioDestino, 0777, true);
         }
 
         $nomeArquivo = basename($caminhoOrigem);
-        $caminhoDestino = $diretorioDestino . '/' . $nomeArquivo;
+        $caminhoDestino = $diretorioDestino.'/'.$nomeArquivo;
 
         if ($caminhoOrigem !== $caminhoDestino) {
             copy($caminhoOrigem, $caminhoDestino);

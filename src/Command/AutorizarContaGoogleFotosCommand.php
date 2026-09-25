@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\ContaGoogleFotos;
+use App\Infra\GoogleOAuth\GoogleOAuthAPI;
 use App\Interface\CriptografiaInterface;
 use App\Repository\ContaGoogleFotosRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -14,7 +15,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand(
     name: 'app:google-fotos:autorizar-conta',
@@ -23,12 +23,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class AutorizarContaGoogleFotosCommand extends Command
 {
     private const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
-    private const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
-    private const GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
     private const SCOPES = 'https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/userinfo.email';
 
     public function __construct(
-        private readonly HttpClientInterface $httpClient,
+        private readonly GoogleOAuthAPI $googleOAuthApi,
         private readonly CriptografiaInterface $criptografia,
         private readonly ContaGoogleFotosRepository $contaRepository,
     ) {
@@ -98,17 +96,12 @@ final class AutorizarContaGoogleFotosCommand extends Command
         $io->section('Passo 3: Troca de código por tokens');
 
         try {
-            $response = $this->httpClient->request('POST', self::GOOGLE_TOKEN_URL, [
-                'body' => [
-                    'client_id' => $clientId,
-                    'client_secret' => $clientSecret,
-                    'code' => trim($code),
-                    'grant_type' => 'authorization_code',
-                    'redirect_uri' => $redirectUri,
-                ],
-            ]);
-
-            $dadosToken = $response->toArray();
+            $dadosToken = $this->googleOAuthApi->trocarCodigoPorToken(
+                $clientId,
+                $clientSecret,
+                trim($code),
+                $redirectUri
+            );
 
             $refreshToken = $dadosToken['refresh_token'] ?? null;
             $accessToken = $dadosToken['access_token'] ?? null;
@@ -122,14 +115,9 @@ final class AutorizarContaGoogleFotosCommand extends Command
 
             /** @var string|null $email */
             $email = $input->getArgument('email');
-            if (empty($email) && !empty($accessToken)) {
+            if (empty($email) && !empty($accessToken) && is_string($accessToken)) {
                 try {
-                    $userInfoResponse = $this->httpClient->request('GET', self::GOOGLE_USERINFO_URL, [
-                        'headers' => [
-                            'Authorization' => 'Bearer ' . $accessToken,
-                        ],
-                    ]);
-                    $userInfo = $userInfoResponse->toArray();
+                    $userInfo = $this->googleOAuthApi->obterUserInfo($accessToken);
                     $email = $userInfo['email'] ?? null;
                 } catch (\Throwable) {
                     $email = null;
@@ -168,7 +156,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Throwable $e) {
-            $io->error('Erro ao processar autorização OAuth: ' . $e->getMessage());
+            $io->error('Erro ao processar autorização OAuth: '.$e->getMessage());
 
             return Command::FAILURE;
         }

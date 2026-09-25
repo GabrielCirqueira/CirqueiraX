@@ -39,3 +39,28 @@ services:
             $clientId: '%env(GOOGLE_CLIENT_ID)%'
             $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
 
+    GuzzleHttp\ClientInterface: '@guzzle.default'
+
+    guzzle.default:
+        class: GuzzleHttp\Client
+
+    guzzle.google_photos:
+        class: GuzzleHttp\Client
+        arguments:
+            - { base_uri: 'https://photoslibrary.googleapis.com' }
+
+    guzzle.google_oauth:
+        class: GuzzleHttp\Client
+        arguments:
+            - { base_uri: 'https://oauth2.googleapis.com' }
+
+    App\Infra\GoogleFotos\GoogleFotosAPI:
+        arguments:
+            $client: '@guzzle.google_photos'
+            $baseUrl: 'https://photoslibrary.googleapis.com'
+
+    App\Infra\GoogleOAuth\GoogleOAuthAPI:
+        arguments:
+            $client: '@guzzle.google_oauth'
+            $baseUrl: 'https://oauth2.googleapis.com'
+

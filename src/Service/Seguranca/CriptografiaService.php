@@ -20,7 +20,7 @@ final class CriptografiaService implements CriptografiaInterface
         $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $conteudoCriptografado = sodium_crypto_secretbox($textoPlano, $nonce, $this->chaveDerivada);
 
-        return base64_encode($nonce . $conteudoCriptografado);
+        return base64_encode($nonce.$conteudoCriptografado);
     }
 
     public function descriptografar(string $textoCriptografado): string

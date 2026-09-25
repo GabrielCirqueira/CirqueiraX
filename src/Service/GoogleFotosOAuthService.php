@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Entity\ContaGoogleFotos;
+use App\Infra\GoogleOAuth\GoogleOAuthAPI;
 use App\Interface\CriptografiaInterface;
 use App\Repository\ContaGoogleFotosRepository;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class GoogleFotosOAuthService
 {
-    private const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
-
     public function __construct(
-        private HttpClientInterface $httpClient,
+        private GoogleOAuthAPI $googleOAuthApi,
         private CriptografiaInterface $criptografia,
         private ContaGoogleFotosRepository $contaRepository,
         private string $clientId = '',
@@ -33,16 +31,8 @@ final readonly class GoogleFotosOAuthService
         $clientId = '' !== $this->clientId ? $this->clientId : ($_ENV['GOOGLE_CLIENT_ID'] ?? getenv('GOOGLE_CLIENT_ID') ?: '');
         $clientSecret = '' !== $this->clientSecret ? $this->clientSecret : ($_ENV['GOOGLE_CLIENT_SECRET'] ?? getenv('GOOGLE_CLIENT_SECRET') ?: '');
 
-        $response = $this->httpClient->request('POST', self::GOOGLE_TOKEN_URL, [
-            'body' => [
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'refresh_token' => $refreshToken,
-                'grant_type' => 'refresh_token',
-            ],
-        ]);
+        $dadosToken = $this->googleOAuthApi->renovarAccessToken($clientId, $clientSecret, $refreshToken);
 
-        $dadosToken = $response->toArray();
         $accessToken = $dadosToken['access_token'] ?? null;
         $expiresIn = (int) ($dadosToken['expires_in'] ?? 3600);
 

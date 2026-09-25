@@ -22,7 +22,7 @@ final class CronHeartbeatCommand extends Command
         $now = new \DateTimeImmutable('now');
         $message = sprintf('[cron] Comando executado às %s (BR)', $now->format('H:i:s'));
 
-        file_put_contents(self::LOG_FILE, $message . PHP_EOL, FILE_APPEND);
+        file_put_contents(self::LOG_FILE, $message.PHP_EOL, FILE_APPEND);
         $output->writeln($message);
 
         return Command::SUCCESS;

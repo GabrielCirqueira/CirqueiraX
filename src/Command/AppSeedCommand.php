@@ -38,7 +38,7 @@ final class AppSeedCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $io->error('Erro durante o seeding: ' . $e->getMessage());
+            $io->error('Erro durante o seeding: '.$e->getMessage());
 
             return Command::FAILURE;
         }

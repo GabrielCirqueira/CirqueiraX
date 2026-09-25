@@ -74,7 +74,7 @@ final class RetentarMediaCommand extends Command
 
                 return Command::SUCCESS;
             } catch (\Exception $e) {
-                $io->error('Erro ao reprocessar lote de mídias: ' . $e->getMessage());
+                $io->error('Erro ao reprocessar lote de mídias: '.$e->getMessage());
 
                 return Command::FAILURE;
             }

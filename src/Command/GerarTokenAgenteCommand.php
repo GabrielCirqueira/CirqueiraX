@@ -72,7 +72,7 @@ final class GerarTokenAgenteCommand extends Command
         }
 
         try {
-            $tokenBruto = 'cx_ag_' . bin2hex(random_bytes(24));
+            $tokenBruto = 'cx_ag_'.bin2hex(random_bytes(24));
             $hash = hash('sha256', $tokenBruto);
 
             $tokenAgente = new TokenAgente(
@@ -100,7 +100,7 @@ final class GerarTokenAgenteCommand extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $io->error('Erro ao gerar token de agente: ' . $e->getMessage());
+            $io->error('Erro ao gerar token de agente: '.$e->getMessage());
 
             return Command::FAILURE;
         }

@@ -6,24 +6,21 @@ namespace App\Service;
 
 use App\Entity\MediaItem;
 use App\Enum\StatusMediaItem;
+use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
 use App\Repository\MediaItemRepository;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final readonly class EnviarGoogleFotosService
 {
-    private const UPLOAD_BYTES_URL = 'https://photoslibrary.googleapis.com/v1/uploads';
-    private const BATCH_CREATE_URL = 'https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate';
-
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
         private CategoriaRepository $categoriaRepository,
         private ContaGoogleFotosRepository $contaRepository,
         private GoogleFotosOAuthService $oauthService,
         private GoogleFotosAlbumService $albumService,
-        private HttpClientInterface $httpClient,
+        private GoogleFotosAPI $googleFotosApi,
     ) {
     }
 
@@ -64,42 +61,19 @@ final readonly class EnviarGoogleFotosService
         $albumId = $this->albumService->criarOuObter($categoria, $conta);
 
         $mimeType = mime_content_type($caminhoLocal) ?: 'application/octet-stream';
-        $stream = fopen($caminhoLocal, 'r');
+        $uploadToken = $this->googleFotosApi->uploadBytes($token, $caminhoLocal, $mimeType);
 
-        $uploadResponse = $this->httpClient->request('POST', self::UPLOAD_BYTES_URL, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type' => 'application/octet-stream',
-                'X-Goog-Upload-Content-Type' => $mimeType,
-                'X-Goog-Upload-Protocol' => 'raw',
-            ],
-            'body' => $stream,
-        ]);
-
-        $uploadToken = $uploadResponse->getContent();
         if (empty($uploadToken)) {
             throw new \DomainException('erro_upload_bytes_google', 400);
         }
 
-        $batchResponse = $this->httpClient->request('POST', self::BATCH_CREATE_URL, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => [
-                'albumId' => $albumId,
-                'newMediaItems' => [
-                    [
-                        'description' => basename($caminhoLocal),
-                        'simpleMediaItem' => [
-                            'uploadToken' => trim($uploadToken),
-                        ],
-                    ],
-                ],
-            ],
-        ]);
+        $dadosBatch = $this->googleFotosApi->batchCreateMediaItems(
+            $token,
+            $albumId,
+            $uploadToken,
+            basename($caminhoLocal)
+        );
 
-        $dadosBatch = $batchResponse->toArray();
         $resultadoItem = $dadosBatch['newMediaItemResults'][0] ?? null;
 
         if (null === $resultadoItem) {
