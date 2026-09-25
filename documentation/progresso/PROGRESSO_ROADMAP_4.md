@@ -145,11 +145,29 @@
   - [`src/Service/MediaItemService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/MediaItemService.php)
   - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Controller/MediaItemController.php)
 
-### ⏳ Tópico 75 — Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados
-- **Status**: Pendente
+### ✅ Tópico 75 — Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados
+- **Status**: Concluído
+- **O que foi feito**:
+  - **DTO de Atualização Parcial de Metadados**: Criado [`src/DataObject/AtualizarMetadataMediaItemDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/AtualizarMetadataMediaItemDTO.php) (`final readonly class`) para capturar alterações em `titulo`, `uploader`, `data`, `duracao` ou metadados extras.
+  - **Serviço de Atualização com Mesclagem**: Adicionado método `atualizarMetadata()` em [`src/Service/MediaItemService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/MediaItemService.php) que busca a mídia, mescla os novos metadados com os existentes e persiste no banco sem alterar `status` nem `categoriaId`.
+  - **Endpoint HTTP PATCH**: Adicionada a rota `PATCH /api/v1/media-itens/{uuid}` em [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Controller/MediaItemController.php) retornando a entidade normalizada via `$this->success()`.
+- **Arquivos envolvidos**:
+  - [`src/DataObject/AtualizarMetadataMediaItemDTO.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/DataObject/AtualizarMetadataMediaItemDTO.php)
+  - [`src/Service/MediaItemService.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Service/MediaItemService.php)
+  - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/pessoal/CirqueiraX/src/Controller/MediaItemController.php)
 
-### ⏳ Tópico 76 — Frontend — estrutura da feature downloads-video
-- **Status**: Pendente
+### ✅ Tópico 76 — Frontend — estrutura da feature downloads-video
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Tipagem Completa**: Criado [`web/features/downloads-video/types.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/types.ts) definindo interfaces TypeScript para `MediaItem`, `MetadataVideo`, `StatusMediaItem`, `OrigemMedia`, `PlataformaVideo`, `FiltrosMediaItem` e DTOs de lote.
+  - **Cliente HTTP Centralizado**: Criado [`web/features/downloads-video/api.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/api.ts) integrando com a instância centralizada `@/config/api` para todos os endpoints (`listar`, `criar`, `categorizar`, `rebaixar`, `apagar`, `atualizarMetadata`, `retentar`).
+  - **Custom Hooks Reativos com Polling Inteligente**: Criado [`web/features/downloads-video/hooks/useDownloadsVideo.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/hooks/useDownloadsVideo.ts) com `useQuery` e `useMutation` do TanStack Query, incluindo polling automático de 3s enquanto houver downloads ativos (`baixando`, `recebido`, `em_fila`, `distribuindo`, `enviando_google_fotos`).
+  - **Barrel Export**: Criado [`web/features/downloads-video/index.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/index.ts).
+- **Arquivos envolvidos**:
+  - [`web/features/downloads-video/types.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/types.ts)
+  - [`web/features/downloads-video/api.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/api.ts)
+  - [`web/features/downloads-video/hooks/useDownloadsVideo.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/hooks/useDownloadsVideo.ts)
+  - [`web/features/downloads-video/index.ts`](file:///home/gabriel/dev/pessoal/CirqueiraX/web/features/downloads-video/index.ts)
 
 ### ⏳ Tópico 77 — Frontend — componentes CardVideo e GridVideos
 - **Status**: Pendente

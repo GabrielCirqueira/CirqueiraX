@@ -86,8 +86,8 @@
 | 72 | Endpoint de ações em lote — categorizar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 73 | Endpoint de ações em lote — rebaixar (redownload) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 74 | Endpoint de ações em lote — apagar arquivos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
-| 75 | Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
-| 76 | Frontend — estrutura da feature downloads-video | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
+| 75 | Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
+| 76 | Frontend — estrutura da feature downloads-video | ✅ Concluído | [ver](PROGRESSO_ROADMAP_4.md) |
 | 77 | Frontend — componentes CardVideo e GridVideos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
 | 78 | Frontend — CampoNovoLink e BarraAcoesEmLote | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |
 | 79 | Frontend — página DownloadsVideo.tsx completa | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_4.md) |

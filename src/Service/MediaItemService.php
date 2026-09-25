@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\DataObject\ApagarLoteDTO;
+use App\DataObject\AtualizarMetadataMediaItemDTO;
 use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
 use App\DataObject\RebaixarLoteDTO;
@@ -94,6 +95,18 @@ final readonly class MediaItemService
         }
 
         return $itensAtualizados;
+    }
+
+    public function atualizarMetadata(string|Uuid $uuid, AtualizarMetadataMediaItemDTO $dto): MediaItem
+    {
+        $mediaItem = $this->buscarPorUuid($uuid);
+        $metadataAtual = $mediaItem->metadata();
+        $novosMetadados = array_merge($metadataAtual, $dto->paraArray());
+
+        $mediaItem->setMetadata($novosMetadados);
+        $this->mediaItemRepository->salvar($mediaItem);
+
+        return $mediaItem;
     }
 
     /**

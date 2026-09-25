@@ -51,8 +51,8 @@
 - [x] **72. Endpoint de ações em lote — categorizar**
 - [x] **73. Endpoint de ações em lote — rebaixar (redownload)**
 - [x] **74. Endpoint de ações em lote — apagar arquivos**
-- [ ] **75. Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados**
-- [ ] **76. Frontend — estrutura da feature downloads-video**
+- [x] **75. Endpoint PATCH /api/v1/media-itens/{id} — edição de metadados**
+- [x] **76. Frontend — estrutura da feature downloads-video**
 - [ ] **77. Frontend — componentes CardVideo e GridVideos**
 - [ ] **78. Frontend — CampoNovoLink e BarraAcoesEmLote**
 - [ ] **79. Frontend — página DownloadsVideo.tsx completa**

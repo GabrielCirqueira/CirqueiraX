@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DataObject\ApagarLoteDTO;
+use App\DataObject\AtualizarMetadataMediaItemDTO;
 use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
 use App\DataObject\FiltrarMediaItemDTO;
@@ -82,6 +83,14 @@ final class MediaItemController extends DefaultController
     public function detalhar(string $uuid): Response
     {
         $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
+
+        return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+    }
+
+    #[Route('/{uuid}', name: 'atualizar_metadata', methods: ['PATCH'])]
+    public function atualizarMetadata(string $uuid, #[MapRequestPayload] AtualizarMetadataMediaItemDTO $dto): Response
+    {
+        $mediaItem = $this->mediaItemService->atualizarMetadata($uuid, $dto);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
