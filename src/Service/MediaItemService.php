@@ -81,6 +81,74 @@ final readonly class MediaItemService
         return $mediaItem;
     }
 
+    /**
+     * @return list<MediaItem>
+     */
+    public function classificarEmLote(CategorizarLoteDTO $dto): array
+    {
+        $dtoIndividual = new ClassificarManualDTO(categoriaId: $dto->categoriaId());
+        $itensAtualizados = [];
+
+        foreach ($dto->uuids() as $uuid) {
+            $itensAtualizados[] = $this->classificarManualmente($uuid, $dtoIndividual);
+        }
+
+        return $itensAtualizados;
+    }
+
+    /**
+     * @return list<MediaItem>
+     */
+    public function rebaixarEmLote(RebaixarLoteDTO $dto): array
+    {
+        $itensProcessados = [];
+
+        foreach ($dto->uuids() as $uuid) {
+            $mediaItem = $this->buscarPorUuid($uuid);
+            $metadata = $mediaItem->metadata();
+            $urlOriginal = $metadata['url_original'] ?? null;
+
+            if (empty($urlOriginal) || !is_string($urlOriginal)) {
+                continue;
+            }
+
+            $mediaItem->setErroMotivo(null);
+            $mediaItem->transicionarPara(StatusMediaItem::BAIXANDO);
+            $this->mediaItemRepository->salvar($mediaItem);
+
+            $this->messageBus->dispatch(new BaixarVideoMessage($urlOriginal, $mediaItem->origem()));
+
+            $itensProcessados[] = $mediaItem;
+        }
+
+        return $itensProcessados;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function apagarEmLote(ApagarLoteDTO $dto): array
+    {
+        $removidos = [];
+
+        foreach ($dto->uuids() as $uuid) {
+            $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+            if (null === $mediaItem) {
+                continue;
+            }
+
+            $caminhoLocal = $mediaItem->caminhoLocal();
+            if (null !== $caminhoLocal && '' !== $caminhoLocal && file_exists($caminhoLocal) && is_file($caminhoLocal)) {
+                @unlink($caminhoLocal);
+            }
+
+            $this->mediaItemRepository->remover($mediaItem);
+            $removidos[] = $uuid;
+        }
+
+        return $removidos;
+    }
+
     public function retentar(string|Uuid $uuid): MediaItem
     {
         $mediaItem = $this->buscarPorUuid($uuid);

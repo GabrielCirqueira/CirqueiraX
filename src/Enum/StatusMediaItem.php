@@ -10,6 +10,7 @@ enum StatusMediaItem: string
     case EM_FILA = 'em_fila';
     case CLASSIFICADO = 'classificado';
     case DISTRIBUINDO = 'distribuindo';
+    case BAIXANDO = 'baixando';
     case DISTRIBUIDO_LOCAL = 'distribuido_local';
     case ENVIANDO_GOOGLE_FOTOS = 'enviando_google_fotos';
     case CONCLUIDO = 'concluido';
@@ -22,6 +23,7 @@ enum StatusMediaItem: string
             self::EM_FILA => 'Em Fila de Processamento',
             self::CLASSIFICADO => 'Classificado',
             self::DISTRIBUINDO => 'Em Distribuição',
+            self::BAIXANDO => 'Baixando Vídeo',
             self::DISTRIBUIDO_LOCAL => 'Distribuído Localmente',
             self::ENVIANDO_GOOGLE_FOTOS => 'Enviando para o Google Fotos',
             self::CONCLUIDO => 'Processamento Concluído',
@@ -44,6 +46,7 @@ enum StatusMediaItem: string
         }
 
         return match ($this) {
+            self::BAIXANDO => in_array($novoStatus, [self::RECEBIDO, self::EM_FILA, self::CLASSIFICADO, self::ERRO], true),
             self::RECEBIDO => in_array($novoStatus, [self::EM_FILA, self::CLASSIFICADO, self::ERRO], true),
             self::EM_FILA => in_array($novoStatus, [self::CLASSIFICADO, self::ERRO], true),
             self::CLASSIFICADO => in_array($novoStatus, [self::DISTRIBUINDO, self::DISTRIBUIDO_LOCAL, self::ENVIANDO_GOOGLE_FOTOS, self::CONCLUIDO, self::ERRO], true),
@@ -51,7 +54,7 @@ enum StatusMediaItem: string
             self::DISTRIBUIDO_LOCAL => in_array($novoStatus, [self::ENVIANDO_GOOGLE_FOTOS, self::CONCLUIDO, self::ERRO], true),
             self::ENVIANDO_GOOGLE_FOTOS => in_array($novoStatus, [self::DISTRIBUIDO_LOCAL, self::CONCLUIDO, self::ERRO], true),
             self::CONCLUIDO => in_array($novoStatus, [self::CLASSIFICADO, self::RECEBIDO], true),
-            self::ERRO => in_array($novoStatus, [self::CLASSIFICADO, self::RECEBIDO, self::EM_FILA], true),
+            self::ERRO => in_array($novoStatus, [self::BAIXANDO, self::CLASSIFICADO, self::RECEBIDO, self::EM_FILA], true),
         };
     }
 }
