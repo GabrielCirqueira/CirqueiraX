@@ -51,4 +51,20 @@ final class MediaItemController extends DefaultController
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
+
+    #[Route('/retentar', name: 'retentar_lote', methods: ['POST'])]
+    public function retentarLote(): Response
+    {
+        $itens = $this->mediaItemService->retentarTodosComErro();
+
+        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+    }
+
+    #[Route('/{uuid}/retentar', name: 'retentar_individual', methods: ['POST'])]
+    public function retentarIndividual(string $uuid): Response
+    {
+        $mediaItem = $this->mediaItemService->retentar($uuid);
+
+        return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+    }
 }

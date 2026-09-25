@@ -76,10 +76,15 @@ Service devolve o dado. Erro previsto: `throw new \DomainException('username_tak
 | Método | Rota | Acesso | Descrição |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/health` | Público | Status da aplicação (DB, disco) |
-| `POST` | `/api/v1/auth/login` | Público | Login ? `{ token, refresh_token }` |
+| `POST` | `/api/v1/auth/login` | Público | Login → `{ token, refresh_token }` |
 | `POST` | `/api/v1/auth/registro` | Público | Cadastro de novo usuário |
 | `GET` | `/api/v1/auth/me` | JWT | Dados do usuário autenticado |
 | `POST` | `/api/v1/token/refresh` | Público | Renova o access token |
+| `GET` | `/api/v1/media-itens` | JWT | Lista paginada de itens de mídia |
+| `GET` | `/api/v1/media-itens/{uuid}` | JWT | Detalhes de um item de mídia |
+| `PATCH` | `/api/v1/media-itens/{uuid}/categoria` | JWT | Classificação manual de categoria |
+| `POST` | `/api/v1/media-itens/retentar` | JWT / Agente | Reprocessa em lote todas as mídias com erro |
+| `POST` | `/api/v1/media-itens/{uuid}/retentar` | JWT / Agente | Reprocessa individualmente uma mídia com erro |
 
 ## Regras de Ouro
 

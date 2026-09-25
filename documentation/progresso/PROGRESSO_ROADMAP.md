@@ -69,5 +69,5 @@
 | 56 | Gravação do google_photos_media_id após upload | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 57 | Captura de exceção nos handlers — erro_motivo e status erro | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
 | 58 | Comando CLI app:media:retentar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
-| 59 | Endpoint de retry — individual e em lote | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
-| 60 | Teste end-to-end do motor completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_3.md) |
+| 59 | Endpoint de retry — individual e em lote | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |
+| 60 | Teste end-to-end do motor completo e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_3.md) |

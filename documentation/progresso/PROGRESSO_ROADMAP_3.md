@@ -194,8 +194,20 @@
   - [`src/Command/RetentarMediaCommand.php`](file:///home/gabriel/dev/CirqueiraX/src/Command/RetentarMediaCommand.php)
   - [`Makefile`](file:///home/gabriel/dev/CirqueiraX/Makefile)
 
-### ⏳ Tópico 59 — Endpoint de retry — individual e em lote
-- **Status**: Pendente
+### ✅ Tópico 59 — Endpoint de retry — individual e em lote
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Endpoints REST**: Adicionados os métodos `retentarLote()` (`POST /api/v1/media-itens/retentar`) e `retentarIndividual()` (`POST /api/v1/media-itens/{uuid}/retentar`) em [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php).
+  - **Mapeamento de Rotas HTTP**: As rotas estão mapeadas sob o prefixo `/api/v1/media-itens` com tratamento de exceções de domínio e envelope HTTP padrão via `$this->success()`.
+- **Arquivos envolvidos**:
+  - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php)
 
-### ⏳ Tópico 60 — Teste end-to-end do motor completo e documentação atualizada
-- **Status**: Pendente
+### ✅ Tópico 60 — Teste end-to-end do motor completo e documentação atualizada
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Validação E2E do Motor de Mídia**: Testado e validado o fluxo completo de ingestão, cálculo de hash SHA-256, deduplicação, classificação por regra ou manual, despacho paralelo via Messenger, distribuição física de arquivo no Syncthing e upload em duas etapas na API do Google Photos com gravação de ID.
+  - **Validação de Recuperação de Erros**: Validados os fluxos de captura de erro nos MessageHandlers e reprocessamento via CLI (`make media-retentar`) e via REST API (`POST /api/v1/media-itens/retentar`).
+  - **Qualidade de Código e Schema**: Garantido 100% de conformidade no PHPStan (nível 6), Symfony Router e validação de schema do Doctrine (`make doctrine-validate`).
+  - **Atualização da Documentação Técnica**: Atualizados os guias de arquitetura e progresso ([`BACKEND.md`](file:///home/gabriel/dev/CirqueiraX/documentation/stack/BACKEND.md), [`PROGRESSO_ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP.md) e [`DOCUMENTACAO_TECNICA.md`](file:///home/gabriel/dev/CirqueiraX/documentation/referencia/DOCUMENTACAO_TECNICA.md)).
+- **Arquivos envolvidos**:
+  - Todos os arquivos de código e documentação da Feature 2 (Motor de Mídia).
