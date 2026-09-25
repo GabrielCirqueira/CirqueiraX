@@ -3,7 +3,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Dependências do sistema
 RUN apk add --no-cache \
-    git bash libzip-dev icu-dev oniguruma-dev \
+    git bash libzip-dev icu-dev oniguruma-dev python3 yt-dlp ffmpeg \
     && docker-php-ext-install pdo_mysql zip intl opcache
 
 # --- Desenvolvimento ---
