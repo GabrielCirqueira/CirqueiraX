@@ -22,11 +22,28 @@
 - **Arquivos envolvidos**:
   - [`src/DataObject/IngestarPrintDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/IngestarPrintDTO.php)
 
-### ⏳ Tópico 83 — IngestarPrintService — aplica OrigemRegra e delega ao motor
-- **Status**: Pendente
+### ✅ Tópico 83 — IngestarPrintService — aplica OrigemRegra e delega ao motor
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Serviço de Ingestão de Prints**: Criado [`src/Service/IngestarPrintService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/IngestarPrintService.php) para gerenciar o salvamento temporário do arquivo em disco (`sys_get_temp_dir() . '/cirqueirax_prints'`).
+  - **Enriquecimento de Metadados**: Mescla a origem do token (`TokenAgente`), nome original e timestamp de captura aos metadados antes da ingestão.
+  - **Delegação ao Motor**: Constrói `IngestarMediaDTO` e invoca `IngestarMediaService::executar()`, acionando a máquina de estados, deduplicação por hash e mensagens assíncronas.
+  - **Integração no Controller**: Atualizado [`src/Controller/IngestaoController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/IngestaoController.php) para injetar `IngestarPrintService` e retornar a entidade serializada via `MediaItemSerializer`.
+- **Arquivos envolvidos**:
+  - [`src/Service/IngestarPrintService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/IngestarPrintService.php)
+  - [`src/Controller/IngestaoController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/IngestaoController.php)
 
-### ⏳ Tópico 84 — Script agente — estrutura base
-- **Status**: Pendente
+### ✅ Tópico 84 — Script agente — estrutura base
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Estrutura Standalone do Agente**: Criado o diretório `agente/` na raiz do projeto com o script principal [`agente/agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py).
+  - **Módulo de Configuração**: Criado [`agente/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/config.py) utilizando `python-dotenv` para carregar `SERVER_URL`, `AGENT_TOKEN`, `WATCH_DIR`, `DEBOUNCE_SECONDS` e `LOG_LEVEL`.
+  - **Template de Ambiente e Dependências**: Criados [`agente/.env.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.example) e [`agente/requirements.txt`](file:///home/gabriel/dev/CirqueiraX/agente/requirements.txt) (`requests`, `watchdog`, `python-dotenv`).
+- **Arquivos envolvidos**:
+  - [`agente/agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py)
+  - [`agente/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/config.py)
+  - [`agente/.env.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.example)
+  - [`agente/requirements.txt`](file:///home/gabriel/dev/CirqueiraX/agente/requirements.txt)
 
 ### ⏳ Tópico 85 — Watcher de pasta com debounce (agente)
 - **Status**: Pendente

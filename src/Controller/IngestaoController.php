@@ -6,6 +6,8 @@ namespace App\Controller;
 
 use App\DataObject\IngestarPrintDTO;
 use App\Security\AgenteUser;
+use App\Serializer\MediaItemSerializer;
+use App\Service\IngestarPrintService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -17,7 +19,10 @@ final class IngestaoController extends DefaultController
 {
     public function __construct(
         private readonly ValidatorInterface $validator,
-    ) {}
+        private readonly IngestarPrintService $ingestarPrintService,
+        private readonly MediaItemSerializer $mediaItemSerializer,
+    ) {
+    }
 
     #[Route('/api/v1/ingestao/print', name: 'api_ingestao_print', methods: ['POST'])]
     #[IsGranted('ROLE_AGENTE')]
@@ -42,13 +47,8 @@ final class IngestaoController extends DefaultController
             return $this->unprocessable('dados_invalidos', $detalhes);
         }
 
-        $tokenAgente = $agenteUser->tokenAgente();
+        $mediaItem = $this->ingestarPrintService->executar($dto, $agenteUser->tokenAgente());
 
-        return $this->created([
-            'nomeOriginal' => $dto->nomeOriginal(),
-            'origem' => $tokenAgente->origem(),
-            'agente' => $tokenAgente->nome(),
-            'status' => 'recebido',
-        ]);
+        return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
     }
 }
