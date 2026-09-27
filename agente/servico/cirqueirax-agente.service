@@ -1,0 +1,15 @@
+[Unit]
+Description=Agente de Ingestao de Prints CirqueiraX
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/dev/CirqueiraX/agente
+ExecStart=/usr/bin/env python3 %h/dev/CirqueiraX/agente/agente.py
+Restart=always
+RestartSec=5s
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

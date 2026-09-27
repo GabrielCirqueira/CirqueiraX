@@ -45,8 +45,8 @@
 - [x] **86. Cliente HTTP do agente — envio autenticado e retry**
 - [x] **87. Configuração do agente PC empresa**
 - [x] **88. Configuração do agente PC pessoal**
-- [ ] **89. Persistência local do agente — evitar reenvio**
-- [ ] **90. Execução do agente como serviço do SO**
+- [x] **89. Persistência local do agente — evitar reenvio**
+- [x] **90. Execução do agente como serviço do SO**
 - [ ] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**
 - [ ] **92. Endpoint POST /api/v1/media-itens/upload (upload manual)**
 - [ ] **93. UploadManualDTO e validação de tipo de arquivo**

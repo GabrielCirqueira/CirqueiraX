@@ -5,6 +5,8 @@ import time
 import requests
 import config
 
+from estado import ja_enviado, marcar_enviado
+
 EXTENSOES_PERMITIDAS = {".png", ".jpg", ".jpeg", ".webp"}
 
 def enviar_print(caminho_arquivo: Path, max_tentativas: int = 3) -> bool:
@@ -15,6 +17,10 @@ def enviar_print(caminho_arquivo: Path, max_tentativas: int = 3) -> bool:
     if caminho_arquivo.suffix.lower() not in EXTENSOES_PERMITIDAS:
         logging.debug(f"Ignorando arquivo por extensão não permitida: {caminho_arquivo}")
         return False
+
+    if ja_enviado(caminho_arquivo):
+        logging.info(f"Arquivo já enviado anteriormente (ignorado): {caminho_arquivo.name}")
+        return True
 
     headers = {
         "X-Agent-Token": config.AGENT_TOKEN,
@@ -45,6 +51,7 @@ def enviar_print(caminho_arquivo: Path, max_tentativas: int = 3) -> bool:
 
             if response.status_code in (200, 201):
                 logging.info(f"Print enviado com sucesso! [{caminho_arquivo.name}] (Status HTTP {response.status_code})")
+                marcar_enviado(caminho_arquivo)
                 return True
             elif 400 <= response.status_code < 500:
                 logging.error(f"Erro cliente ao enviar print [{caminho_arquivo.name}]: Status HTTP {response.status_code} - {response.text}")

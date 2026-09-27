@@ -79,11 +79,29 @@
 - **Arquivos envolvidos**:
   - [`agente/.env.pessoal.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.pessoal.example)
 
-### ⏳ Tópico 89 — Persistência local do agente — evitar reenvio
-- **Status**: Pendente
+### ✅ Tópico 89 — Persistência local do agente — evitar reenvio
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Módulo de Estado Local**: Criado [`agente/estado.py`](file:///home/gabriel/dev/CirqueiraX/agente/estado.py) para cálculo do hash SHA-256 e persistência thread-safe dos arquivos enviados em arquivo JSON (`STATE_FILE`).
+  - **Deduplicação de Envio**: Atualizado [`agente/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/cliente.py) para consultar `ja_enviado()` antes de iniciar o envio HTTP e registrar `marcar_enviado()` no sucesso (HTTP 200/201), evitando redundância e consumo desnecessário de rede.
+- **Arquivos envolvidos**:
+  - [`agente/estado.py`](file:///home/gabriel/dev/CirqueiraX/agente/estado.py)
+  - [`agente/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/cliente.py)
 
-### ⏳ Tópico 90 — Execução do agente como serviço do SO
-- **Status**: Pendente
+### ✅ Tópico 90 — Execução do agente como serviço do SO
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Modelos de Serviço Nativo**: Criados os arquivos de configuração de serviço em `agente/servico/`:
+    - [`agente/servico/cirqueirax-agente.service`](file:///home/gabriel/dev/CirqueiraX/agente/servico/cirqueirax-agente.service) (Systemd unit file para Linux)
+    - [`agente/servico/com.cirqueirax.agente.plist`](file:///home/gabriel/dev/CirqueiraX/agente/servico/com.cirqueirax.agente.plist) (Launchd plist para macOS)
+  - **Scripts de Instalação Automatizada**:
+    - [`agente/servico/instalar-servico-linux.sh`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-linux.sh) (instalação e inicialização de serviço systemd no modo user)
+    - [`agente/servico/instalar-servico-windows.bat`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-windows.bat) (registro de tarefa de inicialização automática no Agendador de Tarefas do Windows)
+- **Arquivos envolvidos**:
+  - [`agente/servico/cirqueirax-agente.service`](file:///home/gabriel/dev/CirqueiraX/agente/servico/cirqueirax-agente.service)
+  - [`agente/servico/com.cirqueirax.agente.plist`](file:///home/gabriel/dev/CirqueiraX/agente/servico/com.cirqueirax.agente.plist)
+  - [`agente/servico/instalar-servico-linux.sh`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-linux.sh)
+  - [`agente/servico/instalar-servico-windows.bat`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-windows.bat)
 
 ### ⏳ Tópico 91 — Cadastro das OrigemRegra para print_empresa e print_pessoal
 - **Status**: Pendente
