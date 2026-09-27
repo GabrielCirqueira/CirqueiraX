@@ -41,10 +41,10 @@
 - [x] **82. DTO IngestarPrintDTO e upload multipart do agente**
 - [x] **83. IngestarPrintService — aplica OrigemRegra e delega ao motor**
 - [x] **84. Script agente — estrutura base**
-- [ ] **85. Watcher de pasta com debounce (agente)**
-- [ ] **86. Cliente HTTP do agente — envio autenticado e retry**
-- [ ] **87. Configuração do agente PC empresa**
-- [ ] **88. Configuração do agente PC pessoal**
+- [x] **85. Watcher de pasta com debounce (agente)**
+- [x] **86. Cliente HTTP do agente — envio autenticado e retry**
+- [x] **87. Configuração do agente PC empresa**
+- [x] **88. Configuração do agente PC pessoal**
 - [ ] **89. Persistência local do agente — evitar reenvio**
 - [ ] **90. Execução do agente como serviço do SO**
 - [ ] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**

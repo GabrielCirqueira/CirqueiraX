@@ -25,12 +25,18 @@ def validar_configuracao():
 
 def main():
     validar_configuracao()
-    logging.info("Aguardando novas imagens capturadas...")
+    from watcher import iniciar_watcher
+
+    observer = iniciar_watcher()
+    logging.info("Agente operando em segundo plano. Pressione Ctrl+C para encerrar.")
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        logging.info("Agente encerrado pelo usuário.")
+        logging.info("Encerrando watcher do agente...")
+        observer.stop()
+        observer.join()
+        logging.info("Agente encerrado com sucesso.")
 
 if __name__ == "__main__":
     main()

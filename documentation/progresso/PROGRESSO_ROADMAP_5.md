@@ -45,17 +45,39 @@
   - [`agente/.env.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.example)
   - [`agente/requirements.txt`](file:///home/gabriel/dev/CirqueiraX/agente/requirements.txt)
 
-### ⏳ Tópico 85 — Watcher de pasta com debounce (agente)
-- **Status**: Pendente
+### ✅ Tópico 85 — Watcher de pasta com debounce (agente)
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Monitoramento do Sistema de Arquivos**: Criado o módulo [`agente/watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/watcher.py) utilizando `watchdog.observers.Observer` e `FileSystemEventHandler`.
+  - **Filtro por Extensão**: Suporte automático para extensões de imagens de print (`.png`, `.jpg`, `.jpeg`, `.webp`).
+  - **Mecanismo de Debounce por Thread**: Aguarda a estabilização do tamanho do arquivo durante o período configurado (`DEBOUNCE_SECONDS`, padrão 3s) antes de autorizar o envio, garantindo que capturas em escrita não sejam enviadas truncadas.
+- **Arquivos envolvidos**:
+  - [`agente/watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/watcher.py)
 
-### ⏳ Tópico 86 — Cliente HTTP do agente — envio autenticado e retry
-- **Status**: Pendente
+### ✅ Tópico 86 — Cliente HTTP do agente — envio autenticado e retry
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Cliente HTTP Dedicado**: Criado o módulo [`agente/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/cliente.py) utilizando a biblioteca `requests`.
+  - **Autenticação e Multipart**: Insere o header `X-Agent-Token` com o token configurado e envia a imagem em `multipart/form-data` com os campos `nomeOriginal` e `timestampCaptura`.
+  - **Estratégia de Retry com Backoff**: Implementado loop de até 3 tentativas com *exponential backoff* (`2^tentativa` segundos) em caso de falhas de conexão ou erros de servidor (HTTP 5xx), descartando retentativas infinitas em erros de validação (HTTP 4xx).
+- **Arquivos envolvidos**:
+  - [`agente/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/cliente.py)
 
-### ⏳ Tópico 87 — Configuração do agente PC empresa
-- **Status**: Pendente
+### ✅ Tópico 87 — Configuração do agente PC empresa
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Geração do Token de Serviço**: Gerado token de agente via comando Symfony `app:agente:gerar-token "Agente PC Empresa" print_empresa` com UUID `01a0dfe1-5320-7fcb-8c9e-1ed1c99b9b17` e origem `print_empresa`.
+  - **Template de Configuração Específico**: Criado o arquivo [`agente/.env.empresa.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.empresa.example) pré-configurado com a origem `print_empresa` e chave de acesso dedicada para a máquina de trabalho da empresa.
+- **Arquivos envolvidos**:
+  - [`agente/.env.empresa.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.empresa.example)
 
-### ⏳ Tópico 88 — Configuração do agente PC pessoal
-- **Status**: Pendente
+### ✅ Tópico 88 — Configuração do agente PC pessoal
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Geração do Token de Serviço**: Gerado token de agente via comando Symfony `app:agente:gerar-token "Agente PC Pessoal" print_pessoal` com UUID `01a0dfe1-71da-7336-a4b5-b577aeb8741f` e origem `print_pessoal`.
+  - **Template de Configuração Específico**: Criado o arquivo [`agente/.env.pessoal.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.pessoal.example) pré-configurado com a origem `print_pessoal` e chave de acesso dedicada para a máquina de uso pessoal.
+- **Arquivos envolvidos**:
+  - [`agente/.env.pessoal.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.pessoal.example)
 
 ### ⏳ Tópico 89 — Persistência local do agente — evitar reenvio
 - **Status**: Pendente
