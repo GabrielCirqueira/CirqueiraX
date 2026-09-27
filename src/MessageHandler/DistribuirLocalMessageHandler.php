@@ -7,7 +7,7 @@ namespace App\MessageHandler;
 use App\Enum\StatusMediaItem;
 use App\Message\DistribuirLocalMessage;
 use App\Repository\MediaItemRepository;
-use App\Service\DistribuirLocalService;
+use App\Service\Distribuicao\DistribuirLocalService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

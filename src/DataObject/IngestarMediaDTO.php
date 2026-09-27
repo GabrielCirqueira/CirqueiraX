@@ -19,6 +19,7 @@ final readonly class IngestarMediaDTO
         public string $caminhoArquivo,
         OrigemMedia|string $origem,
         public array $metadata = [],
+        public ?string $hash = null,
     ) {
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;
     }
@@ -41,17 +42,8 @@ final readonly class IngestarMediaDTO
         return $this->metadata;
     }
 
-    public function calcularHash(): string
+    public function hash(): ?string
     {
-        if (!file_exists($this->caminhoArquivo) || !is_readable($this->caminhoArquivo)) {
-            throw new \DomainException('arquivo_nao_encontrado', 404);
-        }
-
-        $hash = hash_file('sha256', $this->caminhoArquivo);
-        if (false === $hash) {
-            throw new \DomainException('falha_calcular_hash', 500);
-        }
-
-        return $hash;
+        return $this->hash;
     }
 }

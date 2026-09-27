@@ -52,6 +52,34 @@ class OrigemRegraRepository extends ServiceEntityRepository
         return $this->find($uuid);
     }
 
+    public function existeComOrigem(OrigemMedia|string $origem, Uuid|string|null $ignorarUuid = null): bool
+    {
+        $valor = $origem instanceof OrigemMedia ? $origem->value : $origem;
+        $qb = $this->createQueryBuilder('r')
+            ->select('COUNT(r.uuid)')
+            ->where('r.origem = :origem')
+            ->setParameter('origem', $valor);
+
+        if (null !== $ignorarUuid) {
+            $uuidStr = is_string($ignorarUuid) ? $ignorarUuid : $ignorarUuid->toString();
+            $qb->andWhere('r.uuid != :ignorarUuid')
+               ->setParameter('ignorarUuid', $uuidStr);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * @return list<OrigemRegra>
+     */
+    public function listarTodas(): array
+    {
+        /** @var list<OrigemRegra> $resultado */
+        $resultado = $this->findBy([], ['criadoEm' => 'DESC']);
+
+        return $resultado;
+    }
+
     /**
      * @return array{itens: array<int, OrigemRegra>, total: int}
      */

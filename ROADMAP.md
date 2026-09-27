@@ -50,8 +50,8 @@
 - [x] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**
 - [x] **92. Endpoint POST /api/v1/media-itens/upload (upload manual)**
 - [x] **93. UploadManualDTO e validação de tipo de arquivo**
-- [ ] **94. UploadManualService — checagem de duplicidade por hash**
-- [ ] **95. Resposta de duplicidade (aviso, não bloqueio)**
+- [x] **94. UploadManualService — checagem de duplicidade por hash**
+- [x] **95. Resposta de duplicidade (aviso, não bloqueio)**
 - [ ] **96. Frontend — estrutura da feature upload-manual**
 - [ ] **97. Frontend — componente de dropzone**
 - [ ] **98. Frontend — fila de triagem pós-upload**

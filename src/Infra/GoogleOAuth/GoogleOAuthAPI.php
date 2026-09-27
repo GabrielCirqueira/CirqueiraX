@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infra\GoogleOAuth;
 
-use App\Exception\GoogleFotosAPIException;
+use App\Exception\GoogleFotos\GoogleFotosAPIException;
 use GuzzleHttp\Exception\RequestException;
 
 final class GoogleOAuthAPI extends GoogleOAuthClient

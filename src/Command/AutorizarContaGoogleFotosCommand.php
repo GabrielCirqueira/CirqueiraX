@@ -133,7 +133,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
                 }
             }
 
-            $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
+            $expiraEm = (new \DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
             $refreshTokenCriptografado = $this->criptografia->criptografar($refreshToken);
 
             $conta = $this->contaRepository->buscarPorEmail($email);

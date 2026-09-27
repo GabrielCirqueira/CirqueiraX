@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Serializer;
 
 use App\Entity\OrigemRegra;
-use App\Service\CategoriaService;
+use App\Service\Categoria\CategoriaService;
 
 final readonly class OrigemRegraSerializer
 {

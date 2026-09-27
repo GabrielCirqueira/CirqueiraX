@@ -449,9 +449,7 @@ Regras:
 
 ### 13.1 Controllers
 
-#### Onde ficam os controllers
-
-Os controllers de **API** ficam em subpastas por tópico (`Auth/`, `Admin/`, …) e **sempre** extends `DefaultController`. O HTML da SPA fica em `FrontendController`.
+Os controllers de **API** e de **Sistema** ficam obrigatoriamente em subpastas por contexto (`MediaItem/`, `Ingestao/`, `Video/`, `Categoria/`, `OrigemRegra/`, `Sistema/`, `Common/`, etc.) e **sempre** extendem `DefaultController` (localizado em `src/Controller/Common/DefaultController.php`). O HTML da SPA fica em `src/Controller/Sistema/FrontendController.php`. Nunca deixe controllers soltos na raiz de `src/Controller/`.
 
 #### Regra principal dos controllers
 
@@ -478,18 +476,18 @@ Confundi-los gera acoplamentos errados.
 
 **Regra:** Se pode ser testado unitariamente sem nenhum mock de infraestrutura (banco, HTTP), é um **Domain Service**.
 
-#### 13.2.2 Feature (`src/Feature/`)
+#### 13.2.2 Use Cases & Services (`src/Service/`)
 
-**Proibido** concentrar lógica grande num único arquivo. Sempre que a lógica for grande, repetida ou tiver várias peças, parta em vários services com a mesma interface e uma Feature com `#[TaggedIterator]`. A Feature só itera; não faz query. Nova peça = nova classe. Detalhe: [PARA-IA.md](PARA-IA.md) § 4.7.
+Os **Use Cases / Application Services** residem em `src/Service/{Contexto}/` e representam as operações reais da aplicação (ex: `UploadManualService`, `ClassificarMediaItemService`, `ApagarMediaItemService`).
 
-Um Service único e atômico (criar, buscar) não vira Feature.
+- Cada Use Case encapsula o fluxo de uma operação de negócio (validação de regras, chamada de repositórios e clientes de infraestrutura).
+- Controllers injetam os Use Cases diretamente. **É proibido criar "Features" delegadoras que apenas repassem chamadas `$this->service->metodo()`**.
+- Não existem limites estatísticos artificiais (ex: "máximo 3 métodos"). A divisão deve ser guiada estritamente por coesão e responsabilidade.
 
-#### 13.2.3 Interface (`src/Interface/`)
+#### 13.2.3 Interfaces e TaggedIterator (`src/Interface/`, `src/Feature/`)
 
-Contratos PHP em `src/Interface/{Nome}Interface.php`.
-
-- Porta (repositório, HTTP, fila): Service/Feature tipam a interface.
-- Vários services do mesmo fluxo: `#[AutoconfigureTag('app.…')]` na interface; cada Service implementa; a Feature usa `TaggedIterator`. **É o jeito padrão de organizar**, não um caso especial.
+- **Interfaces (`src/Interface/`)**: Devem ser criadas quando houver mais de uma implementação concreta (ex: `ArmazenamentoInterface`, `ExtratorVideoInterface`) ou quando a testabilidade com mocks for necessária. Não crie interfaces por dogmatismo quando só existe uma implementação sem plano de extensão.
+- **Features com TaggedIterator (`src/Feature/`)**: Utilizadas exclusivamente para pipelines ou coleções dinâmicas de regras/estratégias expansíveis que utilizam `#[TaggedIterator]` (detalhes em [PARA-IA.md](PARA-IA.md) § 4.7).
 
 ---
 
@@ -678,7 +676,11 @@ Toda comunicação HTTP com APIs/sistemas externos deve ser desacoplada na camad
 * **Cliente por Sistema (`src/Infra/{Sistema}/{Sistema}Client.php`)**: Classe abstrata que estende `App\Infra\Client` e define a `$baseUrl`.
 * **API do Sistema (`src/Infra/{Sistema}/{Sistema}API.php`)**: Classe concreta estendendo `{Sistema}Client` que expõe os métodos de ação de negócio da API (ex: `criarAlbum()`, `uploadBytes()`, `renovarAccessToken()`).
 * **Injeção DI (`config/services.yaml`)**: Registra instâncias do `GuzzleHttp\Client` com `base_uri` configurada e as injeta em `{Sistema}API`.
-* **Exceções Personalizadas (`src/Exception/`)**: Exceções estendendo `ClienteHTTPException` para tratamento de erros em requisições de clientes externos.
+* **Exceções Personalizadas por Contexto (`src/Exception/`)**: 
+  - **PROIBIDO**: Lançar exceções genéricas nativas do PHP (`throw new \DomainException(...)`, `throw new \RuntimeException(...)`, `throw new \Exception(...)`) diretamente no corpo dos métodos.
+  - **PROIBIDO**: Usar constantes literais de erro soltas para instanciar exceções genéricas.
+  - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: `YtDlpException`, `ArmazenamentoLocalException`, `MediaItemException`).
+  - **Métodos Construtores Estáticos (Static Factory Methods)**: Dentro de cada exceção personalizada, crie métodos estáticos nomeados para cada erro do contexto. O código lança a exceção exclusivamente chamando seu construtor estático (ex: `throw YtDlpException::erroExtrairMetadata();` ou `throw ArmazenamentoLocalException::erroCriarDiretorio();`).
 
 ---
 

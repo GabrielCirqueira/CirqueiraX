@@ -58,12 +58,16 @@ Regra: 2+ arquivos do mesmo assunto → `features/{feature}/`. Reutilizável →
 
 ### Backend (`src/`)
 
+> [!IMPORTANT]
+> **Regra de Organização Obrigatória**: É estritamente **PROIBIDO** deixar arquivos soltos na raiz de `src/Service/`, `src/Exception/`, `src/Controller/` ou `src/Feature/`. Todos os arquivos devem **obrigatoriamente** ficar dentro de uma subpasta de contexto (ex: `MediaItem/`, `Ingestao/`, `Video/`, `GoogleFotos/`, `Storage/`, `Sistema/`). Se a pasta de contexto contiver muitos arquivos, crie subcategorias dentro dela.
+
 | O quê | Onde |
 | :--- | :--- |
-| HTTP da API | `src/Controller/{Categoria}/` — **sempre** extends `DefaultController` |
-| SPA / Twig | `src/Controller/FrontendController.php` |
-| Caso de uso | `src/Service/{Funcionalidade}/VerboEntidadeService.php` |
-| Caso de uso grande / repetido | `src/Feature/{Nome}Feature.php` + vários `*Service` + `TaggedIterator` |
+| HTTP da API | `src/Controller/{Contexto}/` — **sempre** em subpasta de contexto e extends `DefaultController` |
+| SPA / Twig | `src/Controller/Sistema/FrontendController.php` |
+| Caso de uso (Service) | `src/Service/{Contexto}/VerboEntidadeService.php` — **sempre** em subpasta de contexto |
+| Estratégia expansível / Pipeline | `src/Feature/{Contexto}/{Nome}Feature.php` — para algoritmos e regras dinâmicas |
+| Exceções personalizadas | `src/Exception/{Contexto}/{Nome}Exception.php` — **sempre** em subpasta com métodos estáticos descritivos em PT-BR |
 | Banco | `src/Repository/` — único lugar com Doctrine |
 | Contrato PHP | `src/Interface/{Nome}Interface.php` |
 | Entrada da API | `src/DataObject/` — sufixo `DTO` |
@@ -72,7 +76,6 @@ Regra: 2+ arquivos do mesmo assunto → `features/{feature}/`. Reutilizável →
 | Enum fechado | `src/Enum/` |
 | Evento + reação | `src/EventListener/` — fato em `Event/`, reação ao lado |
 | Clientes HTTP externos | `src/Infra/{Sistema}/{Sistema}Client.php` e `src/Infra/{Sistema}/{Sistema}API.php` |
-| Exceções personalizadas | `src/Exception/` |
 
 ---
 
@@ -155,20 +158,20 @@ export function usePedidos() {
 
 ## 4. Backend — como construir
 
-Três camadas, sem exceção:
+Três camadas com responsabilidades claras:
 
 | Camada | Faz | Não faz |
 | :--- | :--- | :--- |
-| **Controller** | Rota, DTO, chamar Service ou Feature, `$this->success()` / `$this->error()` | Regra de negócio, query, EntityManager |
-| **Service** | Uma ação de negócio, devolve o dado | Query; não empilhar 4+ ações no mesmo arquivo |
-| **Feature** | Orquestra vários services via `TaggedIterator` | Query; lógica toda num arquivo só |
-| **Repository** | Toda consulta e persistência | Regra de negócio HTTP |
+| **Controller** | Rota, DTO de entrada, chamar Use Case diretamente, retornar `$this->success()` / `$this->error()` | Regra de negócio, query, EntityManager, fachadas delegadoras |
+| **Use Case (Service)** | Uma operação/caso de uso coeso (ex: `UploadManualService`, `ClassificarMediaItemService`), orquestra domínio e infraestrutura | Query Doctrine; DTO com I/O; repassar chamadas sem valor |
+| **Repository** | Toda consulta e persistência Doctrine | Regra de negócio HTTP ou I/O externo |
+| **Infraestrutura** | Filesystem, chamadas de API externas, processos CLI (`yt-dlp`), clientes HTTP | Regra de negócio do domínio |
 
-Comece pelo **Controller** (contrato da rota). Em seguida o Service com a lógica. Toda busca (`find`, `createQueryBuilder`, SQL, `persist`, `flush`) vai para um método do Repository — o Service só chama esse método.
+Comece pelo **Controller** (contrato da rota). Ele injeta diretamente os **Use Cases (Services)** necessários para a operação. Cada Use Case encapsula o fluxo de um caso de uso real (validar invariantes, acionar repositórios/infraestrutura e persistir). Toda busca (`find`, `createQueryBuilder`, SQL, `persist`, `flush`) vai para um método do Repository — o Use Case só chama esse método.
 
 ### 4.1 Controller
 
-Crie o Controller **primeiro**. Extends `DefaultController`. Corpo: ler DTO → chamar Service (ou Feature) → `$this->success()` / `$this->created()` / `$this->error()`. Sempre `Response`. Nada além disso.
+Crie o Controller **primeiro**. Extends `DefaultController`. Corpo: ler DTO → chamar Use Case diretamente → `$this->success()` / `$this->created()` / `$this->error()`. Sempre `Response`. Nada além disso.
 
 Envelope JSON: `{ success, data }` ou `{ success, error, details? }`. Chaves em **inglês**.
 
@@ -184,14 +187,14 @@ public function criar(#[MapRequestPayload] CriarPedidoDTO $dto): Response
 
 Rotas: prefixo `/api/v1/`, recurso no **plural**.
 
-Handler de fila (módulo `async`): mesma regra — zero regra de negócio; chama um Service.
+Handler de fila (módulo `async`): mesma regra — zero regra de negócio; chama um Use Case.
 
 ### 4.2 Entidade
 
 - UUID como PK nas entidades **novas** (`doctrine.uuid_generator`).
 - Getter **sem** `get`: `nome()`, não `getNome()` — salvo contrato do Symfony (`UserInterface`).
 - Setter `setNome(): self`.
-- Fábrica `fromDTO`.
+- Métodos de intenção de domínio (Tell, Don't Ask): `$mediaItem->classificarComo($categoria)`, `$mediaItem->marcarParaDownload()`, `$mediaItem->registrarErro($motivo)`. Proibido sequências de `set*()` soltos no Use Case quando existe uma operação de domínio.
 - Conjunto fechado de valores → Enum em `src/Enum/`, não string solta.
 
 ### 4.3 Migration
@@ -201,62 +204,53 @@ make new-migration
 make migrate
 ```
 
-Revise o SQL antes de aplicar.
+Revise o SQL antes de aplicar. Garanta índices e restrições de unicidade (`UNIQUE INDEX`) no banco para campos de unicidade de domínio (`hash`, `nome`, `origem`).
 
 ### 4.4 Repository
 
 **Único** lugar com query. `find`, `createQueryBuilder`, DQL, SQL, `persist`, `flush` — só aqui.
 
-**Proibido** no Service e no Controller: `EntityManagerInterface`, `createQueryBuilder`, `findBy`, consulta crua.
+**Proibido** no Use Case e no Controller: `EntityManagerInterface`, `createQueryBuilder`, `findBy`, consulta crua.
 
-O Service pede dados com um método de intenção (`buscarPorUuid`, `usernameJaExiste`, `salvar`). Se a consulta ainda não existe, crie no Repository — não escreva a query no Service.
+O Use Case pede dados com um método de intenção (`buscarPorUuid`, `buscarPorHash`, `salvar`). Se a consulta ainda não existe, crie no Repository — não escreva a query no Use Case.
 
-Contrato do repositório (e de qualquer porta: cliente HTTP, fila) vai em `src/Interface/{Nome}Interface.php`. O Service/Feature tipa a interface, não a classe concreta.
+Contrato do repositório (e de qualquer porta: cliente HTTP, armazenamento) vai em `src/Interface/{Nome}Interface.php`. O Use Case tipa a interface, não a classe concreta.
 
 ### 4.5 DTO
 
 `final readonly class` em `src/DataObject/`, nome `VerboEntidadeDTO`. Sem setters. Getter = nome da propriedade. Validar com `#[Assert\…]`. Entrada HTTP via `MapRequestPayload` / `MapQueryString` — não monte array na mão com `$request->get()`.
 
-### 4.6 Service
+> [!IMPORTANT]
+> **DTO é carregador de dados puro**: É estritamente **PROIBIDO** que um DTO acesse o sistema de arquivos (`file_exists`, `hash_file`, `is_readable`), chame serviços de I/O ou execute validações de infraestrutura. O DTO apenas transporta dados. Cálculos de hash ou checagens de arquivo pertencem ao Use Case ou à camada de Infraestrutura (`ArmazenamentoInterface`).
 
-Toda lógica de negócio fica **aqui**, não no Controller. Um service = **uma ação**. Nome: `CriarPedidoService`. `final class`, deps no construtor, um método `executar()` que devolve o dado.
+### 4.6 Use Cases (Services)
+
+Toda lógica de negócio fica no **Use Case**, não no Controller. Cada Use Case representa uma operação coesa da aplicação (ex: `UploadManualService`, `ClassificarMediaItemService`, `ApagarMediaItemService`). `final class`, dependências no construtor DI.
 
 - Sem Request/Response.
-- **Sem query.** Precisa de dado do banco? Chame o Repository. Não monte QueryBuilder, DQL nem `find` no Service.
-- Erro previsto (duplicado, estado inválido) → `throw new \DomainException('codigo_duplicado', 409)`. O `KernelExceptionListener` responde `{ success: false, error }`.
+- **Sem query.** Precisa de dado do banco? Chame o Repository. Não monte QueryBuilder, DQL nem `find` no Use Case.
+- **Não crie fachadas delegadoras**: É proibido criar classes intermediárias (ex: "Features" delegadoras) apenas para repassar chamadas `$this->service->metodo()`. O Controller deve injetar os Use Cases diretamente.
+- **Divida por Coesão, não por Contagem de Métodos**: Não existe limite artificial de 3 métodos. Uma classe com 5 métodos coesos é infinitamente melhor que 5 classes artificiais de 1 método que apenas repassam chamadas.
+- **Sem `new Service()` manual**: Injete dependências no construtor via Container DI do Symfony.
+- **Processamento em Lote Resiliente**: Métodos em lote devem capturar **exceções esperadas** (de domínio ou armazenamento), logar/coletar a falha em um mapa e continuar o loop. **NUNCA** use `catch (\Throwable)` indiscriminadamente — erros de programação (`TypeError`, `Error`, `LogicException`) devem falhar rapidamente para serem corrigidos.
+- **Substitua Arrays Mágicos por Result Objects**: Operações com múltiplos retornos (ex: upload com flag de duplicado, lote de apagar) devem retornar DTOs de saída dedicados (`ResultadoUploadDTO`), evitando `array{mediaItem: ..., duplicado: true}`.
 - Guard clauses baratas primeiro (dado local → memória → Repository → API externa).
 
-```php
-public function executar(CriarPedidoDTO $dto): Pedido
-{
-    if ($this->repositorio->jaExiste($dto->codigo())) {
-        throw new \DomainException('codigo_duplicado', 409);
-    }
-    $pedido = Pedido::fromDTO($dto);
-    $this->repositorio->salvar($pedido);
+### 4.7 Quando usar Interfaces e TaggedIterator
 
-    return $pedido;
-}
-```
-
-### 4.7 Feature e tagged iterator
-
-**Proibido** juntar a lógica grande num único Service/arquivo (`if`, `switch`, quatro `executar()`). Sempre que a lógica for grande, repetida ou tiver várias peças, **parta em vários services** com a mesma interface e deixe a Feature só iterar. Como vão ser vários services, **organize sempre assim** — não injete um por um “na mão”.
-
-Fluxo obrigatório:
-
-1. Interface em `src/Interface/` com tag.
-2. Um Service pequeno por regra/peça (`src/Service/`).
-3. Feature em `src/Feature/` com `#[TaggedIterator]`. Sem query, sem HTTP.
+**Não crie interfaces nem abstrações para tudo por hábito**. Crie interfaces e estratégias dinâmicas em `src/Interface/` e `src/Feature/` apenas quando houver:
+1. Mais de uma implementação concreta (ex: `ArmazenamentoLocalClient`, `YtDlpClient`).
+2. Necessidade real de estratégias expansíveis (ex: regras de classificação dinâmicas via `#[TaggedIterator]`).
+3. Fronteiras de integração de infraestrutura que exigem substituição em testes.
 
 ```php
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
-#[AutoconfigureTag('app.regra_desconto')]
-interface RegraDescontoInterface
+#[AutoconfigureTag('app.regra_classificacao')]
+interface RegraClassificacaoInterface
 {
-    public function suporta(Pedido $pedido): bool;
-    public function aplicar(Pedido $pedido): void;
+    public function suporta(MediaItem $item): bool;
+    public function classificar(MediaItem $item): ?Categoria;
 }
 ```
 
@@ -304,22 +298,78 @@ Nunca devolva entidade crua. Array estável: `uuid`, campos, timestamps.
 
 ### 4.9 Clientes HTTP e Infraestrutura (`src/Infra/` e `src/Exception/`)
 
-**PROIBIDO**: Fazer requisições HTTP cruas (`HttpClientInterface` ou `$client->request()`) diretamente em Services ou Commands.
+**PROIBIDO**: Fazer requisições HTTP cruas (`HttpClientInterface` ou `$client->request()`), comandos de processos externos (`Symfony\Component\Process\Process`) ou chamadas diretas de sistema de arquivos (`mkdir`, `copy`, `unlink`, `file_exists`, `@unlink`) diretamente em Services ou Commands.
 
-Toda integração com APIs/sistemas externos deve ser desacoplada em `src/Infra/{Sistema}/`:
+Toda integração com APIs, sistemas externos, processos CLI (`yt-dlp`) ou armazenamento de sistema de arquivos deve ser desacoplada na camada de infraestrutura sob `src/Infra/{Sistema}/`:
 
 1. **Base Client Abstrato (`src/Infra/Client.php`)**:
    - Injeta `\GuzzleHttp\ClientInterface` e `baseUrl`.
    - Método `protected function request()` executa a requisição, trata `RequestException` via `executarRequisicao()`, deserializa via Symfony Serializer (se `$type` for informado) ou decodifica JSON e valida via `Assert::isArray()`.
    - Método `protected function requestRaw()` para respostas puras em string.
 2. **Cliente por Sistema (`src/Infra/{Sistema}/{Sistema}Client.php`)**:
-   - Classe abstrata estendendo `App\Infra\Client` configurando a `$baseUrl` no construtor.
-3. **API do Sistema (`src/Infra/{Sistema}/{Sistema}API.php`)**:
-   - Classe concreta estendendo `{Sistema}Client` implementando os métodos de ação (`criarAlbum()`, `uploadBytes()`, `renovarAccessToken()`, etc.).
+   - Classe abstrata ou concreta em `src/Infra/{Sistema}/` isolando comandos de CLI, I/O de disco ou chamadas de API.
+3. **Serviços de Armazenamento Local e Processos (`src/Infra/Storage/`, `src/Infra/YtDlp/`)**:
+   - Operações de sistema de arquivos (copiar, mover, apagar, criar diretório com permissão restrita `0755`) devem ser abstraídas em clientes de Infra (ex: `ArmazenamentoLocalClient`). Proibido usar a arroba `@` para suprimir erros de exclusão — valide o retorno de `unlink` e trate erros adequadamente.
 4. **Configuração DI (`config/services.yaml`)**:
-   - Registra o `GuzzleHttp\Client` do serviço com `base_uri` e o injeta na classe `{Sistema}API`.
-5. **Exceções Personalizadas (`src/Exception/`)**:
-   - Crie exceções sob `src/Exception/` estendendo `ClienteHTTPException` para tratamento refinado de erros externos.
+   - Parâmetros como `%env(GOOGLE_CLIENT_ID)%` e `%env(MEDIA_STORAGE_PATH)%` são injetados diretamente via construtor no `services.yaml`. Proibido ler `$_ENV` ou `getenv()` manualmente dentro de métodos de serviços de negócio.
+5. **Exceções Personalizadas por Contexto (`src/Exception/`)**:
+   - **PROIBIDO**: Lançar exceções genéricas nativas do PHP (`throw new \DomainException(...)`, `throw new \RuntimeException(...)`, `throw new \Exception(...)`) diretamente no corpo dos métodos.
+   - **PROIBIDO**: Usar identificadores curtos com snake_case (ex: `'erro_salvar_arquivo'`) como mensagem de exceção. **A mensagem da exceção (primeiro argumento) deve ser uma frase completa, clara e altamente descritiva em português**.
+   - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: [`App\Exception\YtDlpException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/YtDlpException.php), [`App\Exception\ArmazenamentoLocalException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/ArmazenamentoLocalException.php), [`App\Exception\MediaItemException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/MediaItemException.php), [`App\Exception\UploadManualException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/UploadManualException.php)).
+   - **Métodos Construtores Estáticos Descritivos**: O código lança a exceção exclusivamente chamando seus métodos estáticos em camelCase com mensagens em linguagem natural descritivas (ex: `throw YtDlpException::falhaAoExtrairMetadataDoVideo();`, `throw UploadManualException::falhaAoSalvarArquivoDeUpload();`, `throw ArmazenamentoLocalException::falhaAoCriarDiretorioDeArmazenamento();`).
+
+```php
+namespace App\Exception;
+
+class YtDlpException extends \DomainException
+{
+    public static function falhaAoExtrairMetadataDoVideo(): self
+    {
+        return new self('Falha ao extrair os metadados do vídeo utilizando o yt-dlp.', 400);
+    }
+
+    public static function falhaAoEfetuarDownloadDoVideo(): self
+    {
+        return new self('Ocorreu uma falha durante o download do vídeo pelo yt-dlp.', 500);
+    }
+}
+```
+
+### 4.10 Uso Obrigatório de Constantes e Tipagem Múltipla (Proibição de Magic Values)
+
+**PROIBIDO** utilizar valores numéricos soltos (*magic numbers*) ou strings literais de comportamento/configuração espalhados no corpo dos métodos.
+
+1. **Configurações e Comportamentos**: Timeouts (`TIMEOUT_EXTRACAO_SEGUNDOS = 60.0`), permissões de diretório (`PERMISSAO_DIRETORIO_PADRAO = 0755`), algoritmos (`ALGORITMO_HASH_SHA256 = 'sha256'`), formatos de data/arquivo e subdiretórios temporários **devem obrigatoriamente** ser declarados como `private const` ou `public const` no topo da classe.
+2. **Exceções via Métodos Estáticos**: Códigos de erro HTTP e mensagens estáveis ficam encapsulados dentro das exceções personalizadas em `src/Exception/` (ver § 4.9.5).
+3. **Chaves de Metadados Compartilhadas**: Chaves de array usadas para leitura/gravação de metadados (`url_original`, `nome_original`, `timestamp_captura`) devem utilizar constantes centrais (ex: [`App\Support\MetadataKeys`](file:///home/gabriel/dev/CirqueiraX/src/Support/MetadataKeys.php)).
+
+### 4.11 Object Calisthenics Aplicado ao Projeto
+
+1. **Um nível de indentação por método**: Métodos de Service com loops/condicionais aninhadas devem extrair o corpo do loop/bloco para métodos privados nomeados (ex: `apagarItemIndividual()`).
+2. **Não use `else`**: Sempre inverta a condição e retorne cedo (Guard Clauses).
+3. **Encapsule tipos primitivos (Value Objects e Enums)**: Strings de regra (hash, URLs, status) devem ser Enums (`OrigemMedia`, `StatusMediaItem`), VOs ou checadas via helpers centralizados (`TextoUtil::estaEmBranco()`).
+4. **Coleções de Primeira Classe e DTOs de Saída**: Evite arrays anônimos soltos sem nome para estruturas fixas de retorno.
+5. **Um ponto por linha (Lei de Demeter)**: Evite encadear chamadas longas ou nulas (`$item->uuid()?->toString()`). Encapsule a intenção na entidade ou helper.
+6. **Não abrevie nomes**: Nomes em português completos e descritivos em exceções, variáveis e métodos (`falhaAoExtrairMetadataDoVideo()`).
+7. **Classes e métodos pequenos**: Métodos de `executar()` com mais de ~25 linhas devem ser divididos em passos privados nomeados.
+8. **Métodos de intenção nas Entidades**: Evite sequências de `set*()` soltos no Service. A Entidade deve conter métodos com significado de negócio (ex: `transicionarPara()`, `classificarComo()`).
+9. **Máximo de dependências por Service**: Services com 5+ dependências injetadas devem ser refatorados dividindo responsabilidades ou convertidos em Feature.
+
+### 4.12 Clean Code — Princípios Fundamentais
+
+- **Uma única responsabilidade por método**: Sem duplicação de mapeamento ou transformação de dados.
+- **Trate erros com exceções de contexto**: Nunca exponha mensagens brutas de exceções internas (`$e->getMessage()`) para respostas de API HTTP.
+- **DRY (Don't Repeat Yourself)**: Lógicas de validação de guarda ou regras idênticas entre múltiplos services devem ser centralizadas num helper ou serviço compartilhado.
+- **Fronteiras Claras entre Camadas**: Tipos de infraestrutura externa (JSON de APIs terceiras) devem ser mapeados em DTOs/Value Objects antes de entrar na camada de negócio.
+
+### 4.13 Boas Práticas Específicas do Symfony e Performance
+
+- **Classes `final` com Interface para Portas**: Classes de infraestrutura e serviços de I/O devem ser `final` e implementar uma interface em `src/Interface/` (`ArmazenamentoInterface`, `ExtratorVideoInterface`).
+- **Otimização de Flush em Lote (Prevenção de N+1 Queries e Transactions)**: Em métodos que executam ações em lote no Repository (ex: exclusão de N itens em loop), chame `$repository->remover($item, flush: false)` dentro do loop e execute uma única chamada a `$repository->flush()` **após o término do loop**.
+- **DTOs de Saída em Vez de Arrays Anônimos**: Retornos estruturados de serviços (ex: resultado de upload com flag de duplicado) devem utilizar DTOs de saída dedicados (`ResultadoUploadDTO`), evitando arrays genéricos não-tipados.
+- **Injeção de Parâmetros via DI (`services.yaml`)**: Nunca use `$_ENV` ou `getenv()` dentro de métodos. Injete parâmetros no `services.yaml`.
+- **Value Resolvers HTTP**: Use `MapRequestPayload` / `MapQueryString` por padrão (exceto uploads multipart/form-data com arquivos, que usam `fromRequest()`).
+- **Mensageria**: MessageHandlers devem servir apenas como porta de entrada delegadora, sem conter lógica de negócio.
 
 ---
 
@@ -337,11 +387,32 @@ Toda integração com APIs/sistemas externos deve ser desacoplada em `src/Infra/
 
 - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` — só primitivos de `@/shared/ui/layout`
 - [ ] Sem Header/Footer na página
+- [ ] Sem `any`, sem `ts-ignore`
+- [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return
+- [ ] Nenhum Service usa `\DomainException` genérica — sempre exceção por contexto com método estático
+- [ ] Nenhuma exceção interna (`getMessage()`) é exposta em payload de resposta HTTP
+- [ ] Nenhum Client de I/O ou Infra é `final` sem uma Interface correspondente em `src/Interface/`
+- [ ] Nenhum método de mapeamento de resposta externa duplicado em dois Services — extrair Mapper/DTO único
+- [ ] Nenhuma checagem de "string em branco" repetida com sintaxe diferente — usar `TextoUtil`
+- [ ] Nenhum método proxy que só chama outro método com nome diferente — escolher um nome e eliminar o outro
+- [ ] Nenhum parâmetro de método declarado e nunca usado no corpo
+- [ ] Toda mudança de comportamento de negócio vem em commit separado de reorganização de pastas/namespaces
+- [ ] Toda constante de chave de array de metadata usa `App\Support\MetadataKeys`, nunca string solta
+- [ ] Método de Service com mais de ~25 linhas de corpo é candidato a extrair passos privados nomeados
+- [ ] Regra de negócio de transição de estado mora na Entidade (método de intenção), nunca em dois `set*()` soltos chamados em sequência pelo Service
+- [ ] Loops de remoção/persistência em lote usam `flush: false` e disparam um único `$repository->flush()` ao final
+- [ ] Operações com retornos compostos devolvem DTOs de saída dedicados (ex: `ResultadoUploadDTO`) em vez de arrays genéricos
 - [ ] Sem `useEffect`
 - [ ] Sem Axios fora de `config/api.ts` e dos `api.ts` da feature
 - [ ] Controller extends `DefaultController`; só chama Service ou Feature; retorna `$this->success()` / `$this->error()` (`Response`)
 - [ ] Lógica só no Service (ou Feature orquestrando services) — zero query, zero EntityManager
-- [ ] Lógica grande ou repetida → vários services + interface + `TaggedIterator` na Feature, nunca um arquivo só
+- [ ] Service não excede 3 métodos de ação de negócio — refatorado em Feature/Services se crescer
+- [ ] Injeção direta de Services especificos no Controller/Command — zero fachadas mortas que descartam retornos
+- [ ] Processamento em lote captura `\Throwable` por item e retorna relatório `{ removidos: [...], falhas: [...], total: int }`
+- [ ] Injeção de dependência 100% via DI no construtor — zero `new Service()` manual e zero leitura crua de `$_ENV`/`getenv()`
+- [ ] Sem I/O cru de sistema de arquivos (`mkdir`, `copy`, `unlink`, `@unlink`) ou `Process` no Service — isolado em `src/Infra/`
+- [ ] Exceções personalizadas em `src/Exception/` com métodos estáticos por contexto — zero `throw new \DomainException()` genérico
+- [ ] Zero magic values/strings no corpo dos métodos — utilizar `private const` e `MetadataKeys`
 - [ ] Toda consulta/persistência no Repository
 - [ ] Contrato novo em `src/Interface/{Nome}Interface.php`
 - [ ] DTO validado, sem setter

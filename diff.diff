@@ -1,0 +1,4206 @@
+diff --git a/ROADMAP.md b/ROADMAP.md
+index 6102497..6a3903a 100644
+--- a/ROADMAP.md
++++ b/ROADMAP.md
+@@ -50,8 +50,8 @@
+ - [x] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**
+ - [x] **92. Endpoint POST /api/v1/media-itens/upload (upload manual)**
+ - [x] **93. UploadManualDTO e validação de tipo de arquivo**
+-- [ ] **94. UploadManualService — checagem de duplicidade por hash**
+-- [ ] **95. Resposta de duplicidade (aviso, não bloqueio)**
++- [x] **94. UploadManualService — checagem de duplicidade por hash**
++- [x] **95. Resposta de duplicidade (aviso, não bloqueio)**
+ - [ ] **96. Frontend — estrutura da feature upload-manual**
+ - [ ] **97. Frontend — componente de dropzone**
+ - [ ] **98. Frontend — fila de triagem pós-upload**
+diff --git a/config/services.yaml b/config/services.yaml
+index da4364b..9b1c8e0 100644
+--- a/config/services.yaml
++++ b/config/services.yaml
+@@ -32,12 +32,12 @@ services:
+         arguments:
+             $chaveSecreta: '%env(APP_SECRET)%'
+ 
+-    App\Service\DistribuirLocalService:
++    App\Service\Distribuicao\DistribuirLocalService:
+         arguments:
+             $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'
+             $projectDir: '%kernel.project_dir%'
+ 
+-    App\Service\GoogleFotosOAuthService:
++    App\Service\GoogleFotos\GoogleFotosOAuthService:
+         arguments:
+             $clientId: '%env(GOOGLE_CLIENT_ID)%'
+             $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
+diff --git "a/documentation/guias/Estrutura\303\247\303\243o.md" "b/documentation/guias/Estrutura\303\247\303\243o.md"
+index 7c06969..561b1f6 100644
+--- "a/documentation/guias/Estrutura\303\247\303\243o.md"
++++ "b/documentation/guias/Estrutura\303\247\303\243o.md"
+@@ -449,9 +449,7 @@ Regras:
+ 
+ ### 13.1 Controllers
+ 
+-#### Onde ficam os controllers
+-
+-Os controllers de **API** ficam em subpastas por tópico (`Auth/`, `Admin/`, …) e **sempre** extends `DefaultController`. O HTML da SPA fica em `FrontendController`.
++Os controllers de **API** e de **Sistema** ficam obrigatoriamente em subpastas por contexto (`MediaItem/`, `Ingestao/`, `Video/`, `Categoria/`, `OrigemRegra/`, `Sistema/`, `Common/`, etc.) e **sempre** extendem `DefaultController` (localizado em `src/Controller/Common/DefaultController.php`). O HTML da SPA fica em `src/Controller/Sistema/FrontendController.php`. Nunca deixe controllers soltos na raiz de `src/Controller/`.
+ 
+ #### Regra principal dos controllers
+ 
+@@ -478,18 +476,18 @@ Confundi-los gera acoplamentos errados.
+ 
+ **Regra:** Se pode ser testado unitariamente sem nenhum mock de infraestrutura (banco, HTTP), é um **Domain Service**.
+ 
+-#### 13.2.2 Feature (`src/Feature/`)
+-
+-**Proibido** concentrar lógica grande num único arquivo. Sempre que a lógica for grande, repetida ou tiver várias peças, parta em vários services com a mesma interface e uma Feature com `#[TaggedIterator]`. A Feature só itera; não faz query. Nova peça = nova classe. Detalhe: [PARA-IA.md](PARA-IA.md) § 4.7.
++#### 13.2.2 Use Cases & Services (`src/Service/`)
+ 
+-Um Service único e atômico (criar, buscar) não vira Feature.
++Os **Use Cases / Application Services** residem em `src/Service/{Contexto}/` e representam as operações reais da aplicação (ex: `UploadManualService`, `ClassificarMediaItemService`, `ApagarMediaItemService`).
+ 
+-#### 13.2.3 Interface (`src/Interface/`)
++- Cada Use Case encapsula o fluxo de uma operação de negócio (validação de regras, chamada de repositórios e clientes de infraestrutura).
++- Controllers injetam os Use Cases diretamente. **É proibido criar "Features" delegadoras que apenas repassem chamadas `$this->service->metodo()`**.
++- Não existem limites estatísticos artificiais (ex: "máximo 3 métodos"). A divisão deve ser guiada estritamente por coesão e responsabilidade.
+ 
+-Contratos PHP em `src/Interface/{Nome}Interface.php`.
++#### 13.2.3 Interfaces e TaggedIterator (`src/Interface/`, `src/Feature/`)
+ 
+-- Porta (repositório, HTTP, fila): Service/Feature tipam a interface.
+-- Vários services do mesmo fluxo: `#[AutoconfigureTag('app.…')]` na interface; cada Service implementa; a Feature usa `TaggedIterator`. **É o jeito padrão de organizar**, não um caso especial.
++- **Interfaces (`src/Interface/`)**: Devem ser criadas quando houver mais de uma implementação concreta (ex: `ArmazenamentoInterface`, `ExtratorVideoInterface`) ou quando a testabilidade com mocks for necessária. Não crie interfaces por dogmatismo quando só existe uma implementação sem plano de extensão.
++- **Features com TaggedIterator (`src/Feature/`)**: Utilizadas exclusivamente para pipelines ou coleções dinâmicas de regras/estratégias expansíveis que utilizam `#[TaggedIterator]` (detalhes em [PARA-IA.md](PARA-IA.md) § 4.7).
+ 
+ ---
+ 
+@@ -678,7 +676,11 @@ Toda comunicação HTTP com APIs/sistemas externos deve ser desacoplada na camad
+ * **Cliente por Sistema (`src/Infra/{Sistema}/{Sistema}Client.php`)**: Classe abstrata que estende `App\Infra\Client` e define a `$baseUrl`.
+ * **API do Sistema (`src/Infra/{Sistema}/{Sistema}API.php`)**: Classe concreta estendendo `{Sistema}Client` que expõe os métodos de ação de negócio da API (ex: `criarAlbum()`, `uploadBytes()`, `renovarAccessToken()`).
+ * **Injeção DI (`config/services.yaml`)**: Registra instâncias do `GuzzleHttp\Client` com `base_uri` configurada e as injeta em `{Sistema}API`.
+-* **Exceções Personalizadas (`src/Exception/`)**: Exceções estendendo `ClienteHTTPException` para tratamento de erros em requisições de clientes externos.
++* **Exceções Personalizadas por Contexto (`src/Exception/`)**: 
++  - **PROIBIDO**: Lançar exceções genéricas nativas do PHP (`throw new \DomainException(...)`, `throw new \RuntimeException(...)`, `throw new \Exception(...)`) diretamente no corpo dos métodos.
++  - **PROIBIDO**: Usar constantes literais de erro soltas para instanciar exceções genéricas.
++  - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: `YtDlpException`, `ArmazenamentoLocalException`, `MediaItemException`).
++  - **Métodos Construtores Estáticos (Static Factory Methods)**: Dentro de cada exceção personalizada, crie métodos estáticos nomeados para cada erro do contexto. O código lança a exceção exclusivamente chamando seu construtor estático (ex: `throw YtDlpException::erroExtrairMetadata();` ou `throw ArmazenamentoLocalException::erroCriarDiretorio();`).
+ 
+ ---
+ 
+diff --git a/documentation/guias/PARA-IA.md b/documentation/guias/PARA-IA.md
+index 679bb07..46a34ec 100644
+--- a/documentation/guias/PARA-IA.md
++++ b/documentation/guias/PARA-IA.md
+@@ -58,12 +58,16 @@ Regra: 2+ arquivos do mesmo assunto → `features/{feature}/`. Reutilizável →
+ 
+ ### Backend (`src/`)
+ 
++> [!IMPORTANT]
++> **Regra de Organização Obrigatória**: É estritamente **PROIBIDO** deixar arquivos soltos na raiz de `src/Service/`, `src/Exception/`, `src/Controller/` ou `src/Feature/`. Todos os arquivos devem **obrigatoriamente** ficar dentro de uma subpasta de contexto (ex: `MediaItem/`, `Ingestao/`, `Video/`, `GoogleFotos/`, `Storage/`, `Sistema/`). Se a pasta de contexto contiver muitos arquivos, crie subcategorias dentro dela.
++
+ | O quê | Onde |
+ | :--- | :--- |
+-| HTTP da API | `src/Controller/{Categoria}/` — **sempre** extends `DefaultController` |
+-| SPA / Twig | `src/Controller/FrontendController.php` |
+-| Caso de uso | `src/Service/{Funcionalidade}/VerboEntidadeService.php` |
+-| Caso de uso grande / repetido | `src/Feature/{Nome}Feature.php` + vários `*Service` + `TaggedIterator` |
++| HTTP da API | `src/Controller/{Contexto}/` — **sempre** em subpasta de contexto e extends `DefaultController` |
++| SPA / Twig | `src/Controller/Sistema/FrontendController.php` |
++| Caso de uso (Service) | `src/Service/{Contexto}/VerboEntidadeService.php` — **sempre** em subpasta de contexto |
++| Estratégia expansível / Pipeline | `src/Feature/{Contexto}/{Nome}Feature.php` — para algoritmos e regras dinâmicas |
++| Exceções personalizadas | `src/Exception/{Contexto}/{Nome}Exception.php` — **sempre** em subpasta com métodos estáticos descritivos em PT-BR |
+ | Banco | `src/Repository/` — único lugar com Doctrine |
+ | Contrato PHP | `src/Interface/{Nome}Interface.php` |
+ | Entrada da API | `src/DataObject/` — sufixo `DTO` |
+@@ -72,7 +76,6 @@ Regra: 2+ arquivos do mesmo assunto → `features/{feature}/`. Reutilizável →
+ | Enum fechado | `src/Enum/` |
+ | Evento + reação | `src/EventListener/` — fato em `Event/`, reação ao lado |
+ | Clientes HTTP externos | `src/Infra/{Sistema}/{Sistema}Client.php` e `src/Infra/{Sistema}/{Sistema}API.php` |
+-| Exceções personalizadas | `src/Exception/` |
+ 
+ ---
+ 
+@@ -155,20 +158,20 @@ export function usePedidos() {
+ 
+ ## 4. Backend — como construir
+ 
+-Três camadas, sem exceção:
++Três camadas com responsabilidades claras:
+ 
+ | Camada | Faz | Não faz |
+ | :--- | :--- | :--- |
+-| **Controller** | Rota, DTO, chamar Service ou Feature, `$this->success()` / `$this->error()` | Regra de negócio, query, EntityManager |
+-| **Service** | Uma ação de negócio, devolve o dado | Query; não empilhar 4+ ações no mesmo arquivo |
+-| **Feature** | Orquestra vários services via `TaggedIterator` | Query; lógica toda num arquivo só |
+-| **Repository** | Toda consulta e persistência | Regra de negócio HTTP |
++| **Controller** | Rota, DTO de entrada, chamar Use Case diretamente, retornar `$this->success()` / `$this->error()` | Regra de negócio, query, EntityManager, fachadas delegadoras |
++| **Use Case (Service)** | Uma operação/caso de uso coeso (ex: `UploadManualService`, `ClassificarMediaItemService`), orquestra domínio e infraestrutura | Query Doctrine; DTO com I/O; repassar chamadas sem valor |
++| **Repository** | Toda consulta e persistência Doctrine | Regra de negócio HTTP ou I/O externo |
++| **Infraestrutura** | Filesystem, chamadas de API externas, processos CLI (`yt-dlp`), clientes HTTP | Regra de negócio do domínio |
+ 
+-Comece pelo **Controller** (contrato da rota). Em seguida o Service com a lógica. Toda busca (`find`, `createQueryBuilder`, SQL, `persist`, `flush`) vai para um método do Repository — o Service só chama esse método.
++Comece pelo **Controller** (contrato da rota). Ele injeta diretamente os **Use Cases (Services)** necessários para a operação. Cada Use Case encapsula o fluxo de um caso de uso real (validar invariantes, acionar repositórios/infraestrutura e persistir). Toda busca (`find`, `createQueryBuilder`, SQL, `persist`, `flush`) vai para um método do Repository — o Use Case só chama esse método.
+ 
+ ### 4.1 Controller
+ 
+-Crie o Controller **primeiro**. Extends `DefaultController`. Corpo: ler DTO → chamar Service (ou Feature) → `$this->success()` / `$this->created()` / `$this->error()`. Sempre `Response`. Nada além disso.
++Crie o Controller **primeiro**. Extends `DefaultController`. Corpo: ler DTO → chamar Use Case diretamente → `$this->success()` / `$this->created()` / `$this->error()`. Sempre `Response`. Nada além disso.
+ 
+ Envelope JSON: `{ success, data }` ou `{ success, error, details? }`. Chaves em **inglês**.
+ 
+@@ -184,14 +187,14 @@ public function criar(#[MapRequestPayload] CriarPedidoDTO $dto): Response
+ 
+ Rotas: prefixo `/api/v1/`, recurso no **plural**.
+ 
+-Handler de fila (módulo `async`): mesma regra — zero regra de negócio; chama um Service.
++Handler de fila (módulo `async`): mesma regra — zero regra de negócio; chama um Use Case.
+ 
+ ### 4.2 Entidade
+ 
+ - UUID como PK nas entidades **novas** (`doctrine.uuid_generator`).
+ - Getter **sem** `get`: `nome()`, não `getNome()` — salvo contrato do Symfony (`UserInterface`).
+ - Setter `setNome(): self`.
+-- Fábrica `fromDTO`.
++- Métodos de intenção de domínio (Tell, Don't Ask): `$mediaItem->classificarComo($categoria)`, `$mediaItem->marcarParaDownload()`, `$mediaItem->registrarErro($motivo)`. Proibido sequências de `set*()` soltos no Use Case quando existe uma operação de domínio.
+ - Conjunto fechado de valores → Enum em `src/Enum/`, não string solta.
+ 
+ ### 4.3 Migration
+@@ -201,62 +204,53 @@ make new-migration
+ make migrate
+ ```
+ 
+-Revise o SQL antes de aplicar.
++Revise o SQL antes de aplicar. Garanta índices e restrições de unicidade (`UNIQUE INDEX`) no banco para campos de unicidade de domínio (`hash`, `nome`, `origem`).
+ 
+ ### 4.4 Repository
+ 
+ **Único** lugar com query. `find`, `createQueryBuilder`, DQL, SQL, `persist`, `flush` — só aqui.
+ 
+-**Proibido** no Service e no Controller: `EntityManagerInterface`, `createQueryBuilder`, `findBy`, consulta crua.
++**Proibido** no Use Case e no Controller: `EntityManagerInterface`, `createQueryBuilder`, `findBy`, consulta crua.
+ 
+-O Service pede dados com um método de intenção (`buscarPorUuid`, `usernameJaExiste`, `salvar`). Se a consulta ainda não existe, crie no Repository — não escreva a query no Service.
++O Use Case pede dados com um método de intenção (`buscarPorUuid`, `buscarPorHash`, `salvar`). Se a consulta ainda não existe, crie no Repository — não escreva a query no Use Case.
+ 
+-Contrato do repositório (e de qualquer porta: cliente HTTP, fila) vai em `src/Interface/{Nome}Interface.php`. O Service/Feature tipa a interface, não a classe concreta.
++Contrato do repositório (e de qualquer porta: cliente HTTP, armazenamento) vai em `src/Interface/{Nome}Interface.php`. O Use Case tipa a interface, não a classe concreta.
+ 
+ ### 4.5 DTO
+ 
+ `final readonly class` em `src/DataObject/`, nome `VerboEntidadeDTO`. Sem setters. Getter = nome da propriedade. Validar com `#[Assert\…]`. Entrada HTTP via `MapRequestPayload` / `MapQueryString` — não monte array na mão com `$request->get()`.
+ 
+-### 4.6 Service
++> [!IMPORTANT]
++> **DTO é carregador de dados puro**: É estritamente **PROIBIDO** que um DTO acesse o sistema de arquivos (`file_exists`, `hash_file`, `is_readable`), chame serviços de I/O ou execute validações de infraestrutura. O DTO apenas transporta dados. Cálculos de hash ou checagens de arquivo pertencem ao Use Case ou à camada de Infraestrutura (`ArmazenamentoInterface`).
++
++### 4.6 Use Cases (Services)
+ 
+-Toda lógica de negócio fica **aqui**, não no Controller. Um service = **uma ação**. Nome: `CriarPedidoService`. `final class`, deps no construtor, um método `executar()` que devolve o dado.
++Toda lógica de negócio fica no **Use Case**, não no Controller. Cada Use Case representa uma operação coesa da aplicação (ex: `UploadManualService`, `ClassificarMediaItemService`, `ApagarMediaItemService`). `final class`, dependências no construtor DI.
+ 
+ - Sem Request/Response.
+-- **Sem query.** Precisa de dado do banco? Chame o Repository. Não monte QueryBuilder, DQL nem `find` no Service.
+-- Erro previsto (duplicado, estado inválido) → `throw new \DomainException('codigo_duplicado', 409)`. O `KernelExceptionListener` responde `{ success: false, error }`.
++- **Sem query.** Precisa de dado do banco? Chame o Repository. Não monte QueryBuilder, DQL nem `find` no Use Case.
++- **Não crie fachadas delegadoras**: É proibido criar classes intermediárias (ex: "Features" delegadoras) apenas para repassar chamadas `$this->service->metodo()`. O Controller deve injetar os Use Cases diretamente.
++- **Divida por Coesão, não por Contagem de Métodos**: Não existe limite artificial de 3 métodos. Uma classe com 5 métodos coesos é infinitamente melhor que 5 classes artificiais de 1 método que apenas repassam chamadas.
++- **Sem `new Service()` manual**: Injete dependências no construtor via Container DI do Symfony.
++- **Processamento em Lote Resiliente**: Métodos em lote devem capturar **exceções esperadas** (de domínio ou armazenamento), logar/coletar a falha em um mapa e continuar o loop. **NUNCA** use `catch (\Throwable)` indiscriminadamente — erros de programação (`TypeError`, `Error`, `LogicException`) devem falhar rapidamente para serem corrigidos.
++- **Substitua Arrays Mágicos por Result Objects**: Operações com múltiplos retornos (ex: upload com flag de duplicado, lote de apagar) devem retornar DTOs de saída dedicados (`ResultadoUploadDTO`), evitando `array{mediaItem: ..., duplicado: true}`.
+ - Guard clauses baratas primeiro (dado local → memória → Repository → API externa).
+ 
+-```php
+-public function executar(CriarPedidoDTO $dto): Pedido
+-{
+-    if ($this->repositorio->jaExiste($dto->codigo())) {
+-        throw new \DomainException('codigo_duplicado', 409);
+-    }
+-    $pedido = Pedido::fromDTO($dto);
+-    $this->repositorio->salvar($pedido);
+-
+-    return $pedido;
+-}
+-```
+-
+-### 4.7 Feature e tagged iterator
+-
+-**Proibido** juntar a lógica grande num único Service/arquivo (`if`, `switch`, quatro `executar()`). Sempre que a lógica for grande, repetida ou tiver várias peças, **parta em vários services** com a mesma interface e deixe a Feature só iterar. Como vão ser vários services, **organize sempre assim** — não injete um por um “na mão”.
++### 4.7 Quando usar Interfaces e TaggedIterator
+ 
+-Fluxo obrigatório:
+-
+-1. Interface em `src/Interface/` com tag.
+-2. Um Service pequeno por regra/peça (`src/Service/`).
+-3. Feature em `src/Feature/` com `#[TaggedIterator]`. Sem query, sem HTTP.
++**Não crie interfaces nem abstrações para tudo por hábito**. Crie interfaces e estratégias dinâmicas em `src/Interface/` e `src/Feature/` apenas quando houver:
++1. Mais de uma implementação concreta (ex: `ArmazenamentoLocalClient`, `YtDlpClient`).
++2. Necessidade real de estratégias expansíveis (ex: regras de classificação dinâmicas via `#[TaggedIterator]`).
++3. Fronteiras de integração de infraestrutura que exigem substituição em testes.
+ 
+ ```php
+ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+ 
+-#[AutoconfigureTag('app.regra_desconto')]
+-interface RegraDescontoInterface
++#[AutoconfigureTag('app.regra_classificacao')]
++interface RegraClassificacaoInterface
+ {
+-    public function suporta(Pedido $pedido): bool;
+-    public function aplicar(Pedido $pedido): void;
++    public function suporta(MediaItem $item): bool;
++    public function classificar(MediaItem $item): ?Categoria;
+ }
+ ```
+ 
+@@ -304,22 +298,78 @@ Nunca devolva entidade crua. Array estável: `uuid`, campos, timestamps.
+ 
+ ### 4.9 Clientes HTTP e Infraestrutura (`src/Infra/` e `src/Exception/`)
+ 
+-**PROIBIDO**: Fazer requisições HTTP cruas (`HttpClientInterface` ou `$client->request()`) diretamente em Services ou Commands.
++**PROIBIDO**: Fazer requisições HTTP cruas (`HttpClientInterface` ou `$client->request()`), comandos de processos externos (`Symfony\Component\Process\Process`) ou chamadas diretas de sistema de arquivos (`mkdir`, `copy`, `unlink`, `file_exists`, `@unlink`) diretamente em Services ou Commands.
+ 
+-Toda integração com APIs/sistemas externos deve ser desacoplada em `src/Infra/{Sistema}/`:
++Toda integração com APIs, sistemas externos, processos CLI (`yt-dlp`) ou armazenamento de sistema de arquivos deve ser desacoplada na camada de infraestrutura sob `src/Infra/{Sistema}/`:
+ 
+ 1. **Base Client Abstrato (`src/Infra/Client.php`)**:
+    - Injeta `\GuzzleHttp\ClientInterface` e `baseUrl`.
+    - Método `protected function request()` executa a requisição, trata `RequestException` via `executarRequisicao()`, deserializa via Symfony Serializer (se `$type` for informado) ou decodifica JSON e valida via `Assert::isArray()`.
+    - Método `protected function requestRaw()` para respostas puras em string.
+ 2. **Cliente por Sistema (`src/Infra/{Sistema}/{Sistema}Client.php`)**:
+-   - Classe abstrata estendendo `App\Infra\Client` configurando a `$baseUrl` no construtor.
+-3. **API do Sistema (`src/Infra/{Sistema}/{Sistema}API.php`)**:
+-   - Classe concreta estendendo `{Sistema}Client` implementando os métodos de ação (`criarAlbum()`, `uploadBytes()`, `renovarAccessToken()`, etc.).
++   - Classe abstrata ou concreta em `src/Infra/{Sistema}/` isolando comandos de CLI, I/O de disco ou chamadas de API.
++3. **Serviços de Armazenamento Local e Processos (`src/Infra/Storage/`, `src/Infra/YtDlp/`)**:
++   - Operações de sistema de arquivos (copiar, mover, apagar, criar diretório com permissão restrita `0755`) devem ser abstraídas em clientes de Infra (ex: `ArmazenamentoLocalClient`). Proibido usar a arroba `@` para suprimir erros de exclusão — valide o retorno de `unlink` e trate erros adequadamente.
+ 4. **Configuração DI (`config/services.yaml`)**:
+-   - Registra o `GuzzleHttp\Client` do serviço com `base_uri` e o injeta na classe `{Sistema}API`.
+-5. **Exceções Personalizadas (`src/Exception/`)**:
+-   - Crie exceções sob `src/Exception/` estendendo `ClienteHTTPException` para tratamento refinado de erros externos.
++   - Parâmetros como `%env(GOOGLE_CLIENT_ID)%` e `%env(MEDIA_STORAGE_PATH)%` são injetados diretamente via construtor no `services.yaml`. Proibido ler `$_ENV` ou `getenv()` manualmente dentro de métodos de serviços de negócio.
++5. **Exceções Personalizadas por Contexto (`src/Exception/`)**:
++   - **PROIBIDO**: Lançar exceções genéricas nativas do PHP (`throw new \DomainException(...)`, `throw new \RuntimeException(...)`, `throw new \Exception(...)`) diretamente no corpo dos métodos.
++   - **PROIBIDO**: Usar identificadores curtos com snake_case (ex: `'erro_salvar_arquivo'`) como mensagem de exceção. **A mensagem da exceção (primeiro argumento) deve ser uma frase completa, clara e altamente descritiva em português**.
++   - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: [`App\Exception\YtDlpException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/YtDlpException.php), [`App\Exception\ArmazenamentoLocalException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/ArmazenamentoLocalException.php), [`App\Exception\MediaItemException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/MediaItemException.php), [`App\Exception\UploadManualException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/UploadManualException.php)).
++   - **Métodos Construtores Estáticos Descritivos**: O código lança a exceção exclusivamente chamando seus métodos estáticos em camelCase com mensagens em linguagem natural descritivas (ex: `throw YtDlpException::falhaAoExtrairMetadataDoVideo();`, `throw UploadManualException::falhaAoSalvarArquivoDeUpload();`, `throw ArmazenamentoLocalException::falhaAoCriarDiretorioDeArmazenamento();`).
++
++```php
++namespace App\Exception;
++
++class YtDlpException extends \DomainException
++{
++    public static function falhaAoExtrairMetadataDoVideo(): self
++    {
++        return new self('Falha ao extrair os metadados do vídeo utilizando o yt-dlp.', 400);
++    }
++
++    public static function falhaAoEfetuarDownloadDoVideo(): self
++    {
++        return new self('Ocorreu uma falha durante o download do vídeo pelo yt-dlp.', 500);
++    }
++}
++```
++
++### 4.10 Uso Obrigatório de Constantes e Tipagem Múltipla (Proibição de Magic Values)
++
++**PROIBIDO** utilizar valores numéricos soltos (*magic numbers*) ou strings literais de comportamento/configuração espalhados no corpo dos métodos.
++
++1. **Configurações e Comportamentos**: Timeouts (`TIMEOUT_EXTRACAO_SEGUNDOS = 60.0`), permissões de diretório (`PERMISSAO_DIRETORIO_PADRAO = 0755`), algoritmos (`ALGORITMO_HASH_SHA256 = 'sha256'`), formatos de data/arquivo e subdiretórios temporários **devem obrigatoriamente** ser declarados como `private const` ou `public const` no topo da classe.
++2. **Exceções via Métodos Estáticos**: Códigos de erro HTTP e mensagens estáveis ficam encapsulados dentro das exceções personalizadas em `src/Exception/` (ver § 4.9.5).
++3. **Chaves de Metadados Compartilhadas**: Chaves de array usadas para leitura/gravação de metadados (`url_original`, `nome_original`, `timestamp_captura`) devem utilizar constantes centrais (ex: [`App\Support\MetadataKeys`](file:///home/gabriel/dev/CirqueiraX/src/Support/MetadataKeys.php)).
++
++### 4.11 Object Calisthenics Aplicado ao Projeto
++
++1. **Um nível de indentação por método**: Métodos de Service com loops/condicionais aninhadas devem extrair o corpo do loop/bloco para métodos privados nomeados (ex: `apagarItemIndividual()`).
++2. **Não use `else`**: Sempre inverta a condição e retorne cedo (Guard Clauses).
++3. **Encapsule tipos primitivos (Value Objects e Enums)**: Strings de regra (hash, URLs, status) devem ser Enums (`OrigemMedia`, `StatusMediaItem`), VOs ou checadas via helpers centralizados (`TextoUtil::estaEmBranco()`).
++4. **Coleções de Primeira Classe e DTOs de Saída**: Evite arrays anônimos soltos sem nome para estruturas fixas de retorno.
++5. **Um ponto por linha (Lei de Demeter)**: Evite encadear chamadas longas ou nulas (`$item->uuid()?->toString()`). Encapsule a intenção na entidade ou helper.
++6. **Não abrevie nomes**: Nomes em português completos e descritivos em exceções, variáveis e métodos (`falhaAoExtrairMetadataDoVideo()`).
++7. **Classes e métodos pequenos**: Métodos de `executar()` com mais de ~25 linhas devem ser divididos em passos privados nomeados.
++8. **Métodos de intenção nas Entidades**: Evite sequências de `set*()` soltos no Service. A Entidade deve conter métodos com significado de negócio (ex: `transicionarPara()`, `classificarComo()`).
++9. **Máximo de dependências por Service**: Services com 5+ dependências injetadas devem ser refatorados dividindo responsabilidades ou convertidos em Feature.
++
++### 4.12 Clean Code — Princípios Fundamentais
++
++- **Uma única responsabilidade por método**: Sem duplicação de mapeamento ou transformação de dados.
++- **Trate erros com exceções de contexto**: Nunca exponha mensagens brutas de exceções internas (`$e->getMessage()`) para respostas de API HTTP.
++- **DRY (Don't Repeat Yourself)**: Lógicas de validação de guarda ou regras idênticas entre múltiplos services devem ser centralizadas num helper ou serviço compartilhado.
++- **Fronteiras Claras entre Camadas**: Tipos de infraestrutura externa (JSON de APIs terceiras) devem ser mapeados em DTOs/Value Objects antes de entrar na camada de negócio.
++
++### 4.13 Boas Práticas Específicas do Symfony e Performance
++
++- **Classes `final` com Interface para Portas**: Classes de infraestrutura e serviços de I/O devem ser `final` e implementar uma interface em `src/Interface/` (`ArmazenamentoInterface`, `ExtratorVideoInterface`).
++- **Otimização de Flush em Lote (Prevenção de N+1 Queries e Transactions)**: Em métodos que executam ações em lote no Repository (ex: exclusão de N itens em loop), chame `$repository->remover($item, flush: false)` dentro do loop e execute uma única chamada a `$repository->flush()` **após o término do loop**.
++- **DTOs de Saída em Vez de Arrays Anônimos**: Retornos estruturados de serviços (ex: resultado de upload com flag de duplicado) devem utilizar DTOs de saída dedicados (`ResultadoUploadDTO`), evitando arrays genéricos não-tipados.
++- **Injeção de Parâmetros via DI (`services.yaml`)**: Nunca use `$_ENV` ou `getenv()` dentro de métodos. Injete parâmetros no `services.yaml`.
++- **Value Resolvers HTTP**: Use `MapRequestPayload` / `MapQueryString` por padrão (exceto uploads multipart/form-data com arquivos, que usam `fromRequest()`).
++- **Mensageria**: MessageHandlers devem servir apenas como porta de entrada delegadora, sem conter lógica de negócio.
+ 
+ ---
+ 
+@@ -337,11 +387,32 @@ Toda integração com APIs/sistemas externos deve ser desacoplada em `src/Infra/
+ 
+ - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` — só primitivos de `@/shared/ui/layout`
+ - [ ] Sem Header/Footer na página
++- [ ] Sem `any`, sem `ts-ignore`
++- [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return
++- [ ] Nenhum Service usa `\DomainException` genérica — sempre exceção por contexto com método estático
++- [ ] Nenhuma exceção interna (`getMessage()`) é exposta em payload de resposta HTTP
++- [ ] Nenhum Client de I/O ou Infra é `final` sem uma Interface correspondente em `src/Interface/`
++- [ ] Nenhum método de mapeamento de resposta externa duplicado em dois Services — extrair Mapper/DTO único
++- [ ] Nenhuma checagem de "string em branco" repetida com sintaxe diferente — usar `TextoUtil`
++- [ ] Nenhum método proxy que só chama outro método com nome diferente — escolher um nome e eliminar o outro
++- [ ] Nenhum parâmetro de método declarado e nunca usado no corpo
++- [ ] Toda mudança de comportamento de negócio vem em commit separado de reorganização de pastas/namespaces
++- [ ] Toda constante de chave de array de metadata usa `App\Support\MetadataKeys`, nunca string solta
++- [ ] Método de Service com mais de ~25 linhas de corpo é candidato a extrair passos privados nomeados
++- [ ] Regra de negócio de transição de estado mora na Entidade (método de intenção), nunca em dois `set*()` soltos chamados em sequência pelo Service
++- [ ] Loops de remoção/persistência em lote usam `flush: false` e disparam um único `$repository->flush()` ao final
++- [ ] Operações com retornos compostos devolvem DTOs de saída dedicados (ex: `ResultadoUploadDTO`) em vez de arrays genéricos
+ - [ ] Sem `useEffect`
+ - [ ] Sem Axios fora de `config/api.ts` e dos `api.ts` da feature
+ - [ ] Controller extends `DefaultController`; só chama Service ou Feature; retorna `$this->success()` / `$this->error()` (`Response`)
+ - [ ] Lógica só no Service (ou Feature orquestrando services) — zero query, zero EntityManager
+-- [ ] Lógica grande ou repetida → vários services + interface + `TaggedIterator` na Feature, nunca um arquivo só
++- [ ] Service não excede 3 métodos de ação de negócio — refatorado em Feature/Services se crescer
++- [ ] Injeção direta de Services especificos no Controller/Command — zero fachadas mortas que descartam retornos
++- [ ] Processamento em lote captura `\Throwable` por item e retorna relatório `{ removidos: [...], falhas: [...], total: int }`
++- [ ] Injeção de dependência 100% via DI no construtor — zero `new Service()` manual e zero leitura crua de `$_ENV`/`getenv()`
++- [ ] Sem I/O cru de sistema de arquivos (`mkdir`, `copy`, `unlink`, `@unlink`) ou `Process` no Service — isolado em `src/Infra/`
++- [ ] Exceções personalizadas em `src/Exception/` com métodos estáticos por contexto — zero `throw new \DomainException()` genérico
++- [ ] Zero magic values/strings no corpo dos métodos — utilizar `private const` e `MetadataKeys`
+ - [ ] Toda consulta/persistência no Repository
+ - [ ] Contrato novo em `src/Interface/{Nome}Interface.php`
+ - [ ] DTO validado, sem setter
+diff --git a/documentation/progresso/PROGRESSO_ROADMAP_5.md b/documentation/progresso/PROGRESSO_ROADMAP_5.md
+index 119450c..1debe4d 100644
+--- a/documentation/progresso/PROGRESSO_ROADMAP_5.md
++++ b/documentation/progresso/PROGRESSO_ROADMAP_5.md
+@@ -129,11 +129,23 @@
+ - **Arquivos envolvidos**:
+   - [`src/DataObject/UploadManualDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/UploadManualDTO.php)
+ 
+-### ⏳ Tópico 94 — UploadManualService — checagem de duplicidade por hash
+-- **Status**: Pendente
++### ✅ Tópico 94 — UploadManualService — checagem de duplicidade por hash
++- **Status**: Concluído
++- **O que foi feito**:
++  - **Serviço Dedicado de Upload Manual**: Criado [`src/Service/UploadManualService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/UploadManualService.php) desacoplado do `MediaItemService`.
++  - **Deduplicação por Hash SHA-256**: Calcula o hash SHA-256 do arquivo enviado via `ArmazenamentoLocalClient` e consulta `MediaItemRepository::buscarPorHash()`.
++  - **Limpeza de Temporários**: Se o hash já existir na base de dados, remove o arquivo temporário com segurança e retorna o `MediaItem` existente com flag `duplicado => true`.
++- **Arquivos envolvidos**:
++  - [`src/Service/UploadManualService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/UploadManualService.php)
++  - [`src/Infra/Storage/ArmazenamentoLocalClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Storage/ArmazenamentoLocalClient.php)
+ 
+-### ⏳ Tópico 95 — Resposta de duplicidade (aviso, não bloqueio)
+-- **Status**: Pendente
++### ✅ Tópico 95 — Resposta de duplicidade (aviso, não bloqueio)
++- **Status**: Concluído
++- **O que foi feito**:
++  - **Alerta de Duplicidade no Envelope API**: Atualizado [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php) na ação `uploadManual`.
++  - **Contrato Transparente**: Se o item for retornado como duplicado pelo `UploadManualService`, insere a chave `_warning => 'item_duplicado_existente'` no payload serializado HTTP 201 Created.
++- **Arquivos envolvidos**:
++  - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php)
+ 
+ ### ⏳ Tópico 96 — Frontend — estrutura da feature upload-manual
+ - **Status**: Pendente
+diff --git a/src/Command/AutorizarContaGoogleFotosCommand.php b/src/Command/AutorizarContaGoogleFotosCommand.php
+index b6fcb98..d94c5f4 100644
+--- a/src/Command/AutorizarContaGoogleFotosCommand.php
++++ b/src/Command/AutorizarContaGoogleFotosCommand.php
+@@ -133,7 +133,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
+                 }
+             }
+ 
+-            $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
++            $expiraEm = (new \DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
+             $refreshTokenCriptografado = $this->criptografia->criptografar($refreshToken);
+ 
+             $conta = $this->contaRepository->buscarPorEmail($email);
+diff --git a/src/Command/RetentarMediaCommand.php b/src/Command/RetentarMediaCommand.php
+index 46de696..22b565e 100644
+--- a/src/Command/RetentarMediaCommand.php
++++ b/src/Command/RetentarMediaCommand.php
+@@ -4,7 +4,7 @@ declare(strict_types=1);
+ 
+ namespace App\Command;
+ 
+-use App\Service\MediaItemService;
++use App\Service\MediaItem\RetentarMediaItemService;
+ use Symfony\Component\Console\Attribute\AsCommand;
+ use Symfony\Component\Console\Command\Command;
+ use Symfony\Component\Console\Input\InputArgument;
+@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
+ final class RetentarMediaCommand extends Command
+ {
+     public function __construct(
+-        private readonly MediaItemService $mediaItemService,
++        private readonly RetentarMediaItemService $retentarMediaItemService,
+     ) {
+         parent::__construct();
+     }
+@@ -43,7 +43,7 @@ final class RetentarMediaCommand extends Command
+ 
+         if (null !== $uuid && '' !== trim($uuid)) {
+             try {
+-                $mediaItem = $this->mediaItemService->retentar($uuid);
++                $mediaItem = $this->retentarMediaItemService->retentar($uuid);
+                 $io->success(sprintf('Mídia "%s" enviada para reprocessamento com sucesso.', $mediaItem->uuid()?->toString()));
+                 $io->definitionList(
+                     ['UUID' => $mediaItem->uuid()?->toString() ?? 'N/A'],
+@@ -62,7 +62,7 @@ final class RetentarMediaCommand extends Command
+ 
+         if ($todos) {
+             try {
+-                $itens = $this->mediaItemService->retentarTodosComErro();
++                $itens = $this->retentarMediaItemService->retentarTodosComErro();
+                 $total = count($itens);
+                 if (0 === $total) {
+                     $io->info('Nenhuma mídia com status de erro foi encontrada.');
+@@ -95,7 +95,7 @@ final class RetentarMediaCommand extends Command
+             }
+ 
+             try {
+-                $mediaItem = $this->mediaItemService->retentar($uuidInformado);
++                $mediaItem = $this->retentarMediaItemService->retentar($uuidInformado);
+                 $io->success(sprintf('Mídia "%s" enviada para reprocessamento.', $mediaItem->uuid()?->toString()));
+ 
+                 return Command::SUCCESS;
+@@ -108,7 +108,7 @@ final class RetentarMediaCommand extends Command
+ 
+         if ('2' === $opcao) {
+             try {
+-                $itens = $this->mediaItemService->retentarTodosComErro();
++                $itens = $this->retentarMediaItemService->retentarTodosComErro();
+                 $io->success(sprintf('Reenviadas %d mídia(s) para reprocessamento.', count($itens)));
+ 
+                 return Command::SUCCESS;
+diff --git a/src/Controller/Auth/AuthController.php b/src/Controller/Auth/AuthController.php
+index 8d9834d..0e5121a 100644
+--- a/src/Controller/Auth/AuthController.php
++++ b/src/Controller/Auth/AuthController.php
+@@ -4,7 +4,7 @@ declare(strict_types=1);
+ 
+ namespace App\Controller\Auth;
+ 
+-use App\Controller\DefaultController;
++use App\Controller\Common\DefaultController;
+ use App\Entity\Usuario;
+ use App\Repository\UsuarioRepository;
+ use Symfony\Component\HttpFoundation\Request;
+diff --git a/src/Controller/CategoriaController.php b/src/Controller/Categoria/CategoriaController.php
+similarity index 68%
+rename from src/Controller/CategoriaController.php
+rename to src/Controller/Categoria/CategoriaController.php
+index ee6a089..9574afa 100644
+--- a/src/Controller/CategoriaController.php
++++ b/src/Controller/Categoria/CategoriaController.php
+@@ -2,15 +2,13 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\Categoria;
+ 
+-use App\DataObject\AtualizarCategoriaDTO;
++use App\Controller\Common\DefaultController;
+ use App\DataObject\CriarCategoriaDTO;
+-use App\DataObject\PaginacaoDTO;
+ use App\Serializer\CategoriaSerializer;
+-use App\Service\CategoriaService;
++use App\Service\Categoria\CategoriaService;
+ use Symfony\Component\HttpFoundation\Response;
+-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+ use Symfony\Component\Routing\Attribute\Route;
+ 
+@@ -23,25 +21,11 @@ final class CategoriaController extends DefaultController
+     ) {}
+ 
+     #[Route('', name: 'listar', methods: ['GET'])]
+-    public function listar(#[MapQueryString] ?PaginacaoDTO $paginacao = null): Response
++    public function listar(): Response
+     {
+-        $paginacao ??= new PaginacaoDTO();
+-        $resultado = $this->categoriaService->listarPaginado($paginacao->pagina(), $paginacao->limite());
++        $categorias = $this->categoriaService->listarTodas();
+ 
+-        return $this->paginated(
+-            $this->categoriaSerializer->normalizarLista($resultado['itens']),
+-            $resultado['total'],
+-            $paginacao->pagina(),
+-            $paginacao->limite(),
+-        );
+-    }
+-
+-    #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
+-    public function detalhar(string $uuid): Response
+-    {
+-        $categoria = $this->categoriaService->buscarPorUuid($uuid);
+-
+-        return $this->success($this->categoriaSerializer->normalizar($categoria));
++        return $this->success($this->categoriaSerializer->normalizarLista($categorias));
+     }
+ 
+     #[Route('', name: 'criar', methods: ['POST'])]
+@@ -52,8 +36,16 @@ final class CategoriaController extends DefaultController
+         return $this->created($this->categoriaSerializer->normalizar($categoria));
+     }
+ 
+-    #[Route('/{uuid}', name: 'atualizar', methods: ['PATCH'])]
+-    public function atualizar(string $uuid, #[MapRequestPayload] AtualizarCategoriaDTO $dto): Response
++    #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
++    public function detalhar(string $uuid): Response
++    {
++        $categoria = $this->categoriaService->buscarPorUuid($uuid);
++
++        return $this->success($this->categoriaSerializer->normalizar($categoria));
++    }
++
++    #[Route('/{uuid}', name: 'atualizar', methods: ['PUT', 'PATCH'])]
++    public function atualizar(string $uuid, #[MapRequestPayload] CriarCategoriaDTO $dto): Response
+     {
+         $categoria = $this->categoriaService->atualizar($uuid, $dto);
+ 
+diff --git a/src/Controller/DefaultController.php b/src/Controller/Common/DefaultController.php
+similarity index 98%
+rename from src/Controller/DefaultController.php
+rename to src/Controller/Common/DefaultController.php
+index 414e262..bb2e61a 100644
+--- a/src/Controller/DefaultController.php
++++ b/src/Controller/Common/DefaultController.php
+@@ -2,7 +2,7 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\Common;
+ 
+ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+ use Symfony\Component\HttpFoundation\Response;
+diff --git a/src/Controller/DownloadController.php b/src/Controller/DownloadController.php
+deleted file mode 100644
+index 1fe25e2..0000000
+--- a/src/Controller/DownloadController.php
++++ /dev/null
+@@ -1,36 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Controller;
+-
+-use App\DataObject\BaixarVideoDTO;
+-use App\Enum\OrigemMedia;
+-use App\Service\BaixarVideoService;
+-use App\Service\ValidadorUrlPlataforma;
+-use Symfony\Component\HttpFoundation\Response;
+-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+-use Symfony\Component\Routing\Attribute\Route;
+-
+-final class DownloadController extends DefaultController
+-{
+-    public function __construct(
+-        private readonly BaixarVideoService $baixarVideoService,
+-        private readonly ValidadorUrlPlataforma $validadorUrlPlataforma,
+-    ) {}
+-
+-    #[Route('/api/v1/downloads', name: 'api_downloads_criar', methods: ['POST'])]
+-    public function criar(#[MapRequestPayload] BaixarVideoDTO $dto): Response
+-    {
+-        $mensagem = $this->baixarVideoService->executar($dto, OrigemMedia::MANUAL);
+-        $plataforma = $this->validadorUrlPlataforma->identificarPlataforma($dto->url());
+-
+-        return $this->created([
+-            'url' => $mensagem->url(),
+-            'origem' => $mensagem->origem()->value,
+-            'plataforma' => $plataforma->value,
+-            'plataformaDescricao' => $plataforma->descricao(),
+-            'status' => 'em_fila',
+-        ]);
+-    }
+-}
+diff --git a/src/Controller/IngestaoController.php b/src/Controller/Ingestao/IngestaoController.php
+similarity index 73%
+rename from src/Controller/IngestaoController.php
+rename to src/Controller/Ingestao/IngestaoController.php
+index 6342ed0..655bb24 100644
+--- a/src/Controller/IngestaoController.php
++++ b/src/Controller/Ingestao/IngestaoController.php
+@@ -2,12 +2,13 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\Ingestao;
+ 
++use App\Controller\Common\DefaultController;
+ use App\DataObject\IngestarPrintDTO;
+ use App\Security\AgenteUser;
+ use App\Serializer\MediaItemSerializer;
+-use App\Service\IngestarPrintService;
++use App\Service\Ingestao\IngestarPrintService;
+ use Symfony\Component\HttpFoundation\Request;
+ use Symfony\Component\HttpFoundation\Response;
+ use Symfony\Component\Routing\Attribute\Route;
+@@ -15,28 +16,23 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
+ use Symfony\Component\Security\Http\Attribute\IsGranted;
+ use Symfony\Component\Validator\Validator\ValidatorInterface;
+ 
++#[Route('/api/v1/ingestao', name: 'api_ingestao_')]
+ final class IngestaoController extends DefaultController
+ {
+     public function __construct(
+-        private readonly ValidatorInterface $validator,
+         private readonly IngestarPrintService $ingestarPrintService,
+         private readonly MediaItemSerializer $mediaItemSerializer,
+-    ) {
+-    }
++    ) {}
+ 
+-    #[Route('/api/v1/ingestao/print', name: 'api_ingestao_print', methods: ['POST'])]
++    #[Route('/print', name: 'print', methods: ['POST'])]
+     #[IsGranted('ROLE_AGENTE')]
+     public function ingestarPrint(
+         Request $request,
+-        #[CurrentUser]
+-        ?AgenteUser $agenteUser,
++        ValidatorInterface $validator,
++        #[CurrentUser] AgenteUser $agenteUser,
+     ): Response {
+-        if (null === $agenteUser) {
+-            return $this->unauthorized('agente_nao_autenticado');
+-        }
+-
+         $dto = IngestarPrintDTO::fromRequest($request);
+-        $violacoes = $this->validator->validate($dto);
++        $violacoes = $validator->validate($dto);
+ 
+         if (count($violacoes) > 0) {
+             $detalhes = [];
+@@ -47,7 +43,8 @@ final class IngestaoController extends DefaultController
+             return $this->unprocessable('dados_invalidos', $detalhes);
+         }
+ 
+-        $mediaItem = $this->ingestarPrintService->executar($dto, $agenteUser->tokenAgente());
++        $tokenAgente = $agenteUser->tokenAgente();
++        $mediaItem = $this->ingestarPrintService->executar($dto, $tokenAgente);
+ 
+         return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
+     }
+diff --git a/src/Controller/MediaItemController.php b/src/Controller/MediaItem/MediaItemController.php
+similarity index 68%
+rename from src/Controller/MediaItemController.php
+rename to src/Controller/MediaItem/MediaItemController.php
+index 1e4330d..a44de35 100644
+--- a/src/Controller/MediaItemController.php
++++ b/src/Controller/MediaItem/MediaItemController.php
+@@ -2,8 +2,9 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\MediaItem;
+ 
++use App\Controller\Common\DefaultController;
+ use App\DataObject\ApagarLoteDTO;
+ use App\DataObject\AtualizarMetadataMediaItemDTO;
+ use App\DataObject\CategorizarLoteDTO;
+@@ -12,18 +13,31 @@ use App\DataObject\FiltrarMediaItemDTO;
+ use App\DataObject\RebaixarLoteDTO;
+ use App\DataObject\UploadManualDTO;
+ use App\Serializer\MediaItemSerializer;
+-use App\Service\MediaItemService;
++use App\Service\MediaItem\ApagarMediaItemService;
++use App\Service\MediaItem\AtualizarMetadataMediaItemService;
++use App\Service\MediaItem\ClassificarMediaItemService;
++use App\Service\MediaItem\MediaItemService;
++use App\Service\MediaItem\RebaixarMediaItemService;
++use App\Service\MediaItem\RetentarMediaItemService;
++use App\Service\MediaItem\UploadManualService;
+ use Symfony\Component\HttpFoundation\Request;
+ use Symfony\Component\HttpFoundation\Response;
+ use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+ use Symfony\Component\Routing\Attribute\Route;
++use Symfony\Component\Validator\Validator\ValidatorInterface;
+ 
+ #[Route('/api/v1/media-itens', name: 'api_media_itens_')]
+ final class MediaItemController extends DefaultController
+ {
+     public function __construct(
+         private readonly MediaItemService $mediaItemService,
++        private readonly ClassificarMediaItemService $classificarMediaItemService,
++        private readonly ApagarMediaItemService $apagarMediaItemService,
++        private readonly RebaixarMediaItemService $rebaixarMediaItemService,
++        private readonly RetentarMediaItemService $retentarMediaItemService,
++        private readonly AtualizarMetadataMediaItemService $atualizarMetadataMediaItemService,
++        private readonly UploadManualService $uploadManualService,
+         private readonly MediaItemSerializer $mediaItemSerializer,
+     ) {}
+ 
+@@ -48,7 +62,7 @@ final class MediaItemController extends DefaultController
+     #[Route('/upload', name: 'upload_manual', methods: ['POST'])]
+     public function uploadManual(
+         Request $request,
+-        \Symfony\Component\Validator\Validator\ValidatorInterface $validator,
++        ValidatorInterface $validator,
+     ): Response {
+         $dto = UploadManualDTO::fromRequest($request);
+         $violacoes = $validator->validate($dto);
+@@ -62,15 +76,19 @@ final class MediaItemController extends DefaultController
+             return $this->unprocessable('dados_invalidos', $detalhes);
+         }
+ 
+-        $mediaItem = $this->mediaItemService->uploadManual($dto);
++        $resultado = $this->uploadManualService->executar($dto);
++        $data = $this->mediaItemSerializer->normalizar($resultado->mediaItem());
++        if ($resultado->ehDuplicado()) {
++            $data['_warning'] = 'item_duplicado_existente';
++        }
+ 
+-        return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
++        return $this->created($data);
+     }
+ 
+     #[Route('/lote/categorizar', name: 'categorizar_lote', methods: ['POST'])]
+     public function categorizarLote(#[MapRequestPayload] CategorizarLoteDTO $dto): Response
+     {
+-        $itens = $this->mediaItemService->classificarEmLote($dto);
++        $itens = $this->classificarMediaItemService->classificarEmLote($dto);
+ 
+         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+     }
+@@ -78,7 +96,7 @@ final class MediaItemController extends DefaultController
+     #[Route('/lote/rebaixar', name: 'rebaixar_lote', methods: ['POST'])]
+     public function rebaixarLote(#[MapRequestPayload] RebaixarLoteDTO $dto): Response
+     {
+-        $itens = $this->mediaItemService->rebaixarEmLote($dto);
++        $itens = $this->rebaixarMediaItemService->rebaixarEmLote($dto);
+ 
+         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+     }
+@@ -86,18 +104,15 @@ final class MediaItemController extends DefaultController
+     #[Route('/lote/apagar', name: 'apagar_lote', methods: ['POST'])]
+     public function apagarLote(#[MapRequestPayload] ApagarLoteDTO $dto): Response
+     {
+-        $removidos = $this->mediaItemService->apagarEmLote($dto);
++        $resultado = $this->apagarMediaItemService->apagarEmLote($dto);
+ 
+-        return $this->success([
+-            'removidos' => $removidos,
+-            'total' => count($removidos),
+-        ]);
++        return $this->success($resultado);
+     }
+ 
+     #[Route('/retentar', name: 'retentar_lote', methods: ['POST'])]
+     public function retentarLote(): Response
+     {
+-        $itens = $this->mediaItemService->retentarTodosComErro();
++        $itens = $this->retentarMediaItemService->retentarTodosComErro();
+ 
+         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+     }
+@@ -113,7 +128,7 @@ final class MediaItemController extends DefaultController
+     #[Route('/{uuid}', name: 'atualizar_metadata', methods: ['PATCH'])]
+     public function atualizarMetadata(string $uuid, #[MapRequestPayload] AtualizarMetadataMediaItemDTO $dto): Response
+     {
+-        $mediaItem = $this->mediaItemService->atualizarMetadata($uuid, $dto);
++        $mediaItem = $this->atualizarMetadataMediaItemService->atualizarMetadata($uuid, $dto);
+ 
+         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+     }
+@@ -121,7 +136,7 @@ final class MediaItemController extends DefaultController
+     #[Route('/{uuid}/categoria', name: 'classificar_categoria', methods: ['PATCH'])]
+     public function classificarCategoria(string $uuid, #[MapRequestPayload] ClassificarManualDTO $dto): Response
+     {
+-        $mediaItem = $this->mediaItemService->classificarManualmente($uuid, $dto);
++        $mediaItem = $this->classificarMediaItemService->classificarManualmente($uuid, $dto);
+ 
+         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+     }
+@@ -129,7 +144,7 @@ final class MediaItemController extends DefaultController
+     #[Route('/{uuid}/retentar', name: 'retentar_individual', methods: ['POST'])]
+     public function retentarIndividual(string $uuid): Response
+     {
+-        $mediaItem = $this->mediaItemService->retentar($uuid);
++        $mediaItem = $this->retentarMediaItemService->retentar($uuid);
+ 
+         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+     }
+diff --git a/src/Controller/OrigemRegraController.php b/src/Controller/OrigemRegra/OrigemRegraController.php
+similarity index 68%
+rename from src/Controller/OrigemRegraController.php
+rename to src/Controller/OrigemRegra/OrigemRegraController.php
+index dccc4d2..242825a 100644
+--- a/src/Controller/OrigemRegraController.php
++++ b/src/Controller/OrigemRegra/OrigemRegraController.php
+@@ -2,15 +2,13 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\OrigemRegra;
+ 
+-use App\DataObject\AtualizarOrigemRegraDTO;
++use App\Controller\Common\DefaultController;
+ use App\DataObject\CriarOrigemRegraDTO;
+-use App\DataObject\PaginacaoDTO;
+ use App\Serializer\OrigemRegraSerializer;
+-use App\Service\OrigemRegraService;
++use App\Service\OrigemRegra\OrigemRegraService;
+ use Symfony\Component\HttpFoundation\Response;
+-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+ use Symfony\Component\Routing\Attribute\Route;
+ 
+@@ -23,25 +21,11 @@ final class OrigemRegraController extends DefaultController
+     ) {}
+ 
+     #[Route('', name: 'listar', methods: ['GET'])]
+-    public function listar(#[MapQueryString] ?PaginacaoDTO $paginacao = null): Response
++    public function listar(): Response
+     {
+-        $paginacao ??= new PaginacaoDTO();
+-        $resultado = $this->origemRegraService->listarPaginado($paginacao->pagina(), $paginacao->limite());
++        $regras = $this->origemRegraService->listarTodas();
+ 
+-        return $this->paginated(
+-            $this->origemRegraSerializer->normalizarLista($resultado['itens']),
+-            $resultado['total'],
+-            $paginacao->pagina(),
+-            $paginacao->limite(),
+-        );
+-    }
+-
+-    #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
+-    public function detalhar(string $uuid): Response
+-    {
+-        $regra = $this->origemRegraService->buscarPorUuid($uuid);
+-
+-        return $this->success($this->origemRegraSerializer->normalizar($regra));
++        return $this->success($this->origemRegraSerializer->normalizarLista($regras));
+     }
+ 
+     #[Route('', name: 'criar', methods: ['POST'])]
+@@ -52,8 +36,16 @@ final class OrigemRegraController extends DefaultController
+         return $this->created($this->origemRegraSerializer->normalizar($regra));
+     }
+ 
+-    #[Route('/{uuid}', name: 'atualizar', methods: ['PATCH'])]
+-    public function atualizar(string $uuid, #[MapRequestPayload] AtualizarOrigemRegraDTO $dto): Response
++    #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
++    public function detalhar(string $uuid): Response
++    {
++        $regra = $this->origemRegraService->buscarPorUuid($uuid);
++
++        return $this->success($this->origemRegraSerializer->normalizar($regra));
++    }
++
++    #[Route('/{uuid}', name: 'atualizar', methods: ['PUT'])]
++    public function atualizar(string $uuid, #[MapRequestPayload] CriarOrigemRegraDTO $dto): Response
+     {
+         $regra = $this->origemRegraService->atualizar($uuid, $dto);
+ 
+diff --git a/src/Controller/FrontendController.php b/src/Controller/Sistema/FrontendController.php
+similarity index 91%
+rename from src/Controller/FrontendController.php
+rename to src/Controller/Sistema/FrontendController.php
+index 3f7da5d..d430351 100644
+--- a/src/Controller/FrontendController.php
++++ b/src/Controller/Sistema/FrontendController.php
+@@ -2,7 +2,7 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\Sistema;
+ 
+ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+ use Symfony\Component\HttpFoundation\Response;
+diff --git a/src/Controller/HealthController.php b/src/Controller/Sistema/HealthController.php
+similarity index 91%
+rename from src/Controller/HealthController.php
+rename to src/Controller/Sistema/HealthController.php
+index b2d8f26..875f290 100644
+--- a/src/Controller/HealthController.php
++++ b/src/Controller/Sistema/HealthController.php
+@@ -2,7 +2,9 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Controller;
++namespace App\Controller\Sistema;
++
++use App\Controller\Common\DefaultController;
+ 
+ use Doctrine\DBAL\Connection;
+ use Symfony\Component\HttpFoundation\Response;
+@@ -23,7 +25,7 @@ final class HealthController extends DefaultController
+ 
+         return $this->success([
+             'status' => $isHealthy ? 'ok' : 'unhealthy',
+-            'timestamp' => new \DateTime()->format(\DateTimeInterface::ATOM),
++            'timestamp' => (new \DateTime())->format(\DateTimeInterface::ATOM),
+             'services' => [
+                 'database' => $databaseStatus,
+                 'disk' => $diskStatus,
+diff --git a/src/Controller/Video/DownloadController.php b/src/Controller/Video/DownloadController.php
+new file mode 100644
+index 0000000..45d6a5e
+--- /dev/null
++++ b/src/Controller/Video/DownloadController.php
+@@ -0,0 +1,30 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Controller\Video;
++
++use App\Controller\Common\DefaultController;
++use App\DataObject\BaixarVideoDTO;
++use App\Serializer\MediaItemSerializer;
++use App\Service\Video\BaixarVideoService;
++use Symfony\Component\HttpFoundation\Response;
++use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
++use Symfony\Component\Routing\Attribute\Route;
++
++#[Route('/api/v1/downloads', name: 'api_downloads_')]
++final class DownloadController extends DefaultController
++{
++    public function __construct(
++        private readonly BaixarVideoService $baixarVideoService,
++        private readonly MediaItemSerializer $mediaItemSerializer,
++    ) {}
++
++    #[Route('', name: 'solicitar', methods: ['POST'])]
++    public function solicitar(#[MapRequestPayload] BaixarVideoDTO $dto): Response
++    {
++        $mediaItem = $this->baixarVideoService->executar($dto->url());
++
++        return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
++    }
++}
+diff --git a/src/DataObject/IngestarMediaDTO.php b/src/DataObject/IngestarMediaDTO.php
+index 2ff13cd..7093fcf 100644
+--- a/src/DataObject/IngestarMediaDTO.php
++++ b/src/DataObject/IngestarMediaDTO.php
+@@ -19,6 +19,7 @@ final readonly class IngestarMediaDTO
+         public string $caminhoArquivo,
+         OrigemMedia|string $origem,
+         public array $metadata = [],
++        public ?string $hash = null,
+     ) {
+         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;
+     }
+@@ -41,17 +42,8 @@ final readonly class IngestarMediaDTO
+         return $this->metadata;
+     }
+ 
+-    public function calcularHash(): string
++    public function hash(): ?string
+     {
+-        if (!file_exists($this->caminhoArquivo) || !is_readable($this->caminhoArquivo)) {
+-            throw new \DomainException('arquivo_nao_encontrado', 404);
+-        }
+-
+-        $hash = hash_file('sha256', $this->caminhoArquivo);
+-        if (false === $hash) {
+-            throw new \DomainException('falha_calcular_hash', 500);
+-        }
+-
+-        return $hash;
++        return $this->hash;
+     }
+ }
+diff --git a/src/DataObject/ResultadoUploadDTO.php b/src/DataObject/ResultadoUploadDTO.php
+new file mode 100644
+index 0000000..1668c5f
+--- /dev/null
++++ b/src/DataObject/ResultadoUploadDTO.php
+@@ -0,0 +1,25 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\DataObject;
++
++use App\Entity\MediaItem;
++
++final readonly class ResultadoUploadDTO
++{
++    public function __construct(
++        public MediaItem $mediaItem,
++        public bool $duplicado = false,
++    ) {}
++
++    public function mediaItem(): MediaItem
++    {
++        return $this->mediaItem;
++    }
++
++    public function ehDuplicado(): bool
++    {
++        return $this->duplicado;
++    }
++}
+diff --git a/src/Entity/Categoria.php b/src/Entity/Categoria.php
+index a01707e..cbd4edf 100644
+--- a/src/Entity/Categoria.php
++++ b/src/Entity/Categoria.php
+@@ -87,14 +87,14 @@ class Categoria
+         return $this;
+     }
+ 
+-    public function googlePhotosAlbumId(): ?string
++    public function googleFotosAlbumId(): ?string
+     {
+         return $this->googlePhotosAlbumId;
+     }
+ 
+-    public function setGooglePhotosAlbumId(?string $googlePhotosAlbumId): self
++    public function setGoogleFotosAlbumId(?string $googleFotosAlbumId): self
+     {
+-        $this->googlePhotosAlbumId = $googlePhotosAlbumId;
++        $this->googlePhotosAlbumId = $googleFotosAlbumId;
+         $this->atualizadoEm = new \DateTimeImmutable();
+ 
+         return $this;
+diff --git a/src/Entity/MediaItem.php b/src/Entity/MediaItem.php
+index c6571da..200af19 100644
+--- a/src/Entity/MediaItem.php
++++ b/src/Entity/MediaItem.php
+@@ -85,6 +85,21 @@ class MediaItem
+         ];
+     }
+ 
++    public static function fromIngestaoDTO(\App\DataObject\IngestarMediaDTO $dto, string $hash): self
++    {
++        $item = new self(
++            hash: $hash,
++            origem: $dto->origem(),
++            status: StatusMediaItem::RECEBIDO,
++        );
++        $item->setCaminhoLocal($dto->caminhoArquivo());
++        if (!empty($dto->metadata())) {
++            $item->setMetadata($dto->metadata());
++        }
++
++        return $item;
++    }
++
+     public static function fromDTO(CriarMediaItemDTO $dto): self
+     {
+         $item = new self(
+@@ -98,7 +113,7 @@ class MediaItem
+         }
+ 
+         if (null !== $dto->googlePhotosMediaId()) {
+-            $item->setGooglePhotosMediaId($dto->googlePhotosMediaId());
++            $item->setGoogleFotosId($dto->googlePhotosMediaId());
+         }
+ 
+         if (null !== $dto->categoriaId()) {
+@@ -143,6 +158,38 @@ class MediaItem
+         return $this;
+     }
+ 
++    public function classificarComo(Categoria $categoria): self
++    {
++        $this->categoriaId = $categoria->uuid()?->toString() ?? $this->categoriaId;
++        $this->transicionarPara(StatusMediaItem::CLASSIFICADO);
++
++        return $this;
++    }
++
++    public function marcarParaDownload(): self
++    {
++        $this->erroMotivo = null;
++        $this->transicionarPara(StatusMediaItem::BAIXANDO);
++
++        return $this;
++    }
++
++    public function limparErro(): self
++    {
++        $this->erroMotivo = null;
++        $this->atualizadoEm = new \DateTimeImmutable();
++
++        return $this;
++    }
++
++    public function registrarErro(string $motivo): self
++    {
++        $this->erroMotivo = $motivo;
++        $this->transicionarPara(StatusMediaItem::ERRO);
++
++        return $this;
++    }
++
+     public function status(): StatusMediaItem
+     {
+         return $this->status;
+@@ -153,7 +200,7 @@ class MediaItem
+         $statusAlvo = is_string($novoStatus) ? (StatusMediaItem::tryFrom($novoStatus) ?? StatusMediaItem::ERRO) : $novoStatus;
+ 
+         if (!$this->status->podeTransicionarPara($statusAlvo)) {
+-            throw new \DomainException(sprintf('Transição de status inválida de "%s" para "%s".', $this->status->value, $statusAlvo->value), 422);
++            throw \App\Exception\MediaItem\MediaItemException::transicaoDeStatusInvalida($this->status->value, $statusAlvo->value);
+         }
+ 
+         $deStatus = $this->status->value;
+@@ -196,14 +243,14 @@ class MediaItem
+         return $this;
+     }
+ 
+-    public function googlePhotosMediaId(): ?string
++    public function googleFotosId(): ?string
+     {
+         return $this->googlePhotosMediaId;
+     }
+ 
+-    public function setGooglePhotosMediaId(?string $googlePhotosMediaId): self
++    public function setGoogleFotosId(?string $googleFotosId): self
+     {
+-        $this->googlePhotosMediaId = $googlePhotosMediaId;
++        $this->googlePhotosMediaId = $googleFotosId;
+         $this->atualizadoEm = new \DateTimeImmutable();
+ 
+         return $this;
+diff --git a/src/Enum/OrigemMedia.php b/src/Enum/OrigemMedia.php
+index eb8f114..2a9ded8 100644
+--- a/src/Enum/OrigemMedia.php
++++ b/src/Enum/OrigemMedia.php
+@@ -9,6 +9,7 @@ enum OrigemMedia: string
+     case PRINT_EMPRESA = 'print_empresa';
+     case PRINT_PESSOAL = 'print_pessoal';
+     case BOT_TELEGRAM = 'bot_telegram';
++    case DOWNLOAD = 'download';
+     case MANUAL = 'manual';
+ 
+     public function descricao(): string
+@@ -17,6 +18,7 @@ enum OrigemMedia: string
+             self::PRINT_EMPRESA => 'Agente Print Empresa',
+             self::PRINT_PESSOAL => 'Agente Print Pessoal',
+             self::BOT_TELEGRAM => 'Bot de Download Telegram',
++            self::DOWNLOAD => 'Download de Vídeo',
+             self::MANUAL => 'Upload Manual',
+         };
+     }
+diff --git a/src/Exception/Categoria/CategoriaException.php b/src/Exception/Categoria/CategoriaException.php
+new file mode 100644
+index 0000000..126fefe
+--- /dev/null
++++ b/src/Exception/Categoria/CategoriaException.php
+@@ -0,0 +1,18 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\Categoria;
++
++final class CategoriaException extends \DomainException
++{
++    public static function categoriaNaoEncontrada(): self
++    {
++        return new self('A categoria solicitada não foi encontrada no sistema.', 404);
++    }
++
++    public static function nomeJaExiste(string $nome): self
++    {
++        return new self(sprintf('Já existe uma categoria cadastrada com o nome "%s".', $nome), 409);
++    }
++}
+diff --git a/src/Exception/GoogleFotos/GoogleFotosAPIException.php b/src/Exception/GoogleFotos/GoogleFotosAPIException.php
+new file mode 100644
+index 0000000..b8acc7c
+--- /dev/null
++++ b/src/Exception/GoogleFotos/GoogleFotosAPIException.php
+@@ -0,0 +1,40 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\GoogleFotos;
++
++use App\Exception\HTTP\ClienteHTTPException;
++
++class GoogleFotosAPIException extends ClienteHTTPException
++{
++    public static function contaNaoEncontrada(): self
++    {
++        return new self('Nenhuma conta ativa do Google Fotos foi encontrada para realizar a integração.', 404);
++    }
++
++    public static function falhaUploadBytes(): self
++    {
++        return new self('Falha ao realizar o envio de bytes do arquivo para a API do Google Fotos.', 400);
++    }
++
++    public static function falhaRespostaLote(): self
++    {
++        return new self('Resposta inválida ou vazia recebida do envio em lote do Google Fotos.', 400);
++    }
++
++    public static function falhaBatchItem(string $mensagem): self
++    {
++        return new self(sprintf('O Google Fotos rejeitou o item enviado: %s', $mensagem), 400);
++    }
++
++    public static function mediaIdNaoRetornado(): self
++    {
++        return new self('O Google Fotos não retornou um ID válido para a mídia cadastrada.', 400);
++    }
++
++    public static function falhaCriarAlbum(string $nomeAlbum): self
++    {
++        return new self(sprintf('Ocorreu um erro ao criar o álbum "%s" no Google Fotos.', $nomeAlbum), 400);
++    }
++}
+diff --git a/src/Exception/GoogleFotos/GoogleFotosOAuthException.php b/src/Exception/GoogleFotos/GoogleFotosOAuthException.php
+new file mode 100644
+index 0000000..ea80010
+--- /dev/null
++++ b/src/Exception/GoogleFotos/GoogleFotosOAuthException.php
+@@ -0,0 +1,13 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\GoogleFotos;
++
++class GoogleFotosOAuthException extends \DomainException
++{
++    public static function falhaAoRenovarAccessTokenDoGoogle(): self
++    {
++        return new self('Ocorreu uma falha ao renovar o access token junto à API do Google Fotos.', 400);
++    }
++}
+diff --git a/src/Exception/GoogleFotosAPIException.php b/src/Exception/GoogleFotosAPIException.php
+deleted file mode 100644
+index b7267db..0000000
+--- a/src/Exception/GoogleFotosAPIException.php
++++ /dev/null
+@@ -1,7 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Exception;
+-
+-class GoogleFotosAPIException extends ClienteHTTPException {}
+diff --git a/src/Exception/ClienteHTTPException.php b/src/Exception/HTTP/ClienteHTTPException.php
+similarity index 75%
+rename from src/Exception/ClienteHTTPException.php
+rename to src/Exception/HTTP/ClienteHTTPException.php
+index 82669ed..00c72f1 100644
+--- a/src/Exception/ClienteHTTPException.php
++++ b/src/Exception/HTTP/ClienteHTTPException.php
+@@ -2,6 +2,6 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Exception;
++namespace App\Exception\HTTP;
+ 
+ class ClienteHTTPException extends \RuntimeException {}
+diff --git a/src/Exception/Ingestao/IngestarPrintException.php b/src/Exception/Ingestao/IngestarPrintException.php
+new file mode 100644
+index 0000000..d67369a
+--- /dev/null
++++ b/src/Exception/Ingestao/IngestarPrintException.php
+@@ -0,0 +1,18 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\Ingestao;
++
++class IngestarPrintException extends \DomainException
++{
++    public static function arquivoDePrintNaoInformado(): self
++    {
++        return new self('O arquivo de imagem do print é obrigatório e não foi informado na requisição.', 400);
++    }
++
++    public static function falhaAoSalvarArquivoDePrint(): self
++    {
++        return new self('Ocorreu uma falha ao salvar o arquivo de imagem do print no diretório temporário.', 500);
++    }
++}
+diff --git a/src/Exception/MediaItem/MediaItemException.php b/src/Exception/MediaItem/MediaItemException.php
+new file mode 100644
+index 0000000..0b88cb5
+--- /dev/null
++++ b/src/Exception/MediaItem/MediaItemException.php
+@@ -0,0 +1,28 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\MediaItem;
++
++class MediaItemException extends \DomainException
++{
++    public static function midiaNaoEncontradaPorUuid(): self
++    {
++        return new self('Nenhuma mídia foi encontrada com o UUID informado.', 404);
++    }
++
++    public static function categoriaDesejadaNaoDefinida(): self
++    {
++        return new self('A categoria desejada para a mídia não foi especificada.', 400);
++    }
++
++    public static function arquivoDeOrigemNaoEncontrado(): self
++    {
++        return new self('O arquivo físico de origem da mídia não foi localizado no sistema.', 404);
++    }
++
++    public static function transicaoDeStatusInvalida(string $de, string $para): self
++    {
++        return new self(sprintf('Transição de status inválida de "%s" para "%s".', $de, $para), 422);
++    }
++}
+diff --git a/src/Exception/MediaItem/UploadManualException.php b/src/Exception/MediaItem/UploadManualException.php
+new file mode 100644
+index 0000000..26508d3
+--- /dev/null
++++ b/src/Exception/MediaItem/UploadManualException.php
+@@ -0,0 +1,23 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\MediaItem;
++
++class UploadManualException extends \DomainException
++{
++    public static function arquivoUploadNaoInformado(): self
++    {
++        return new self('O arquivo para upload manual é obrigatório e não foi fornecido.', 400);
++    }
++
++    public static function falhaAoSalvarArquivoDeUpload(): self
++    {
++        return new self('Ocorreu uma falha ao mover e salvar o arquivo de upload no armazenamento temporário.', 500);
++    }
++
++    public static function falhaAoCalcularHashDoArquivo(): self
++    {
++        return new self('Não foi possível calcular o hash SHA-256 do arquivo enviado.', 500);
++    }
++}
+diff --git a/src/Exception/OrigemRegra/OrigemRegraException.php b/src/Exception/OrigemRegra/OrigemRegraException.php
+new file mode 100644
+index 0000000..172a7dc
+--- /dev/null
++++ b/src/Exception/OrigemRegra/OrigemRegraException.php
+@@ -0,0 +1,18 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\OrigemRegra;
++
++final class OrigemRegraException extends \DomainException
++{
++    public static function regraNaoEncontrada(): self
++    {
++        return new self('A regra de origem para categoria não foi encontrada.', 404);
++    }
++
++    public static function regraDuplicada(string $origem): self
++    {
++        return new self(sprintf('Já existe uma regra de vinculação cadastrada para a origem "%s".', $origem), 409);
++    }
++}
+diff --git a/src/Exception/Storage/ArmazenamentoLocalException.php b/src/Exception/Storage/ArmazenamentoLocalException.php
+new file mode 100644
+index 0000000..6b74edc
+--- /dev/null
++++ b/src/Exception/Storage/ArmazenamentoLocalException.php
+@@ -0,0 +1,38 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\Storage;
++
++class ArmazenamentoLocalException extends \DomainException
++{
++    public static function falhaAoCriarDiretorioDeArmazenamento(): self
++    {
++        return new self('Não foi possível criar o diretório de armazenamento no sistema de arquivos local.', 500);
++    }
++
++    public static function falhaAoRemoverArquivoDoArmazenamento(): self
++    {
++        return new self('Ocorreu uma falha ao remover o arquivo do sistema de arquivos local.', 500);
++    }
++
++    public static function arquivoDeOrigemNaoEncontradoParaCopia(): self
++    {
++        return new self('O arquivo de origem especificado não foi encontrado para realizar a cópia.', 404);
++    }
++
++    public static function falhaAoCopiarArquivoParaDestino(): self
++    {
++        return new self('Ocorreu uma falha ao copiar o arquivo para o diretório de destino.', 500);
++    }
++
++    public static function arquivoNaoEncontrado(string $caminho): self
++    {
++        return new self(sprintf('O arquivo no caminho "%s" não foi encontrado ou não pode ser lido.', $caminho), 404);
++    }
++
++    public static function falhaCalcularHash(string $caminho): self
++    {
++        return new self(sprintf('Não foi possível calcular o hash SHA-256 para o arquivo no caminho "%s".', $caminho), 500);
++    }
++}
+diff --git a/src/Exception/Video/YtDlpException.php b/src/Exception/Video/YtDlpException.php
+new file mode 100644
+index 0000000..2a4721f
+--- /dev/null
++++ b/src/Exception/Video/YtDlpException.php
+@@ -0,0 +1,33 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Exception\Video;
++
++class YtDlpException extends \DomainException
++{
++    public static function falhaAoExtrairMetadataDoVideo(): self
++    {
++        return new self('Falha ao extrair os metadados do vídeo utilizando o yt-dlp.', 400);
++    }
++
++    public static function falhaAoProcessarJsonDeMetadata(): self
++    {
++        return new self('Não foi possível realizar o parse do JSON de metadados retornado pelo yt-dlp.', 500);
++    }
++
++    public static function falhaAoEfetuarDownloadDoVideo(): self
++    {
++        return new self('Ocorreu uma falha durante o download do vídeo pelo yt-dlp.', 500);
++    }
++
++    public static function arquivoDeVideoBaixadoNaoEncontrado(): self
++    {
++        return new self('O arquivo de vídeo baixado pelo yt-dlp não foi localizado no diretório de destino.', 500);
++    }
++
++    public static function urlInvalidaOuNaoSuportada(string $url): self
++    {
++        return new self(sprintf('A URL informada "%s" é inválida ou não pertence a uma plataforma suportada.', $url), 400);
++    }
++}
+diff --git a/src/Feature/.gitkeep b/src/Feature/.gitkeep
+deleted file mode 100644
+index e69de29..0000000
+diff --git a/src/Infra/GoogleFotos/GoogleFotosAPI.php b/src/Infra/GoogleFotos/GoogleFotosAPI.php
+index 0ec9b54..75bf9ed 100644
+--- a/src/Infra/GoogleFotos/GoogleFotosAPI.php
++++ b/src/Infra/GoogleFotos/GoogleFotosAPI.php
+@@ -4,7 +4,8 @@ declare(strict_types=1);
+ 
+ namespace App\Infra\GoogleFotos;
+ 
+-use App\Exception\GoogleFotosAPIException;
++use App\Exception\GoogleFotos\GoogleFotosAPIException;
++use App\Exception\Storage\ArmazenamentoLocalException;
+ use GuzzleHttp\Exception\RequestException;
+ 
+ final class GoogleFotosAPI extends GoogleFotosClient
+@@ -45,7 +46,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
+     {
+         $stream = @fopen($caminhoArquivo, 'r');
+         if (false === $stream) {
+-            throw new \DomainException('arquivo_origem_nao_encontrado', 404);
++            throw ArmazenamentoLocalException::arquivoDeOrigemNaoEncontradoParaCopia();
+         }
+ 
+         $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
+@@ -107,4 +108,12 @@ final class GoogleFotosAPI extends GoogleFotosClient
+ 
+         return $dados;
+     }
++
++    /**
++     * @return array<string, mixed>
++     */
++    public function criarMediaItem(string $accessToken, string $uploadToken, string $albumId, string $descricao): array
++    {
++        return $this->batchCreateMediaItems($accessToken, $albumId, $uploadToken, $descricao);
++    }
+ }
+diff --git a/src/Infra/GoogleOAuth/GoogleOAuthAPI.php b/src/Infra/GoogleOAuth/GoogleOAuthAPI.php
+index cabea2b..0937807 100644
+--- a/src/Infra/GoogleOAuth/GoogleOAuthAPI.php
++++ b/src/Infra/GoogleOAuth/GoogleOAuthAPI.php
+@@ -4,7 +4,7 @@ declare(strict_types=1);
+ 
+ namespace App\Infra\GoogleOAuth;
+ 
+-use App\Exception\GoogleFotosAPIException;
++use App\Exception\GoogleFotos\GoogleFotosAPIException;
+ use GuzzleHttp\Exception\RequestException;
+ 
+ final class GoogleOAuthAPI extends GoogleOAuthClient
+diff --git a/src/Infra/Storage/ArmazenamentoLocalClient.php b/src/Infra/Storage/ArmazenamentoLocalClient.php
+new file mode 100644
+index 0000000..8573ee5
+--- /dev/null
++++ b/src/Infra/Storage/ArmazenamentoLocalClient.php
+@@ -0,0 +1,66 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Infra\Storage;
++
++use App\Exception\Storage\ArmazenamentoLocalException;
++use App\Interface\ArmazenamentoInterface;
++
++final class ArmazenamentoLocalClient implements ArmazenamentoInterface
++{
++    private const int PERMISSAO_DIRETORIO_PADRAO = 0755;
++
++    public function criarDiretorio(string $caminho, int $permissao = self::PERMISSAO_DIRETORIO_PADRAO): void
++    {
++        if (!is_dir($caminho) && !mkdir($caminho, $permissao, true) && !is_dir($caminho)) {
++            throw ArmazenamentoLocalException::falhaAoCriarDiretorioDeArmazenamento();
++        }
++    }
++
++    public function remover(string $caminhoArquivo): void
++    {
++        if ('' === $caminhoArquivo || !file_exists($caminhoArquivo) || !is_file($caminhoArquivo)) {
++            return;
++        }
++
++        $removido = unlink($caminhoArquivo);
++        if (!$removido) {
++            throw ArmazenamentoLocalException::falhaAoRemoverArquivoDoArmazenamento();
++        }
++    }
++
++    public function copiar(string $origem, string $destino): void
++    {
++        if (!file_exists($origem) || !is_file($origem)) {
++            throw ArmazenamentoLocalException::arquivoDeOrigemNaoEncontradoParaCopia();
++        }
++
++        $diretorioDestino = dirname($destino);
++        $this->criarDiretorio($diretorioDestino);
++
++        $copiado = copy($origem, $destino);
++        if (!$copiado) {
++            throw ArmazenamentoLocalException::falhaAoCopiarArquivoParaDestino();
++        }
++    }
++
++    public function existe(string $caminhoArquivo): bool
++    {
++        return '' !== $caminhoArquivo && file_exists($caminhoArquivo) && is_readable($caminhoArquivo);
++    }
++
++    public function calcularHash(string $caminhoArquivo): string
++    {
++        if (!$this->existe($caminhoArquivo)) {
++            throw ArmazenamentoLocalException::arquivoNaoEncontrado($caminhoArquivo);
++        }
++
++        $hash = hash_file('sha256', $caminhoArquivo);
++        if (false === $hash) {
++            throw ArmazenamentoLocalException::falhaCalcularHash($caminhoArquivo);
++        }
++
++        return $hash;
++    }
++}
+diff --git a/src/Infra/YtDlp/YtDlpClient.php b/src/Infra/YtDlp/YtDlpClient.php
+new file mode 100644
+index 0000000..71e46a9
+--- /dev/null
++++ b/src/Infra/YtDlp/YtDlpClient.php
+@@ -0,0 +1,70 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Infra\YtDlp;
++
++use App\Exception\Video\YtDlpException;
++use App\Interface\ExtratorVideoInterface;
++use Symfony\Component\Process\Process;
++
++final class YtDlpClient implements ExtratorVideoInterface
++{
++    private const float TIMEOUT_EXTRACAO_METADATA_SEGUNDOS = 60.0;
++    private const float TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS = 300.0;
++    private const string FORMATO_VIDEO_PREFERIDO = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
++
++    /**
++     * @return array<string, mixed>
++     */
++    public function extrairMetadata(string $url): array
++    {
++        $process = new Process(['yt-dlp', '--dump-json', '--no-playlist', $url]);
++        $process->setTimeout(self::TIMEOUT_EXTRACAO_METADATA_SEGUNDOS);
++        $process->run();
++
++        if (!$process->isSuccessful()) {
++            throw YtDlpException::falhaAoExtrairMetadataDoVideo();
++        }
++
++        /** @var mixed $dados */
++        $dados = json_decode($process->getOutput(), true);
++        if (!is_array($dados)) {
++            throw YtDlpException::falhaAoProcessarJsonDeMetadata();
++        }
++
++        /** @var array<string, mixed> $dados */
++        return $dados;
++    }
++
++    public function baixarVideo(string $url, string $diretorioDestino): string
++    {
++        $templateSaida = $diretorioDestino . '/%(id)s.%(ext)s';
++        $process = new Process([
++            'yt-dlp',
++            '--no-playlist',
++            '--format',
++            self::FORMATO_VIDEO_PREFERIDO,
++            '--output',
++            $templateSaida,
++            '--print',
++            'after_move:filepath',
++            $url,
++        ]);
++        $process->setTimeout(self::TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS);
++        $process->run();
++
++        if (!$process->isSuccessful()) {
++            throw YtDlpException::falhaAoEfetuarDownloadDoVideo();
++        }
++
++        $linhas = array_filter(explode("\n", trim($process->getOutput())));
++        $caminhoArquivo = trim((string) end($linhas));
++
++        if ('' === $caminhoArquivo || !file_exists($caminhoArquivo)) {
++            throw YtDlpException::arquivoDeVideoBaixadoNaoEncontrado();
++        }
++
++        return $caminhoArquivo;
++    }
++}
+diff --git a/src/Interface/ArmazenamentoInterface.php b/src/Interface/ArmazenamentoInterface.php
+new file mode 100644
+index 0000000..f2e5e99
+--- /dev/null
++++ b/src/Interface/ArmazenamentoInterface.php
+@@ -0,0 +1,18 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Interface;
++
++interface ArmazenamentoInterface
++{
++    public function criarDiretorio(string $caminho, int $permissao = 0755): void;
++
++    public function remover(string $caminhoArquivo): void;
++
++    public function copiar(string $origem, string $destino): void;
++
++    public function existe(string $caminhoArquivo): bool;
++
++    public function calcularHash(string $caminhoArquivo): string;
++}
+diff --git a/src/Interface/ExtratorVideoInterface.php b/src/Interface/ExtratorVideoInterface.php
+new file mode 100644
+index 0000000..8a8f1aa
+--- /dev/null
++++ b/src/Interface/ExtratorVideoInterface.php
+@@ -0,0 +1,15 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Interface;
++
++interface ExtratorVideoInterface
++{
++    /**
++     * @return array<string, mixed>
++     */
++    public function extrairMetadata(string $url): array;
++
++    public function baixarVideo(string $url, string $diretorioDestino): string;
++}
+diff --git a/src/MessageHandler/BaixarVideoMessageHandler.php b/src/MessageHandler/BaixarVideoMessageHandler.php
+index fb0b28e..e239fc7 100644
+--- a/src/MessageHandler/BaixarVideoMessageHandler.php
++++ b/src/MessageHandler/BaixarVideoMessageHandler.php
+@@ -4,30 +4,19 @@ declare(strict_types=1);
+ 
+ namespace App\MessageHandler;
+ 
+-use App\DataObject\IngestarMediaDTO;
+ use App\Message\BaixarVideoMessage;
+-use App\Service\BaixarVideoDownloadService;
+-use App\Service\IngestarMediaService;
++use App\Service\Video\BaixarVideoService;
+ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+ 
+ #[AsMessageHandler]
+ final readonly class BaixarVideoMessageHandler
+ {
+     public function __construct(
+-        private BaixarVideoDownloadService $downloadService,
+-        private IngestarMediaService $ingestarMediaService,
++        private BaixarVideoService $baixarVideoService,
+     ) {}
+ 
+     public function __invoke(BaixarVideoMessage $message): void
+     {
+-        $resultado = $this->downloadService->executar($message->url());
+-
+-        $ingestarDTO = new IngestarMediaDTO(
+-            caminhoArquivo: $resultado['caminho_arquivo'],
+-            origem: $message->origem(),
+-            metadata: $resultado['metadata'],
+-        );
+-
+-        $this->ingestarMediaService->executar($ingestarDTO);
++        $this->baixarVideoService->executar($message->url());
+     }
+ }
+diff --git a/src/MessageHandler/DistribuirLocalMessageHandler.php b/src/MessageHandler/DistribuirLocalMessageHandler.php
+index 0b86ae3..41f773a 100644
+--- a/src/MessageHandler/DistribuirLocalMessageHandler.php
++++ b/src/MessageHandler/DistribuirLocalMessageHandler.php
+@@ -7,7 +7,7 @@ namespace App\MessageHandler;
+ use App\Enum\StatusMediaItem;
+ use App\Message\DistribuirLocalMessage;
+ use App\Repository\MediaItemRepository;
+-use App\Service\DistribuirLocalService;
++use App\Service\Distribuicao\DistribuirLocalService;
+ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+ 
+ #[AsMessageHandler]
+diff --git a/src/MessageHandler/EnviarGoogleFotosMessageHandler.php b/src/MessageHandler/EnviarGoogleFotosMessageHandler.php
+index 287a89e..f51ee5f 100644
+--- a/src/MessageHandler/EnviarGoogleFotosMessageHandler.php
++++ b/src/MessageHandler/EnviarGoogleFotosMessageHandler.php
+@@ -7,7 +7,7 @@ namespace App\MessageHandler;
+ use App\Enum\StatusMediaItem;
+ use App\Message\EnviarGoogleFotosMessage;
+ use App\Repository\MediaItemRepository;
+-use App\Service\EnviarGoogleFotosService;
++use App\Service\GoogleFotos\EnviarGoogleFotosService;
+ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+ 
+ #[AsMessageHandler]
+diff --git a/src/Repository/CategoriaRepository.php b/src/Repository/CategoriaRepository.php
+index 33d3a06..e95730f 100644
+--- a/src/Repository/CategoriaRepository.php
++++ b/src/Repository/CategoriaRepository.php
+@@ -49,6 +49,33 @@ class CategoriaRepository extends ServiceEntityRepository
+         return $this->find($uuid);
+     }
+ 
++    public function existeComNome(string $nome, Uuid|string|null $ignorarUuid = null): bool
++    {
++        $qb = $this->createQueryBuilder('c')
++            ->select('COUNT(c.uuid)')
++            ->where('c.nome = :nome')
++            ->setParameter('nome', $nome);
++
++        if (null !== $ignorarUuid) {
++            $uuidStr = is_string($ignorarUuid) ? $ignorarUuid : $ignorarUuid->toString();
++            $qb->andWhere('c.uuid != :ignorarUuid')
++               ->setParameter('ignorarUuid', $uuidStr);
++        }
++
++        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
++    }
++
++    /**
++     * @return list<Categoria>
++     */
++    public function listarTodas(): array
++    {
++        /** @var list<Categoria> $resultado */
++        $resultado = $this->findBy([], ['nome' => 'ASC']);
++
++        return $resultado;
++    }
++
+     /**
+      * @return array{itens: array<int, Categoria>, total: int}
+      */
+diff --git a/src/Repository/ContaGoogleFotosRepository.php b/src/Repository/ContaGoogleFotosRepository.php
+index 811e905..be81d80 100644
+--- a/src/Repository/ContaGoogleFotosRepository.php
++++ b/src/Repository/ContaGoogleFotosRepository.php
+@@ -49,6 +49,11 @@ class ContaGoogleFotosRepository extends ServiceEntityRepository
+         return $this->find($uuid);
+     }
+ 
++    public function buscarContaAtiva(): ?ContaGoogleFotos
++    {
++        return $this->buscarContaPrincipal();
++    }
++
+     public function buscarContaPrincipal(): ?ContaGoogleFotos
+     {
+         return $this->findOneBy([]);
+diff --git a/src/Repository/MediaItemRepository.php b/src/Repository/MediaItemRepository.php
+index a5cc2c2..ed7ea15 100644
+--- a/src/Repository/MediaItemRepository.php
++++ b/src/Repository/MediaItemRepository.php
+@@ -37,6 +37,11 @@ class MediaItemRepository extends ServiceEntityRepository
+         }
+     }
+ 
++    public function flush(): void
++    {
++        $this->getEntityManager()->flush();
++    }
++
+     public function buscarPorHash(string $hash): ?MediaItem
+     {
+         return $this->findOneBy(['hash' => $hash]);
+diff --git a/src/Repository/OrigemRegraRepository.php b/src/Repository/OrigemRegraRepository.php
+index a4b33d1..b3157f1 100644
+--- a/src/Repository/OrigemRegraRepository.php
++++ b/src/Repository/OrigemRegraRepository.php
+@@ -52,6 +52,34 @@ class OrigemRegraRepository extends ServiceEntityRepository
+         return $this->find($uuid);
+     }
+ 
++    public function existeComOrigem(OrigemMedia|string $origem, Uuid|string|null $ignorarUuid = null): bool
++    {
++        $valor = $origem instanceof OrigemMedia ? $origem->value : $origem;
++        $qb = $this->createQueryBuilder('r')
++            ->select('COUNT(r.uuid)')
++            ->where('r.origem = :origem')
++            ->setParameter('origem', $valor);
++
++        if (null !== $ignorarUuid) {
++            $uuidStr = is_string($ignorarUuid) ? $ignorarUuid : $ignorarUuid->toString();
++            $qb->andWhere('r.uuid != :ignorarUuid')
++               ->setParameter('ignorarUuid', $uuidStr);
++        }
++
++        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
++    }
++
++    /**
++     * @return list<OrigemRegra>
++     */
++    public function listarTodas(): array
++    {
++        /** @var list<OrigemRegra> $resultado */
++        $resultado = $this->findBy([], ['criadoEm' => 'DESC']);
++
++        return $resultado;
++    }
++
+     /**
+      * @return array{itens: array<int, OrigemRegra>, total: int}
+      */
+diff --git a/src/Schedule.php b/src/Schedule.php
+index bd9c634..bc42f93 100644
+--- a/src/Schedule.php
++++ b/src/Schedule.php
+@@ -16,7 +16,7 @@ class Schedule implements ScheduleProviderInterface
+ 
+     public function getSchedule(): SymfonySchedule
+     {
+-        return new SymfonySchedule()
++        return (new SymfonySchedule())
+             ->stateful($this->cache) // ensure missed tasks are executed
+             ->processOnlyLastMissedRun(true) // ensure only last missed task is run
+ 
+diff --git a/src/Serializer/CategoriaSerializer.php b/src/Serializer/CategoriaSerializer.php
+index e846cf0..55672fd 100644
+--- a/src/Serializer/CategoriaSerializer.php
++++ b/src/Serializer/CategoriaSerializer.php
+@@ -17,7 +17,7 @@ final readonly class CategoriaSerializer
+             'uuid' => $categoria->uuid()?->toString(),
+             'nome' => $categoria->nome(),
+             'pastaLocal' => $categoria->pastaLocal(),
+-            'googlePhotosAlbumId' => $categoria->googlePhotosAlbumId(),
++            'googlePhotosAlbumId' => $categoria->googleFotosAlbumId(),
+             'criadoEm' => $categoria->criadoEm()->format(\DateTimeInterface::ATOM),
+             'atualizadoEm' => $categoria->atualizadoEm()->format(\DateTimeInterface::ATOM),
+         ];
+diff --git a/src/Serializer/MediaItemSerializer.php b/src/Serializer/MediaItemSerializer.php
+index f3b55e1..3346ece 100644
+--- a/src/Serializer/MediaItemSerializer.php
++++ b/src/Serializer/MediaItemSerializer.php
+@@ -5,7 +5,7 @@ declare(strict_types=1);
+ namespace App\Serializer;
+ 
+ use App\Entity\MediaItem;
+-use App\Service\CategoriaService;
++use App\Service\Categoria\CategoriaService;
+ 
+ final readonly class MediaItemSerializer
+ {
+@@ -39,7 +39,7 @@ final readonly class MediaItemSerializer
+             'status' => $item->status()->value,
+             'statusDescricao' => $item->status()->descricao(),
+             'caminhoLocal' => $item->caminhoLocal(),
+-            'googlePhotosMediaId' => $item->googlePhotosMediaId(),
++            'googlePhotosMediaId' => $item->googleFotosId(),
+             'categoriaId' => $item->categoriaId(),
+             'categoria' => $categoriaData,
+             'metadata' => $item->metadata(),
+diff --git a/src/Serializer/OrigemRegraSerializer.php b/src/Serializer/OrigemRegraSerializer.php
+index 0eb40a0..65b12c0 100644
+--- a/src/Serializer/OrigemRegraSerializer.php
++++ b/src/Serializer/OrigemRegraSerializer.php
+@@ -5,7 +5,7 @@ declare(strict_types=1);
+ namespace App\Serializer;
+ 
+ use App\Entity\OrigemRegra;
+-use App\Service\CategoriaService;
++use App\Service\Categoria\CategoriaService;
+ 
+ final readonly class OrigemRegraSerializer
+ {
+diff --git a/src/Service/BaixarVideoDownloadService.php b/src/Service/BaixarVideoDownloadService.php
+deleted file mode 100644
+index d5e98c5..0000000
+--- a/src/Service/BaixarVideoDownloadService.php
++++ /dev/null
+@@ -1,61 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use Symfony\Component\Process\Process;
+-
+-final readonly class BaixarVideoDownloadService
+-{
+-    public function __construct(
+-        private ExtrairMetadataVideoService $extrairMetadataVideoService,
+-    ) {}
+-
+-    /**
+-     * @return array{
+-     *     caminho_arquivo: string,
+-     *     metadata: array<string, mixed>
+-     * }
+-     */
+-    public function executar(string $url, ?string $diretorioDestino = null): array
+-    {
+-        $diretorio = $diretorioDestino ?? sys_get_temp_dir() . '/cirqueirax_downloads';
+-        if (!is_dir($diretorio) && !mkdir($diretorio, 0o755, true) && !is_dir($diretorio)) {
+-            throw new \DomainException('erro_criar_diretorio_temp_download', 500);
+-        }
+-
+-        $metadata = $this->extrairMetadataVideoService->extrair($url);
+-
+-        $templateSaida = $diretorio . '/%(id)s.%(ext)s';
+-        $process = new Process([
+-            'yt-dlp',
+-            '--no-playlist',
+-            '--format',
+-            'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+-            '--output',
+-            $templateSaida,
+-            '--print',
+-            'after_move:filepath',
+-            $url,
+-        ]);
+-        $process->setTimeout(300.0);
+-        $process->run();
+-
+-        if (!$process->isSuccessful()) {
+-            throw new \DomainException('falha_download_video: ' . $process->getErrorOutput(), 500);
+-        }
+-
+-        $linhas = explode("\n", trim($process->getOutput()));
+-        $caminhoArquivo = trim((string) end($linhas));
+-
+-        if ('' === $caminhoArquivo || !file_exists($caminhoArquivo)) {
+-            throw new \DomainException('arquivo_baixado_nao_encontrado', 500);
+-        }
+-
+-        return [
+-            'caminho_arquivo' => $caminhoArquivo,
+-            'metadata' => $metadata,
+-        ];
+-    }
+-}
+diff --git a/src/Service/BaixarVideoService.php b/src/Service/BaixarVideoService.php
+deleted file mode 100644
+index f98417f..0000000
+--- a/src/Service/BaixarVideoService.php
++++ /dev/null
+@@ -1,34 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\DataObject\BaixarVideoDTO;
+-use App\Enum\OrigemMedia;
+-use App\Message\BaixarVideoMessage;
+-use Symfony\Component\Messenger\MessageBusInterface;
+-
+-final readonly class BaixarVideoService
+-{
+-    public function __construct(
+-        private ValidadorUrlPlataforma $validadorUrlPlataforma,
+-        private MessageBusInterface $messageBus,
+-    ) {}
+-
+-    public function executar(BaixarVideoDTO $dto, OrigemMedia $origem = OrigemMedia::BOT_TELEGRAM): BaixarVideoMessage
+-    {
+-        if (!$this->validadorUrlPlataforma->validar($dto->url())) {
+-            throw new \DomainException('url_invalida', 400);
+-        }
+-
+-        $mensagem = new BaixarVideoMessage(
+-            url: $dto->url(),
+-            origem: $origem,
+-        );
+-
+-        $this->messageBus->dispatch($mensagem);
+-
+-        return $mensagem;
+-    }
+-}
+diff --git a/src/Service/Categoria/CategoriaService.php b/src/Service/Categoria/CategoriaService.php
+new file mode 100644
+index 0000000..d642d22
+--- /dev/null
++++ b/src/Service/Categoria/CategoriaService.php
+@@ -0,0 +1,70 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\Categoria;
++
++use App\DataObject\CriarCategoriaDTO;
++use App\Entity\Categoria;
++use App\Exception\Categoria\CategoriaException;
++use App\Repository\CategoriaRepository;
++use Symfony\Component\Uid\Uuid;
++
++final readonly class CategoriaService
++{
++    public function __construct(
++        private CategoriaRepository $categoriaRepository,
++    ) {}
++
++    public function criar(CriarCategoriaDTO $dto): Categoria
++    {
++        if ($this->categoriaRepository->existeComNome($dto->nome())) {
++            throw CategoriaException::nomeJaExiste($dto->nome());
++        }
++
++        $categoria = Categoria::fromDTO($dto);
++        $this->categoriaRepository->salvar($categoria);
++
++        return $categoria;
++    }
++
++    public function atualizar(string|Uuid $uuid, CriarCategoriaDTO $dto): Categoria
++    {
++        $categoria = $this->buscarPorUuid($uuid);
++
++        if ($categoria->nome() !== $dto->nome() && $this->categoriaRepository->existeComNome($dto->nome(), $uuid)) {
++            throw CategoriaException::nomeJaExiste($dto->nome());
++        }
++
++        $categoria->setNome($dto->nome());
++        $categoria->setPastaLocal($dto->pastaLocal());
++
++        $this->categoriaRepository->salvar($categoria);
++
++        return $categoria;
++    }
++
++    /**
++     * @return list<Categoria>
++     */
++    public function listarTodas(): array
++    {
++        return $this->categoriaRepository->listarTodas();
++    }
++
++    public function buscarPorUuid(string|Uuid $uuid): Categoria
++    {
++        $categoria = $this->categoriaRepository->buscarPorUuid($uuid);
++        if (null === $categoria) {
++            throw CategoriaException::categoriaNaoEncontrada();
++        }
++
++        return $categoria;
++    }
++
++    public function remover(string|Uuid $uuid): void
++    {
++        $categoria = $this->buscarPorUuid($uuid);
++        $this->categoriaRepository->remover($categoria);
++    }
++}
+diff --git a/src/Service/CategoriaService.php b/src/Service/CategoriaService.php
+deleted file mode 100644
+index 3753fc9..0000000
+--- a/src/Service/CategoriaService.php
++++ /dev/null
+@@ -1,80 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\DataObject\AtualizarCategoriaDTO;
+-use App\DataObject\CriarCategoriaDTO;
+-use App\Entity\Categoria;
+-use App\Repository\CategoriaRepository;
+-use Symfony\Component\Uid\Uuid;
+-
+-final readonly class CategoriaService
+-{
+-    public function __construct(
+-        private CategoriaRepository $categoriaRepository,
+-    ) {}
+-
+-    public function criar(CriarCategoriaDTO $dto): Categoria
+-    {
+-        if (null !== $this->categoriaRepository->buscarPorNome($dto->nome())) {
+-            throw new \DomainException('categoria_nome_duplicado', 409);
+-        }
+-
+-        $categoria = Categoria::fromDTO($dto);
+-        $this->categoriaRepository->salvar($categoria);
+-
+-        return $categoria;
+-    }
+-
+-    public function atualizar(string|Uuid $uuid, AtualizarCategoriaDTO $dto): Categoria
+-    {
+-        $categoria = $this->buscarPorUuid($uuid);
+-
+-        if (null !== $dto->nome() && $dto->nome() !== $categoria->nome()) {
+-            $existente = $this->categoriaRepository->buscarPorNome($dto->nome());
+-            if (null !== $existente && $existente->uuid()?->toString() !== $categoria->uuid()?->toString()) {
+-                throw new \DomainException('categoria_nome_duplicado', 409);
+-            }
+-            $categoria->setNome($dto->nome());
+-        }
+-
+-        if (null !== $dto->pastaLocal()) {
+-            $categoria->setPastaLocal($dto->pastaLocal());
+-        }
+-
+-        if (null !== $dto->googlePhotosAlbumId()) {
+-            $categoria->setGooglePhotosAlbumId($dto->googlePhotosAlbumId());
+-        }
+-
+-        $this->categoriaRepository->salvar($categoria);
+-
+-        return $categoria;
+-    }
+-
+-    public function remover(string|Uuid $uuid): void
+-    {
+-        $categoria = $this->buscarPorUuid($uuid);
+-        $this->categoriaRepository->remover($categoria);
+-    }
+-
+-    public function buscarPorUuid(string|Uuid $uuid): Categoria
+-    {
+-        $categoria = $this->categoriaRepository->buscarPorUuid($uuid);
+-
+-        if (null === $categoria) {
+-            throw new \DomainException('categoria_nao_encontrada', 404);
+-        }
+-
+-        return $categoria;
+-    }
+-
+-    /**
+-     * @return array{itens: array<int, Categoria>, total: int}
+-     */
+-    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+-    {
+-        return $this->categoriaRepository->listarPaginado($pagina, $limite);
+-    }
+-}
+diff --git a/src/Service/Distribuicao/DistribuirLocalService.php b/src/Service/Distribuicao/DistribuirLocalService.php
+new file mode 100644
+index 0000000..930ec59
+--- /dev/null
++++ b/src/Service/Distribuicao/DistribuirLocalService.php
+@@ -0,0 +1,68 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\Distribuicao;
++
++use App\Entity\MediaItem;
++use App\Enum\StatusMediaItem;
++use App\Exception\Categoria\CategoriaException;
++use App\Exception\MediaItem\MediaItemException;
++use App\Interface\ArmazenamentoInterface;
++use App\Repository\CategoriaRepository;
++use App\Repository\MediaItemRepository;
++use App\Support\TextoUtil;
++
++final readonly class DistribuirLocalService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private CategoriaRepository $categoriaRepository,
++        private ArmazenamentoInterface $armazenamentoClient,
++        private string $mediaStoragePath = './var/storage',
++        private string $projectDir = '',
++    ) {}
++
++    public function executar(string $mediaItemUuid): MediaItem
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($mediaItemUuid);
++        if (null === $mediaItem) {
++            throw MediaItemException::midiaNaoEncontradaPorUuid();
++        }
++
++        $categoriaId = $mediaItem->categoriaId();
++        if (TextoUtil::estaEmBranco($categoriaId)) {
++            throw MediaItemException::categoriaDesejadaNaoDefinida();
++        }
++
++        $categoria = $this->categoriaRepository->buscarPorUuid((string) $categoriaId);
++        if (null === $categoria) {
++            throw CategoriaException::categoriaNaoEncontrada();
++        }
++
++        $caminhoOrigem = $mediaItem->caminhoLocal();
++        if (TextoUtil::estaEmBranco($caminhoOrigem) || !file_exists((string) $caminhoOrigem)) {
++            throw MediaItemException::arquivoDeOrigemNaoEncontrado();
++        }
++
++        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
++            ? $this->mediaStoragePath
++            : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
++
++        $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoria->pastaLocal(), '/');
++        $this->armazenamentoClient->criarDiretorio($diretorioDestino);
++
++        $nomeArquivo = basename((string) $caminhoOrigem);
++        $caminhoDestinoFinal = $diretorioDestino . '/' . $nomeArquivo;
++
++        if ($caminhoOrigem !== $caminhoDestinoFinal) {
++            $this->armazenamentoClient->copiar((string) $caminhoOrigem, $caminhoDestinoFinal);
++        }
++
++        $mediaItem->setCaminhoLocal($caminhoDestinoFinal);
++        $mediaItem->transicionarPara(StatusMediaItem::DISTRIBUIDO_LOCAL);
++        $this->mediaItemRepository->salvar($mediaItem);
++
++        return $mediaItem;
++    }
++}
+diff --git a/src/Service/DistribuirLocalService.php b/src/Service/DistribuirLocalService.php
+deleted file mode 100644
+index 2880283..0000000
+--- a/src/Service/DistribuirLocalService.php
++++ /dev/null
+@@ -1,68 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\Entity\MediaItem;
+-use App\Enum\StatusMediaItem;
+-use App\Repository\CategoriaRepository;
+-use App\Repository\MediaItemRepository;
+-use Symfony\Component\Uid\Uuid;
+-
+-final readonly class DistribuirLocalService
+-{
+-    public function __construct(
+-        private MediaItemRepository $mediaItemRepository,
+-        private CategoriaRepository $categoriaRepository,
+-        private string $mediaStoragePath = './var/storage',
+-        private string $projectDir = '',
+-    ) {}
+-
+-    public function executar(string|Uuid $uuid): MediaItem
+-    {
+-        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+-        if (null === $mediaItem) {
+-            throw new \DomainException('media_item_nao_encontrado', 404);
+-        }
+-
+-        if (null === $mediaItem->categoriaId()) {
+-            throw new \DomainException('categoria_nao_definida', 400);
+-        }
+-
+-        $categoria = $this->categoriaRepository->buscarPorUuid($mediaItem->categoriaId());
+-        if (null === $categoria) {
+-            throw new \DomainException('categoria_nao_encontrada', 404);
+-        }
+-
+-        $caminhoOrigem = $mediaItem->caminhoLocal();
+-        if (null === $caminhoOrigem || !file_exists($caminhoOrigem)) {
+-            throw new \DomainException('arquivo_origem_nao_encontrado', 404);
+-        }
+-
+-        $baseStoragePath = $this->mediaStoragePath;
+-        if (!str_starts_with($baseStoragePath, '/') && '' !== $this->projectDir) {
+-            $baseStoragePath = $this->projectDir . '/' . ltrim($baseStoragePath, './');
+-        }
+-
+-        $pastaLocal = trim($categoria->pastaLocal(), '/');
+-        $diretorioDestino = rtrim($baseStoragePath, '/') . '/' . $pastaLocal;
+-
+-        if (!is_dir($diretorioDestino)) {
+-            mkdir($diretorioDestino, 0o777, true);
+-        }
+-
+-        $nomeArquivo = basename($caminhoOrigem);
+-        $caminhoDestino = $diretorioDestino . '/' . $nomeArquivo;
+-
+-        if ($caminhoOrigem !== $caminhoDestino) {
+-            copy($caminhoOrigem, $caminhoDestino);
+-        }
+-
+-        $mediaItem->setCaminhoLocal($caminhoDestino);
+-        $mediaItem->transicionarPara(StatusMediaItem::DISTRIBUIDO_LOCAL);
+-        $this->mediaItemRepository->salvar($mediaItem);
+-
+-        return $mediaItem;
+-    }
+-}
+diff --git a/src/Service/EnviarGoogleFotosService.php b/src/Service/EnviarGoogleFotosService.php
+deleted file mode 100644
+index 844fd8d..0000000
+--- a/src/Service/EnviarGoogleFotosService.php
++++ /dev/null
+@@ -1,98 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\Entity\MediaItem;
+-use App\Enum\StatusMediaItem;
+-use App\Infra\GoogleFotos\GoogleFotosAPI;
+-use App\Repository\CategoriaRepository;
+-use App\Repository\ContaGoogleFotosRepository;
+-use App\Repository\MediaItemRepository;
+-use Symfony\Component\Uid\Uuid;
+-
+-final readonly class EnviarGoogleFotosService
+-{
+-    public function __construct(
+-        private MediaItemRepository $mediaItemRepository,
+-        private CategoriaRepository $categoriaRepository,
+-        private ContaGoogleFotosRepository $contaRepository,
+-        private GoogleFotosOAuthService $oauthService,
+-        private GoogleFotosAlbumService $albumService,
+-        private GoogleFotosAPI $googleFotosApi,
+-    ) {}
+-
+-    public function executar(string|Uuid $uuid): MediaItem
+-    {
+-        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+-        if (null === $mediaItem) {
+-            throw new \DomainException('media_item_nao_encontrado', 404);
+-        }
+-
+-        if (StatusMediaItem::CONCLUIDO === $mediaItem->status()) {
+-            return $mediaItem;
+-        }
+-
+-        if (null === $mediaItem->categoriaId()) {
+-            throw new \DomainException('categoria_nao_definida', 400);
+-        }
+-
+-        $categoria = $this->categoriaRepository->buscarPorUuid($mediaItem->categoriaId());
+-        if (null === $categoria) {
+-            throw new \DomainException('categoria_nao_encontrada', 404);
+-        }
+-
+-        $caminhoLocal = $mediaItem->caminhoLocal();
+-        if (null === $caminhoLocal || !file_exists($caminhoLocal)) {
+-            throw new \DomainException('arquivo_origem_nao_encontrado', 404);
+-        }
+-
+-        $conta = $this->contaRepository->buscarContaPrincipal();
+-        if (null === $conta) {
+-            throw new \DomainException('conta_google_fotos_nao_encontrada', 404);
+-        }
+-
+-        $mediaItem->transicionarPara(StatusMediaItem::ENVIANDO_GOOGLE_FOTOS);
+-        $this->mediaItemRepository->salvar($mediaItem);
+-
+-        $token = $this->oauthService->obterAccessTokenValido($conta);
+-        $albumId = $this->albumService->criarOuObter($categoria, $conta);
+-
+-        $mimeType = mime_content_type($caminhoLocal) ?: 'application/octet-stream';
+-        $uploadToken = $this->googleFotosApi->uploadBytes($token, $caminhoLocal, $mimeType);
+-
+-        if (empty($uploadToken)) {
+-            throw new \DomainException('erro_upload_bytes_google', 400);
+-        }
+-
+-        $dadosBatch = $this->googleFotosApi->batchCreateMediaItems(
+-            $token,
+-            $albumId,
+-            $uploadToken,
+-            basename($caminhoLocal)
+-        );
+-
+-        $resultadoItem = $dadosBatch['newMediaItemResults'][0] ?? null;
+-
+-        if (null === $resultadoItem) {
+-            throw new \DomainException('erro_resposta_lote_google_fotos', 400);
+-        }
+-
+-        $statusCodigo = $resultadoItem['status']['code'] ?? 0;
+-        if (0 !== $statusCodigo) {
+-            throw new \DomainException('falha_upload_batch_google', 400);
+-        }
+-
+-        $mediaId = $resultadoItem['mediaItem']['id'] ?? null;
+-        if (empty($mediaId) || !is_string($mediaId)) {
+-            throw new \DomainException('erro_gravar_media_id_google', 400);
+-        }
+-
+-        $mediaItem->setGooglePhotosMediaId($mediaId);
+-        $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
+-        $this->mediaItemRepository->salvar($mediaItem);
+-
+-        return $mediaItem;
+-    }
+-}
+diff --git a/src/Service/ExtrairMetadataVideoService.php b/src/Service/ExtrairMetadataVideoService.php
+deleted file mode 100644
+index 053b8df..0000000
+--- a/src/Service/ExtrairMetadataVideoService.php
++++ /dev/null
+@@ -1,45 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use Symfony\Component\Process\Process;
+-
+-final readonly class ExtrairMetadataVideoService
+-{
+-    /**
+-     * @return array{
+-     *     titulo: string,
+-     *     uploader: string,
+-     *     duracao: int,
+-     *     thumbnail: string,
+-     *     plataforma: string,
+-     *     url_original: string
+-     * }
+-     */
+-    public function extrair(string $url): array
+-    {
+-        $process = new Process(['yt-dlp', '--dump-json', '--no-playlist', $url]);
+-        $process->setTimeout(60.0);
+-        $process->run();
+-
+-        if (!$process->isSuccessful()) {
+-            throw new \DomainException('erro_extrair_metadata_video: ' . $process->getErrorOutput(), 400);
+-        }
+-
+-        $dados = json_decode($process->getOutput(), true);
+-        if (!is_array($dados)) {
+-            throw new \DomainException('erro_parse_metadata_video', 500);
+-        }
+-
+-        return [
+-            'titulo' => (string) ($dados['title'] ?? $dados['fulltitle'] ?? 'Vídeo sem título'),
+-            'uploader' => (string) ($dados['uploader'] ?? $dados['channel'] ?? $dados['creator'] ?? 'Desconhecido'),
+-            'duracao' => (int) ($dados['duration'] ?? 0),
+-            'thumbnail' => (string) ($dados['thumbnail'] ?? ''),
+-            'plataforma' => (string) ($dados['extractor_key'] ?? $dados['extractor'] ?? 'outros'),
+-            'url_original' => $url,
+-        ];
+-    }
+-}
+diff --git a/src/Service/GoogleFotos/EnviarGoogleFotosService.php b/src/Service/GoogleFotos/EnviarGoogleFotosService.php
+new file mode 100644
+index 0000000..adf1029
+--- /dev/null
++++ b/src/Service/GoogleFotos/EnviarGoogleFotosService.php
+@@ -0,0 +1,103 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\GoogleFotos;
++
++use App\Entity\MediaItem;
++use App\Enum\StatusMediaItem;
++use App\Exception\Categoria\CategoriaException;
++use App\Exception\GoogleFotos\GoogleFotosAPIException;
++use App\Exception\MediaItem\MediaItemException;
++use App\Infra\GoogleFotos\GoogleFotosAPI;
++use App\Repository\CategoriaRepository;
++use App\Repository\ContaGoogleFotosRepository;
++use App\Repository\MediaItemRepository;
++use App\Support\TextoUtil;
++
++final readonly class EnviarGoogleFotosService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private CategoriaRepository $categoriaRepository,
++        private ContaGoogleFotosRepository $contaRepository,
++        private GoogleFotosOAuthService $oAuthService,
++        private GoogleFotosAlbumService $albumService,
++        private GoogleFotosAPI $googleFotosApi,
++    ) {}
++
++    public function executar(string $mediaItemUuid): MediaItem
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($mediaItemUuid);
++        if (null === $mediaItem) {
++            throw MediaItemException::midiaNaoEncontradaPorUuid();
++        }
++
++        $categoriaId = $mediaItem->categoriaId();
++        if (TextoUtil::estaEmBranco($categoriaId)) {
++            throw MediaItemException::categoriaDesejadaNaoDefinida();
++        }
++
++        $categoria = $this->categoriaRepository->buscarPorUuid((string) $categoriaId);
++        if (null === $categoria) {
++            throw CategoriaException::categoriaNaoEncontrada();
++        }
++
++        $caminhoLocal = $mediaItem->caminhoLocal();
++        if (TextoUtil::estaEmBranco($caminhoLocal) || !file_exists((string) $caminhoLocal)) {
++            throw MediaItemException::arquivoDeOrigemNaoEncontrado();
++        }
++
++        $conta = $this->contaRepository->buscarContaAtiva();
++        if (null === $conta) {
++            throw GoogleFotosAPIException::contaNaoEncontrada();
++        }
++
++        $token = $this->oAuthService->obterAccessTokenValido($conta);
++        $albumId = $this->albumService->obterOuCriarAlbumId($categoria);
++
++        $caminhoLocalStr = (string) $caminhoLocal;
++        $mimeType = mime_content_type($caminhoLocalStr) ?: 'application/octet-stream';
++
++        $uploadToken = $this->googleFotosApi->uploadBytes($token, $caminhoLocalStr, $mimeType);
++        if (TextoUtil::estaEmBranco($uploadToken)) {
++            throw GoogleFotosAPIException::falhaUploadBytes();
++        }
++
++        $descricao = sprintf(
++            'CirqueiraX | Categoria: %s | Origem: %s',
++            $categoria->nome(),
++            $mediaItem->origem()->value
++        );
++
++        $resultado = $this->googleFotosApi->criarMediaItem($token, $uploadToken, $albumId, $descricao);
++
++        /** @var array<int, array<string, mixed>>|null $newMediaItemResults */
++        $newMediaItemResults = $resultado['newMediaItemResults'] ?? null;
++        if (!is_array($newMediaItemResults) || empty($newMediaItemResults)) {
++            throw GoogleFotosAPIException::falhaRespostaLote();
++        }
++
++        $primeiroResultado = $newMediaItemResults[0];
++        $status = $primeiroResultado['status'] ?? null;
++
++        if (is_array($status)) {
++            $code = (int) ($status['code'] ?? 0);
++            $message = (string) ($status['message'] ?? '');
++            if (0 !== $code && 'Success' !== $message && 'OK' !== $message && '' !== $message) {
++                throw GoogleFotosAPIException::falhaBatchItem('' !== $message ? $message : sprintf('Código de erro HTTP/API %d', $code));
++            }
++        }
++
++        $googleMediaId = (string) ($primeiroResultado['mediaItem']['id'] ?? '');
++        if (TextoUtil::estaEmBranco($googleMediaId)) {
++            throw GoogleFotosAPIException::mediaIdNaoRetornado();
++        }
++
++        $mediaItem->setGoogleFotosId($googleMediaId);
++        $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
++        $this->mediaItemRepository->salvar($mediaItem);
++
++        return $mediaItem;
++    }
++}
+diff --git a/src/Service/GoogleFotos/GoogleFotosAlbumService.php b/src/Service/GoogleFotos/GoogleFotosAlbumService.php
+new file mode 100644
+index 0000000..8a42869
+--- /dev/null
++++ b/src/Service/GoogleFotos/GoogleFotosAlbumService.php
+@@ -0,0 +1,48 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\GoogleFotos;
++
++use App\Entity\Categoria;
++use App\Exception\GoogleFotos\GoogleFotosAPIException;
++use App\Infra\GoogleFotos\GoogleFotosAPI;
++use App\Repository\CategoriaRepository;
++use App\Repository\ContaGoogleFotosRepository;
++
++final readonly class GoogleFotosAlbumService
++{
++    public function __construct(
++        private GoogleFotosAPI $googleFotosApi,
++        private GoogleFotosOAuthService $oAuthService,
++        private ContaGoogleFotosRepository $contaRepository,
++        private CategoriaRepository $categoriaRepository,
++    ) {}
++
++    public function obterOuCriarAlbumId(Categoria $categoria): string
++    {
++        $albumIdExistente = $categoria->googleFotosAlbumId();
++        if (null !== $albumIdExistente && '' !== trim($albumIdExistente)) {
++            return $albumIdExistente;
++        }
++
++        $conta = $this->contaRepository->buscarContaAtiva();
++        if (null === $conta) {
++            throw GoogleFotosAPIException::contaNaoEncontrada();
++        }
++
++        $token = $this->oAuthService->obterAccessTokenValido($conta);
++
++        $resultado = $this->googleFotosApi->criarAlbum($token, $categoria->nome());
++        $albumId = (string) ($resultado['id'] ?? '');
++
++        if ('' === $albumId) {
++            throw GoogleFotosAPIException::falhaCriarAlbum($categoria->nome());
++        }
++
++        $categoria->setGoogleFotosAlbumId($albumId);
++        $this->categoriaRepository->salvar($categoria);
++
++        return $albumId;
++    }
++}
+diff --git a/src/Service/GoogleFotosOAuthService.php b/src/Service/GoogleFotos/GoogleFotosOAuthService.php
+similarity index 66%
+rename from src/Service/GoogleFotosOAuthService.php
+rename to src/Service/GoogleFotos/GoogleFotosOAuthService.php
+index 1a3b9b2..2eb070b 100644
+--- a/src/Service/GoogleFotosOAuthService.php
++++ b/src/Service/GoogleFotos/GoogleFotosOAuthService.php
+@@ -2,9 +2,10 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Service;
++namespace App\Service\GoogleFotos;
+ 
+ use App\Entity\ContaGoogleFotos;
++use App\Exception\GoogleFotos\GoogleFotosOAuthException;
+ use App\Infra\GoogleOAuth\GoogleOAuthAPI;
+ use App\Interface\CriptografiaInterface;
+ use App\Repository\ContaGoogleFotosRepository;
+@@ -15,8 +16,8 @@ final readonly class GoogleFotosOAuthService
+         private GoogleOAuthAPI $googleOAuthApi,
+         private CriptografiaInterface $criptografia,
+         private ContaGoogleFotosRepository $contaRepository,
+-        private string $clientId = '',
+-        private string $clientSecret = '',
++        private string $clientId,
++        private string $clientSecret,
+     ) {}
+ 
+     public function obterAccessTokenValido(ContaGoogleFotos $conta): string
+@@ -27,19 +28,16 @@ final readonly class GoogleFotosOAuthService
+ 
+         $refreshToken = $this->criptografia->descriptografar($conta->refreshTokenCriptografado());
+ 
+-        $clientId = '' !== $this->clientId ? $this->clientId : ($_ENV['GOOGLE_CLIENT_ID'] ?? getenv('GOOGLE_CLIENT_ID') ?: '');
+-        $clientSecret = '' !== $this->clientSecret ? $this->clientSecret : ($_ENV['GOOGLE_CLIENT_SECRET'] ?? getenv('GOOGLE_CLIENT_SECRET') ?: '');
+-
+-        $dadosToken = $this->googleOAuthApi->renovarAccessToken($clientId, $clientSecret, $refreshToken);
++        $dadosToken = $this->googleOAuthApi->renovarAccessToken($this->clientId, $this->clientSecret, $refreshToken);
+ 
+         $accessToken = $dadosToken['access_token'] ?? null;
+         $expiresIn = (int) ($dadosToken['expires_in'] ?? 3600);
+ 
+         if (empty($accessToken) || !is_string($accessToken)) {
+-            throw new \DomainException('erro_renovar_token_google', 400);
++            throw GoogleFotosOAuthException::falhaAoRenovarAccessTokenDoGoogle();
+         }
+ 
+-        $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
++        $expiraEm = (new \DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
+ 
+         $conta->setAccessTokenCache($accessToken, $expiraEm);
+         $this->contaRepository->salvar($conta);
+diff --git a/src/Service/GoogleFotosAlbumService.php b/src/Service/GoogleFotosAlbumService.php
+deleted file mode 100644
+index 4351922..0000000
+--- a/src/Service/GoogleFotosAlbumService.php
++++ /dev/null
+@@ -1,50 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\Entity\Categoria;
+-use App\Entity\ContaGoogleFotos;
+-use App\Infra\GoogleFotos\GoogleFotosAPI;
+-use App\Repository\CategoriaRepository;
+-use App\Repository\ContaGoogleFotosRepository;
+-
+-final readonly class GoogleFotosAlbumService
+-{
+-    public function __construct(
+-        private GoogleFotosAPI $googleFotosApi,
+-        private GoogleFotosOAuthService $oauthService,
+-        private ContaGoogleFotosRepository $contaRepository,
+-        private CategoriaRepository $categoriaRepository,
+-    ) {}
+-
+-    public function criarOuObter(Categoria $categoria, ?ContaGoogleFotos $conta = null): string
+-    {
+-        $albumIdExistente = $categoria->googlePhotosAlbumId();
+-        if (null !== $albumIdExistente && '' !== trim($albumIdExistente)) {
+-            return $albumIdExistente;
+-        }
+-
+-        if (null === $conta) {
+-            $conta = $this->contaRepository->buscarContaPrincipal();
+-        }
+-
+-        if (null === $conta) {
+-            throw new \DomainException('conta_google_fotos_nao_encontrada', 404);
+-        }
+-
+-        $token = $this->oauthService->obterAccessTokenValido($conta);
+-        $dados = $this->googleFotosApi->criarAlbum($token, $categoria->nome());
+-
+-        $albumId = $dados['id'] ?? null;
+-        if (empty($albumId) || !is_string($albumId)) {
+-            throw new \DomainException('erro_criar_album_google', 400);
+-        }
+-
+-        $categoria->setGooglePhotosAlbumId($albumId);
+-        $this->categoriaRepository->salvar($categoria);
+-
+-        return $albumId;
+-    }
+-}
+diff --git a/src/Service/IngestarMediaService.php b/src/Service/Ingestao/IngestarMediaService.php
+similarity index 58%
+rename from src/Service/IngestarMediaService.php
+rename to src/Service/Ingestao/IngestarMediaService.php
+index 52d3d4b..d944f94 100644
+--- a/src/Service/IngestarMediaService.php
++++ b/src/Service/Ingestao/IngestarMediaService.php
+@@ -2,11 +2,11 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Service;
++namespace App\Service\Ingestao;
+ 
+ use App\DataObject\IngestarMediaDTO;
+ use App\Entity\MediaItem;
+-use App\Enum\StatusMediaItem;
++use App\Interface\ArmazenamentoInterface;
+ use App\Message\ClassificarMediaMessage;
+ use App\Repository\MediaItemRepository;
+ use Symfony\Component\Messenger\MessageBusInterface;
+@@ -15,29 +15,20 @@ final readonly class IngestarMediaService
+ {
+     public function __construct(
+         private MediaItemRepository $mediaItemRepository,
++        private ArmazenamentoInterface $armazenamentoClient,
+         private MessageBusInterface $messageBus,
+     ) {}
+ 
+     public function executar(IngestarMediaDTO $dto): MediaItem
+     {
+-        $hash = $dto->calcularHash();
++        $hash = $dto->hash() ?? $this->armazenamentoClient->calcularHash($dto->caminhoArquivo());
+ 
+-        $existente = $this->mediaItemRepository->buscarPorHash($hash);
+-        if (null !== $existente) {
+-            return $existente;
+-        }
+-
+-        $mediaItem = new MediaItem(
+-            hash: $hash,
+-            origem: $dto->origem(),
+-            status: StatusMediaItem::RECEBIDO,
+-        );
+-        $mediaItem->setCaminhoLocal($dto->caminhoArquivo());
+-
+-        if (!empty($dto->metadata())) {
+-            $mediaItem->setMetadata($dto->metadata());
++        $mediaItem = $this->mediaItemRepository->buscarPorHash($hash);
++        if (null !== $mediaItem) {
++            return $mediaItem;
+         }
+ 
++        $mediaItem = MediaItem::fromIngestaoDTO($dto, $hash);
+         $this->mediaItemRepository->salvar($mediaItem);
+ 
+         if (null !== $mediaItem->uuid()) {
+diff --git a/src/Service/IngestarPrintService.php b/src/Service/Ingestao/IngestarPrintService.php
+similarity index 55%
+rename from src/Service/IngestarPrintService.php
+rename to src/Service/Ingestao/IngestarPrintService.php
+index aeacc66..ab63878 100644
+--- a/src/Service/IngestarPrintService.php
++++ b/src/Service/Ingestao/IngestarPrintService.php
+@@ -2,19 +2,28 @@
+ 
+ declare(strict_types=1);
+ 
+-namespace App\Service;
++namespace App\Service\Ingestao;
+ 
+ use App\DataObject\IngestarMediaDTO;
+ use App\DataObject\IngestarPrintDTO;
+ use App\Entity\MediaItem;
+ use App\Entity\TokenAgente;
+ use App\Enum\OrigemMedia;
++use App\Exception\Ingestao\IngestarPrintException;
++use App\Infra\Storage\ArmazenamentoLocalClient;
++use App\Support\MetadataKeys;
+ use Symfony\Component\HttpFoundation\File\Exception\FileException;
+ 
+ final readonly class IngestarPrintService
+ {
++    private const string SUBDIR_PRINTS = 'cirqueirax_prints';
++    private const string EXTENSAO_FALLBACK = 'png';
++    private const string FORMATO_NOME_ARQUIVO = 'print_%s_%s.%s';
++    private const string FORMATO_DATA_SUFIXO = 'Ymd_His';
++
+     public function __construct(
+         private IngestarMediaService $ingestarMediaService,
++        private ArmazenamentoLocalClient $armazenamentoLocalClient,
+     ) {
+     }
+ 
+@@ -22,29 +31,27 @@ final readonly class IngestarPrintService
+     {
+         $arquivo = $dto->arquivo();
+         if (null === $arquivo) {
+-            throw new \DomainException('arquivo_print_obrigatorio', 400);
++            throw IngestarPrintException::arquivoDePrintNaoInformado();
+         }
+ 
+-        $diretorioDestino = sys_get_temp_dir() . '/cirqueirax_prints';
+-        if (!is_dir($diretorioDestino) && !mkdir($diretorioDestino, 0777, true) && !is_dir($diretorioDestino)) {
+-            throw new \DomainException('erro_criar_diretorio_temp', 500);
+-        }
++        $diretorioDestino = sys_get_temp_dir() . '/' . self::SUBDIR_PRINTS;
++        $this->armazenamentoLocalClient->criarDiretorio($diretorioDestino);
+ 
+-        $extensao = $arquivo->guessExtension() ?? 'png';
+-        $nomeArquivo = sprintf('print_%s_%s.%s', date('Ymd_His'), bin2hex(random_bytes(4)), $extensao);
++        $extensao = $arquivo->guessExtension() ?? self::EXTENSAO_FALLBACK;
++        $nomeArquivo = sprintf(self::FORMATO_NOME_ARQUIVO, date(self::FORMATO_DATA_SUFIXO), bin2hex(random_bytes(4)), $extensao);
+ 
+         try {
+             $arquivoMovido = $arquivo->move($diretorioDestino, $nomeArquivo);
+         } catch (FileException) {
+-            throw new \DomainException('erro_salvar_arquivo_print', 500);
++            throw IngestarPrintException::falhaAoSalvarArquivoDePrint();
+         }
+ 
+         $origemMedia = OrigemMedia::tryFrom($tokenAgente->origem()) ?? OrigemMedia::MANUAL;
+ 
+         /** @var array<string, mixed> $metadataExtra */
+         $metadataExtra = array_filter([
+-            'nome_original' => $dto->nomeOriginal(),
+-            'timestamp_captura' => $dto->timestampCaptura(),
++            MetadataKeys::NOME_ORIGINAL => $dto->nomeOriginal(),
++            MetadataKeys::TIMESTAMP_CAPTURA => $dto->timestampCaptura(),
+             'agente_nome' => $tokenAgente->nome(),
+             'agente_uuid' => $tokenAgente->uuid()?->toString(),
+         ]);
+diff --git a/src/Service/MediaItem/ApagarMediaItemService.php b/src/Service/MediaItem/ApagarMediaItemService.php
+new file mode 100644
+index 0000000..5a24399
+--- /dev/null
++++ b/src/Service/MediaItem/ApagarMediaItemService.php
+@@ -0,0 +1,85 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\DataObject\ApagarLoteDTO;
++use App\Interface\ArmazenamentoInterface;
++use App\Repository\MediaItemRepository;
++use Psr\Log\LoggerInterface;
++
++final readonly class ApagarMediaItemService
++{
++    private const string ERRO_REMOVER_ARQUIVO = 'erro_remover_arquivo_fisico';
++    private const string ERRO_REMOVER_BANCO = 'erro_remover_banco_dados';
++
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private ArmazenamentoInterface $armazenamentoClient,
++        private LoggerInterface $logger,
++    ) {}
++
++    /**
++     * @return array{removidos: list<string>, falhas: array<string, string>, total: int}
++     */
++    public function apagarEmLote(ApagarLoteDTO $dto): array
++    {
++        $removidos = [];
++        $falhas = [];
++
++        foreach ($dto->uuids() as $uuid) {
++            $resultado = $this->apagarItemIndividual($uuid);
++            if ($resultado['sucesso']) {
++                $removidos[] = $uuid;
++                continue;
++            }
++
++            if (null !== $resultado['erro']) {
++                $falhas[$uuid] = $resultado['erro'];
++            }
++        }
++
++        if (!empty($removidos)) {
++            $this->mediaItemRepository->flush();
++        }
++
++        return [
++            'removidos' => $removidos,
++            'falhas' => $falhas,
++            'total' => count($removidos),
++        ];
++    }
++
++    /**
++     * @return array{sucesso: bool, erro: string|null}
++     */
++    private function apagarItemIndividual(string $uuid): array
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
++        if (null === $mediaItem) {
++            return ['sucesso' => false, 'erro' => null];
++        }
++
++        $caminhoLocal = $mediaItem->caminhoLocal();
++        if (\App\Support\TextoUtil::naoEstaEmBranco($caminhoLocal)) {
++            try {
++                $this->armazenamentoClient->remover((string) $caminhoLocal);
++            } catch (\Throwable $e) {
++                $this->logger->error(sprintf('Falha ao remover arquivo físico da mídia "%s": %s', $uuid, $e->getMessage()));
++
++                return ['sucesso' => false, 'erro' => self::ERRO_REMOVER_ARQUIVO];
++            }
++        }
++
++        try {
++            $this->mediaItemRepository->remover($mediaItem, flush: false);
++
++            return ['sucesso' => true, 'erro' => null];
++        } catch (\Throwable $e) {
++            $this->logger->error(sprintf('Falha ao remover mídia do banco "%s": %s', $uuid, $e->getMessage()));
++
++            return ['sucesso' => false, 'erro' => self::ERRO_REMOVER_BANCO];
++        }
++    }
++}
+diff --git a/src/Service/MediaItem/AtualizarMetadataMediaItemService.php b/src/Service/MediaItem/AtualizarMetadataMediaItemService.php
+new file mode 100644
+index 0000000..cd3a07f
+--- /dev/null
++++ b/src/Service/MediaItem/AtualizarMetadataMediaItemService.php
+@@ -0,0 +1,39 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\DataObject\AtualizarMetadataMediaItemDTO;
++use App\Entity\MediaItem;
++use App\Exception\MediaItem\MediaItemException;
++use App\Repository\MediaItemRepository;
++use Symfony\Component\Uid\Uuid;
++
++final readonly class AtualizarMetadataMediaItemService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++    ) {}
++
++    public function atualizarMetadata(string|Uuid $uuid, AtualizarMetadataMediaItemDTO $dto): MediaItem
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
++        if (null === $mediaItem) {
++            throw MediaItemException::midiaNaoEncontradaPorUuid();
++        }
++
++        $novosMetadados = $dto->paraArray();
++        if (empty($novosMetadados)) {
++            return $mediaItem;
++        }
++
++        $metadadosAtuais = $mediaItem->metadata();
++        $metadadosMesclados = array_merge($metadadosAtuais, $novosMetadados);
++
++        $mediaItem->setMetadata($metadadosMesclados);
++        $this->mediaItemRepository->salvar($mediaItem);
++
++        return $mediaItem;
++    }
++}
+diff --git a/src/Service/MediaItem/ClassificarMediaItemService.php b/src/Service/MediaItem/ClassificarMediaItemService.php
+new file mode 100644
+index 0000000..bc035c6
+--- /dev/null
++++ b/src/Service/MediaItem/ClassificarMediaItemService.php
+@@ -0,0 +1,70 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\DataObject\CategorizarLoteDTO;
++use App\DataObject\ClassificarManualDTO;
++use App\Entity\MediaItem;
++use App\Enum\StatusMediaItem;
++use App\Exception\MediaItem\MediaItemException;
++use App\Message\DistribuirLocalMessage;
++use App\Message\EnviarGoogleFotosMessage;
++use App\Repository\MediaItemRepository;
++use App\Service\Categoria\CategoriaService;
++use Symfony\Component\Messenger\MessageBusInterface;
++use Symfony\Component\Uid\Uuid;
++
++final readonly class ClassificarMediaItemService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private CategoriaService $categoriaService,
++        private MessageBusInterface $messageBus,
++    ) {}
++
++    public function classificarManualmente(string|Uuid $uuid, ClassificarManualDTO $dto): MediaItem
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
++        if (null === $mediaItem) {
++            throw MediaItemException::midiaNaoEncontradaPorUuid();
++        }
++
++        $categoria = $this->categoriaService->buscarPorUuid($dto->categoriaId());
++
++        $mediaItem->classificarComo($categoria);
++        $this->mediaItemRepository->salvar($mediaItem);
++
++        $this->despacharProcessamentoPósClassificacao($mediaItem);
++
++        return $mediaItem;
++    }
++
++    /**
++     * @return list<MediaItem>
++     */
++    public function classificarEmLote(CategorizarLoteDTO $dto): array
++    {
++        $resultado = [];
++        foreach ($dto->uuids() as $uuid) {
++            try {
++                $resultado[] = $this->classificarManualmente($uuid, new ClassificarManualDTO($dto->categoriaId()));
++            } catch (\Throwable) {
++                // Silently skip item failure in batch to remain resilient
++                continue;
++            }
++        }
++
++        return $resultado;
++    }
++
++    public function despacharProcessamentoPósClassificacao(MediaItem $mediaItem): void
++    {
++        if (null !== $mediaItem->uuid()) {
++            $mediaUuidStr = $mediaItem->uuid()->toString();
++            $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
++            $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
++        }
++    }
++}
+diff --git a/src/Service/MediaItem/MediaItemService.php b/src/Service/MediaItem/MediaItemService.php
+new file mode 100644
+index 0000000..7ed40e1
+--- /dev/null
++++ b/src/Service/MediaItem/MediaItemService.php
+@@ -0,0 +1,54 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\Entity\MediaItem;
++use App\Enum\OrigemMedia;
++use App\Enum\StatusMediaItem;
++use App\Exception\MediaItem\MediaItemException;
++use App\Repository\MediaItemRepository;
++use Symfony\Component\Uid\Uuid;
++
++final readonly class MediaItemService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++    ) {}
++
++    public function buscarPorUuid(string|Uuid $uuid): MediaItem
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
++        if (null === $mediaItem) {
++            throw MediaItemException::midiaNaoEncontradaPorUuid();
++        }
++
++        return $mediaItem;
++    }
++
++    /**
++     * @return array{itens: array<int, MediaItem>, total: int}
++     */
++    public function listarPaginado(int $pagina = 1, int $limite = 20): array
++    {
++        return $this->mediaItemRepository->listarPaginado($pagina, $limite);
++    }
++
++    /**
++     * @param array{
++     *     status?: StatusMediaItem|string|null,
++     *     origem?: OrigemMedia|string|null,
++     *     categoriaId?: string|null,
++     *     busca?: string|null,
++     *     ordenacao?: string|null,
++     *     direcao?: string|null
++     * } $filtros
++     *
++     * @return array{itens: array<int, MediaItem>, total: int}
++     */
++    public function paginarComFiltros(array $filtros = [], int $pagina = 1, int $limite = 20): array
++    {
++        return $this->mediaItemRepository->paginarComFiltros($filtros, $pagina, $limite);
++    }
++}
+diff --git a/src/Service/MediaItem/RebaixarMediaItemService.php b/src/Service/MediaItem/RebaixarMediaItemService.php
+new file mode 100644
+index 0000000..453c07c
+--- /dev/null
++++ b/src/Service/MediaItem/RebaixarMediaItemService.php
+@@ -0,0 +1,53 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\DataObject\RebaixarLoteDTO;
++use App\Entity\MediaItem;
++use App\Enum\StatusMediaItem;
++use App\Message\BaixarVideoMessage;
++use App\Repository\MediaItemRepository;
++use Symfony\Component\Messenger\MessageBusInterface;
++
++final readonly class RebaixarMediaItemService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private MessageBusInterface $messageBus,
++    ) {}
++
++    /**
++     * @return list<MediaItem>
++     */
++    public function rebaixarEmLote(RebaixarLoteDTO $dto): array
++    {
++        $resultado = [];
++        foreach ($dto->uuids() as $uuid) {
++            $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
++            if (null === $mediaItem) {
++                continue;
++            }
++
++            $mediaItem->setErroMotivo(null);
++            $mediaItem->transicionarPara(StatusMediaItem::BAIXANDO);
++            $this->mediaItemRepository->salvar($mediaItem);
++
++            $metadata = $mediaItem->metadata();
++            /** @var string|null $urlOriginal */
++            $urlOriginal = $metadata['url_original'] ?? null;
++
++            if (\App\Support\TextoUtil::naoEstaEmBranco($urlOriginal)) {
++                $this->messageBus->dispatch(new BaixarVideoMessage(
++                    $urlOriginal,
++                    $mediaItem->origem()
++                ));
++            }
++
++            $resultado[] = $mediaItem;
++        }
++
++        return $resultado;
++    }
++}
+diff --git a/src/Service/MediaItem/RetentarMediaItemService.php b/src/Service/MediaItem/RetentarMediaItemService.php
+new file mode 100644
+index 0000000..ca540d3
+--- /dev/null
++++ b/src/Service/MediaItem/RetentarMediaItemService.php
+@@ -0,0 +1,68 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\Entity\MediaItem;
++use App\Enum\StatusMediaItem;
++use App\Exception\MediaItem\MediaItemException;
++use App\Message\ClassificarMediaMessage;
++use App\Repository\MediaItemRepository;
++use Symfony\Component\Messenger\MessageBusInterface;
++use Symfony\Component\Uid\Uuid;
++
++final readonly class RetentarMediaItemService
++{
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private ClassificarMediaItemService $classificarMediaItemService,
++        private MessageBusInterface $messageBus,
++    ) {}
++
++    public function retentar(string|Uuid $uuid): MediaItem
++    {
++        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
++        if (null === $mediaItem) {
++            throw MediaItemException::midiaNaoEncontradaPorUuid();
++        }
++
++        $this->retentarMediaItem($mediaItem);
++
++        return $mediaItem;
++    }
++
++    /**
++     * @return list<MediaItem>
++     */
++    public function retentarTodosComErro(): array
++    {
++        $itensComErro = $this->mediaItemRepository->buscarPorStatus(StatusMediaItem::ERRO);
++        foreach ($itensComErro as $mediaItem) {
++            $this->retentarMediaItem($mediaItem);
++        }
++
++        return $itensComErro;
++    }
++
++    private function retentarMediaItem(MediaItem $mediaItem): void
++    {
++        $mediaItem->setErroMotivo(null);
++
++        if (null !== $mediaItem->categoriaId()) {
++            $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);
++            $this->mediaItemRepository->salvar($mediaItem);
++
++            $this->classificarMediaItemService->despacharProcessamentoPósClassificacao($mediaItem);
++
++            return;
++        }
++
++        $mediaItem->transicionarPara(StatusMediaItem::RECEBIDO);
++        $this->mediaItemRepository->salvar($mediaItem);
++
++        if (null !== $mediaItem->uuid()) {
++            $this->messageBus->dispatch(new ClassificarMediaMessage($mediaItem->uuid()->toString()));
++        }
++    }
++}
+diff --git a/src/Service/MediaItem/UploadManualService.php b/src/Service/MediaItem/UploadManualService.php
+new file mode 100644
+index 0000000..ee9f465
+--- /dev/null
++++ b/src/Service/MediaItem/UploadManualService.php
+@@ -0,0 +1,100 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\MediaItem;
++
++use App\DataObject\ClassificarManualDTO;
++use App\DataObject\IngestarMediaDTO;
++use App\DataObject\ResultadoUploadDTO;
++use App\DataObject\UploadManualDTO;
++use App\Entity\MediaItem;
++use App\Enum\OrigemMedia;
++use App\Exception\MediaItem\UploadManualException;
++use App\Interface\ArmazenamentoInterface;
++use App\Repository\MediaItemRepository;
++use App\Service\Ingestao\IngestarMediaService;
++use App\Support\MetadataKeys;
++use Symfony\Component\HttpFoundation\File\Exception\FileException;
++
++final readonly class UploadManualService
++{
++    private const string SUBDIR_UPLOADS = 'cirqueirax_uploads';
++    private const string EXTENSAO_FALLBACK = 'bin';
++    private const string FORMATO_NOME_ARQUIVO = 'upload_%s_%s.%s';
++    private const string FORMATO_DATA_SUFIXO = 'Ymd_His';
++    private const string ALGORITMO_HASH_SHA256 = 'sha256';
++
++    public function __construct(
++        private MediaItemRepository $mediaItemRepository,
++        private IngestarMediaService $ingestarMediaService,
++        private ClassificarMediaItemService $classificarMediaItemService,
++        private ArmazenamentoInterface $armazenamentoClient,
++    ) {}
++
++    public function executar(UploadManualDTO $dto): ResultadoUploadDTO
++    {
++        $arquivo = $dto->arquivo();
++        if (null === $arquivo) {
++            throw UploadManualException::arquivoUploadNaoInformado();
++        }
++
++        $diretorioDestino = sys_get_temp_dir() . '/' . self::SUBDIR_UPLOADS;
++        $this->armazenamentoClient->criarDiretorio($diretorioDestino);
++
++        $extensao = $arquivo->guessExtension() ?? self::EXTENSAO_FALLBACK;
++        $nomeArquivo = sprintf(self::FORMATO_NOME_ARQUIVO, date(self::FORMATO_DATA_SUFIXO), bin2hex(random_bytes(4)), $extensao);
++
++        try {
++            $arquivoMovido = $arquivo->move($diretorioDestino, $nomeArquivo);
++        } catch (FileException) {
++            throw UploadManualException::falhaAoSalvarArquivoDeUpload();
++        }
++
++        $caminhoArquivo = $arquivoMovido->getPathname();
++        try {
++            $hash = $this->armazenamentoClient->calcularHash($caminhoArquivo);
++        } catch (\Throwable) {
++            $this->armazenamentoClient->remover($caminhoArquivo);
++            throw UploadManualException::falhaAoCalcularHashDoArquivo();
++        }
++
++        $existente = $this->mediaItemRepository->buscarPorHash($hash);
++        if (null !== $existente) {
++            $this->armazenamentoClient->remover($caminhoArquivo);
++
++            return new ResultadoUploadDTO(
++                mediaItem: $existente,
++                duplicado: true,
++            );
++        }
++
++        /** @var array<string, mixed> $metadataExtra */
++        $metadataExtra = array_filter([
++            MetadataKeys::NOME_ORIGINAL => $dto->nomeOriginal(),
++            MetadataKeys::CATEGORIA_ID_DESEJADA => $dto->categoriaId(),
++        ]);
++        $metadata = array_merge($dto->metadata(), $metadataExtra);
++
++        $ingestarDTO = new IngestarMediaDTO(
++            caminhoArquivo: $caminhoArquivo,
++            origem: OrigemMedia::MANUAL,
++            metadata: $metadata,
++            hash: $hash,
++        );
++
++        $mediaItem = $this->ingestarMediaService->executar($ingestarDTO);
++
++        if (null !== $dto->categoriaId() && '' !== trim($dto->categoriaId())) {
++            $mediaItem = $this->classificarMediaItemService->classificarManualmente(
++                $mediaItem->uuid()?->toString() ?? '',
++                new ClassificarManualDTO($dto->categoriaId())
++            );
++        }
++
++        return new ResultadoUploadDTO(
++            mediaItem: $mediaItem,
++            duplicado: false,
++        );
++    }
++}
+diff --git a/src/Service/MediaItemService.php b/src/Service/MediaItemService.php
+deleted file mode 100644
+index 07ef3c6..0000000
+--- a/src/Service/MediaItemService.php
++++ /dev/null
+@@ -1,248 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\DataObject\ApagarLoteDTO;
+-use App\DataObject\AtualizarMetadataMediaItemDTO;
+-use App\DataObject\CategorizarLoteDTO;
+-use App\DataObject\ClassificarManualDTO;
+-use App\DataObject\RebaixarLoteDTO;
+-use App\Entity\MediaItem;
+-use App\Enum\OrigemMedia;
+-use App\Enum\StatusMediaItem;
+-use App\Message\BaixarVideoMessage;
+-use App\Message\ClassificarMediaMessage;
+-use App\Message\DistribuirLocalMessage;
+-use App\Message\EnviarGoogleFotosMessage;
+-use App\Repository\MediaItemRepository;
+-use Symfony\Component\Messenger\MessageBusInterface;
+-use Symfony\Component\Uid\Uuid;
+-
+-final readonly class MediaItemService
+-{
+-    public function __construct(
+-        private MediaItemRepository $mediaItemRepository,
+-        private CategoriaService $categoriaService,
+-        private MessageBusInterface $messageBus,
+-    ) {}
+-
+-    public function buscarPorUuid(string|Uuid $uuid): MediaItem
+-    {
+-        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+-        if (null === $mediaItem) {
+-            throw new \DomainException('media_item_nao_encontrado', 404);
+-        }
+-
+-        return $mediaItem;
+-    }
+-
+-    /**
+-     * @return array{itens: array<int, MediaItem>, total: int}
+-     */
+-    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+-    {
+-        return $this->mediaItemRepository->listarPaginado($pagina, $limite);
+-    }
+-
+-    /**
+-     * @param array{
+-     *     status?: StatusMediaItem|string|null,
+-     *     origem?: OrigemMedia|string|null,
+-     *     categoriaId?: string|null,
+-     *     busca?: string|null,
+-     *     ordenacao?: string|null,
+-     *     direcao?: string|null
+-     * } $filtros
+-     *
+-     * @return array{itens: array<int, MediaItem>, total: int}
+-     */
+-    public function paginarComFiltros(array $filtros = [], int $pagina = 1, int $porPagina = 20): array
+-    {
+-        return $this->mediaItemRepository->paginarComFiltros($filtros, $pagina, $porPagina);
+-    }
+-
+-    public function classificarManualmente(string|Uuid $uuid, ClassificarManualDTO $dto): MediaItem
+-    {
+-        $mediaItem = $this->buscarPorUuid($uuid);
+-        $this->categoriaService->buscarPorUuid($dto->categoriaId());
+-
+-        $mediaItem->setCategoriaId($dto->categoriaId());
+-        $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);
+-        $this->mediaItemRepository->salvar($mediaItem);
+-
+-        if (null !== $mediaItem->uuid()) {
+-            $mediaItemUuidStr = $mediaItem->uuid()->toString();
+-            $this->messageBus->dispatch(new DistribuirLocalMessage($mediaItemUuidStr));
+-            $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaItemUuidStr));
+-        }
+-
+-        return $mediaItem;
+-    }
+-
+-    /**
+-     * @return list<MediaItem>
+-     */
+-    public function classificarEmLote(CategorizarLoteDTO $dto): array
+-    {
+-        $dtoIndividual = new ClassificarManualDTO(categoriaId: $dto->categoriaId());
+-        $itensAtualizados = [];
+-
+-        foreach ($dto->uuids() as $uuid) {
+-            $itensAtualizados[] = $this->classificarManualmente($uuid, $dtoIndividual);
+-        }
+-
+-        return $itensAtualizados;
+-    }
+-
+-    public function atualizarMetadata(string|Uuid $uuid, AtualizarMetadataMediaItemDTO $dto): MediaItem
+-    {
+-        $mediaItem = $this->buscarPorUuid($uuid);
+-        $metadataAtual = $mediaItem->metadata();
+-        $novosMetadados = array_merge($metadataAtual, $dto->paraArray());
+-
+-        $mediaItem->setMetadata($novosMetadados);
+-        $this->mediaItemRepository->salvar($mediaItem);
+-
+-        return $mediaItem;
+-    }
+-
+-    /**
+-     * @return list<MediaItem>
+-     */
+-    public function rebaixarEmLote(RebaixarLoteDTO $dto): array
+-    {
+-        $itensProcessados = [];
+-
+-        foreach ($dto->uuids() as $uuid) {
+-            $mediaItem = $this->buscarPorUuid($uuid);
+-            $metadata = $mediaItem->metadata();
+-            $urlOriginal = $metadata['url_original'] ?? null;
+-
+-            if (empty($urlOriginal) || !is_string($urlOriginal)) {
+-                continue;
+-            }
+-
+-            $mediaItem->setErroMotivo(null);
+-            $mediaItem->transicionarPara(StatusMediaItem::BAIXANDO);
+-            $this->mediaItemRepository->salvar($mediaItem);
+-
+-            $this->messageBus->dispatch(new BaixarVideoMessage($urlOriginal, $mediaItem->origem()));
+-
+-            $itensProcessados[] = $mediaItem;
+-        }
+-
+-        return $itensProcessados;
+-    }
+-
+-    /**
+-     * @return list<string>
+-     */
+-    public function apagarEmLote(ApagarLoteDTO $dto): array
+-    {
+-        $removidos = [];
+-
+-        foreach ($dto->uuids() as $uuid) {
+-            $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+-            if (null === $mediaItem) {
+-                continue;
+-            }
+-
+-            $caminhoLocal = $mediaItem->caminhoLocal();
+-            if (null !== $caminhoLocal && '' !== $caminhoLocal && file_exists($caminhoLocal) && is_file($caminhoLocal)) {
+-                @unlink($caminhoLocal);
+-            }
+-
+-            $this->mediaItemRepository->remover($mediaItem);
+-            $removidos[] = $uuid;
+-        }
+-
+-        return $removidos;
+-    }
+-
+-    public function retentar(string|Uuid $uuid): MediaItem
+-    {
+-        $mediaItem = $this->buscarPorUuid($uuid);
+-        $this->retentarMediaItem($mediaItem);
+-
+-        return $mediaItem;
+-    }
+-
+-    /**
+-     * @return list<MediaItem>
+-     */
+-    public function retentarTodosComErro(): array
+-    {
+-        $itensComErro = $this->mediaItemRepository->buscarPorStatus(StatusMediaItem::ERRO);
+-        foreach ($itensComErro as $mediaItem) {
+-            $this->retentarMediaItem($mediaItem);
+-        }
+-
+-        return $itensComErro;
+-    }
+-
+-    private function retentarMediaItem(MediaItem $mediaItem): void
+-    {
+-        $mediaItem->setErroMotivo(null);
+-
+-        if (null !== $mediaItem->categoriaId()) {
+-            $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);
+-            $this->mediaItemRepository->salvar($mediaItem);
+-
+-            if (null !== $mediaItem->uuid()) {
+-                $mediaUuidStr = $mediaItem->uuid()->toString();
+-                $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
+-                $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+-            }
+-
+-            return;
+-        }
+-
+-        $mediaItem->transicionarPara(StatusMediaItem::RECEBIDO);
+-        $this->mediaItemRepository->salvar($mediaItem);
+-
+-        if (null !== $mediaItem->uuid()) {
+-            $this->messageBus->dispatch(new ClassificarMediaMessage($mediaItem->uuid()->toString()));
+-        }
+-    }
+-
+-    public function uploadManual(\App\DataObject\UploadManualDTO $dto): MediaItem
+-    {
+-        $arquivo = $dto->arquivo();
+-        if (null === $arquivo) {
+-            throw new \DomainException('arquivo_upload_obrigatorio', 400);
+-        }
+-
+-        $diretorioDestino = sys_get_temp_dir() . '/cirqueirax_uploads';
+-        if (!is_dir($diretorioDestino) && !mkdir($diretorioDestino, 0777, true) && !is_dir($diretorioDestino)) {
+-            throw new \DomainException('erro_criar_diretorio_temp', 500);
+-        }
+-
+-        $extensao = $arquivo->guessExtension() ?? 'bin';
+-        $nomeArquivo = sprintf('upload_%s_%s.%s', date('Ymd_His'), bin2hex(random_bytes(4)), $extensao);
+-        $arquivoMovido = $arquivo->move($diretorioDestino, $nomeArquivo);
+-
+-        /** @var array<string, mixed> $metadataExtra */
+-        $metadataExtra = array_filter([
+-            'nome_original' => $dto->nomeOriginal(),
+-            'categoria_id_desejada' => $dto->categoriaId(),
+-        ]);
+-        $metadata = array_merge($dto->metadata(), $metadataExtra);
+-
+-        $ingestarDTO = new \App\DataObject\IngestarMediaDTO(
+-            caminhoArquivo: $arquivoMovido->getPathname(),
+-            origem: OrigemMedia::MANUAL,
+-            metadata: $metadata,
+-        );
+-
+-        $ingestarService = new IngestarMediaService($this->mediaItemRepository, $this->messageBus);
+-        $mediaItem = $ingestarService->executar($ingestarDTO);
+-
+-        if (null !== $dto->categoriaId() && '' !== trim($dto->categoriaId())) {
+-            $this->classificarManualmente($mediaItem->uuid()?->toString() ?? '', new ClassificarManualDTO($dto->categoriaId()));
+-        }
+-
+-        return $mediaItem;
+-    }
+-}
+diff --git a/src/Service/OrigemRegra/OrigemRegraService.php b/src/Service/OrigemRegra/OrigemRegraService.php
+new file mode 100644
+index 0000000..41f6886
+--- /dev/null
++++ b/src/Service/OrigemRegra/OrigemRegraService.php
+@@ -0,0 +1,76 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\OrigemRegra;
++
++use App\DataObject\CriarOrigemRegraDTO;
++use App\Entity\OrigemRegra;
++use App\Exception\OrigemRegra\OrigemRegraException;
++use App\Repository\OrigemRegraRepository;
++use App\Service\Categoria\CategoriaService;
++use Symfony\Component\Uid\Uuid;
++
++final readonly class OrigemRegraService
++{
++    public function __construct(
++        private OrigemRegraRepository $origemRegraRepository,
++        private CategoriaService $categoriaService,
++    ) {}
++
++    public function criar(CriarOrigemRegraDTO $dto): OrigemRegra
++    {
++        if ($this->origemRegraRepository->existeComOrigem($dto->origem())) {
++            throw OrigemRegraException::regraDuplicada($dto->origem()->value);
++        }
++
++        $categoria = $this->categoriaService->buscarPorUuid($dto->categoriaId());
++
++        $origemRegra = OrigemRegra::fromDTO($dto);
++        $this->origemRegraRepository->salvar($origemRegra);
++
++        return $origemRegra;
++    }
++
++    public function atualizar(string|Uuid $uuid, CriarOrigemRegraDTO $dto): OrigemRegra
++    {
++        $origemRegra = $this->buscarPorUuid($uuid);
++
++        if ($origemRegra->origem()->value !== $dto->origem()->value && $this->origemRegraRepository->existeComOrigem($dto->origem(), $uuid)) {
++            throw OrigemRegraException::regraDuplicada($dto->origem()->value);
++        }
++
++        $categoria = $this->categoriaService->buscarPorUuid($dto->categoriaId());
++
++        $origemRegra->setOrigem($dto->origem());
++        $origemRegra->setCategoriaId($categoria->uuid()?->toString() ?? $dto->categoriaId());
++
++        $this->origemRegraRepository->salvar($origemRegra);
++
++        return $origemRegra;
++    }
++
++    /**
++     * @return list<OrigemRegra>
++     */
++    public function listarTodas(): array
++    {
++        return $this->origemRegraRepository->listarTodas();
++    }
++
++    public function buscarPorUuid(string|Uuid $uuid): OrigemRegra
++    {
++        $origemRegra = $this->origemRegraRepository->buscarPorUuid($uuid);
++        if (null === $origemRegra) {
++            throw OrigemRegraException::regraNaoEncontrada();
++        }
++
++        return $origemRegra;
++    }
++
++    public function remover(string|Uuid $uuid): void
++    {
++        $origemRegra = $this->buscarPorUuid($uuid);
++        $this->origemRegraRepository->remover($origemRegra);
++    }
++}
+diff --git a/src/Service/OrigemRegraService.php b/src/Service/OrigemRegraService.php
+deleted file mode 100644
+index abc4a24..0000000
+--- a/src/Service/OrigemRegraService.php
++++ /dev/null
+@@ -1,86 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\DataObject\AtualizarOrigemRegraDTO;
+-use App\DataObject\CriarOrigemRegraDTO;
+-use App\Entity\OrigemRegra;
+-use App\Enum\OrigemMedia;
+-use App\Repository\OrigemRegraRepository;
+-use Symfony\Component\Uid\Uuid;
+-
+-final readonly class OrigemRegraService
+-{
+-    public function __construct(
+-        private OrigemRegraRepository $origemRegraRepository,
+-        private CategoriaService $categoriaService,
+-    ) {}
+-
+-    public function criar(CriarOrigemRegraDTO $dto): OrigemRegra
+-    {
+-        if (null !== $this->origemRegraRepository->buscarPorOrigem($dto->origem())) {
+-            throw new \DomainException('origem_regra_duplicada', 409);
+-        }
+-
+-        $this->categoriaService->buscarPorUuid($dto->categoriaId());
+-
+-        $regra = OrigemRegra::fromDTO($dto);
+-        $this->origemRegraRepository->salvar($regra);
+-
+-        return $regra;
+-    }
+-
+-    public function atualizar(string|Uuid $uuid, AtualizarOrigemRegraDTO $dto): OrigemRegra
+-    {
+-        $regra = $this->buscarPorUuid($uuid);
+-
+-        if (null !== $dto->origem() && $dto->origem() !== $regra->origem()) {
+-            $existente = $this->origemRegraRepository->buscarPorOrigem($dto->origem());
+-            if (null !== $existente && $existente->uuid()?->toString() !== $regra->uuid()?->toString()) {
+-                throw new \DomainException('origem_regra_duplicada', 409);
+-            }
+-            $regra->setOrigem($dto->origem());
+-        }
+-
+-        if (null !== $dto->categoriaId()) {
+-            $this->categoriaService->buscarPorUuid($dto->categoriaId());
+-            $regra->setCategoriaId($dto->categoriaId());
+-        }
+-
+-        $this->origemRegraRepository->salvar($regra);
+-
+-        return $regra;
+-    }
+-
+-    public function remover(string|Uuid $uuid): void
+-    {
+-        $regra = $this->buscarPorUuid($uuid);
+-        $this->origemRegraRepository->remover($regra);
+-    }
+-
+-    public function buscarPorUuid(string|Uuid $uuid): OrigemRegra
+-    {
+-        $regra = $this->origemRegraRepository->buscarPorUuid($uuid);
+-
+-        if (null === $regra) {
+-            throw new \DomainException('origem_regra_nao_encontrada', 404);
+-        }
+-
+-        return $regra;
+-    }
+-
+-    public function buscarPorOrigem(OrigemMedia|string $origem): ?OrigemRegra
+-    {
+-        return $this->origemRegraRepository->buscarPorOrigem($origem);
+-    }
+-
+-    /**
+-     * @return array{itens: array<int, OrigemRegra>, total: int}
+-     */
+-    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+-    {
+-        return $this->origemRegraRepository->listarPaginado($pagina, $limite);
+-    }
+-}
+diff --git a/src/Service/ValidadorUrlPlataforma.php b/src/Service/ValidadorUrlPlataforma.php
+deleted file mode 100644
+index f570457..0000000
+--- a/src/Service/ValidadorUrlPlataforma.php
++++ /dev/null
+@@ -1,53 +0,0 @@
+-<?php
+-
+-declare(strict_types=1);
+-
+-namespace App\Service;
+-
+-use App\Enum\PlataformaVideo;
+-
+-final readonly class ValidadorUrlPlataforma
+-{
+-    public function validar(string $url): bool
+-    {
+-        if (false === filter_var($url, FILTER_VALIDATE_URL)) {
+-            return false;
+-        }
+-
+-        $scheme = parse_url($url, PHP_URL_SCHEME);
+-
+-        return 'http' === $scheme || 'https' === $scheme;
+-    }
+-
+-    public function identificarPlataforma(string $url): PlataformaVideo
+-    {
+-        if (!$this->validar($url)) {
+-            return PlataformaVideo::OUTROS;
+-        }
+-
+-        $host = parse_url($url, PHP_URL_HOST);
+-        if (null === $host || false === $host) {
+-            return PlataformaVideo::OUTROS;
+-        }
+-
+-        $host = strtolower((string) $host);
+-
+-        if (str_contains($host, 'youtube.com') || str_contains($host, 'youtu.be')) {
+-            return PlataformaVideo::YOUTUBE;
+-        }
+-
+-        if (str_contains($host, 'tiktok.com')) {
+-            return PlataformaVideo::TIKTOK;
+-        }
+-
+-        if (str_contains($host, 'twitter.com') || str_contains($host, 'x.com')) {
+-            return PlataformaVideo::TWITTER;
+-        }
+-
+-        if (str_contains($host, 'instagram.com') || str_contains($host, 'instagr.am')) {
+-            return PlataformaVideo::INSTAGRAM;
+-        }
+-
+-        return PlataformaVideo::OUTROS;
+-    }
+-}
+diff --git a/src/Service/Video/BaixarVideoDownloadService.php b/src/Service/Video/BaixarVideoDownloadService.php
+new file mode 100644
+index 0000000..46491eb
+--- /dev/null
++++ b/src/Service/Video/BaixarVideoDownloadService.php
+@@ -0,0 +1,43 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\Video;
++
++use App\Infra\Storage\ArmazenamentoLocalClient;
++use App\Infra\YtDlp\YtDlpClient;
++
++final readonly class BaixarVideoDownloadService
++{
++    private const string SUBDIR_DOWNLOADS = 'cirqueirax_downloads';
++
++    public function __construct(
++        private YtDlpClient $ytDlpClient,
++        private ArmazenamentoLocalClient $armazenamentoLocalClient,
++    ) {}
++
++    /**
++     * @return array<string, mixed>
++     */
++    public function extrairMetadata(string $url): array
++    {
++        $dados = $this->ytDlpClient->extrairMetadata($url);
++
++        return [
++            'titulo' => $dados['title'] ?? null,
++            'uploader' => $dados['uploader'] ?? ($dados['uploader_id'] ?? null),
++            'duracao' => $dados['duration'] ?? null,
++            'data' => $dados['upload_date'] ?? null,
++            'extensao' => $dados['ext'] ?? null,
++            'url_original' => $url,
++        ];
++    }
++
++    public function baixarParaStorage(string $url): string
++    {
++        $diretorioDestino = sys_get_temp_dir() . '/' . self::SUBDIR_DOWNLOADS;
++        $this->armazenamentoLocalClient->criarDiretorio($diretorioDestino);
++
++        return $this->ytDlpClient->baixarVideo($url, $diretorioDestino);
++    }
++}
+diff --git a/src/Service/Video/BaixarVideoService.php b/src/Service/Video/BaixarVideoService.php
+new file mode 100644
+index 0000000..2d174f0
+--- /dev/null
++++ b/src/Service/Video/BaixarVideoService.php
+@@ -0,0 +1,38 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\Video;
++
++use App\DataObject\IngestarMediaDTO;
++use App\Entity\MediaItem;
++use App\Enum\OrigemMedia;
++use App\Exception\Video\YtDlpException;
++use App\Service\Ingestao\IngestarMediaService;
++
++final readonly class BaixarVideoService
++{
++    public function __construct(
++        private ValidadorUrlPlataforma $validadorUrl,
++        private IngestarMediaService $ingestarMediaService,
++        private BaixarVideoDownloadService $baixarVideoDownloadService,
++    ) {}
++
++    public function executar(string $url, ?OrigemMedia $origem = null): MediaItem
++    {
++        if (!$this->validadorUrl->ehUrlSuportada($url)) {
++            throw YtDlpException::urlInvalidaOuNaoSuportada($url);
++        }
++
++        $metadataExtraida = $this->baixarVideoDownloadService->extrairMetadata($url);
++        $caminhoLocal = $this->baixarVideoDownloadService->baixarParaStorage($url);
++
++        $dto = new IngestarMediaDTO(
++            caminhoArquivo: $caminhoLocal,
++            origem: $origem ?? OrigemMedia::DOWNLOAD,
++            metadata: $metadataExtraida,
++        );
++
++        return $this->ingestarMediaService->executar($dto);
++    }
++}
+diff --git a/src/Service/Video/ExtrairMetadataVideoService.php b/src/Service/Video/ExtrairMetadataVideoService.php
+new file mode 100644
+index 0000000..6a68d65
+--- /dev/null
++++ b/src/Service/Video/ExtrairMetadataVideoService.php
+@@ -0,0 +1,31 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\Video;
++
++use App\Infra\YtDlp\YtDlpClient;
++
++final readonly class ExtrairMetadataVideoService
++{
++    public function __construct(
++        private YtDlpClient $ytDlpClient,
++    ) {}
++
++    /**
++     * @return array<string, mixed>
++     */
++    public function extrair(string $url): array
++    {
++        $dados = $this->ytDlpClient->extrairMetadata($url);
++
++        return [
++            'titulo' => $dados['title'] ?? null,
++            'uploader' => $dados['uploader'] ?? ($dados['uploader_id'] ?? null),
++            'duracao' => $dados['duration'] ?? null,
++            'data' => $dados['upload_date'] ?? null,
++            'extensao' => $dados['ext'] ?? null,
++            'url_original' => $url,
++        ];
++    }
++}
+diff --git a/src/Service/Video/ValidadorUrlPlataforma.php b/src/Service/Video/ValidadorUrlPlataforma.php
+new file mode 100644
+index 0000000..4c49364
+--- /dev/null
++++ b/src/Service/Video/ValidadorUrlPlataforma.php
+@@ -0,0 +1,33 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Service\Video;
++
++final class ValidadorUrlPlataforma
++{
++    /** @var list<string> */
++    private const array PADROES_SUPORTADOS = [
++        '/^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/i',
++        '/^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/.+$/i',
++        '/^https?:\/\/(www\.)?(tiktok\.com|vm\.tiktok\.com)\/.+$/i',
++        '/^https?:\/\/(www\.)?x\.com\/.+\/status\/.+$/i',
++        '/^https?:\/\/(www\.)?twitter\.com\/.+\/status\/.+$/i',
++    ];
++
++    public function ehUrlSuportada(string $url): bool
++    {
++        $urlLimpa = trim($url);
++        if ('' === $urlLimpa) {
++            return false;
++        }
++
++        foreach (self::PADROES_SUPORTADOS as $padrao) {
++            if (1 === preg_match($padrao, $urlLimpa)) {
++                return true;
++            }
++        }
++
++        return false;
++    }
++}
+diff --git a/src/Support/MetadataKeys.php b/src/Support/MetadataKeys.php
+new file mode 100644
+index 0000000..e8fa187
+--- /dev/null
++++ b/src/Support/MetadataKeys.php
+@@ -0,0 +1,14 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Support;
++
++final class MetadataKeys
++{
++    public const string URL_ORIGINAL = 'url_original';
++    public const string NOME_ORIGINAL = 'nome_original';
++    public const string CATEGORIA_ID_DESEJADA = 'categoria_id_desejada';
++    public const string TIMESTAMP_CAPTURA = 'timestamp_captura';
++    public const string ORIGEM_TOKEN = 'origem_token';
++}
+diff --git a/src/Support/TextoUtil.php b/src/Support/TextoUtil.php
+new file mode 100644
+index 0000000..adc628e
+--- /dev/null
++++ b/src/Support/TextoUtil.php
+@@ -0,0 +1,18 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\Support;
++
++final class TextoUtil
++{
++    public static function estaEmBranco(?string $valor): bool
++    {
++        return null === $valor || '' === trim($valor);
++    }
++
++    public static function naoEstaEmBranco(?string $valor): bool
++    {
++        return !self::estaEmBranco($valor);
++    }
++}
+diff --git a/src/ValueObject/UrlVideo.php b/src/ValueObject/UrlVideo.php
+new file mode 100644
+index 0000000..6cad861
+--- /dev/null
++++ b/src/ValueObject/UrlVideo.php
+@@ -0,0 +1,32 @@
++<?php
++
++declare(strict_types=1);
++
++namespace App\ValueObject;
++
++use App\Exception\Video\YtDlpException;
++
++final readonly class UrlVideo
++{
++    private string $url;
++
++    public function __construct(string $url)
++    {
++        $urlLimpa = trim($url);
++        if ('' === $urlLimpa || false === filter_var($urlLimpa, FILTER_VALIDATE_URL)) {
++            throw YtDlpException::urlInvalidaOuNaoSuportada($url);
++        }
++
++        $this->url = $urlLimpa;
++    }
++
++    public function valor(): string
++    {
++        return $this->url;
++    }
++
++    public function __toString(): string
++    {
++        return $this->url;
++    }
++}

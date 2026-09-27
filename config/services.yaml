@@ -32,12 +32,12 @@ services:
         arguments:
             $chaveSecreta: '%env(APP_SECRET)%'
 
-    App\Service\DistribuirLocalService:
+    App\Service\Distribuicao\DistribuirLocalService:
         arguments:
             $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'
             $projectDir: '%kernel.project_dir%'
 
-    App\Service\GoogleFotosOAuthService:
+    App\Service\GoogleFotos\GoogleFotosOAuthService:
         arguments:
             $clientId: '%env(GOOGLE_CLIENT_ID)%'
             $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'

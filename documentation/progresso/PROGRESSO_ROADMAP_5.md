@@ -129,11 +129,23 @@
 - **Arquivos envolvidos**:
   - [`src/DataObject/UploadManualDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/UploadManualDTO.php)
 
-### ⏳ Tópico 94 — UploadManualService — checagem de duplicidade por hash
-- **Status**: Pendente
+### ✅ Tópico 94 — UploadManualService — checagem de duplicidade por hash
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Serviço Dedicado de Upload Manual**: Criado [`src/Service/UploadManualService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/UploadManualService.php) desacoplado do `MediaItemService`.
+  - **Deduplicação por Hash SHA-256**: Calcula o hash SHA-256 do arquivo enviado via `ArmazenamentoLocalClient` e consulta `MediaItemRepository::buscarPorHash()`.
+  - **Limpeza de Temporários**: Se o hash já existir na base de dados, remove o arquivo temporário com segurança e retorna o `MediaItem` existente com flag `duplicado => true`.
+- **Arquivos envolvidos**:
+  - [`src/Service/UploadManualService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/UploadManualService.php)
+  - [`src/Infra/Storage/ArmazenamentoLocalClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Storage/ArmazenamentoLocalClient.php)
 
-### ⏳ Tópico 95 — Resposta de duplicidade (aviso, não bloqueio)
-- **Status**: Pendente
+### ✅ Tópico 95 — Resposta de duplicidade (aviso, não bloqueio)
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Alerta de Duplicidade no Envelope API**: Atualizado [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php) na ação `uploadManual`.
+  - **Contrato Transparente**: Se o item for retornado como duplicado pelo `UploadManualService`, insere a chave `_warning => 'item_duplicado_existente'` no payload serializado HTTP 201 Created.
+- **Arquivos envolvidos**:
+  - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php)
 
 ### ⏳ Tópico 96 — Frontend — estrutura da feature upload-manual
 - **Status**: Pendente

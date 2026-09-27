@@ -85,6 +85,21 @@ class MediaItem
         ];
     }
 
+    public static function fromIngestaoDTO(\App\DataObject\IngestarMediaDTO $dto, string $hash): self
+    {
+        $item = new self(
+            hash: $hash,
+            origem: $dto->origem(),
+            status: StatusMediaItem::RECEBIDO,
+        );
+        $item->setCaminhoLocal($dto->caminhoArquivo());
+        if (!empty($dto->metadata())) {
+            $item->setMetadata($dto->metadata());
+        }
+
+        return $item;
+    }
+
     public static function fromDTO(CriarMediaItemDTO $dto): self
     {
         $item = new self(
@@ -98,7 +113,7 @@ class MediaItem
         }
 
         if (null !== $dto->googlePhotosMediaId()) {
-            $item->setGooglePhotosMediaId($dto->googlePhotosMediaId());
+            $item->setGoogleFotosId($dto->googlePhotosMediaId());
         }
 
         if (null !== $dto->categoriaId()) {
@@ -143,6 +158,38 @@ class MediaItem
         return $this;
     }
 
+    public function classificarComo(Categoria $categoria): self
+    {
+        $this->categoriaId = $categoria->uuid()?->toString() ?? $this->categoriaId;
+        $this->transicionarPara(StatusMediaItem::CLASSIFICADO);
+
+        return $this;
+    }
+
+    public function marcarParaDownload(): self
+    {
+        $this->erroMotivo = null;
+        $this->transicionarPara(StatusMediaItem::BAIXANDO);
+
+        return $this;
+    }
+
+    public function limparErro(): self
+    {
+        $this->erroMotivo = null;
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function registrarErro(string $motivo): self
+    {
+        $this->erroMotivo = $motivo;
+        $this->transicionarPara(StatusMediaItem::ERRO);
+
+        return $this;
+    }
+
     public function status(): StatusMediaItem
     {
         return $this->status;
@@ -153,7 +200,7 @@ class MediaItem
         $statusAlvo = is_string($novoStatus) ? (StatusMediaItem::tryFrom($novoStatus) ?? StatusMediaItem::ERRO) : $novoStatus;
 
         if (!$this->status->podeTransicionarPara($statusAlvo)) {
-            throw new \DomainException(sprintf('Transição de status inválida de "%s" para "%s".', $this->status->value, $statusAlvo->value), 422);
+            throw \App\Exception\MediaItem\MediaItemException::transicaoDeStatusInvalida($this->status->value, $statusAlvo->value);
         }
 
         $deStatus = $this->status->value;
@@ -196,14 +243,14 @@ class MediaItem
         return $this;
     }
 
-    public function googlePhotosMediaId(): ?string
+    public function googleFotosId(): ?string
     {
         return $this->googlePhotosMediaId;
     }
 
-    public function setGooglePhotosMediaId(?string $googlePhotosMediaId): self
+    public function setGoogleFotosId(?string $googleFotosId): self
     {
-        $this->googlePhotosMediaId = $googlePhotosMediaId;
+        $this->googlePhotosMediaId = $googleFotosId;
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infra\GoogleFotos;
 
-use App\Exception\GoogleFotosAPIException;
+use App\Exception\GoogleFotos\GoogleFotosAPIException;
+use App\Exception\Storage\ArmazenamentoLocalException;
 use GuzzleHttp\Exception\RequestException;
 
 final class GoogleFotosAPI extends GoogleFotosClient
@@ -45,7 +46,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
     {
         $stream = @fopen($caminhoArquivo, 'r');
         if (false === $stream) {
-            throw new \DomainException('arquivo_origem_nao_encontrado', 404);
+            throw ArmazenamentoLocalException::arquivoDeOrigemNaoEncontradoParaCopia();
         }
 
         $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
@@ -106,5 +107,13 @@ final class GoogleFotosAPI extends GoogleFotosClient
         );
 
         return $dados;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function criarMediaItem(string $accessToken, string $uploadToken, string $albumId, string $descricao): array
+    {
+        return $this->batchCreateMediaItems($accessToken, $albumId, $uploadToken, $descricao);
     }
 }

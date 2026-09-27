@@ -9,6 +9,7 @@ enum OrigemMedia: string
     case PRINT_EMPRESA = 'print_empresa';
     case PRINT_PESSOAL = 'print_pessoal';
     case BOT_TELEGRAM = 'bot_telegram';
+    case DOWNLOAD = 'download';
     case MANUAL = 'manual';
 
     public function descricao(): string
@@ -17,6 +18,7 @@ enum OrigemMedia: string
             self::PRINT_EMPRESA => 'Agente Print Empresa',
             self::PRINT_PESSOAL => 'Agente Print Pessoal',
             self::BOT_TELEGRAM => 'Bot de Download Telegram',
+            self::DOWNLOAD => 'Download de Vídeo',
             self::MANUAL => 'Upload Manual',
         };
     }

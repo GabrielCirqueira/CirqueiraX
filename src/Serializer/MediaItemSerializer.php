@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Serializer;
 
 use App\Entity\MediaItem;
-use App\Service\CategoriaService;
+use App\Service\Categoria\CategoriaService;
 
 final readonly class MediaItemSerializer
 {
@@ -39,7 +39,7 @@ final readonly class MediaItemSerializer
             'status' => $item->status()->value,
             'statusDescricao' => $item->status()->descricao(),
             'caminhoLocal' => $item->caminhoLocal(),
-            'googlePhotosMediaId' => $item->googlePhotosMediaId(),
+            'googlePhotosMediaId' => $item->googleFotosId(),
             'categoriaId' => $item->categoriaId(),
             'categoria' => $categoriaData,
             'metadata' => $item->metadata(),

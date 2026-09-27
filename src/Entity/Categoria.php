@@ -87,14 +87,14 @@ class Categoria
         return $this;
     }
 
-    public function googlePhotosAlbumId(): ?string
+    public function googleFotosAlbumId(): ?string
     {
         return $this->googlePhotosAlbumId;
     }
 
-    public function setGooglePhotosAlbumId(?string $googlePhotosAlbumId): self
+    public function setGoogleFotosAlbumId(?string $googleFotosAlbumId): self
     {
-        $this->googlePhotosAlbumId = $googlePhotosAlbumId;
+        $this->googlePhotosAlbumId = $googleFotosAlbumId;
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;

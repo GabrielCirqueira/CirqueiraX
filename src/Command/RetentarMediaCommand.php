@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use App\Service\MediaItemService;
+use App\Service\MediaItem\RetentarMediaItemService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class RetentarMediaCommand extends Command
 {
     public function __construct(
-        private readonly MediaItemService $mediaItemService,
+        private readonly RetentarMediaItemService $retentarMediaItemService,
     ) {
         parent::__construct();
     }
@@ -43,7 +43,7 @@ final class RetentarMediaCommand extends Command
 
         if (null !== $uuid && '' !== trim($uuid)) {
             try {
-                $mediaItem = $this->mediaItemService->retentar($uuid);
+                $mediaItem = $this->retentarMediaItemService->retentar($uuid);
                 $io->success(sprintf('Mídia "%s" enviada para reprocessamento com sucesso.', $mediaItem->uuid()?->toString()));
                 $io->definitionList(
                     ['UUID' => $mediaItem->uuid()?->toString() ?? 'N/A'],
@@ -62,7 +62,7 @@ final class RetentarMediaCommand extends Command
 
         if ($todos) {
             try {
-                $itens = $this->mediaItemService->retentarTodosComErro();
+                $itens = $this->retentarMediaItemService->retentarTodosComErro();
                 $total = count($itens);
                 if (0 === $total) {
                     $io->info('Nenhuma mídia com status de erro foi encontrada.');
@@ -95,7 +95,7 @@ final class RetentarMediaCommand extends Command
             }
 
             try {
-                $mediaItem = $this->mediaItemService->retentar($uuidInformado);
+                $mediaItem = $this->retentarMediaItemService->retentar($uuidInformado);
                 $io->success(sprintf('Mídia "%s" enviada para reprocessamento.', $mediaItem->uuid()?->toString()));
 
                 return Command::SUCCESS;
@@ -108,7 +108,7 @@ final class RetentarMediaCommand extends Command
 
         if ('2' === $opcao) {
             try {
-                $itens = $this->mediaItemService->retentarTodosComErro();
+                $itens = $this->retentarMediaItemService->retentarTodosComErro();
                 $io->success(sprintf('Reenviadas %d mídia(s) para reprocessamento.', count($itens)));
 
                 return Command::SUCCESS;

@@ -37,6 +37,11 @@ class MediaItemRepository extends ServiceEntityRepository
         }
     }
 
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
+
     public function buscarPorHash(string $hash): ?MediaItem
     {
         return $this->findOneBy(['hash' => $hash]);

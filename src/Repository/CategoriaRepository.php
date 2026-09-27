@@ -49,6 +49,33 @@ class CategoriaRepository extends ServiceEntityRepository
         return $this->find($uuid);
     }
 
+    public function existeComNome(string $nome, Uuid|string|null $ignorarUuid = null): bool
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->select('COUNT(c.uuid)')
+            ->where('c.nome = :nome')
+            ->setParameter('nome', $nome);
+
+        if (null !== $ignorarUuid) {
+            $uuidStr = is_string($ignorarUuid) ? $ignorarUuid : $ignorarUuid->toString();
+            $qb->andWhere('c.uuid != :ignorarUuid')
+               ->setParameter('ignorarUuid', $uuidStr);
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult() > 0;
+    }
+
+    /**
+     * @return list<Categoria>
+     */
+    public function listarTodas(): array
+    {
+        /** @var list<Categoria> $resultado */
+        $resultado = $this->findBy([], ['nome' => 'ASC']);
+
+        return $resultado;
+    }
+
     /**
      * @return array{itens: array<int, Categoria>, total: int}
      */

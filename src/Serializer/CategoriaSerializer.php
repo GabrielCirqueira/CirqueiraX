@@ -17,7 +17,7 @@ final readonly class CategoriaSerializer
             'uuid' => $categoria->uuid()?->toString(),
             'nome' => $categoria->nome(),
             'pastaLocal' => $categoria->pastaLocal(),
-            'googlePhotosAlbumId' => $categoria->googlePhotosAlbumId(),
+            'googlePhotosAlbumId' => $categoria->googleFotosAlbumId(),
             'criadoEm' => $categoria->criadoEm()->format(\DateTimeInterface::ATOM),
             'atualizadoEm' => $categoria->atualizadoEm()->format(\DateTimeInterface::ATOM),
         ];
