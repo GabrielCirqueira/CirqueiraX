@@ -10,8 +10,10 @@ use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
 use App\DataObject\FiltrarMediaItemDTO;
 use App\DataObject\RebaixarLoteDTO;
+use App\DataObject\UploadManualDTO;
 use App\Serializer\MediaItemSerializer;
 use App\Service\MediaItemService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -41,6 +43,28 @@ final class MediaItemController extends DefaultController
             $filtro->pagina(),
             $filtro->porPagina(),
         );
+    }
+
+    #[Route('/upload', name: 'upload_manual', methods: ['POST'])]
+    public function uploadManual(
+        Request $request,
+        \Symfony\Component\Validator\Validator\ValidatorInterface $validator,
+    ): Response {
+        $dto = UploadManualDTO::fromRequest($request);
+        $violacoes = $validator->validate($dto);
+
+        if (count($violacoes) > 0) {
+            $detalhes = [];
+            foreach ($violacoes as $violacao) {
+                $detalhes[$violacao->getPropertyPath()] = (string) $violacao->getMessage();
+            }
+
+            return $this->unprocessable('dados_invalidos', $detalhes);
+        }
+
+        $mediaItem = $this->mediaItemService->uploadManual($dto);
+
+        return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
     #[Route('/lote/categorizar', name: 'categorizar_lote', methods: ['POST'])]

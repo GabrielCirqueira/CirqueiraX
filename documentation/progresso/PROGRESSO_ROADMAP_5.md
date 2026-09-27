@@ -103,14 +103,31 @@
   - [`agente/servico/instalar-servico-linux.sh`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-linux.sh)
   - [`agente/servico/instalar-servico-windows.bat`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-windows.bat)
 
-### ⏳ Tópico 91 — Cadastro das OrigemRegra para print_empresa e print_pessoal
-- **Status**: Pendente
+### ✅ Tópico 91 — Cadastro das OrigemRegra para print_empresa e print_pessoal
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Command de Seeding**: Criado o comando Symfony [`src/Command/SeedOrigemRegrasCommand.php`](file:///home/gabriel/dev/CirqueiraX/src/Command/SeedOrigemRegrasCommand.php) (`app:seed:origem-regras`).
+  - **Categorias Automáticas**: Garante a existência das categorias `Print Empresa` (pasta `prints/empresa`) e `Print Pessoal` (pasta `prints/pessoal`).
+  - **Mapeamento de Regras de Origem**: Cadastra e vincula as instâncias de `OrigemRegra` no banco de dados para `print_empresa` e `print_pessoal`, garantindo que os prints ingeridos pelos agentes sejam classificados e distribuídos automaticamente sem necessidade de triagem manual.
+- **Arquivos envolvidos**:
+  - [`src/Command/SeedOrigemRegrasCommand.php`](file:///home/gabriel/dev/CirqueiraX/src/Command/SeedOrigemRegrasCommand.php)
 
-### ⏳ Tópico 92 — Endpoint POST /api/v1/media-itens/upload (upload manual)
-- **Status**: Pendente
+### ✅ Tópico 92 — Endpoint POST /api/v1/media-itens/upload (upload manual)
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Endpoint HTTP POST**: Adicionada a rota `POST /api/v1/media-itens/upload` (`api_media_itens_upload_manual`) em [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php) para aceitar requisições de upload manual (`multipart/form-data`).
+  - **Processamento de Ingestão**: Recebe a requisição, executa validações de DTO, salva o arquivo temporário, gera a metadata de envio e retorna envelope HTTP 201 Created via `$this->created()` com os dados serializados da nova mídia.
+- **Arquivos envolvidos**:
+  - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php)
 
-### ⏳ Tópico 93 — UploadManualDTO e validação de tipo de arquivo
-- **Status**: Pendente
+### ✅ Tópico 93 — UploadManualDTO e validação de tipo de arquivo
+- **Status**: Concluído
+- **O que foi feito**:
+  - **DTO de Upload Manual**: Criado [`src/DataObject/UploadManualDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/UploadManualDTO.php) (`final readonly class`) para capturar requisições de arquivos via formulário.
+  - **Validação Estrita de Mídia**: Aplicadas as validações `#[Assert\NotNull]` para a presença do arquivo e `#[Assert\File(maxSize: '100M')]` com suporte completo para extensões de imagens (`PNG`, `JPEG`, `WebP`, `GIF`) e vídeos (`MP4`, `WebM`, `MOV`, `AVI`, `MKV`).
+  - **Método de Extração `fromRequest()`**: Extrai de maneira limpa o arquivo, nome original, `categoriaId` desejada e metadados adicionais em formato array/JSON.
+- **Arquivos envolvidos**:
+  - [`src/DataObject/UploadManualDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/UploadManualDTO.php)
 
 ### ⏳ Tópico 94 — UploadManualService — checagem de duplicidade por hash
 - **Status**: Pendente

@@ -206,4 +206,43 @@ final readonly class MediaItemService
             $this->messageBus->dispatch(new ClassificarMediaMessage($mediaItem->uuid()->toString()));
         }
     }
+
+    public function uploadManual(\App\DataObject\UploadManualDTO $dto): MediaItem
+    {
+        $arquivo = $dto->arquivo();
+        if (null === $arquivo) {
+            throw new \DomainException('arquivo_upload_obrigatorio', 400);
+        }
+
+        $diretorioDestino = sys_get_temp_dir() . '/cirqueirax_uploads';
+        if (!is_dir($diretorioDestino) && !mkdir($diretorioDestino, 0777, true) && !is_dir($diretorioDestino)) {
+            throw new \DomainException('erro_criar_diretorio_temp', 500);
+        }
+
+        $extensao = $arquivo->guessExtension() ?? 'bin';
+        $nomeArquivo = sprintf('upload_%s_%s.%s', date('Ymd_His'), bin2hex(random_bytes(4)), $extensao);
+        $arquivoMovido = $arquivo->move($diretorioDestino, $nomeArquivo);
+
+        /** @var array<string, mixed> $metadataExtra */
+        $metadataExtra = array_filter([
+            'nome_original' => $dto->nomeOriginal(),
+            'categoria_id_desejada' => $dto->categoriaId(),
+        ]);
+        $metadata = array_merge($dto->metadata(), $metadataExtra);
+
+        $ingestarDTO = new \App\DataObject\IngestarMediaDTO(
+            caminhoArquivo: $arquivoMovido->getPathname(),
+            origem: OrigemMedia::MANUAL,
+            metadata: $metadata,
+        );
+
+        $ingestarService = new IngestarMediaService($this->mediaItemRepository, $this->messageBus);
+        $mediaItem = $ingestarService->executar($ingestarDTO);
+
+        if (null !== $dto->categoriaId() && '' !== trim($dto->categoriaId())) {
+            $this->classificarManualmente($mediaItem->uuid()?->toString() ?? '', new ClassificarManualDTO($dto->categoriaId()));
+        }
+
+        return $mediaItem;
+    }
 }

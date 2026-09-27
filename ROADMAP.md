@@ -47,9 +47,9 @@
 - [x] **88. Configuração do agente PC pessoal**
 - [x] **89. Persistência local do agente — evitar reenvio**
 - [x] **90. Execução do agente como serviço do SO**
-- [ ] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**
-- [ ] **92. Endpoint POST /api/v1/media-itens/upload (upload manual)**
-- [ ] **93. UploadManualDTO e validação de tipo de arquivo**
+- [x] **91. Cadastro das OrigemRegra para print_empresa e print_pessoal**
+- [x] **92. Endpoint POST /api/v1/media-itens/upload (upload manual)**
+- [x] **93. UploadManualDTO e validação de tipo de arquivo**
 - [ ] **94. UploadManualService — checagem de duplicidade por hash**
 - [ ] **95. Resposta de duplicidade (aviso, não bloqueio)**
 - [ ] **96. Frontend — estrutura da feature upload-manual**
