@@ -52,8 +52,8 @@
 - [x] **93. UploadManualDTO e validação de tipo de arquivo**
 - [x] **94. UploadManualService — checagem de duplicidade por hash**
 - [x] **95. Resposta de duplicidade (aviso, não bloqueio)**
-- [ ] **96. Frontend — estrutura da feature upload-manual**
-- [ ] **97. Frontend — componente de dropzone**
+- [x] **96. Frontend — estrutura da feature upload-manual**
+- [x] **97. Frontend — componente de dropzone**
 - [ ] **98. Frontend — fila de triagem pós-upload**
 - [ ] **99. Frontend — página UploadManual.tsx completa**
 - [ ] **100. Teste end-to-end de agentes e upload manual, documentação atualizada**

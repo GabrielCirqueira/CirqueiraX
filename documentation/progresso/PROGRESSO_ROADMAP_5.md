@@ -147,11 +147,27 @@
 - **Arquivos envolvidos**:
   - [`src/Controller/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItemController.php)
 
-### ⏳ Tópico 96 — Frontend — estrutura da feature upload-manual
-- **Status**: Pendente
+### ✅ Tópico 96 — Frontend — estrutura da feature upload-manual
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Estrutura Base de Feature**: Criado o diretório [`web/features/upload-manual/`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/) com a organização padrão (`types.ts`, `api.ts`, `hooks/`, `components/`, `index.ts`).
+  - **Integração de Tipos e API**: Definidos tipos de fila de upload (`ArquivoFilaUpload`, `ItemUploadEstado`) e cliente HTTP Axios em `api.ts` apontando para `POST /api/v1/media-itens/upload`.
+  - **Gerenciador de Fila**: Criado o hook [`useUploadManual`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/hooks/useUploadManual.ts) com controle de adição de arquivos, previews locais, barra de progresso por item e envio para a API.
+- **Arquivos envolvidos**:
+  - [`web/features/upload-manual/types.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/types.ts)
+  - [`web/features/upload-manual/api.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/api.ts)
+  - [`web/features/upload-manual/hooks/useUploadManual.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/hooks/useUploadManual.ts)
 
-### ⏳ Tópico 97 — Frontend — componente de dropzone
-- **Status**: Pendente
+### ✅ Tópico 97 — Frontend — componente de dropzone
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente Interativo Drag-and-Drop**: Criado [`web/features/upload-manual/components/DropzoneUpload.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/components/DropzoneUpload.tsx) com suporte a arrastar-e-soltar e seletor manual.
+  - **Previews e Barras de Progresso**: Miniaturas dinâmicas para fotos e vídeos (`createObjectURL`), progresso percentual por arquivo e seletor de categoria pré-definida.
+  - **Badging de Status**: Indicadores visuais para status de envio: `pendente`, `enviando`, `sucesso`, `duplicado` (aviso amarelo quando já existe no servidor) e `erro`.
+  - **Conformidade UI**: Desenvolvido estritamente com primitivos de layout (`Box`, `VStack`, `HStack`, `Flex`, `Grid`, `Text`).
+- **Arquivos envolvidos**:
+  - [`web/features/upload-manual/components/DropzoneUpload.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/components/DropzoneUpload.tsx)
+  - [`web/features/upload-manual/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/index.ts)
 
 ### ⏳ Tópico 98 — Frontend — fila de triagem pós-upload
 - **Status**: Pendente

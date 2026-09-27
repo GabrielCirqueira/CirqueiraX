@@ -46,8 +46,8 @@ final readonly class DistribuirLocalService
         }
 
         $baseStorage = str_starts_with($this->mediaStoragePath, '/')
-            ? $this->mediaStoragePath
-            : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+        ? $this->mediaStoragePath
+        : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
 
         $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoria->pastaLocal(), '/');
         $this->armazenamentoClient->criarDiretorio($diretorioDestino);

@@ -45,6 +45,7 @@ web/
 │   ├── auth/                 hooks, api, types de autenticação
 │   ├── cadastro/             Página e formulário de cadastro
 │   ├── downloads-video/      Feature de downloads: components, hooks, api, types
+│   ├── upload-manual/        Feature de upload manual: DropzoneUpload, hooks, api, types
 │   ├── home/                 Home page
 │   └── not-found/            Página 404
 ├── layouts/

@@ -35,8 +35,7 @@ final readonly class UploadManualDTO
         public ?string $nomeOriginal = null,
         public ?string $categoriaId = null,
         public array $metadata = [],
-    ) {
-    }
+    ) {}
 
     public static function fromRequest(Request $request): self
     {

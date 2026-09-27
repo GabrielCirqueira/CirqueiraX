@@ -24,8 +24,7 @@ final readonly class IngestarPrintService
     public function __construct(
         private IngestarMediaService $ingestarMediaService,
         private ArmazenamentoLocalClient $armazenamentoLocalClient,
-    ) {
-    }
+    ) {}
 
     public function executar(IngestarPrintDTO $dto, TokenAgente $tokenAgente): MediaItem
     {

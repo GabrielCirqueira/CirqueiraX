@@ -29,7 +29,8 @@ final class IngestaoController extends DefaultController
     public function ingestarPrint(
         Request $request,
         ValidatorInterface $validator,
-        #[CurrentUser] AgenteUser $agenteUser,
+        #[CurrentUser]
+        AgenteUser $agenteUser,
     ): Response {
         $dto = IngestarPrintDTO::fromRequest($request);
         $violacoes = $validator->validate($dto);
