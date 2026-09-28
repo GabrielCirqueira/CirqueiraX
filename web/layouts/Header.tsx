@@ -1,13 +1,14 @@
 import { useTheme } from '@/contexts'
 import { Box, HStack, Text } from '@/shared/ui/layout'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { Chip, buttonVariants } from '@heroui/react'
+import { Button, Chip } from '@heroui/react'
 import { Code2, LogIn, Moon, Sun, User } from 'lucide-react'
 import { memo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const navLinks = [
   { href: '/downloads', label: 'Downloads' },
+  { href: '/upload-manual', label: 'Upload' },
   { href: '/#showcase', label: 'Componentes' },
   { href: '/#stack', label: 'Stack' },
   { href: '/#steps', label: 'Como funciona' },
@@ -33,9 +34,15 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
               <Code2 className="size-4 text-white" strokeWidth={2.5} />
             </Box>
             <Text as="span" className="font-black font-sans text-sm tracking-tight">
-              cirqueiraX{' '}
+              Cirqueira
               <Text as="span" className="text-brand-500">
-                Skeleton
+                X
+              </Text>{' '}
+              <Text
+                as="span"
+                className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-500 border border-brand-500/20 ml-1"
+              >
+                Media
               </Text>
             </Text>
           </HStack>
@@ -49,15 +56,16 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
           ))}
         </nav>
 
-        <HStack>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="size-8 rounded-lg flex items-center justify-center text-muted hover:text-foreground hover:bg-surface-secondary transition-colors"
+        <HStack className="gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            isIconOnly
+            onPress={toggleTheme}
             aria-label="Alternar tema"
           >
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </button>
+          </Button>
 
           {autenticado ? (
             <Chip color="success" variant="soft" size="sm">
@@ -66,14 +74,10 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
             </Chip>
           ) : (
             !isAuthPage && (
-              <button
-                type="button"
-                onClick={onAbrirModal}
-                className={buttonVariants({ variant: 'primary', size: 'sm' })}
-              >
+              <Button size="sm" variant="primary" onPress={onAbrirModal}>
                 <LogIn className="size-3.5" />
                 Entrar
-              </button>
+              </Button>
             )
           )}
         </HStack>

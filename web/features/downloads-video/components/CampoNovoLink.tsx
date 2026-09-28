@@ -1,4 +1,6 @@
 import { cn } from '@/shared/lib/cn'
+import { Box, Flex, HStack, VStack } from '@/shared/ui/layout'
+import { Button, Card, CardContent, Chip, Input } from '@heroui/react'
 import { Clipboard, Download, Globe, Instagram, Loader2, Video, X, Youtube } from 'lucide-react'
 import { type FormEvent, memo, useState } from 'react'
 import { useCriarDownload } from '../hooks/useDownloadsVideo'
@@ -86,88 +88,81 @@ export const CampoNovoLink = memo(function CampoNovoLink({
   }
 
   return (
-    <div className="w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 sm:p-5 shadow-sm">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-          <div className="relative flex-1 flex items-center">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="Cole aqui o link do YouTube, TikTok, Twitter ou Instagram..."
-              disabled={isPending}
-              required
-              className={cn(
-                'w-full h-12 rounded-xl px-4 text-sm font-medium transition-all',
-                'bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100',
-                'border border-zinc-200 dark:border-zinc-700/80 focus:border-brand-500 dark:focus:border-brand-500',
-                'focus:outline-none focus:ring-2 focus:ring-brand-500/20',
-                'disabled:opacity-60 disabled:cursor-not-allowed',
-                url ? 'pr-20' : 'pr-24'
-              )}
-            />
+    <Card className="w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+      <CardContent className="p-4 sm:p-5">
+        <form onSubmit={handleSubmit}>
+          <VStack className="gap-3">
+            <Flex className="flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <Box className="relative flex-1 flex items-center">
+                <Input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Cole aqui o link do YouTube, TikTok, Twitter ou Instagram..."
+                  isDisabled={isPending}
+                  required
+                  className="w-full h-12 pr-24"
+                />
 
-            <div className="absolute right-2.5 flex items-center gap-1">
-              {url ? (
-                <button
-                  type="button"
-                  onClick={() => setUrl('')}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-zinc-700 transition-colors"
-                  aria-label="Limpar campo"
+                <HStack className="absolute right-2.5 gap-1">
+                  {url ? (
+                    <Button
+                      size="sm"
+                      variant="quiet"
+                      isIconOnly
+                      onPress={() => setUrl('')}
+                      aria-label="Limpar campo"
+                    >
+                      <X className="size-4 text-zinc-400" />
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="quiet"
+                      onPress={colarAreaTransferencia}
+                      className="text-xs text-zinc-600 dark:text-zinc-300 bg-zinc-200/60 dark:bg-zinc-700/60"
+                    >
+                      <Clipboard className="size-3.5" />
+                      <span>Colar</span>
+                    </Button>
+                  )}
+                </HStack>
+              </Box>
+
+              <Button
+                type="submit"
+                isDisabled={!url.trim() || isPending}
+                className="h-12 px-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm shrink-0"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    <span>Iniciando...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="size-4" />
+                    <span>Baixar Vídeo</span>
+                  </>
+                )}
+              </Button>
+            </Flex>
+
+            {plataforma && (
+              <HStack className="gap-2">
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className={cn('gap-1 text-xs font-medium border', plataforma.cor)}
                 >
-                  <X className="size-4" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={colarAreaTransferencia}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-300 bg-zinc-200/60 dark:bg-zinc-700/60 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                >
-                  <Clipboard className="size-3.5" />
-                  <span>Colar</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={!url.trim() || isPending}
-            className={cn(
-              'h-12 px-6 rounded-xl font-semibold text-sm inline-flex items-center justify-center gap-2 transition-all shadow-sm shrink-0',
-              'bg-brand-500 hover:bg-brand-600 text-white',
-              'focus:outline-none focus:ring-2 focus:ring-brand-500/30',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand-500'
+                  <IconePlataforma className="size-3.5" />
+                  <span>{plataforma.nome} detectado</span>
+                </Chip>
+              </HStack>
             )}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                <span>Iniciando...</span>
-              </>
-            ) : (
-              <>
-                <Download className="size-4" />
-                <span>Baixar Vídeo</span>
-              </>
-            )}
-          </button>
-        </div>
-
-        {plataforma && (
-          <div className="flex items-center gap-2 text-xs">
-            <span
-              className={cn(
-                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-medium border text-xs',
-                plataforma.cor
-              )}
-            >
-              <IconePlataforma className="size-3.5" />
-              {plataforma.nome} detectado
-            </span>
-          </div>
-        )}
-      </form>
-    </div>
+          </VStack>
+        </form>
+      </CardContent>
+    </Card>
   )
 })

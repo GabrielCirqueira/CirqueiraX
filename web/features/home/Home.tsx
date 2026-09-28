@@ -1,128 +1,46 @@
-import { useTheme } from '@/contexts'
+import { listarCategorias, listarMediaItens } from '@/features/downloads-video/api'
 import type { MainLayoutContext } from '@/layouts'
-import { Box, Container, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Box, Container, Flex, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
 import { useAuthStore } from '@/stores/useAuthStore'
 import {
-  Accordion,
-  AccordionBody,
-  AccordionHeading,
-  AccordionIndicator,
-  AccordionItem,
-  AccordionPanel,
-  AccordionTrigger,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   Chip,
-  Input,
-  Label,
   ProgressBar,
   ProgressBarFill,
-  ProgressBarOutput,
   ProgressBarTrack,
-  Separator,
-  SwitchContent,
-  SwitchControl,
-  SwitchRoot,
-  SwitchThumb,
-  TextField,
-  buttonVariants,
 } from '@heroui/react'
+import { useQuery } from '@tanstack/react-query'
 import {
-  Activity,
   ArrowRight,
-  BookOpen,
   CheckCircle2,
-  Code2,
-  Github,
+  Cloud,
+  DownloadCloud,
+  FileImage,
+  FileVideo,
+  Film,
+  FolderCheck,
+  FolderPlus,
   Globe,
-  Lock,
+  HardDrive,
+  Instagram,
+  Layers,
   LogIn,
-  Mail,
-  Moon,
-  Package,
-  Rocket,
-  Server,
-  Shield,
+  Monitor,
+  RefreshCw,
+  Share2,
+  ShieldCheck,
   Sparkles,
-  Sun,
-  Terminal,
+  UploadCloud,
+  Video,
+  Youtube,
   Zap,
 } from 'lucide-react'
-import { memo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
-
-const techStack = [
-  {
-    category: 'Backend',
-    icon: Server,
-    items: [
-      'PHP 8.4',
-      'Symfony 7.3',
-      'Doctrine ORM 3',
-      'Lexik JWT',
-      'Gesdinet Refresh',
-      'Nelmio CORS',
-    ],
-  },
-  {
-    category: 'Frontend',
-    icon: Code2,
-    items: [
-      'React 19',
-      'TypeScript 5.9',
-      'Vite 7',
-      'Tailwind CSS 4',
-      'HeroUI v3',
-      'React Router 7',
-    ],
-  },
-  {
-    category: 'Estado & Dados',
-    icon: Activity,
-    items: ['TanStack Query 5', 'Zustand 5', 'Zod 4', 'Axios', 'React Aria'],
-  },
-  {
-    category: 'Infraestrutura',
-    icon: Terminal,
-    items: ['Docker Compose', 'Nginx', 'PHP-FPM', 'MySQL 8', 'Vite dev server'],
-  },
-]
-
-const steps = [
-  {
-    n: '01',
-    icon: Code2,
-    title: 'Clone e configure',
-    desc: 'Execute ./scripts/setup.sh, escolha os módulos opcionais e configure seu .env.',
-  },
-  {
-    n: '02',
-    icon: Terminal,
-    title: 'Suba o ambiente',
-    desc: 'docker compose up -d inicia backend, banco de dados, frontend e proxy.',
-  },
-  {
-    n: '03',
-    icon: Rocket,
-    title: 'Comece a codar',
-    desc: 'Autenticação pronta, rotas protegidas, hot reload — foque na regra de negócio.',
-  },
-]
-
-const teamMembers = [
-  {
-    initials: 'GC',
-    name: 'Gabriel C.',
-    role: 'Arquitetura',
-    bg: 'bg-brand-500/20',
-    text: 'text-brand-500',
-  },
-  { initials: 'AD', name: 'API Dev', role: 'Backend', bg: 'bg-success/20', text: 'text-success' },
-  { initials: 'UD', name: 'UI Dev', role: 'Frontend', bg: 'bg-warning/20', text: 'text-warning' },
-]
+import { memo } from 'react'
+import { Link, useOutletContext } from 'react-router-dom'
 
 export function Component() {
   const { abrirModal } = useOutletContext<MainLayoutContext>()
@@ -132,565 +50,381 @@ export function Component() {
 const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: () => void }) {
   const autenticado = useAuthStore((s) => s.autenticado)
   const usuario = useAuthStore((s) => s.usuario)
-  const { theme, toggleTheme } = useTheme()
 
-  const [notif, setNotif] = useState(true)
-  const [analytics, setAnalytics] = useState(false)
-  const [formEmail, setFormEmail] = useState('')
-  const [formSenha, setFormSenha] = useState('')
+  // Consultar dados do sistema em tempo real
+  const { data: respostaMedia, isLoading: carregandoMedia } = useQuery({
+    queryKey: ['media-itens', 'home-stats'],
+    queryFn: () => listarMediaItens({ porPagina: 10 }),
+  })
+
+  const { data: categorias = [] } = useQuery({
+    queryKey: ['categorias', 'home-stats'],
+    queryFn: listarCategorias,
+  })
+
+  const totalMedia = respostaMedia?.paginacao?.total ?? 0
+  const mídiasRecentes = respostaMedia?.data ?? []
 
   return (
-    <Box>
+    <VStack className="w-full gap-12 py-10">
       {/* ════════════════════════════════════════════
-          HERO
+          HERO SECTION — CIRQUEIRAX MEDIA PIPELINE
       ════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden w-full">
         <Box className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-5%,color-mix(in_oklch,var(--color-brand-500)_20%,transparent),transparent)] pointer-events-none" />
         <Box className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_70%,var(--color-background))] pointer-events-none" />
 
-        <VStack className="relative max-w-6xl mx-auto px-6 pt-20 pb-12 items-center text-center gap-6">
+        <Container size="xl" className="relative text-center space-y-6 py-12">
           <Chip
             variant="soft"
             size="sm"
-            className="border border-brand-500/30 bg-brand-500/10 text-brand-600 motion-preset-fade"
+            className="border border-brand-500/30 bg-brand-500/10 text-brand-600 font-semibold"
           >
-            <Sparkles className="size-3 mr-1" />
-            v5.0 · Tailwind 4 + HeroUI v3
+            <Sparkles className="size-3.5 mr-1" />
+            CirqueiraX Media Pipeline v5.0
           </Chip>
 
-          <VStack className="gap-3 motion-preset-slide-up motion-delay-100">
+          <VStack className="gap-3 items-center max-w-3xl mx-auto">
             <Text
               as="h1"
-              className="text-5xl sm:text-7xl font-black font-sans tracking-tight leading-none"
+              className="text-4xl sm:text-6xl font-black font-sans tracking-tight leading-tight text-zinc-900 dark:text-zinc-100"
             >
-              cirqueiraX{' '}
+              Central Inteligente de Ingestão &{' '}
               <Text as="span" className="text-brand-500">
-                Skeleton
+                Gestão de Mídias
               </Text>
             </Text>
-            <Text className="text-lg text-muted max-w-xl mx-auto">
-              Fundação opinativa para aplicações{' '}
-              <strong className="text-foreground font-semibold">Symfony + React</strong>. Core
-              enxuto, módulos opt-in, pronto para produção.
+            <Text className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+              Automação completa para download de vídeos de redes sociais, upload manual com triagem
+              inteligente por hash e agentes de captura de tela em segundo plano.
             </Text>
           </VStack>
 
-          {autenticado ? (
-            <HStack className="px-4 py-2 rounded-xl bg-success/10 border border-success/20 text-success text-sm font-medium">
-              <CheckCircle2 className="size-4" />
-              Bem-vindo, {usuario?.nomeCompleto ?? usuario?.username}!
-            </HStack>
-          ) : (
-            <HStack className="gap-3 flex-wrap justify-center motion-preset-fade motion-delay-200">
-              <button
-                type="button"
-                onClick={onAbrirModal}
-                className={buttonVariants({ variant: 'primary' })}
-              >
-                <LogIn className="size-4" />
-                Começar agora
-              </button>
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noreferrer"
-                className={buttonVariants({ variant: 'outline' })}
-              >
-                <Github className="size-4" />
-                Ver no GitHub
-              </a>
-            </HStack>
-          )}
+          {/* Quick Actions Buttons */}
+          <HStack className="gap-4 flex-wrap justify-center pt-2">
+            <Button
+              as={Link}
+              to="/downloads"
+              variant="primary"
+              size="lg"
+              className="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 shadow-lg shadow-brand-500/20"
+            >
+              <DownloadCloud className="size-5" />
+              <span>Downloads de Vídeo</span>
+            </Button>
 
-          <HStack className="flex-wrap justify-center gap-2 motion-preset-fade motion-delay-300">
-            {['PHP 8.4', 'Symfony 7', 'React 19', 'TypeScript', 'Tailwind 4', 'Docker'].map((t) => (
-              <Text
-                as="span"
-                key={t}
-                className="px-3 py-1 rounded-full text-xs font-medium bg-surface-secondary border border-border text-muted"
-              >
-                {t}
-              </Text>
-            ))}
+            <Button
+              as={Link}
+              to="/upload-manual"
+              variant="outline"
+              size="lg"
+              className="border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold px-6 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            >
+              <UploadCloud className="size-5 text-brand-500" />
+              <span>Upload Manual & Triagem</span>
+            </Button>
           </HStack>
-        </VStack>
-      </section>
 
-      {/* ════════════════════════════════════════════
-          COMPONENT SHOWCASE
-      ════════════════════════════════════════════ */}
-      <section id="showcase" className="max-w-6xl mx-auto px-6 py-16">
-        <VStack className="items-center gap-2 mb-10 text-center">
-          <Chip
-            variant="soft"
-            size="sm"
-            className="bg-brand-500/10 text-brand-600 border border-brand-500/20"
-          >
-            Componentes
-          </Chip>
-          <Text as="h2" className="text-3xl font-bold font-sans">
-            Tudo que você precisa, pronto
-          </Text>
-          <Text className="text-muted text-sm max-w-md">
-            HeroUI v3 + Tailwind 4 integrados. Veja os componentes em ação.
-          </Text>
-        </VStack>
-
-        <Grid className="grid-cols-1 md:grid-cols-3">
-          <Card className="border border-border shadow-sm bg-surface">
-            <CardHeader className="pb-2">
-              <HStack className="mb-1">
-                <Box className="size-7 rounded-lg bg-brand-500/10 flex items-center justify-center">
-                  <Shield className="size-4 text-brand-500" strokeWidth={1.5} />
-                </Box>
-                <CardTitle className="text-sm font-semibold">Autenticação</CardTitle>
-              </HStack>
-              <Text className="text-xs text-muted">JWT RS256 com refresh token integrado</Text>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              <TextField>
-                <Label className="text-xs font-medium">Email</Label>
-                <Box className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted pointer-events-none" />
-                  <Input
-                    type="email"
-                    placeholder="john@exemplo.com"
-                    value={formEmail}
-                    onChange={(e) => setFormEmail(e.target.value)}
-                    className="pl-8 w-full text-sm"
-                  />
-                </Box>
-              </TextField>
-
-              <TextField>
-                <Label className="text-xs font-medium">Senha</Label>
-                <Box className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted pointer-events-none" />
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    value={formSenha}
-                    onChange={(e) => setFormSenha(e.target.value)}
-                    className="pl-8 w-full text-sm"
-                  />
-                </Box>
-              </TextField>
-
-              <Button variant="primary" fullWidth size="sm" className="mt-1">
-                Entrar na conta
-              </Button>
-
-              <HStack className="gap-3">
-                <Box className="flex-1 h-px bg-border" />
-                <Text as="span" className="text-xs text-muted">
-                  ou
-                </Text>
-                <Box className="flex-1 h-px bg-border" />
-              </HStack>
-
-              <Grid className="grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          {/* Status Chip Bar */}
+          <HStack className="flex-wrap justify-center gap-2 pt-4">
+            {['YouTube', 'TikTok', 'Twitter / X', 'Instagram', 'Agentes PC', 'Google Fotos'].map(
+              (tag) => (
+                <Chip
+                  key={tag}
+                  size="sm"
+                  variant="soft"
+                  className="bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 text-xs font-medium"
                 >
-                  <Globe className="size-3.5" />
-                  Google
-                </button>
-                <button
-                  type="button"
-                  className={buttonVariants({ variant: 'outline', size: 'sm' })}
-                >
-                  <Github className="size-3.5" />
-                  GitHub
-                </button>
-              </Grid>
-
-              <HStack className="flex-wrap gap-2 pt-1">
-                <Chip size="sm" variant="soft" color="success">
-                  ✓ Refresh Token
+                  {tag}
                 </Chip>
-                <Chip size="sm" variant="soft" color="accent">
-                  RS256
-                </Chip>
-                <Chip size="sm" variant="soft" color="default">
-                  Stateless
-                </Chip>
-              </HStack>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-border shadow-sm bg-surface">
-            <CardHeader className="pb-2">
-              <HStack className="mb-1">
-                <Box className="size-7 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <Activity className="size-4 text-accent" strokeWidth={1.5} />
-                </Box>
-                <CardTitle className="text-sm font-semibold">Controles & Progresso</CardTitle>
-              </HStack>
-              <Text className="text-xs text-muted">Switches, barras de progresso e tema</Text>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <VStack className="gap-3">
-                <SwitchRoot
-                  isSelected={theme === 'dark'}
-                  onChange={toggleTheme}
-                  className="flex-row items-center justify-between w-full"
-                >
-                  <SwitchContent className="flex items-center gap-2 text-sm font-medium">
-                    {theme === 'dark' ? (
-                      <Moon className="size-3.5 text-muted" />
-                    ) : (
-                      <Sun className="size-3.5 text-muted" />
-                    )}
-                    Modo escuro
-                  </SwitchContent>
-                  <SwitchControl>
-                    <SwitchThumb />
-                  </SwitchControl>
-                </SwitchRoot>
-
-                <SwitchRoot
-                  isSelected={notif}
-                  onChange={setNotif}
-                  className="flex-row items-center justify-between w-full"
-                >
-                  <SwitchContent className="text-sm font-medium">Notificações</SwitchContent>
-                  <SwitchControl>
-                    <SwitchThumb />
-                  </SwitchControl>
-                </SwitchRoot>
-
-                <SwitchRoot
-                  isSelected={analytics}
-                  onChange={setAnalytics}
-                  className="flex-row items-center justify-between w-full"
-                >
-                  <SwitchContent className="text-sm font-medium">Analytics</SwitchContent>
-                  <SwitchControl>
-                    <SwitchThumb />
-                  </SwitchControl>
-                </SwitchRoot>
-              </VStack>
-
-              <Separator />
-
-              <VStack className="gap-3">
-                <ProgressBar value={78} color="accent">
-                  <Label className="text-xs font-medium">CPU</Label>
-                  <ProgressBarOutput className="text-xs text-muted" />
-                  <ProgressBarTrack>
-                    <ProgressBarFill />
-                  </ProgressBarTrack>
-                </ProgressBar>
-
-                <ProgressBar value={45} color="success">
-                  <Label className="text-xs font-medium">Memória</Label>
-                  <ProgressBarOutput className="text-xs text-muted" />
-                  <ProgressBarTrack>
-                    <ProgressBarFill />
-                  </ProgressBarTrack>
-                </ProgressBar>
-
-                <ProgressBar value={92} color="warning">
-                  <Label className="text-xs font-medium">Disco</Label>
-                  <ProgressBarOutput className="text-xs text-muted" />
-                  <ProgressBarTrack>
-                    <ProgressBarFill />
-                  </ProgressBarTrack>
-                </ProgressBar>
-              </VStack>
-            </CardContent>
-          </Card>
-
-          <Card className="border border-border shadow-sm bg-surface">
-            <CardHeader className="pb-2">
-              <HStack className="mb-1">
-                <Box className="size-7 rounded-lg bg-success/10 flex items-center justify-center">
-                  <Zap className="size-4 text-success" strokeWidth={1.5} />
-                </Box>
-                <CardTitle className="text-sm font-semibold">Botões & Feedback</CardTitle>
-              </HStack>
-              <Text className="text-xs text-muted">Variantes, estados e notificações</Text>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <VStack className="gap-2">
-                <Button variant="primary" size="sm" fullWidth>
-                  <Rocket className="size-3.5" />
-                  Deploy agora
-                </Button>
-                <Button variant="outline" size="sm" fullWidth>
-                  <BookOpen className="size-3.5" />
-                  Ver documentação
-                </Button>
-                <Button variant="danger-soft" size="sm" fullWidth>
-                  Revogar acesso
-                </Button>
-                <Button variant="ghost" size="sm" fullWidth isDisabled>
-                  Em desenvolvimento...
-                </Button>
-              </VStack>
-
-              <Separator />
-
-              <Box>
-                <Text className="text-xs font-medium text-muted mb-3">Time do projeto</Text>
-                <HStack className="flex-wrap gap-3">
-                  {teamMembers.map((m) => (
-                    <HStack key={m.name} className="gap-2">
-                      <Box
-                        className={`size-8 rounded-xl flex items-center justify-center text-xs font-black font-sans ${m.bg} ${m.text}`}
-                      >
-                        {m.initials}
-                      </Box>
-                      <VStack className="gap-0">
-                        <Text className="text-xs font-semibold leading-none">{m.name}</Text>
-                        <Text className="text-xs text-muted">{m.role}</Text>
-                      </VStack>
-                    </HStack>
-                  ))}
-                </HStack>
-              </Box>
-
-              <Separator />
-
-              <VStack className="gap-2">
-                {[
-                  {
-                    color: 'bg-success/10 border-success/25 text-success',
-                    icon: '✓',
-                    msg: 'Deploy realizado com sucesso',
-                  },
-                  {
-                    color: 'bg-warning/10 border-warning/25 text-warning',
-                    icon: '⚠',
-                    msg: 'Rate limit em 80%',
-                  },
-                  {
-                    color: 'bg-danger/10 border-danger/25 text-danger',
-                    icon: '!',
-                    msg: 'Token expirado',
-                  },
-                ].map((a) => (
-                  <HStack
-                    key={a.msg}
-                    className={`px-3 py-2 rounded-lg border text-xs font-medium ${a.color}`}
-                  >
-                    <Text as="span" className="shrink-0">
-                      {a.icon}
-                    </Text>
-                    {a.msg}
-                  </HStack>
-                ))}
-              </VStack>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid className="mt-4 grid-cols-2 sm:grid-cols-4">
-          {[
-            {
-              label: 'Linhas de código',
-              value: '< 2k',
-              icon: Code2,
-              color: 'text-brand-500',
-              bg: 'bg-brand-500/10',
-            },
-            {
-              label: 'Dependências core',
-              value: '18',
-              icon: Package,
-              color: 'text-success',
-              bg: 'bg-success/10',
-            },
-            {
-              label: 'Endpoints prontos',
-              value: '5',
-              icon: Globe,
-              color: 'text-warning',
-              bg: 'bg-warning/10',
-            },
-            {
-              label: 'Setup em minutos',
-              value: '< 3',
-              icon: Zap,
-              color: 'text-danger',
-              bg: 'bg-danger/10',
-            },
-          ].map((s) => (
-            <HStack
-              key={s.label}
-              className="gap-3 p-4 rounded-xl border border-border bg-surface shadow-sm"
-            >
-              <Box
-                className={`size-10 rounded-xl flex items-center justify-center shrink-0 ${s.bg}`}
-              >
-                <s.icon className={`size-5 ${s.color}`} />
-              </Box>
-              <VStack className="gap-0">
-                <Text className="text-2xl font-black font-sans leading-none">{s.value}</Text>
-                <Text className="text-xs text-muted">{s.label}</Text>
-              </VStack>
-            </HStack>
-          ))}
-        </Grid>
-      </section>
-
-      <Separator />
-
-      {/* ════════════════════════════════════════════
-          STACK
-      ════════════════════════════════════════════ */}
-      <section id="stack" className="bg-surface-secondary border-b border-border">
-        <Container className="px-6 py-16">
-          <VStack className="items-center gap-2 mb-10 text-center">
-            <Chip
-              variant="soft"
-              size="sm"
-              className="bg-brand-500/10 text-brand-600 border border-brand-500/20"
-            >
-              Stack
-            </Chip>
-            <Text as="h2" className="text-3xl font-bold font-sans">
-              Tecnologias incluídas
-            </Text>
-          </VStack>
-
-          <Accordion variant="surface" className="max-w-2xl mx-auto">
-            {techStack.map((t) => (
-              <AccordionItem key={t.category} id={t.category}>
-                <AccordionHeading>
-                  <AccordionTrigger className="flex items-center gap-3 w-full text-left">
-                    <Box className="size-8 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">
-                      <t.icon className="size-4 text-brand-500" />
-                    </Box>
-                    <Text as="span" className="font-semibold text-sm">
-                      {t.category}
-                    </Text>
-                    <Text as="span" className="ml-auto text-xs text-muted">
-                      {t.items.length} tecnologias
-                    </Text>
-                    <AccordionIndicator className="shrink-0" />
-                  </AccordionTrigger>
-                </AccordionHeading>
-                <AccordionPanel>
-                  <AccordionBody className="flex flex-wrap gap-2 pb-4 pl-11">
-                    {t.items.map((item) => (
-                      <Chip key={item} variant="soft" color="default" size="sm">
-                        {item}
-                      </Chip>
-                    ))}
-                  </AccordionBody>
-                </AccordionPanel>
-              </AccordionItem>
-            ))}
-          </Accordion>
+              )
+            )}
+          </HStack>
         </Container>
       </section>
 
       {/* ════════════════════════════════════════════
-          COMO FUNCIONA
+          PAINEL DE MÉTRICAS & RECURSOS ATIVOS
       ════════════════════════════════════════════ */}
-      <section id="steps" className="max-w-6xl mx-auto px-6 py-16">
-        <VStack className="items-center gap-2 mb-10 text-center">
-          <Chip
-            variant="soft"
-            size="sm"
-            className="bg-brand-500/10 text-brand-600 border border-brand-500/20"
-          >
-            Como funciona
-          </Chip>
-          <Text as="h2" className="text-3xl font-bold font-sans">
-            3 passos para começar
+      <Container size="xl" className="space-y-6">
+        <VStack className="gap-1 text-center sm:text-left">
+          <Text as="h2" className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+            Métricas & Status do Sistema
+          </Text>
+          <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+            Resumo em tempo real dos pipelines de ingestão, categorias e agentes conectados.
           </Text>
         </VStack>
 
-        <Grid className="grid-cols-1 sm:grid-cols-3 gap-6">
-          {steps.map((s, i) => (
-            <VStack
-              key={s.n}
-              className="relative gap-4 p-6 rounded-2xl border border-border bg-surface shadow-sm"
-            >
-              {i < steps.length - 1 && (
-                <Box className="hidden sm:block absolute top-8 right-0 translate-x-1/2 text-border">
-                  <ArrowRight className="size-4" />
-                </Box>
-              )}
-              <Box className="size-10 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center">
-                <Text as="span" className="text-sm font-black font-sans text-brand-500">
-                  {s.n}
-                </Text>
+        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card Total Mídias */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                Mídias Processadas
+              </CardTitle>
+              <Box className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
+                <Film className="size-5" />
               </Box>
-              <Box>
-                <Text as="h3" className="font-bold font-sans text-sm mb-2">
-                  {s.title}
-                </Text>
-                <Text className="text-xs text-muted leading-relaxed">{s.desc}</Text>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Text className="text-3xl font-black text-zinc-900 dark:text-zinc-100">
+                {carregandoMedia ? '...' : totalMedia}
+              </Text>
+              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                Vídeos e imagens registrados no banco de dados
+              </Text>
+            </CardContent>
+          </Card>
+
+          {/* Card Categorias Cadastradas */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                Categorias Ativas
+              </CardTitle>
+              <Box className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
+                <FolderCheck className="size-5" />
               </Box>
-            </VStack>
-          ))}
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Text className="text-3xl font-black text-zinc-900 dark:text-zinc-100">
+                {categorias.length}
+              </Text>
+              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                Categorias para organização e triagem automática
+              </Text>
+            </CardContent>
+          </Card>
+
+          {/* Card Agentes de Ingestão */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                Agentes de Print
+              </CardTitle>
+              <Box className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
+                <Monitor className="size-5" />
+              </Box>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <HStack className="gap-2 items-center">
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold"
+                >
+                  2 Conectados
+                </Chip>
+              </HStack>
+              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                Agente PC Empresa e Agente PC Pessoal ativos via X-Agent-Token
+              </Text>
+            </CardContent>
+          </Card>
+
+          {/* Card Integração Google Fotos */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                Google Fotos Pipeline
+              </CardTitle>
+              <Box className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
+                <Cloud className="size-5" />
+              </Box>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <HStack className="gap-2 items-center">
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold"
+                >
+                  OAuth2 Pronto
+                </Chip>
+              </HStack>
+              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                Sincronização com renovação automática de tokens
+              </Text>
+            </CardContent>
+          </Card>
         </Grid>
-      </section>
+      </Container>
 
       {/* ════════════════════════════════════════════
-          CTA FINAL
+          RECURSOS DO SISTEMA & FUNCIONALIDADES
       ════════════════════════════════════════════ */}
-      <section className="border-t border-border bg-surface">
-        <VStack className="max-w-6xl mx-auto px-6 py-20 items-center gap-6 text-center">
-          <Box className="size-16 rounded-2xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
-            <Rocket className="size-8 text-white" />
-          </Box>
-
-          <Box>
-            <Text as="h2" className="text-4xl font-black font-sans mb-3">
-              Pronto para começar?
-            </Text>
-            <Text className="text-muted max-w-md text-sm">
-              Clone, configure e tenha um projeto full-stack profissional rodando em minutos.
-            </Text>
-          </Box>
-
-          <HStack className="bg-surface-secondary border border-border rounded-xl px-5 py-3 font-mono text-sm w-full max-w-lg">
-            <Terminal className="size-4 text-muted shrink-0" />
-            <Text as="span" className="text-muted select-none">
-              $
-            </Text>
-            <Text as="span" className="text-foreground">
-              git clone cirqueirax && ./setup.sh
-            </Text>
-          </HStack>
-
-          <HStack className="gap-3 flex-wrap justify-center">
-            {!autenticado && (
-              <button
-                type="button"
-                onClick={onAbrirModal}
-                className={buttonVariants({ variant: 'primary' })}
-              >
-                <LogIn className="size-4" />
-                Experimentar agora
-              </button>
-            )}
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ variant: 'outline' })}
-            >
-              <Github className="size-4" />
-              Ver no GitHub
-            </a>
-            <a href="#" className={buttonVariants({ variant: 'ghost' })}>
-              <BookOpen className="size-4" />
-              Documentação
-            </a>
-          </HStack>
-
-          <HStack className="gap-2 text-xs text-muted">
-            <CheckCircle2 className="size-3 text-success" />
-            MIT License · Open Source · Sem vendor lock-in
-          </HStack>
+      <Container size="xl" className="space-y-6">
+        <VStack className="gap-1 text-center sm:text-left">
+          <Text as="h2" className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+            Recursos Principais do CirqueiraX
+          </Text>
+          <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+            Conheça as ferramentas e pipelines integrados ao ecossistema.
+          </Text>
         </VStack>
-      </section>
-    </Box>
+
+        <Grid className="grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Feature 1: Downloads de Vídeo */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-brand-500/40 transition-colors">
+            <CardHeader className="space-y-2">
+              <Box className="size-10 rounded-2xl bg-brand-500/10 text-brand-500 flex items-center justify-center">
+                <Video className="size-5" />
+              </Box>
+              <CardTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                Downloads de Redes Sociais
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Text className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Suporte completo a URLs do YouTube, TikTok, X (Twitter) e Instagram com extração
+                automática de metadados (título, uploader, duração e thumbnail).
+              </Text>
+
+              <HStack className="gap-2 flex-wrap">
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                >
+                  <Youtube className="size-3 mr-1" /> YouTube
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20"
+                >
+                  <Video className="size-3 mr-1" /> TikTok
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20"
+                >
+                  <Globe className="size-3 mr-1" /> Twitter / X
+                </Chip>
+              </HStack>
+
+              <Button
+                as={Link}
+                to="/downloads"
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between text-brand-500 hover:text-brand-600 hover:bg-brand-500/10 font-bold"
+              >
+                <span>Acessar Downloads</span>
+                <ArrowRight className="size-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Feature 2: Upload Manual & Triagem */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-brand-500/40 transition-colors">
+            <CardHeader className="space-y-2">
+              <Box className="size-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                <UploadCloud className="size-5" />
+              </Box>
+              <CardTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                Upload Manual & Triagem
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Text className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Área de drag-and-drop interativa para fotos e vídeos com verificação imediata de
+                hash contra arquivos duplicados e atribuição rápida de categorias em lote.
+              </Text>
+
+              <HStack className="gap-2 flex-wrap">
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"
+                >
+                  Drag & Drop
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                >
+                  Checagem de Hash
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                >
+                  Ações em Lote
+                </Chip>
+              </HStack>
+
+              <Button
+                as={Link}
+                to="/upload-manual"
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10 font-bold"
+              >
+                <span>Acessar Upload Manual</span>
+                <ArrowRight className="size-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Feature 3: Agentes de Print & Automação */}
+          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-brand-500/40 transition-colors">
+            <CardHeader className="space-y-2">
+              <Box className="size-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                <ShieldCheck className="size-5" />
+              </Box>
+              <CardTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                Agentes de Ingestão Automática
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Text className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Agentes autônomos para PC Empresa e PC Pessoal com monitoramento de pastas em tempo
+                real, debounce, cliente HTTP com retry e salvamento seguro.
+              </Text>
+
+              <HStack className="gap-2 flex-wrap">
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                >
+                  print_empresa
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20"
+                >
+                  print_pessoal
+                </Chip>
+                <Chip
+                  size="sm"
+                  variant="soft"
+                  className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                >
+                  X-Agent-Token
+                </Chip>
+              </HStack>
+
+              <Button
+                as={Link}
+                to="/downloads"
+                variant="ghost"
+                size="sm"
+                className="w-full justify-between text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 font-bold"
+              >
+                <span>Ver Mídias dos Agentes</span>
+                <ArrowRight className="size-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Container>
+    </VStack>
   )
 })

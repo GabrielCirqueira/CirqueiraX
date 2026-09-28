@@ -1,7 +1,10 @@
 import { cn } from '@/shared/lib/cn'
+import { Box, Flex, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Button, Card, CardContent, Chip } from '@heroui/react'
 import {
   AlertCircle,
   CheckCircle2,
+  CheckSquare,
   Clock,
   DownloadCloud,
   Edit3,
@@ -9,6 +12,7 @@ import {
   FolderPlus,
   Loader2,
   RotateCcw,
+  Square,
   Trash2,
   User,
   Video,
@@ -162,16 +166,16 @@ export const CardVideo = memo(function CardVideo({
   const urlOriginal = item.metadata?.url_original
 
   return (
-    <div
+    <Card
       className={cn(
-        'group relative flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden',
-        'bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md',
+        'group relative flex flex-col rounded-2xl border transition-all duration-200 overflow-hidden shadow-none',
+        'bg-white dark:bg-zinc-900',
         selecionado
           ? 'border-brand-500 ring-2 ring-brand-500/20 bg-brand-50/10'
           : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
       )}
     >
-      <div className="relative aspect-video w-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+      <Box className="relative aspect-video w-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
         {temThumbnail ? (
           <img
             src={item.metadata.thumbnail}
@@ -181,48 +185,56 @@ export const CardVideo = memo(function CardVideo({
             loading="lazy"
           />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-zinc-400 dark:text-zinc-600">
+          <VStack className="h-full w-full items-center justify-center gap-2 text-zinc-400 dark:text-zinc-600">
             <Video className="size-10 stroke-[1.5]" />
-            <span className="text-xs font-medium">Sem prévia</span>
-          </div>
+            <Text className="text-xs font-medium">Sem prévia</Text>
+          </VStack>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+        <Box className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
-        <div className="absolute top-2.5 left-2.5 z-10">
-          <input
-            type="checkbox"
-            checked={selecionado}
-            onChange={() => onToggleSelect(item.uuid)}
-            className="size-5 rounded-md border-zinc-300 dark:border-zinc-600 text-brand-600 focus:ring-brand-500 bg-white/90 dark:bg-zinc-900/90 cursor-pointer shadow"
+        <Box className="absolute top-2.5 left-2.5 z-10">
+          <Button
+            size="sm"
+            variant="ghost"
+            isIconOnly
+            onPress={() => onToggleSelect(item.uuid)}
+            className="p-1 rounded-lg bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors"
             aria-label={`Selecionar ${titulo}`}
-          />
-        </div>
-
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
-          <span
-            className={cn(
-              'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border backdrop-blur-md',
-              statusInfo.classes
-            )}
           >
-            {statusInfo.animado ? (
-              <Loader2 className="size-3 animate-spin" />
-            ) : item.status === 'erro' ? (
-              <AlertCircle className="size-3" />
-            ) : item.status === 'concluido' ? (
-              <CheckCircle2 className="size-3" />
+            {selecionado ? (
+              <CheckSquare className="size-4 text-brand-400" />
             ) : (
-              <Clock className="size-3" />
+              <Square className="size-4" />
             )}
-            {statusInfo.label}
-          </span>
-        </div>
+          </Button>
+        </Box>
+
+        <Box className="absolute top-2.5 right-2.5 z-10">
+          <Chip
+            size="sm"
+            variant="soft"
+            className={cn('backdrop-blur-md border', statusInfo.classes)}
+          >
+            <HStack className="gap-1 items-center">
+              {statusInfo.animado ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : item.status === 'erro' ? (
+                <AlertCircle className="size-3" />
+              ) : item.status === 'concluido' ? (
+                <CheckCircle2 className="size-3" />
+              ) : (
+                <Clock className="size-3" />
+              )}
+              <span>{statusInfo.label}</span>
+            </HStack>
+          </Chip>
+        </Box>
 
         {duracaoFormatada && (
-          <div className="absolute bottom-2.5 right-2.5 z-10 rounded-md bg-black/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+          <Box className="absolute bottom-2.5 right-2.5 z-10 rounded-md bg-black/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
             {duracaoFormatada}
-          </div>
+          </Box>
         )}
 
         {urlOriginal && (
@@ -236,103 +248,116 @@ export const CardVideo = memo(function CardVideo({
             <ExternalLink className="size-3.5" />
           </a>
         )}
-      </div>
+      </Box>
 
-      <div className="flex flex-1 flex-col p-4">
-        <h3
+      <CardContent className="flex flex-1 flex-col p-4">
+        <Text
+          as="h3"
           className="font-semibold text-sm line-clamp-2 text-zinc-900 dark:text-zinc-100 leading-snug mb-1.5"
           title={titulo}
         >
           {titulo}
-        </h3>
+        </Text>
 
-        <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+        <HStack className="gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 mb-2">
           <User className="size-3.5 shrink-0" />
-          <span className="truncate">{uploader}</span>
-        </div>
+          <Text as="span" className="truncate">
+            {uploader}
+          </Text>
+        </HStack>
 
-        <div className="flex items-center justify-between gap-2 text-xs text-zinc-400 dark:text-zinc-500 pt-1 border-t border-zinc-100 dark:border-zinc-800/80 mb-3">
-          <span className="truncate">
+        <Flex className="items-center justify-between gap-2 text-xs text-zinc-400 dark:text-zinc-500 pt-1 border-t border-zinc-100 dark:border-zinc-800/80 mb-3">
+          <Box className="truncate">
             {item.categoria?.nome ? (
-              <span className="inline-flex items-center gap-1 font-medium text-brand-600 dark:text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded">
-                <FolderPlus className="size-3" />
-                {item.categoria.nome}
-              </span>
+              <Chip
+                size="sm"
+                variant="soft"
+                className="bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20"
+              >
+                <HStack className="gap-1 items-center">
+                  <FolderPlus className="size-3" />
+                  <span>{item.categoria.nome}</span>
+                </HStack>
+              </Chip>
             ) : (
-              <span className="italic text-zinc-400">Sem categoria</span>
+              <Text as="span" className="italic text-zinc-400">
+                Sem categoria
+              </Text>
             )}
-          </span>
-          <span className="shrink-0">{tempoRelativoNativo(item.criadoEm)}</span>
-        </div>
+          </Box>
+          <Text as="span" className="shrink-0">
+            {tempoRelativoNativo(item.criadoEm)}
+          </Text>
+        </Flex>
 
         {item.status === 'erro' && item.erroMotivo && (
-          <div className="mb-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 p-2 text-xs text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 line-clamp-2">
+          <Box className="mb-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 p-2 text-xs text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900 line-clamp-2">
             {item.erroMotivo}
-          </div>
+          </Box>
         )}
 
-        <div className="mt-auto flex items-center justify-end gap-1 pt-2">
+        <HStack className="mt-auto items-center justify-end gap-1 pt-2">
           {onEditarMetadata && (
-            <button
-              type="button"
-              onClick={() => onEditarMetadata(item)}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              title="Editar metadados"
+            <Button
+              size="sm"
+              variant="ghost"
+              isIconOnly
+              onPress={() => onEditarMetadata(item)}
               aria-label="Editar metadados"
             >
-              <Edit3 className="size-4" />
-            </button>
+              <Edit3 className="size-4 text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100" />
+            </Button>
           )}
 
           {onCategorizar && (
-            <button
-              type="button"
-              onClick={() => onCategorizar(item)}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-brand-600 dark:text-zinc-400 dark:hover:text-brand-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              title="Categorizar vídeo"
+            <Button
+              size="sm"
+              variant="ghost"
+              isIconOnly
+              onPress={() => onCategorizar(item)}
               aria-label="Categorizar vídeo"
             >
-              <FolderPlus className="size-4" />
-            </button>
+              <FolderPlus className="size-4 text-zinc-500 hover:text-brand-600 dark:text-zinc-400 dark:hover:text-brand-400" />
+            </Button>
           )}
 
           {onRebaixar && (
-            <button
-              type="button"
-              onClick={() => onRebaixar(item.uuid)}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              title="Rebaixar vídeo"
+            <Button
+              size="sm"
+              variant="ghost"
+              isIconOnly
+              onPress={() => onRebaixar(item.uuid)}
               aria-label="Rebaixar vídeo"
             >
-              <DownloadCloud className="size-4" />
-            </button>
+              <DownloadCloud className="size-4 text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400" />
+            </Button>
           )}
 
           {item.status === 'erro' && onRetentar && (
-            <button
-              type="button"
-              onClick={() => onRetentar(item.uuid)}
-              className="p-1.5 rounded-lg text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors"
-              title="Retentar processamento"
+            <Button
+              size="sm"
+              variant="ghost"
+              isIconOnly
+              onPress={() => onRetentar(item.uuid)}
               aria-label="Retentar processamento"
             >
-              <RotateCcw className="size-4" />
-            </button>
+              <RotateCcw className="size-4 text-amber-600 hover:text-amber-700 dark:text-amber-400" />
+            </Button>
           )}
 
           {onApagar && (
-            <button
-              type="button"
-              onClick={() => onApagar(item.uuid)}
-              className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-              title="Apagar vídeo"
+            <Button
+              size="sm"
+              variant="ghost"
+              isIconOnly
+              onPress={() => onApagar(item.uuid)}
               aria-label="Apagar vídeo"
             >
-              <Trash2 className="size-4" />
-            </button>
+              <Trash2 className="size-4 text-zinc-500 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-400" />
+            </Button>
           )}
-        </div>
-      </div>
-    </div>
+        </HStack>
+      </CardContent>
+    </Card>
   )
 })

@@ -1,9 +1,22 @@
 import { AppContainer } from '@/layouts/AppContainer'
 import { cn } from '@/shared/lib/cn'
-import { Container } from '@/shared/ui/layout'
+import { Box, Container, Flex, HStack, Text, VStack } from '@/shared/ui/layout'
+import {
+  Button,
+  Chip,
+  Input,
+  Label,
+  Modal,
+  ModalBackdrop,
+  ModalBody,
+  ModalContainer,
+  ModalDialog,
+  ModalHeader,
+  ModalHeading,
+  TextField,
+} from '@heroui/react'
 import {
   AlertTriangle,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -230,29 +243,29 @@ export default function DownloadsVideo() {
   return (
     <AppContainer maxWidth="7xl" paddingY="8" paddingX="6">
       <Container size="full" className="space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
+        <Flex className="flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6">
+          <VStack className="gap-1">
+            <HStack className="gap-2.5">
+              <Box className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
                 <Video className="size-6" />
-              </div>
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+              </Box>
+              <Text as="h1" className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                 Downloads de Vídeo
-              </h1>
-            </div>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              </Text>
+            </HStack>
+            <Text className="text-sm text-zinc-500 dark:text-zinc-400">
               Cole links de vídeos do YouTube, TikTok, Twitter e Instagram para ingestão e
               processamento automático.
-            </p>
-          </div>
+            </Text>
+          </VStack>
 
-          <div className="flex items-center gap-2">
+          <HStack className="gap-2">
             {temItensComErro && (
-              <button
-                type="button"
-                onClick={() => retentarTodosMutate()}
-                disabled={pendenteRetentarTodos}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 hover:bg-amber-100 transition-colors"
+              <Button
+                size="sm"
+                isDisabled={pendenteRetentarTodos}
+                onPress={() => retentarTodosMutate()}
+                className="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
               >
                 {pendenteRetentarTodos ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -260,50 +273,49 @@ export default function DownloadsVideo() {
                   <RotateCcw className="size-3.5" />
                 )}
                 <span>Retentar Falhas</span>
-              </button>
+              </Button>
             )}
 
-            <button
-              type="button"
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+            <Button
+              size="sm"
+              variant="ghost"
+              isDisabled={isFetching}
+              onPress={() => refetch()}
+              className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
             >
               <RefreshCw className={cn('size-3.5', isFetching && 'animate-spin')} />
               <span>Atualizar</span>
-            </button>
-          </div>
-        </div>
+            </Button>
+          </HStack>
+        </Flex>
 
         <CampoNovoLink onDownloadIniciado={() => refetch()} />
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
-            <input
-              type="text"
+        <Flex className="flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+          <Box className="relative flex-1 max-w-md">
+            <Input
               value={busca}
               onChange={(e) => {
                 setBusca(e.target.value)
                 setPagina(1)
               }}
               placeholder="Buscar por título, canal ou hash..."
-              className="w-full h-10 pl-9 pr-4 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
+              className="w-full"
             />
-          </div>
+          </Box>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 text-xs text-zinc-500">
+          <HStack className="gap-2">
+            <HStack className="gap-1 text-xs text-zinc-500">
               <Filter className="size-3.5" />
               <span>Status:</span>
-            </div>
+            </HStack>
             <select
               value={statusFiltro}
               onChange={(e) => {
                 setStatusFiltro(e.target.value)
                 setPagina(1)
               }}
-              className="h-10 px-3 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer"
+              className="h-10 px-3 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer text-zinc-900 dark:text-zinc-100"
             >
               <option value="">Todos os status</option>
               <option value="baixando">Baixando</option>
@@ -323,7 +335,7 @@ export default function DownloadsVideo() {
                 setOrigemFiltro(e.target.value)
                 setPagina(1)
               }}
-              className="h-10 px-3 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer"
+              className="h-10 px-3 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer text-zinc-900 dark:text-zinc-100"
             >
               <option value="">Todas as origens</option>
               <option value="manual">Manual / Web</option>
@@ -331,8 +343,8 @@ export default function DownloadsVideo() {
               <option value="print_empresa">Print Empresa</option>
               <option value="print_pessoal">Print Pessoal</option>
             </select>
-          </div>
-        </div>
+          </HStack>
+        </Flex>
 
         <GridVideos
           itens={itens}
@@ -348,34 +360,36 @@ export default function DownloadsVideo() {
         />
 
         {paginacao && paginacao.total > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <Flex className="flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <Text className="text-xs text-zinc-500 dark:text-zinc-400">
               Mostrando {itens.length} de {paginacao.total} registros (Página {pagina} de{' '}
               {totalPaginas})
-            </span>
+            </Text>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setPagina((p) => Math.max(1, p - 1))}
-                disabled={pagina <= 1 || isFetching}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            <HStack className="gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                isDisabled={pagina <= 1 || isFetching}
+                onPress={() => setPagina((p) => Math.max(1, p - 1))}
+                className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
               >
                 <ChevronLeft className="size-4" />
                 <span>Anterior</span>
-              </button>
+              </Button>
 
-              <button
-                type="button"
-                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                disabled={pagina >= totalPaginas || isFetching}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              <Button
+                size="sm"
+                variant="ghost"
+                isDisabled={pagina >= totalPaginas || isFetching}
+                onPress={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
               >
                 <span>Próxima</span>
                 <ChevronRight className="size-4" />
-              </button>
-            </div>
-          </div>
+              </Button>
+            </HStack>
+          </Flex>
         )}
 
         <BarraAcoesEmLote
@@ -388,235 +402,199 @@ export default function DownloadsVideo() {
           processando={pendenteCategorizarLote || pendenteRebaixar || pendenteApagar}
         />
 
-        {itemEditarMetadata && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
-                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                  Editar Metadados
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setItemEditarMetadata(null)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
+        {/* Modal Editar Metadados */}
+        <Modal
+          isOpen={Boolean(itemEditarMetadata)}
+          onOpenChange={(open) => !open && setItemEditarMetadata(null)}
+        >
+          <ModalBackdrop />
+          <ModalContainer>
+            <ModalDialog className="max-w-lg">
+              <ModalHeader>
+                <ModalHeading className="text-base font-bold">Editar Metadados</ModalHeading>
+              </ModalHeader>
+              <ModalBody className="gap-4">
+                <VStack className="gap-3">
+                  <TextField>
+                    <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      Título
+                    </Label>
+                    <Input
+                      type="text"
+                      value={novoTitulo}
+                      onChange={(e) => setNovoTitulo(e.target.value)}
+                      className="w-full"
+                    />
+                  </TextField>
 
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <label
-                    htmlFor="campo-editar-titulo"
-                    className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  <TextField>
+                    <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      Uploader / Canal
+                    </Label>
+                    <Input
+                      type="text"
+                      value={novoUploader}
+                      onChange={(e) => setNovoUploader(e.target.value)}
+                      className="w-full"
+                    />
+                  </TextField>
+                </VStack>
+
+                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <Button size="sm" variant="ghost" onPress={() => setItemEditarMetadata(null)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    isDisabled={pendenteMetadata}
+                    onPress={handleSalvarMetadata}
+                    className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
                   >
-                    Título
-                  </label>
-                  <input
-                    id="campo-editar-titulo"
-                    type="text"
-                    value={novoTitulo}
-                    onChange={(e) => setNovoTitulo(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-                  />
-                </div>
+                    {pendenteMetadata && <Loader2 className="size-3.5 animate-spin" />}
+                    <span>Salvar Alterações</span>
+                  </Button>
+                </HStack>
+              </ModalBody>
+            </ModalDialog>
+          </ModalContainer>
+        </Modal>
 
-                <div className="space-y-1">
-                  <label
-                    htmlFor="campo-editar-uploader"
-                    className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+        {/* Modal Categorizar */}
+        <Modal isOpen={modalCategorizarAberto} onOpenChange={setModalCategorizarAberto}>
+          <ModalBackdrop />
+          <ModalContainer>
+            <ModalDialog className="max-w-md">
+              <ModalHeader>
+                <ModalHeading className="text-base font-bold">
+                  {categoriaAlvoUuid
+                    ? 'Categorizar Vídeo'
+                    : `Categorizar ${selecionados.length} Itens`}
+                </ModalHeading>
+              </ModalHeader>
+              <ModalBody className="gap-4">
+                <VStack className="gap-2">
+                  <Text className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Selecione a Categoria de Destino
+                  </Text>
+                  <select
+                    value={categoriaSelecionadaId}
+                    onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
+                    className="w-full h-11 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
                   >
-                    Uploader / Canal
-                  </label>
-                  <input
-                    id="campo-editar-uploader"
-                    type="text"
-                    value={novoUploader}
-                    onChange={(e) => setNovoUploader(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-                  />
-                </div>
-              </div>
+                    <option value="">Selecione uma categoria...</option>
+                    {categorias.map((cat) => (
+                      <option key={cat.uuid} value={cat.uuid}>
+                        {cat.nome}
+                      </option>
+                    ))}
+                  </select>
+                </VStack>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setItemEditarMetadata(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSalvarMetadata}
-                  disabled={pendenteMetadata}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-500 hover:bg-brand-600 text-white disabled:opacity-50"
-                >
-                  {pendenteMetadata && <Loader2 className="size-3.5 animate-spin" />}
-                  <span>Salvar Alterações</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onPress={() => setModalCategorizarAberto(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    isDisabled={
+                      !categoriaSelecionadaId ||
+                      pendenteCategorizarLote ||
+                      pendenteClassificarIndividual
+                    }
+                    onPress={handleConfirmarCategorizar}
+                    className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                  >
+                    {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    )}
+                    <span>Confirmar Categoria</span>
+                  </Button>
+                </HStack>
+              </ModalBody>
+            </ModalDialog>
+          </ModalContainer>
+        </Modal>
 
-        {modalCategorizarAberto && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-zinc-800">
-                <div className="flex items-center gap-2">
-                  <FolderPlus className="size-5 text-brand-500" />
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                    {categoriaAlvoUuid
-                      ? 'Categorizar Vídeo'
-                      : `Categorizar ${selecionados.length} Itens`}
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setModalCategorizarAberto(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
+        {/* Modal Confirmar Apagar */}
+        <Modal isOpen={modalConfirmarApagar} onOpenChange={setModalConfirmarApagar}>
+          <ModalBackdrop />
+          <ModalContainer>
+            <ModalDialog className="max-w-md">
+              <ModalHeader>
+                <ModalHeading className="text-base font-bold">Confirmar Exclusão</ModalHeading>
+              </ModalHeader>
+              <ModalBody className="gap-4">
+                <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+                  Tem certeza que deseja apagar{' '}
+                  <strong>
+                    {itemApagarAlvo
+                      ? 'este arquivo'
+                      : `${selecionados.length} arquivos selecionados`}
+                  </strong>
+                  ? Esta ação removerá o arquivo físico e o registro do banco.
+                </Text>
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="campo-selecionar-categoria"
-                  className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
-                >
-                  Selecione a Categoria de Destino
-                </label>
-                <select
-                  id="campo-selecionar-categoria"
-                  value={categoriaSelecionadaId}
-                  onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
-                  className="w-full h-11 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer"
-                >
-                  <option value="">Selecione uma categoria...</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.uuid} value={cat.uuid}>
-                      {cat.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <Button size="sm" variant="ghost" onPress={() => setModalConfirmarApagar(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    isDisabled={pendenteApagar}
+                    onPress={handleConfirmarApagar}
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-semibold"
+                  >
+                    {pendenteApagar && <Loader2 className="size-3.5 animate-spin" />}
+                    <span>Sim, Apagar</span>
+                  </Button>
+                </HStack>
+              </ModalBody>
+            </ModalDialog>
+          </ModalContainer>
+        </Modal>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setModalCategorizarAberto(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmarCategorizar}
-                  disabled={
-                    !categoriaSelecionadaId ||
-                    pendenteCategorizarLote ||
-                    pendenteClassificarIndividual
-                  }
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-brand-500 hover:bg-brand-600 text-white disabled:opacity-50"
-                >
-                  {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
-                    <Loader2 className="size-3.5 animate-spin" />
-                  )}
-                  <span>Confirmar Categoria</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Modal Confirmar Rebaixar */}
+        <Modal isOpen={modalConfirmarRebaixar} onOpenChange={setModalConfirmarRebaixar}>
+          <ModalBackdrop />
+          <ModalContainer>
+            <ModalDialog className="max-w-md">
+              <ModalHeader>
+                <ModalHeading className="text-base font-bold">Rebaixar Vídeo(s)</ModalHeading>
+              </ModalHeader>
+              <ModalBody className="gap-4">
+                <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+                  O download será reenfileirado a partir da URL original gravada nos metadados.
+                </Text>
 
-        {modalConfirmarApagar && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-full bg-rose-500/10 text-rose-500">
-                  <Trash2 className="size-6" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                    Confirmar Exclusão
-                  </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    Esta ação removerá o arquivo físico e o registro do banco.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-xs text-zinc-600 dark:text-zinc-300">
-                Tem certeza que deseja apagar{' '}
-                <strong>
-                  {itemApagarAlvo ? 'este arquivo' : `${selecionados.length} arquivos selecionados`}
-                </strong>
-                ?
-              </p>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setModalConfirmarApagar(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmarApagar}
-                  disabled={pendenteApagar}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50"
-                >
-                  {pendenteApagar && <Loader2 className="size-3.5 animate-spin" />}
-                  <span>Sim, Apagar</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {modalConfirmarRebaixar && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 shadow-2xl space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-full bg-blue-500/10 text-blue-500">
-                  <Download className="size-6" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                    Rebaixar Vídeo(s)
-                  </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                    O download será reenfileirado a partir da URL original gravada nos metadados.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setModalConfirmarRebaixar(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmarRebaixar}
-                  disabled={pendenteRebaixar}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-                >
-                  {pendenteRebaixar && <Loader2 className="size-3.5 animate-spin" />}
-                  <span>Confirmar Rebaixamento</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onPress={() => setModalConfirmarRebaixar(false)}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    isDisabled={pendenteRebaixar}
+                    onPress={handleConfirmarRebaixar}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  >
+                    {pendenteRebaixar && <Loader2 className="size-3.5 animate-spin" />}
+                    <span>Confirmar Rebaixamento</span>
+                  </Button>
+                </HStack>
+              </ModalBody>
+            </ModalDialog>
+          </ModalContainer>
+        </Modal>
       </Container>
     </AppContainer>
   )
 }
+
+export { DownloadsVideo as Component }

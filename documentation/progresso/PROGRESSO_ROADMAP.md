@@ -110,6 +110,6 @@
 | 95 | Resposta de duplicidade (aviso, não bloqueio) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
 | 96 | Frontend — estrutura da feature upload-manual | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
 | 97 | Frontend — componente de dropzone | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
-| 98 | Frontend — fila de triagem pós-upload | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
-| 99 | Frontend — página UploadManual.tsx completa | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
-| 100 | Teste end-to-end de agentes e upload manual, documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_5.md) |
+| 98 | Frontend — fila de triagem pós-upload | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
+| 99 | Frontend — página UploadManual.tsx completa | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
+| 100 | Teste end-to-end de agentes e upload manual, documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |

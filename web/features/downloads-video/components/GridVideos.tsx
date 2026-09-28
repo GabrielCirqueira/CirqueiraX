@@ -1,3 +1,5 @@
+import { Box, Flex, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Button } from '@heroui/react'
 import { CheckSquare, Film, Square } from 'lucide-react'
 import { memo } from 'react'
 import type { MediaItem } from '../types'
@@ -18,17 +20,17 @@ export interface GridVideosProps {
 
 function SkeletonCard() {
   return (
-    <div className="flex flex-col rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm animate-pulse">
-      <div className="aspect-video w-full bg-zinc-200 dark:bg-zinc-800" />
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-5/6" />
-        <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
-        <div className="pt-2 flex justify-between">
-          <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3" />
-          <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4" />
-        </div>
-      </div>
-    </div>
+    <Box className="flex flex-col rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm animate-pulse">
+      <Box className="aspect-video w-full bg-zinc-200 dark:bg-zinc-800" />
+      <VStack className="p-4 gap-3">
+        <Box className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-5/6" />
+        <Box className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2" />
+        <Flex className="pt-2 justify-between">
+          <Box className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3" />
+          <Box className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4" />
+        </Flex>
+      </VStack>
+    </Box>
   )
 }
 
@@ -49,57 +51,58 @@ export const GridVideos = memo(function GridVideos({
 
   if (carregando && itens.length === 0) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {Array.from({ length: 8 }).map((_, index) => (
           <SkeletonCard key={`skeleton-${index + 1}`} />
         ))}
-      </div>
+      </Grid>
     )
   }
 
   if (!carregando && itens.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-        <div className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 mb-4">
+      <VStack className="items-center justify-center py-16 px-4 text-center rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 gap-2">
+        <Box className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 mb-2">
           <Film className="size-10" strokeWidth={1.5} />
-        </div>
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
+        </Box>
+        <Text as="h3" className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
           Nenhum vídeo encontrado
-        </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
+        </Text>
+        <Text className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
           Cole o link de um vídeo do YouTube, TikTok, Twitter ou Instagram acima para iniciar o
           download.
-        </p>
-      </div>
+        </Text>
+      </VStack>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <VStack className="gap-4">
       {itens.length > 0 && onToggleSelectAll && (
-        <div className="flex items-center justify-between px-1 py-1">
-          <button
-            type="button"
-            onClick={onToggleSelectAll}
-            className="inline-flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+        <Flex className="items-center justify-between px-1 py-1">
+          <Button
+            size="sm"
+            variant="ghost"
+            onPress={onToggleSelectAll}
+            className="inline-flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
           >
             {todosSelecionados ? (
               <CheckSquare className="size-4 text-brand-500" />
             ) : (
               <Square className="size-4" />
             )}
-            <span>
+            <Text as="span">
               {todosSelecionados
                 ? 'Desmarcar todos'
                 : algunsSelecionados
                   ? `Selecionados (${selecionados.length}/${itens.length})`
                   : 'Selecionar todos'}
-            </span>
-          </button>
-        </div>
+            </Text>
+          </Button>
+        </Flex>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {itens.map((item) => (
           <CardVideo
             key={item.uuid}
@@ -113,7 +116,7 @@ export const GridVideos = memo(function GridVideos({
             onApagar={onApagar}
           />
         ))}
-      </div>
-    </div>
+      </Grid>
+    </VStack>
   )
 })

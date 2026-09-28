@@ -169,11 +169,34 @@
   - [`web/features/upload-manual/components/DropzoneUpload.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/components/DropzoneUpload.tsx)
   - [`web/features/upload-manual/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/index.ts)
 
-### ⏳ Tópico 98 — Frontend — fila de triagem pós-upload
-- **Status**: Pendente
+### ✅ Tópico 98 — Frontend — fila de triagem pós-upload
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente FilaTriagemUpload**: Criado o componente [`web/features/upload-manual/components/FilaTriagemUpload.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/components/FilaTriagemUpload.tsx) para gerenciar mídias enviadas via upload/triagem.
+  - **Filtros e Busca**: Abas utilizando `Tabs` do `@heroui/react` para filtragem por status (`todas`, `sem_categoria`, `classificadas`, `erro`) e campo de busca por título ou hash SHA-256.
+  - **Grid de Cards e Miniaturas**: Renderização responsiva em grid com seletores rápidos de categoria por item, visualização de hash, badges de origem (`MANUAL`, `PRINT_EMPRESA`, `PRINT_PESSOAL`), retentativa de itens com falha e indicador de seleção em lote.
+  - **Ações em Lote e Modais**: Integração com a barra flutuante de ações em lote para categorização em lote via `Modal` do HeroUI e exclusão múltipla de itens.
+- **Arquivos envolvidos**:
+  - [`web/features/upload-manual/components/FilaTriagemUpload.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/components/FilaTriagemUpload.tsx)
 
-### ⏳ Tópico 99 — Frontend — página UploadManual.tsx completa
-- **Status**: Pendente
+### ✅ Tópico 99 — Frontend — página UploadManual.tsx completa
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Página de Upload Manual**: Criada a página [`web/features/upload-manual/UploadManual.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/UploadManual.tsx) integrando a Dropzone de Upload, a Fila de Triagem, queries do TanStack Query e mutations para classificação/lote/exclusão.
+  - **Exportação do Componente**: Exportação adequada `export { UploadManual as Component }` para compatibilidade com o carregamento preguiçoso (`lazy()`) do React Router 7.
+  - **Registro de Rota e Layout**: Rota `/upload-manual` registrada em [`web/App.tsx`](file:///home/gabriel/dev/CirqueiraX/web/App.tsx) dentro do `MainLayout` e item de navegação direta disponibilizado no [`web/layouts/Header.tsx`](file:///home/gabriel/dev/CirqueiraX/web/layouts/Header.tsx).
+- **Arquivos envolvidos**:
+  - [`web/features/upload-manual/UploadManual.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/upload-manual/UploadManual.tsx)
+  - [`web/App.tsx`](file:///home/gabriel/dev/CirqueiraX/web/App.tsx)
+  - [`web/layouts/Header.tsx`](file:///home/gabriel/dev/CirqueiraX/web/layouts/Header.tsx)
 
-### ⏳ Tópico 100 — Teste end-to-end de agentes e upload manual, documentação atualizada
-- **Status**: Pendente
+### ✅ Tópico 100 — Teste end-to-end de agentes e upload manual, documentação atualizada
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Validação E2E e Compilação**: Validação completa da esteira de ingestão de prints (agentes empresa/pessoal) e do fluxo de upload manual com checagem de hash duplicado, avisos no frontend e categorização.
+  - **Build e Formatação**: `npx biome check --write web` e `npm run build` validados sem nenhum erro de compilação TypeScript nem avisos de linting.
+  - **Atualização da Documentação**: Atualizados o roadmap principal [`ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/ROADMAP.md), o detalhamento [`PROGRESSO_ROADMAP_5.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP_5.md) e o índice visual [`PROGRESSO_ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP.md), selando a conclusão de 100% dos 100 tópicos planejados.
+- **Arquivos envolvidos**:
+  - [`ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/ROADMAP.md)
+  - [`documentation/progresso/PROGRESSO_ROADMAP_5.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP_5.md)
+  - [`documentation/progresso/PROGRESSO_ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP.md)
