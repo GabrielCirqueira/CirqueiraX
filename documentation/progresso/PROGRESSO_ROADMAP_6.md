@@ -49,11 +49,25 @@
   - [`src/Service/Ingestao/IngestarMediaService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Ingestao/IngestarMediaService.php)
   - [`src/Service/Dashboard/DashboardService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Dashboard/DashboardService.php)
 
-### ⏳ Tópico 106 — SyncthingClient — cliente HTTP para a REST API do Syncthing
-- **Status**: Pendente
+### ✅ Tópico 106 — SyncthingClient — cliente HTTP para a REST API do Syncthing
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Interface do Cliente**: Criada a interface [`src/Interface/SyncthingClientInterface.php`](file:///home/gabriel/dev/CirqueiraX/src/Interface/SyncthingClientInterface.php) definindo os métodos `obterStatusPastas()`, `sincronizarPasta()` e `isOnline()`.
+  - **Implementação do Cliente HTTP**: Criado [`src/Infra/Syncthing/SyncthingClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Syncthing/SyncthingClient.php) consumindo a REST API do Syncthing (`/rest/system/status`, `/rest/config/folders`, `/rest/db/status` e `/rest/db/scan`) com autenticação via header `X-API-Key`.
+  - **Resiliência e Fallback**: Tratamento gracioso caso a instância do Syncthing esteja temporariamente offline ou sem credenciais configuradas, evitando falhas em cascata no dashboard.
+- **Arquivos envolvidos**:
+  - [`src/Interface/SyncthingClientInterface.php`](file:///home/gabriel/dev/CirqueiraX/src/Interface/SyncthingClientInterface.php)
+  - [`src/Infra/Syncthing/SyncthingClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Syncthing/SyncthingClient.php)
+  - [`src/Exception/Syncthing/SyncthingException.php`](file:///home/gabriel/dev/CirqueiraX/src/Exception/Syncthing/SyncthingException.php)
+  - [`config/services.yaml`](file:///home/gabriel/dev/CirqueiraX/config/services.yaml)
 
-### ⏳ Tópico 107 — Endpoint proxy GET /api/v1/sync/pastas
-- **Status**: Pendente
+### ✅ Tópico 107 — Endpoint proxy GET /api/v1/sync/pastas
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Controller REST de Sincronização**: Criado [`src/Controller/Sync/SyncController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Sync/SyncController.php) estendendo `DefaultController`.
+  - **Proxy Seguro para o Frontend**: Exposta a rota `GET /api/v1/sync/pastas` (`api_sync_pastas`) que retorna a lista padronizada de pastas sincronizadas (id, label, caminho, estado, se está em sincronização e tamanho acumulado em bytes/formatado).
+- **Arquivos envolvidos**:
+  - [`src/Controller/Sync/SyncController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Sync/SyncController.php)
 
 ### ⏳ Tópico 108 — Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar
 - **Status**: Pendente

@@ -119,8 +119,8 @@
 | 103 | DashboardService — agregações via QueryBuilder | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 104 | Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 105 | Cálculo de tamanho total (bytes) por categoria/origem | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-| 106 | SyncthingClient — cliente HTTP para a REST API do Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
-| 107 | Endpoint proxy GET /api/v1/sync/pastas | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 106 | SyncthingClient — cliente HTTP para a REST API do Syncthing | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
+| 107 | Endpoint proxy GET /api/v1/sync/pastas | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 108 | Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 109 | Configuração de credenciais da API do Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 110 | Endpoint de fila de erros (status=erro) com motivo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |

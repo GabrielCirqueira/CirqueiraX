@@ -42,8 +42,8 @@
 - [x] **103. DashboardService — agregações via QueryBuilder**
 - [x] **104. Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho**
 - [x] **105. Cálculo de tamanho total (bytes) por categoria/origem**
-- [ ] **106. SyncthingClient — cliente HTTP para a REST API do Syncthing**
-- [ ] **107. Endpoint proxy GET /api/v1/sync/pastas**
+- [x] **106. SyncthingClient — cliente HTTP para a REST API do Syncthing**
+- [x] **107. Endpoint proxy GET /api/v1/sync/pastas**
 - [ ] **108. Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar**
 - [ ] **109. Configuração de credenciais da API do Syncthing**
 - [ ] **110. Endpoint de fila de erros (status=erro) com motivo**
