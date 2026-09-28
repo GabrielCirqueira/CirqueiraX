@@ -50,8 +50,8 @@
 - [x] **111. Ação de retry em lote na fila de erros**
 - [x] **112. Reclassificação manual — mover pasta local**
 - [x] **113. Reclassificação manual — trocar álbum no Google Fotos**
-- [ ] **114. Frontend — estrutura da feature dashboard**
-- [ ] **115. Frontend — cards de visão geral**
+- [x] **114. Frontend — estrutura da feature dashboard**
+- [x] **115. Frontend — cards de visão geral**
 - [ ] **116. Frontend — visão por categoria com edição de mapeamento**
 - [ ] **117. Frontend — painel de status de sincronização**
 - [ ] **118. Frontend — fila de erros com ação de retry**

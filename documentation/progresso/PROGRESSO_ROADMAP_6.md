@@ -132,11 +132,31 @@
   - [`src/Infra/GoogleFotos/GoogleFotosAPI.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/GoogleFotos/GoogleFotosAPI.php)
   - [`src/Service/MediaItem/ClassificarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/ClassificarMediaItemService.php)
 
-### ⏳ Tópico 114 — Frontend — estrutura da feature dashboard
-- **Status**: Pendente
+### ✅ Tópico 114 — Frontend — estrutura da feature dashboard
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Módulo de Feature Dedicado**: Criada a pasta [`web/features/dashboard`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard) estruturada segundo o padrão arquitetural do projeto (`types.ts`, `api.ts`, `hooks/`, `components/`, `index.ts`).
+  - **Tipagem Completa**: Criado [`web/features/dashboard/types.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/types.ts) definindo interfaces tipadas para o resumo do dashboard (`ResumoDashboard`), métricas de categorias (`CategoriaMetrica`), status do Syncthing (`PastaSync`) e fila de erros (`ItemFilaErro`).
+  - **Cliente de API e Hooks TanStack Query**: Implementados [`web/features/dashboard/api.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/api.ts) e os hooks reativos em [`web/features/dashboard/hooks/useDashboard.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/hooks/useDashboard.ts) com polling inteligente (`refetchInterval`) e invalidação automática de cache pós-mutações.
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/types.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/types.ts)
+  - [`web/features/dashboard/api.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/api.ts)
+  - [`web/features/dashboard/hooks/useDashboard.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/hooks/useDashboard.ts)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
-### ⏳ Tópico 115 — Frontend — cards de visão geral
-- **Status**: Pendente
+### ✅ Tópico 115 — Frontend — cards de visão geral
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente `CardsResumo`**: Criado [`web/features/dashboard/components/CardsResumo.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/CardsResumo.tsx) utilizando HeroUI v3 (`Card`, `CardHeader`, `CardTitle`, `CardContent`, `Chip`, `Skeleton`) e design glassmorphism moderno.
+  - **Métricas Chave**:
+    - **Total Ingerido**: Contagem geral consolidada com indicador de espaço em disco utilizado.
+    - **Concluídas**: Total de itens processados com cálculo automático da taxa de sucesso (`%`) e destaque verde esmeralda.
+    - **Em Processamento**: Total de mídias em fila ou etapas assíncronas com feedback visual de loader animado.
+    - **Fila de Erros**: Destaque dinâmico em vermelho/rosa quando há itens com falha requerendo ação.
+  - **Distribuição por Origens**: Grade secundária detalhando a contagem e consumo de armazenamento por fonte (`Prints Empresa`, `Prints Pessoal`, `Bot Telegram`, `Downloads de Vídeo`, `Upload Manual`) com ícones temáticos dedicados.
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/components/CardsResumo.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/CardsResumo.tsx)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
 ### ⏳ Tópico 116 — Frontend — visão por categoria com edição de mapeamento
 - **Status**: Pendente

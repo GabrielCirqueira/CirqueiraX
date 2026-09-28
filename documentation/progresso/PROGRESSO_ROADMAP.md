@@ -127,8 +127,8 @@
 | 111 | Ação de retry em lote na fila de erros | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 112 | Reclassificação manual — mover pasta local | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 113 | Reclassificação manual — trocar álbum no Google Fotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-| 114 | Frontend — estrutura da feature dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
-| 115 | Frontend — cards de visão geral | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 114 | Frontend — estrutura da feature dashboard | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
+| 115 | Frontend — cards de visão geral | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 116 | Frontend — visão por categoria com edição de mapeamento | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 117 | Frontend — painel de status de sincronização | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 118 | Frontend — fila de erros com ação de retry | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
