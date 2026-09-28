@@ -200,6 +200,28 @@
   - [`web/features/dashboard/components/GraficosDashboard.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/GraficosDashboard.tsx)
   - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
-### ⏳ Tópico 120 — Página Dashboard.tsx completa, teste end-to-end geral e documentação final
-- **Status**: Pendente
+### ✅ Tópico 120 — Página Dashboard.tsx completa, teste end-to-end geral e documentação final
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Página Central do Dashboard**: Criada [`web/features/dashboard/Dashboard.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/Dashboard.tsx) consolidando todos os módulos e componentes desenvolvidos na Feature 5:
+    - **Banner de Status Global**: Métricas de topo com indicador de saúde do pipeline (`100% Operacional` ou `Erros Pendentes`), contagem de pastas sincronizando em tempo real e botão de atualização sob demanda invalidando queries do TanStack Query.
+    - **Cards de Resumo (KPIs)**: [`CardsResumo.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/CardsResumo.tsx) com total geral, concluídas, em processamento, erros e consumo por canal de origem.
+    - **Navegação em Abas Reativas**: Abas integradas com HeroUI v3 (`Visão Geral & Gráficos`, `Categorias`, `Sincronização Syncthing` e `Fila de Erros`).
+    - **Gráficos Recharts**: [`GraficosDashboard.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/GraficosDashboard.tsx) com Donut Chart de canais e BarChart de armazenamento em MB por categoria.
+    - **Gerenciamento de Diretórios**: [`TabelaCategorias.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/TabelaCategorias.tsx) com busca em tempo real e [`ModalEditarCategoria.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/ModalEditarCategoria.tsx) para remapeamento de pastas locais.
+    - **Painel de Sincronização**: [`PainelSync.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/PainelSync.tsx) com status live das pastas e trigger manual de scan.
+    - **Fila Operacional de Falhas**: [`FilaErros.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/FilaErros.tsx) com exibição de `erroMotivo`, retry individual e retry em lote.
+  - **Roteamento & Integração Global**: Registrada a rota `/dashboard` e atualizada a rota protegida `/app` no [`web/App.tsx`](file:///home/gabriel/dev/CirqueiraX/web/App.tsx); link direto adicionado no [`web/layouts/Header.tsx`](file:///home/gabriel/dev/CirqueiraX/web/layouts/Header.tsx) e botões de acesso na [`web/features/home/Home.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/home/Home.tsx).
+  - **Fechamento e Consolidação da v1.0**: Atualização das documentações técnicas ([`CIRQUEIRAX.md`](file:///home/gabriel/dev/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX.md), [`FRONTEND.md`](file:///home/gabriel/dev/CirqueiraX/documentation/stack/FRONTEND.md), [`ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/ROADMAP.md) e [`PROGRESSO_ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP.md)), selando a entrega de **100% dos 120 tópicos do roadmap do CirqueiraX**.
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/Dashboard.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/Dashboard.tsx)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
+  - [`web/App.tsx`](file:///home/gabriel/dev/CirqueiraX/web/App.tsx)
+  - [`web/layouts/Header.tsx`](file:///home/gabriel/dev/CirqueiraX/web/layouts/Header.tsx)
+  - [`web/features/home/Home.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/home/Home.tsx)
+  - [`documentation/funcionalidades/CIRQUEIRAX.md`](file:///home/gabriel/dev/CirqueiraX/documentation/funcionalidades/CIRQUEIRAX.md)
+  - [`documentation/stack/FRONTEND.md`](file:///home/gabriel/dev/CirqueiraX/documentation/stack/FRONTEND.md)
+  - [`ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/ROADMAP.md)
+  - [`documentation/progresso/PROGRESSO_ROADMAP.md`](file:///home/gabriel/dev/CirqueiraX/documentation/progresso/PROGRESSO_ROADMAP.md)
+
 

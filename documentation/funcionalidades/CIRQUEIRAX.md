@@ -1,8 +1,8 @@
 # CirqueiraX — Documentação Técnica
 
-**Versão:** 1.1 (v1 / MVP)
-**Última atualização:** 21/09/2026
-**Stack base:** cirqueiraX v5.0.0 (Symfony 7.3 + React 19, DDD/Clean Architecture) — módulo instalado, ainda sem `async`/`observability`/`ui-extra` ativados
+**Versão:** 1.0 Final (v1.0 Completa — 120/120 Tópicos Concluídos)
+**Última atualização:** 28/09/2026
+**Stack base:** cirqueiraX v5.0.0 (Symfony 7.3 + React 19, DDD/Clean Architecture) — Módulos `async` (Messenger + Supervisor) e `ui-extra` (Recharts) 100% ativos e integrados
 
 ---
 

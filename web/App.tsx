@@ -20,6 +20,10 @@ const router = createBrowserRouter(
           lazy={() => lazyWithRetry(() => import('@/features/cadastro/Cadastro'))}
         />
         <Route
+          path="dashboard"
+          lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
+        />
+        <Route
           path="downloads"
           lazy={() => lazyWithRetry(() => import('@/features/downloads-video/DownloadsVideo'))}
         />
@@ -32,7 +36,10 @@ const router = createBrowserRouter(
 
       <Route element={<MainLayout />}>
         <Route element={<RotaProtegida />}>
-          <Route path="app" lazy={() => lazyWithRetry(() => import('@/features/home/Home'))} />
+          <Route
+            path="app"
+            lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
+          />
         </Route>
       </Route>
     </Route>

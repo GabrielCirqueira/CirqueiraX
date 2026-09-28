@@ -44,6 +44,7 @@ web/
 ├── features/
 │   ├── auth/                 hooks, api, types de autenticação
 │   ├── cadastro/             Página e formulário de cadastro
+│   ├── dashboard/            Dashboard central: CardsResumo, GraficosDashboard, TabelaCategorias, PainelSync, FilaErros
 │   ├── downloads-video/      Feature de downloads: components, hooks, api, types
 │   ├── upload-manual/        Feature de upload manual: DropzoneUpload, hooks, api, types
 │   ├── home/                 Home page

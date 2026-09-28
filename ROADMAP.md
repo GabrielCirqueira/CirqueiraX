@@ -56,7 +56,7 @@
 - [x] **117. Frontend — painel de status de sincronização**
 - [x] **118. Frontend — fila de erros com ação de retry**
 - [x] **119. Frontend — gráficos Recharts**
-- [ ] **120. Página Dashboard.tsx completa, teste end-to-end geral e documentação final**
+- [x] **120. Página Dashboard.tsx completa, teste end-to-end geral e documentação final**
 
 ---
 

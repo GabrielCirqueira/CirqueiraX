@@ -133,4 +133,5 @@
 | 117 | Frontend — painel de status de sincronização | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 118 | Frontend — fila de erros com ação de retry | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 119 | Frontend — gráficos Recharts | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-| 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
+

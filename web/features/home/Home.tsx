@@ -1,56 +1,30 @@
 import { listarCategorias, listarMediaItens } from '@/features/downloads-video/api'
-import type { MainLayoutContext } from '@/layouts'
-import { Box, Container, Flex, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
-import { useAuthStore } from '@/stores/useAuthStore'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Chip,
-  ProgressBar,
-  ProgressBarFill,
-  ProgressBarTrack,
-} from '@heroui/react'
+import { Box, Container, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Button, Card, CardContent, CardHeader, CardTitle, Chip } from '@heroui/react'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
-  CheckCircle2,
   Cloud,
   DownloadCloud,
-  FileImage,
-  FileVideo,
   Film,
   FolderCheck,
-  FolderPlus,
   Globe,
-  HardDrive,
-  Instagram,
-  Layers,
-  LogIn,
+  LayoutDashboard,
   Monitor,
-  RefreshCw,
-  Share2,
   ShieldCheck,
   Sparkles,
   UploadCloud,
   Video,
   Youtube,
-  Zap,
 } from 'lucide-react'
 import { memo } from 'react'
-import { Link, useOutletContext } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 export function Component() {
-  const { abrirModal } = useOutletContext<MainLayoutContext>()
-  return <HomeContent onAbrirModal={abrirModal} />
+  return <HomeContent />
 }
 
-const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: () => void }) {
-  const autenticado = useAuthStore((s) => s.autenticado)
-  const usuario = useAuthStore((s) => s.usuario)
-
+const HomeContent = memo(function HomeContent() {
   // Consultar dados do sistema em tempo real
   const { data: respostaMedia, isLoading: carregandoMedia } = useQuery({
     queryKey: ['media-itens', 'home-stats'],
@@ -62,8 +36,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
     queryFn: listarCategorias,
   })
 
-  const totalMedia = respostaMedia?.paginacao?.total ?? 0
-  const mídiasRecentes = respostaMedia?.data ?? []
+  const totalMedia = respostaMedia?.total ?? 0
 
   return (
     <VStack className="w-full gap-12 py-10">
@@ -81,7 +54,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
             className="border border-brand-500/30 bg-brand-500/10 text-brand-600 font-semibold"
           >
             <Sparkles className="size-3.5 mr-1" />
-            CirqueiraX Media Pipeline v5.0
+            CirqueiraX Media Pipeline v6.0 • v1.0 Final
           </Chip>
 
           <VStack className="gap-3 items-center max-w-3xl mx-auto">
@@ -102,27 +75,38 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
 
           {/* Quick Actions Buttons */}
           <HStack className="gap-4 flex-wrap justify-center pt-2">
-            <Button
-              as={Link}
-              to="/downloads"
-              variant="primary"
-              size="lg"
-              className="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 shadow-lg shadow-brand-500/20"
-            >
-              <DownloadCloud className="size-5" />
-              <span>Downloads de Vídeo</span>
-            </Button>
+            <Link to="/dashboard">
+              <Button
+                variant="primary"
+                size="lg"
+                className="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 shadow-lg shadow-brand-500/20"
+              >
+                <LayoutDashboard className="size-5 mr-2" />
+                <span>Acessar Dashboard</span>
+              </Button>
+            </Link>
 
-            <Button
-              as={Link}
-              to="/upload-manual"
-              variant="outline"
-              size="lg"
-              className="border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold px-6 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            >
-              <UploadCloud className="size-5 text-brand-500" />
-              <span>Upload Manual & Triagem</span>
-            </Button>
+            <Link to="/downloads">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold px-6 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                <DownloadCloud className="size-5 text-brand-500 mr-2" />
+                <span>Downloads de Vídeo</span>
+              </Button>
+            </Link>
+
+            <Link to="/upload-manual">
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold px-6 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                <UploadCloud className="size-5 text-indigo-500 mr-2" />
+                <span>Upload Manual & Triagem</span>
+              </Button>
+            </Link>
           </HStack>
 
           {/* Status Chip Bar */}
@@ -305,16 +289,16 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
                 </Chip>
               </HStack>
 
-              <Button
-                as={Link}
-                to="/downloads"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between text-brand-500 hover:text-brand-600 hover:bg-brand-500/10 font-bold"
-              >
-                <span>Acessar Downloads</span>
-                <ArrowRight className="size-4" />
-              </Button>
+              <Link to="/downloads" className="w-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-between text-brand-500 hover:text-brand-600 hover:bg-brand-500/10 font-bold"
+                >
+                  <span>Acessar Downloads</span>
+                  <ArrowRight className="size-4" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -358,16 +342,16 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
                 </Chip>
               </HStack>
 
-              <Button
-                as={Link}
-                to="/upload-manual"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10 font-bold"
-              >
-                <span>Acessar Upload Manual</span>
-                <ArrowRight className="size-4" />
-              </Button>
+              <Link to="/upload-manual" className="w-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-between text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10 font-bold"
+                >
+                  <span>Acessar Upload Manual</span>
+                  <ArrowRight className="size-4" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -411,16 +395,16 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal: 
                 </Chip>
               </HStack>
 
-              <Button
-                as={Link}
-                to="/downloads"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 font-bold"
-              >
-                <span>Ver Mídias dos Agentes</span>
-                <ArrowRight className="size-4" />
-              </Button>
+              <Link to="/downloads" className="w-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-between text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 font-bold"
+                >
+                  <span>Ver Mídias dos Agentes</span>
+                  <ArrowRight className="size-4" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </Grid>
