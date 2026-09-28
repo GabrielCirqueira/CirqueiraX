@@ -69,11 +69,26 @@
 - **Arquivos envolvidos**:
   - [`src/Controller/Sync/SyncController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Sync/SyncController.php)
 
-### ⏳ Tópico 108 — Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar
-- **Status**: Pendente
+### ✅ Tópico 108 — Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Ação de Sincronização Sob Demanda**: Adicionada a rota `POST /api/v1/sync/pastas/{id}/sincronizar` (`api_sync_sincronizar_pasta`) em [`src/Controller/Sync/SyncController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Sync/SyncController.php).
+  - **Disparo de Scan via SyncthingClient**: O endpoint aciona `SyncthingClientInterface::sincronizarPasta($id)`, chamando a REST API `/rest/db/scan` do Syncthing.
+  - **Tratamento de Exceções**: Em caso de falha de conexão ou erro reportado pelo daemon Syncthing, captura `SyncthingException` e retorna resposta estruturada de erro com status `HTTP 502 Bad Gateway` mantendo o padrão `DefaultController`.
+- **Arquivos envolvidos**:
+  - [`src/Controller/Sync/SyncController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Sync/SyncController.php)
+  - [`src/Infra/Syncthing/SyncthingClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Syncthing/SyncthingClient.php)
 
-### ⏳ Tópico 109 — Configuração de credenciais da API do Syncthing
-- **Status**: Pendente
+### ✅ Tópico 109 — Configuração de credenciais da API do Syncthing
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Variáveis de Ambiente**: Definidas as variáveis `SYNCTHING_API_URL` (default `http://localhost:8384`) e `SYNCTHING_API_KEY` no arquivo [`.env`](file:///home/gabriel/dev/CirqueiraX/.env).
+  - **Injeção de Dependências**: Parâmetros mapeados em [`config/services.yaml`](file:///home/gabriel/dev/CirqueiraX/config/services.yaml) com injeção explícita no serviço `App\Infra\Syncthing\SyncthingClient` (`$apiUrl`, `$apiKey` e `$client` via `@guzzle.default`).
+  - **Atualização da Documentação**: Endpoints documentados na tabela da API em [`documentation/stack/BACKEND.md`](file:///home/gabriel/dev/CirqueiraX/documentation/stack/BACKEND.md).
+- **Arquivos envolvidos**:
+  - [`.env`](file:///home/gabriel/dev/CirqueiraX/.env)
+  - [`config/services.yaml`](file:///home/gabriel/dev/CirqueiraX/config/services.yaml)
+  - [`documentation/stack/BACKEND.md`](file:///home/gabriel/dev/CirqueiraX/documentation/stack/BACKEND.md)
 
 ### ⏳ Tópico 110 — Endpoint de fila de erros (status=erro) com motivo
 - **Status**: Pendente

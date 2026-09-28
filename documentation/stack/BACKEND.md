@@ -86,6 +86,10 @@ Service devolve o dado. Erro previsto: `throw new \DomainException('username_tak
 | `PATCH` | `/api/v1/media-itens/{uuid}/categoria` | JWT | Classificação manual de categoria |
 | `POST` | `/api/v1/media-itens/retentar` | JWT / Agente | Reprocessa em lote todas as mídias com erro |
 | `POST` | `/api/v1/media-itens/{uuid}/retentar` | JWT / Agente | Reprocessa individualmente uma mídia com erro |
+| `GET` | `/api/v1/dashboard/resumo` | JWT | Resumo de métricas por status e origem |
+| `GET` | `/api/v1/dashboard/categorias` | JWT | Métricas agregadas por categoria e tamanho |
+| `GET` | `/api/v1/sync/pastas` | JWT | Status e progresso das pastas no Syncthing |
+| `POST` | `/api/v1/sync/pastas/{id}/sincronizar` | JWT | Dispara rescan/sincronização de pasta no Syncthing |
 
 ## Regras de Ouro
 

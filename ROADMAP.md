@@ -44,8 +44,8 @@
 - [x] **105. Cálculo de tamanho total (bytes) por categoria/origem**
 - [x] **106. SyncthingClient — cliente HTTP para a REST API do Syncthing**
 - [x] **107. Endpoint proxy GET /api/v1/sync/pastas**
-- [ ] **108. Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar**
-- [ ] **109. Configuração de credenciais da API do Syncthing**
+- [x] **108. Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar**
+- [x] **109. Configuração de credenciais da API do Syncthing**
 - [ ] **110. Endpoint de fila de erros (status=erro) com motivo**
 - [ ] **111. Ação de retry em lote na fila de erros**
 - [ ] **112. Reclassificação manual — mover pasta local**
