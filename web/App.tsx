@@ -13,34 +13,31 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/">
       <Route element={<MainLayout />}>
-        <Route index lazy={() => lazyWithRetry(() => import('@/features/home/Home'))} />
+        {/* Rota pública de autenticação */}
         <Route path="login" lazy={() => lazyWithRetry(() => import('@/features/auth/Login'))} />
-        <Route
-          path="cadastro"
-          lazy={() => lazyWithRetry(() => import('@/features/cadastro/Cadastro'))}
-        />
-        <Route
-          path="dashboard"
-          lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
-        />
-        <Route
-          path="downloads"
-          lazy={() => lazyWithRetry(() => import('@/features/downloads-video/DownloadsVideo'))}
-        />
-        <Route
-          path="upload-manual"
-          lazy={() => lazyWithRetry(() => import('@/features/upload-manual/UploadManual'))}
-        />
-        <Route path="*" lazy={() => lazyWithRetry(() => import('@/features/not-found/NotFound'))} />
-      </Route>
 
-      <Route element={<MainLayout />}>
+        {/* Rotas protegidas — exigem login */}
         <Route element={<RotaProtegida />}>
+          <Route index lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))} />
+          <Route
+            path="dashboard"
+            lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
+          />
+          <Route
+            path="downloads"
+            lazy={() => lazyWithRetry(() => import('@/features/downloads-video/DownloadsVideo'))}
+          />
+          <Route
+            path="upload-manual"
+            lazy={() => lazyWithRetry(() => import('@/features/upload-manual/UploadManual'))}
+          />
           <Route
             path="app"
             lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
           />
         </Route>
+
+        <Route path="*" lazy={() => lazyWithRetry(() => import('@/features/not-found/NotFound'))} />
       </Route>
     </Route>
   )

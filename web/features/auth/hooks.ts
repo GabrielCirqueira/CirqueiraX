@@ -5,13 +5,7 @@ import { toast } from '@heroui/react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import type {
-  CadastroInput,
-  LoginInput,
-  RespostaCadastro,
-  RespostaLogin,
-  RespostaMe,
-} from './types'
+import type { LoginInput, RespostaLogin, RespostaMe } from './types'
 
 export function useLogin() {
   const { setAutenticado } = useAuthStore()
@@ -20,7 +14,7 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (input: LoginInput): Promise<void> => {
       const { data: loginData } = await api.post<RespostaLogin>('/api/v1/auth/login', {
-        username: input.username,
+        username: input.emailOuUsuario.trim(),
         senha: input.senha,
       })
 
@@ -34,6 +28,7 @@ export function useLogin() {
           id: meData.id,
           nomeCompleto: meData.nomeCompleto,
           username: meData.username,
+          email: meData.email,
           roles: meData.roles,
           criadoEm: meData.criadoEm,
         },
@@ -42,42 +37,14 @@ export function useLogin() {
       )
     },
     onSuccess: () => {
-      toast.success('Bem-vindo de volta!')
-      navigate('/app')
+      toast.success('Bem-vindo ao CirqueiraX!')
+      navigate('/dashboard')
     },
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-        toast.danger('Usuário ou senha incorretos.')
+        toast.danger('E-mail ou senha incorretos.')
       } else {
-        toast.danger('Falha ao fazer login. Tente novamente.')
-      }
-    },
-  })
-}
-
-export function useCadastro() {
-  const navigate = useNavigate()
-
-  return useMutation({
-    mutationFn: async (input: CadastroInput): Promise<RespostaCadastro> => {
-      const { data } = await api.post<RespostaCadastro>('/api/v1/auth/registro', {
-        nomeCompleto: input.nomeCompleto,
-        username: input.username,
-        senha: input.senha,
-      })
-      return data
-    },
-    onSuccess: () => {
-      toast.success('Cadastro realizado! Faça login para continuar.')
-      navigate('/login')
-    },
-    onError: (err) => {
-      if (axios.isAxiosError(err) && err.response?.status === 409) {
-        toast.danger('Este nome de usuário já está em uso.')
-      } else if (axios.isAxiosError(err) && err.response?.status === 422) {
-        toast.danger('Corrija os campos e tente novamente.')
-      } else {
-        toast.danger('Falha no cadastro. Tente novamente.')
+        toast.danger('Falha ao autenticar. Tente novamente.')
       }
     },
   })

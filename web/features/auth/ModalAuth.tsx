@@ -1,8 +1,7 @@
 import { api } from '@/config/api'
 import type { RespostaApi } from '@/shared/types/api'
-import { Box } from '@/shared/ui/layout'
+import { Box, HStack, Text, VStack } from '@/shared/ui/layout'
 import { useAuthStore } from '@/stores'
-import { toast } from '@heroui/react'
 import {
   Button,
   FieldError,
@@ -15,45 +14,20 @@ import {
   ModalDialog,
   ModalHeader,
   ModalHeading,
-  Tab,
-  TabList,
-  TabListContainer,
-  TabPanel,
-  Tabs,
   TextField,
+  toast,
 } from '@heroui/react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
-import { Code2 } from 'lucide-react'
-import { useState } from 'react'
+import { Code2, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { type FormEvent, useState } from 'react'
 import { z } from 'zod'
-import type {
-  CadastroInput,
-  LoginInput,
-  RespostaCadastro,
-  RespostaLogin,
-  RespostaMe,
-} from './types'
+import type { LoginInput, RespostaLogin, RespostaMe } from './types'
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Informe o usuário.'),
+  emailOuUsuario: z.string().min(1, 'Informe seu e-mail ou nome de usuário.'),
   senha: z.string().min(1, 'Informe a senha.'),
 })
-
-const cadastroSchema = z
-  .object({
-    nomeCompleto: z.string().min(3, 'Mínimo 3 caracteres.'),
-    username: z
-      .string()
-      .min(3, 'Mínimo 3 caracteres.')
-      .regex(/^[a-zA-Z0-9._-]+$/),
-    senha: z.string().min(8, 'Mínimo 8 caracteres.'),
-    confirmacaoSenha: z.string().min(1, 'Confirme a senha.'),
-  })
-  .refine((d) => d.senha === d.confirmacaoSenha, {
-    message: 'Senhas não coincidem.',
-    path: ['confirmacaoSenha'],
-  })
 
 interface ModalAuthProps {
   isOpen: boolean
@@ -63,21 +37,28 @@ interface ModalAuthProps {
 export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
   const { setAutenticado } = useAuthStore()
 
-  const [loginForm, setLoginForm] = useState<LoginInput>({ username: '', senha: '' })
-  const [loginErros, setLoginErros] = useState<Record<string, string>>({})
+  const [form, setForm] = useState<LoginInput>({ emailOuUsuario: '', senha: '' })
+  const [mostrarSenha, setMostrarSenha] = useState(false)
+  const [erros, setErros] = useState<Record<string, string>>({})
 
   const loginMutation = useMutation({
     mutationFn: async (input: LoginInput) => {
-      const { data: loginData } = await api.post<RespostaLogin>('/api/v1/auth/login', input)
+      const { data: loginData } = await api.post<RespostaLogin>('/api/v1/auth/login', {
+        username: input.emailOuUsuario.trim(),
+        senha: input.senha,
+      })
+
       const { data: meResposta } = await api.get<RespostaApi<RespostaMe>>('/api/v1/auth/me', {
         headers: { Authorization: `Bearer ${loginData.token}` },
       })
       const meData = meResposta.data
+
       setAutenticado(
         {
           id: meData.id,
           nomeCompleto: meData.nomeCompleto,
           username: meData.username,
+          email: meData.email,
           roles: meData.roles,
           criadoEm: meData.criadoEm,
         },
@@ -86,66 +67,30 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
       )
     },
     onSuccess: () => {
-      toast.success('Bem-vindo!')
+      toast.success('Autenticado com sucesso!')
       onClose()
     },
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-        toast.danger('Usuário ou senha incorretos.')
+        toast.danger('E-mail ou senha incorretos.')
       } else {
         toast.danger('Falha ao entrar. Tente novamente.')
       }
     },
   })
 
-  function handleLoginSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    const result = loginSchema.safeParse(loginForm)
-    if (!result.success) {
-      const errs: Record<string, string> = {}
-      for (const issue of result.error.issues) errs[issue.path[0] as string] = issue.message
-      setLoginErros(errs)
-      return
-    }
-    loginMutation.mutate(result.data)
-  }
-
-  const [cadastroForm, setCadastroForm] = useState<CadastroInput>({
-    nomeCompleto: '',
-    username: '',
-    senha: '',
-    confirmacaoSenha: '',
-  })
-  const [cadastroErros, setCadastroErros] = useState<Record<string, string>>({})
-
-  const cadastroMutation = useMutation({
-    mutationFn: async (input: CadastroInput): Promise<RespostaCadastro> => {
-      const { data } = await api.post<RespostaCadastro>('/api/v1/auth/registro', input)
-      return data
-    },
-    onSuccess: () => {
-      toast.success('Conta criada! Faça login.')
-      onClose()
-    },
-    onError: (err) => {
-      if (axios.isAxiosError(err) && err.response?.status === 409) {
-        toast.danger('Usuário já existe.')
-      } else {
-        toast.danger('Falha no cadastro. Tente novamente.')
+    const resultado = loginSchema.safeParse(form)
+    if (!resultado.success) {
+      const errosCampos: Record<string, string> = {}
+      for (const erro of resultado.error.issues) {
+        errosCampos[erro.path[0] as string] = erro.message
       }
-    },
-  })
-
-  function handleCadastroSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const result = cadastroSchema.safeParse(cadastroForm)
-    if (!result.success) {
-      const errs: Record<string, string> = {}
-      for (const issue of result.error.issues) errs[issue.path[0] as string] = issue.message
-      setCadastroErros(errs)
+      setErros(errosCampos)
       return
     }
-    cadastroMutation.mutate(result.data)
+    loginMutation.mutate(resultado.data)
   }
 
   return (
@@ -157,149 +102,80 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
     >
       <ModalBackdrop isDismissable>
         <ModalContainer placement="center" size="sm">
-          <ModalDialog>
-            <ModalHeader className="flex items-center gap-2">
-              <Box className="size-7 rounded-lg bg-accent flex items-center justify-center">
-                <Code2 className="size-4 text-white" strokeWidth={2.5} />
+          <ModalDialog className="border border-white/10 bg-zinc-950/95 backdrop-blur-2xl shadow-2xl rounded-3xl overflow-hidden p-0">
+            <ModalHeader className="flex items-center gap-3 p-6 border-b border-white/5">
+              <Box className="size-9 rounded-xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <Code2 className="size-5 text-white" strokeWidth={2.5} />
               </Box>
-              <ModalHeading>cirqueiraX</ModalHeading>
+              <VStack className="gap-0.5">
+                <ModalHeading className="text-lg font-bold text-white font-sans">
+                  CirqueiraX Media
+                </ModalHeading>
+                <Text className="text-xs text-white/50">Entre com seu e-mail e senha</Text>
+              </VStack>
             </ModalHeader>
 
-            <ModalBody className="pb-6">
-              <Tabs>
-                <TabListContainer>
-                  <TabList>
-                    <Tab id="login">Entrar</Tab>
-                    <Tab id="cadastro">Criar conta</Tab>
-                  </TabList>
-                </TabListContainer>
+            <ModalBody className="p-6">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+                <TextField isInvalid={Boolean(erros.emailOuUsuario)}>
+                  <Label className="text-xs font-semibold text-white/80">E-mail ou Usuário</Label>
+                  <Input
+                    placeholder="usuario@cirqueira.com ou usuario"
+                    value={form.emailOuUsuario}
+                    onChange={(e) => {
+                      setForm((p) => ({ ...p, emailOuUsuario: e.target.value }))
+                      setErros((p) => ({ ...p, emailOuUsuario: '' }))
+                    }}
+                    autoFocus
+                    className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 h-10"
+                  />
+                  <FieldError className="text-xs text-rose-400">{erros.emailOuUsuario}</FieldError>
+                </TextField>
 
-                <TabPanel id="login">
-                  <form
-                    onSubmit={handleLoginSubmit}
-                    className="flex flex-col gap-3 pt-2"
-                    noValidate
-                  >
-                    <TextField isInvalid={!!loginErros.username}>
-                      <Label className="text-sm font-medium">Usuário</Label>
-                      <Input
-                        value={loginForm.username}
-                        onChange={(e) => {
-                          setLoginForm((p) => ({ ...p, username: e.target.value }))
-                          setLoginErros((p) => ({ ...p, username: '' }))
-                        }}
-                        autoFocus
-                        className="w-full"
-                      />
-                      <FieldError className="text-xs text-danger">{loginErros.username}</FieldError>
-                    </TextField>
-
-                    <TextField isInvalid={!!loginErros.senha}>
-                      <Label className="text-sm font-medium">Senha</Label>
-                      <Input
-                        type="password"
-                        value={loginForm.senha}
-                        onChange={(e) => {
-                          setLoginForm((p) => ({ ...p, senha: e.target.value }))
-                          setLoginErros((p) => ({ ...p, senha: '' }))
-                        }}
-                        className="w-full"
-                      />
-                      <FieldError className="text-xs text-danger">{loginErros.senha}</FieldError>
-                    </TextField>
-
+                <TextField isInvalid={Boolean(erros.senha)}>
+                  <Label className="text-xs font-semibold text-white/80">Senha</Label>
+                  <HStack className="relative w-full">
+                    <Input
+                      type={mostrarSenha ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={form.senha}
+                      onChange={(e) => {
+                        setForm((p) => ({ ...p, senha: e.target.value }))
+                        setErros((p) => ({ ...p, senha: '' }))
+                      }}
+                      className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 h-10 pr-9"
+                    />
                     <Button
-                      type="submit"
-                      variant="primary"
-                      fullWidth
-                      isPending={loginMutation.isPending}
-                      isDisabled={loginMutation.isPending}
-                      className="mt-1"
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      isIconOnly
+                      onPress={() => setMostrarSenha((v) => !v)}
+                      className="absolute right-1.5 text-white/40 hover:text-white/80 h-7 w-7"
+                      aria-label={mostrarSenha ? 'Ocultar senha' : 'Ver senha'}
                     >
-                      Entrar
+                      {mostrarSenha ? (
+                        <EyeOff className="size-3.5" />
+                      ) : (
+                        <Eye className="size-3.5" />
+                      )}
                     </Button>
-                  </form>
-                </TabPanel>
+                  </HStack>
+                  <FieldError className="text-xs text-rose-400">{erros.senha}</FieldError>
+                </TextField>
 
-                <TabPanel id="cadastro">
-                  <form
-                    onSubmit={handleCadastroSubmit}
-                    className="flex flex-col gap-3 pt-2"
-                    noValidate
-                  >
-                    <TextField isInvalid={!!cadastroErros.nomeCompleto}>
-                      <Label className="text-sm font-medium">Nome completo</Label>
-                      <Input
-                        value={cadastroForm.nomeCompleto}
-                        onChange={(e) => {
-                          setCadastroForm((p) => ({ ...p, nomeCompleto: e.target.value }))
-                          setCadastroErros((p) => ({ ...p, nomeCompleto: '' }))
-                        }}
-                        className="w-full"
-                      />
-                      <FieldError className="text-xs text-danger">
-                        {cadastroErros.nomeCompleto}
-                      </FieldError>
-                    </TextField>
-
-                    <TextField isInvalid={!!cadastroErros.username}>
-                      <Label className="text-sm font-medium">Usuário</Label>
-                      <Input
-                        value={cadastroForm.username}
-                        onChange={(e) => {
-                          setCadastroForm((p) => ({ ...p, username: e.target.value }))
-                          setCadastroErros((p) => ({ ...p, username: '' }))
-                        }}
-                        className="w-full"
-                      />
-                      <FieldError className="text-xs text-danger">
-                        {cadastroErros.username}
-                      </FieldError>
-                    </TextField>
-
-                    <TextField isInvalid={!!cadastroErros.senha}>
-                      <Label className="text-sm font-medium">Senha</Label>
-                      <Input
-                        type="password"
-                        value={cadastroForm.senha}
-                        onChange={(e) => {
-                          setCadastroForm((p) => ({ ...p, senha: e.target.value }))
-                          setCadastroErros((p) => ({ ...p, senha: '' }))
-                        }}
-                        className="w-full"
-                      />
-                      <FieldError className="text-xs text-danger">{cadastroErros.senha}</FieldError>
-                    </TextField>
-
-                    <TextField isInvalid={!!cadastroErros.confirmacaoSenha}>
-                      <Label className="text-sm font-medium">Confirmar senha</Label>
-                      <Input
-                        type="password"
-                        value={cadastroForm.confirmacaoSenha}
-                        onChange={(e) => {
-                          setCadastroForm((p) => ({ ...p, confirmacaoSenha: e.target.value }))
-                          setCadastroErros((p) => ({ ...p, confirmacaoSenha: '' }))
-                        }}
-                        className="w-full"
-                      />
-                      <FieldError className="text-xs text-danger">
-                        {cadastroErros.confirmacaoSenha}
-                      </FieldError>
-                    </TextField>
-
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      fullWidth
-                      isPending={cadastroMutation.isPending}
-                      isDisabled={cadastroMutation.isPending}
-                      className="mt-1"
-                    >
-                      Criar conta
-                    </Button>
-                  </form>
-                </TabPanel>
-              </Tabs>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  fullWidth
+                  isPending={loginMutation.isPending}
+                  isDisabled={loginMutation.isPending}
+                  className="mt-2 h-10 font-bold bg-brand-500 hover:bg-brand-600 text-white shadow-lg shadow-brand-500/20"
+                >
+                  <Lock className="size-4 mr-1.5" />
+                  <span>Entrar</span>
+                </Button>
+              </form>
             </ModalBody>
           </ModalDialog>
         </ModalContainer>

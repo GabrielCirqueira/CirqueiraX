@@ -8,6 +8,7 @@ export interface Usuario {
   id: number
   nomeCompleto: string
   username: string
+  email: string
   roles: string[]
   criadoEm: string
 }

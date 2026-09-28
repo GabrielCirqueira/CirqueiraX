@@ -12,6 +12,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Entity(repositoryClass: UsuarioRepository::class)]
 #[ORM\Table(name: 'usuario')]
 #[ORM\UniqueConstraint(name: 'UNIQ_USUARIO_USERNAME', fields: ['username'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_USUARIO_EMAIL', fields: ['email'])]
 class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -25,9 +26,13 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private string $username;
 
+    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    private string $email;
+
     #[ORM\Column(type: 'string')]
     private string $password;
 
+    /** @var list<string> */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
@@ -37,10 +42,11 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $atualizadoEm;
 
-    public function __construct(string $nomeCompleto, string $username)
+    public function __construct(string $nomeCompleto, string $username, string $email)
     {
         $this->nomeCompleto = $nomeCompleto;
         $this->username = $username;
+        $this->email = $email;
         $this->password = '';
         $this->criadoEm = new \DateTimeImmutable();
         $this->atualizadoEm = new \DateTimeImmutable();
@@ -69,10 +75,23 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->username;
     }
 
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
+    }
+
     /** @return non-empty-string */
     public function getUserIdentifier(): string
     {
-        return $this->username;
+        return $this->email !== '' ? $this->email : $this->username;
     }
 
     public function setUsername(string $username): static
@@ -102,7 +121,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
         $roles = $this->roles;
         $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        return array_values(array_unique($roles));
     }
 
     /** @param list<string> $roles */

@@ -1,15 +1,8 @@
 import type { Usuario } from '@/shared/types'
 
 export interface LoginInput {
-  username: string
+  emailOuUsuario: string
   senha: string
-}
-
-export interface CadastroInput {
-  nomeCompleto: string
-  username: string
-  senha: string
-  confirmacaoSenha: string
 }
 
 export interface RespostaLogin {
@@ -22,15 +15,11 @@ export interface RespostaRefresh {
   refresh_token: string
 }
 
-export interface RespostaCadastro {
-  success: boolean
-  data: null
-}
-
 export interface RespostaMe {
   id: number
   nomeCompleto: string
   username: string
+  email: string
   roles: string[]
   criadoEm: string
 }
