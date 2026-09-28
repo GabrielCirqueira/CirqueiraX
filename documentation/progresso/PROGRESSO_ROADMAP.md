@@ -129,8 +129,8 @@
 | 113 | Reclassificação manual — trocar álbum no Google Fotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 114 | Frontend — estrutura da feature dashboard | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 115 | Frontend — cards de visão geral | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-| 116 | Frontend — visão por categoria com edição de mapeamento | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
-| 117 | Frontend — painel de status de sincronização | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 116 | Frontend — visão por categoria com edição de mapeamento | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
+| 117 | Frontend — painel de status de sincronização | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 118 | Frontend — fila de erros com ação de retry | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 119 | Frontend — gráficos Recharts | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |

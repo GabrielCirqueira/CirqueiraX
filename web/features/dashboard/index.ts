@@ -1,4 +1,7 @@
 export * from './api'
 export * from './components/CardsResumo'
+export * from './components/ModalEditarCategoria'
+export * from './components/PainelSync'
+export * from './components/TabelaCategorias'
 export * from './hooks/useDashboard'
 export * from './types'

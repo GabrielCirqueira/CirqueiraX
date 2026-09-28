@@ -158,11 +158,26 @@
   - [`web/features/dashboard/components/CardsResumo.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/CardsResumo.tsx)
   - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
-### ⏳ Tópico 116 — Frontend — visão por categoria com edição de mapeamento
-- **Status**: Pendente
+### ✅ Tópico 116 — Frontend — visão por categoria com edição de mapeamento
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente `TabelaCategorias`**: Criado [`web/features/dashboard/components/TabelaCategorias.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/TabelaCategorias.tsx) apresentando a grade de categorias com contagem de mídias, espaço acumulado formatado, subdiretório local e indicador de vinculação com Google Fotos.
+  - **Modal de Edição de Mapeamento**: Criado [`web/features/dashboard/components/ModalEditarCategoria.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/ModalEditarCategoria.tsx) com HeroUI v3 (`Modal`, `TextField`, `Input`, `Button`) permitindo renomear a categoria e alterar a pasta local no disco sob demanda.
+  - **Filtro em Tempo Real**: Adicionado campo de busca interativo para filtragem rápida entre categorias cadastradas.
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/components/TabelaCategorias.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/TabelaCategorias.tsx)
+  - [`web/features/dashboard/components/ModalEditarCategoria.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/ModalEditarCategoria.tsx)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
-### ⏳ Tópico 117 — Frontend — painel de status de sincronização
-- **Status**: Pendente
+### ✅ Tópico 117 — Frontend — painel de status de sincronização
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente `PainelSync`**: Criado [`web/features/dashboard/components/PainelSync.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/PainelSync.tsx) integrando com a REST API do Syncthing via hooks `usePastasSync` e `useSincronizarPasta`.
+  - **Monitoramento em Tempo Real**: Exibe o status de cada pasta sincronizada (`idle`, `syncing`, `paused`, `offline`) com chips de estado coloridos, tamanho consumido e caminho local.
+  - **Ação de Sincronização Sob Demanda**: Botão "Sincronizar agora" por pasta com loading de rotação (`Loader2`) e feedback visual de sucesso (`CheckCircle2`).
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/components/PainelSync.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/PainelSync.tsx)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
 ### ⏳ Tópico 118 — Frontend — fila de erros com ação de retry
 - **Status**: Pendente

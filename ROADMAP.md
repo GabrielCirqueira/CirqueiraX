@@ -52,8 +52,8 @@
 - [x] **113. Reclassificação manual — trocar álbum no Google Fotos**
 - [x] **114. Frontend — estrutura da feature dashboard**
 - [x] **115. Frontend — cards de visão geral**
-- [ ] **116. Frontend — visão por categoria com edição de mapeamento**
-- [ ] **117. Frontend — painel de status de sincronização**
+- [x] **116. Frontend — visão por categoria com edição de mapeamento**
+- [x] **117. Frontend — painel de status de sincronização**
 - [ ] **118. Frontend — fila de erros com ação de retry**
 - [ ] **119. Frontend — gráficos Recharts**
 - [ ] **120. Página Dashboard.tsx completa, teste end-to-end geral e documentação final**

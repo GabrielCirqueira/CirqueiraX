@@ -1,5 +1,5 @@
 import { cn } from '@/shared/lib/cn'
-import { Box, Flex, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Box, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
 import { Card, CardContent, CardHeader, CardTitle, Chip, Skeleton } from '@heroui/react'
 import {
   AlertCircle,
@@ -137,7 +137,7 @@ export const CardsResumo = memo(function CardsResumo({
             <HStack className="mt-2 text-xs text-emerald-400/70 gap-1.5">
               <Chip
                 size="sm"
-                variant="flat"
+                variant="soft"
                 className="h-5 text-[10px] bg-emerald-500/20 text-emerald-300 border-0"
               >
                 {taxaConclusao}% sucesso
