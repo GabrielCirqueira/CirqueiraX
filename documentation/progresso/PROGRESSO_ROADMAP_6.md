@@ -90,11 +90,26 @@
   - [`config/services.yaml`](file:///home/gabriel/dev/CirqueiraX/config/services.yaml)
   - [`documentation/stack/BACKEND.md`](file:///home/gabriel/dev/CirqueiraX/documentation/stack/BACKEND.md)
 
-### ⏳ Tópico 110 — Endpoint de fila de erros (status=erro) com motivo
-- **Status**: Pendente
+### ✅ Tópico 110 — Endpoint de fila de erros (status=erro) com motivo
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Fila de Erros Paginada**: Implementada a rota `GET /api/v1/dashboard/erros` (`api_dashboard_erros`) em [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php), retornando itens com `status=erro` com suporte a paginação (`pagina`, `limite`).
+  - **Serialização Completa com Motivo**: Cada item inclui `uuid`, `hash`, `origem`, `status`, `caminhoLocal`, `categoria`, `metadata`, `erroMotivo` (detalhando a causa da falha: Syncthing, download, Google Fotos, etc.) e histórico de status serializados por [`src/Serializer/MediaItemSerializer.php`](file:///home/gabriel/dev/CirqueiraX/src/Serializer/MediaItemSerializer.php).
+  - **Compatibilidade**: Mantida também a funcionalidade completa via `GET /api/v1/media-itens?status=erro`.
+- **Arquivos envolvidos**:
+  - [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php)
+  - [`src/Serializer/MediaItemSerializer.php`](file:///home/gabriel/dev/CirqueiraX/src/Serializer/MediaItemSerializer.php)
+  - [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/CirqueiraX/src/Repository/MediaItemRepository.php)
 
-### ⏳ Tópico 111 — Ação de retry em lote na fila de erros
-- **Status**: Pendente
+### ✅ Tópico 111 — Ação de retry em lote na fila de erros
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Ação de Retentativa em Lote**: Implementada a rota `POST /api/v1/dashboard/erros/retentar` (`api_dashboard_erros_retentar`) no [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php) e validado o endpoint existente `POST /api/v1/media-itens/retentar` em [`src/Controller/MediaItem/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItem/MediaItemController.php).
+  - **Lógica de Reprocessamento**: O serviço [`src/Service/MediaItem/RetentarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/RetentarMediaItemService.php) limpa `erroMotivo`, transiciona os itens para `CLASSIFICADO` (se já possuírem categoria definida) disparando `DistribuirLocalMessage` e `EnviarGoogleFotosMessage`, ou para `RECEBIDO` disparando `ClassificarMediaMessage`.
+- **Arquivos envolvidos**:
+  - [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php)
+  - [`src/Controller/MediaItem/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItem/MediaItemController.php)
+  - [`src/Service/MediaItem/RetentarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/RetentarMediaItemService.php)
 
 ### ⏳ Tópico 112 — Reclassificação manual — mover pasta local
 - **Status**: Pendente

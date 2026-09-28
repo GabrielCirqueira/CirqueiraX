@@ -123,8 +123,8 @@
 | 107 | Endpoint proxy GET /api/v1/sync/pastas | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 108 | Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 109 | Configuração de credenciais da API do Syncthing | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-| 110 | Endpoint de fila de erros (status=erro) com motivo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
-| 111 | Ação de retry em lote na fila de erros | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 110 | Endpoint de fila de erros (status=erro) com motivo | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
+| 111 | Ação de retry em lote na fila de erros | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 112 | Reclassificação manual — mover pasta local | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 113 | Reclassificação manual — trocar álbum no Google Fotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 114 | Frontend — estrutura da feature dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |

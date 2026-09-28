@@ -88,6 +88,8 @@ Service devolve o dado. Erro previsto: `throw new \DomainException('username_tak
 | `POST` | `/api/v1/media-itens/{uuid}/retentar` | JWT / Agente | Reprocessa individualmente uma mídia com erro |
 | `GET` | `/api/v1/dashboard/resumo` | JWT | Resumo de métricas por status e origem |
 | `GET` | `/api/v1/dashboard/categorias` | JWT | Métricas agregadas por categoria e tamanho |
+| `GET` | `/api/v1/dashboard/erros` | JWT | Fila paginada de itens com erro e motivo de falha |
+| `POST` | `/api/v1/dashboard/erros/retentar` | JWT | Reprocessa em lote todas as mídias com erro do dashboard |
 | `GET` | `/api/v1/sync/pastas` | JWT | Status e progresso das pastas no Syncthing |
 | `POST` | `/api/v1/sync/pastas/{id}/sincronizar` | JWT | Dispara rescan/sincronização de pasta no Syncthing |
 
