@@ -37,9 +37,9 @@
 
 ## Checklist
 
-- [ ] **101. Endpoint GET /api/v1/dashboard/resumo — totais por status**
-- [ ] **102. Endpoint GET /api/v1/dashboard/resumo — totais por origem**
-- [ ] **103. DashboardService — agregações via QueryBuilder**
+- [x] **101. Endpoint GET /api/v1/dashboard/resumo — totais por status**
+- [x] **102. Endpoint GET /api/v1/dashboard/resumo — totais por origem**
+- [x] **103. DashboardService — agregações via QueryBuilder**
 - [ ] **104. Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho**
 - [ ] **105. Cálculo de tamanho total (bytes) por categoria/origem**
 - [ ] **106. SyncthingClient — cliente HTTP para a REST API do Syncthing**

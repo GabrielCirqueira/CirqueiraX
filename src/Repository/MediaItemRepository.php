@@ -162,4 +162,56 @@ class MediaItemRepository extends ServiceEntityRepository
             'total' => $total,
         ];
     }
+
+    /**
+     * @return array<string, int>
+     */
+    public function contarAgrupadoPorStatus(): array
+    {
+        /** @var list<array{status: string, total: int|string}> $resultados */
+        $resultados = $this->createQueryBuilder('m')
+            ->select('m.status as status, COUNT(m.uuid) as total')
+            ->groupBy('m.status')
+            ->getQuery()
+            ->getArrayResult();
+
+        $totais = [];
+        foreach (StatusMediaItem::cases() as $case) {
+            $totais[$case->value] = 0;
+        }
+
+        foreach ($resultados as $row) {
+            if (isset($row['status'])) {
+                $totais[$row['status']] = (int) $row['total'];
+            }
+        }
+
+        return $totais;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function contarAgrupadoPorOrigem(): array
+    {
+        /** @var list<array{origem: string, total: int|string}> $resultados */
+        $resultados = $this->createQueryBuilder('m')
+            ->select('m.origem as origem, COUNT(m.uuid) as total')
+            ->groupBy('m.origem')
+            ->getQuery()
+            ->getArrayResult();
+
+        $totais = [];
+        foreach (OrigemMedia::cases() as $case) {
+            $totais[$case->value] = 0;
+        }
+
+        foreach ($resultados as $row) {
+            if (isset($row['origem'])) {
+                $totais[$row['origem']] = (int) $row['total'];
+            }
+        }
+
+        return $totais;
+    }
 }

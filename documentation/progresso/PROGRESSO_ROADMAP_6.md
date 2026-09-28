@@ -4,14 +4,30 @@
 
 ---
 
-### ⏳ Tópico 101 — Endpoint GET /api/v1/dashboard/resumo — totais por status
-- **Status**: Pendente
+### ✅ Tópico 101 — Endpoint GET /api/v1/dashboard/resumo — totais por status
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Endpoint HTTP REST**: Criada a rota `GET /api/v1/dashboard/resumo` (`api_dashboard_resumo`) em [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php).
+  - **Agregação por Status**: Retorna o envelope JSON com a contagem total de mídias por `status` (mapeando todos os valores do enum `StatusMediaItem`), garantindo inicialização com zero para status sem registros.
+- **Arquivos envolvidos**:
+  - [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php)
 
-### ⏳ Tópico 102 — Endpoint GET /api/v1/dashboard/resumo — totais por origem
-- **Status**: Pendente
+### ✅ Tópico 102 — Endpoint GET /api/v1/dashboard/resumo — totais por origem
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Métricas por Origem**: Integrado no mesmo payload unificado do endpoint `GET /api/v1/dashboard/resumo` o agrupamento por `origem` (`print_empresa`, `print_pessoal`, `bot_telegram`, `download`, `manual`).
+  - **Contagem Consolidada**: Incluídos também os contadores agregados `totalGeral` e `totalErros` para consumo direto dos cards de visão geral do frontend.
+- **Arquivos envolvidos**:
+  - [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php)
 
-### ⏳ Tópico 103 — DashboardService — agregações via QueryBuilder
-- **Status**: Pendente
+### ✅ Tópico 103 — DashboardService — agregações via QueryBuilder
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Serviço de Métricas Dedicado**: Criado [`src/Service/Dashboard/DashboardService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Dashboard/DashboardService.php) mantendo os Controllers enxutos e sem regras de negócio.
+  - **Consultas Otimizadas no Repository**: Adicionados em [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/CirqueiraX/src/Repository/MediaItemRepository.php) os métodos `contarAgrupadoPorStatus()` e `contarAgrupadoPorOrigem()` utilizando `QueryBuilder` com `GROUP BY` e `COUNT(m.uuid)`, evitando o carregamento de entidades em memória.
+- **Arquivos envolvidos**:
+  - [`src/Service/Dashboard/DashboardService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Dashboard/DashboardService.php)
+  - [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/CirqueiraX/src/Repository/MediaItemRepository.php)
 
 ### ⏳ Tópico 104 — Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho
 - **Status**: Pendente
