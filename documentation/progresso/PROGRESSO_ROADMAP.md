@@ -125,8 +125,8 @@
 | 109 | Configuração de credenciais da API do Syncthing | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 110 | Endpoint de fila de erros (status=erro) com motivo | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 111 | Ação de retry em lote na fila de erros | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-| 112 | Reclassificação manual — mover pasta local | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
-| 113 | Reclassificação manual — trocar álbum no Google Fotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 112 | Reclassificação manual — mover pasta local | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
+| 113 | Reclassificação manual — trocar álbum no Google Fotos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 114 | Frontend — estrutura da feature dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 115 | Frontend — cards de visão geral | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
 | 116 | Frontend — visão por categoria com edição de mapeamento | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |

@@ -48,8 +48,8 @@
 - [x] **109. Configuração de credenciais da API do Syncthing**
 - [x] **110. Endpoint de fila de erros (status=erro) com motivo**
 - [x] **111. Ação de retry em lote na fila de erros**
-- [ ] **112. Reclassificação manual — mover pasta local**
-- [ ] **113. Reclassificação manual — trocar álbum no Google Fotos**
+- [x] **112. Reclassificação manual — mover pasta local**
+- [x] **113. Reclassificação manual — trocar álbum no Google Fotos**
 - [ ] **114. Frontend — estrutura da feature dashboard**
 - [ ] **115. Frontend — cards de visão geral**
 - [ ] **116. Frontend — visão por categoria com edição de mapeamento**

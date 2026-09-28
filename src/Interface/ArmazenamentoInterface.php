@@ -12,6 +12,8 @@ interface ArmazenamentoInterface
 
     public function copiar(string $origem, string $destino): void;
 
+    public function mover(string $origem, string $destino): void;
+
     public function existe(string $caminhoArquivo): bool;
 
     public function calcularHash(string $caminhoArquivo): string;

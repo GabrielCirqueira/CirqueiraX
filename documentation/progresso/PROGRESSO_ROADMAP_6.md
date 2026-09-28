@@ -111,11 +111,26 @@
   - [`src/Controller/MediaItem/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItem/MediaItemController.php)
   - [`src/Service/MediaItem/RetentarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/RetentarMediaItemService.php)
 
-### ⏳ Tópico 112 — Reclassificação manual — mover pasta local
-- **Status**: Pendente
+### ✅ Tópico 112 — Reclassificação manual — mover pasta local
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Movimentação Física de Arquivo**: Atualizado [`src/Service/MediaItem/ClassificarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/ClassificarMediaItemService.php) para identificar itens que já foram processados/distribuídos (`CONCLUIDO` ou `DISTRIBUIDO_LOCAL`) e mover fisicamente o arquivo do diretório da categoria antiga para o diretório da nova categoria mapeada.
+  - **Método `mover` no Armazenamento**: Adicionado o método `mover(string $origem, string $destino)` em [`src/Interface/ArmazenamentoInterface.php`](file:///home/gabriel/dev/CirqueiraX/src/Interface/ArmazenamentoInterface.php) e implementado com atomicidade em [`src/Infra/Storage/ArmazenamentoLocalClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Storage/ArmazenamentoLocalClient.php) (usando `rename` com fallback para `copy` + `unlink`).
+  - **Atualização do Caminho Local**: O registro de `MediaItem::caminhoLocal` é atualizado para o novo caminho no disco e persistido.
+- **Arquivos envolvidos**:
+  - [`src/Interface/ArmazenamentoInterface.php`](file:///home/gabriel/dev/CirqueiraX/src/Interface/ArmazenamentoInterface.php)
+  - [`src/Infra/Storage/ArmazenamentoLocalClient.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/Storage/ArmazenamentoLocalClient.php)
+  - [`src/Service/MediaItem/ClassificarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/ClassificarMediaItemService.php)
+  - [`config/services.yaml`](file:///home/gabriel/dev/CirqueiraX/config/services.yaml)
 
-### ⏳ Tópico 113 — Reclassificação manual — trocar álbum no Google Fotos
-- **Status**: Pendente
+### ✅ Tópico 113 — Reclassificação manual — trocar álbum no Google Fotos
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Operações em Lote de Álbuns na Google Fotos API**: Implementados os métodos `adicionarItensAoAlbum()` e `removerItensDoAlbum()` em [`src/Infra/GoogleFotos/GoogleFotosAPI.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/GoogleFotos/GoogleFotosAPI.php) utilizando os endpoints `:batchAddMediaItems` e `:batchRemoveMediaItems` da Google Photos Library API.
+  - **Migração Automática entre Álbuns**: No fluxo de reclassificação de [`src/Service/MediaItem/ClassificarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/ClassificarMediaItemService.php), para itens com `googlePhotosMediaId` existente, o serviço obtém ou cria o álbum da nova categoria via [`GoogleFotosAlbumService`](file:///home/gabriel/dev/CirqueiraX/src/Service/GoogleFotos/GoogleFotosAlbumService.php), vincula o item ao novo álbum e remove do álbum anterior de forma resiliente.
+- **Arquivos envolvidos**:
+  - [`src/Infra/GoogleFotos/GoogleFotosAPI.php`](file:///home/gabriel/dev/CirqueiraX/src/Infra/GoogleFotos/GoogleFotosAPI.php)
+  - [`src/Service/MediaItem/ClassificarMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/ClassificarMediaItemService.php)
 
 ### ⏳ Tópico 114 — Frontend — estrutura da feature dashboard
 - **Status**: Pendente

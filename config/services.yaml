@@ -44,6 +44,13 @@ services:
             $clientId: '%env(GOOGLE_CLIENT_ID)%'
             $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
 
+    App\Interface\ArmazenamentoInterface: '@App\Infra\Storage\ArmazenamentoLocalClient'
+
+    App\Service\MediaItem\ClassificarMediaItemService:
+        arguments:
+            $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'
+            $projectDir: '%kernel.project_dir%'
+
     GuzzleHttp\ClientInterface: '@guzzle.default'
 
     guzzle.default:

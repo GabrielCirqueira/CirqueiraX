@@ -116,4 +116,68 @@ final class GoogleFotosAPI extends GoogleFotosClient
     {
         return $this->batchCreateMediaItems($accessToken, $albumId, $uploadToken, $descricao);
     }
+
+    /**
+     * @param list<string> $mediaItemIds
+     *
+     * @return array<string, mixed>
+     */
+    public function adicionarItensAoAlbum(string $accessToken, string $albumId, array $mediaItemIds): array
+    {
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
+            message: sprintf('Erro ao adicionar mídia ao álbum no Google Fotos: %s', $e->getMessage()),
+            code: (int) $e->getCode(),
+            previous: $e,
+        );
+
+        /** @var array<string, mixed> $dados */
+        $dados = $this->request(
+            method: 'POST',
+            uri: $this->resolverUrl(sprintf('/v1/albums/%s:batchAddMediaItems', $albumId)),
+            options: [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'mediaItemIds' => array_values($mediaItemIds),
+                ],
+            ],
+            throw: $customThrow,
+        );
+
+        return $dados;
+    }
+
+    /**
+     * @param list<string> $mediaItemIds
+     *
+     * @return array<string, mixed>
+     */
+    public function removerItensDoAlbum(string $accessToken, string $albumId, array $mediaItemIds): array
+    {
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
+            message: sprintf('Erro ao remover mídia do álbum no Google Fotos: %s', $e->getMessage()),
+            code: (int) $e->getCode(),
+            previous: $e,
+        );
+
+        /** @var array<string, mixed> $dados */
+        $dados = $this->request(
+            method: 'POST',
+            uri: $this->resolverUrl(sprintf('/v1/albums/%s:batchRemoveMediaItems', $albumId)),
+            options: [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'mediaItemIds' => array_values($mediaItemIds),
+                ],
+            ],
+            throw: $customThrow,
+        );
+
+        return $dados;
+    }
 }

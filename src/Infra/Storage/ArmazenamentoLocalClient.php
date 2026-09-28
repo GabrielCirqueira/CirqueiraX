@@ -45,6 +45,22 @@ final class ArmazenamentoLocalClient implements ArmazenamentoInterface
         }
     }
 
+    public function mover(string $origem, string $destino): void
+    {
+        if (!file_exists($origem) || !is_file($origem)) {
+            throw ArmazenamentoLocalException::arquivoDeOrigemNaoEncontradoParaCopia();
+        }
+
+        $diretorioDestino = dirname($destino);
+        $this->criarDiretorio($diretorioDestino);
+
+        $movido = @rename($origem, $destino);
+        if (!$movido) {
+            $this->copiar($origem, $destino);
+            $this->remover($origem);
+        }
+    }
+
     public function existe(string $caminhoArquivo): bool
     {
         return '' !== $caminhoArquivo && file_exists($caminhoArquivo) && is_readable($caminhoArquivo);
