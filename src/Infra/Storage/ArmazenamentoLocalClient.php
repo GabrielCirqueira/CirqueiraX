@@ -9,7 +9,7 @@ use App\Interface\ArmazenamentoInterface;
 
 final class ArmazenamentoLocalClient implements ArmazenamentoInterface
 {
-    private const int PERMISSAO_DIRETORIO_PADRAO = 0755;
+    private const int PERMISSAO_DIRETORIO_PADRAO = 0o755;
 
     public function criarDiretorio(string $caminho, int $permissao = self::PERMISSAO_DIRETORIO_PADRAO): void
     {

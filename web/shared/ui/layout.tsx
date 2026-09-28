@@ -58,6 +58,5 @@ interface TextProps extends ComponentProps<'p'> {
 }
 
 export const Text = ({ as: Tag = 'p', className, ...props }: TextProps) => (
-  // biome-ignore lint/suspicious/noExplicitAny: polimorfismo via prop `as`
-  <Tag className={cn(className)} {...(props as any)} />
+  <Tag className={cn(className)} {...(props as ComponentProps<typeof Tag>)} />
 )

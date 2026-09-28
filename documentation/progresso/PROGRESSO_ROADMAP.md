@@ -10,6 +10,7 @@
 > - **Tópicos 41+** → [PROGRESSO_ROADMAP_3.md](PROGRESSO_ROADMAP_3.md)
 > - **Tópicos 61+** → [PROGRESSO_ROADMAP_4.md](PROGRESSO_ROADMAP_4.md)
 > - **Tópicos 81+** → [PROGRESSO_ROADMAP_5.md](PROGRESSO_ROADMAP_5.md)
+> - **Tópicos 101+** → [PROGRESSO_ROADMAP_6.md](PROGRESSO_ROADMAP_6.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -113,3 +114,23 @@
 | 98 | Frontend — fila de triagem pós-upload | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
 | 99 | Frontend — página UploadManual.tsx completa | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
 | 100 | Teste end-to-end de agentes e upload manual, documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_5.md) |
+| 101 | Endpoint GET /api/v1/dashboard/resumo — totais por status | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 102 | Endpoint GET /api/v1/dashboard/resumo — totais por origem | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 103 | DashboardService — agregações via QueryBuilder | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 104 | Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 105 | Cálculo de tamanho total (bytes) por categoria/origem | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 106 | SyncthingClient — cliente HTTP para a REST API do Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 107 | Endpoint proxy GET /api/v1/sync/pastas | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 108 | Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 109 | Configuração de credenciais da API do Syncthing | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 110 | Endpoint de fila de erros (status=erro) com motivo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 111 | Ação de retry em lote na fila de erros | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 112 | Reclassificação manual — mover pasta local | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 113 | Reclassificação manual — trocar álbum no Google Fotos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 114 | Frontend — estrutura da feature dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 115 | Frontend — cards de visão geral | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 116 | Frontend — visão por categoria com edição de mapeamento | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 117 | Frontend — painel de status de sincronização | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 118 | Frontend — fila de erros com ação de retry | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 119 | Frontend — gráficos Recharts | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |
+| 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_6.md) |

@@ -6,7 +6,7 @@ namespace App\Interface;
 
 interface ArmazenamentoInterface
 {
-    public function criarDiretorio(string $caminho, int $permissao = 0755): void;
+    public function criarDiretorio(string $caminho, int $permissao = 0o755): void;
 
     public function remover(string $caminhoArquivo): void;
 
