@@ -179,11 +179,27 @@
   - [`web/features/dashboard/components/PainelSync.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/PainelSync.tsx)
   - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
-### ⏳ Tópico 118 — Frontend — fila de erros com ação de retry
-- **Status**: Pendente
+### ✅ Tópico 118 — Frontend — fila de erros com ação de retry
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente `FilaErros`**: Criado [`web/features/dashboard/components/FilaErros.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/FilaErros.tsx) consumindo a rota `GET /api/v1/dashboard/erros` via TanStack Query (`useFilaErros`).
+  - **Exibição Explícita de Falhas**: Cada card detalha o título/nome original da mídia, hash identificador, ícone de origem (`Bot`, `Building2`, `Smartphone`, `DownloadCloud`, `UploadCloud`), categoria associada, caminho em disco e o motivo detalhado da falha (`erroMotivo`).
+  - **Ações de Reprocessamento**: Botão de retry individual (`useRetentarErroIndividual`) e botão global "Retentar Todos ({total})" (`useRetentarErros`) com feedback de loading (`Loader2`), badges de contagem e toast de sucesso pós-reprocessamento.
+  - **Estado Saudável e Paginação**: Exibição de card temático verde esmeralda quando o pipeline não possui erros ativos e controles de paginação responsivos.
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/components/FilaErros.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/FilaErros.tsx)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
-### ⏳ Tópico 119 — Frontend — gráficos Recharts
-- **Status**: Pendente
+### ✅ Tópico 119 — Frontend — gráficos Recharts
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Componente `GraficosDashboard`**: Criado [`web/features/dashboard/components/GraficosDashboard.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/GraficosDashboard.tsx) utilizando a biblioteca `recharts` com design glassmorphism e paleta de cores temática.
+  - **Donut Chart por Origem**: Gráfico `PieChart` com corte interno (`innerRadius={60}`, `outerRadius={85}`) ilustrando a distribuição proporcional de mídias por canal de entrada (`Prints Empresa`, `Prints Pessoal`, `Telegram`, `Downloads`, `Upload Manual`), com legendas customizadas e tooltip flutuante moderno.
+  - **BarChart por Categoria**: Gráfico de barras verticais `BarChart` exibindo o consumo em megabytes (MB) por categoria mapeada no disco, com grid sutil (`CartesianGrid`), eixos rotacionados (`XAxis`, `YAxis`) e tooltip interativo detalhando tamanho formatado e contagem total de itens.
+- **Arquivos envolvidos**:
+  - [`web/features/dashboard/components/GraficosDashboard.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/components/GraficosDashboard.tsx)
+  - [`web/features/dashboard/index.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/dashboard/index.ts)
 
 ### ⏳ Tópico 120 — Página Dashboard.tsx completa, teste end-to-end geral e documentação final
 - **Status**: Pendente
+
