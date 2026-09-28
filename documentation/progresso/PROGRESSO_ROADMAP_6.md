@@ -29,11 +29,25 @@
   - [`src/Service/Dashboard/DashboardService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Dashboard/DashboardService.php)
   - [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/CirqueiraX/src/Repository/MediaItemRepository.php)
 
-### ⏳ Tópico 104 — Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho
-- **Status**: Pendente
+### ✅ Tópico 104 — Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Endpoint HTTP REST**: Criada a rota `GET /api/v1/dashboard/categorias` (`api_dashboard_categorias`) em [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php).
+  - **Métricas de Categoria**: Mapeia todas as categorias cadastradas (mais a pseudo-categoria `Sem Categoria`) contendo a contagem total de itens (`totalItens`), tamanho acumulado em bytes (`tamanhoBytes`) e tamanho formatado (`tamanhoFormatado`, ex: `12.50 MB`).
+- **Arquivos envolvidos**:
+  - [`src/Controller/Dashboard/DashboardController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/Dashboard/DashboardController.php)
+  - [`src/Service/Dashboard/DashboardService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Dashboard/DashboardService.php)
 
-### ⏳ Tópico 105 — Cálculo de tamanho total (bytes) por categoria/origem
-- **Status**: Pendente
+### ✅ Tópico 105 — Cálculo de tamanho total (bytes) por categoria/origem
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Método Auxiliar de Tamanho**: Criado o método `MediaItem::tamanhoBytes()` em [`src/Entity/MediaItem.php`](file:///home/gabriel/dev/CirqueiraX/src/Entity/MediaItem.php) para obter o tamanho do arquivo via `metadata['tamanho_bytes']`, `metadata['filesize']` ou inspecionando o arquivo físico em disco.
+  - **Enriquecimento na Ingestão**: Atualizado [`src/Service/Ingestao/IngestarMediaService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Ingestao/IngestarMediaService.php) para gravar automaticamente a chave `tamanho_bytes` durante o recebimento de arquivos.
+  - **Consolidação de Métricas**: `DashboardService` calcula o tamanho total acumulado (`tamanhoTotalBytes` e `tamanhoTotalFormatado`) e o detalhamento por `origemEspaco` para exibição no dashboard.
+- **Arquivos envolvidos**:
+  - [`src/Entity/MediaItem.php`](file:///home/gabriel/dev/CirqueiraX/src/Entity/MediaItem.php)
+  - [`src/Service/Ingestao/IngestarMediaService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Ingestao/IngestarMediaService.php)
+  - [`src/Service/Dashboard/DashboardService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Dashboard/DashboardService.php)
 
 ### ⏳ Tópico 106 — SyncthingClient — cliente HTTP para a REST API do Syncthing
 - **Status**: Pendente

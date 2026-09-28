@@ -21,4 +21,10 @@ final class DashboardController extends DefaultController
     {
         return $this->success($this->dashboardService->obterResumo());
     }
+
+    #[Route('/categorias', name: 'categorias', methods: ['GET'])]
+    public function categorias(): Response
+    {
+        return $this->success($this->dashboardService->resumoPorCategoria());
+    }
 }

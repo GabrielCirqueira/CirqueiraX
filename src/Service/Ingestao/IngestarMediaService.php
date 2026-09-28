@@ -29,6 +29,13 @@ final readonly class IngestarMediaService
         }
 
         $mediaItem = MediaItem::fromIngestaoDTO($dto, $hash);
+
+        $metadata = $mediaItem->metadata();
+        if (!isset($metadata['tamanho_bytes']) && file_exists($dto->caminhoArquivo())) {
+            $metadata['tamanho_bytes'] = (int) @filesize($dto->caminhoArquivo());
+            $mediaItem->setMetadata($metadata);
+        }
+
         $this->mediaItemRepository->salvar($mediaItem);
 
         if (null !== $mediaItem->uuid()) {

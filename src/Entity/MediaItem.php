@@ -310,4 +310,25 @@ class MediaItem
     {
         return $this->atualizadoEm;
     }
+
+    public function tamanhoBytes(): int
+    {
+        if (isset($this->metadata['tamanho_bytes'])) {
+            return (int) $this->metadata['tamanho_bytes'];
+        }
+
+        if (isset($this->metadata['filesize'])) {
+            return (int) $this->metadata['filesize'];
+        }
+
+        if (isset($this->metadata['size'])) {
+            return (int) $this->metadata['size'];
+        }
+
+        if (null !== $this->caminhoLocal && file_exists($this->caminhoLocal)) {
+            return (int) @filesize($this->caminhoLocal);
+        }
+
+        return 0;
+    }
 }
