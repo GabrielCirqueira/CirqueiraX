@@ -47,6 +47,12 @@ export interface PastaSync {
   tamanhoFormatado: string
 }
 
+export interface StatusSyncthing {
+  online: boolean
+  versao: string | null
+  pastas: PastaSync[]
+}
+
 export interface ItemFilaErro {
   uuid: string
   hash: string

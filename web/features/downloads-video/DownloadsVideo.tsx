@@ -407,190 +407,198 @@ export default function DownloadsVideo() {
           isOpen={Boolean(itemEditarMetadata)}
           onOpenChange={(open) => !open && setItemEditarMetadata(null)}
         >
-          <ModalBackdrop />
-          <ModalContainer>
-            <ModalDialog className="max-w-lg">
-              <ModalHeader>
-                <ModalHeading className="text-base font-bold">Editar Metadados</ModalHeading>
-              </ModalHeader>
-              <ModalBody className="gap-4">
-                <VStack className="gap-3">
-                  <TextField>
-                    <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Título
-                    </Label>
-                    <Input
-                      type="text"
-                      value={novoTitulo}
-                      onChange={(e) => setNovoTitulo(e.target.value)}
-                      className="w-full"
-                    />
-                  </TextField>
+          <ModalBackdrop isDismissable>
+            <ModalContainer>
+              <ModalDialog className="max-w-lg">
+                <ModalHeader>
+                  <ModalHeading className="text-base font-bold">Editar Metadados</ModalHeading>
+                </ModalHeader>
+                <ModalBody className="gap-4">
+                  <VStack className="gap-3">
+                    <TextField>
+                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Título
+                      </Label>
+                      <Input
+                        type="text"
+                        value={novoTitulo}
+                        onChange={(e) => setNovoTitulo(e.target.value)}
+                        className="w-full"
+                      />
+                    </TextField>
 
-                  <TextField>
-                    <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Uploader / Canal
-                    </Label>
-                    <Input
-                      type="text"
-                      value={novoUploader}
-                      onChange={(e) => setNovoUploader(e.target.value)}
-                      className="w-full"
-                    />
-                  </TextField>
-                </VStack>
+                    <TextField>
+                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Uploader / Canal
+                      </Label>
+                      <Input
+                        type="text"
+                        value={novoUploader}
+                        onChange={(e) => setNovoUploader(e.target.value)}
+                        className="w-full"
+                      />
+                    </TextField>
+                  </VStack>
 
-                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                  <Button size="sm" variant="ghost" onPress={() => setItemEditarMetadata(null)}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    isDisabled={pendenteMetadata}
-                    onPress={handleSalvarMetadata}
-                    className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
-                  >
-                    {pendenteMetadata && <Loader2 className="size-3.5 animate-spin" />}
-                    <span>Salvar Alterações</span>
-                  </Button>
-                </HStack>
-              </ModalBody>
-            </ModalDialog>
-          </ModalContainer>
+                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                    <Button size="sm" variant="ghost" onPress={() => setItemEditarMetadata(null)}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      isDisabled={pendenteMetadata}
+                      onPress={handleSalvarMetadata}
+                      className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                    >
+                      {pendenteMetadata && <Loader2 className="size-3.5 animate-spin" />}
+                      <span>Salvar Alterações</span>
+                    </Button>
+                  </HStack>
+                </ModalBody>
+              </ModalDialog>
+            </ModalContainer>
+          </ModalBackdrop>
         </Modal>
 
         {/* Modal Categorizar */}
         <Modal isOpen={modalCategorizarAberto} onOpenChange={setModalCategorizarAberto}>
-          <ModalBackdrop />
-          <ModalContainer>
-            <ModalDialog className="max-w-md">
-              <ModalHeader>
-                <ModalHeading className="text-base font-bold">
-                  {categoriaAlvoUuid
-                    ? 'Categorizar Vídeo'
-                    : `Categorizar ${selecionados.length} Itens`}
-                </ModalHeading>
-              </ModalHeader>
-              <ModalBody className="gap-4">
-                <VStack className="gap-2">
-                  <Text className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                    Selecione a Categoria de Destino
-                  </Text>
-                  <select
-                    value={categoriaSelecionadaId}
-                    onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
-                    className="w-full h-11 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
-                  >
-                    <option value="">Selecione uma categoria...</option>
-                    {categorias.map((cat) => (
-                      <option key={cat.uuid} value={cat.uuid}>
-                        {cat.nome}
-                      </option>
-                    ))}
-                  </select>
-                </VStack>
+          <ModalBackdrop isDismissable>
+            <ModalContainer>
+              <ModalDialog className="max-w-md">
+                <ModalHeader>
+                  <ModalHeading className="text-base font-bold">
+                    {categoriaAlvoUuid
+                      ? 'Categorizar Vídeo'
+                      : `Categorizar ${selecionados.length} Itens`}
+                  </ModalHeading>
+                </ModalHeader>
+                <ModalBody className="gap-4">
+                  <VStack className="gap-2">
+                    <Text className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      Selecione a Categoria de Destino
+                    </Text>
+                    <select
+                      value={categoriaSelecionadaId}
+                      onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
+                      className="w-full h-11 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                    >
+                      <option value="">Selecione uma categoria...</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.uuid} value={cat.uuid}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </VStack>
 
-                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onPress={() => setModalCategorizarAberto(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    isDisabled={
-                      !categoriaSelecionadaId ||
-                      pendenteCategorizarLote ||
-                      pendenteClassificarIndividual
-                    }
-                    onPress={handleConfirmarCategorizar}
-                    className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
-                  >
-                    {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    )}
-                    <span>Confirmar Categoria</span>
-                  </Button>
-                </HStack>
-              </ModalBody>
-            </ModalDialog>
-          </ModalContainer>
+                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() => setModalCategorizarAberto(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      isDisabled={
+                        !categoriaSelecionadaId ||
+                        pendenteCategorizarLote ||
+                        pendenteClassificarIndividual
+                      }
+                      onPress={handleConfirmarCategorizar}
+                      className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                    >
+                      {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      )}
+                      <span>Confirmar Categoria</span>
+                    </Button>
+                  </HStack>
+                </ModalBody>
+              </ModalDialog>
+            </ModalContainer>
+          </ModalBackdrop>
         </Modal>
 
         {/* Modal Confirmar Apagar */}
         <Modal isOpen={modalConfirmarApagar} onOpenChange={setModalConfirmarApagar}>
-          <ModalBackdrop />
-          <ModalContainer>
-            <ModalDialog className="max-w-md">
-              <ModalHeader>
-                <ModalHeading className="text-base font-bold">Confirmar Exclusão</ModalHeading>
-              </ModalHeader>
-              <ModalBody className="gap-4">
-                <Text className="text-xs text-zinc-600 dark:text-zinc-300">
-                  Tem certeza que deseja apagar{' '}
-                  <strong>
-                    {itemApagarAlvo
-                      ? 'este arquivo'
-                      : `${selecionados.length} arquivos selecionados`}
-                  </strong>
-                  ? Esta ação removerá o arquivo físico e o registro do banco.
-                </Text>
+          <ModalBackdrop isDismissable>
+            <ModalContainer>
+              <ModalDialog className="max-w-md">
+                <ModalHeader>
+                  <ModalHeading className="text-base font-bold">Confirmar Exclusão</ModalHeading>
+                </ModalHeader>
+                <ModalBody className="gap-4">
+                  <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+                    Tem certeza que deseja apagar{' '}
+                    <strong>
+                      {itemApagarAlvo
+                        ? 'este arquivo'
+                        : `${selecionados.length} arquivos selecionados`}
+                    </strong>
+                    ? Esta ação removerá o arquivo físico e o registro do banco.
+                  </Text>
 
-                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                  <Button size="sm" variant="ghost" onPress={() => setModalConfirmarApagar(false)}>
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    isDisabled={pendenteApagar}
-                    onPress={handleConfirmarApagar}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-semibold"
-                  >
-                    {pendenteApagar && <Loader2 className="size-3.5 animate-spin" />}
-                    <span>Sim, Apagar</span>
-                  </Button>
-                </HStack>
-              </ModalBody>
-            </ModalDialog>
-          </ModalContainer>
+                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() => setModalConfirmarApagar(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      isDisabled={pendenteApagar}
+                      onPress={handleConfirmarApagar}
+                      className="bg-rose-600 hover:bg-rose-700 text-white font-semibold"
+                    >
+                      {pendenteApagar && <Loader2 className="size-3.5 animate-spin" />}
+                      <span>Sim, Apagar</span>
+                    </Button>
+                  </HStack>
+                </ModalBody>
+              </ModalDialog>
+            </ModalContainer>
+          </ModalBackdrop>
         </Modal>
 
         {/* Modal Confirmar Rebaixar */}
         <Modal isOpen={modalConfirmarRebaixar} onOpenChange={setModalConfirmarRebaixar}>
-          <ModalBackdrop />
-          <ModalContainer>
-            <ModalDialog className="max-w-md">
-              <ModalHeader>
-                <ModalHeading className="text-base font-bold">Rebaixar Vídeo(s)</ModalHeading>
-              </ModalHeader>
-              <ModalBody className="gap-4">
-                <Text className="text-xs text-zinc-600 dark:text-zinc-300">
-                  O download será reenfileirado a partir da URL original gravada nos metadados.
-                </Text>
+          <ModalBackdrop isDismissable>
+            <ModalContainer>
+              <ModalDialog className="max-w-md">
+                <ModalHeader>
+                  <ModalHeading className="text-base font-bold">Rebaixar Vídeo(s)</ModalHeading>
+                </ModalHeader>
+                <ModalBody className="gap-4">
+                  <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+                    O download será reenfileirado a partir da URL original gravada nos metadados.
+                  </Text>
 
-                <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onPress={() => setModalConfirmarRebaixar(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    isDisabled={pendenteRebaixar}
-                    onPress={handleConfirmarRebaixar}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                  >
-                    {pendenteRebaixar && <Loader2 className="size-3.5 animate-spin" />}
-                    <span>Confirmar Rebaixamento</span>
-                  </Button>
-                </HStack>
-              </ModalBody>
-            </ModalDialog>
-          </ModalContainer>
+                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onPress={() => setModalConfirmarRebaixar(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      isDisabled={pendenteRebaixar}
+                      onPress={handleConfirmarRebaixar}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                    >
+                      {pendenteRebaixar && <Loader2 className="size-3.5 animate-spin" />}
+                      <span>Confirmar Rebaixamento</span>
+                    </Button>
+                  </HStack>
+                </ModalBody>
+              </ModalDialog>
+            </ModalContainer>
+          </ModalBackdrop>
         </Modal>
       </Container>
     </AppContainer>

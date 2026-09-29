@@ -6,6 +6,7 @@ import type {
   PastaSync,
   ResultadoSincronizacao,
   ResumoDashboard,
+  StatusSyncthing,
 } from './types'
 
 export async function obterResumoDashboard(): Promise<ResumoDashboard> {
@@ -38,9 +39,25 @@ export async function retentarErroIndividual(uuid: string): Promise<ItemFilaErro
   return data.data
 }
 
+export async function obterStatusSync(): Promise<StatusSyncthing> {
+  const { data } = await api.get<RespostaApi<StatusSyncthing | PastaSync[]>>('/api/v1/sync/pastas')
+  if (Array.isArray(data.data)) {
+    return {
+      online: true,
+      versao: null,
+      pastas: data.data,
+    }
+  }
+  return {
+    online: data.data?.online ?? false,
+    versao: data.data?.versao ?? null,
+    pastas: data.data?.pastas ?? [],
+  }
+}
+
 export async function obterPastasSync(): Promise<PastaSync[]> {
-  const { data } = await api.get<RespostaApi<PastaSync[]>>('/api/v1/sync/pastas')
-  return data.data
+  const status = await obterStatusSync()
+  return status.pastas
 }
 
 export async function sincronizarPasta(pastaId: string): Promise<ResultadoSincronizacao> {

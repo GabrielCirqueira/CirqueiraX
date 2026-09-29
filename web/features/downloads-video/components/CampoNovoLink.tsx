@@ -99,7 +99,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="Cole aqui o link do YouTube, TikTok, Twitter ou Instagram..."
-                  isDisabled={isPending}
+                  disabled={isPending}
                   required
                   className="w-full h-12 pr-24"
                 />
@@ -108,7 +108,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                   {url ? (
                     <Button
                       size="sm"
-                      variant="quiet"
+                      variant="ghost"
                       isIconOnly
                       onPress={() => setUrl('')}
                       aria-label="Limpar campo"
@@ -118,7 +118,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                   ) : (
                     <Button
                       size="sm"
-                      variant="quiet"
+                      variant="ghost"
                       onPress={colarAreaTransferencia}
                       className="text-xs text-zinc-600 dark:text-zinc-300 bg-zinc-200/60 dark:bg-zinc-700/60"
                     >

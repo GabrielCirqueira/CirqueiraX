@@ -5,6 +5,7 @@ import {
   obterFilaErros,
   obterPastasSync,
   obterResumoDashboard,
+  obterStatusSync,
   reclassificarMediaItem,
   retentarErroIndividual,
   retentarTodosErros,
@@ -16,6 +17,7 @@ export const DASHBOARD_QUERY_KEYS = {
   categorias: ['dashboard', 'categorias'] as const,
   erros: (pagina: number, limite: number) => ['dashboard', 'erros', pagina, limite] as const,
   syncPastas: ['sync', 'pastas'] as const,
+  syncStatus: ['sync', 'status'] as const,
 }
 
 export function useResumoDashboard() {
@@ -46,6 +48,14 @@ export function usePastasSync() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.syncPastas,
     queryFn: obterPastasSync,
+    refetchInterval: 10_000,
+  })
+}
+
+export function useStatusSync() {
+  return useQuery({
+    queryKey: DASHBOARD_QUERY_KEYS.syncStatus,
+    queryFn: obterStatusSync,
     refetchInterval: 10_000,
   })
 }

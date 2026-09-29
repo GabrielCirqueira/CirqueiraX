@@ -14,7 +14,7 @@ import {
   WifiOff,
 } from 'lucide-react'
 import { memo, useState } from 'react'
-import { usePastasSync, useSincronizarPasta } from '../hooks/useDashboard'
+import { useSincronizarPasta, useStatusSync } from '../hooks/useDashboard'
 import type { PastaSync } from '../types'
 
 export interface PainelSyncProps {
@@ -73,12 +73,14 @@ export const PainelSync = memo(function PainelSync({
   carregando: carregandoProp,
   className,
 }: PainelSyncProps) {
-  const { data: pastasQuery, isLoading: carregandoQuery, refetch, isFetching } = usePastasSync()
+  const { data: statusQuery, isLoading: carregandoQuery, refetch, isFetching } = useStatusSync()
   const { mutate: dispararSync, isPending: sincronizando } = useSincronizarPasta()
   const [pastaEmAcao, setPastaEmAcao] = useState<string | null>(null)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
 
-  const pastas = pastasList ?? pastasQuery ?? []
+  const isOnline = statusQuery?.online ?? false
+  const versao = statusQuery?.versao
+  const pastas = pastasList ?? statusQuery?.pastas ?? []
   const carregando = carregandoProp ?? carregandoQuery
 
   function handleSincronizar(pastaId: string) {
@@ -141,11 +143,22 @@ export const PainelSync = memo(function PainelSync({
           <Chip
             size="sm"
             variant="soft"
-            className="h-6 text-[11px] bg-cyan-500/10 text-cyan-300 border border-cyan-500/20"
+            className={cn(
+              'h-6 text-[11px] border',
+              isOnline
+                ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20'
+                : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+            )}
           >
             <HStack className="gap-1.5">
-              <Wifi className="w-3 h-3 text-cyan-400" />
-              <span>Syncthing Ativo</span>
+              {isOnline ? (
+                <Wifi className="w-3 h-3 text-cyan-400" />
+              ) : (
+                <WifiOff className="w-3 h-3 text-zinc-400" />
+              )}
+              <span>
+                {isOnline ? `Syncthing Ativo ${versao ? `(v${versao})` : ''}` : 'Syncthing Inativo'}
+              </span>
             </HStack>
           </Chip>
 

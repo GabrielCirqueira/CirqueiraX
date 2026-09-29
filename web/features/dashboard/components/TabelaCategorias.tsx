@@ -96,12 +96,13 @@ export const TabelaCategorias = memo(function TabelaCategorias({
         </Card>
       ) : (
         <Grid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categoriasFiltradas.map((cat) => {
+          {categoriasFiltradas.map((cat, idx) => {
             const ehSemCategoria = !cat.uuid || cat.uuid === 'sem_categoria'
+            const itemKey = cat.uuid ? `cat-${cat.uuid}` : `cat-item-${cat.nome || idx}`
 
             return (
               <Card
-                key={cat.uuid || 'sem-categoria'}
+                key={itemKey}
                 className="border border-white/10 bg-linear-to-br from-white/5 to-white/2 backdrop-blur-xl hover:border-purple-500/30 transition-all duration-300 shadow-md group"
               >
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
