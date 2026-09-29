@@ -1,4 +1,4 @@
-import { toast } from '@heroui/react'
+import { addToast } from '@/shared/components/ui/toaster'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   apagarLote,
@@ -59,11 +59,11 @@ export function useCriarDownload() {
   return useMutation({
     mutationFn: (input: PedidoDownloadInput) => criarPedidoDownload(input),
     onSuccess: (res) => {
-      toast.success(`Download de ${res.plataformaDescricao} iniciado!`)
+      addToast({ title: `Download de ${res.plataformaDescricao} iniciado!`, color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao iniciar download. Verifique a URL informada.')
+      addToast({ title: 'Falha ao iniciar download. Verifique a URL informada.', color: 'danger' })
     },
   })
 }
@@ -74,13 +74,14 @@ export function useCategorizarLote() {
   return useMutation({
     mutationFn: (input: CategorizarLoteInput) => categorizarLote(input),
     onSuccess: (itens) => {
-      toast.success(
-        `${itens.length} ${itens.length === 1 ? 'item categorizado' : 'itens categorizados'} com sucesso!`
-      )
+      addToast({
+        title: `${itens.length} ${itens.length === 1 ? 'item categorizado' : 'itens categorizados'} com sucesso!`,
+        color: 'success',
+      })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao categorizar itens em lote.')
+      addToast({ title: 'Falha ao categorizar itens em lote.', color: 'danger' })
     },
   })
 }
@@ -92,11 +93,11 @@ export function useClassificarIndividual() {
     mutationFn: ({ uuid, categoriaId }: { uuid: string; categoriaId: string }) =>
       classificarCategoriaIndividual(uuid, categoriaId),
     onSuccess: () => {
-      toast.success('Categoria vinculada com sucesso!')
+      addToast({ title: 'Categoria vinculada com sucesso!', color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao categorizar o vídeo.')
+      addToast({ title: 'Falha ao categorizar o vídeo.', color: 'danger' })
     },
   })
 }
@@ -107,11 +108,11 @@ export function useRebaixarLote() {
   return useMutation({
     mutationFn: (input: RebaixarLoteInput) => rebaixarLote(input),
     onSuccess: (itens) => {
-      toast.success(`${itens.length} download(s) reenfileirado(s)!`)
+      addToast({ title: `${itens.length} download(s) reenfileirado(s)!`, color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao rebaixar itens selecionados.')
+      addToast({ title: 'Falha ao rebaixar itens selecionados.', color: 'danger' })
     },
   })
 }
@@ -122,13 +123,14 @@ export function useApagarLote() {
   return useMutation({
     mutationFn: (input: ApagarLoteInput) => apagarLote(input),
     onSuccess: (res) => {
-      toast.success(
-        `${res.total} ${res.total === 1 ? 'arquivo apagado' : 'arquivos apagados'} com sucesso!`
-      )
+      addToast({
+        title: `${res.total} ${res.total === 1 ? 'arquivo apagado' : 'arquivos apagados'} com sucesso!`,
+        color: 'success',
+      })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao apagar arquivos.')
+      addToast({ title: 'Falha ao apagar arquivos.', color: 'danger' })
     },
   })
 }
@@ -140,11 +142,11 @@ export function useAtualizarMetadata() {
     mutationFn: ({ uuid, input }: { uuid: string; input: AtualizarMetadataInput }) =>
       atualizarMetadata(uuid, input),
     onSuccess: () => {
-      toast.success('Metadados atualizados!')
+      addToast({ title: 'Metadados atualizados!', color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao atualizar metadados.')
+      addToast({ title: 'Falha ao atualizar metadados.', color: 'danger' })
     },
   })
 }
@@ -155,11 +157,11 @@ export function useRetentarMediaItem() {
   return useMutation({
     mutationFn: (uuid: string) => retentarMediaItem(uuid),
     onSuccess: () => {
-      toast.success('Processamento reenfileirado!')
+      addToast({ title: 'Processamento reenfileirado!', color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao retentar item.')
+      addToast({ title: 'Falha ao retentar item.', color: 'danger' })
     },
   })
 }
@@ -170,11 +172,11 @@ export function useRetentarTodos() {
   return useMutation({
     mutationFn: () => retentarTodos(),
     onSuccess: (itens) => {
-      toast.success(`${itens.length} item(ns) com erro reenfileirados!`)
+      addToast({ title: `${itens.length} item(ns) com erro reenfileirados!`, color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao reenfileirar itens com erro.')
+      addToast({ title: 'Falha ao reenfileirar itens com erro.', color: 'danger' })
     },
   })
 }

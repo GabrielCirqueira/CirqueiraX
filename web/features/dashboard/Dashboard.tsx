@@ -1,5 +1,4 @@
-import { Container, HStack, Text, VStack } from '@/shared/ui/layout'
-import { Button, Chip, Tab, TabList, Tabs } from '@heroui/react'
+import { Badge, Button, Container, HStack, Tabs, Text, VStack } from '@chakra-ui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertTriangle,
@@ -55,190 +54,213 @@ const DashboardView = memo(function DashboardView() {
   }
 
   return (
-    <Container size="xl" className="py-8 space-y-8">
-      {/* ════════════════════════════════════════════
-          CABEÇALHO PRINCIPAL DO DASHBOARD
-      ════════════════════════════════════════════ */}
-      <VStack className="gap-4">
-        <HStack className="justify-between items-start flex-wrap gap-4">
-          <VStack className="gap-1.5">
-            <HStack className="gap-2 items-center flex-wrap">
-              <Chip
-                variant="soft"
-                size="sm"
-                className="border border-brand-500/30 bg-brand-500/10 text-brand-600 font-semibold"
-              >
-                <Sparkles className="w-3.5 h-3.5 mr-1" />
-                Painel v1.0 • Master
-              </Chip>
-              {totalErros > 0 ? (
-                <Chip
-                  variant="soft"
-                  size="sm"
-                  className="bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold cursor-pointer"
-                  onClick={() => setAbaAtiva('erros')}
-                >
-                  <AlertTriangle className="w-3.5 h-3.5 mr-1" />
-                  {totalErros} {totalErros === 1 ? 'erro pendente' : 'erros pendentes'}
-                </Chip>
-              ) : (
-                <Chip
-                  variant="soft"
-                  size="sm"
-                  className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                  Pipeline 100% Operacional
-                </Chip>
-              )}
-              {pastasSincronizando > 0 && (
-                <Chip
-                  variant="soft"
-                  size="sm"
-                  className="bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold animate-pulse"
-                >
-                  <RefreshCw className="w-3.5 h-3.5 mr-1 animate-spin" />
-                  {pastasSincronizando} pasta(s) sincronizando
-                </Chip>
-              )}
-            </HStack>
-
-            <Text as="h1" className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-              Dashboard de Mídias & Pipeline
-            </Text>
-            <Text className="text-sm text-white/60 max-w-2xl">
-              Visão consolidada de ingestão, distribuição local, categorização, agentes e
-              sincronização Syncthing em tempo real.
-            </Text>
-          </VStack>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            isDisabled={atualizandoManual}
-            onPress={handleAtualizarTudo}
-            className="border border-white/10 bg-white/5 hover:bg-white/10 text-white font-medium h-9"
-          >
-            <RefreshCw
-              className={`w-4 h-4 mr-1.5 ${atualizandoManual ? 'animate-spin text-brand-400' : ''}`}
-            />
-            <span>{atualizandoManual ? 'Atualizando...' : 'Atualizar Dados'}</span>
-          </Button>
-        </HStack>
-      </VStack>
-
-      {/* ════════════════════════════════════════════
-          CARDS DE RESUMO (KPIs)
-      ════════════════════════════════════════════ */}
-      <CardsResumo resumo={resumo} carregando={carregandoResumo} />
-
-      {/* ════════════════════════════════════════════
-          ABAS DE NAVEGAÇÃO DO PAINEL
-      ════════════════════════════════════════════ */}
-      <VStack className="gap-6">
-        <Tabs
-          selectedKey={abaAtiva}
-          onSelectionChange={(chave) => setAbaAtiva(String(chave))}
-          className="w-full"
-        >
-          <TabList className="gap-1.5 bg-zinc-900/90 border border-white/10 p-1.5 rounded-2xl backdrop-blur-xl flex-wrap">
-            <Tab
-              id="visao-geral"
-              className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all"
-            >
-              <HStack className="gap-2 items-center">
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Visão Geral & Gráficos</span>
-              </HStack>
-            </Tab>
-
-            <Tab
-              id="categorias"
-              className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all"
-            >
-              <HStack className="gap-2 items-center">
-                <FolderTree className="w-4 h-4" />
-                <span>Categorias ({categorias.length})</span>
-              </HStack>
-            </Tab>
-
-            <Tab
-              id="sincronizacao"
-              className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all"
-            >
-              <HStack className="gap-2 items-center">
-                <RefreshCw className="w-4 h-4" />
-                <span>Sincronização ({pastasSync.length})</span>
-              </HStack>
-            </Tab>
-
-            <Tab
-              id="erros"
-              className="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all"
-            >
-              <HStack className="gap-2 items-center">
-                <AlertTriangle className="w-4 h-4" />
-                <span>Fila de Erros</span>
-                {totalErros > 0 && (
-                  <Chip
+    <Container maxW="7xl" py={8} px={6}>
+      <VStack w="full" gap={8} alignItems="stretch">
+        <VStack w="full" gap={4} alignItems="stretch">
+          <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
+            <VStack gap={1.5} alignItems="flex-start">
+              <HStack gap={2} align="center" flexWrap="wrap">
+                <Badge variant="subtle" size="sm" colorPalette="brand" fontWeight="semibold">
+                  <Sparkles size={14} style={{ marginRight: '4px' }} />
+                  Painel v1.0 • Master
+                </Badge>
+                {totalErros > 0 ? (
+                  <Badge
+                    variant="subtle"
                     size="sm"
-                    variant="soft"
-                    className="h-4 px-1.5 text-[10px] bg-rose-500/20 text-rose-300 font-bold"
+                    colorPalette="red"
+                    fontWeight="semibold"
+                    cursor="pointer"
+                    onClick={() => setAbaAtiva('erros')}
                   >
-                    {totalErros}
-                  </Chip>
+                    <AlertTriangle size={14} style={{ marginRight: '4px' }} />
+                    {totalErros} {totalErros === 1 ? 'erro pendente' : 'erros pendentes'}
+                  </Badge>
+                ) : (
+                  <Badge variant="subtle" size="sm" colorPalette="green" fontWeight="semibold">
+                    <CheckCircle2 size={14} style={{ marginRight: '4px' }} />
+                    Pipeline 100% Operacional
+                  </Badge>
+                )}
+                {pastasSincronizando > 0 && (
+                  <Badge variant="subtle" size="sm" colorPalette="blue" fontWeight="semibold">
+                    <RefreshCw
+                      size={14}
+                      style={{ animation: 'spin 1s linear infinite', marginRight: '4px' }}
+                    />
+                    {pastasSincronizando} pasta(s) sincronizando
+                  </Badge>
                 )}
               </HStack>
-            </Tab>
-          </TabList>
-        </Tabs>
 
-        {/* ── Conteúdo da Aba 1: Visão Geral & Gráficos ── */}
-        {abaAtiva === 'visao-geral' && (
-          <VStack className="gap-8 w-full">
-            <GraficosDashboard
-              resumo={resumo}
-              categorias={categorias}
-              carregando={carregandoResumo || carregandoCategorias}
-            />
+              <Text
+                as="h1"
+                fontSize={{ base: '3xl', sm: '4xl' }}
+                fontWeight="black"
+                color="fg"
+                letterSpacing="tight"
+              >
+                Dashboard de Mídias & Pipeline
+              </Text>
+              <Text fontSize="sm" color="fg.subtle" maxW="2xl">
+                Visão consolidada de ingestão, distribuição local, categorização, agentes e
+                sincronização Syncthing em tempo real.
+              </Text>
+            </VStack>
 
-            <HStack className="justify-between items-center pt-2">
-              <VStack className="gap-0.5">
-                <Text as="h2" className="text-xl font-bold text-white">
-                  Distribuição por Pastas & Categorias
-                </Text>
-                <Text className="text-xs text-white/50">
-                  Gerencie mapeamentos de diretórios locais e sincronização
-                </Text>
-              </VStack>
-            </HStack>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={atualizandoManual}
+              onClick={handleAtualizarTudo}
+              fontWeight="medium"
+              h={9}
+              borderRadius="xl"
+            >
+              <RefreshCw
+                size={16}
+                style={{
+                  animation: atualizandoManual ? 'spin 1s linear infinite' : 'none',
+                  marginRight: '6px',
+                }}
+              />
+              <span>{atualizandoManual ? 'Atualizando...' : 'Atualizar Dados'}</span>
+            </Button>
+          </HStack>
+        </VStack>
 
-            <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
+        {/* ════════════════════════════════════════════
+            CARDS DE RESUMO (KPIs)
+        ════════════════════════════════════════════ */}
+        <CardsResumo resumo={resumo} carregando={carregandoResumo} />
 
-            <PainelSync />
-          </VStack>
-        )}
+        {/* ════════════════════════════════════════════
+            ABAS DE NAVEGAÇÃO DO PAINEL
+        ════════════════════════════════════════════ */}
+        <VStack w="full" gap={6} alignItems="stretch">
+          <Tabs.Root value={abaAtiva} onValueChange={(e) => setAbaAtiva(e.value)} w="full">
+            <Tabs.List
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              p={1.5}
+              borderRadius="2xl"
+              flexWrap="wrap"
+              gap={1.5}
+            >
+              <Tabs.Trigger
+                value="visao-geral"
+                px={4}
+                py={2}
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="semibold"
+                borderRadius="xl"
+              >
+                <HStack gap={2} align="center">
+                  <LayoutDashboard size={16} />
+                  <span>Visão Geral & Gráficos</span>
+                </HStack>
+              </Tabs.Trigger>
 
-        {/* ── Conteúdo da Aba 2: Categorias ── */}
-        {abaAtiva === 'categorias' && (
-          <VStack className="gap-6 w-full">
-            <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
-          </VStack>
-        )}
+              <Tabs.Trigger
+                value="categorias"
+                px={4}
+                py={2}
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="semibold"
+                borderRadius="xl"
+              >
+                <HStack gap={2} align="center">
+                  <FolderTree size={16} />
+                  <span>Categorias ({categorias.length})</span>
+                </HStack>
+              </Tabs.Trigger>
 
-        {/* ── Conteúdo da Aba 3: Sincronização ── */}
-        {abaAtiva === 'sincronizacao' && (
-          <VStack className="gap-6 w-full">
-            <PainelSync />
-          </VStack>
-        )}
+              <Tabs.Trigger
+                value="sincronizacao"
+                px={4}
+                py={2}
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="semibold"
+                borderRadius="xl"
+              >
+                <HStack gap={2} align="center">
+                  <RefreshCw size={16} />
+                  <span>Sincronização ({pastasSync.length})</span>
+                </HStack>
+              </Tabs.Trigger>
 
-        {/* ── Conteúdo da Aba 4: Fila de Erros ── */}
-        {abaAtiva === 'erros' && (
-          <VStack className="gap-6 w-full">
-            <FilaErros />
-          </VStack>
-        )}
+              <Tabs.Trigger
+                value="erros"
+                px={4}
+                py={2}
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="semibold"
+                borderRadius="xl"
+              >
+                <HStack gap={2} align="center">
+                  <AlertTriangle size={16} />
+                  <span>Fila de Erros</span>
+                  {totalErros > 0 && (
+                    <Badge
+                      size="sm"
+                      variant="subtle"
+                      colorPalette="red"
+                      px={1.5}
+                      fontSize="10px"
+                      fontWeight="bold"
+                    >
+                      {totalErros}
+                    </Badge>
+                  )}
+                </HStack>
+              </Tabs.Trigger>
+            </Tabs.List>
+          </Tabs.Root>
+
+          {abaAtiva === 'visao-geral' && (
+            <VStack gap={8} w="full" alignItems="stretch">
+              <GraficosDashboard
+                resumo={resumo}
+                categorias={categorias}
+                carregando={carregandoResumo || carregandoCategorias}
+              />
+
+              <HStack justify="space-between" align="center" pt={2}>
+                <VStack gap={0.5} alignItems="flex-start">
+                  <Text as="h2" fontSize="xl" fontWeight="bold" color="fg">
+                    Distribuição por Pastas & Categorias
+                  </Text>
+                  <Text fontSize="xs" color="fg.subtle">
+                    Gerencie mapeamentos de diretórios locais e sincronização
+                  </Text>
+                </VStack>
+              </HStack>
+
+              <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
+
+              <PainelSync />
+            </VStack>
+          )}
+
+          {abaAtiva === 'categorias' && (
+            <VStack gap={6} w="full" alignItems="stretch">
+              <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
+            </VStack>
+          )}
+
+          {abaAtiva === 'sincronizacao' && (
+            <VStack gap={6} w="full" alignItems="stretch">
+              <PainelSync />
+            </VStack>
+          )}
+
+          {abaAtiva === 'erros' && (
+            <VStack gap={6} w="full" alignItems="stretch">
+              <FilaErros />
+            </VStack>
+          )}
+        </VStack>
       </VStack>
     </Container>
   )

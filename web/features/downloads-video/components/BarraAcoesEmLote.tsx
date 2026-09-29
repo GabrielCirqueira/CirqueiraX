@@ -1,5 +1,4 @@
-import { Box, Flex, HStack, Text } from '@/shared/ui/layout'
-import { Button, Chip } from '@heroui/react'
+import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
 import { DownloadCloud, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
 import { memo } from 'react'
 
@@ -26,39 +25,53 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
   }
 
   return (
-    <Box className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-2xl animate-in fade-in slide-in-from-bottom-5 duration-200">
-      <Flex className="flex-col sm:flex-row items-center justify-between gap-3 p-3 sm:px-5 sm:py-3.5 rounded-2xl border border-zinc-200/80 dark:border-zinc-700/80 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg shadow-2xl">
-        <HStack className="gap-2.5">
-          <Chip size="sm" className="bg-brand-500 text-white font-bold">
+    <Box position="fixed" bottom={6} left="50%" transform="translateX(-50%)" zIndex={50} w="92%" maxW="2xl">
+      <Flex
+        direction={{ base: 'column', sm: 'row' }}
+        align="center"
+        justify="space-between"
+        gap={3}
+        p={3}
+        px={{ sm: 5 }}
+        py={{ sm: 3.5 }}
+        borderRadius="2xl"
+        borderWidth="1px"
+        borderColor="border.subtle"
+        bg="bg.panel"
+        backdropFilter="blur(16px)"
+        shadow="2xl"
+      >
+        <HStack gap={2.5}>
+          <Badge colorPalette="brand" px={2} py={0.5} borderRadius="md" fontWeight="bold">
             {totalSelecionados}
-          </Chip>
-          <Text as="span" className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          </Badge>
+          <Text as="span" fontSize="sm" fontWeight="medium" color="fg">
             {totalSelecionados === 1 ? 'item selecionado' : 'itens selecionados'}
           </Text>
           <Button
-            size="sm"
+            size="xs"
             variant="ghost"
-            isIconOnly
-            isDisabled={processando}
-            onPress={onLimparSelecao}
+            disabled={processando}
+            onClick={onLimparSelecao}
             aria-label="Desmarcar todos"
+            p={1}
           >
-            <X className="size-4 text-zinc-400" />
+            <X size={16} />
           </Button>
         </HStack>
 
-        <HStack className="gap-2 w-full sm:w-auto justify-end">
+        <HStack gap={2} w={{ base: 'full', sm: 'auto' }} justify="flex-end">
           <Button
             size="sm"
             variant="ghost"
-            isDisabled={processando}
-            onPress={onCategorizarLote}
-            className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+            disabled={processando}
+            onClick={onCategorizarLote}
+            borderRadius="xl"
           >
             {processando ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
             ) : (
-              <FolderPlus className="size-3.5 text-brand-500" />
+              <FolderPlus size={14} color="#8b5cf6" style={{ marginRight: '6px' }} />
             )}
             <span>Categorizar</span>
           </Button>
@@ -66,29 +79,30 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
           <Button
             size="sm"
             variant="ghost"
-            isDisabled={processando}
-            onPress={onRebaixarLote}
-            className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+            disabled={processando}
+            onClick={onRebaixarLote}
+            borderRadius="xl"
           >
             {processando ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
             ) : (
-              <DownloadCloud className="size-3.5 text-blue-500" />
+              <DownloadCloud size={14} color="#3b82f6" style={{ marginRight: '6px' }} />
             )}
             <span>Rebaixar</span>
           </Button>
 
           <Button
             size="sm"
-            variant="ghost"
-            isDisabled={processando}
-            onPress={onApagarLote}
-            className="bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900"
+            variant="subtle"
+            colorPalette="red"
+            disabled={processando}
+            onClick={onApagarLote}
+            borderRadius="xl"
           >
             {processando ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
             ) : (
-              <Trash2 className="size-3.5" />
+              <Trash2 size={14} style={{ marginRight: '6px' }} />
             )}
             <span>Apagar</span>
           </Button>
@@ -97,3 +111,4 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
     </Box>
   )
 })
+

@@ -1,6 +1,4 @@
-import { cn } from '@/shared/lib/cn'
-import { Box, Flex, HStack, VStack } from '@/shared/ui/layout'
-import { Button, Card, CardContent, Chip, Input } from '@heroui/react'
+import { Badge, Box, Button, Card, Flex, HStack, Input, VStack } from '@chakra-ui/react'
 import { Clipboard, Download, Globe, Instagram, Loader2, Video, X, Youtube } from 'lucide-react'
 import { type FormEvent, memo, useState } from 'react'
 import { useCriarDownload } from '../hooks/useDownloadsVideo'
@@ -12,7 +10,7 @@ export interface CampoNovoLinkProps {
 function identificarPlataforma(url: string): {
   nome: string
   icone: typeof Youtube
-  cor: string
+  colorPalette: string
 } | null {
   if (!url || !url.trim()) {
     return null
@@ -21,14 +19,14 @@ function identificarPlataforma(url: string): {
   const urlLimpa = url.toLowerCase()
 
   if (urlLimpa.includes('youtube.com') || urlLimpa.includes('youtu.be')) {
-    return { nome: 'YouTube', icone: Youtube, cor: 'text-red-500 bg-red-500/10 border-red-500/20' }
+    return { nome: 'YouTube', icone: Youtube, colorPalette: 'red' }
   }
 
   if (urlLimpa.includes('tiktok.com')) {
     return {
       nome: 'TikTok',
       icone: Video,
-      cor: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20',
+      colorPalette: 'cyan',
     }
   }
 
@@ -36,7 +34,7 @@ function identificarPlataforma(url: string): {
     return {
       nome: 'X / Twitter',
       icone: Globe,
-      cor: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
+      colorPalette: 'sky',
     }
   }
 
@@ -44,11 +42,11 @@ function identificarPlataforma(url: string): {
     return {
       nome: 'Instagram',
       icone: Instagram,
-      cor: 'text-pink-500 bg-pink-500/10 border-pink-500/20',
+      colorPalette: 'pink',
     }
   }
 
-  return { nome: 'Vídeo Web', icone: Globe, cor: 'text-zinc-500 bg-zinc-500/10 border-zinc-500/20' }
+  return { nome: 'Vídeo Web', icone: Globe, colorPalette: 'gray' }
 }
 
 export const CampoNovoLink = memo(function CampoNovoLink({
@@ -88,12 +86,12 @@ export const CampoNovoLink = memo(function CampoNovoLink({
   }
 
   return (
-    <Card className="w-full rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-      <CardContent className="p-4 sm:p-5">
+    <Card.Root w="full" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="sm">
+      <Card.Body p={{ base: 4, sm: 5 }}>
         <form onSubmit={handleSubmit}>
-          <VStack className="gap-3">
-            <Flex className="flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-              <Box className="relative flex-1 flex items-center">
+          <VStack gap={3} alignItems="stretch">
+            <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'center' }} gap={2.5}>
+              <Box position="relative" flex={1} display="flex" alignItems="center">
                 <Input
                   type="url"
                   value={url}
@@ -101,28 +99,36 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                   placeholder="Cole aqui o link do YouTube, TikTok, Twitter ou Instagram..."
                   disabled={isPending}
                   required
-                  className="w-full h-12 pr-24"
+                  w="full"
+                  h={12}
+                  pr={24}
+                  bg="bg.muted"
+                  borderColor="border.subtle"
+                  borderRadius="xl"
                 />
 
-                <HStack className="absolute right-2.5 gap-1">
+                <HStack position="absolute" right={2.5} gap={1}>
                   {url ? (
                     <Button
-                      size="sm"
+                      size="xs"
                       variant="ghost"
-                      isIconOnly
-                      onPress={() => setUrl('')}
+                      onClick={() => setUrl('')}
                       aria-label="Limpar campo"
+                      p={1}
                     >
-                      <X className="size-4 text-zinc-400" />
+                      <X size={16} />
                     </Button>
                   ) : (
                     <Button
-                      size="sm"
+                      size="xs"
                       variant="ghost"
-                      onPress={colarAreaTransferencia}
-                      className="text-xs text-zinc-600 dark:text-zinc-300 bg-zinc-200/60 dark:bg-zinc-700/60"
+                      onClick={colarAreaTransferencia}
+                      fontSize="xs"
+                      borderRadius="lg"
+                      px={2}
+                      py={1}
                     >
-                      <Clipboard className="size-3.5" />
+                      <Clipboard size={14} style={{ marginRight: '4px' }} />
                       <span>Colar</span>
                     </Button>
                   )}
@@ -131,17 +137,23 @@ export const CampoNovoLink = memo(function CampoNovoLink({
 
               <Button
                 type="submit"
-                isDisabled={!url.trim() || isPending}
-                className="h-12 px-6 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm shrink-0"
+                colorPalette="brand"
+                disabled={!url.trim() || isPending}
+                h={12}
+                px={6}
+                fontWeight="semibold"
+                fontSize="sm"
+                flexShrink={0}
+                borderRadius="xl"
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="size-4 animate-spin" />
+                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
                     <span>Iniciando...</span>
                   </>
                 ) : (
                   <>
-                    <Download className="size-4" />
+                    <Download size={16} style={{ marginRight: '6px' }} />
                     <span>Baixar Vídeo</span>
                   </>
                 )}
@@ -149,20 +161,27 @@ export const CampoNovoLink = memo(function CampoNovoLink({
             </Flex>
 
             {plataforma && (
-              <HStack className="gap-2">
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className={cn('gap-1 text-xs font-medium border', plataforma.cor)}
+              <HStack gap={2}>
+                <Badge
+                  variant="subtle"
+                  colorPalette={plataforma.colorPalette}
+                  fontSize="xs"
+                  fontWeight="medium"
+                  px={2.5}
+                  py={1}
+                  borderRadius="full"
                 >
-                  <IconePlataforma className="size-3.5" />
-                  <span>{plataforma.nome} detectado</span>
-                </Chip>
+                  <HStack gap={1} alignItems="center">
+                    <IconePlataforma size={14} />
+                    <span>{plataforma.nome} detectado</span>
+                  </HStack>
+                </Badge>
               </HStack>
             )}
           </VStack>
         </form>
-      </CardContent>
-    </Card>
+      </Card.Body>
+    </Card.Root>
   )
 })
+

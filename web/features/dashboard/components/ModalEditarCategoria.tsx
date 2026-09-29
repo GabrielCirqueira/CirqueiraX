@@ -1,20 +1,14 @@
-import { Box, Flex, HStack, Text, VStack } from '@/shared/ui/layout'
 import {
+  Box,
   Button,
-  FieldError,
+  Dialog,
+  Field,
+  HStack,
+  IconButton,
   Input,
-  Label,
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalContainer,
-  ModalDialog,
-  ModalFooter,
-  ModalHeader,
-  ModalHeading,
-  TextField,
-  useMediaQuery,
-} from '@heroui/react'
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { FolderCheck, Loader2, Save, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useAtualizarMapeamentoCategoria } from '../hooks/useDashboard'
@@ -33,7 +27,6 @@ export function ModalEditarCategoria({
   onFechar,
   onSucesso,
 }: ModalEditarCategoriaProps) {
-  const isMobile = useMediaQuery('(max-width: 767px)')
   const { mutate: atualizarCategoria, isPending } = useAtualizarMapeamentoCategoria()
 
   const [nome, setNome] = useState('')
@@ -87,115 +80,122 @@ export function ModalEditarCategoria({
   if (!categoria) return null
 
   return (
-    <Modal isOpen={aberto} onOpenChange={(open) => !open && onFechar()}>
-      <ModalBackdrop isDismissable>
-        <ModalContainer
-          placement={isMobile ? 'bottom' : 'center'}
-          className={isMobile ? 'rounded-b-none rounded-t-2xl m-0 max-w-full' : ''}
-        >
-          <ModalDialog className="border border-white/10 bg-zinc-950/90 backdrop-blur-2xl text-white shadow-2xl max-w-md w-full">
-            <ModalHeader className="flex flex-row items-center justify-between pb-3 border-b border-white/10">
-              <HStack className="gap-2.5">
-                <Box className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                  <FolderCheck className="w-5 h-5" />
-                </Box>
-                <VStack className="gap-0.5">
-                  <ModalHeading className="text-base font-semibold text-white">
-                    Editar Categoria
-                  </ModalHeading>
-                  <Text className="text-xs text-white/50">
-                    Ajuste o nome e a pasta local de destino
-                  </Text>
-                </VStack>
-              </HStack>
-              <Button
-                size="sm"
-                variant="ghost"
-                isIconOnly
-                onPress={onFechar}
-                className="text-white/60 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </ModalHeader>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()}>
+      <Dialog.Backdrop />
+      <Dialog.Positioner>
+        <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={0} maxW="md" w="full">
+          <Dialog.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" p={4} borderBottomWidth="1px" borderColor="border.subtle">
+            <HStack gap={2.5}>
+              <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+                <FolderCheck size={20} />
+              </Box>
+              <VStack gap={0.5} alignItems="flex-start">
+                <Dialog.Title fontSize="base" fontWeight="semibold" color="fg">
+                  Editar Categoria
+                </Dialog.Title>
+                <Text fontSize="xs" color="fg.subtle">
+                  Ajuste o nome e a pasta local de destino
+                </Text>
+              </VStack>
+            </HStack>
+            <IconButton
+              size="sm"
+              variant="ghost"
+              onClick={onFechar}
+              aria-label="Fechar modal"
+            >
+              <X size={16} />
+            </IconButton>
+          </Dialog.Header>
 
-            <form onSubmit={handleSubmit}>
-              <ModalBody className="py-4 gap-4">
+          <form onSubmit={handleSubmit}>
+            <Dialog.Body p={4}>
+              <VStack gap={4} alignItems="stretch">
                 {erro && (
-                  <Box className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+                  <Box p={3} borderRadius="xl" bg="red.500/10" borderWidth="1px" borderColor="red.500/20" color="red.500" fontSize="xs">
                     {erro}
                   </Box>
                 )}
 
-                <TextField isRequired className="w-full">
-                  <Label className="text-xs font-medium text-white/80">Nome da Categoria</Label>
+                <Field.Root invalid={Boolean(erro && !nome.trim())} w="full">
+                  <Field.Label fontSize="xs" fontWeight="medium" color="fg.subtle">Nome da Categoria</Field.Label>
                   <Input
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
                     placeholder="Ex: Vídeos Curtos, Memes..."
-                    className="mt-1 bg-white/5 border-white/10 text-white focus:border-purple-500"
+                    mt={1}
+                    bg="bg.muted"
+                    borderColor="border.subtle"
+                    borderRadius="xl"
                   />
-                  <FieldError className="text-xs text-rose-400 mt-1" />
-                </TextField>
+                </Field.Root>
 
-                <TextField isRequired className="w-full">
-                  <Label className="text-xs font-medium text-white/80">
+                <Field.Root invalid={Boolean(erro && !pastaLocal.trim())} w="full">
+                  <Field.Label fontSize="xs" fontWeight="medium" color="fg.subtle">
                     Pasta Local (subdiretório no storage)
-                  </Label>
+                  </Field.Label>
                   <Input
                     value={pastaLocal}
                     onChange={(e) => setPastaLocal(e.target.value)}
                     placeholder="Ex: videos, prints/empresa..."
-                    className="mt-1 bg-white/5 border-white/10 text-white focus:border-purple-500 font-mono text-xs"
+                    mt={1}
+                    bg="bg.muted"
+                    borderColor="border.subtle"
+                    fontFamily="mono"
+                    fontSize="xs"
+                    borderRadius="xl"
                   />
-                  <Text className="text-[11px] text-white/40 mt-1">
+                  <Text fontSize="11px" color="fg.subtle" mt={1}>
                     Os arquivos associados a esta categoria serão movidos para esta pasta.
                   </Text>
-                </TextField>
+                </Field.Root>
 
                 {categoria.googlePhotosAlbumId && (
-                  <VStack className="p-3 rounded-xl bg-white/5 border border-white/10 gap-1">
-                    <Text className="text-xs font-semibold text-white/70">
+                  <VStack p={3} borderRadius="xl" bg="bg.muted" borderWidth="1px" borderColor="border.subtle" gap={1} alignItems="flex-start">
+                    <Text fontSize="xs" fontWeight="semibold" color="fg">
                       Integração Google Fotos
                     </Text>
-                    <Text className="text-[11px] text-white/40 font-mono break-all">
+                    <Text fontSize="11px" color="fg.subtle" fontFamily="mono" wordBreak="break-all">
                       ID do Álbum: {categoria.googlePhotosAlbumId}
                     </Text>
                   </VStack>
                 )}
-              </ModalBody>
+              </VStack>
+            </Dialog.Body>
 
-              <ModalFooter className="flex justify-end gap-2 pt-3 border-t border-white/10">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onPress={onFechar}
-                  className="bg-white/5 text-white/70 hover:bg-white/10"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  isDisabled={isPending}
-                  className="bg-purple-600 hover:bg-purple-500 text-white font-medium"
-                >
-                  {isPending ? (
-                    <HStack className="gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Salvando...</span>
-                    </HStack>
-                  ) : (
-                    <HStack className="gap-2">
-                      <Save className="w-4 h-4" />
-                      <span>Salvar Mapeamento</span>
-                    </HStack>
-                  )}
-                </Button>
-              </ModalFooter>
-            </form>
-          </ModalDialog>
-        </ModalContainer>
-      </ModalBackdrop>
-    </Modal>
+            <Dialog.Footer display="flex" justifyContent="flex-end" gap={2} p={4} borderTopWidth="1px" borderColor="border.subtle">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onFechar}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                colorPalette="brand"
+                disabled={isPending}
+                fontWeight="medium"
+                borderRadius="xl"
+              >
+                {isPending ? (
+                  <HStack gap={2}>
+                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>Salvando...</span>
+                  </HStack>
+                ) : (
+                  <HStack gap={2}>
+                    <Save size={16} />
+                    <span>Salvar Mapeamento</span>
+                  </HStack>
+                )}
+              </Button>
+            </Dialog.Footer>
+          </form>
+        </Dialog.Content>
+      </Dialog.Positioner>
+    </Dialog.Root>
   )
 }
+
+

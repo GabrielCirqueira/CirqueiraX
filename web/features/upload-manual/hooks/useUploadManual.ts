@@ -1,4 +1,4 @@
-import { toast } from '@heroui/react'
+import { addToast } from '@/shared/components/ui/toaster'
 import { useCallback, useState } from 'react'
 import { enviarArquivoUpload } from '../api'
 import type { ArquivoFilaUpload } from '../types'
@@ -39,7 +39,7 @@ export function useUploadManual() {
       if (novosArquivos.length === 0) return
 
       setFila((prev) => [...prev, ...novosArquivos])
-      toast.success(`${novosArquivos.length} arquivo(s) adicionado(s) à fila.`)
+      addToast({ title: `${novosArquivos.length} arquivo(s) adicionado(s) à fila.`, color: 'success' })
     },
     [categoriaPadraoId]
   )
@@ -105,9 +105,9 @@ export function useUploadManual() {
       )
 
       if (resultado.ehDuplicado) {
-        toast.warning(`"${item.nome}" já existia no banco e foi identificado como duplicado.`)
+        addToast({ title: `"${item.nome}" já existia no banco e foi identificado como duplicado.`, color: 'warning' })
       } else {
-        toast.success(`"${item.nome}" enviado com sucesso!`)
+        addToast({ title: `"${item.nome}" enviado com sucesso!`, color: 'success' })
       }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Falha ao enviar arquivo'
@@ -123,14 +123,14 @@ export function useUploadManual() {
             : f
         )
       )
-      toast.danger(`Erro ao enviar "${item.nome}": ${msg}`)
+      addToast({ title: `Erro ao enviar "${item.nome}": ${msg}`, color: 'danger' })
     }
   }
 
   const enviarTodosPendentes = useCallback(async () => {
     const pendentes = fila.filter((f) => f.status === 'pendente' || f.status === 'erro')
     if (pendentes.length === 0) {
-      toast.warning('Nenhum arquivo pendente para enviar.')
+      addToast({ title: 'Nenhum arquivo pendente para enviar.', color: 'warning' })
       return
     }
 

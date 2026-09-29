@@ -1,7 +1,7 @@
 import { api } from '@/config/api'
+import { addToast } from '@/shared/components/ui/toaster'
 import type { RespostaApi } from '@/shared/types/api'
 import { useAuthStore } from '@/stores'
-import { toast } from '@heroui/react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
@@ -37,14 +37,14 @@ export function useLogin() {
       )
     },
     onSuccess: () => {
-      toast.success('Bem-vindo ao CirqueiraX!')
+      addToast({ title: 'Bem-vindo ao CirqueiraX!', color: 'success' })
       navigate('/dashboard')
     },
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
-        toast.danger('E-mail ou senha incorretos.')
+        addToast({ title: 'E-mail ou senha incorretos.', color: 'danger' })
       } else {
-        toast.danger('Falha ao autenticar. Tente novamente.')
+        addToast({ title: 'Falha ao autenticar. Tente novamente.', color: 'danger' })
       }
     },
   })

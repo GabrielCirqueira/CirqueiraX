@@ -1,6 +1,4 @@
-import { cn } from '@/shared/lib/cn'
-import { Box, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
-import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '@heroui/react'
+import { Box, Card, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { BarChart3, HardDrive, PieChart as PieChartIcon } from 'lucide-react'
 import { memo } from 'react'
 import {
@@ -22,15 +20,14 @@ export interface GraficosDashboardProps {
   resumo?: ResumoDashboard
   categorias?: CategoriaMetrica[]
   carregando?: boolean
-  className?: string
 }
 
 const CORES_ORIGEM = {
-  print_empresa: '#3b82f6', // azul
-  print_pessoal: '#10b981', // esmeralda
-  bot_telegram: '#06b6d4', // ciano
-  download: '#f59e0b', // âmbar
-  manual: '#a855f7', // roxo
+  print_empresa: '#3b82f6',
+  print_pessoal: '#10b981',
+  bot_telegram: '#06b6d4',
+  download: '#f59e0b',
+  manual: '#a855f7',
 }
 
 const NOMES_ORIGEM = {
@@ -62,11 +59,11 @@ function CustomTooltipPie({
     return null
   }
   return (
-    <Box className="rounded-xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-3 shadow-2xl text-xs">
-      <Text className="font-semibold text-white mb-1">{data.name}</Text>
-      <HStack className="gap-2 text-white/70">
+    <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={3} shadow="2xl" fontSize="xs">
+      <Text fontWeight="semibold" color="fg" mb={1}>{data.name}</Text>
+      <HStack gap={2} color="fg.subtle">
         <span>Quantidade:</span>
-        <span className="font-bold text-white">{data.value} itens</span>
+        <span style={{ fontWeight: 'bold', color: 'var(--chakra-colors-fg)' }}>{data.value} itens</span>
       </HStack>
     </Box>
   )
@@ -89,16 +86,16 @@ function CustomTooltipBar({
     return null
   }
   return (
-    <Box className="rounded-xl border border-white/10 bg-zinc-950/90 backdrop-blur-xl p-3 shadow-2xl text-xs">
-      <Text className="font-semibold text-white mb-1">{label}</Text>
-      <VStack className="gap-1 text-white/70">
-        <HStack className="justify-between gap-4">
+    <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={3} shadow="2xl" fontSize="xs">
+      <Text fontWeight="semibold" color="fg" mb={1}>{label}</Text>
+      <VStack gap={1} color="fg.subtle" alignItems="stretch">
+        <HStack justify="space-between" gap={4}>
           <span>Tamanho:</span>
-          <span className="font-bold text-purple-300">{data.payload.tamanhoFormatado}</span>
+          <span style={{ fontWeight: 'bold', color: '#a855f7' }}>{data.payload.tamanhoFormatado}</span>
         </HStack>
-        <HStack className="justify-between gap-4">
+        <HStack justify="space-between" gap={4}>
           <span>Total de itens:</span>
-          <span className="font-bold text-white">{data.payload.totalItens}</span>
+          <span style={{ fontWeight: 'bold', color: 'var(--chakra-colors-fg)' }}>{data.payload.totalItens}</span>
         </HStack>
       </VStack>
     </Box>
@@ -109,22 +106,20 @@ export const GraficosDashboard = memo(function GraficosDashboard({
   resumo,
   categorias = [],
   carregando = false,
-  className,
 }: GraficosDashboardProps) {
   if (carregando) {
     return (
-      <Grid className={cn('grid-cols-1 lg:grid-cols-2 gap-4 w-full', className)}>
+      <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
         {['grafico-sk-1', 'grafico-sk-2'].map((chave) => (
-          <Card key={chave} className="border border-white/10 bg-black/40 backdrop-blur-md p-4">
-            <Skeleton className="h-6 w-48 rounded-md mb-4" />
-            <Skeleton className="h-64 w-full rounded-xl" />
-          </Card>
+          <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={4}>
+            <Skeleton h={6} w={48} borderRadius="md" mb={4} />
+            <Skeleton h={64} w="full" borderRadius="xl" />
+          </Card.Root>
         ))}
       </Grid>
     )
   }
 
-  // 1. Dados para o Donut Chart por Origem
   const dadosOrigem = [
     {
       name: NOMES_ORIGEM.print_empresa,
@@ -153,7 +148,6 @@ export const GraficosDashboard = memo(function GraficosDashboard({
     },
   ].filter((item) => item.value > 0)
 
-  // 2. Dados para o BarChart por Categoria (em Megabytes para escala proporcional)
   const dadosCategorias = categorias.map((cat) => ({
     name: cat.nome,
     tamanhoMb: Number((cat.tamanhoBytes / (1024 * 1024)).toFixed(2)),
@@ -165,31 +159,30 @@ export const GraficosDashboard = memo(function GraficosDashboard({
   const temDadosCategorias = dadosCategorias.length > 0
 
   return (
-    <Grid className={cn('grid-cols-1 lg:grid-cols-2 gap-4 w-full', className)}>
-      {/* ── Gráfico 1: Volume por Origem ── */}
-      <Card className="border border-white/10 bg-linear-to-br from-white/5 to-white/2 backdrop-blur-xl shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <HStack className="gap-2.5">
-            <Box className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <PieChartIcon className="w-5 h-5" />
+    <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
+      <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="lg">
+        <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+          <HStack gap={2.5}>
+            <Box p={2} borderRadius="xl" bg="blue.500/10" color="blue.500">
+              <PieChartIcon size={20} />
             </Box>
-            <VStack className="gap-0.5">
-              <CardTitle className="text-sm font-semibold text-white">
+            <VStack gap={0.5} alignItems="flex-start">
+              <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                 Distribuição de Mídias por Origem
-              </CardTitle>
-              <Text className="text-xs text-white/50">Proporção de itens por canal de entrada</Text>
+              </Card.Title>
+              <Text fontSize="xs" color="fg.subtle">Proporção de itens por canal de entrada</Text>
             </VStack>
           </HStack>
-        </CardHeader>
+        </Card.Header>
 
-        <CardContent className="pt-2">
+        <Card.Body pt={2}>
           {!temDadosOrigem ? (
-            <Box className="h-64 flex flex-col items-center justify-center text-center text-white/40">
-              <PieChartIcon className="w-8 h-8 mb-2 opacity-30" />
-              <Text className="text-xs">Nenhuma mídia registrada para exibição gráfica.</Text>
+            <Box h={64} display="flex" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" color="fg.subtle">
+              <PieChartIcon size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
+              <Text fontSize="xs">Nenhuma mídia registrada para exibição gráfica.</Text>
             </Box>
           ) : (
-            <Box className="h-64 w-full">
+            <Box h={64} w="full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip content={<CustomTooltipPie />} />
@@ -210,42 +203,41 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                     verticalAlign="bottom"
                     iconType="circle"
                     formatter={(value) => (
-                      <span className="text-xs text-white/70 font-medium">{value}</span>
+                      <span style={{ fontSize: '12px', color: 'var(--chakra-colors-fg-subtle)', fontWeight: 500 }}>{value}</span>
                     )}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
           )}
-        </CardContent>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
-      {/* ── Gráfico 2: Armazenamento por Categoria ── */}
-      <Card className="border border-white/10 bg-linear-to-br from-white/5 to-white/2 backdrop-blur-xl shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <HStack className="gap-2.5">
-            <Box className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              <HardDrive className="w-5 h-5" />
+      <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="lg">
+        <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+          <HStack gap={2.5}>
+            <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+              <HardDrive size={20} />
             </Box>
-            <VStack className="gap-0.5">
-              <CardTitle className="text-sm font-semibold text-white">
+            <VStack gap={0.5} alignItems="flex-start">
+              <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                 Armazenamento por Categoria (MB)
-              </CardTitle>
-              <Text className="text-xs text-white/50">
+              </Card.Title>
+              <Text fontSize="xs" color="fg.subtle">
                 Consumo em disco por diretório classificado
               </Text>
             </VStack>
           </HStack>
-        </CardHeader>
+        </Card.Header>
 
-        <CardContent className="pt-2">
+        <Card.Body pt={2}>
           {!temDadosCategorias ? (
-            <Box className="h-64 flex flex-col items-center justify-center text-center text-white/40">
-              <BarChart3 className="w-8 h-8 mb-2 opacity-30" />
-              <Text className="text-xs">Nenhum dado de categoria disponível.</Text>
+            <Box h={64} display="flex" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" color="fg.subtle">
+              <BarChart3 size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
+              <Text fontSize="xs">Nenhum dado de categoria disponível.</Text>
             </Box>
           ) : (
-            <Box className="h-64 w-full">
+            <Box h={64} w="full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={dadosCategorias}
@@ -273,8 +265,8 @@ export const GraficosDashboard = memo(function GraficosDashboard({
               </ResponsiveContainer>
             </Box>
           )}
-        </CardContent>
-      </Card>
+        </Card.Body>
+      </Card.Root>
     </Grid>
   )
 })

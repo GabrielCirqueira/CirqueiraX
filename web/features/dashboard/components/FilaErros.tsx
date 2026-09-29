@@ -1,6 +1,4 @@
-import { cn } from '@/shared/lib/cn'
-import { Box, HStack, Text, VStack } from '@/shared/ui/layout'
-import { Button, Card, CardContent, Chip, Skeleton } from '@heroui/react'
+import { Badge, Box, Button, Card, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
   AlertTriangle,
@@ -21,10 +19,6 @@ import { memo, useState } from 'react'
 import { useFilaErros, useRetentarErroIndividual, useRetentarErros } from '../hooks/useDashboard'
 import type { OrigemMedia } from '../types'
 
-export interface FilaErrosProps {
-  className?: string
-}
-
 const ORIGEM_ICON: Record<OrigemMedia, typeof Bot> = {
   print_empresa: Building2,
   print_pessoal: Smartphone,
@@ -33,7 +27,7 @@ const ORIGEM_ICON: Record<OrigemMedia, typeof Bot> = {
   manual: UploadCloud,
 }
 
-export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) {
+export const FilaErros = memo(function FilaErros() {
   const [pagina, setPagina] = useState(1)
   const limite = 10
 
@@ -80,20 +74,20 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
 
   if (carregando && itens.length === 0) {
     return (
-      <VStack className={cn('w-full gap-4', className)}>
-        <HStack className="justify-between items-center">
-          <Skeleton className="h-6 w-48 rounded-md" />
-          <Skeleton className="h-9 w-32 rounded-xl" />
+      <VStack w="full" gap={4} alignItems="stretch">
+        <HStack justify="space-between" align="center">
+          <Skeleton h={6} w={48} borderRadius="md" />
+          <Skeleton h={9} w={32} borderRadius="xl" />
         </HStack>
-        <VStack className="gap-3 w-full">
+        <VStack gap={3} w="full" alignItems="stretch">
           {['erro-sk-1', 'erro-sk-2'].map((chave) => (
-            <Card key={chave} className="border border-white/10 bg-black/40 backdrop-blur-md">
-              <CardContent className="p-4">
-                <Skeleton className="h-5 w-44 rounded-md mb-2" />
-                <Skeleton className="h-10 w-full rounded-md mb-3" />
-                <Skeleton className="h-8 w-32 rounded-lg" />
-              </CardContent>
-            </Card>
+            <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+              <Card.Body p={4}>
+                <Skeleton h={5} w={44} borderRadius="md" mb={2} />
+                <Skeleton h={10} w="full" borderRadius="md" mb={3} />
+                <Skeleton h={8} w={32} borderRadius="lg" />
+              </Card.Body>
+            </Card.Root>
           ))}
         </VStack>
       </VStack>
@@ -101,27 +95,27 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
   }
 
   return (
-    <VStack className={cn('w-full gap-4', className)}>
-      {/* ── Cabeçalho da Fila de Erros ── */}
-      <HStack className="justify-between items-center flex-wrap gap-3">
-        <HStack className="gap-2.5">
-          <Box className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-            <AlertTriangle className="w-5 h-5" />
+    <VStack w="full" gap={4} alignItems="stretch">
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
+        <HStack gap={2.5}>
+          <Box p={2} borderRadius="xl" bg="red.500/10" color="red.500">
+            <AlertTriangle size={20} />
           </Box>
-          <VStack className="gap-0.5">
-            <HStack className="gap-2 items-center">
-              <Text className="text-base font-semibold text-white">Fila Operacional de Erros</Text>
+          <VStack gap={0.5} alignItems="flex-start">
+            <HStack gap={2} align="center">
+              <Text fontSize="base" fontWeight="semibold" color="fg">Fila Operacional de Erros</Text>
               {total > 0 && (
-                <Chip
+                <Badge
                   size="sm"
-                  variant="soft"
-                  className="h-5 text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 font-semibold"
+                  variant="subtle"
+                  colorPalette="red"
+                  fontWeight="semibold"
                 >
                   {total} {total === 1 ? 'falha' : 'falhas'}
-                </Chip>
+                </Badge>
               )}
             </HStack>
-            <Text className="text-xs text-white/50">
+            <Text fontSize="xs" color="fg.subtle">
               Itens que falharam na ingestão, download ou sincronização
             </Text>
           </VStack>
@@ -131,18 +125,22 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
           <Button
             size="sm"
             variant="ghost"
-            isDisabled={retentandoTodos}
-            onPress={handleRetentarTodos}
-            className="bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/30 font-medium text-xs h-9"
+            colorPalette="red"
+            disabled={retentandoTodos}
+            onClick={handleRetentarTodos}
+            fontSize="xs"
+            fontWeight="medium"
+            h={9}
+            borderRadius="xl"
           >
             {retentandoTodos ? (
-              <HStack className="gap-1.5">
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              <HStack gap={1.5}>
+                <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
                 <span>Reprocessando...</span>
               </HStack>
             ) : (
-              <HStack className="gap-1.5">
-                <RotateCcw className="w-3.5 h-3.5" />
+              <HStack gap={1.5}>
+                <RotateCcw size={14} />
                 <span>Retentar Todos ({total})</span>
               </HStack>
             )}
@@ -150,31 +148,29 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
         )}
       </HStack>
 
-      {/* ── Mensagem de Feedback Rápido ── */}
       {mensagemSucesso && (
-        <Box className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <Box p={3} borderRadius="xl" bg="emerald.500/10" borderWidth="1px" borderColor="emerald.500/20" color="emerald.500" fontSize="xs" display="flex" alignItems="center" gap={2}>
+          <CheckCircle2 size={16} flexShrink={0} />
           <span>{mensagemSucesso}</span>
         </Box>
       )}
 
-      {/* ── Lista de Itens com Erro ou Estado Saudável ── */}
       {itens.length === 0 ? (
-        <Card className="border border-emerald-500/20 bg-linear-to-br from-emerald-500/5 to-white/2 backdrop-blur-xl p-8 text-center shadow-lg">
-          <CardContent className="flex flex-col items-center justify-center gap-2.5">
-            <Box className="p-3 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <CheckCircle2 className="w-8 h-8" />
+        <Card.Root borderWidth="1px" borderColor="emerald.500/20" bg="emerald.500/5" p={8} textAlign="center" shadow="lg">
+          <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2.5}>
+            <Box p={3} borderRadius="full" bg="emerald.500/10" color="emerald.500">
+              <CheckCircle2 size={32} />
             </Box>
-            <Text className="text-sm font-semibold text-emerald-300">
+            <Text fontSize="sm" fontWeight="semibold" color="emerald.500">
               Nenhuma falha ativa no pipeline
             </Text>
-            <Text className="text-xs text-white/50 max-w-md">
+            <Text fontSize="xs" color="fg.subtle" maxW="md">
               Todos os downloads, prints e sincronizações foram processados com sucesso.
             </Text>
-          </CardContent>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       ) : (
-        <VStack className="w-full gap-3">
+        <VStack w="full" gap={3} alignItems="stretch">
           {itens.map((item) => {
             const IconeOrigem = ORIGEM_ICON[item.origem] || FileVideo
             const estaRetentando = retentandoIndividual && itemEmAcao === item.uuid
@@ -185,21 +181,26 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
               `Mídia ${item.hash.substring(0, 8)}`
 
             return (
-              <Card
+              <Card.Root
                 key={item.uuid}
-                className="border border-rose-500/30 bg-linear-to-br from-rose-500/5 via-black/40 to-white/2 backdrop-blur-xl shadow-md hover:border-rose-500/50 transition-all duration-300"
+                borderWidth="1px"
+                borderColor="red.500/30"
+                bg="red.500/5"
+                shadow="md"
+                transition="all 0.2s"
+                _hover={{ borderColor: 'red.500/50' }}
               >
-                <CardContent className="p-4">
-                  <HStack className="justify-between items-start flex-wrap gap-2 mb-3">
-                    <HStack className="gap-2.5 items-center">
-                      <Box className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                        <IconeOrigem className="w-4 h-4" />
+                <Card.Body p={4}>
+                  <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={2} mb={3}>
+                    <HStack gap={2.5} align="center">
+                      <Box p={2} borderRadius="xl" bg="red.500/10" color="red.500">
+                        <IconeOrigem size={16} />
                       </Box>
-                      <VStack className="gap-0.5">
-                        <Text className="text-sm font-semibold text-white truncate max-w-[280px] sm:max-w-md">
+                      <VStack gap={0.5} alignItems="flex-start">
+                        <Text fontSize="sm" fontWeight="semibold" color="fg" truncate maxW={{ base: '280px', sm: 'md' }}>
                           {tituloMedia}
                         </Text>
-                        <HStack className="gap-2 text-[11px] text-white/50">
+                        <HStack gap={2} fontSize="11px" color="fg.subtle">
                           <span>Origem: {item.origemDescricao}</span>
                           <span>•</span>
                           <span>Hash: {item.hash.substring(0, 10)}...</span>
@@ -210,41 +211,42 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
                     <Button
                       size="sm"
                       variant="ghost"
-                      isDisabled={estaRetentando || retentandoTodos}
-                      onPress={() => handleRetentarItem(item.uuid)}
-                      className="h-8 text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-500/30 font-medium"
+                      colorPalette="red"
+                      disabled={estaRetentando || retentandoTodos}
+                      onClick={() => handleRetentarItem(item.uuid)}
+                      fontSize="xs"
+                      fontWeight="medium"
+                      h={8}
                     >
                       {estaRetentando ? (
-                        <HStack className="gap-1.5">
-                          <Loader2 className="w-3 h-3 animate-spin" />
+                        <HStack gap={1.5}>
+                          <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
                           <span>Retentando...</span>
                         </HStack>
                       ) : (
-                        <HStack className="gap-1.5">
-                          <RefreshCw className="w-3 h-3" />
+                        <HStack gap={1.5}>
+                          <RefreshCw size={12} />
                           <span>Tentar novamente</span>
                         </HStack>
                       )}
                     </Button>
                   </HStack>
 
-                  {/* ── Motivo do Erro ── */}
-                  <Box className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-200 text-xs flex items-start gap-2.5 mb-3">
-                    <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                    <VStack className="gap-0.5 flex-1">
-                      <Text className="font-semibold text-rose-300">Motivo da Falha:</Text>
-                      <Text className="text-rose-200/90 font-mono text-[11px] break-all">
+                  <Box p={3} borderRadius="xl" bg="red.500/10" borderWidth="1px" borderColor="red.500/20" color="red.500" fontSize="xs" display="flex" alignItems="flex-start" gap={2.5} mb={3}>
+                    <AlertCircle size={16} flexShrink={0} style={{ marginTop: '2px' }} />
+                    <VStack gap={0.5} flex={1} alignItems="flex-start">
+                      <Text fontWeight="semibold" color="red.500">Motivo da Falha:</Text>
+                      <Text fontFamily="mono" fontSize="11px" wordBreak="break-all">
                         {item.erroMotivo || 'Erro genérico durante o processamento do pipeline.'}
                       </Text>
                     </VStack>
                   </Box>
 
-                  {/* ── Detalhes Adicionais ── */}
-                  <HStack className="justify-between items-center text-[11px] text-white/40 pt-1 border-t border-white/5 flex-wrap gap-2">
-                    <HStack className="gap-2">
+                  <HStack justify="space-between" align="center" fontSize="11px" color="fg.subtle" pt={1} borderTopWidth="1px" borderColor="border.subtle" flexWrap="wrap" gap={2}>
+                    <HStack gap={2}>
                       {item.categoria?.nome && <span>Categoria: {item.categoria.nome}</span>}
                       {item.caminhoLocal && (
-                        <span className="font-mono truncate max-w-[200px]">
+                        <span style={{ fontFamily: 'monospace' }}>
                           📁 {item.caminhoLocal}
                         </span>
                       )}
@@ -254,37 +256,36 @@ export const FilaErros = memo(function FilaErros({ className }: FilaErrosProps) 
                       {new Date(item.atualizadoEm || item.criadoEm).toLocaleString('pt-BR')}
                     </span>
                   </HStack>
-                </CardContent>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             )
           })}
 
-          {/* ── Paginação ── */}
           {totalPaginas > 1 && (
-            <HStack className="justify-between items-center pt-2 px-1 text-xs text-white/60">
+            <HStack justify="space-between" align="center" pt={2} px={1} fontSize="xs" color="fg.subtle">
               <Text>
                 Página {pagina} de {totalPaginas} ({total} itens)
               </Text>
-              <HStack className="gap-1.5">
+              <HStack gap={1.5}>
                 <Button
                   size="sm"
                   variant="ghost"
-                  isDisabled={pagina <= 1}
-                  onPress={() => setPagina((p) => Math.max(1, p - 1))}
-                  className="h-8 text-white/70"
+                  disabled={pagina <= 1}
+                  onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                  h={8}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft size={16} />
                   <span>Anterior</span>
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
-                  isDisabled={pagina >= totalPaginas}
-                  onPress={() => setPagina((p) => p + 1)}
-                  className="h-8 text-white/70"
+                  disabled={pagina >= totalPaginas}
+                  onClick={() => setPagina((p) => p + 1)}
+                  h={8}
                 >
                   <span>Próxima</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight size={16} />
                 </Button>
               </HStack>
             </HStack>

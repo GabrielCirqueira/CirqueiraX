@@ -1,4 +1,4 @@
-import { Box, HStack, Text } from '@/shared/ui/layout'
+import { Box, Flex, HStack, Text } from '@chakra-ui/react'
 import { Code2, Github } from 'lucide-react'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
@@ -11,43 +11,43 @@ const footerLinks = [
 
 export const Footer = memo(function Footer() {
   return (
-    <footer className="border-t border-border bg-surface">
-      <HStack className="max-w-6xl mx-auto px-6 h-16 justify-between flex-wrap">
+    <Box as="footer" borderTop="1px solid" borderColor="whiteAlpha.200" bg="zinc.950">
+      <HStack maxW="6xl" mx="auto" px={6} h={16} justify="space-between" flexWrap="wrap">
         <Link to="/">
-          <HStack>
-            <Box className="size-6 rounded-md bg-brand-500 flex items-center justify-center">
-              <Code2 className="size-3.5 text-white" strokeWidth={2.5} />
+          <HStack gap={2}>
+            <Box w={6} h={6} borderRadius="md" bg="brand.500" display="flex" alignItems="center" justifyContent="center">
+              <Code2 size={14} color="white" strokeWidth={2.5} />
             </Box>
-            <Text as="span" className="font-black font-sans text-xs tracking-tight">
+            <Text as="span" fontWeight="900" fontSize="xs" letterSpacing="tight">
               cirqueiraX{' '}
-              <Text as="span" className="text-brand-500">
+              <Text as="span" color="brand.500">
                 Skeleton
               </Text>
             </Text>
           </HStack>
         </Link>
 
-        <nav className="hidden sm:flex items-center gap-5 text-xs text-muted">
+        <Flex display={{ base: 'none', sm: 'flex' }} alignItems="center" gap={5} fontSize="xs" color="zinc.400">
           {footerLinks.map((link) => (
-            <a key={link.href} href={link.href} className="hover:text-foreground transition-colors">
+            <a key={link.href} href={link.href} style={{ color: 'inherit', transition: 'color 0.2s' }}>
               {link.label}
             </a>
           ))}
-        </nav>
+        </Flex>
 
-        <HStack className="gap-3 text-xs text-muted">
+        <HStack gap={3} fontSize="xs" color="zinc.400">
           <Text as="span">MIT License</Text>
           <a
             href="https://github.com"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-foreground transition-colors"
             aria-label="GitHub"
+            style={{ color: 'inherit' }}
           >
-            <Github className="size-4" />
+            <Github size={16} />
           </a>
         </HStack>
       </HStack>
-    </footer>
+    </Box>
   )
 })

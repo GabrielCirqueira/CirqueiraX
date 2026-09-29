@@ -1,6 +1,5 @@
 import { listarCategorias, listarMediaItens } from '@/features/downloads-video/api'
-import { Box, Container, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
-import { Button, Card, CardContent, CardHeader, CardTitle, Chip } from '@heroui/react'
+import { Badge, Box, Button, Card, Container, Grid, HStack, Text, VStack } from '@chakra-ui/react'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
@@ -25,7 +24,6 @@ export function Component() {
 }
 
 const HomeContent = memo(function HomeContent() {
-  // Consultar dados do sistema em tempo real
   const { data: respostaMedia, isLoading: carregandoMedia } = useQuery({
     queryKey: ['media-itens', 'home-stats'],
     queryFn: () => listarMediaItens({ porPagina: 10 }),
@@ -39,49 +37,60 @@ const HomeContent = memo(function HomeContent() {
   const totalMedia = respostaMedia?.total ?? 0
 
   return (
-    <VStack className="w-full gap-12 py-10">
-      {/* ════════════════════════════════════════════
-          HERO SECTION — CIRQUEIRAX MEDIA PIPELINE
-      ════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden w-full">
-        <Box className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-5%,color-mix(in_oklch,var(--color-brand-500)_20%,transparent),transparent)] pointer-events-none" />
-        <Box className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_70%,var(--color-background))] pointer-events-none" />
-
-        <Container size="xl" className="relative text-center space-y-6 py-12">
-          <Chip
-            variant="soft"
-            size="sm"
-            className="border border-brand-500/30 bg-brand-500/10 text-brand-600 font-semibold"
+    <VStack w="full" gap={12} py={10}>
+      <Box as="section" position="relative" overflow="hidden" w="full">
+        <Container maxW="6xl" position="relative" textAlign="center" py={12}>
+          <Badge
+            variant="subtle"
+            colorPalette="purple"
+            border="1px solid"
+            borderColor="brand.500/30"
+            color="brand.400"
+            fontWeight="semibold"
+            px={3}
+            py={1}
+            borderRadius="full"
+            display="inline-flex"
+            alignItems="center"
+            mb={4}
           >
-            <Sparkles className="size-3.5 mr-1" />
+            <Sparkles size={14} style={{ marginRight: '6px' }} />
             CirqueiraX Media Pipeline v6.0 • v1.0 Final
-          </Chip>
+          </Badge>
 
-          <VStack className="gap-3 items-center max-w-3xl mx-auto">
+          <VStack gap={3} alignItems="center" maxW="3xl" mx="auto" mb={6}>
             <Text
               as="h1"
-              className="text-4xl sm:text-6xl font-black font-sans tracking-tight leading-tight text-zinc-900 dark:text-zinc-100"
+              fontSize={{ base: '4xl', sm: '6xl' }}
+              fontWeight="900"
+              letterSpacing="tight"
+              lineHeight="tight"
+              color="white"
             >
               Central Inteligente de Ingestão &{' '}
-              <Text as="span" className="text-brand-500">
+              <Text as="span" color="brand.500">
                 Gestão de Mídias
               </Text>
             </Text>
-            <Text className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+            <Text fontSize={{ base: 'sm', sm: 'lg' }} color="zinc.400" maxW="2xl" lineHeight="relaxed">
               Automação completa para download de vídeos de redes sociais, upload manual com triagem
               inteligente por hash e agentes de captura de tela em segundo plano.
             </Text>
           </VStack>
 
-          {/* Quick Actions Buttons */}
-          <HStack className="gap-4 flex-wrap justify-center pt-2">
+          <HStack gap={4} flexWrap="wrap" justifyContent="center" pt={2}>
             <Link to="/dashboard">
               <Button
-                variant="primary"
                 size="lg"
-                className="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 shadow-lg shadow-brand-500/20"
+                bg="brand.500"
+                _hover={{ bg: 'brand.600' }}
+                color="white"
+                fontWeight="bold"
+                px={6}
+                borderRadius="xl"
+                shadow="lg"
               >
-                <LayoutDashboard className="size-5 mr-2" />
+                <LayoutDashboard size={20} style={{ marginRight: '8px' }} />
                 <span>Acessar Dashboard</span>
               </Button>
             </Link>
@@ -90,9 +99,14 @@ const HomeContent = memo(function HomeContent() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold px-6 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                borderColor="zinc.700"
+                color="zinc.200"
+                fontWeight="bold"
+                px={6}
+                borderRadius="xl"
+                _hover={{ bg: 'zinc.800' }}
               >
-                <DownloadCloud className="size-5 text-brand-500 mr-2" />
+                <DownloadCloud size={20} style={{ marginRight: '8px', color: '#8b5cf6' }} />
                 <span>Downloads de Vídeo</span>
               </Button>
             </Link>
@@ -101,312 +115,279 @@ const HomeContent = memo(function HomeContent() {
               <Button
                 variant="outline"
                 size="lg"
-                className="border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold px-6 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                borderColor="zinc.700"
+                color="zinc.200"
+                fontWeight="bold"
+                px={6}
+                borderRadius="xl"
+                _hover={{ bg: 'zinc.800' }}
               >
-                <UploadCloud className="size-5 text-indigo-500 mr-2" />
+                <UploadCloud size={20} style={{ marginRight: '8px', color: '#6366f1' }} />
                 <span>Upload Manual & Triagem</span>
               </Button>
             </Link>
           </HStack>
 
-          {/* Status Chip Bar */}
-          <HStack className="flex-wrap justify-center gap-2 pt-4">
+          <HStack flexWrap="wrap" justifyContent="center" gap={2} pt={4}>
             {['YouTube', 'TikTok', 'Twitter / X', 'Instagram', 'Agentes PC', 'Google Fotos'].map(
               (tag) => (
-                <Chip
+                <Badge
                   key={tag}
-                  size="sm"
-                  variant="soft"
-                  className="bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 text-xs font-medium"
+                  variant="subtle"
+                  colorPalette="gray"
+                  bg="zinc.800"
+                  color="zinc.400"
+                  border="1px solid"
+                  borderColor="zinc.700"
+                  fontSize="xs"
+                  fontWeight="medium"
+                  px={2.5}
+                  py={0.5}
+                  borderRadius="md"
                 >
                   {tag}
-                </Chip>
+                </Badge>
               )
             )}
           </HStack>
         </Container>
-      </section>
+      </Box>
 
-      {/* ════════════════════════════════════════════
-          PAINEL DE MÉTRICAS & RECURSOS ATIVOS
-      ════════════════════════════════════════════ */}
-      <Container size="xl" className="space-y-6">
-        <VStack className="gap-1 text-center sm:text-left">
-          <Text as="h2" className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+      <Container maxW="6xl">
+        <VStack gap={1} textAlign={{ base: 'center', sm: 'left' }} mb={6}>
+          <Text as="h2" fontSize="2xl" fontWeight="800" color="white">
             Métricas & Status do Sistema
           </Text>
-          <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+          <Text fontSize="xs" color="zinc.400">
             Resumo em tempo real dos pipelines de ingestão, categorias e agentes conectados.
           </Text>
         </VStack>
 
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card Total Mídias */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+        <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
+            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
                 Mídias Processadas
-              </CardTitle>
-              <Box className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
-                <Film className="size-5" />
+              </Card.Title>
+              <Box p={2} borderRadius="xl" bg="brand.500/10" color="brand.500">
+                <Film size={20} />
               </Box>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Text className="text-3xl font-black text-zinc-900 dark:text-zinc-100">
+            </Card.Header>
+            <Card.Body>
+              <Text fontSize="3xl" fontWeight="900" color="white" mb={1}>
                 {carregandoMedia ? '...' : totalMedia}
               </Text>
-              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+              <Text fontSize="xs" color="zinc.400">
                 Vídeos e imagens registrados no banco de dados
               </Text>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
-          {/* Card Categorias Cadastradas */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
+            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
                 Categorias Ativas
-              </CardTitle>
-              <Box className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500">
-                <FolderCheck className="size-5" />
+              </Card.Title>
+              <Box p={2} borderRadius="xl" bg="indigo.500/10" color="indigo.500">
+                <FolderCheck size={20} />
               </Box>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Text className="text-3xl font-black text-zinc-900 dark:text-zinc-100">
+            </Card.Header>
+            <Card.Body>
+              <Text fontSize="3xl" fontWeight="900" color="white" mb={1}>
                 {categorias.length}
               </Text>
-              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+              <Text fontSize="xs" color="zinc.400">
                 Categorias para organização e triagem automática
               </Text>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
-          {/* Card Agentes de Ingestão */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
+            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
                 Agentes de Print
-              </CardTitle>
-              <Box className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500">
-                <Monitor className="size-5" />
+              </Card.Title>
+              <Box p={2} borderRadius="xl" bg="emerald.500/10" color="emerald.500">
+                <Monitor size={20} />
               </Box>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <HStack className="gap-2 items-center">
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold"
-                >
+            </Card.Header>
+            <Card.Body>
+              <HStack gap={2} alignItems="center" mb={1}>
+                <Badge colorPalette="green" variant="subtle" bg="emerald.500/10" color="emerald-400" border="1px solid" borderColor="emerald.500/20" fontWeight="bold" px={2} py={0.5} borderRadius="md">
                   2 Conectados
-                </Chip>
+                </Badge>
               </HStack>
-              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+              <Text fontSize="xs" color="zinc.400">
                 Agente PC Empresa e Agente PC Pessoal ativos via X-Agent-Token
               </Text>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
-          {/* Card Integração Google Fotos */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
+            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
                 Google Fotos Pipeline
-              </CardTitle>
-              <Box className="p-2 rounded-xl bg-amber-500/10 text-amber-500">
-                <Cloud className="size-5" />
+              </Card.Title>
+              <Box p={2} borderRadius="xl" bg="amber.500/10" color="amber.500">
+                <Cloud size={20} />
               </Box>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <HStack className="gap-2 items-center">
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold"
-                >
+            </Card.Header>
+            <Card.Body>
+              <HStack gap={2} alignItems="center" mb={1}>
+                <Badge colorPalette="amber" variant="subtle" bg="amber.500/10" color="amber.400" border="1px solid" borderColor="amber.500/20" fontWeight="bold" px={2} py={0.5} borderRadius="md">
                   OAuth2 Pronto
-                </Chip>
+                </Badge>
               </HStack>
-              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+              <Text fontSize="xs" color="zinc.400">
                 Sincronização com renovação automática de tokens
               </Text>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         </Grid>
       </Container>
 
-      {/* ════════════════════════════════════════════
-          RECURSOS DO SISTEMA & FUNCIONALIDADES
-      ════════════════════════════════════════════ */}
-      <Container size="xl" className="space-y-6">
-        <VStack className="gap-1 text-center sm:text-left">
-          <Text as="h2" className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100">
+      <Container maxW="6xl">
+        <VStack gap={1} textAlign={{ base: 'center', sm: 'left' }} mb={6}>
+          <Text as="h2" fontSize="2xl" fontWeight="800" color="white">
             Recursos Principais do CirqueiraX
           </Text>
-          <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+          <Text fontSize="xs" color="zinc.400">
             Conheça as ferramentas e pipelines integrados ao ecossistema.
           </Text>
         </VStack>
 
-        <Grid className="grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Feature 1: Downloads de Vídeo */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-brand-500/40 transition-colors">
-            <CardHeader className="space-y-2">
-              <Box className="size-10 rounded-2xl bg-brand-500/10 text-brand-500 flex items-center justify-center">
-                <Video className="size-5" />
+        <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl" _hover={{ borderColor: 'brand.500/40' }}>
+            <Card.Header>
+              <Box w={10} h={10} borderRadius="2xl" bg="brand.500/10" color="brand.500" display="flex" alignItems="center" justifyContent="center" mb={2}>
+                <Video size={20} />
               </Box>
-              <CardTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <Card.Title fontSize="lg" fontWeight="bold" color="white">
                 Downloads de Redes Sociais
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Text className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              </Card.Title>
+            </Card.Header>
+            <Card.Body display="flex" flexDirection="column" gap={4}>
+              <Text fontSize="xs" color="zinc.400" lineHeight="relaxed">
                 Suporte completo a URLs do YouTube, TikTok, X (Twitter) e Instagram com extração
                 automática de metadados (título, uploader, duração e thumbnail).
               </Text>
 
-              <HStack className="gap-2 flex-wrap">
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
-                >
-                  <Youtube className="size-3 mr-1" /> YouTube
-                </Chip>
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20"
-                >
-                  <Video className="size-3 mr-1" /> TikTok
-                </Chip>
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20"
-                >
-                  <Globe className="size-3 mr-1" /> Twitter / X
-                </Chip>
+              <HStack gap={2} flexWrap="wrap">
+                <Badge colorPalette="red" variant="subtle" px={2} py={0.5} borderRadius="md">
+                  <Youtube size={12} style={{ marginRight: '4px', display: 'inline' }} /> YouTube
+                </Badge>
+                <Badge colorPalette="cyan" variant="subtle" px={2} py={0.5} borderRadius="md">
+                  <Video size={12} style={{ marginRight: '4px', display: 'inline' }} /> TikTok
+                </Badge>
+                <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="md">
+                  <Globe size={12} style={{ marginRight: '4px', display: 'inline' }} /> Twitter / X
+                </Badge>
               </HStack>
 
-              <Link to="/downloads" className="w-full">
+              <Link to="/downloads" style={{ width: '100%', paddingTop: '8px' }}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-between text-brand-500 hover:text-brand-600 hover:bg-brand-500/10 font-bold"
+                  w="full"
+                  justifyContent="space-between"
+                  color="brand.500"
+                  _hover={{ color: 'brand.400', bg: 'brand.500/10' }}
+                  fontWeight="bold"
                 >
                   <span>Acessar Downloads</span>
-                  <ArrowRight className="size-4" />
+                  <ArrowRight size={16} />
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
-          {/* Feature 2: Upload Manual & Triagem */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-brand-500/40 transition-colors">
-            <CardHeader className="space-y-2">
-              <Box className="size-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                <UploadCloud className="size-5" />
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl" _hover={{ borderColor: 'brand.500/40' }}>
+            <Card.Header>
+              <Box w={10} h={10} borderRadius="2xl" bg="indigo.500/10" color="indigo.500" display="flex" alignItems="center" justifyContent="center" mb={2}>
+                <UploadCloud size={20} />
               </Box>
-              <CardTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <Card.Title fontSize="lg" fontWeight="bold" color="white">
                 Upload Manual & Triagem
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Text className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              </Card.Title>
+            </Card.Header>
+            <Card.Body display="flex" flexDirection="column" gap={4}>
+              <Text fontSize="xs" color="zinc.400" lineHeight="relaxed">
                 Área de drag-and-drop interativa para fotos e vídeos com verificação imediata de
                 hash contra arquivos duplicados e atribuição rápida de categorias em lote.
               </Text>
 
-              <HStack className="gap-2 flex-wrap">
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"
-                >
+              <HStack gap={2} flexWrap="wrap">
+                <Badge colorPalette="purple" variant="subtle" px={2} py={0.5} borderRadius="md">
                   Drag & Drop
-                </Chip>
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                >
+                </Badge>
+                <Badge colorPalette="green" variant="subtle" px={2} py={0.5} borderRadius="md">
                   Checagem de Hash
-                </Chip>
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                >
+                </Badge>
+                <Badge colorPalette="amber" variant="subtle" px={2} py={0.5} borderRadius="md">
                   Ações em Lote
-                </Chip>
+                </Badge>
               </HStack>
 
-              <Link to="/upload-manual" className="w-full">
+              <Link to="/upload-manual" style={{ width: '100%', paddingTop: '8px' }}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-between text-indigo-500 hover:text-indigo-600 hover:bg-indigo-500/10 font-bold"
+                  w="full"
+                  justifyContent="space-between"
+                  color="indigo.400"
+                  _hover={{ color: 'indigo.300', bg: 'indigo.500/10' }}
+                  fontWeight="bold"
                 >
                   <span>Acessar Upload Manual</span>
-                  <ArrowRight className="size-4" />
+                  <ArrowRight size={16} />
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
 
-          {/* Feature 3: Agentes de Print & Automação */}
-          <Card className="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:border-brand-500/40 transition-colors">
-            <CardHeader className="space-y-2">
-              <Box className="size-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <ShieldCheck className="size-5" />
+          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl" _hover={{ borderColor: 'brand.500/40' }}>
+            <Card.Header>
+              <Box w={10} h={10} borderRadius="2xl" bg="emerald.500/10" color="emerald.500" display="flex" alignItems="center" justifyContent="center" mb={2}>
+                <ShieldCheck size={20} />
               </Box>
-              <CardTitle className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <Card.Title fontSize="lg" fontWeight="bold" color="white">
                 Agentes de Ingestão Automática
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Text className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              </Card.Title>
+            </Card.Header>
+            <Card.Body display="flex" flexDirection="column" gap={4}>
+              <Text fontSize="xs" color="zinc.400" lineHeight="relaxed">
                 Agentes autônomos para PC Empresa e PC Pessoal com monitoramento de pastas em tempo
                 real, debounce, cliente HTTP com retry e salvamento seguro.
               </Text>
 
-              <HStack className="gap-2 flex-wrap">
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                >
+              <HStack gap={2} flexWrap="wrap">
+                <Badge colorPalette="green" variant="subtle" px={2} py={0.5} borderRadius="md">
                   print_empresa
-                </Chip>
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20"
-                >
+                </Badge>
+                <Badge colorPalette="teal" variant="subtle" px={2} py={0.5} borderRadius="md">
                   print_pessoal
-                </Chip>
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                >
+                </Badge>
+                <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="md">
                   X-Agent-Token
-                </Chip>
+                </Badge>
               </HStack>
 
-              <Link to="/downloads" className="w-full">
+              <Link to="/downloads" style={{ width: '100%', paddingTop: '8px' }}>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="w-full justify-between text-emerald-500 hover:text-emerald-600 hover:bg-emerald-500/10 font-bold"
+                  w="full"
+                  justifyContent="space-between"
+                  color="emerald.400"
+                  _hover={{ color: 'emerald.300', bg: 'emerald.500/10' }}
+                  fontWeight="bold"
                 >
                   <span>Ver Mídias dos Agentes</span>
-                  <ArrowRight className="size-4" />
+                  <ArrowRight size={16} />
                 </Button>
               </Link>
-            </CardContent>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         </Grid>
       </Container>
     </VStack>

@@ -69,3 +69,33 @@
 - **Arquivos**: `devops/php/Dockerfile`, container `symfony`, `src/Infra/YtDlp/YtDlpClient.php`
 
 ---
+
+### ✅ Melhoria 7 — Migração de HeroUI + Tailwind CSS para Chakra UI v3
+
+- **Status**: Concluído
+- **Data**: 29 de setembro de 2026
+- **Problema**: O frontend misturava três camadas de estilo distintas — componentes do **HeroUI**, classes utilitárias do **Tailwind CSS** e props nativas do **Chakra UI** — gerando conflitos de especificidade, duplicação de tokens de design e dificuldade de manutenção. O arquivo `shared/ui/layout.tsx` reexportava wrappers desnecessários e a configuração de tema era inexistente.
+- **Solução**:
+  - Removida a dependência `@heroui/react` e toda referência a seus componentes.
+  - Removido o Tailwind CSS (`tailwind.config.js`, classes `className="..."` de utilitários Tailwind) de todos os arquivos refatorados.
+  - Instalado e configurado o **Chakra UI v3** (`@chakra-ui/react`) com `createSystem` e tokens de tema customizados (cor brand, semântica de cores, espaçamentos).
+  - O provider `<ChakraProvider value={system}>` foi centralizado em `main.tsx`.
+  - Esvaziado `web/shared/ui/layout.tsx`: os componentes de layout passaram a ser importados diretamente de `@chakra-ui/react`.
+  - Refatorados 9 componentes para usar exclusivamente primitivos do Chakra UI v3 (`Box`, `Flex`, `Grid`, `Stack`, `Text`, `Badge`, `Button`, `Table`, `Modal`, `Spinner`, `Icon` etc.).
+  - Comentários obsoletos e código legado removidos via script `cli/remove-comments.sh` em 11 arquivos.
+  - Build de produção (`npm run build`) executado com sucesso após todas as alterações (exit code 0).
+- **Arquivos**:
+  - `web/main.tsx`
+  - `web/theme.ts` *(novo — tokens e sistema de tema)*
+  - `web/shared/ui/layout.tsx` *(esvaziado)*
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/dashboard/components/CardsResumo.tsx`
+  - `web/features/dashboard/components/GraficosDashboard.tsx`
+  - `web/features/dashboard/components/TabelaCategorias.tsx`
+  - `web/features/dashboard/components/PainelSync.tsx`
+  - `web/features/dashboard/components/FilaErros.tsx`
+  - `web/features/dashboard/components/ModalEditarCategoria.tsx`
+  - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
+
+---

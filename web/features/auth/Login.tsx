@@ -1,17 +1,6 @@
 import { useLogin } from '@/features/auth'
-import { Box, Container, HStack, Text, VStack } from '@/shared/ui/layout'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Chip,
-  FieldError,
-  Input,
-  Label,
-  TextField,
-} from '@heroui/react'
-import { Code2, Eye, EyeOff, Lock, Mail, ShieldCheck, Sparkles } from 'lucide-react'
+import { Badge, Box, Button, Card, Container, Field, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Code2, Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { z } from 'zod'
 
@@ -47,116 +36,163 @@ export function Component() {
   }
 
   return (
-    <Container size="sm" className="min-h-[80vh] flex items-center justify-center py-12">
-      <Box className="w-full max-w-md relative">
-        {/* Glow de fundo */}
-        <Box className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-brand-500/30 via-purple-600/20 to-blue-600/30 blur-xl opacity-70 pointer-events-none" />
+    <Container maxW="sm" minH="80vh" display="flex" alignItems="center" justifyContent="center" py={12}>
+      <Box w="full" maxW="md" position="relative">
+        <Box
+          position="absolute"
+          inset={-1}
+          borderRadius="3xl"
+          bgGradient="to-r"
+          gradientFrom="brand.500/30"
+          gradientVia="purple.600/20"
+          gradientTo="blue.600/30"
+          filter="blur(16px)"
+          opacity={0.7}
+          pointerEvents="none"
+        />
 
-        <Card className="relative border border-white/10 bg-zinc-950/80 backdrop-blur-2xl shadow-2xl rounded-3xl overflow-hidden">
-          <CardHeader className="flex flex-col items-center gap-3 pb-2 pt-8 px-8 text-center">
-            {/* Logo Badge */}
-            <HStack className="gap-2.5 items-center justify-center">
-              <Box className="size-10 rounded-2xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
-                <Code2 className="size-5 text-white" strokeWidth={2.5} />
+        <Card.Root bg="zinc.950" borderColor="whiteAlpha.200" border="1px solid" borderRadius="3xl" overflow="hidden" position="relative" shadow="2xl">
+          <Card.Header display="flex" flexDirection="column" alignItems="center" gap={3} pb={2} pt={8} px={8} textAlign="center">
+            <HStack gap={2.5} alignItems="center" justifyContent="center">
+              <Box w={10} h={10} borderRadius="2xl" bg="brand.500" display="flex" alignItems="center" justifyContent="center" shadow="lg">
+                <Code2 size={20} color="white" strokeWidth={2.5} />
               </Box>
-              <Text as="span" className="font-black font-sans text-xl tracking-tight text-white">
+              <Text as="span" fontWeight="900" fontSize="xl" letterSpacing="tight" color="white">
                 Cirqueira
-                <Text as="span" className="text-brand-500">
+                <Text as="span" color="brand.500">
                   X
                 </Text>{' '}
                 <Text
                   as="span"
-                  className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 ml-1"
+                  fontSize="xs"
+                  fontWeight="semibold"
+                  px={2}
+                  py={0.5}
+                  borderRadius="full"
+                  bg="brand.500/10"
+                  color="brand.400"
+                  border="1px solid"
+                  borderColor="brand.500/20"
+                  ml={1}
                 >
                   Media
                 </Text>
               </Text>
             </HStack>
 
-            <VStack className="gap-1 items-center">
-              <Text as="h1" className="text-2xl font-bold font-sans text-white">
+            <VStack gap={1} alignItems="center">
+              <Text as="h1" fontSize="2xl" fontWeight="bold" color="white">
                 Acesso ao Sistema
               </Text>
-              <Text className="text-xs text-white/50 max-w-xs">
+              <Text fontSize="xs" color="whiteAlpha.500" maxW="xs">
                 Informe suas credenciais para gerenciar pipelines e downloads
               </Text>
             </VStack>
 
-            <Chip
-              variant="soft"
-              size="sm"
-              className="border border-white/10 bg-white/5 text-white/70 text-[11px] font-medium"
+            <Badge
+              variant="subtle"
+              colorPalette="purple"
+              border="1px solid"
+              borderColor="whiteAlpha.100"
+              color="whiteAlpha.700"
+              fontSize="11px"
+              fontWeight="medium"
+              px={2.5}
+              py={1}
+              borderRadius="full"
             >
-              <ShieldCheck className="size-3.5 mr-1 text-brand-400" />
+              <ShieldCheck size={14} style={{ marginRight: '4px' }} color="#c084fc" />
               Autenticação Segura JWT RS256
-            </Chip>
-          </CardHeader>
+            </Badge>
+          </Card.Header>
 
-          <CardContent className="px-8 py-6">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-              <TextField isInvalid={Boolean(erros.emailOuUsuario)}>
-                <Label className="text-xs font-semibold text-white/80">E-mail ou Usuário</Label>
+          <Card.Body px={8} py={6}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} noValidate>
+              <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
+                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">E-mail ou Usuário</Field.Label>
                 <Input
                   placeholder="usuario@cirqueira.com ou usuario"
                   value={form.emailOuUsuario}
                   onChange={(e) => handleChange('emailOuUsuario', e.target.value)}
                   autoComplete="username"
                   autoFocus
-                  className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 h-11"
+                  w="full"
+                  bg="whiteAlpha.50"
+                  borderColor="whiteAlpha.200"
+                  color="white"
+                  _placeholder={{ color: 'whiteAlpha.400' }}
+                  h={11}
                 />
-                <FieldError className="text-xs text-rose-400">{erros.emailOuUsuario}</FieldError>
-              </TextField>
+                <Field.ErrorText fontSize="xs" color="rose.400">{erros.emailOuUsuario}</Field.ErrorText>
+              </Field.Root>
 
-              <TextField isInvalid={Boolean(erros.senha)}>
-                <Label className="text-xs font-semibold text-white/80">Senha de Acesso</Label>
-                <HStack className="relative w-full">
+              <Field.Root invalid={Boolean(erros.senha)}>
+                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">Senha de Acesso</Field.Label>
+                <HStack position="relative" w="full">
                   <Input
                     type={mostrarSenha ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={form.senha}
                     onChange={(e) => handleChange('senha', e.target.value)}
                     autoComplete="current-password"
-                    className="w-full bg-white/5 border-white/10 text-white placeholder:text-white/30 h-11 pr-10"
+                    w="full"
+                    bg="whiteAlpha.50"
+                    borderColor="whiteAlpha.200"
+                    color="white"
+                    _placeholder={{ color: 'whiteAlpha.400' }}
+                    h={11}
+                    pr={10}
                   />
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
-                    isIconOnly
-                    onPress={() => setMostrarSenha((v) => !v)}
-                    className="absolute right-2 text-white/40 hover:text-white/80 h-7 w-7"
+                    size="xs"
+                    onClick={() => setMostrarSenha((v) => !v)}
+                    position="absolute"
+                    right={2}
+                    color="whiteAlpha.400"
+                    _hover={{ color: 'whiteAlpha.800' }}
+                    h={7}
+                    w={7}
+                    p={0}
                     aria-label={mostrarSenha ? 'Ocultar senha' : 'Ver senha'}
                   >
-                    {mostrarSenha ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {mostrarSenha ? <EyeOff size={16} /> : <Eye size={16} />}
                   </Button>
                 </HStack>
-                <FieldError className="text-xs text-rose-400">{erros.senha}</FieldError>
-              </TextField>
+                <Field.ErrorText fontSize="xs" color="rose.400">{erros.senha}</Field.ErrorText>
+              </Field.Root>
 
               <Button
                 type="submit"
-                variant="primary"
-                fullWidth
-                isPending={login.isPending}
-                isDisabled={login.isPending}
-                className="mt-2 h-11 font-bold bg-brand-500 hover:bg-brand-600 text-white shadow-lg shadow-brand-500/25 transition-all"
+                loading={login.isPending}
+                disabled={login.isPending}
+                mt={2}
+                h={11}
+                fontWeight="bold"
+                bg="brand.500"
+                _hover={{ bg: 'brand.600' }}
+                color="white"
+                w="full"
+                borderRadius="xl"
+                shadow="lg"
               >
-                <Lock className="size-4 mr-1.5" />
+                <Lock size={16} style={{ marginRight: '6px' }} />
                 <span>Entrar no Hub</span>
               </Button>
             </form>
 
-            <Box className="mt-6 pt-4 border-t border-white/5 text-center">
-              <Text className="text-[11px] text-white/40">
+            <Box mt={6} pt={4} borderTop="1px solid" borderColor="whiteAlpha.100" textAlign="center">
+              <Text fontSize="11px" color="whiteAlpha.400">
                 Acesso restrito. Novos usuários são provisionados via CLI administrativa (
-                <Text as="span" className="font-mono text-brand-400">
+                <Text as="span" fontFamily="mono" color="brand.400">
                   app:usuario:criar
                 </Text>
                 ).
               </Text>
             </Box>
-          </CardContent>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </Box>
     </Container>
   )

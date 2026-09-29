@@ -1,9 +1,10 @@
-import { ToastProvider } from '@heroui/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import { ThemeProvider } from './contexts'
+import { Provider } from './shared/components/ui/provider'
+import { Toaster } from './shared/components/ui/toaster'
 import './index.css'
 
 import '@fontsource/poppins/400.css'
@@ -36,11 +37,13 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider placement="top-right" />
-        <App />
-      </QueryClientProvider>
-    </ThemeProvider>
+    <Provider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <Toaster />
+          <App />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </Provider>
   </StrictMode>
 )

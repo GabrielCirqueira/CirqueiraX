@@ -1,14 +1,4 @@
-import { cn } from '@/shared/lib/cn'
-import { Box, Flex, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
-import {
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  ProgressBar,
-  ProgressBarFill,
-  ProgressBarTrack,
-} from '@heroui/react'
+import { Badge, Box, Button, Card, Flex, Grid, HStack, Progress, Text, VStack } from '@chakra-ui/react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -99,58 +89,76 @@ export const DropzoneUpload = memo(function DropzoneUpload({
   ).length
 
   return (
-    <VStack className="w-full gap-6">
-      {/* Área de Arrastar e Soltar */}
-      <Card
+    <VStack w="full" gap={6}>
+      <Card.Root
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={cn(
-          'relative w-full rounded-2xl border-2 border-dashed p-8 sm:p-10 text-center cursor-pointer transition-all duration-200 shadow-none',
-          'flex flex-col items-center justify-center gap-3',
-          isDragOver
-            ? 'border-brand-500 bg-brand-500/10 scale-[1.01]'
-            : 'border-zinc-300 dark:border-zinc-700 bg-white/50 dark:bg-zinc-900/50 hover:border-brand-400 dark:hover:border-brand-500/80 hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
-        )}
+        w="full"
+        borderRadius="2xl"
+        borderWidth="2px"
+        borderStyle="dashed"
+        p={{ base: 8, sm: 10 }}
+        textAlign="center"
+        cursor="pointer"
+        transition="all 0.2s"
+        shadow="none"
+        borderColor={isDragOver ? 'brand.500' : 'border.subtle'}
+        bg={isDragOver ? 'brand.500/10' : 'bg.panel'}
+        transform={isDragOver ? 'scale(1.01)' : 'none'}
+        _hover={{ borderColor: 'brand.500', bg: 'bg.muted' }}
       >
-        <CardContent className="flex flex-col items-center justify-center gap-3 p-0">
+        <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={3} p={0}>
           <input
             ref={inputRef}
             type="file"
             multiple
             accept="image/*,video/*"
             onChange={handleFileSelect}
-            className="hidden"
+            style={{ display: 'none' }}
           />
 
-          <Box className="p-4 rounded-2xl bg-brand-500/10 text-brand-500 dark:bg-brand-500/20">
-            <UploadCloud className="size-10 sm:size-12" />
+          <Box p={4} borderRadius="2xl" bg="brand.500/10" color="brand.500">
+            <UploadCloud size={40} />
           </Box>
 
-          <VStack className="gap-1 items-center">
+          <VStack gap={1} alignItems="center">
             <Text
               as="h3"
-              className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100"
+              fontSize={{ base: 'md', sm: 'lg' }}
+              fontWeight="bold"
+              color="fg"
             >
               {isDragOver ? 'Solte os arquivos aqui' : 'Arraste e solte fotos ou vídeos aqui'}
             </Text>
-            <Text className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+            <Text fontSize={{ base: 'xs', sm: 'sm' }} color="fg.muted">
               Suporta arquivos de imagem (PNG, JPG, WEBP) e vídeos (MP4, MKV, WEBM). Clique para
               buscar no computador.
             </Text>
           </VStack>
 
-          {/* Seleção de Categoria Padrão */}
-          <HStack className="mt-2 gap-2" onClick={(e) => e.stopPropagation()}>
-            <FolderPlus className="size-4 text-zinc-400" />
-            <Text as="span" className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+          <HStack mt={2} gap={2} onClick={(e) => e.stopPropagation()}>
+            <FolderPlus size={16} />
+            <Text as="span" fontSize="xs" fontWeight="medium" color="fg.subtle">
               Categoria pré-definida:
             </Text>
             <select
               value={categoriaPadraoId ?? ''}
               onChange={(e) => onSetCategoriaPadraoId(e.target.value || null)}
-              className="h-8 px-3 rounded-lg text-xs font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+              style={{
+                height: '32px',
+                paddingLeft: '12px',
+                paddingRight: '12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: '500',
+                backgroundColor: 'var(--chakra-colors-bg-muted)',
+                borderColor: 'var(--chakra-colors-border-subtle)',
+                color: 'inherit',
+                borderWidth: '1px',
+                outline: 'none',
+              }}
             >
               <option value="">Nenhuma (triagem posterior)</option>
               {categorias.map((cat) => (
@@ -160,36 +168,47 @@ export const DropzoneUpload = memo(function DropzoneUpload({
               ))}
             </select>
           </HStack>
-        </CardContent>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
-      {/* Controles da Fila */}
       {fila.length > 0 && (
-        <VStack className="w-full gap-4">
-          <Flex className="flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-100/80 dark:bg-zinc-800/80 p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80">
-            <HStack className="gap-2">
-              <Text as="strong" className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+        <VStack w="full" gap={4}>
+          <Flex
+            w="full"
+            direction={{ base: 'column', sm: 'row' }}
+            align={{ base: 'stretch', sm: 'center' }}
+            justify="space-between"
+            gap={3}
+            bg="bg.muted"
+            p={4}
+            borderRadius="xl"
+            borderWidth="1px"
+            borderColor="border.subtle"
+          >
+            <HStack gap={2}>
+              <Text as="strong" fontSize="sm" fontWeight="bold" color="fg">
                 Fila de Upload ({fila.length})
               </Text>
               {pendentesCount > 0 && (
-                <Chip
-                  size="sm"
-                  variant="soft"
-                  className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                <Badge
+                  colorPalette="amber"
+                  variant="subtle"
+                  px={2}
+                  py={0.5}
+                  borderRadius="md"
                 >
                   {pendentesCount} pendente(s)
-                </Chip>
+                </Badge>
               )}
             </HStack>
 
-            <HStack className="gap-2 justify-end">
+            <HStack gap={2} justify="flex-end">
               {concluidosCount > 0 && (
                 <Button
-                  size="sm"
-                  variant="quiet"
-                  isDisabled={estaProcessando}
-                  onPress={onLimparConcluidos}
-                  className="text-xs text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  size="xs"
+                  variant="ghost"
+                  disabled={estaProcessando}
+                  onClick={onLimparConcluidos}
                 >
                   Limpar concluidos ({concluidosCount})
                 </Button>
@@ -197,18 +216,20 @@ export const DropzoneUpload = memo(function DropzoneUpload({
 
               <Button
                 size="sm"
-                isDisabled={estaProcessando || pendentesCount === 0}
-                onPress={onEnviarTodos}
-                className="bg-brand-500 hover:bg-brand-600 text-white font-bold"
+                colorPalette="brand"
+                disabled={estaProcessando || pendentesCount === 0}
+                onClick={onEnviarTodos}
+                fontWeight="bold"
+                borderRadius="xl"
               >
                 {estaProcessando ? (
                   <>
-                    <Loader2 className="size-3.5 animate-spin" />
+                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
                     <span>Enviando...</span>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="size-3.5" />
+                    <UploadCloud size={14} style={{ marginRight: '6px' }} />
                     <span>Enviar Todos ({pendentesCount})</span>
                   </>
                 )}
@@ -216,60 +237,87 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             </HStack>
           </Flex>
 
-          {/* Lista de Arquivos */}
-          <Grid className="grid-cols-1 gap-3">
+          <Grid w="full" templateColumns="1fr" gap={3}>
             {fila.map((item) => (
-              <Card
+              <Card.Root
                 key={item.id}
-                className={cn(
-                  'p-3 sm:p-4 rounded-xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-none',
-                  'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800',
-                  item.status === 'enviando' &&
-                    'border-brand-500/50 bg-brand-500/5 dark:bg-brand-500/10',
-                  item.status === 'sucesso' && 'border-emerald-500/30 dark:border-emerald-500/20',
-                  item.status === 'duplicado' &&
-                    'border-amber-500/30 dark:border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10',
-                  item.status === 'erro' && 'border-rose-500/40 bg-rose-500/5 dark:bg-rose-500/10'
-                )}
+                p={{ base: 3, sm: 4 }}
+                borderRadius="xl"
+                borderWidth="1px"
+                transition="all 0.2s"
+                shadow="none"
+                bg={
+                  item.status === 'enviando'
+                    ? 'brand.500/5'
+                    : item.status === 'duplicado'
+                    ? 'amber.500/5'
+                    : item.status === 'erro'
+                    ? 'red.500/5'
+                    : 'bg.panel'
+                }
+                borderColor={
+                  item.status === 'enviando'
+                    ? 'brand.500/50'
+                    : item.status === 'sucesso'
+                    ? 'emerald.500/30'
+                    : item.status === 'duplicado'
+                    ? 'amber.500/30'
+                    : item.status === 'erro'
+                    ? 'red.500/40'
+                    : 'border.subtle'
+                }
               >
-                <CardContent className="w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-0">
-                  {/* Esquerda: Preview + Informações do Arquivo */}
-                  <HStack className="gap-3.5 flex-1 min-w-0">
-                    {/* Miniature / Icon */}
-                    <Box className="relative w-12 h-12 rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800 shrink-0 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+                <Card.Body display="flex" flexDirection={{ base: 'column', sm: 'row' }} alignItems={{ base: 'flex-start', sm: 'center' }} justifyContent="space-between" gap={4} p={0}>
+                  <HStack gap={3.5} flex={1} minW={0} w="full">
+                    <Box
+                      position="relative"
+                      w={12}
+                      h={12}
+                      borderRadius="lg"
+                      overflow="hidden"
+                      bg="bg.muted"
+                      flexShrink={0}
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
                       {item.previewUrl && item.tipoMime.startsWith('image/') ? (
                         <img
                           src={item.previewUrl}
                           alt={item.nome}
-                          className="w-full h-full object-cover"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       ) : item.previewUrl && item.tipoMime.startsWith('video/') ? (
-                        <video src={item.previewUrl} className="w-full h-full object-cover">
+                        <video src={item.previewUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
                           <track kind="captions" />
                         </video>
                       ) : item.tipoMime.startsWith('video/') ? (
-                        <FileVideo className="size-6 text-indigo-500" />
+                        <FileVideo size={24} color="#6366f1" />
                       ) : (
-                        <FileImage className="size-6 text-emerald-500" />
+                        <FileImage size={24} color="#10b981" />
                       )}
                     </Box>
 
-                    <VStack className="gap-0.5 min-w-0 flex-1">
-                      <HStack className="gap-2">
+                    <VStack gap={0.5} minW={0} flex={1} alignItems="flex-start">
+                      <HStack gap={2} w="full">
                         <Text
                           as="span"
-                          className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate"
+                          fontWeight="semibold"
+                          fontSize="sm"
+                          color="fg"
+                          truncate
                         >
                           {item.nome}
                         </Text>
-                        <Text as="small" className="text-xs text-zinc-400 shrink-0">
+                        <Text as="small" fontSize="xs" color="fg.subtle" flexShrink={0}>
                           ({formatarTamanho(item.tamanhoBytes)})
                         </Text>
                       </HStack>
 
-                      {/* Selector de Categoria por Item */}
-                      <HStack className="gap-2 mt-1">
-                        <Text as="span" className="text-xs text-zinc-500 dark:text-zinc-400">
+                      <HStack gap={2} mt={1}>
+                        <Text as="span" fontSize="xs" color="fg.subtle">
                           Categoria:
                         </Text>
                         <select
@@ -278,7 +326,18 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           onChange={(e) =>
                             onAtualizarCategoriaItem(item.id, e.target.value || null)
                           }
-                          className="h-6 px-2 rounded text-xs bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 focus:outline-none"
+                          style={{
+                            height: '24px',
+                            paddingLeft: '8px',
+                            paddingRight: '8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            backgroundColor: 'var(--chakra-colors-bg-muted)',
+                            borderColor: 'var(--chakra-colors-border-subtle)',
+                            color: 'inherit',
+                            borderWidth: '1px',
+                            outline: 'none',
+                          }}
                         >
                           <option value="">Sem Categoria</option>
                           {categorias.map((cat) => (
@@ -289,118 +348,93 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                         </select>
                       </HStack>
 
-                      {/* Progress Bar during upload */}
                       {item.status === 'enviando' && (
-                        <Box className="w-full mt-2">
-                          <ProgressBar value={item.progresso} aria-label="Progresso de upload">
-                            <ProgressBarTrack className="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full">
-                              <ProgressBarFill className="bg-brand-500 rounded-full" />
-                            </ProgressBarTrack>
-                          </ProgressBar>
+                        <Box w="full" mt={2}>
+                          <Progress.Root value={item.progresso} size="xs" colorPalette="brand">
+                            <Progress.Track bg="bg.muted" borderRadius="full">
+                              <Progress.Range borderRadius="full" />
+                            </Progress.Track>
+                          </Progress.Root>
                         </Box>
                       )}
 
-                      {/* Mensagem de Erro */}
                       {item.mensagemErro && (
-                        <Text className="text-xs font-medium text-rose-500 mt-1">
+                        <Text fontSize="xs" fontWeight="medium" color="red.500" mt={1}>
                           {item.mensagemErro}
                         </Text>
                       )}
                     </VStack>
                   </HStack>
 
-                  {/* Direita: Status Badge + Botões */}
-                  <HStack className="gap-3 shrink-0 self-end sm:self-center">
-                    {/* Status Badges via HeroUI Chip */}
+                  <HStack gap={3} flexShrink={0} alignSelf={{ base: 'flex-end', sm: 'center' }}>
                     {item.status === 'pendente' && (
-                      <Chip
-                        size="sm"
-                        variant="soft"
-                        className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700"
-                      >
+                      <Badge variant="subtle" colorPalette="gray" px={2} py={0.5} borderRadius="md">
                         Pendente
-                      </Chip>
+                      </Badge>
                     )}
 
                     {item.status === 'enviando' && (
-                      <Chip
-                        size="sm"
-                        variant="soft"
-                        className="bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20"
-                      >
-                        <HStack className="gap-1.5 items-center">
-                          <Loader2 className="size-3.5 animate-spin" />
+                      <Badge variant="subtle" colorPalette="brand" px={2} py={0.5} borderRadius="md">
+                        <HStack gap={1.5} alignItems="center">
+                          <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
                           <span>{item.progresso}%</span>
                         </HStack>
-                      </Chip>
+                      </Badge>
                     )}
 
                     {item.status === 'sucesso' && (
-                      <Chip
-                        size="sm"
-                        variant="soft"
-                        className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                      >
-                        <HStack className="gap-1.5 items-center">
-                          <CheckCircle2 className="size-3.5" />
+                      <Badge variant="subtle" colorPalette="green" px={2} py={0.5} borderRadius="md">
+                        <HStack gap={1.5} alignItems="center">
+                          <CheckCircle2 size={14} />
                           <span>Enviado</span>
                         </HStack>
-                      </Chip>
+                      </Badge>
                     )}
 
                     {item.status === 'duplicado' && (
-                      <Chip
-                        size="sm"
-                        variant="soft"
-                        className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
-                      >
-                        <HStack className="gap-1.5 items-center">
-                          <AlertTriangle className="size-3.5" />
+                      <Badge variant="subtle" colorPalette="amber" px={2} py={0.5} borderRadius="md">
+                        <HStack gap={1.5} alignItems="center">
+                          <AlertTriangle size={14} />
                           <span>Duplicado (já existia)</span>
                         </HStack>
-                      </Chip>
+                      </Badge>
                     )}
 
                     {item.status === 'erro' && (
-                      <Chip
-                        size="sm"
-                        variant="soft"
-                        className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
-                      >
-                        <HStack className="gap-1.5 items-center">
-                          <XCircle className="size-3.5" />
+                      <Badge variant="subtle" colorPalette="red" px={2} py={0.5} borderRadius="md">
+                        <HStack gap={1.5} alignItems="center">
+                          <XCircle size={14} />
                           <span>Falha</span>
                         </HStack>
-                      </Chip>
+                      </Badge>
                     )}
 
-                    {/* Actions via HeroUI Button */}
                     {(item.status === 'erro' || item.status === 'pendente') && (
                       <Button
-                        size="sm"
-                        variant="quiet"
-                        isIconOnly
-                        isDisabled={estaProcessando}
-                        onPress={() => onReenviarItem(item.id)}
+                        size="xs"
+                        variant="ghost"
+                        disabled={estaProcessando}
+                        onClick={() => onReenviarItem(item.id)}
                         aria-label="Enviar item"
+                        p={1.5}
                       >
-                        <RefreshCw className="size-4 text-zinc-500 hover:text-brand-500" />
+                        <RefreshCw size={16} />
                       </Button>
                     )}
 
                     <Button
-                      size="sm"
-                      variant="quiet"
-                      isIconOnly
-                      isDisabled={item.status === 'enviando'}
-                      onPress={() => onRemoverArquivo(item.id)}
+                      size="xs"
+                      variant="ghost"
+                      disabled={item.status === 'enviando'}
+                      onClick={() => onRemoverArquivo(item.id)}
                       aria-label="Remover da fila"
+                      p={1.5}
                     >
-                      <Trash2 className="size-4 text-zinc-400 hover:text-rose-500" />
+                      <Trash2 size={16} />
                     </Button>
                   </HStack>
-                </CardContent>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             ))}
           </Grid>
         </VStack>

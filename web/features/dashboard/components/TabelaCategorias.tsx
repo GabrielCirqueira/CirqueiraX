@@ -1,15 +1,16 @@
-import { cn } from '@/shared/lib/cn'
-import { Box, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
 import {
+  Badge,
+  Box,
   Button,
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Chip,
+  Grid,
+  HStack,
+  IconButton,
   Input,
   Skeleton,
-} from '@heroui/react'
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { Cloud, Edit3, FileVideo, Folder, HardDrive, Layers, Search } from 'lucide-react'
 import { memo, useState } from 'react'
 import type { CategoriaMetrica } from '../types'
@@ -18,13 +19,11 @@ import { ModalEditarCategoria } from './ModalEditarCategoria'
 export interface TabelaCategoriasProps {
   categorias?: CategoriaMetrica[]
   carregando?: boolean
-  className?: string
 }
 
 export const TabelaCategorias = memo(function TabelaCategorias({
   categorias = [],
   carregando = false,
-  className,
 }: TabelaCategoriasProps) {
   const [busca, setBusca] = useState('')
   const [categoriaEditando, setCategoriaEditando] = useState<CategoriaMetrica | null>(null)
@@ -37,20 +36,20 @@ export const TabelaCategorias = memo(function TabelaCategorias({
 
   if (carregando && categorias.length === 0) {
     return (
-      <VStack className={cn('w-full gap-4', className)}>
-        <HStack className="justify-between items-center">
-          <Skeleton className="h-6 w-44 rounded-md" />
-          <Skeleton className="h-9 w-60 rounded-xl" />
+      <VStack w="full" gap={4} alignItems="stretch">
+        <HStack justify="space-between" align="center">
+          <Skeleton h={6} w={44} borderRadius="md" />
+          <Skeleton h={9} w={60} borderRadius="xl" />
         </HStack>
-        <Grid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={4}>
           {['cat-sk-1', 'cat-sk-2', 'cat-sk-3'].map((chave) => (
-            <Card key={chave} className="border border-white/10 bg-black/40 backdrop-blur-md">
-              <CardContent className="p-4">
-                <Skeleton className="h-5 w-32 rounded-md mb-2" />
-                <Skeleton className="h-4 w-48 rounded-md mb-3" />
-                <Skeleton className="h-8 w-full rounded-lg" />
-              </CardContent>
-            </Card>
+            <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+              <Card.Body p={4}>
+                <Skeleton h={5} w={32} borderRadius="md" mb={2} />
+                <Skeleton h={4} w={48} borderRadius="md" mb={3} />
+                <Skeleton h={8} w="full" borderRadius="lg" />
+              </Card.Body>
+            </Card.Root>
           ))}
         </Grid>
       </VStack>
@@ -58,138 +57,146 @@ export const TabelaCategorias = memo(function TabelaCategorias({
   }
 
   return (
-    <VStack className={cn('w-full gap-4', className)}>
-      {/* ── Cabeçalho e Busca ── */}
-      <HStack className="justify-between items-center flex-wrap gap-3">
-        <HStack className="gap-2.5">
-          <Box className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-            <Layers className="w-5 h-5" />
+    <VStack w="full" gap={4} alignItems="stretch">
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
+        <HStack gap={2.5}>
+          <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+            <Layers size={20} />
           </Box>
-          <VStack className="gap-0.5">
-            <Text className="text-base font-semibold text-white">Mapeamento por Categoria</Text>
-            <Text className="text-xs text-white/50">
+          <VStack gap={0.5} alignItems="flex-start">
+            <Text fontSize="base" fontWeight="semibold" color="fg">Mapeamento por Categoria</Text>
+            <Text fontSize="xs" color="fg.subtle">
               Controle de pastas locais, álbuns e consumo de armazenamento
             </Text>
           </VStack>
         </HStack>
 
-        <Box className="relative w-full sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none z-10" />
+        <Box position="relative" w={{ base: 'full', sm: '64' }}>
+          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 10, opacity: 0.5 }} />
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar categoria..."
-            className="pl-9 bg-white/5 border-white/10 text-white placeholder:text-white/40 text-xs h-9 w-full"
+            pl={9}
+            bg="bg.muted"
+            borderColor="border.subtle"
+            fontSize="xs"
+            h={9}
+            w="full"
           />
         </Box>
       </HStack>
 
-      {/* ── Grid de Categorias ── */}
       {categoriasFiltradas.length === 0 ? (
-        <Card className="border border-white/10 bg-white/2 backdrop-blur-md p-8 text-center">
-          <CardContent className="flex flex-col items-center justify-center gap-2">
-            <Folder className="w-8 h-8 text-white/30" />
-            <Text className="text-sm font-medium text-white/70">
+        <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={8} textAlign="center">
+          <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
+            <Folder size={32} style={{ opacity: 0.3 }} />
+            <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
               {busca ? 'Nenhuma categoria corresponde à busca.' : 'Nenhuma categoria cadastrada.'}
             </Text>
-          </CardContent>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       ) : (
-        <Grid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={4}>
           {categoriasFiltradas.map((cat, idx) => {
             const ehSemCategoria = !cat.uuid || cat.uuid === 'sem_categoria'
             const itemKey = cat.uuid ? `cat-${cat.uuid}` : `cat-item-${cat.nome || idx}`
 
             return (
-              <Card
+              <Card.Root
                 key={itemKey}
-                className="border border-white/10 bg-linear-to-br from-white/5 to-white/2 backdrop-blur-xl hover:border-purple-500/30 transition-all duration-300 shadow-md group"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                bg="bg.panel"
+                shadow="md"
+                transition="all 0.2s"
+                _hover={{ borderColor: 'brand.500' }}
               >
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <HStack className="gap-2.5">
-                    <Box className="p-2 rounded-xl bg-purple-500/10 text-purple-300 border border-purple-500/20 group-hover:bg-purple-500/20 transition-colors">
-                      <Folder className="w-4 h-4" />
+                <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+                  <HStack gap={2.5}>
+                    <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.400">
+                      <Folder size={16} />
                     </Box>
-                    <VStack className="gap-0.5">
-                      <CardTitle className="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors">
+                    <VStack gap={0.5} alignItems="flex-start">
+                      <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                         {cat.nome}
-                      </CardTitle>
-                      <Text className="text-[11px] font-mono text-white/40 truncate max-w-[180px]">
+                      </Card.Title>
+                      <Text fontSize="11px" fontFamily="mono" color="fg.subtle" truncate maxW="180px">
                         📁 {cat.pastaLocal || 'pasta padrão'}
                       </Text>
                     </VStack>
                   </HStack>
 
                   {!ehSemCategoria && (
-                    <Button
+                    <IconButton
                       size="sm"
                       variant="ghost"
-                      isIconOnly
-                      onPress={() => setCategoriaEditando(cat)}
-                      className="text-white/60 hover:text-white hover:bg-purple-500/20"
+                      onClick={() => setCategoriaEditando(cat)}
                       aria-label="Editar Mapeamento"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </Button>
+                      <Edit3 size={14} />
+                    </IconButton>
                   )}
-                </CardHeader>
+                </Card.Header>
 
-                <CardContent className="pt-2">
-                  <HStack className="justify-between items-center py-2 border-t border-white/5 text-xs text-white/60">
-                    <HStack className="gap-1.5">
-                      <FileVideo className="w-3.5 h-3.5 text-blue-400" />
+                <Card.Body pt={2}>
+                  <HStack justify="space-between" align="center" py={2} borderTopWidth="1px" borderColor="border.subtle" fontSize="xs" color="fg.subtle">
+                    <HStack gap={1.5}>
+                      <FileVideo size={14} color="#3b82f6" />
                       <span>
                         {cat.totalItens} {cat.totalItens === 1 ? 'mídia' : 'mídias'}
                       </span>
                     </HStack>
 
-                    <HStack className="gap-1.5">
-                      <HardDrive className="w-3.5 h-3.5 text-purple-400" />
-                      <span className="font-semibold text-white/80">{cat.tamanhoFormatado}</span>
+                    <HStack gap={1.5}>
+                      <HardDrive size={14} color="#a855f7" />
+                      <span style={{ fontWeight: 600, color: 'var(--chakra-colors-fg)' }}>{cat.tamanhoFormatado}</span>
                     </HStack>
                   </HStack>
 
-                  <HStack className="pt-2 justify-between items-center text-[11px]">
+                  <HStack pt={2} justify="space-between" align="center" fontSize="11px">
                     {cat.googlePhotosAlbumId ? (
-                      <Chip
+                      <Badge
                         size="sm"
-                        variant="soft"
-                        className="h-5 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        variant="subtle"
+                        colorPalette="green"
                       >
-                        <HStack className="gap-1">
-                          <Cloud className="w-3 h-3" />
+                        <HStack gap={1}>
+                          <Cloud size={12} />
                           <span>Google Fotos</span>
                         </HStack>
-                      </Chip>
+                      </Badge>
                     ) : (
-                      <Chip
+                      <Badge
                         size="sm"
-                        variant="soft"
-                        className="h-5 text-[10px] bg-white/5 text-white/40 border border-white/10"
+                        variant="subtle"
+                        colorPalette="gray"
                       >
                         Local apenas
-                      </Chip>
+                      </Badge>
                     )}
 
                     {!ehSemCategoria && (
                       <Button
                         size="sm"
                         variant="ghost"
-                        onPress={() => setCategoriaEditando(cat)}
-                        className="h-6 text-[11px] text-purple-400 hover:text-purple-300 p-0"
+                        onClick={() => setCategoriaEditando(cat)}
+                        fontSize="11px"
+                        color="purple.500"
+                        p={0}
+                        h={6}
                       >
                         Editar pasta
                       </Button>
                     )}
                   </HStack>
-                </CardContent>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             )
           })}
         </Grid>
       )}
 
-      {/* ── Modal de Edição de Mapeamento ── */}
       <ModalEditarCategoria
         categoria={categoriaEditando}
         aberto={Boolean(categoriaEditando)}

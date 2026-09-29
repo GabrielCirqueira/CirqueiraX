@@ -17,3 +17,4 @@
 | M4 | Correção de Prop `isDisabled` e Variantes de Botão em `CampoNovoLink` | ✅ Concluído | 28/09/2026 | [ver](MELHORIAS_1.md#melhoria-4--adequação-de-propriedades-dom-em-camponovolink) |
 | M5 | Reestruturação de Modais HeroUI / React Aria (`PressResponder`) em Downloads | ✅ Concluído | 28/09/2026 | [ver](MELHORIAS_1.md#melhoria-5--reestruturação-de-modais-heroui-em-downloads-de-vídeo) |
 | M6 | Instalação e Habilitação de `yt-dlp` e `ffmpeg` no Container para Download de Vídeos | ✅ Concluído | 28/09/2026 | [ver](MELHORIAS_1.md#melhoria-6--instalação-de-yt-dlp-e-ffmpeg-para-extração-e-download-de-vídeos) |
+| M7 | Migração completa de HeroUI + Tailwind CSS para Chakra UI v3 | ✅ Concluído | 29/09/2026 | [ver](MELHORIAS_1.md#melhoria-7--migração-de-heroui--tailwind-css-para-chakra-ui-v3) |

@@ -1,34 +1,13 @@
 import { AppContainer } from '@/layouts/AppContainer'
-import { cn } from '@/shared/lib/cn'
-import { Box, Container, Flex, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Box, Button, Container, Dialog, Field, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import {
-  Button,
-  Chip,
-  Input,
-  Label,
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalContainer,
-  ModalDialog,
-  ModalHeader,
-  ModalHeading,
-  TextField,
-} from '@heroui/react'
-import {
-  AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  Download,
   Filter,
-  FolderPlus,
   Loader2,
   RefreshCw,
   RotateCcw,
-  Search,
-  Trash2,
   Video,
-  X,
 } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
@@ -98,8 +77,9 @@ export default function DownloadsVideo() {
   const { mutate: retentarTodosMutate, isPending: pendenteRetentarTodos } = useRetentarTodos()
 
   const itens = respostaPaginada?.data ?? []
-  const paginacao = respostaPaginada?.paginacao
-  const totalPaginas = paginacao ? Math.ceil(paginacao.total / paginacao.porPagina) : 1
+  const total = respostaPaginada?.total ?? 0
+  const porPagina = respostaPaginada?.porPagina ?? 12
+  const totalPaginas = Math.ceil(total / porPagina) || 1
   const temItensComErro = itens.some((item) => item.status === 'erro')
 
   const handleToggleSelect = useCallback((uuid: string) => {
@@ -242,35 +222,45 @@ export default function DownloadsVideo() {
 
   return (
     <AppContainer maxWidth="7xl" paddingY="8" paddingX="6">
-      <Container size="full" className="space-y-8">
-        <Flex className="flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-6">
-          <VStack className="gap-1">
-            <HStack className="gap-2.5">
-              <Box className="p-2 rounded-xl bg-brand-500/10 text-brand-500">
-                <Video className="size-6" />
+      <VStack w="full" gap={8} alignItems="stretch">
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          align={{ base: 'flex-start', md: 'center' }}
+          justify="space-between"
+          gap={4}
+          borderBottomWidth="1px"
+          borderColor="border.subtle"
+          pb={6}
+        >
+          <VStack gap={1} alignItems="flex-start">
+            <HStack gap={2.5}>
+              <Box p={2} borderRadius="xl" bg="brand.500/10" color="brand.500">
+                <Video size={24} />
               </Box>
-              <Text as="h1" className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+              <Text as="h1" fontSize="2xl" fontWeight="bold" color="fg">
                 Downloads de Vídeo
               </Text>
             </HStack>
-            <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+            <Text fontSize="sm" color="fg.subtle">
               Cole links de vídeos do YouTube, TikTok, Twitter e Instagram para ingestão e
               processamento automático.
             </Text>
           </VStack>
 
-          <HStack className="gap-2">
+          <HStack gap={2}>
             {temItensComErro && (
               <Button
                 size="sm"
-                isDisabled={pendenteRetentarTodos}
-                onPress={() => retentarTodosMutate()}
-                className="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900"
+                colorPalette="amber"
+                variant="subtle"
+                disabled={pendenteRetentarTodos}
+                onClick={() => retentarTodosMutate()}
+                borderRadius="xl"
               >
                 {pendenteRetentarTodos ? (
-                  <Loader2 className="size-3.5 animate-spin" />
+                  <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
                 ) : (
-                  <RotateCcw className="size-3.5" />
+                  <RotateCcw size={14} style={{ marginRight: '6px' }} />
                 )}
                 <span>Retentar Falhas</span>
               </Button>
@@ -279,11 +269,11 @@ export default function DownloadsVideo() {
             <Button
               size="sm"
               variant="ghost"
-              isDisabled={isFetching}
-              onPress={() => refetch()}
-              className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+              disabled={isFetching}
+              onClick={() => refetch()}
+              borderRadius="xl"
             >
-              <RefreshCw className={cn('size-3.5', isFetching && 'animate-spin')} />
+              <RefreshCw size={14} style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none', marginRight: '6px' }} />
               <span>Atualizar</span>
             </Button>
           </HStack>
@@ -291,8 +281,18 @@ export default function DownloadsVideo() {
 
         <CampoNovoLink onDownloadIniciado={() => refetch()} />
 
-        <Flex className="flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-2xl border border-zinc-200 dark:border-zinc-800">
-          <Box className="relative flex-1 max-w-md">
+        <Flex
+          direction={{ base: 'column', sm: 'row' }}
+          align={{ base: 'stretch', sm: 'center' }}
+          justify="space-between"
+          gap={3}
+          bg="bg.panel"
+          p={3}
+          borderRadius="2xl"
+          borderWidth="1px"
+          borderColor="border.subtle"
+        >
+          <Box flex={1} maxW="md">
             <Input
               value={busca}
               onChange={(e) => {
@@ -300,13 +300,17 @@ export default function DownloadsVideo() {
                 setPagina(1)
               }}
               placeholder="Buscar por título, canal ou hash..."
-              className="w-full"
+              bg="bg.muted"
+              borderColor="border.subtle"
+              fontSize="xs"
+              h={10}
+              borderRadius="xl"
             />
           </Box>
 
-          <HStack className="gap-2">
-            <HStack className="gap-1 text-xs text-zinc-500">
-              <Filter className="size-3.5" />
+          <HStack gap={2}>
+            <HStack gap={1} fontSize="xs" color="fg.subtle">
+              <Filter size={14} />
               <span>Status:</span>
             </HStack>
             <select
@@ -315,7 +319,20 @@ export default function DownloadsVideo() {
                 setStatusFiltro(e.target.value)
                 setPagina(1)
               }}
-              className="h-10 px-3 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer text-zinc-900 dark:text-zinc-100"
+              style={{
+                height: '40px',
+                paddingLeft: '12px',
+                paddingRight: '12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '500',
+                backgroundColor: 'var(--chakra-colors-bg-muted)',
+                borderColor: 'var(--chakra-colors-border-subtle)',
+                color: 'inherit',
+                borderWidth: '1px',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
               <option value="">Todos os status</option>
               <option value="baixando">Baixando</option>
@@ -335,7 +352,20 @@ export default function DownloadsVideo() {
                 setOrigemFiltro(e.target.value)
                 setPagina(1)
               }}
-              className="h-10 px-3 rounded-xl text-xs font-medium bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-500/20 cursor-pointer text-zinc-900 dark:text-zinc-100"
+              style={{
+                height: '40px',
+                paddingLeft: '12px',
+                paddingRight: '12px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '500',
+                backgroundColor: 'var(--chakra-colors-bg-muted)',
+                borderColor: 'var(--chakra-colors-border-subtle)',
+                color: 'inherit',
+                borderWidth: '1px',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
               <option value="">Todas as origens</option>
               <option value="manual">Manual / Web</option>
@@ -359,34 +389,42 @@ export default function DownloadsVideo() {
           onApagar={handleAbrirApagarIndividual}
         />
 
-        {paginacao && paginacao.total > 0 && (
-          <Flex className="flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <Text className="text-xs text-zinc-500 dark:text-zinc-400">
-              Mostrando {itens.length} de {paginacao.total} registros (Página {pagina} de{' '}
+        {total > 0 && (
+          <Flex
+            direction={{ base: 'column', sm: 'row' }}
+            align="center"
+            justify="space-between"
+            gap={4}
+            pt={4}
+            borderTopWidth="1px"
+            borderColor="border.subtle"
+          >
+            <Text fontSize="xs" color="fg.subtle">
+              Mostrando {itens.length} de {total} registros (Página {pagina} de{' '}
               {totalPaginas})
             </Text>
 
-            <HStack className="gap-2">
+            <HStack gap={2}>
               <Button
                 size="sm"
                 variant="ghost"
-                isDisabled={pagina <= 1 || isFetching}
-                onPress={() => setPagina((p) => Math.max(1, p - 1))}
-                className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+                disabled={pagina <= 1 || isFetching}
+                onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                borderRadius="xl"
               >
-                <ChevronLeft className="size-4" />
+                <ChevronLeft size={16} style={{ marginRight: '4px' }} />
                 <span>Anterior</span>
               </Button>
 
               <Button
                 size="sm"
                 variant="ghost"
-                isDisabled={pagina >= totalPaginas || isFetching}
-                onPress={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200"
+                disabled={pagina >= totalPaginas || isFetching}
+                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                borderRadius="xl"
               >
                 <span>Próxima</span>
-                <ChevronRight className="size-4" />
+                <ChevronRight size={16} style={{ marginLeft: '4px' }} />
               </Button>
             </HStack>
           </Flex>
@@ -402,135 +440,154 @@ export default function DownloadsVideo() {
           processando={pendenteCategorizarLote || pendenteRebaixar || pendenteApagar}
         />
 
-        {/* Modal Editar Metadados */}
-        <Modal
-          isOpen={Boolean(itemEditarMetadata)}
-          onOpenChange={(open) => !open && setItemEditarMetadata(null)}
+        <Dialog.Root
+          open={Boolean(itemEditarMetadata)}
+          onOpenChange={(e) => !e.open && setItemEditarMetadata(null)}
         >
-          <ModalBackdrop isDismissable>
-            <ModalContainer>
-              <ModalDialog className="max-w-lg">
-                <ModalHeader>
-                  <ModalHeading className="text-base font-bold">Editar Metadados</ModalHeading>
-                </ModalHeader>
-                <ModalBody className="gap-4">
-                  <VStack className="gap-3">
-                    <TextField>
-                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Título
-                      </Label>
-                      <Input
-                        type="text"
-                        value={novoTitulo}
-                        onChange={(e) => setNovoTitulo(e.target.value)}
-                        className="w-full"
-                      />
-                    </TextField>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="lg">
+              <Dialog.Header>
+                <Dialog.Title fontSize="md" fontWeight="bold">Editar Metadados</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body py={4}>
+                <VStack gap={4} alignItems="stretch">
+                  <Field.Root>
+                    <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                      Título
+                    </Field.Label>
+                    <Input
+                      type="text"
+                      value={novoTitulo}
+                      onChange={(e) => setNovoTitulo(e.target.value)}
+                      bg="bg.muted"
+                      borderColor="border.subtle"
+                      borderRadius="xl"
+                    />
+                  </Field.Root>
 
-                    <TextField>
-                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Uploader / Canal
-                      </Label>
-                      <Input
-                        type="text"
-                        value={novoUploader}
-                        onChange={(e) => setNovoUploader(e.target.value)}
-                        className="w-full"
-                      />
-                    </TextField>
-                  </VStack>
+                  <Field.Root>
+                    <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                      Uploader / Canal
+                    </Field.Label>
+                    <Input
+                      type="text"
+                      value={novoUploader}
+                      onChange={(e) => setNovoUploader(e.target.value)}
+                      bg="bg.muted"
+                      borderColor="border.subtle"
+                      borderRadius="xl"
+                    />
+                  </Field.Root>
 
-                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-                    <Button size="sm" variant="ghost" onPress={() => setItemEditarMetadata(null)}>
+                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
+                    <Button size="sm" variant="ghost" onClick={() => setItemEditarMetadata(null)}>
                       Cancelar
                     </Button>
                     <Button
                       size="sm"
-                      isDisabled={pendenteMetadata}
-                      onPress={handleSalvarMetadata}
-                      className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                      colorPalette="brand"
+                      disabled={pendenteMetadata}
+                      onClick={handleSalvarMetadata}
+                      fontWeight="semibold"
+                      borderRadius="xl"
                     >
-                      {pendenteMetadata && <Loader2 className="size-3.5 animate-spin" />}
+                      {pendenteMetadata && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />}
                       <span>Salvar Alterações</span>
                     </Button>
                   </HStack>
-                </ModalBody>
-              </ModalDialog>
-            </ModalContainer>
-          </ModalBackdrop>
-        </Modal>
+                </VStack>
+              </Dialog.Body>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
-        {/* Modal Categorizar */}
-        <Modal isOpen={modalCategorizarAberto} onOpenChange={setModalCategorizarAberto}>
-          <ModalBackdrop isDismissable>
-            <ModalContainer>
-              <ModalDialog className="max-w-md">
-                <ModalHeader>
-                  <ModalHeading className="text-base font-bold">
-                    {categoriaAlvoUuid
-                      ? 'Categorizar Vídeo'
-                      : `Categorizar ${selecionados.length} Itens`}
-                  </ModalHeading>
-                </ModalHeader>
-                <ModalBody className="gap-4">
-                  <VStack className="gap-2">
-                    <Text className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Selecione a Categoria de Destino
-                    </Text>
-                    <select
-                      value={categoriaSelecionadaId}
-                      onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
-                      className="w-full h-11 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
-                    >
-                      <option value="">Selecione uma categoria...</option>
-                      {categorias.map((cat) => (
-                        <option key={cat.uuid} value={cat.uuid}>
-                          {cat.nome}
-                        </option>
-                      ))}
-                    </select>
-                  </VStack>
+        <Dialog.Root open={modalCategorizarAberto} onOpenChange={(e) => setModalCategorizarAberto(e.open)}>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+              <Dialog.Header>
+                <Dialog.Title fontSize="md" fontWeight="bold">
+                  {categoriaAlvoUuid
+                    ? 'Categorizar Vídeo'
+                    : `Categorizar ${selecionados.length} Itens`}
+                </Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body py={4}>
+                <VStack gap={4} alignItems="stretch">
+                  <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                    Selecione a Categoria de Destino
+                  </Text>
+                  <select
+                    value={categoriaSelecionadaId}
+                    onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
+                    style={{
+                      width: '100%',
+                      height: '44px',
+                      paddingLeft: '12px',
+                      paddingRight: '12px',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: 'var(--chakra-colors-bg-muted)',
+                      borderColor: 'var(--chakra-colors-border-subtle)',
+                      color: 'inherit',
+                      borderWidth: '1px',
+                      outline: 'none',
+                    }}
+                  >
+                    <option value="">Selecione uma categoria...</option>
+                    {categorias.map((cat) => (
+                      <option key={cat.uuid} value={cat.uuid}>
+                        {cat.nome}
+                      </option>
+                    ))}
+                  </select>
 
-                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onPress={() => setModalCategorizarAberto(false)}
+                      onClick={() => setModalCategorizarAberto(false)}
                     >
                       Cancelar
                     </Button>
                     <Button
                       size="sm"
-                      isDisabled={
+                      colorPalette="brand"
+                      disabled={
                         !categoriaSelecionadaId ||
                         pendenteCategorizarLote ||
                         pendenteClassificarIndividual
                       }
-                      onPress={handleConfirmarCategorizar}
-                      className="bg-brand-500 hover:bg-brand-600 text-white font-semibold"
+                      onClick={handleConfirmarCategorizar}
+                      fontWeight="semibold"
+                      borderRadius="xl"
                     >
                       {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
-                        <Loader2 className="size-3.5 animate-spin" />
+                        <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
                       )}
                       <span>Confirmar Categoria</span>
                     </Button>
                   </HStack>
-                </ModalBody>
-              </ModalDialog>
-            </ModalContainer>
-          </ModalBackdrop>
-        </Modal>
+                </VStack>
+              </Dialog.Body>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
-        {/* Modal Confirmar Apagar */}
-        <Modal isOpen={modalConfirmarApagar} onOpenChange={setModalConfirmarApagar}>
-          <ModalBackdrop isDismissable>
-            <ModalContainer>
-              <ModalDialog className="max-w-md">
-                <ModalHeader>
-                  <ModalHeading className="text-base font-bold">Confirmar Exclusão</ModalHeading>
-                </ModalHeader>
-                <ModalBody className="gap-4">
-                  <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+        <Dialog.Root open={modalConfirmarApagar} onOpenChange={(e) => setModalConfirmarApagar(e.open)}>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+              <Dialog.Header>
+                <Dialog.Title fontSize="md" fontWeight="bold">Confirmar Exclusão</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body py={4}>
+                <VStack gap={4} alignItems="stretch">
+                  <Text fontSize="xs" color="fg.subtle">
                     Tem certeza que deseja apagar{' '}
                     <strong>
                       {itemApagarAlvo
@@ -540,67 +597,73 @@ export default function DownloadsVideo() {
                     ? Esta ação removerá o arquivo físico e o registro do banco.
                   </Text>
 
-                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onPress={() => setModalConfirmarApagar(false)}
+                      onClick={() => setModalConfirmarApagar(false)}
                     >
                       Cancelar
                     </Button>
                     <Button
                       size="sm"
-                      isDisabled={pendenteApagar}
-                      onPress={handleConfirmarApagar}
-                      className="bg-rose-600 hover:bg-rose-700 text-white font-semibold"
+                      colorPalette="red"
+                      disabled={pendenteApagar}
+                      onClick={handleConfirmarApagar}
+                      fontWeight="semibold"
+                      borderRadius="xl"
                     >
-                      {pendenteApagar && <Loader2 className="size-3.5 animate-spin" />}
+                      {pendenteApagar && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />}
                       <span>Sim, Apagar</span>
                     </Button>
                   </HStack>
-                </ModalBody>
-              </ModalDialog>
-            </ModalContainer>
-          </ModalBackdrop>
-        </Modal>
+                </VStack>
+              </Dialog.Body>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
 
-        {/* Modal Confirmar Rebaixar */}
-        <Modal isOpen={modalConfirmarRebaixar} onOpenChange={setModalConfirmarRebaixar}>
-          <ModalBackdrop isDismissable>
-            <ModalContainer>
-              <ModalDialog className="max-w-md">
-                <ModalHeader>
-                  <ModalHeading className="text-base font-bold">Rebaixar Vídeo(s)</ModalHeading>
-                </ModalHeader>
-                <ModalBody className="gap-4">
-                  <Text className="text-xs text-zinc-600 dark:text-zinc-300">
+        <Dialog.Root open={modalConfirmarRebaixar} onOpenChange={(e) => setModalConfirmarRebaixar(e.open)}>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+              <Dialog.Header>
+                <Dialog.Title fontSize="md" fontWeight="bold">Rebaixar Vídeo(s)</Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body py={4}>
+                <VStack gap={4} alignItems="stretch">
+                  <Text fontSize="xs" color="fg.subtle">
                     O download será reenfileirado a partir da URL original gravada nos metadados.
                   </Text>
 
-                  <HStack className="justify-end gap-2 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
                     <Button
                       size="sm"
                       variant="ghost"
-                      onPress={() => setModalConfirmarRebaixar(false)}
+                      onClick={() => setModalConfirmarRebaixar(false)}
                     >
                       Cancelar
                     </Button>
                     <Button
                       size="sm"
-                      isDisabled={pendenteRebaixar}
-                      onPress={handleConfirmarRebaixar}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                      colorPalette="blue"
+                      disabled={pendenteRebaixar}
+                      onClick={handleConfirmarRebaixar}
+                      fontWeight="semibold"
+                      borderRadius="xl"
                     >
-                      {pendenteRebaixar && <Loader2 className="size-3.5 animate-spin" />}
+                      {pendenteRebaixar && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />}
                       <span>Confirmar Rebaixamento</span>
                     </Button>
                   </HStack>
-                </ModalBody>
-              </ModalDialog>
-            </ModalContainer>
-          </ModalBackdrop>
-        </Modal>
-      </Container>
+                </VStack>
+              </Dialog.Body>
+              <Dialog.CloseTrigger />
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      </VStack>
     </AppContainer>
   )
 }

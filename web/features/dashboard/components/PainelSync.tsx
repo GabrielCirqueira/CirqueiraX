@@ -1,6 +1,4 @@
-import { cn } from '@/shared/lib/cn'
-import { Box, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
-import { Button, Card, CardContent, CardHeader, CardTitle, Chip, Skeleton } from '@heroui/react'
+import { Badge, Box, Button, Card, Grid, HStack, IconButton, Skeleton, Text, VStack } from '@chakra-ui/react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -20,7 +18,6 @@ import type { PastaSync } from '../types'
 export interface PainelSyncProps {
   pastas?: PastaSync[]
   carregando?: boolean
-  className?: string
 }
 
 function estadoBadge(estado: string, emSincronizacao: boolean) {
@@ -29,7 +26,7 @@ function estadoBadge(estado: string, emSincronizacao: boolean) {
       label: 'Sincronizando...',
       icon: Loader2,
       animate: true,
-      className: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+      colorPalette: 'blue',
     }
   }
 
@@ -38,7 +35,7 @@ function estadoBadge(estado: string, emSincronizacao: boolean) {
       label: 'Sincronizado',
       icon: CheckCircle2,
       animate: false,
-      className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      colorPalette: 'green',
     }
   }
 
@@ -47,7 +44,7 @@ function estadoBadge(estado: string, emSincronizacao: boolean) {
       label: 'Pausado',
       icon: PauseCircle,
       animate: false,
-      className: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      colorPalette: 'amber',
     }
   }
 
@@ -56,7 +53,7 @@ function estadoBadge(estado: string, emSincronizacao: boolean) {
       label: 'Daemon Offline',
       icon: WifiOff,
       animate: false,
-      className: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
+      colorPalette: 'gray',
     }
   }
 
@@ -64,14 +61,13 @@ function estadoBadge(estado: string, emSincronizacao: boolean) {
     label: estado || 'Ocioso',
     icon: AlertTriangle,
     animate: false,
-    className: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    colorPalette: 'purple',
   }
 }
 
 export const PainelSync = memo(function PainelSync({
   pastas: pastasList,
   carregando: carregandoProp,
-  className,
 }: PainelSyncProps) {
   const { data: statusQuery, isLoading: carregandoQuery, refetch, isFetching } = useStatusSync()
   const { mutate: dispararSync, isPending: sincronizando } = useSincronizarPasta()
@@ -101,20 +97,20 @@ export const PainelSync = memo(function PainelSync({
 
   if (carregando && pastas.length === 0) {
     return (
-      <VStack className={cn('w-full gap-4', className)}>
-        <HStack className="justify-between items-center">
-          <Skeleton className="h-6 w-52 rounded-md" />
-          <Skeleton className="h-8 w-8 rounded-full" />
+      <VStack w="full" gap={4} alignItems="stretch">
+        <HStack justify="space-between" align="center">
+          <Skeleton h={6} w={52} borderRadius="md" />
+          <Skeleton h={8} w={8} borderRadius="full" />
         </HStack>
-        <Grid className="grid-cols-1 md:grid-cols-2 gap-4">
+        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
           {['sync-sk-1', 'sync-sk-2'].map((chave) => (
-            <Card key={chave} className="border border-white/10 bg-black/40 backdrop-blur-md">
-              <CardContent className="p-4">
-                <Skeleton className="h-5 w-40 rounded-md mb-2" />
-                <Skeleton className="h-4 w-56 rounded-md mb-3" />
-                <Skeleton className="h-8 w-28 rounded-lg" />
-              </CardContent>
-            </Card>
+            <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+              <Card.Body p={4}>
+                <Skeleton h={5} w={40} borderRadius="md" mb={2} />
+                <Skeleton h={4} w={56} borderRadius="md" mb={3} />
+                <Skeleton h={8} w={28} borderRadius="lg" />
+              </Card.Body>
+            </Card.Root>
           ))}
         </Grid>
       </VStack>
@@ -122,149 +118,147 @@ export const PainelSync = memo(function PainelSync({
   }
 
   return (
-    <VStack className={cn('w-full gap-4', className)}>
-      {/* ── Cabeçalho do Painel ── */}
-      <HStack className="justify-between items-center flex-wrap gap-2">
-        <HStack className="gap-2.5">
-          <Box className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-            <FolderSync className="w-5 h-5" />
+    <VStack w="full" gap={4} alignItems="stretch">
+      <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
+        <HStack gap={2.5}>
+          <Box p={2} borderRadius="xl" bg="cyan.500/10" color="cyan.500">
+            <FolderSync size={20} />
           </Box>
-          <VStack className="gap-0.5">
-            <Text className="text-base font-semibold text-white">
+          <VStack gap={0.5} alignItems="flex-start">
+            <Text fontSize="base" fontWeight="semibold" color="fg">
               Sincronização com Dispositivos (Syncthing)
             </Text>
-            <Text className="text-xs text-white/50">
+            <Text fontSize="xs" color="fg.subtle">
               Pastas observadas e transferência direta com celular/VPS
             </Text>
           </VStack>
         </HStack>
 
-        <HStack className="gap-2">
-          <Chip
+        <HStack gap={2}>
+          <Badge
             size="sm"
-            variant="soft"
-            className={cn(
-              'h-6 text-[11px] border',
-              isOnline
-                ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20'
-                : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-            )}
+            variant="subtle"
+            colorPalette={isOnline ? 'cyan' : 'gray'}
           >
-            <HStack className="gap-1.5">
+            <HStack gap={1.5}>
               {isOnline ? (
-                <Wifi className="w-3 h-3 text-cyan-400" />
+                <Wifi size={12} color="#06b6d4" />
               ) : (
-                <WifiOff className="w-3 h-3 text-zinc-400" />
+                <WifiOff size={12} />
               )}
               <span>
                 {isOnline ? `Syncthing Ativo ${versao ? `(v${versao})` : ''}` : 'Syncthing Inativo'}
               </span>
             </HStack>
-          </Chip>
+          </Badge>
 
-          <Button
+          <IconButton
             size="sm"
             variant="ghost"
-            isIconOnly
-            onPress={() => refetch()}
-            isDisabled={isFetching}
-            className="text-white/60 hover:text-white bg-white/5 hover:bg-white/10"
+            onClick={() => refetch()}
+            disabled={isFetching}
             aria-label="Atualizar Status"
           >
-            <RefreshCw className={cn('w-3.5 h-3.5', isFetching && 'animate-spin text-cyan-400')} />
-          </Button>
+            <RefreshCw size={14} style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none' }} />
+          </IconButton>
         </HStack>
       </HStack>
 
-      {/* ── Mensagem de Feedback Rápido ── */}
       {mensagemSucesso && (
-        <Box className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+        <Box p={3} borderRadius="xl" bg="emerald.500/10" borderWidth="1px" borderColor="emerald.500/20" color="emerald.500" fontSize="xs" display="flex" alignItems="center" gap={2}>
+          <CheckCircle2 size={16} flexShrink={0} />
           <span>{mensagemSucesso}</span>
         </Box>
       )}
 
-      {/* ── Grid de Pastas Observadas ── */}
       {pastas.length === 0 ? (
-        <Card className="border border-white/10 bg-white/2 backdrop-blur-md p-6 text-center">
-          <CardContent className="flex flex-col items-center justify-center gap-2">
-            <Smartphone className="w-8 h-8 text-white/30" />
-            <Text className="text-sm font-medium text-white/70">
+        <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={6} textAlign="center">
+          <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
+            <Smartphone size={32} style={{ opacity: 0.3 }} />
+            <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
               Nenhuma pasta configurada no daemon do Syncthing.
             </Text>
-            <Text className="text-xs text-white/40">
+            <Text fontSize="xs" color="fg.subtle">
               As pastas sincronizadas pelo app móvel aparecerão aqui automaticamente.
             </Text>
-          </CardContent>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       ) : (
-        <Grid className="grid-cols-1 md:grid-cols-2 gap-4">
+        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
           {pastas.map((pasta) => {
             const badge = estadoBadge(pasta.estado, pasta.emSincronizacao)
             const BadgeIcon = badge.icon
             const estaSincronizandoEstaPasta = sincronizando && pastaEmAcao === pasta.id
 
             return (
-              <Card
+              <Card.Root
                 key={pasta.id}
-                className="border border-white/10 bg-linear-to-br from-white/5 to-white/2 backdrop-blur-xl hover:border-cyan-500/30 transition-all duration-300 shadow-md group"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                bg="bg.panel"
+                shadow="md"
+                transition="all 0.2s"
+                _hover={{ borderColor: 'cyan.500' }}
               >
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <HStack className="gap-2.5">
-                    <Box className="p-2 rounded-xl bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 group-hover:bg-cyan-500/20 transition-colors">
-                      <Smartphone className="w-4 h-4" />
+                <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+                  <HStack gap={2.5}>
+                    <Box p={2} borderRadius="xl" bg="cyan.500/10" color="cyan.400">
+                      <Smartphone size={16} />
                     </Box>
-                    <VStack className="gap-0.5">
-                      <CardTitle className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors">
+                    <VStack gap={0.5} alignItems="flex-start">
+                      <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                         {pasta.label || pasta.id}
-                      </CardTitle>
-                      <Text className="text-[11px] font-mono text-white/40 truncate max-w-[200px]">
+                      </Card.Title>
+                      <Text fontSize="11px" fontFamily="mono" color="fg.subtle" truncate maxW="200px">
                         {pasta.caminho || `ID: ${pasta.id}`}
                       </Text>
                     </VStack>
                   </HStack>
 
-                  <Chip
+                  <Badge
                     size="sm"
-                    variant="soft"
-                    className={cn('h-6 text-[10px] border', badge.className)}
+                    variant="subtle"
+                    colorPalette={badge.colorPalette}
                   >
-                    <HStack className="gap-1">
-                      <BadgeIcon className={cn('w-3 h-3', badge.animate && 'animate-spin')} />
+                    <HStack gap={1}>
+                      <BadgeIcon size={12} style={{ animation: badge.animate ? 'spin 1s linear infinite' : 'none' }} />
                       <span>{badge.label}</span>
                     </HStack>
-                  </Chip>
-                </CardHeader>
+                  </Badge>
+                </Card.Header>
 
-                <CardContent className="pt-2">
-                  <HStack className="justify-between items-center py-2 border-t border-white/5 text-xs text-white/60">
-                    <HStack className="gap-1.5">
-                      <HardDrive className="w-3.5 h-3.5 text-cyan-400" />
+                <Card.Body pt={2}>
+                  <HStack justify="space-between" align="center" py={2} borderTopWidth="1px" borderColor="border.subtle" fontSize="xs" color="fg.subtle">
+                    <HStack gap={1.5}>
+                      <HardDrive size={14} color="#06b6d4" />
                       <span>{pasta.tamanhoFormatado || '0 B'}</span>
                     </HStack>
 
                     <Button
                       size="sm"
                       variant="ghost"
-                      isDisabled={estaSincronizandoEstaPasta || pasta.emSincronizacao}
-                      onPress={() => handleSincronizar(pasta.id)}
-                      className="h-7 text-xs bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 border border-cyan-500/30 font-medium"
+                      colorPalette="cyan"
+                      disabled={estaSincronizandoEstaPasta || pasta.emSincronizacao}
+                      onClick={() => handleSincronizar(pasta.id)}
+                      fontSize="xs"
+                      fontWeight="medium"
+                      h={7}
                     >
                       {estaSincronizandoEstaPasta ? (
-                        <HStack className="gap-1.5">
-                          <Loader2 className="w-3 h-3 animate-spin" />
+                        <HStack gap={1.5}>
+                          <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
                           <span>Solicitando...</span>
                         </HStack>
                       ) : (
-                        <HStack className="gap-1.5">
-                          <RefreshCw className="w-3 h-3" />
+                        <HStack gap={1.5}>
+                          <RefreshCw size={12} />
                           <span>Sincronizar agora</span>
                         </HStack>
                       )}
                     </Button>
                   </HStack>
-                </CardContent>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             )
           })}
         </Grid>

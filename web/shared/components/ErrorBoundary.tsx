@@ -1,5 +1,4 @@
-import { Box, Text, VStack } from '@/shared/ui/layout'
-import { Button } from '@heroui/react'
+import { Box, Button, Text, VStack } from '@chakra-ui/react'
 import { AlertTriangle } from 'lucide-react'
 import * as React from 'react'
 
@@ -32,20 +31,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       if (this.props.fallback) return this.props.fallback
 
       return (
-        <VStack className="min-h-50 items-center justify-center gap-4 p-8 text-center">
-          <Box className="size-12 rounded-xl bg-danger/10 flex items-center justify-center">
-            <AlertTriangle className="size-6 text-danger" />
+        <VStack minH="200px" alignItems="center" justifyContent="center" gap={4} p={8} textAlign="center">
+          <Box w={12} h={12} borderRadius="xl" bg="rose.500/10" display="flex" alignItems="center" justifyContent="center">
+            <AlertTriangle size={24} color="#f43f5e" />
           </Box>
-          <VStack className="gap-1">
-            <Text className="font-semibold">Algo deu errado</Text>
-            <Text className="text-sm text-muted">
+          <VStack gap={1}>
+            <Text fontWeight="semibold" color="white">Algo deu errado</Text>
+            <Text fontSize="sm" color="zinc.400">
               {this.state.error?.message ?? 'Erro inesperado'}
             </Text>
           </VStack>
           <Button
             size="sm"
-            variant="danger-soft"
-            onPress={() => this.setState({ hasError: false, error: undefined })}
+            colorPalette="red"
+            variant="subtle"
+            onClick={() => this.setState({ hasError: false, error: undefined })}
           >
             Tentar novamente
           </Button>

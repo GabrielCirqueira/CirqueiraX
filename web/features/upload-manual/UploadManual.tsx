@@ -7,8 +7,8 @@ import {
   retentarMediaItem,
 } from '@/features/downloads-video/api'
 import { AppContainer } from '@/layouts'
-import { Container, HStack, Text, VStack } from '@/shared/ui/layout'
-import { Button, Chip, toast } from '@heroui/react'
+import { addToast } from '@/shared/components/ui/toaster'
+import { Badge, Button, Container, HStack, Text, VStack } from '@chakra-ui/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, FolderCheck, RefreshCw } from 'lucide-react'
 import { memo, useCallback, useMemo, useState } from 'react'
@@ -36,13 +36,11 @@ const UploadManual = memo(function UploadManual() {
     reenviarItemIndividual,
   } = useUploadManual()
 
-  // Buscar categorias cadastradas
   const { data: categorias = [] } = useQuery({
     queryKey: ['categorias'],
     queryFn: listarCategorias,
   })
 
-  // Buscar mídias enviadas via upload/triagem
   const { data: respostaMedia, isLoading: carregandoMedia } = useQuery({
     queryKey: ['media-itens', 'upload-manual', filtroStatus, busca],
     queryFn: () =>
@@ -58,59 +56,54 @@ const UploadManual = memo(function UploadManual() {
 
   const itensMedia = useMemo(() => respostaMedia?.data ?? [], [respostaMedia])
 
-  // Mutation: Classificar Individual
   const mutationClassificar = useMutation({
     mutationFn: ({ uuid, categoriaId }: { uuid: string; categoriaId: string }) =>
       classificarCategoriaIndividual(uuid, categoriaId),
     onSuccess: () => {
-      toast.success('Categoria atribuída com sucesso!')
+      addToast({ title: 'Categoria atribuída com sucesso!', color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao atribuir categoria.')
+      addToast({ title: 'Falha ao atribuir categoria.', color: 'danger' })
     },
   })
 
-  // Mutation: Categorizar em Lote
   const mutationCategorizarLote = useMutation({
     mutationFn: ({ uuids, categoriaId }: { uuids: string[]; categoriaId: string }) =>
       categorizarLote({ uuids, categoriaId }),
     onSuccess: (itens) => {
-      toast.success(`${itens.length} mídia(s) categorizada(s) com sucesso!`)
+      addToast({ title: `${itens.length} mídia(s) categorizada(s) com sucesso!`, color: 'success' })
       setSelecionados([])
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao categorizar itens em lote.')
+      addToast({ title: 'Falha ao categorizar itens em lote.', color: 'danger' })
     },
   })
 
-  // Mutation: Apagar em Lote
   const mutationApagarLote = useMutation({
     mutationFn: (uuids: string[]) => apagarLote({ uuids }),
     onSuccess: (res) => {
-      toast.success(`${res.removidos.length} item(ns) apagado(s) com sucesso!`)
+      addToast({ title: `${res.removidos.length} item(ns) apagado(s) com sucesso!`, color: 'success' })
       setSelecionados([])
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao apagar itens selecionados.')
+      addToast({ title: 'Falha ao apagar itens selecionados.', color: 'danger' })
     },
   })
 
-  // Mutation: Retentar Item
   const mutationRetentar = useMutation({
     mutationFn: (uuid: string) => retentarMediaItem(uuid),
     onSuccess: () => {
-      toast.success('Item reenviado para o motor de mensagens!')
+      addToast({ title: 'Item reenviado para o motor de mensagens!', color: 'success' })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
-      toast.danger('Falha ao retentar processamento do item.')
+      addToast({ title: 'Falha ao retentar processamento do item.', color: 'danger' })
     },
   })
 
-  // Callbacks de seleção
   const handleToggleSelect = useCallback((uuid: string) => {
     setSelecionados((prev) =>
       prev.includes(uuid) ? prev.filter((id) => id !== uuid) : [...prev, uuid]
@@ -125,55 +118,46 @@ const UploadManual = memo(function UploadManual() {
 
   return (
     <AppContainer>
-      <Container size="xl" className="py-8 space-y-8">
-        {/* Top Header Navegação & Título */}
-        <VStack className="gap-4">
-          <HStack className="justify-between">
+      <Container maxW="6xl" py={8} spaceY={8}>
+        <VStack gap={4} alignItems="stretch">
+          <HStack justify="space-between">
             <Link
               to="/downloads"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#a1a1aa' }}
             >
-              <ArrowLeft className="size-4" />
+              <ArrowLeft size={16} />
               <span>Voltar para Downloads</span>
             </Link>
 
-            <HStack className="gap-2">
+            <HStack gap={2}>
               <Button
-                size="sm"
+                size="xs"
                 variant="ghost"
-                isIconOnly
-                onPress={() => queryClient.invalidateQueries({ queryKey: ['media-itens'] })}
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['media-itens'] })}
                 aria-label="Atualizar lista"
+                p={1.5}
               >
-                <RefreshCw className="size-4 text-zinc-600 dark:text-zinc-300" />
+                <RefreshCw size={16} color="#d4d4d8" />
               </Button>
             </HStack>
           </HStack>
 
-          <VStack className="gap-1">
-            <HStack className="gap-2.5">
-              <Text
-                as="h1"
-                className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-100"
-              >
+          <VStack gap={1} alignItems="flex-start">
+            <HStack gap={2.5}>
+              <Text as="h1" fontSize={{ base: '2xl', sm: '3xl' }} fontWeight="900" color="white">
                 Upload Manual & Triagem
               </Text>
-              <Chip
-                size="sm"
-                variant="soft"
-                className="bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20"
-              >
+              <Badge variant="subtle" colorPalette="purple" px={2} py={0.5} borderRadius="md">
                 Feature 4
-              </Chip>
+              </Badge>
             </HStack>
-            <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+            <Text fontSize="sm" color="zinc.400">
               Envie fotos ou vídeos locais diretamente para o sistema e realize a classificação e
               triagem rápida por categorias.
             </Text>
           </VStack>
         </VStack>
 
-        {/* Dropzone de Upload (Tópico 97) */}
         <DropzoneUpload
           fila={fila}
           estaProcessando={estaProcessando}
@@ -188,11 +172,10 @@ const UploadManual = memo(function UploadManual() {
           onReenviarItem={reenviarItemIndividual}
         />
 
-        {/* Fila de Triagem & Mídias Enviadas (Tópico 98) */}
-        <VStack className="gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-          <HStack className="gap-2">
-            <FolderCheck className="size-5 text-brand-500" />
-            <Text as="h2" className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+        <VStack gap={4} pt={4} borderTop="1px solid" borderColor="zinc.800" alignItems="flex-start">
+          <HStack gap={2}>
+            <FolderCheck size={20} color="#8b5cf6" />
+            <Text as="h2" fontSize="lg" fontWeight="bold" color="white">
               Triagem de Mídias Recebidas
             </Text>
           </HStack>

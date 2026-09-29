@@ -1,31 +1,11 @@
 import type { MediaItem } from '@/features/downloads-video/types'
-import { cn } from '@/shared/lib/cn'
-import { Box, Flex, Grid, HStack, Text, VStack } from '@/shared/ui/layout'
+import { Badge, Box, Button, Card, Dialog, Flex, Grid, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import {
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Input,
-  Modal,
-  ModalBackdrop,
-  ModalBody,
-  ModalContainer,
-  ModalDialog,
-  ModalHeader,
-  ModalHeading,
-  Tab,
-  TabList,
-  Tabs,
-} from '@heroui/react'
-import {
-  CheckCircle2,
   CheckSquare,
   FileImage,
   FileVideo,
   FolderPlus,
   RefreshCw,
-  Search,
   Square,
   Trash2,
   Upload,
@@ -78,98 +58,136 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
     setCategoriaLoteId('')
   }
 
-  return (
-    <VStack className="w-full gap-6">
-      {/* Filtros e Busca */}
-      <Flex className="flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
-        {/* Abas de Filtro usando HeroUI Tabs */}
-        <Tabs selectedKey={filtroStatus} onSelectionChange={(k) => onMudarFiltroStatus(String(k))}>
-          <TabList className="gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
-            <Tab id="todos" className="px-3 py-1.5 text-xs font-semibold rounded-lg">
-              Todas
-            </Tab>
-            <Tab id="sem_categoria" className="px-3 py-1.5 text-xs font-semibold rounded-lg">
-              Sem Categoria
-            </Tab>
-            <Tab id="classificado" className="px-3 py-1.5 text-xs font-semibold rounded-lg">
-              Classificadas
-            </Tab>
-            <Tab id="erro" className="px-3 py-1.5 text-xs font-semibold rounded-lg">
-              Com Erro
-            </Tab>
-          </TabList>
-        </Tabs>
+  const abasFiltro = [
+    { value: 'todos', label: 'Todas' },
+    { value: 'sem_categoria', label: 'Sem Categoria' },
+    { value: 'classificado', label: 'Classificadas' },
+    { value: 'erro', label: 'Com Erro' },
+  ]
 
-        {/* Input de Busca usando HeroUI Input */}
-        <Box className="w-full sm:w-64">
+  return (
+    <VStack w="full" gap={6}>
+      <Flex
+        w="full"
+        direction={{ base: 'column', sm: 'row' }}
+        align={{ base: 'stretch', sm: 'center' }}
+        justify="space-between"
+        gap={4}
+        bg="bg.panel"
+        p={4}
+        borderRadius="2xl"
+        borderWidth="1px"
+        borderColor="border.subtle"
+        shadow="sm"
+      >
+        <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl">
+          {abasFiltro.map((aba) => (
+            <Button
+              key={aba.value}
+              size="xs"
+              variant={filtroStatus === aba.value ? 'solid' : 'ghost'}
+              colorPalette={filtroStatus === aba.value ? 'brand' : 'gray'}
+              onClick={() => onMudarFiltroStatus(aba.value)}
+              px={3}
+              py={1.5}
+              fontSize="xs"
+              fontWeight="semibold"
+              borderRadius="lg"
+            >
+              {aba.label}
+            </Button>
+          ))}
+        </HStack>
+
+        <Box w={{ base: 'full', sm: '64' }}>
           <Input
             value={busca}
             onChange={(e) => onMudarBusca(e.target.value)}
             placeholder="Buscar por nome ou hash..."
-            className="w-full"
+            bg="bg.muted"
+            borderColor="border.subtle"
+            fontSize="xs"
+            h={9}
+            borderRadius="xl"
           />
         </Box>
       </Flex>
 
-      {/* Seleção em Lote & Status */}
       {itens.length > 0 && (
-        <Flex className="items-center justify-between px-1">
+        <Flex w="full" align="center" justify="space-between" px={1}>
           <Button
-            variant="quiet"
-            size="sm"
-            onPress={onToggleSelectAll}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+            variant="ghost"
+            size="xs"
+            onClick={onToggleSelectAll}
+            fontSize="xs"
+            fontWeight="semibold"
+            color="fg.subtle"
+            _hover={{ color: 'fg' }}
           >
-            {todosSelecionados ? (
-              <CheckSquare className="size-4 text-brand-500" />
-            ) : (
-              <Square className="size-4" />
-            )}
-            <Text as="span">
-              {todosSelecionados
-                ? 'Desmarcar todos'
-                : algunsSelecionados
-                  ? `Selecionados (${selecionados.length}/${itens.length})`
-                  : 'Selecionar todos'}
-            </Text>
+            <HStack gap={2}>
+              {todosSelecionados ? (
+                <CheckSquare size={16} color="#8b5cf6" />
+              ) : (
+                <Square size={16} />
+              )}
+              <Text as="span">
+                {todosSelecionados
+                  ? 'Desmarcar todos'
+                  : algunsSelecionados
+                    ? `Selecionados (${selecionados.length}/${itens.length})`
+                    : 'Selecionar todos'}
+              </Text>
+            </HStack>
           </Button>
 
-          <Text className="text-xs text-zinc-400 font-medium">
+          <Text fontSize="xs" color="fg.subtle" fontWeight="medium">
             Exibindo {itens.length} item(ns)
           </Text>
         </Flex>
       )}
 
-      {/* Estado de Carregamento */}
       {carregando && (
-        <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Grid w="full" templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
           {Array.from({ length: 4 }).map((_, i) => (
             <Box
               key={`skeleton-${i + 1}`}
-              className="h-48 rounded-2xl bg-zinc-200 dark:bg-zinc-800 animate-pulse"
+              h={48}
+              borderRadius="2xl"
+              bg="bg.muted"
             />
           ))}
         </Grid>
       )}
 
-      {/* Fila Vazia */}
       {!carregando && itens.length === 0 && (
-        <VStack className="items-center justify-center py-16 px-4 text-center rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 gap-3">
-          <Box className="p-4 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400">
-            <Upload className="size-8" strokeWidth={1.5} />
+        <VStack
+          w="full"
+          align="center"
+          justify="center"
+          py={16}
+          px={4}
+          textAlign="center"
+          borderRadius="2xl"
+          borderWidth="1px"
+          borderStyle="dashed"
+          borderColor="border.subtle"
+          bg="bg.panel"
+          gap={3}
+        >
+          <Box p={4} borderRadius="full" bg="bg.muted" color="fg.subtle">
+            <Upload size={32} strokeWidth={1.5} />
           </Box>
-          <Text as="h3" className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+          <Text as="h3" fontSize="md" fontWeight="bold" color="fg">
             Nenhuma mídia encontrada na triagem
           </Text>
-          <Text className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm">
+          <Text fontSize="xs" color="fg.subtle" maxW="sm">
             Envie arquivos no painel de upload manual acima ou selecione outros filtros.
           </Text>
         </VStack>
       )}
 
-      {/* Grid de Cards de Mídia */}
       {!carregando && itens.length > 0 && (
-        <Grid className="grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Grid w="full" templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
           {itens.map((item) => {
             const ehSelecionado = selecionados.includes(item.uuid)
             const ehVideo =
@@ -178,100 +196,148 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               item.caminhoLocal?.endsWith('.webm')
 
             return (
-              <Card
+              <Card.Root
                 key={item.uuid}
-                className={cn(
-                  'relative rounded-2xl border bg-white dark:bg-zinc-900 overflow-hidden shadow-none transition-all flex flex-col justify-between',
-                  ehSelecionado
-                    ? 'border-brand-500 ring-2 ring-brand-500/20'
-                    : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                )}
+                position="relative"
+                borderRadius="2xl"
+                borderWidth={ehSelecionado ? '2px' : '1px'}
+                borderColor={ehSelecionado ? 'brand.500' : 'border.subtle'}
+                bg="bg.panel"
+                overflow="hidden"
+                shadow="none"
+                transition="all 0.2s"
+                display="flex"
+                flexDirection="column"
+                justifyContent="space-between"
+                _hover={{ borderColor: ehSelecionado ? 'brand.500' : 'border.muted' }}
               >
-                {/* Seleção Checkbox Overlay */}
                 <Button
-                  size="sm"
-                  variant="quiet"
-                  isIconOnly
-                  onPress={() => onToggleSelect(item.uuid)}
-                  className="absolute top-3 left-3 z-10 p-1 rounded-lg bg-black/40 hover:bg-black/60 text-white backdrop-blur-md transition-colors"
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => onToggleSelect(item.uuid)}
+                  position="absolute"
+                  top={3}
+                  left={3}
+                  zIndex={10}
+                  p={1.5}
+                  borderRadius="lg"
+                  bg="blackAlpha.600"
+                  _hover={{ bg: 'blackAlpha.800' }}
+                  color="white"
+                  backdropFilter="blur(8px)"
                   aria-label="Selecionar item"
                 >
                   {ehSelecionado ? (
-                    <CheckSquare className="size-4 text-brand-400" />
+                    <CheckSquare size={16} color="#a78bfa" />
                   ) : (
-                    <Square className="size-4" />
+                    <Square size={16} />
                   )}
                 </Button>
 
-                {/* Header / Thumbnail Placeholder */}
-                <Box className="relative aspect-video w-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border-b border-zinc-100 dark:border-zinc-800">
+                <Box position="relative" aspectRatio="16/9" w="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center" borderBottomWidth="1px" borderColor="border.subtle">
                   {ehVideo ? (
-                    <FileVideo className="size-10 text-indigo-500/80" />
+                    <FileVideo size={40} color="#6366f1" />
                   ) : (
-                    <FileImage className="size-10 text-emerald-500/80" />
+                    <FileImage size={40} color="#10b981" />
                   )}
 
-                  {/* Origem Badge */}
-                  <Chip
-                    size="sm"
-                    className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider bg-black/50 text-white backdrop-blur-md border-0"
+                  <Badge
+                    variant="subtle"
+                    colorPalette="gray"
+                    position="absolute"
+                    top={3}
+                    right={3}
+                    fontSize="10px"
+                    fontWeight="bold"
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                    bg="blackAlpha.600"
+                    color="white"
+                    backdropFilter="blur(8px)"
+                    borderWidth="0"
+                    px={2}
+                    py={0.5}
+                    borderRadius="md"
                   >
                     {item.origemDescricao ?? item.origem}
-                  </Chip>
+                  </Badge>
                 </Box>
 
-                {/* Corpo do Card */}
-                <CardContent className="p-4 gap-3 flex-1 flex flex-col justify-between">
-                  <VStack className="gap-1.5">
+                <Card.Body p={4} gap={3} flex={1} display="flex" flexDirection="column" justifyContent="space-between">
+                  <VStack gap={1.5} alignItems="flex-start" w="full">
                     <Text
                       as="h4"
-                      className="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate"
+                      fontWeight="bold"
+                      fontSize="xs"
+                      color="fg"
+                      truncate
+                      w="full"
                     >
-                      {item.metadata?.nome_original ??
-                        item.caminhoLocal?.split('/').pop() ??
-                        item.uuid}
+                      {String(
+                        item.metadata?.nome_original ??
+                          item.caminhoLocal?.split('/').pop() ??
+                          item.uuid
+                      )}
                     </Text>
 
-                    <HStack className="gap-2">
+                    <HStack gap={2} w="full">
                       {item.categoria ? (
-                        <Chip
-                          size="sm"
-                          variant="soft"
-                          className="bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20"
+                        <Badge
+                          variant="subtle"
+                          colorPalette="brand"
+                          px={2}
+                          py={0.5}
+                          borderRadius="md"
                         >
-                          <HStack className="gap-1 items-center">
-                            <FolderPlus className="size-3" />
+                          <HStack gap={1} alignItems="center">
+                            <FolderPlus size={12} />
                             <span>{item.categoria.nome}</span>
                           </HStack>
-                        </Chip>
+                        </Badge>
                       ) : (
-                        <Chip
-                          size="sm"
-                          variant="soft"
-                          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                        <Badge
+                          variant="subtle"
+                          colorPalette="amber"
+                          px={2}
+                          py={0.5}
+                          borderRadius="md"
                         >
                           Sem Categoria
-                        </Chip>
+                        </Badge>
                       )}
 
-                      <Text as="span" className="text-[10px] font-mono text-zinc-400">
+                      <Text as="span" fontSize="10px" fontFamily="mono" color="fg.subtle">
                         {item.hash.substring(0, 8)}...
                       </Text>
                     </HStack>
                   </VStack>
 
-                  {/* Seletor Rápido de Categoria */}
-                  <VStack className="gap-1 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <VStack gap={1} pt={2} borderTopWidth="1px" borderColor="border.subtle" alignItems="flex-start" w="full">
                     <Text
-                      as="label"
-                      className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400"
+                      as="span"
+                      fontSize="11px"
+                      fontWeight="medium"
+                      color="fg.subtle"
                     >
                       Atribuir Categoria:
                     </Text>
                     <select
                       value={item.categoriaId ?? ''}
                       onChange={(e) => onClassificarIndividual(item.uuid, e.target.value)}
-                      className="w-full h-8 px-2 rounded-lg text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
+                      style={{
+                        width: '100%',
+                        height: '32px',
+                        paddingLeft: '8px',
+                        paddingRight: '8px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        backgroundColor: 'var(--chakra-colors-bg-muted)',
+                        borderColor: 'var(--chakra-colors-border-subtle)',
+                        color: 'inherit',
+                        borderWidth: '1px',
+                        outline: 'none',
+                      }}
                     >
                       <option value="">Selecione uma categoria...</option>
                       {categorias.map((cat) => (
@@ -281,64 +347,65 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       ))}
                     </select>
                   </VStack>
-                </CardContent>
+                </Card.Body>
 
-                {/* Footer do Card com Ações */}
-                <HStack className="px-4 py-2.5 bg-zinc-50 dark:bg-zinc-800/40 border-t border-zinc-100 dark:border-zinc-800 justify-between">
-                  <Text as="span" className="text-[11px] font-medium text-zinc-400">
+                <HStack px={4} py={2.5} bg="bg.muted" borderTopWidth="1px" borderColor="border.subtle" justify="space-between" w="full">
+                  <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                     {item.statusDescricao ?? item.status}
                   </Text>
 
-                  <HStack className="gap-1">
+                  <HStack gap={1}>
                     {item.status === 'erro' && (
                       <Button
-                        size="sm"
-                        variant="quiet"
-                        isIconOnly
-                        onPress={() => onRetentar(item.uuid)}
+                        size="xs"
+                        variant="ghost"
+                        onClick={() => onRetentar(item.uuid)}
                         aria-label="Retentar processamento"
+                        p={1.5}
                       >
-                        <RefreshCw className="size-3.5 text-zinc-400 hover:text-brand-500" />
+                        <RefreshCw size={14} />
                       </Button>
                     )}
                   </HStack>
                 </HStack>
-              </Card>
+              </Card.Root>
             )
           })}
         </Grid>
       )}
 
-      {/* Barra Flutuante de Ações em Lote */}
       {selecionados.length > 0 && (
-        <Box className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-xl animate-in fade-in slide-in-from-bottom-5 duration-200">
-          <Flex className="items-center justify-between gap-3 p-3 px-5 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-lg shadow-2xl">
-            <HStack className="gap-2">
-              <Chip size="sm" className="bg-brand-500 text-white font-bold">
+        <Box position="fixed" bottom={6} left="50%" transform="translateX(-50%)" zIndex={50} w="92%" maxW="xl">
+          <Flex align="center" justify="space-between" gap={3} p={3} px={5} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" backdropFilter="blur(16px)" shadow="2xl">
+            <HStack gap={2}>
+              <Badge colorPalette="brand" px={2} py={0.5} borderRadius="md" fontWeight="bold">
                 {selecionados.length}
-              </Chip>
-              <Text as="span" className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+              </Badge>
+              <Text as="span" fontSize="xs" fontWeight="semibold" color="fg">
                 selecionado(s)
               </Text>
             </HStack>
 
-            <HStack className="gap-2">
+            <HStack gap={2}>
               <Button
                 size="sm"
-                onPress={() => setModalCategorizarAberto(true)}
-                className="bg-brand-500 text-white font-semibold"
+                colorPalette="brand"
+                onClick={() => setModalCategorizarAberto(true)}
+                fontWeight="semibold"
+                borderRadius="xl"
               >
-                <FolderPlus className="size-3.5" />
+                <FolderPlus size={14} style={{ marginRight: '4px' }} />
                 <span>Categorizar</span>
               </Button>
 
               <Button
                 size="sm"
-                variant="quiet"
-                onPress={onApagarEmLote}
-                className="bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900 hover:bg-rose-100"
+                variant="subtle"
+                colorPalette="red"
+                onClick={onApagarEmLote}
+                borderRadius="xl"
               >
-                <Trash2 className="size-3.5" />
+                <Trash2 size={14} style={{ marginRight: '4px' }} />
                 <span>Apagar</span>
               </Button>
             </HStack>
@@ -346,51 +413,68 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         </Box>
       )}
 
-      {/* Modal de Categorização em Lote usando HeroUI Modal */}
-      <Modal isOpen={modalCategorizarAberto} onOpenChange={setModalCategorizarAberto}>
-        <ModalBackdrop />
-        <ModalContainer>
-          <ModalDialog className="max-w-md">
-            <ModalHeader>
-              <ModalHeading className="text-base font-bold">
+      <Dialog.Root open={modalCategorizarAberto} onOpenChange={(e) => setModalCategorizarAberto(e.open)}>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+            <Dialog.Header>
+              <Dialog.Title fontSize="md" fontWeight="bold">
                 Categorizar {selecionados.length} item(ns) em lote
-              </ModalHeading>
-            </ModalHeader>
-            <ModalBody className="gap-4">
-              <Text className="text-xs text-zinc-500 dark:text-zinc-400">
-                Escolha a categoria que será atribuída a todas as mídias selecionadas:
-              </Text>
+              </Dialog.Title>
+            </Dialog.Header>
+            <Dialog.Body py={4}>
+              <VStack gap={4} alignItems="stretch">
+                <Text fontSize="xs" color="fg.subtle">
+                  Escolha a categoria que será atribuída a todas as mídias selecionadas:
+                </Text>
 
-              <select
-                value={categoriaLoteId}
-                onChange={(e) => setCategoriaLoteId(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none"
-              >
-                <option value="">Selecione a categoria...</option>
-                {categorias.map((cat) => (
-                  <option key={cat.uuid} value={cat.uuid}>
-                    {cat.nome}
-                  </option>
-                ))}
-              </select>
-
-              <HStack className="justify-end gap-2 pt-2">
-                <Button size="sm" variant="quiet" onPress={() => setModalCategorizarAberto(false)}>
-                  Cancelar
-                </Button>
-                <Button
-                  size="sm"
-                  isDisabled={!categoriaLoteId}
-                  onPress={handleConfirmarCategorizarLote}
-                  className="bg-brand-500 text-white font-bold"
+                <select
+                  value={categoriaLoteId}
+                  onChange={(e) => setCategoriaLoteId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '40px',
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    backgroundColor: 'var(--chakra-colors-bg-muted)',
+                    borderColor: 'var(--chakra-colors-border-subtle)',
+                    color: 'inherit',
+                    borderWidth: '1px',
+                    outline: 'none',
+                  }}
                 >
-                  Aplicar Categoria
-                </Button>
-              </HStack>
-            </ModalBody>
-          </ModalDialog>
-        </ModalContainer>
-      </Modal>
+                  <option value="">Selecione a categoria...</option>
+                  {categorias.map((cat) => (
+                    <option key={cat.uuid} value={cat.uuid}>
+                      {cat.nome}
+                    </option>
+                  ))}
+                </select>
+
+                <HStack justify="flex-end" gap={2} pt={2}>
+                  <Button size="sm" variant="ghost" onClick={() => setModalCategorizarAberto(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorPalette="brand"
+                    disabled={!categoriaLoteId}
+                    onClick={handleConfirmarCategorizarLote}
+                    fontWeight="bold"
+                    borderRadius="xl"
+                  >
+                    Aplicar Categoria
+                  </Button>
+                </HStack>
+              </VStack>
+            </Dialog.Body>
+            <Dialog.CloseTrigger />
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Dialog.Root>
     </VStack>
   )
 })

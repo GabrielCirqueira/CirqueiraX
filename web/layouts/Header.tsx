@@ -1,7 +1,6 @@
 import { useTheme } from '@/contexts'
-import { Box, HStack, Text } from '@/shared/ui/layout'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { Button, Chip } from '@heroui/react'
+import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
 import { Code2, LogIn, LogOut, Moon, Sun, User } from 'lucide-react'
 import { memo } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -13,10 +12,10 @@ const navLinks = [
 ]
 
 interface HeaderProps {
-  onAbrirModal: () => void
+  onAbrirModal?: () => void
 }
 
-export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
+export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: HeaderProps) {
   const autenticado = useAuthStore((s) => s.autenticado)
   const usuario = useAuthStore((s) => s.usuario)
   const limparAuth = useAuthStore((s) => s.limpar)
@@ -31,21 +30,39 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <HStack className="max-w-6xl mx-auto px-6 h-14 justify-between">
+    <Box
+      as="header"
+      position="sticky"
+      top={0}
+      zIndex={50}
+      borderBottom="1px solid"
+      borderColor="whiteAlpha.200"
+      bg="zinc.950/80"
+      backdropFilter="blur(12px)"
+    >
+      <HStack maxW="6xl" mx="auto" px={6} h={14} justify="space-between">
         <Link to={autenticado ? '/dashboard' : '/login'}>
-          <HStack>
-            <Box className="size-7 rounded-lg bg-brand-500 flex items-center justify-center">
-              <Code2 className="size-4 text-white" strokeWidth={2.5} />
+          <HStack gap={2}>
+            <Box w={7} h={7} borderRadius="lg" bg="brand.500" display="flex" alignItems="center" justifyContent="center">
+              <Code2 size={16} color="white" strokeWidth={2.5} />
             </Box>
-            <Text as="span" className="font-black font-sans text-sm tracking-tight">
+            <Text as="span" fontWeight="900" fontSize="sm" letterSpacing="tight">
               Cirqueira
-              <Text as="span" className="text-brand-500">
+              <Text as="span" color="brand.500">
                 X
               </Text>{' '}
               <Text
                 as="span"
-                className="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-500 border border-brand-500/20 ml-1"
+                fontSize="xs"
+                fontWeight="semibold"
+                px={2}
+                py={0.5}
+                borderRadius="full"
+                bg="brand.500/10"
+                color="brand.500"
+                border="1px solid"
+                borderColor="brand.500/20"
+                ml={1}
               >
                 Media
               </Text>
@@ -54,54 +71,57 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
         </Link>
 
         {autenticado && (
-          <nav className="hidden md:flex items-center gap-6 text-sm text-muted">
+          <Flex display={{ base: 'none', md: 'flex' }} alignItems="center" gap={6} fontSize="sm" color="zinc.400">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 to={link.href}
-                className={`transition-colors hover:text-foreground ${
-                  pathname === link.href ? 'text-brand-400 font-semibold' : ''
-                }`}
+                style={{
+                  color: pathname === link.href ? '#a855f7' : undefined,
+                  fontWeight: pathname === link.href ? 600 : undefined,
+                  transition: 'color 0.2s',
+                }}
               >
                 {link.label}
               </Link>
             ))}
-          </nav>
+          </Flex>
         )}
 
-        <HStack className="gap-2">
+        <HStack gap={2}>
           <Button
-            size="sm"
+            size="xs"
             variant="ghost"
-            isIconOnly
-            onPress={toggleTheme}
+            onClick={toggleTheme}
             aria-label="Alternar tema"
+            p={1.5}
           >
-            {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </Button>
 
           {autenticado ? (
-            <HStack className="gap-2 items-center">
-              <Chip color="success" variant="soft" size="sm">
-                <User className="size-3 mr-1" />
+            <HStack gap={2} alignItems="center">
+              <Badge colorPalette="green" variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="xs" display="flex" alignItems="center">
+                <User size={12} style={{ marginRight: '4px' }} />
                 {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
-              </Chip>
+              </Badge>
               <Button
-                size="sm"
+                size="xs"
                 variant="ghost"
-                isIconOnly
-                onPress={handleLogout}
-                className="text-zinc-400 hover:text-rose-400"
+                onClick={handleLogout}
+                color="zinc.400"
+                _hover={{ color: 'rose.400' }}
+                p={1.5}
                 aria-label="Sair da conta"
               >
-                <LogOut className="size-4" />
+                <LogOut size={16} />
               </Button>
             </HStack>
           ) : (
             !isLoginPage && (
               <Link to="/login">
-                <Button size="sm" variant="primary">
-                  <LogIn className="size-3.5 mr-1" />
+                <Button size="sm" bg="brand.500" _hover={{ bg: 'brand.600' }} color="white" borderRadius="lg" px={3} py={1} fontSize="xs" fontWeight="semibold">
+                  <LogIn size={14} style={{ marginRight: '4px' }} />
                   Entrar
                 </Button>
               </Link>
@@ -109,6 +129,6 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
           )}
         </HStack>
       </HStack>
-    </header>
+    </Box>
   )
 })
