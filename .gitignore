@@ -5,6 +5,7 @@
 
 ###> devops ###
 devops/.env
+devops/var/
 ###< devops ###
 
 ###> symfony/framework-bundle ###
@@ -14,6 +15,7 @@ devops/.env
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
+var/
 /vendor/
 ###< symfony/framework-bundle ###
 

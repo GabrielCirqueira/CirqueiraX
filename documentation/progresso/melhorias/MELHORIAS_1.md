@@ -99,3 +99,48 @@
   - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
 
 ---
+
+### ✅ Melhoria 8 — Visualização de Vídeo, Streaming com Range Headers, Prévia de Thumbnails e Download Direto
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**: 
+  - Cards de mídia mostravam "Sem prévia" porque a extração do `yt-dlp` não gravava a URL da thumbnail no metadados do item.
+  - Não havia endpoint para streaming do arquivo de vídeo salvo no backend, impedindo reprodução direta no navegador.
+  - Não existia modal para visualização e reprodução de vídeos, nem opção rápida para download direto do arquivo MP4 salvo.
+  - Os arquivos eram armazenados em `/tmp` em vez de um diretório persistente configurável.
+- **Solução**:
+  - Atualizado `BaixarVideoDownloadService` para capturar a URL da melhor thumbnail extraída pelo `yt-dlp` e salvar vídeos em `var/storage/downloads` persistente.
+  - Implementados os endpoints `GET /api/v1/media-itens/{uuid}/stream` e `GET /api/v1/media-itens/{uuid}/download` com suporte a `BinaryFileResponse`, `Accept-Ranges: bytes` (HTTP 206 para seek de vídeo) e autenticação JWT via query parameter (`token=...`).
+  - Desenvolvido o componente `ModalVisualizarMidia.tsx` com player HTML5 responsivo, metadados detalhados (duração, tamanho formatado, uploader), botão para baixar arquivo MP4 e link para a postagem original.
+  - Adicionado botão de Play com efeito hover nos cards de vídeo (`CardVideo.tsx`) e botão de download direto nos cards e modal.
+  - Integrado o modal no `DownloadsVideo.tsx`.
+- **Arquivos**:
+  - `src/Service/Video/BaixarVideoDownloadService.php`
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `config/services.yaml`
+  - `config/packages/lexik_jwt_authentication.yaml`
+  - `web/features/downloads-video/api.ts`
+  - `web/features/downloads-video/components/ModalVisualizarMidia.tsx` *(novo)*
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/components/GridVideos.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+
+---
+
+### ✅ Melhoria 9 — Correção do Componente Toaster e Layout de Notificações Chakra UI v3
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - As notificações Toast apareciam comprimidas lateralmente em formato de coluna fina vertical, com quebra de palavras letra por letra e visual verde opaco desalinhado.
+  - A estrutura do `Toast.Root` não continha dimensões mínimas/máximas responsivas nem flexbox horizontal adequado para ícones, título, descrição e botão de fechar.
+  - Havia mistura residual de tags HTML em layouts e componentes auxiliares.
+- **Solução**:
+  - Refatorado completamente `web/shared/components/ui/toaster.tsx` com base nas primitivas nativas do Chakra UI v3 (`Toast.Root`, `Toast.Title`, `Toast.Description`, `Toast.CloseTrigger`).
+  - Definida largura responsiva fixa (`w={{ base: 'calc(100vw - 32px)', sm: '380px' }}`, `minW="300px"` e `maxW="420px"`), padding adequado (`p={3.5}`) e visual glassmorphism refinado (`bg="bg.panel"`, `shadow="2xl"`, `borderColor="border.subtle"`).
+  - Implementado `renderizarIconeToast` com ícones Lucide para cada status (`success`, `error`, `warning`, `info`, `loading`).
+  - Padronizada a API `addToast` com mapeamento unificado de tipos e compatibilidade retroativa para hooks e componentes.
+- **Arquivos**:
+  - `web/shared/components/ui/toaster.tsx`
+

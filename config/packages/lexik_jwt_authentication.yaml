@@ -5,3 +5,11 @@ lexik_jwt_authentication:
     token_ttl: '%env(int:JWT_TTL)%'
     encoder:
         signature_algorithm: RS256
+    token_extractors:
+        authorization_header:
+            enabled: true
+            prefix: Bearer
+            name: Authorization
+        query_parameter:
+            enabled: true
+            name: token

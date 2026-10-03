@@ -51,6 +51,11 @@ services:
             $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\Video\BaixarVideoDownloadService:
+        arguments:
+            $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'
+            $projectDir: '%kernel.project_dir%'
+
     GuzzleHttp\ClientInterface: '@guzzle.default'
 
     guzzle.default:

@@ -18,3 +18,7 @@
 | M5 | Reestruturação de Modais HeroUI / React Aria (`PressResponder`) em Downloads | ✅ Concluído | 28/09/2026 | [ver](MELHORIAS_1.md#melhoria-5--reestruturação-de-modais-heroui-em-downloads-de-vídeo) |
 | M6 | Instalação e Habilitação de `yt-dlp` e `ffmpeg` no Container para Download de Vídeos | ✅ Concluído | 28/09/2026 | [ver](MELHORIAS_1.md#melhoria-6--instalação-de-yt-dlp-e-ffmpeg-para-extração-e-download-de-vídeos) |
 | M7 | Migração completa de HeroUI + Tailwind CSS para Chakra UI v3 | ✅ Concluído | 29/09/2026 | [ver](MELHORIAS_1.md#melhoria-7--migração-de-heroui--tailwind-css-para-chakra-ui-v3) |
+| M8 | Visualização de Vídeo, Streaming com Range Headers, Prévia de Thumbnails e Download Direto | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-8--visualização-de-vídeo-streaming-com-range-headers-prévia-de-thumbnails-e-download-direto) |
+| M9 | Correção do Componente Toaster e Layout de Notificações Chakra UI v3 | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-9--correção-do-componente-toaster-e-layout-de-notificações-chakra-ui-v3) |
+
+

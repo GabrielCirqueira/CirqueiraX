@@ -148,4 +148,54 @@ final class MediaItemController extends DefaultController
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
+
+    #[Route('/{uuid}/stream', name: 'stream', methods: ['GET'])]
+    public function streamArquivo(string $uuid): Response
+    {
+        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
+        $caminho = (string) $mediaItem->caminhoLocal();
+
+        if ('' === trim($caminho) || !file_exists($caminho)) {
+            return $this->error('Arquivo de mídia físico não encontrado no servidor.', Response::HTTP_NOT_FOUND);
+        }
+
+        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($caminho);
+        $response->setAutoEtag();
+        $response->headers->set('Accept-Ranges', 'bytes');
+
+        $mimeType = @mime_content_type($caminho) ?: 'application/octet-stream';
+        $response->headers->set('Content-Type', $mimeType);
+        $response->setContentDisposition(
+            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_INLINE,
+            basename($caminho)
+        );
+
+        return $response;
+    }
+
+    #[Route('/{uuid}/download', name: 'download_arquivo', methods: ['GET'])]
+    public function baixarArquivo(string $uuid): Response
+    {
+        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
+        $caminho = (string) $mediaItem->caminhoLocal();
+
+        if ('' === trim($caminho) || !file_exists($caminho)) {
+            return $this->error('Arquivo de mídia físico não encontrado no servidor.', Response::HTTP_NOT_FOUND);
+        }
+
+        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($caminho);
+        $metadata = $mediaItem->metadata();
+        $titulo = (string) ($metadata['titulo'] ?? 'video_' . $mediaItem->hash());
+        $ext = (string) ($metadata['extensao'] ?? pathinfo($caminho, PATHINFO_EXTENSION) ?: 'mp4');
+
+        $nomeLimpo = preg_replace('/[^\w\s\-_.]/u', '', $titulo) ?: 'video_' . $mediaItem->hash();
+        $nomeArquivo = sprintf('%s.%s', trim($nomeLimpo), $ext);
+
+        $response->setContentDisposition(
+            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $nomeArquivo
+        );
+
+        return $response;
+    }
 }
