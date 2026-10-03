@@ -17,11 +17,14 @@ use App\Service\MediaItem\ApagarMediaItemService;
 use App\Service\MediaItem\AtualizarMetadataMediaItemService;
 use App\Service\MediaItem\ClassificarMediaItemService;
 use App\Service\MediaItem\MediaItemService;
+use App\Service\MediaItem\ObterArquivoMidiaService;
 use App\Service\MediaItem\RebaixarMediaItemService;
 use App\Service\MediaItem\RetentarMediaItemService;
 use App\Service\MediaItem\UploadManualService;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,6 +41,7 @@ final class MediaItemController extends DefaultController
         private readonly RetentarMediaItemService $retentarMediaItemService,
         private readonly AtualizarMetadataMediaItemService $atualizarMetadataMediaItemService,
         private readonly UploadManualService $uploadManualService,
+        private readonly ObterArquivoMidiaService $obterArquivoMidiaService,
         private readonly MediaItemSerializer $mediaItemSerializer,
     ) {}
 
@@ -152,22 +156,15 @@ final class MediaItemController extends DefaultController
     #[Route('/{uuid}/stream', name: 'stream', methods: ['GET'])]
     public function streamArquivo(string $uuid): Response
     {
-        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
-        $caminho = (string) $mediaItem->caminhoLocal();
+        $arquivoMidia = $this->obterArquivoMidiaService->obterParaStream($uuid);
 
-        if ('' === trim($caminho) || !file_exists($caminho)) {
-            return $this->error('Arquivo de mídia físico não encontrado no servidor.', Response::HTTP_NOT_FOUND);
-        }
-
-        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($caminho);
+        $response = new BinaryFileResponse($arquivoMidia->caminhoFisico());
         $response->setAutoEtag();
         $response->headers->set('Accept-Ranges', 'bytes');
-
-        $mimeType = @mime_content_type($caminho) ?: 'application/octet-stream';
-        $response->headers->set('Content-Type', $mimeType);
+        $response->headers->set('Content-Type', $arquivoMidia->mimeType());
         $response->setContentDisposition(
-            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_INLINE,
-            basename($caminho)
+            ResponseHeaderBag::DISPOSITION_INLINE,
+            $arquivoMidia->nomeArquivo(),
         );
 
         return $response;
@@ -176,24 +173,12 @@ final class MediaItemController extends DefaultController
     #[Route('/{uuid}/download', name: 'download_arquivo', methods: ['GET'])]
     public function baixarArquivo(string $uuid): Response
     {
-        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
-        $caminho = (string) $mediaItem->caminhoLocal();
+        $arquivoMidia = $this->obterArquivoMidiaService->obterParaDownload($uuid);
 
-        if ('' === trim($caminho) || !file_exists($caminho)) {
-            return $this->error('Arquivo de mídia físico não encontrado no servidor.', Response::HTTP_NOT_FOUND);
-        }
-
-        $response = new \Symfony\Component\HttpFoundation\BinaryFileResponse($caminho);
-        $metadata = $mediaItem->metadata();
-        $titulo = (string) ($metadata['titulo'] ?? 'video_' . $mediaItem->hash());
-        $ext = (string) ($metadata['extensao'] ?? pathinfo($caminho, PATHINFO_EXTENSION) ?: 'mp4');
-
-        $nomeLimpo = preg_replace('/[^\w\s\-_.]/u', '', $titulo) ?: 'video_' . $mediaItem->hash();
-        $nomeArquivo = sprintf('%s.%s', trim($nomeLimpo), $ext);
-
+        $response = new BinaryFileResponse($arquivoMidia->caminhoFisico());
         $response->setContentDisposition(
-            \Symfony\Component\HttpFoundation\ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $nomeArquivo
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $arquivoMidia->nomeArquivo(),
         );
 
         return $response;

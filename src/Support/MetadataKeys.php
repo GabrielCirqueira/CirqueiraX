@@ -11,4 +11,10 @@ final class MetadataKeys
     public const string CATEGORIA_ID_DESEJADA = 'categoria_id_desejada';
     public const string TIMESTAMP_CAPTURA = 'timestamp_captura';
     public const string ORIGEM_TOKEN = 'origem_token';
+    public const string TITULO = 'titulo';
+    public const string UPLOADER = 'uploader';
+    public const string DURACAO = 'duracao';
+    public const string DATA = 'data';
+    public const string EXTENSAO = 'extensao';
+    public const string THUMBNAIL = 'thumbnail';
 }

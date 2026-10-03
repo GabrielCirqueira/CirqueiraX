@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace App\Service\Video;
 
-use App\Infra\Storage\ArmazenamentoLocalClient;
 use App\Infra\YtDlp\YtDlpClient;
+use App\Interface\ArmazenamentoInterface;
+use App\Support\MetadataKeys;
+use App\Support\TextoUtil;
 
 final readonly class BaixarVideoDownloadService
 {
     private const string SUBDIR_DOWNLOADS = 'downloads';
+    private const string CAMINHO_STORAGE_PADRAO = './var/storage';
 
     public function __construct(
         private YtDlpClient $ytDlpClient,
-        private ArmazenamentoLocalClient $armazenamentoLocalClient,
-        private string $mediaStoragePath = './var/storage',
+        private ArmazenamentoInterface $armazenamentoClient,
+        private string $mediaStoragePath = self::CAMINHO_STORAGE_PADRAO,
         private string $projectDir = '',
     ) {}
 
@@ -24,37 +27,59 @@ final readonly class BaixarVideoDownloadService
     public function extrairMetadata(string $url): array
     {
         $dados = $this->ytDlpClient->extrairMetadata($url);
-
-        $thumbnail = null;
-        if (isset($dados['thumbnail']) && is_string($dados['thumbnail']) && '' !== trim($dados['thumbnail'])) {
-            $thumbnail = $dados['thumbnail'];
-        } elseif (isset($dados['thumbnails']) && is_array($dados['thumbnails']) && !empty($dados['thumbnails'])) {
-            $lastThumb = end($dados['thumbnails']);
-            if (is_array($lastThumb) && isset($lastThumb['url']) && is_string($lastThumb['url'])) {
-                $thumbnail = $lastThumb['url'];
-            }
-        }
+        $thumbnail = $this->extrairThumbnail($dados);
 
         return [
-            'titulo' => $dados['title'] ?? null,
-            'uploader' => $dados['uploader'] ?? ($dados['uploader_id'] ?? null),
-            'duracao' => $dados['duration'] ?? null,
-            'data' => $dados['upload_date'] ?? null,
-            'extensao' => $dados['ext'] ?? null,
-            'thumbnail' => $thumbnail,
-            'url_original' => $url,
+            MetadataKeys::TITULO => $dados['title'] ?? null,
+            MetadataKeys::UPLOADER => $dados['uploader'] ?? ($dados['uploader_id'] ?? null),
+            MetadataKeys::DURACAO => $dados['duration'] ?? null,
+            MetadataKeys::DATA => $dados['upload_date'] ?? null,
+            MetadataKeys::EXTENSAO => $dados['ext'] ?? null,
+            MetadataKeys::THUMBNAIL => $thumbnail,
+            MetadataKeys::URL_ORIGINAL => $url,
         ];
     }
 
     public function baixarParaStorage(string $url): string
     {
-        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
-        ? $this->mediaStoragePath
-        : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
-
-        $diretorioDestino = rtrim($baseStorage, '/') . '/' . self::SUBDIR_DOWNLOADS;
-        $this->armazenamentoLocalClient->criarDiretorio($diretorioDestino);
+        $diretorioDestino = $this->resolverDiretorioDestino();
+        $this->armazenamentoClient->criarDiretorio($diretorioDestino);
 
         return $this->ytDlpClient->baixarVideo($url, $diretorioDestino);
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     */
+    private function extrairThumbnail(array $dados): ?string
+    {
+        if (isset($dados['thumbnail']) && is_string($dados['thumbnail']) && TextoUtil::naoEstaEmBranco($dados['thumbnail'])) {
+            return $dados['thumbnail'];
+        }
+
+        if (isset($dados['thumbnails']) && is_array($dados['thumbnails']) && !empty($dados['thumbnails'])) {
+            $ultimaThumbnail = end($dados['thumbnails']);
+            if (is_array($ultimaThumbnail) && isset($ultimaThumbnail['url']) && is_string($ultimaThumbnail['url'])) {
+                return $ultimaThumbnail['url'];
+            }
+        }
+
+        return null;
+    }
+
+    private function resolverDiretorioDestino(): string
+    {
+        $baseStorage = $this->resolverCaminhoBaseStorage();
+
+        return rtrim($baseStorage, '/') . '/' . self::SUBDIR_DOWNLOADS;
+    }
+
+    private function resolverCaminhoBaseStorage(): string
+    {
+        if (str_starts_with($this->mediaStoragePath, '/')) {
+            return $this->mediaStoragePath;
+        }
+
+        return rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
     }
 }
