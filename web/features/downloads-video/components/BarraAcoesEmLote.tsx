@@ -25,7 +25,15 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
   }
 
   return (
-    <Box position="fixed" bottom={6} left="50%" transform="translateX(-50%)" zIndex={50} w="92%" maxW="2xl">
+    <Box
+      position="fixed"
+      bottom={6}
+      left="50%"
+      transform="translateX(-50%)"
+      zIndex={50}
+      w="92%"
+      maxW="2xl"
+    >
       <Flex
         direction={{ base: 'column', sm: 'row' }}
         align="center"
@@ -69,11 +77,14 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             borderRadius="xl"
           >
             {processando ? (
-              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
+              <Loader2
+                size={14}
+                style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+              />
             ) : (
               <FolderPlus size={14} color="#8b5cf6" style={{ marginRight: '6px' }} />
             )}
-            <span>Categorizar</span>
+            <Text as="span">Categorizar</Text>
           </Button>
 
           <Button
@@ -84,11 +95,14 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             borderRadius="xl"
           >
             {processando ? (
-              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
+              <Loader2
+                size={14}
+                style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+              />
             ) : (
               <DownloadCloud size={14} color="#3b82f6" style={{ marginRight: '6px' }} />
             )}
-            <span>Rebaixar</span>
+            <Text as="span">Rebaixar</Text>
           </Button>
 
           <Button
@@ -100,15 +114,17 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             borderRadius="xl"
           >
             {processando ? (
-              <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
+              <Loader2
+                size={14}
+                style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+              />
             ) : (
               <Trash2 size={14} style={{ marginRight: '6px' }} />
             )}
-            <span>Apagar</span>
+            <Text as="span">Apagar</Text>
           </Button>
         </HStack>
       </Flex>
     </Box>
   )
 })
-

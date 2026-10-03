@@ -7,7 +7,16 @@ export function AuthLayout() {
     <VStack minH="100vh" align="center" justify="center" px={4} py={12} gap={0}>
       <Link to="/" style={{ marginBottom: '2rem' }}>
         <HStack gap={2}>
-          <Box w={8} h={8} borderRadius="xl" bg="brand.500" display="flex" alignItems="center" justifyContent="center" shadow="md">
+          <Box
+            w={8}
+            h={8}
+            borderRadius="xl"
+            bg="brand.500"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            shadow="md"
+          >
             <Code2 size={16} color="white" strokeWidth={2.5} />
           </Box>
           <Text as="span" fontFamily="sans-serif" fontWeight="bold" fontSize="xl">

@@ -103,14 +103,11 @@ export const FilaErros = memo(function FilaErros() {
           </Box>
           <VStack gap={0.5} alignItems="flex-start">
             <HStack gap={2} align="center">
-              <Text fontSize="base" fontWeight="semibold" color="fg">Fila Operacional de Erros</Text>
+              <Text fontSize="base" fontWeight="semibold" color="fg">
+                Fila Operacional de Erros
+              </Text>
               {total > 0 && (
-                <Badge
-                  size="sm"
-                  variant="subtle"
-                  colorPalette="red"
-                  fontWeight="semibold"
-                >
+                <Badge size="sm" variant="subtle" colorPalette="red" fontWeight="semibold">
                   {total} {total === 1 ? 'falha' : 'falhas'}
                 </Badge>
               )}
@@ -136,12 +133,12 @@ export const FilaErros = memo(function FilaErros() {
             {retentandoTodos ? (
               <HStack gap={1.5}>
                 <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                <span>Reprocessando...</span>
+                <Text as="span">Reprocessando...</Text>
               </HStack>
             ) : (
               <HStack gap={1.5}>
                 <RotateCcw size={14} />
-                <span>Retentar Todos ({total})</span>
+                <Text as="span">Retentar Todos ({total})</Text>
               </HStack>
             )}
           </Button>
@@ -149,15 +146,39 @@ export const FilaErros = memo(function FilaErros() {
       </HStack>
 
       {mensagemSucesso && (
-        <Box p={3} borderRadius="xl" bg="emerald.500/10" borderWidth="1px" borderColor="emerald.500/20" color="emerald.500" fontSize="xs" display="flex" alignItems="center" gap={2}>
+        <Box
+          p={3}
+          borderRadius="xl"
+          bg="emerald.500/10"
+          borderWidth="1px"
+          borderColor="emerald.500/20"
+          color="emerald.500"
+          fontSize="xs"
+          display="flex"
+          alignItems="center"
+          gap={2}
+        >
           <CheckCircle2 size={16} flexShrink={0} />
-          <span>{mensagemSucesso}</span>
+          <Text as="span">{mensagemSucesso}</Text>
         </Box>
       )}
 
       {itens.length === 0 ? (
-        <Card.Root borderWidth="1px" borderColor="emerald.500/20" bg="emerald.500/5" p={8} textAlign="center" shadow="lg">
-          <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2.5}>
+        <Card.Root
+          borderWidth="1px"
+          borderColor="emerald.500/20"
+          bg="emerald.500/5"
+          p={8}
+          textAlign="center"
+          shadow="lg"
+        >
+          <Card.Body
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            gap={2.5}
+          >
             <Box p={3} borderRadius="full" bg="emerald.500/10" color="emerald.500">
               <CheckCircle2 size={32} />
             </Box>
@@ -197,13 +218,19 @@ export const FilaErros = memo(function FilaErros() {
                         <IconeOrigem size={16} />
                       </Box>
                       <VStack gap={0.5} alignItems="flex-start">
-                        <Text fontSize="sm" fontWeight="semibold" color="fg" truncate maxW={{ base: '280px', sm: 'md' }}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="semibold"
+                          color="fg"
+                          truncate
+                          maxW={{ base: '280px', sm: 'md' }}
+                        >
                           {tituloMedia}
                         </Text>
                         <HStack gap={2} fontSize="11px" color="fg.subtle">
-                          <span>Origem: {item.origemDescricao}</span>
-                          <span>•</span>
-                          <span>Hash: {item.hash.substring(0, 10)}...</span>
+                          <Text as="span">Origem: {item.origemDescricao}</Text>
+                          <Text as="span">•</Text>
+                          <Text as="span">Hash: {item.hash.substring(0, 10)}...</Text>
                         </HStack>
                       </VStack>
                     </HStack>
@@ -221,40 +248,66 @@ export const FilaErros = memo(function FilaErros() {
                       {estaRetentando ? (
                         <HStack gap={1.5}>
                           <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
-                          <span>Retentando...</span>
+                          <Text as="span">Retentando...</Text>
                         </HStack>
                       ) : (
                         <HStack gap={1.5}>
                           <RefreshCw size={12} />
-                          <span>Tentar novamente</span>
+                          <Text as="span">Tentar novamente</Text>
                         </HStack>
                       )}
                     </Button>
                   </HStack>
 
-                  <Box p={3} borderRadius="xl" bg="red.500/10" borderWidth="1px" borderColor="red.500/20" color="red.500" fontSize="xs" display="flex" alignItems="flex-start" gap={2.5} mb={3}>
+                  <Box
+                    p={3}
+                    borderRadius="xl"
+                    bg="red.500/10"
+                    borderWidth="1px"
+                    borderColor="red.500/20"
+                    color="red.500"
+                    fontSize="xs"
+                    display="flex"
+                    alignItems="flex-start"
+                    gap={2.5}
+                    mb={3}
+                  >
                     <AlertCircle size={16} flexShrink={0} style={{ marginTop: '2px' }} />
                     <VStack gap={0.5} flex={1} alignItems="flex-start">
-                      <Text fontWeight="semibold" color="red.500">Motivo da Falha:</Text>
+                      <Text fontWeight="semibold" color="red.500">
+                        Motivo da Falha:
+                      </Text>
                       <Text fontFamily="mono" fontSize="11px" wordBreak="break-all">
                         {item.erroMotivo || 'Erro genérico durante o processamento do pipeline.'}
                       </Text>
                     </VStack>
                   </Box>
 
-                  <HStack justify="space-between" align="center" fontSize="11px" color="fg.subtle" pt={1} borderTopWidth="1px" borderColor="border.subtle" flexWrap="wrap" gap={2}>
+                  <HStack
+                    justify="space-between"
+                    align="center"
+                    fontSize="11px"
+                    color="fg.subtle"
+                    pt={1}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                    flexWrap="wrap"
+                    gap={2}
+                  >
                     <HStack gap={2}>
-                      {item.categoria?.nome && <span>Categoria: {item.categoria.nome}</span>}
+                      {item.categoria?.nome && (
+                        <Text as="span">Categoria: {item.categoria.nome}</Text>
+                      )}
                       {item.caminhoLocal && (
-                        <span style={{ fontFamily: 'monospace' }}>
+                        <Text as="span" fontFamily="mono">
                           📁 {item.caminhoLocal}
-                        </span>
+                        </Text>
                       )}
                     </HStack>
-                    <span>
+                    <Text as="span">
                       Registrado em:{' '}
                       {new Date(item.atualizadoEm || item.criadoEm).toLocaleString('pt-BR')}
-                    </span>
+                    </Text>
                   </HStack>
                 </Card.Body>
               </Card.Root>
@@ -262,7 +315,14 @@ export const FilaErros = memo(function FilaErros() {
           })}
 
           {totalPaginas > 1 && (
-            <HStack justify="space-between" align="center" pt={2} px={1} fontSize="xs" color="fg.subtle">
+            <HStack
+              justify="space-between"
+              align="center"
+              pt={2}
+              px={1}
+              fontSize="xs"
+              color="fg.subtle"
+            >
               <Text>
                 Página {pagina} de {totalPaginas} ({total} itens)
               </Text>
@@ -275,7 +335,7 @@ export const FilaErros = memo(function FilaErros() {
                   h={8}
                 >
                   <ChevronLeft size={16} />
-                  <span>Anterior</span>
+                  <Text as="span">Anterior</Text>
                 </Button>
                 <Button
                   size="sm"
@@ -284,7 +344,7 @@ export const FilaErros = memo(function FilaErros() {
                   onClick={() => setPagina((p) => p + 1)}
                   h={8}
                 >
-                  <span>Próxima</span>
+                  <Text as="span">Próxima</Text>
                   <ChevronRight size={16} />
                 </Button>
               </HStack>

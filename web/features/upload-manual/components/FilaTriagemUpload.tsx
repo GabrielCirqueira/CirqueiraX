@@ -1,5 +1,17 @@
 import type { MediaItem } from '@/features/downloads-video/types'
-import { Badge, Box, Button, Card, Dialog, Flex, Grid, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Dialog,
+  Flex,
+  Grid,
+  HStack,
+  Input,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import {
   CheckSquare,
   FileImage,
@@ -86,11 +98,8 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               key={aba.value}
               size="xs"
               variant={filtroStatus === aba.value ? 'solid' : 'ghost'}
-              colorPalette={filtroStatus === aba.value ? 'brand' : 'gray'}
+              colorPalette={filtroStatus === aba.value ? 'brand' : undefined}
               onClick={() => onMudarFiltroStatus(aba.value)}
-              px={3}
-              py={1.5}
-              fontSize="xs"
               fontWeight="semibold"
               borderRadius="lg"
             >
@@ -99,25 +108,25 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           ))}
         </HStack>
 
-        <Box w={{ base: 'full', sm: '64' }}>
+        <Box position="relative" maxW={{ base: 'full', sm: 'xs' }} w="full">
           <Input
             value={busca}
             onChange={(e) => onMudarBusca(e.target.value)}
-            placeholder="Buscar por nome ou hash..."
+            placeholder="Filtrar por nome ou hash..."
             bg="bg.muted"
             borderColor="border.subtle"
             fontSize="xs"
-            h={9}
+            h={8}
             borderRadius="xl"
           />
         </Box>
       </Flex>
 
       {itens.length > 0 && (
-        <Flex w="full" align="center" justify="space-between" px={1}>
+        <Flex w="full" justify="space-between" align="center" px={1}>
           <Button
+            size="sm"
             variant="ghost"
-            size="xs"
             onClick={onToggleSelectAll}
             fontSize="xs"
             fontWeight="semibold"
@@ -125,11 +134,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             _hover={{ color: 'fg' }}
           >
             <HStack gap={2}>
-              {todosSelecionados ? (
-                <CheckSquare size={16} color="#8b5cf6" />
-              ) : (
-                <Square size={16} />
-              )}
+              {todosSelecionados ? <CheckSquare size={16} color="#8b5cf6" /> : <Square size={16} />}
               <Text as="span">
                 {todosSelecionados
                   ? 'Desmarcar todos'
@@ -140,139 +145,145 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             </HStack>
           </Button>
 
-          <Text fontSize="xs" color="fg.subtle" fontWeight="medium">
-            Exibindo {itens.length} item(ns)
+          <Text fontSize="xs" color="fg.subtle">
+            Exibindo {itens.length} registro(s)
           </Text>
         </Flex>
       )}
 
-      {carregando && (
-        <Grid w="full" templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Box
-              key={`skeleton-${i + 1}`}
-              h={48}
+      {carregando && itens.length === 0 ? (
+        <Grid
+          w="full"
+          templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          gap={4}
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card.Root
+              key={`sk-${i + 1}`}
               borderRadius="2xl"
-              bg="bg.muted"
-            />
+              borderWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.panel"
+              h={56}
+              p={4}
+            >
+              <VStack h="full" justify="space-between" align="stretch">
+                <Box h={4} bg="bg.muted" borderRadius="md" w="70%" />
+                <Box h={32} bg="bg.muted" borderRadius="xl" />
+                <Box h={4} bg="bg.muted" borderRadius="md" w="40%" />
+              </VStack>
+            </Card.Root>
           ))}
         </Grid>
-      )}
-
-      {!carregando && itens.length === 0 && (
+      ) : itens.length === 0 ? (
         <VStack
           w="full"
-          align="center"
-          justify="center"
           py={16}
           px={4}
-          textAlign="center"
           borderRadius="2xl"
           borderWidth="1px"
           borderStyle="dashed"
           borderColor="border.subtle"
           bg="bg.panel"
-          gap={3}
+          gap={2}
+          textAlign="center"
         >
-          <Box p={4} borderRadius="full" bg="bg.muted" color="fg.subtle">
-            <Upload size={32} strokeWidth={1.5} />
+          <Box p={4} borderRadius="full" bg="bg.muted" color="fg.subtle" mb={2}>
+            <Upload size={40} strokeWidth={1.5} />
           </Box>
-          <Text as="h3" fontSize="md" fontWeight="bold" color="fg">
+          <Text as="h3" fontWeight="bold" fontSize="md" color="fg">
             Nenhuma mídia encontrada na triagem
           </Text>
           <Text fontSize="xs" color="fg.subtle" maxW="sm">
-            Envie arquivos no painel de upload manual acima ou selecione outros filtros.
+            {busca
+              ? 'Tente remover os filtros de busca para visualizar os registros.'
+              : 'Faça upload de arquivos acima para iniciar o processo de triagem e categorização.'}
           </Text>
         </VStack>
-      )}
-
-      {!carregando && itens.length > 0 && (
-        <Grid w="full" templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
+      ) : (
+        <Grid
+          w="full"
+          templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          gap={4}
+        >
           {itens.map((item) => {
-            const ehSelecionado = selecionados.includes(item.uuid)
-            const ehVideo =
-              item.caminhoLocal?.endsWith('.mp4') ||
-              item.caminhoLocal?.endsWith('.mkv') ||
-              item.caminhoLocal?.endsWith('.webm')
+            const isVideo =
+              item.mimeType?.startsWith('video/') ||
+              Boolean(item.metadata?.duracao) ||
+              item.caminhoLocal?.match(/\.(mp4|mkv|webm|mov)$/i)
+
+            const isSelected = selecionados.includes(item.uuid)
 
             return (
               <Card.Root
                 key={item.uuid}
-                position="relative"
                 borderRadius="2xl"
-                borderWidth={ehSelecionado ? '2px' : '1px'}
-                borderColor={ehSelecionado ? 'brand.500' : 'border.subtle'}
+                borderWidth={isSelected ? '2px' : '1px'}
+                borderColor={isSelected ? 'brand.500' : 'border.subtle'}
                 bg="bg.panel"
                 overflow="hidden"
-                shadow="none"
+                shadow="sm"
                 transition="all 0.2s"
-                display="flex"
-                flexDirection="column"
-                justifyContent="space-between"
-                _hover={{ borderColor: ehSelecionado ? 'brand.500' : 'border.muted' }}
+                _hover={{ borderColor: isSelected ? 'brand.500' : 'border.muted' }}
               >
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  onClick={() => onToggleSelect(item.uuid)}
-                  position="absolute"
-                  top={3}
-                  left={3}
-                  zIndex={10}
-                  p={1.5}
-                  borderRadius="lg"
-                  bg="blackAlpha.600"
-                  _hover={{ bg: 'blackAlpha.800' }}
-                  color="white"
-                  backdropFilter="blur(8px)"
-                  aria-label="Selecionar item"
-                >
-                  {ehSelecionado ? (
-                    <CheckSquare size={16} color="#a78bfa" />
+                <Box position="relative" w="full" h={40} bg="bg.muted" overflow="hidden">
+                  {item.metadata?.thumbnail ? (
+                    <Box
+                      as="img"
+                      src={String(item.metadata.thumbnail)}
+                      alt={item.hash}
+                      w="full"
+                      h="full"
+                      objectFit="cover"
+                    />
                   ) : (
-                    <Square size={16} />
-                  )}
-                </Button>
-
-                <Box position="relative" aspectRatio="16/9" w="full" bg="bg.muted" display="flex" alignItems="center" justifyContent="center" borderBottomWidth="1px" borderColor="border.subtle">
-                  {ehVideo ? (
-                    <FileVideo size={40} color="#6366f1" />
-                  ) : (
-                    <FileImage size={40} color="#10b981" />
+                    <VStack h="full" w="full" align="center" justify="center" color="fg.subtle">
+                      {isVideo ? <FileVideo size={40} /> : <FileImage size={40} />}
+                    </VStack>
                   )}
 
-                  <Badge
-                    variant="subtle"
-                    colorPalette="gray"
-                    position="absolute"
-                    top={3}
-                    right={3}
-                    fontSize="10px"
-                    fontWeight="bold"
-                    textTransform="uppercase"
-                    letterSpacing="wider"
-                    bg="blackAlpha.600"
-                    color="white"
-                    backdropFilter="blur(8px)"
-                    borderWidth="0"
-                    px={2}
-                    py={0.5}
-                    borderRadius="md"
-                  >
-                    {item.origemDescricao ?? item.origem}
-                  </Badge>
+                  <Box position="absolute" top={2.5} left={2.5} zIndex={10}>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => onToggleSelect(item.uuid)}
+                      bg="blackAlpha.600"
+                      color="white"
+                      _hover={{ bg: 'blackAlpha.800' }}
+                      backdropFilter="blur(8px)"
+                      borderRadius="lg"
+                      p={1}
+                      aria-label="Selecionar"
+                    >
+                      {isSelected ? (
+                        <CheckSquare size={16} color="#a78bfa" />
+                      ) : (
+                        <Square size={16} />
+                      )}
+                    </Button>
+                  </Box>
+
+                  <Box position="absolute" top={2.5} right={2.5} zIndex={10}>
+                    <Badge
+                      size="sm"
+                      variant="subtle"
+                      colorPalette={isVideo ? 'purple' : 'blue'}
+                      backdropFilter="blur(8px)"
+                    >
+                      {isVideo ? 'Vídeo' : 'Imagem'}
+                    </Badge>
+                  </Box>
                 </Box>
 
-                <Card.Body p={4} gap={3} flex={1} display="flex" flexDirection="column" justifyContent="space-between">
+                <Card.Body
+                  p={4}
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="space-between"
+                  gap={3}
+                >
                   <VStack gap={1.5} alignItems="flex-start" w="full">
-                    <Text
-                      as="h4"
-                      fontWeight="bold"
-                      fontSize="xs"
-                      color="fg"
-                      truncate
-                      w="full"
-                    >
+                    <Text as="h4" fontWeight="bold" fontSize="xs" color="fg" truncate w="full">
                       {String(
                         item.metadata?.nome_original ??
                           item.caminhoLocal?.split('/').pop() ??
@@ -291,7 +302,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                         >
                           <HStack gap={1} alignItems="center">
                             <FolderPlus size={12} />
-                            <span>{item.categoria.nome}</span>
+                            <Text as="span">{item.categoria.nome}</Text>
                           </HStack>
                         </Badge>
                       ) : (
@@ -312,44 +323,56 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                     </HStack>
                   </VStack>
 
-                  <VStack gap={1} pt={2} borderTopWidth="1px" borderColor="border.subtle" alignItems="flex-start" w="full">
-                    <Text
-                      as="span"
-                      fontSize="11px"
-                      fontWeight="medium"
-                      color="fg.subtle"
-                    >
+                  <VStack
+                    gap={1}
+                    pt={2}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                    alignItems="flex-start"
+                    w="full"
+                  >
+                    <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                       Atribuir Categoria:
                     </Text>
-                    <select
+                    <Box
+                      as="select"
                       value={item.categoriaId ?? ''}
-                      onChange={(e) => onClassificarIndividual(item.uuid, e.target.value)}
-                      style={{
-                        width: '100%',
-                        height: '32px',
-                        paddingLeft: '8px',
-                        paddingRight: '8px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        backgroundColor: 'var(--chakra-colors-bg-muted)',
-                        borderColor: 'var(--chakra-colors-border-subtle)',
-                        color: 'inherit',
-                        borderWidth: '1px',
-                        outline: 'none',
-                      }}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        onClassificarIndividual(item.uuid, e.target.value)
+                      }
+                      w="full"
+                      h={8}
+                      px={2}
+                      borderRadius="lg"
+                      fontSize="xs"
+                      fontWeight="medium"
+                      bg="bg.muted"
+                      borderColor="border.subtle"
+                      color="inherit"
+                      borderWidth="1px"
+                      outline="none"
                     >
-                      <option value="">Selecione uma categoria...</option>
+                      <Box as="option" value="">
+                        Selecione uma categoria...
+                      </Box>
                       {categorias.map((cat) => (
-                        <option key={cat.uuid} value={cat.uuid}>
+                        <Box as="option" key={cat.uuid} value={cat.uuid}>
                           {cat.nome}
-                        </option>
+                        </Box>
                       ))}
-                    </select>
+                    </Box>
                   </VStack>
                 </Card.Body>
 
-                <HStack px={4} py={2.5} bg="bg.muted" borderTopWidth="1px" borderColor="border.subtle" justify="space-between" w="full">
+                <HStack
+                  px={4}
+                  py={2.5}
+                  bg="bg.muted"
+                  borderTopWidth="1px"
+                  borderColor="border.subtle"
+                  justify="space-between"
+                  w="full"
+                >
                   <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                     {item.statusDescricao ?? item.status}
                   </Text>
@@ -375,8 +398,28 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
       )}
 
       {selecionados.length > 0 && (
-        <Box position="fixed" bottom={6} left="50%" transform="translateX(-50%)" zIndex={50} w="92%" maxW="xl">
-          <Flex align="center" justify="space-between" gap={3} p={3} px={5} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" backdropFilter="blur(16px)" shadow="2xl">
+        <Box
+          position="fixed"
+          bottom={6}
+          left="50%"
+          transform="translateX(-50%)"
+          zIndex={50}
+          w="92%"
+          maxW="xl"
+        >
+          <Flex
+            align="center"
+            justify="space-between"
+            gap={3}
+            p={3}
+            px={5}
+            borderRadius="2xl"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            bg="bg.panel"
+            backdropFilter="blur(16px)"
+            shadow="2xl"
+          >
             <HStack gap={2}>
               <Badge colorPalette="brand" px={2} py={0.5} borderRadius="md" fontWeight="bold">
                 {selecionados.length}
@@ -395,7 +438,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 borderRadius="xl"
               >
                 <FolderPlus size={14} style={{ marginRight: '4px' }} />
-                <span>Categorizar</span>
+                <Text as="span">Categorizar</Text>
               </Button>
 
               <Button
@@ -406,17 +449,28 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 borderRadius="xl"
               >
                 <Trash2 size={14} style={{ marginRight: '4px' }} />
-                <span>Apagar</span>
+                <Text as="span">Apagar</Text>
               </Button>
             </HStack>
           </Flex>
         </Box>
       )}
 
-      <Dialog.Root open={modalCategorizarAberto} onOpenChange={(e) => setModalCategorizarAberto(e.open)}>
+      <Dialog.Root
+        open={modalCategorizarAberto}
+        onOpenChange={(e) => setModalCategorizarAberto(e.open)}
+      >
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+          <Dialog.Content
+            bg="bg.panel"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            color="fg"
+            borderRadius="2xl"
+            p={4}
+            maxW="md"
+          >
             <Dialog.Header>
               <Dialog.Title fontSize="md" fontWeight="bold">
                 Categorizar {selecionados.length} item(ns) em lote
@@ -428,34 +482,40 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                   Escolha a categoria que será atribuída a todas as mídias selecionadas:
                 </Text>
 
-                <select
+                <Box
+                  as="select"
                   value={categoriaLoteId}
-                  onChange={(e) => setCategoriaLoteId(e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '40px',
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    backgroundColor: 'var(--chakra-colors-bg-muted)',
-                    borderColor: 'var(--chakra-colors-border-subtle)',
-                    color: 'inherit',
-                    borderWidth: '1px',
-                    outline: 'none',
-                  }}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setCategoriaLoteId(e.target.value)
+                  }
+                  w="full"
+                  h={10}
+                  px={3}
+                  borderRadius="xl"
+                  fontSize="xs"
+                  fontWeight="medium"
+                  bg="bg.muted"
+                  borderColor="border.subtle"
+                  color="inherit"
+                  borderWidth="1px"
+                  outline="none"
                 >
-                  <option value="">Selecione a categoria...</option>
+                  <Box as="option" value="">
+                    Selecione a categoria...
+                  </Box>
                   {categorias.map((cat) => (
-                    <option key={cat.uuid} value={cat.uuid}>
+                    <Box as="option" key={cat.uuid} value={cat.uuid}>
                       {cat.nome}
-                    </option>
+                    </Box>
                   ))}
-                </select>
+                </Box>
 
                 <HStack justify="flex-end" gap={2} pt={2}>
-                  <Button size="sm" variant="ghost" onClick={() => setModalCategorizarAberto(false)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setModalCategorizarAberto(false)}
+                  >
                     Cancelar
                   </Button>
                   <Button

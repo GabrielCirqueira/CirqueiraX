@@ -1,4 +1,15 @@
-import { Badge, Box, Button, Card, Grid, HStack, IconButton, Skeleton, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Grid,
+  HStack,
+  IconButton,
+  Skeleton,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -135,20 +146,12 @@ export const PainelSync = memo(function PainelSync({
         </HStack>
 
         <HStack gap={2}>
-          <Badge
-            size="sm"
-            variant="subtle"
-            colorPalette={isOnline ? 'cyan' : 'gray'}
-          >
+          <Badge size="sm" variant="subtle" colorPalette={isOnline ? 'cyan' : 'gray'}>
             <HStack gap={1.5}>
-              {isOnline ? (
-                <Wifi size={12} color="#06b6d4" />
-              ) : (
-                <WifiOff size={12} />
-              )}
-              <span>
+              {isOnline ? <Wifi size={12} color="#06b6d4" /> : <WifiOff size={12} />}
+              <Text as="span">
                 {isOnline ? `Syncthing Ativo ${versao ? `(v${versao})` : ''}` : 'Syncthing Inativo'}
-              </span>
+              </Text>
             </HStack>
           </Badge>
 
@@ -159,21 +162,47 @@ export const PainelSync = memo(function PainelSync({
             disabled={isFetching}
             aria-label="Atualizar Status"
           >
-            <RefreshCw size={14} style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none' }} />
+            <RefreshCw
+              size={14}
+              style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none' }}
+            />
           </IconButton>
         </HStack>
       </HStack>
 
       {mensagemSucesso && (
-        <Box p={3} borderRadius="xl" bg="emerald.500/10" borderWidth="1px" borderColor="emerald.500/20" color="emerald.500" fontSize="xs" display="flex" alignItems="center" gap={2}>
+        <Box
+          p={3}
+          borderRadius="xl"
+          bg="emerald.500/10"
+          borderWidth="1px"
+          borderColor="emerald.500/20"
+          color="emerald.500"
+          fontSize="xs"
+          display="flex"
+          alignItems="center"
+          gap={2}
+        >
           <CheckCircle2 size={16} flexShrink={0} />
-          <span>{mensagemSucesso}</span>
+          <Text as="span">{mensagemSucesso}</Text>
         </Box>
       )}
 
       {pastas.length === 0 ? (
-        <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={6} textAlign="center">
-          <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
+        <Card.Root
+          borderWidth="1px"
+          borderColor="border.subtle"
+          bg="bg.panel"
+          p={6}
+          textAlign="center"
+        >
+          <Card.Body
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+          >
             <Smartphone size={32} style={{ opacity: 0.3 }} />
             <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
               Nenhuma pasta configurada no daemon do Syncthing.
@@ -200,7 +229,13 @@ export const PainelSync = memo(function PainelSync({
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cyan.500' }}
               >
-                <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+                <Card.Header
+                  display="flex"
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  pb={2}
+                >
                   <HStack gap={2.5}>
                     <Box p={2} borderRadius="xl" bg="cyan.500/10" color="cyan.400">
                       <Smartphone size={16} />
@@ -209,29 +244,42 @@ export const PainelSync = memo(function PainelSync({
                       <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                         {pasta.label || pasta.id}
                       </Card.Title>
-                      <Text fontSize="11px" fontFamily="mono" color="fg.subtle" truncate maxW="200px">
+                      <Text
+                        fontSize="11px"
+                        fontFamily="mono"
+                        color="fg.subtle"
+                        truncate
+                        maxW="200px"
+                      >
                         {pasta.caminho || `ID: ${pasta.id}`}
                       </Text>
                     </VStack>
                   </HStack>
 
-                  <Badge
-                    size="sm"
-                    variant="subtle"
-                    colorPalette={badge.colorPalette}
-                  >
+                  <Badge size="sm" variant="subtle" colorPalette={badge.colorPalette}>
                     <HStack gap={1}>
-                      <BadgeIcon size={12} style={{ animation: badge.animate ? 'spin 1s linear infinite' : 'none' }} />
-                      <span>{badge.label}</span>
+                      <BadgeIcon
+                        size={12}
+                        style={{ animation: badge.animate ? 'spin 1s linear infinite' : 'none' }}
+                      />
+                      <Text as="span">{badge.label}</Text>
                     </HStack>
                   </Badge>
                 </Card.Header>
 
                 <Card.Body pt={2}>
-                  <HStack justify="space-between" align="center" py={2} borderTopWidth="1px" borderColor="border.subtle" fontSize="xs" color="fg.subtle">
+                  <HStack
+                    justify="space-between"
+                    align="center"
+                    py={2}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                    fontSize="xs"
+                    color="fg.subtle"
+                  >
                     <HStack gap={1.5}>
                       <HardDrive size={14} color="#06b6d4" />
-                      <span>{pasta.tamanhoFormatado || '0 B'}</span>
+                      <Text as="span">{pasta.tamanhoFormatado || '0 B'}</Text>
                     </HStack>
 
                     <Button
@@ -247,12 +295,12 @@ export const PainelSync = memo(function PainelSync({
                       {estaSincronizandoEstaPasta ? (
                         <HStack gap={1.5}>
                           <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
-                          <span>Solicitando...</span>
+                          <Text as="span">Solicitando...</Text>
                         </HStack>
                       ) : (
                         <HStack gap={1.5}>
                           <RefreshCw size={12} />
-                          <span>Sincronizar agora</span>
+                          <Text as="span">Sincronizar agora</Text>
                         </HStack>
                       )}
                     </Button>

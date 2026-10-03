@@ -8,7 +8,7 @@ import {
 } from '@/features/downloads-video/api'
 import { AppContainer } from '@/layouts'
 import { addToast } from '@/shared/components/ui/toaster'
-import { Badge, Button, Container, HStack, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Container, HStack, Text, VStack } from '@chakra-ui/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, FolderCheck, RefreshCw } from 'lucide-react'
 import { memo, useCallback, useMemo, useState } from 'react'
@@ -84,7 +84,10 @@ const UploadManual = memo(function UploadManual() {
   const mutationApagarLote = useMutation({
     mutationFn: (uuids: string[]) => apagarLote({ uuids }),
     onSuccess: (res) => {
-      addToast({ title: `${res.removidos.length} item(ns) apagado(s) com sucesso!`, color: 'success' })
+      addToast({
+        title: `${res.removidos.length} item(ns) apagado(s) com sucesso!`,
+        color: 'success',
+      })
       setSelecionados([])
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
@@ -121,13 +124,20 @@ const UploadManual = memo(function UploadManual() {
       <Container maxW="6xl" py={8} spaceY={8}>
         <VStack gap={4} alignItems="stretch">
           <HStack justify="space-between">
-            <Link
+            <Box
+              as={Link}
               to="/downloads"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#a1a1aa' }}
+              display="inline-flex"
+              alignItems="center"
+              gap={1.5}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="fg.subtle"
+              _hover={{ color: 'fg' }}
             >
               <ArrowLeft size={16} />
-              <span>Voltar para Downloads</span>
-            </Link>
+              <Text as="span">Voltar para Downloads</Text>
+            </Box>
 
             <HStack gap={2}>
               <Button
@@ -144,14 +154,14 @@ const UploadManual = memo(function UploadManual() {
 
           <VStack gap={1} alignItems="flex-start">
             <HStack gap={2.5}>
-              <Text as="h1" fontSize={{ base: '2xl', sm: '3xl' }} fontWeight="900" color="white">
+              <Text as="h1" fontSize={{ base: '2xl', sm: '3xl' }} fontWeight="black" color="fg">
                 Upload Manual & Triagem
               </Text>
               <Badge variant="subtle" colorPalette="purple" px={2} py={0.5} borderRadius="md">
                 Feature 4
               </Badge>
             </HStack>
-            <Text fontSize="sm" color="zinc.400">
+            <Text fontSize="sm" color="fg.subtle">
               Envie fotos ou vídeos locais diretamente para o sistema e realize a classificação e
               triagem rápida por categorias.
             </Text>
@@ -172,10 +182,16 @@ const UploadManual = memo(function UploadManual() {
           onReenviarItem={reenviarItemIndividual}
         />
 
-        <VStack gap={4} pt={4} borderTop="1px solid" borderColor="zinc.800" alignItems="flex-start">
+        <VStack
+          gap={4}
+          pt={4}
+          borderTop="1px solid"
+          borderColor="border.subtle"
+          alignItems="flex-start"
+        >
           <HStack gap={2}>
             <FolderCheck size={20} color="#8b5cf6" />
-            <Text as="h2" fontSize="lg" fontWeight="bold" color="white">
+            <Text as="h2" fontSize="lg" fontWeight="bold" color="fg">
               Triagem de Mídias Recebidas
             </Text>
           </HStack>

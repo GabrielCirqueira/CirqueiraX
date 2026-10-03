@@ -1,5 +1,5 @@
 import { AppContainer } from '@/layouts/AppContainer'
-import { Box, Button, Container, Dialog, Field, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Dialog, Field, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +13,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
 import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
+import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import {
   useApagarLote,
   useAtualizarMetadata,
@@ -33,6 +34,7 @@ export default function DownloadsVideo() {
   const [origemFiltro, setOrigemFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
 
+  const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
   const [itemEditarMetadata, setItemEditarMetadata] = useState<MediaItem | null>(null)
   const [novoTitulo, setNovoTitulo] = useState('')
   const [novoUploader, setNovoUploader] = useState('')
@@ -258,11 +260,14 @@ export default function DownloadsVideo() {
                 borderRadius="xl"
               >
                 {pendenteRetentarTodos ? (
-                  <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
+                  <Loader2
+                    size={14}
+                    style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                  />
                 ) : (
                   <RotateCcw size={14} style={{ marginRight: '6px' }} />
                 )}
-                <span>Retentar Falhas</span>
+                <Text as="span">Retentar Falhas</Text>
               </Button>
             )}
 
@@ -273,8 +278,14 @@ export default function DownloadsVideo() {
               onClick={() => refetch()}
               borderRadius="xl"
             >
-              <RefreshCw size={14} style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none', marginRight: '6px' }} />
-              <span>Atualizar</span>
+              <RefreshCw
+                size={14}
+                style={{
+                  animation: isFetching ? 'spin 1s linear infinite' : 'none',
+                  marginRight: '6px',
+                }}
+              />
+              <Text as="span">Atualizar</Text>
             </Button>
           </HStack>
         </Flex>
@@ -311,68 +322,94 @@ export default function DownloadsVideo() {
           <HStack gap={2}>
             <HStack gap={1} fontSize="xs" color="fg.subtle">
               <Filter size={14} />
-              <span>Status:</span>
+              <Text as="span">Status:</Text>
             </HStack>
-            <select
+            <Box
+              as="select"
               value={statusFiltro}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 setStatusFiltro(e.target.value)
                 setPagina(1)
               }}
-              style={{
-                height: '40px',
-                paddingLeft: '12px',
-                paddingRight: '12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '500',
-                backgroundColor: 'var(--chakra-colors-bg-muted)',
-                borderColor: 'var(--chakra-colors-border-subtle)',
-                color: 'inherit',
-                borderWidth: '1px',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
+              h={10}
+              px={3}
+              borderRadius="xl"
+              fontSize="xs"
+              fontWeight="medium"
+              bg="bg.muted"
+              borderColor="border.subtle"
+              color="inherit"
+              borderWidth="1px"
+              outline="none"
+              cursor="pointer"
             >
-              <option value="">Todos os status</option>
-              <option value="baixando">Baixando</option>
-              <option value="recebido">Recebido</option>
-              <option value="em_fila">Em Fila</option>
-              <option value="classificado">Classificado</option>
-              <option value="distribuindo">Distribuindo</option>
-              <option value="distribuido_local">Distribuído</option>
-              <option value="enviando_google_fotos">Google Fotos</option>
-              <option value="concluido">Concluído</option>
-              <option value="erro">Com Erro</option>
-            </select>
+              <Box as="option" value="">
+                Todos os status
+              </Box>
+              <Box as="option" value="baixando">
+                Baixando
+              </Box>
+              <Box as="option" value="recebido">
+                Recebido
+              </Box>
+              <Box as="option" value="em_fila">
+                Em Fila
+              </Box>
+              <Box as="option" value="classificado">
+                Classificado
+              </Box>
+              <Box as="option" value="distribuindo">
+                Distribuindo
+              </Box>
+              <Box as="option" value="distribuido_local">
+                Distribuído
+              </Box>
+              <Box as="option" value="enviando_google_fotos">
+                Google Fotos
+              </Box>
+              <Box as="option" value="concluido">
+                Concluído
+              </Box>
+              <Box as="option" value="erro">
+                Com Erro
+              </Box>
+            </Box>
 
-            <select
+            <Box
+              as="select"
               value={origemFiltro}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 setOrigemFiltro(e.target.value)
                 setPagina(1)
               }}
-              style={{
-                height: '40px',
-                paddingLeft: '12px',
-                paddingRight: '12px',
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: '500',
-                backgroundColor: 'var(--chakra-colors-bg-muted)',
-                borderColor: 'var(--chakra-colors-border-subtle)',
-                color: 'inherit',
-                borderWidth: '1px',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
+              h={10}
+              px={3}
+              borderRadius="xl"
+              fontSize="xs"
+              fontWeight="medium"
+              bg="bg.muted"
+              borderColor="border.subtle"
+              color="inherit"
+              borderWidth="1px"
+              outline="none"
+              cursor="pointer"
             >
-              <option value="">Todas as origens</option>
-              <option value="manual">Manual / Web</option>
-              <option value="bot_telegram">Bot Telegram</option>
-              <option value="print_empresa">Print Empresa</option>
-              <option value="print_pessoal">Print Pessoal</option>
-            </select>
+              <Box as="option" value="">
+                Todas as origens
+              </Box>
+              <Box as="option" value="manual">
+                Manual / Web
+              </Box>
+              <Box as="option" value="bot_telegram">
+                Bot Telegram
+              </Box>
+              <Box as="option" value="print_empresa">
+                Print Empresa
+              </Box>
+              <Box as="option" value="print_pessoal">
+                Print Pessoal
+              </Box>
+            </Box>
           </HStack>
         </Flex>
 
@@ -382,6 +419,7 @@ export default function DownloadsVideo() {
           selecionados={selecionados}
           onToggleSelect={handleToggleSelect}
           onToggleSelectAll={handleToggleSelectAll}
+          onVisualizar={(item) => setItemVisualizar(item)}
           onEditarMetadata={handleAbrirEditarMetadata}
           onCategorizar={handleAbrirCategorizarIndividual}
           onRebaixar={handleAbrirRebaixarIndividual}
@@ -400,8 +438,7 @@ export default function DownloadsVideo() {
             borderColor="border.subtle"
           >
             <Text fontSize="xs" color="fg.subtle">
-              Mostrando {itens.length} de {total} registros (Página {pagina} de{' '}
-              {totalPaginas})
+              Mostrando {itens.length} de {total} registros (Página {pagina} de {totalPaginas})
             </Text>
 
             <HStack gap={2}>
@@ -413,7 +450,7 @@ export default function DownloadsVideo() {
                 borderRadius="xl"
               >
                 <ChevronLeft size={16} style={{ marginRight: '4px' }} />
-                <span>Anterior</span>
+                <Text as="span">Anterior</Text>
               </Button>
 
               <Button
@@ -423,7 +460,7 @@ export default function DownloadsVideo() {
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
                 borderRadius="xl"
               >
-                <span>Próxima</span>
+                <Text as="span">Próxima</Text>
                 <ChevronRight size={16} style={{ marginLeft: '4px' }} />
               </Button>
             </HStack>
@@ -446,9 +483,19 @@ export default function DownloadsVideo() {
         >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="lg">
+            <Dialog.Content
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              color="fg"
+              borderRadius="2xl"
+              p={4}
+              maxW="lg"
+            >
               <Dialog.Header>
-                <Dialog.Title fontSize="md" fontWeight="bold">Editar Metadados</Dialog.Title>
+                <Dialog.Title fontSize="md" fontWeight="bold">
+                  Editar Metadados
+                </Dialog.Title>
               </Dialog.Header>
               <Dialog.Body py={4}>
                 <VStack gap={4} alignItems="stretch">
@@ -480,7 +527,13 @@ export default function DownloadsVideo() {
                     />
                   </Field.Root>
 
-                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
+                  <HStack
+                    justify="flex-end"
+                    gap={2}
+                    pt={3}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                  >
                     <Button size="sm" variant="ghost" onClick={() => setItemEditarMetadata(null)}>
                       Cancelar
                     </Button>
@@ -492,8 +545,13 @@ export default function DownloadsVideo() {
                       fontWeight="semibold"
                       borderRadius="xl"
                     >
-                      {pendenteMetadata && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />}
-                      <span>Salvar Alterações</span>
+                      {pendenteMetadata && (
+                        <Loader2
+                          size={14}
+                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                        />
+                      )}
+                      <Text as="span">Salvar Alterações</Text>
                     </Button>
                   </HStack>
                 </VStack>
@@ -503,10 +561,21 @@ export default function DownloadsVideo() {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        <Dialog.Root open={modalCategorizarAberto} onOpenChange={(e) => setModalCategorizarAberto(e.open)}>
+        <Dialog.Root
+          open={modalCategorizarAberto}
+          onOpenChange={(e) => setModalCategorizarAberto(e.open)}
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+            <Dialog.Content
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              color="fg"
+              borderRadius="2xl"
+              p={4}
+              maxW="md"
+            >
               <Dialog.Header>
                 <Dialog.Title fontSize="md" fontWeight="bold">
                   {categoriaAlvoUuid
@@ -519,33 +588,41 @@ export default function DownloadsVideo() {
                   <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
                     Selecione a Categoria de Destino
                   </Text>
-                  <select
+                  <Box
+                    as="select"
                     value={categoriaSelecionadaId}
-                    onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
-                    style={{
-                      width: '100%',
-                      height: '44px',
-                      paddingLeft: '12px',
-                      paddingRight: '12px',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      backgroundColor: 'var(--chakra-colors-bg-muted)',
-                      borderColor: 'var(--chakra-colors-border-subtle)',
-                      color: 'inherit',
-                      borderWidth: '1px',
-                      outline: 'none',
-                    }}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setCategoriaSelecionadaId(e.target.value)
+                    }
+                    w="full"
+                    h={11}
+                    px={3}
+                    borderRadius="xl"
+                    fontSize="xs"
+                    fontWeight="medium"
+                    bg="bg.muted"
+                    borderColor="border.subtle"
+                    color="inherit"
+                    borderWidth="1px"
+                    outline="none"
                   >
-                    <option value="">Selecione uma categoria...</option>
+                    <Box as="option" value="">
+                      Selecione uma categoria...
+                    </Box>
                     {categorias.map((cat) => (
-                      <option key={cat.uuid} value={cat.uuid}>
+                      <Box as="option" key={cat.uuid} value={cat.uuid}>
                         {cat.nome}
-                      </option>
+                      </Box>
                     ))}
-                  </select>
+                  </Box>
 
-                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
+                  <HStack
+                    justify="flex-end"
+                    gap={2}
+                    pt={3}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                  >
                     <Button
                       size="sm"
                       variant="ghost"
@@ -566,9 +643,12 @@ export default function DownloadsVideo() {
                       borderRadius="xl"
                     >
                       {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
-                        <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
+                        <Loader2
+                          size={14}
+                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                        />
                       )}
-                      <span>Confirmar Categoria</span>
+                      <Text as="span">Confirmar Categoria</Text>
                     </Button>
                   </HStack>
                 </VStack>
@@ -578,26 +658,45 @@ export default function DownloadsVideo() {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        <Dialog.Root open={modalConfirmarApagar} onOpenChange={(e) => setModalConfirmarApagar(e.open)}>
+        <Dialog.Root
+          open={modalConfirmarApagar}
+          onOpenChange={(e) => setModalConfirmarApagar(e.open)}
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+            <Dialog.Content
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              color="fg"
+              borderRadius="2xl"
+              p={4}
+              maxW="md"
+            >
               <Dialog.Header>
-                <Dialog.Title fontSize="md" fontWeight="bold">Confirmar Exclusão</Dialog.Title>
+                <Dialog.Title fontSize="md" fontWeight="bold">
+                  Confirmar Exclusão
+                </Dialog.Title>
               </Dialog.Header>
               <Dialog.Body py={4}>
                 <VStack gap={4} alignItems="stretch">
                   <Text fontSize="xs" color="fg.subtle">
                     Tem certeza que deseja apagar{' '}
-                    <strong>
+                    <Text as="strong" color="fg">
                       {itemApagarAlvo
                         ? 'este arquivo'
                         : `${selecionados.length} arquivos selecionados`}
-                    </strong>
+                    </Text>
                     ? Esta ação removerá o arquivo físico e o registro do banco.
                   </Text>
 
-                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
+                  <HStack
+                    justify="flex-end"
+                    gap={2}
+                    pt={3}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                  >
                     <Button
                       size="sm"
                       variant="ghost"
@@ -613,8 +712,13 @@ export default function DownloadsVideo() {
                       fontWeight="semibold"
                       borderRadius="xl"
                     >
-                      {pendenteApagar && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />}
-                      <span>Sim, Apagar</span>
+                      {pendenteApagar && (
+                        <Loader2
+                          size={14}
+                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                        />
+                      )}
+                      <Text as="span">Sim, Apagar</Text>
                     </Button>
                   </HStack>
                 </VStack>
@@ -624,12 +728,25 @@ export default function DownloadsVideo() {
           </Dialog.Positioner>
         </Dialog.Root>
 
-        <Dialog.Root open={modalConfirmarRebaixar} onOpenChange={(e) => setModalConfirmarRebaixar(e.open)}>
+        <Dialog.Root
+          open={modalConfirmarRebaixar}
+          onOpenChange={(e) => setModalConfirmarRebaixar(e.open)}
+        >
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="bg.panel" borderWidth="1px" borderColor="border.subtle" color="fg" borderRadius="2xl" p={4} maxW="md">
+            <Dialog.Content
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              color="fg"
+              borderRadius="2xl"
+              p={4}
+              maxW="md"
+            >
               <Dialog.Header>
-                <Dialog.Title fontSize="md" fontWeight="bold">Rebaixar Vídeo(s)</Dialog.Title>
+                <Dialog.Title fontSize="md" fontWeight="bold">
+                  Rebaixar Vídeo(s)
+                </Dialog.Title>
               </Dialog.Header>
               <Dialog.Body py={4}>
                 <VStack gap={4} alignItems="stretch">
@@ -637,7 +754,13 @@ export default function DownloadsVideo() {
                     O download será reenfileirado a partir da URL original gravada nos metadados.
                   </Text>
 
-                  <HStack justify="flex-end" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
+                  <HStack
+                    justify="flex-end"
+                    gap={2}
+                    pt={3}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                  >
                     <Button
                       size="sm"
                       variant="ghost"
@@ -653,8 +776,13 @@ export default function DownloadsVideo() {
                       fontWeight="semibold"
                       borderRadius="xl"
                     >
-                      {pendenteRebaixar && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />}
-                      <span>Confirmar Rebaixamento</span>
+                      {pendenteRebaixar && (
+                        <Loader2
+                          size={14}
+                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                        />
+                      )}
+                      <Text as="span">Confirmar Rebaixamento</Text>
                     </Button>
                   </HStack>
                 </VStack>
@@ -663,6 +791,13 @@ export default function DownloadsVideo() {
             </Dialog.Content>
           </Dialog.Positioner>
         </Dialog.Root>
+        <ModalVisualizarMidia
+          item={itemVisualizar}
+          aberto={Boolean(itemVisualizar)}
+          onFechar={() => setItemVisualizar(null)}
+          onCategorizar={handleAbrirCategorizarIndividual}
+          onEditarMetadata={handleAbrirEditarMetadata}
+        />
       </VStack>
     </AppContainer>
   )

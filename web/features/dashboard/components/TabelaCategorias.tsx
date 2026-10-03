@@ -41,7 +41,11 @@ export const TabelaCategorias = memo(function TabelaCategorias({
           <Skeleton h={6} w={44} borderRadius="md" />
           <Skeleton h={9} w={60} borderRadius="xl" />
         </HStack>
-        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={4}>
+        <Grid
+          w="full"
+          templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          gap={4}
+        >
           {['cat-sk-1', 'cat-sk-2', 'cat-sk-3'].map((chave) => (
             <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
               <Card.Body p={4}>
@@ -64,7 +68,9 @@ export const TabelaCategorias = memo(function TabelaCategorias({
             <Layers size={20} />
           </Box>
           <VStack gap={0.5} alignItems="flex-start">
-            <Text fontSize="base" fontWeight="semibold" color="fg">Mapeamento por Categoria</Text>
+            <Text fontSize="base" fontWeight="semibold" color="fg">
+              Mapeamento por Categoria
+            </Text>
             <Text fontSize="xs" color="fg.subtle">
               Controle de pastas locais, álbuns e consumo de armazenamento
             </Text>
@@ -72,7 +78,18 @@ export const TabelaCategorias = memo(function TabelaCategorias({
         </HStack>
 
         <Box position="relative" w={{ base: 'full', sm: '64' }}>
-          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 10, opacity: 0.5 }} />
+          <Search
+            size={16}
+            style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+              zIndex: 10,
+              opacity: 0.5,
+            }}
+          />
           <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -88,8 +105,20 @@ export const TabelaCategorias = memo(function TabelaCategorias({
       </HStack>
 
       {categoriasFiltradas.length === 0 ? (
-        <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={8} textAlign="center">
-          <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
+        <Card.Root
+          borderWidth="1px"
+          borderColor="border.subtle"
+          bg="bg.panel"
+          p={8}
+          textAlign="center"
+        >
+          <Card.Body
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+          >
             <Folder size={32} style={{ opacity: 0.3 }} />
             <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
               {busca ? 'Nenhuma categoria corresponde à busca.' : 'Nenhuma categoria cadastrada.'}
@@ -97,7 +126,11 @@ export const TabelaCategorias = memo(function TabelaCategorias({
           </Card.Body>
         </Card.Root>
       ) : (
-        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={4}>
+        <Grid
+          w="full"
+          templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          gap={4}
+        >
           {categoriasFiltradas.map((cat, idx) => {
             const ehSemCategoria = !cat.uuid || cat.uuid === 'sem_categoria'
             const itemKey = cat.uuid ? `cat-${cat.uuid}` : `cat-item-${cat.nome || idx}`
@@ -112,7 +145,13 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                 transition="all 0.2s"
                 _hover={{ borderColor: 'brand.500' }}
               >
-                <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+                <Card.Header
+                  display="flex"
+                  flexDirection="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  pb={2}
+                >
                   <HStack gap={2.5}>
                     <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.400">
                       <Folder size={16} />
@@ -121,7 +160,13 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                       <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                         {cat.nome}
                       </Card.Title>
-                      <Text fontSize="11px" fontFamily="mono" color="fg.subtle" truncate maxW="180px">
+                      <Text
+                        fontSize="11px"
+                        fontFamily="mono"
+                        color="fg.subtle"
+                        truncate
+                        maxW="180px"
+                      >
                         📁 {cat.pastaLocal || 'pasta padrão'}
                       </Text>
                     </VStack>
@@ -140,38 +185,40 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                 </Card.Header>
 
                 <Card.Body pt={2}>
-                  <HStack justify="space-between" align="center" py={2} borderTopWidth="1px" borderColor="border.subtle" fontSize="xs" color="fg.subtle">
+                  <HStack
+                    justify="space-between"
+                    align="center"
+                    py={2}
+                    borderTopWidth="1px"
+                    borderColor="border.subtle"
+                    fontSize="xs"
+                    color="fg.subtle"
+                  >
                     <HStack gap={1.5}>
                       <FileVideo size={14} color="#3b82f6" />
-                      <span>
+                      <Text as="span">
                         {cat.totalItens} {cat.totalItens === 1 ? 'mídia' : 'mídias'}
-                      </span>
+                      </Text>
                     </HStack>
 
                     <HStack gap={1.5}>
                       <HardDrive size={14} color="#a855f7" />
-                      <span style={{ fontWeight: 600, color: 'var(--chakra-colors-fg)' }}>{cat.tamanhoFormatado}</span>
+                      <Text as="span" fontWeight="semibold" color="fg">
+                        {cat.tamanhoFormatado}
+                      </Text>
                     </HStack>
                   </HStack>
 
                   <HStack pt={2} justify="space-between" align="center" fontSize="11px">
                     {cat.googlePhotosAlbumId ? (
-                      <Badge
-                        size="sm"
-                        variant="subtle"
-                        colorPalette="green"
-                      >
+                      <Badge size="sm" variant="subtle" colorPalette="green">
                         <HStack gap={1}>
                           <Cloud size={12} />
-                          <span>Google Fotos</span>
+                          <Text as="span">Google Fotos</Text>
                         </HStack>
                       </Badge>
                     ) : (
-                      <Badge
-                        size="sm"
-                        variant="subtle"
-                        colorPalette="gray"
-                      >
+                      <Badge size="sm" variant="subtle" colorPalette="gray">
                         Local apenas
                       </Badge>
                     )}

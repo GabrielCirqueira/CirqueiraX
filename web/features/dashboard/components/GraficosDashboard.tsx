@@ -59,11 +59,23 @@ function CustomTooltipPie({
     return null
   }
   return (
-    <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={3} shadow="2xl" fontSize="xs">
-      <Text fontWeight="semibold" color="fg" mb={1}>{data.name}</Text>
+    <Box
+      borderRadius="xl"
+      borderWidth="1px"
+      borderColor="border.subtle"
+      bg="bg.panel"
+      p={3}
+      shadow="2xl"
+      fontSize="xs"
+    >
+      <Text fontWeight="semibold" color="fg" mb={1}>
+        {data.name}
+      </Text>
       <HStack gap={2} color="fg.subtle">
-        <span>Quantidade:</span>
-        <span style={{ fontWeight: 'bold', color: 'var(--chakra-colors-fg)' }}>{data.value} itens</span>
+        <Text as="span">Quantidade:</Text>
+        <Text as="span" fontWeight="bold" color="fg">
+          {data.value} itens
+        </Text>
       </HStack>
     </Box>
   )
@@ -86,16 +98,30 @@ function CustomTooltipBar({
     return null
   }
   return (
-    <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={3} shadow="2xl" fontSize="xs">
-      <Text fontWeight="semibold" color="fg" mb={1}>{label}</Text>
+    <Box
+      borderRadius="xl"
+      borderWidth="1px"
+      borderColor="border.subtle"
+      bg="bg.panel"
+      p={3}
+      shadow="2xl"
+      fontSize="xs"
+    >
+      <Text fontWeight="semibold" color="fg" mb={1}>
+        {label}
+      </Text>
       <VStack gap={1} color="fg.subtle" alignItems="stretch">
         <HStack justify="space-between" gap={4}>
-          <span>Tamanho:</span>
-          <span style={{ fontWeight: 'bold', color: '#a855f7' }}>{data.payload.tamanhoFormatado}</span>
+          <Text as="span">Tamanho:</Text>
+          <Text as="span" fontWeight="bold" color="#a855f7">
+            {data.payload.tamanhoFormatado}
+          </Text>
         </HStack>
         <HStack justify="space-between" gap={4}>
-          <span>Total de itens:</span>
-          <span style={{ fontWeight: 'bold', color: 'var(--chakra-colors-fg)' }}>{data.payload.totalItens}</span>
+          <Text as="span">Total de itens:</Text>
+          <Text as="span" fontWeight="bold" color="fg">
+            {data.payload.totalItens}
+          </Text>
         </HStack>
       </VStack>
     </Box>
@@ -161,7 +187,13 @@ export const GraficosDashboard = memo(function GraficosDashboard({
   return (
     <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
       <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="lg">
-        <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+        <Card.Header
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          pb={2}
+        >
           <HStack gap={2.5}>
             <Box p={2} borderRadius="xl" bg="blue.500/10" color="blue.500">
               <PieChartIcon size={20} />
@@ -170,14 +202,24 @@ export const GraficosDashboard = memo(function GraficosDashboard({
               <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
                 Distribuição de Mídias por Origem
               </Card.Title>
-              <Text fontSize="xs" color="fg.subtle">Proporção de itens por canal de entrada</Text>
+              <Text fontSize="xs" color="fg.subtle">
+                Proporção de itens por canal de entrada
+              </Text>
             </VStack>
           </HStack>
         </Card.Header>
 
         <Card.Body pt={2}>
           {!temDadosOrigem ? (
-            <Box h={64} display="flex" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" color="fg.subtle">
+            <Box
+              h={64}
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              color="fg.subtle"
+            >
               <PieChartIcon size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
               <Text fontSize="xs">Nenhuma mídia registrada para exibição gráfica.</Text>
             </Box>
@@ -203,7 +245,9 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                     verticalAlign="bottom"
                     iconType="circle"
                     formatter={(value) => (
-                      <span style={{ fontSize: '12px', color: 'var(--chakra-colors-fg-subtle)', fontWeight: 500 }}>{value}</span>
+                      <Text as="span" fontSize="xs" color="fg.subtle" fontWeight="medium">
+                        {value}
+                      </Text>
                     )}
                   />
                 </PieChart>
@@ -214,7 +258,13 @@ export const GraficosDashboard = memo(function GraficosDashboard({
       </Card.Root>
 
       <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="lg">
-        <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
+        <Card.Header
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          pb={2}
+        >
           <HStack gap={2.5}>
             <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
               <HardDrive size={20} />
@@ -232,7 +282,15 @@ export const GraficosDashboard = memo(function GraficosDashboard({
 
         <Card.Body pt={2}>
           {!temDadosCategorias ? (
-            <Box h={64} display="flex" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" color="fg.subtle">
+            <Box
+              h={64}
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              color="fg.subtle"
+            >
               <BarChart3 size={32} style={{ opacity: 0.3, marginBottom: '8px' }} />
               <Text fontSize="xs">Nenhum dado de categoria disponível.</Text>
             </Box>

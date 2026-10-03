@@ -10,16 +10,7 @@ export interface AppContainerProps {
 }
 
 export const AppContainer = React.forwardRef<HTMLDivElement, AppContainerProps>(
-  (
-    {
-      children,
-      maxWidth = 'full',
-      paddingY = '8',
-      paddingX = '6',
-      centered = true,
-    },
-    ref
-  ) => (
+  ({ children, maxWidth = 'full', paddingY = '8', paddingX = '6', centered = true }, ref) => (
     <Container
       ref={ref}
       w="full"

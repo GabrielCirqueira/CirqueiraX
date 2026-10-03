@@ -97,3 +97,30 @@ export async function listarCategorias(): Promise<Array<{ uuid: string; nome: st
   )
   return data.data
 }
+
+export function obterUrlStreamMediaItem(uuid: string): string {
+  const token = localStorage.getItem('token') || ''
+  const baseUrl = `/api/v1/media-itens/${uuid}/stream`
+  return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl
+}
+
+export async function baixarArquivoMidia(uuid: string, nomeArquivo?: string): Promise<void> {
+  const response = await api.get(`/api/v1/media-itens/${uuid}/download`, {
+    responseType: 'blob',
+  })
+  const blob = new Blob([response.data], {
+    type: response.headers['content-type'] || 'application/octet-stream',
+  })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = nomeArquivo
+    ? nomeArquivo.endsWith('.mp4')
+      ? nomeArquivo
+      : `${nomeArquivo}.mp4`
+    : `video_${uuid}.mp4`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  window.URL.revokeObjectURL(url)
+}

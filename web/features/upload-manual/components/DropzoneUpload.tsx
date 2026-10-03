@@ -1,4 +1,15 @@
-import { Badge, Box, Button, Card, Flex, Grid, HStack, Progress, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Flex,
+  Grid,
+  HStack,
+  Progress,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import {
   AlertTriangle,
   CheckCircle2,
@@ -109,14 +120,22 @@ export const DropzoneUpload = memo(function DropzoneUpload({
         transform={isDragOver ? 'scale(1.01)' : 'none'}
         _hover={{ borderColor: 'brand.500', bg: 'bg.muted' }}
       >
-        <Card.Body display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={3} p={0}>
-          <input
+        <Card.Body
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={3}
+          p={0}
+        >
+          <Box
+            as="input"
             ref={inputRef}
             type="file"
             multiple
             accept="image/*,video/*"
             onChange={handleFileSelect}
-            style={{ display: 'none' }}
+            display="none"
           />
 
           <Box p={4} borderRadius="2xl" bg="brand.500/10" color="brand.500">
@@ -124,12 +143,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
           </Box>
 
           <VStack gap={1} alignItems="center">
-            <Text
-              as="h3"
-              fontSize={{ base: 'md', sm: 'lg' }}
-              fontWeight="bold"
-              color="fg"
-            >
+            <Text as="h3" fontSize={{ base: 'md', sm: 'lg' }} fontWeight="bold" color="fg">
               {isDragOver ? 'Solte os arquivos aqui' : 'Arraste e solte fotos ou vídeos aqui'}
             </Text>
             <Text fontSize={{ base: 'xs', sm: 'sm' }} color="fg.muted">
@@ -138,35 +152,37 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             </Text>
           </VStack>
 
-          <HStack mt={2} gap={2} onClick={(e) => e.stopPropagation()}>
+          <HStack mt={2} gap={2} onClick={(e: React.MouseEvent) => e.stopPropagation()}>
             <FolderPlus size={16} />
             <Text as="span" fontSize="xs" fontWeight="medium" color="fg.subtle">
               Categoria pré-definida:
             </Text>
-            <select
+            <Box
+              as="select"
               value={categoriaPadraoId ?? ''}
-              onChange={(e) => onSetCategoriaPadraoId(e.target.value || null)}
-              style={{
-                height: '32px',
-                paddingLeft: '12px',
-                paddingRight: '12px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                fontWeight: '500',
-                backgroundColor: 'var(--chakra-colors-bg-muted)',
-                borderColor: 'var(--chakra-colors-border-subtle)',
-                color: 'inherit',
-                borderWidth: '1px',
-                outline: 'none',
-              }}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                onSetCategoriaPadraoId(e.target.value || null)
+              }
+              h={8}
+              px={3}
+              borderRadius="md"
+              fontSize="xs"
+              fontWeight="medium"
+              bg="bg.muted"
+              borderColor="border.subtle"
+              color="inherit"
+              borderWidth="1px"
+              outline="none"
             >
-              <option value="">Nenhuma (triagem posterior)</option>
+              <Box as="option" value="">
+                Nenhuma (triagem posterior)
+              </Box>
               {categorias.map((cat) => (
-                <option key={cat.uuid} value={cat.uuid}>
+                <Box as="option" key={cat.uuid} value={cat.uuid}>
                   {cat.nome}
-                </option>
+                </Box>
               ))}
-            </select>
+            </Box>
           </HStack>
         </Card.Body>
       </Card.Root>
@@ -185,52 +201,51 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             borderWidth="1px"
             borderColor="border.subtle"
           >
-            <HStack gap={2}>
-              <Text as="strong" fontSize="sm" fontWeight="bold" color="fg">
-                Fila de Upload ({fila.length})
-              </Text>
-              {pendentesCount > 0 && (
-                <Badge
-                  colorPalette="amber"
-                  variant="subtle"
-                  px={2}
-                  py={0.5}
-                  borderRadius="md"
-                >
-                  {pendentesCount} pendente(s)
-                </Badge>
+            <HStack gap={3}>
+              <Badge colorPalette="brand" px={2.5} py={1} borderRadius="lg" fontWeight="bold">
+                {fila.length} {fila.length === 1 ? 'arquivo' : 'arquivos'}
+              </Badge>
+              {concluidosCount > 0 && (
+                <Text fontSize="xs" color="fg.subtle">
+                  ({concluidosCount} concluído{concluidosCount > 1 ? 's' : ''})
+                </Text>
               )}
             </HStack>
 
-            <HStack gap={2} justify="flex-end">
+            <HStack gap={2}>
               {concluidosCount > 0 && (
                 <Button
-                  size="xs"
+                  size="sm"
                   variant="ghost"
-                  disabled={estaProcessando}
                   onClick={onLimparConcluidos}
+                  disabled={estaProcessando}
+                  borderRadius="xl"
                 >
-                  Limpar concluidos ({concluidosCount})
+                  <Trash2 size={14} style={{ marginRight: '6px' }} />
+                  <Text as="span">Limpar Concluídos</Text>
                 </Button>
               )}
 
               <Button
                 size="sm"
                 colorPalette="brand"
-                disabled={estaProcessando || pendentesCount === 0}
+                disabled={pendentesCount === 0 || estaProcessando}
                 onClick={onEnviarTodos}
-                fontWeight="bold"
+                fontWeight="semibold"
                 borderRadius="xl"
               >
                 {estaProcessando ? (
                   <>
-                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
-                    <span>Enviando...</span>
+                    <Loader2
+                      size={14}
+                      style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                    />
+                    <Text as="span">Enviando...</Text>
                   </>
                 ) : (
                   <>
                     <UploadCloud size={14} style={{ marginRight: '6px' }} />
-                    <span>Enviar Todos ({pendentesCount})</span>
+                    <Text as="span">Enviar Todos ({pendentesCount})</Text>
                   </>
                 )}
               </Button>
@@ -244,75 +259,40 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 p={{ base: 3, sm: 4 }}
                 borderRadius="xl"
                 borderWidth="1px"
-                transition="all 0.2s"
-                shadow="none"
-                bg={
-                  item.status === 'enviando'
-                    ? 'brand.500/5'
-                    : item.status === 'duplicado'
-                    ? 'amber.500/5'
-                    : item.status === 'erro'
-                    ? 'red.500/5'
-                    : 'bg.panel'
-                }
-                borderColor={
-                  item.status === 'enviando'
-                    ? 'brand.500/50'
-                    : item.status === 'sucesso'
-                    ? 'emerald.500/30'
-                    : item.status === 'duplicado'
-                    ? 'amber.500/30'
-                    : item.status === 'erro'
-                    ? 'red.500/40'
-                    : 'border.subtle'
-                }
+                borderColor="border.subtle"
+                bg="bg.panel"
               >
-                <Card.Body display="flex" flexDirection={{ base: 'column', sm: 'row' }} alignItems={{ base: 'flex-start', sm: 'center' }} justifyContent="space-between" gap={4} p={0}>
-                  <HStack gap={3.5} flex={1} minW={0} w="full">
+                <Flex
+                  direction={{ base: 'column', sm: 'row' }}
+                  align={{ base: 'flex-start', sm: 'center' }}
+                  justify="space-between"
+                  gap={3}
+                >
+                  <HStack gap={3} flex={1} minW={0} w="full">
                     <Box
-                      position="relative"
-                      w={12}
-                      h={12}
-                      borderRadius="lg"
-                      overflow="hidden"
-                      bg="bg.muted"
+                      p={2.5}
+                      borderRadius="xl"
+                      bg="brand.500/10"
+                      color="brand.400"
                       flexShrink={0}
-                      borderWidth="1px"
-                      borderColor="border.subtle"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
                     >
-                      {item.previewUrl && item.tipoMime.startsWith('image/') ? (
-                        <img
-                          src={item.previewUrl}
-                          alt={item.nome}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        />
-                      ) : item.previewUrl && item.tipoMime.startsWith('video/') ? (
-                        <video src={item.previewUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }}>
-                          <track kind="captions" />
-                        </video>
-                      ) : item.tipoMime.startsWith('video/') ? (
-                        <FileVideo size={24} color="#6366f1" />
+                      {item.tipoMime.startsWith('video/') ? (
+                        <FileVideo size={20} />
                       ) : (
-                        <FileImage size={24} color="#10b981" />
+                        <FileImage size={20} />
                       )}
                     </Box>
 
-                    <VStack gap={0.5} minW={0} flex={1} alignItems="flex-start">
-                      <HStack gap={2} w="full">
-                        <Text
-                          as="span"
-                          fontWeight="semibold"
-                          fontSize="sm"
-                          color="fg"
-                          truncate
-                        >
-                          {item.nome}
-                        </Text>
-                        <Text as="small" fontSize="xs" color="fg.subtle" flexShrink={0}>
-                          ({formatarTamanho(item.tamanhoBytes)})
+                    <VStack align="flex-start" gap={0.5} flex={1} minW={0}>
+                      <Text fontWeight="medium" fontSize="sm" color="fg" truncate w="full">
+                        {item.nome}
+                      </Text>
+
+                      <HStack gap={2} fontSize="xs" color="fg.subtle">
+                        <Text as="span">{formatarTamanho(item.tamanhoBytes)}</Text>
+                        <Text as="span">•</Text>
+                        <Text as="span" fontFamily="mono" fontSize="11px">
+                          {item.tipoMime || 'desconhecido'}
                         </Text>
                       </HStack>
 
@@ -320,32 +300,32 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                         <Text as="span" fontSize="xs" color="fg.subtle">
                           Categoria:
                         </Text>
-                        <select
+                        <Box
+                          as="select"
                           value={item.categoriaId ?? ''}
                           disabled={item.status === 'enviando' || item.status === 'sucesso'}
-                          onChange={(e) =>
+                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                             onAtualizarCategoriaItem(item.id, e.target.value || null)
                           }
-                          style={{
-                            height: '24px',
-                            paddingLeft: '8px',
-                            paddingRight: '8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            backgroundColor: 'var(--chakra-colors-bg-muted)',
-                            borderColor: 'var(--chakra-colors-border-subtle)',
-                            color: 'inherit',
-                            borderWidth: '1px',
-                            outline: 'none',
-                          }}
+                          h={6}
+                          px={2}
+                          borderRadius="sm"
+                          fontSize="xs"
+                          bg="bg.muted"
+                          borderColor="border.subtle"
+                          color="inherit"
+                          borderWidth="1px"
+                          outline="none"
                         >
-                          <option value="">Sem Categoria</option>
+                          <Box as="option" value="">
+                            Sem Categoria
+                          </Box>
                           {categorias.map((cat) => (
-                            <option key={cat.uuid} value={cat.uuid}>
+                            <Box as="option" key={cat.uuid} value={cat.uuid}>
                               {cat.nome}
-                            </option>
+                            </Box>
                           ))}
-                        </select>
+                        </Box>
                       </HStack>
 
                       {item.status === 'enviando' && (
@@ -374,28 +354,46 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                     )}
 
                     {item.status === 'enviando' && (
-                      <Badge variant="subtle" colorPalette="brand" px={2} py={0.5} borderRadius="md">
+                      <Badge
+                        variant="subtle"
+                        colorPalette="brand"
+                        px={2}
+                        py={0.5}
+                        borderRadius="md"
+                      >
                         <HStack gap={1.5} alignItems="center">
                           <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                          <span>{item.progresso}%</span>
+                          <Text as="span">{item.progresso}%</Text>
                         </HStack>
                       </Badge>
                     )}
 
                     {item.status === 'sucesso' && (
-                      <Badge variant="subtle" colorPalette="green" px={2} py={0.5} borderRadius="md">
+                      <Badge
+                        variant="subtle"
+                        colorPalette="green"
+                        px={2}
+                        py={0.5}
+                        borderRadius="md"
+                      >
                         <HStack gap={1.5} alignItems="center">
                           <CheckCircle2 size={14} />
-                          <span>Enviado</span>
+                          <Text as="span">Enviado</Text>
                         </HStack>
                       </Badge>
                     )}
 
                     {item.status === 'duplicado' && (
-                      <Badge variant="subtle" colorPalette="amber" px={2} py={0.5} borderRadius="md">
+                      <Badge
+                        variant="subtle"
+                        colorPalette="amber"
+                        px={2}
+                        py={0.5}
+                        borderRadius="md"
+                      >
                         <HStack gap={1.5} alignItems="center">
                           <AlertTriangle size={14} />
-                          <span>Duplicado (já existia)</span>
+                          <Text as="span">Duplicado (já existia)</Text>
                         </HStack>
                       </Badge>
                     )}
@@ -404,7 +402,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       <Badge variant="subtle" colorPalette="red" px={2} py={0.5} borderRadius="md">
                         <HStack gap={1.5} alignItems="center">
                           <XCircle size={14} />
-                          <span>Falha</span>
+                          <Text as="span">Falha</Text>
                         </HStack>
                       </Badge>
                     )}
@@ -427,13 +425,13 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       variant="ghost"
                       disabled={item.status === 'enviando'}
                       onClick={() => onRemoverArquivo(item.id)}
-                      aria-label="Remover da fila"
+                      aria-label="Remover item da fila"
                       p={1.5}
                     >
                       <Trash2 size={16} />
                     </Button>
                   </HStack>
-                </Card.Body>
+                </Flex>
               </Card.Root>
             ))}
           </Grid>

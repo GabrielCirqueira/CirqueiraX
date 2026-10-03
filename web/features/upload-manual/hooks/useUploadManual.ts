@@ -39,7 +39,10 @@ export function useUploadManual() {
       if (novosArquivos.length === 0) return
 
       setFila((prev) => [...prev, ...novosArquivos])
-      addToast({ title: `${novosArquivos.length} arquivo(s) adicionado(s) à fila.`, color: 'success' })
+      addToast({
+        title: `${novosArquivos.length} arquivo(s) adicionado(s) à fila.`,
+        color: 'success',
+      })
     },
     [categoriaPadraoId]
   )
@@ -105,7 +108,10 @@ export function useUploadManual() {
       )
 
       if (resultado.ehDuplicado) {
-        addToast({ title: `"${item.nome}" já existia no banco e foi identificado como duplicado.`, color: 'warning' })
+        addToast({
+          title: `"${item.nome}" já existia no banco e foi identificado como duplicado.`,
+          color: 'warning',
+        })
       } else {
         addToast({ title: `"${item.nome}" enviado com sucesso!`, color: 'success' })
       }

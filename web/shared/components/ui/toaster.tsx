@@ -1,9 +1,14 @@
 import {
-  createToaster,
+  Box,
   Toaster as ChakraToaster,
+  IconButton,
   Portal,
+  Spinner,
   Toast,
+  VStack,
+  createToaster,
 } from '@chakra-ui/react'
+import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react'
 
 export const toaster = createToaster({
   placement: 'top-end',
@@ -14,17 +19,19 @@ export interface ToastOptions {
   title: string
   description?: string
   color?: 'success' | 'danger' | 'error' | 'warning' | 'info' | 'primary'
-  type?: 'success' | 'error' | 'warning' | 'info'
+  type?: 'success' | 'error' | 'warning' | 'info' | 'loading'
+  duration?: number
 }
 
 export const addToast = (options: ToastOptions) => {
-  const typeMap: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
+  const typeMap: Record<string, 'success' | 'error' | 'warning' | 'info' | 'loading'> = {
     success: 'success',
     danger: 'error',
     error: 'error',
     warning: 'warning',
     info: 'info',
     primary: 'info',
+    loading: 'loading',
   }
 
   const toastType = options.type || typeMap[options.color || 'info'] || 'info'
@@ -33,20 +40,75 @@ export const addToast = (options: ToastOptions) => {
     title: options.title,
     description: options.description,
     type: toastType,
+    duration: options.duration ?? 4000,
   })
+}
+
+function renderizarIconeToast(type?: string) {
+  switch (type) {
+    case 'success':
+      return <CheckCircle2 size={18} color="#22c55e" />
+    case 'error':
+      return <AlertCircle size={18} color="#ef4444" />
+    case 'warning':
+      return <AlertTriangle size={18} color="#f59e0b" />
+    case 'loading':
+      return <Spinner size="xs" color="brand.500" />
+    default:
+      return <Info size={18} color="#3b82f6" />
+  }
 }
 
 export function Toaster() {
   return (
     <Portal>
-      <ChakraToaster toaster={toaster}>
+      <ChakraToaster toaster={toaster} insetInlineEnd="16px" top="16px">
         {(toast) => (
-          <Toast.Root key={toast.id}>
-            {toast.title && <Toast.Title>{toast.title}</Toast.Title>}
-            {toast.description && (
-              <Toast.Description>{toast.description}</Toast.Description>
-            )}
-            <Toast.CloseTrigger />
+          <Toast.Root
+            key={toast.id}
+            w={{ base: 'calc(100vw - 32px)', sm: '380px' }}
+            minW="300px"
+            maxW="420px"
+            bg="bg.panel"
+            borderRadius="xl"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            shadow="2xl"
+            p={3.5}
+            display="flex"
+            flexDirection="row"
+            alignItems="flex-start"
+            gap={3}
+          >
+            <Box flexShrink={0} pt={0.5}>
+              {renderizarIconeToast(toast.type)}
+            </Box>
+
+            <VStack flex={1} gap={0.5} align="flex-start" minW={0}>
+              {toast.title && (
+                <Toast.Title fontSize="sm" fontWeight="semibold" color="fg" lineClamp={2}>
+                  {toast.title}
+                </Toast.Title>
+              )}
+              {toast.description && (
+                <Toast.Description fontSize="xs" color="fg.subtle" lineClamp={3}>
+                  {toast.description}
+                </Toast.Description>
+              )}
+            </VStack>
+
+            <Toast.CloseTrigger asChild>
+              <IconButton
+                size="2xs"
+                variant="ghost"
+                color="fg.subtle"
+                _hover={{ color: 'fg', bg: 'bg.muted' }}
+                aria-label="Fechar notificação"
+                flexShrink={0}
+              >
+                <X size={14} />
+              </IconButton>
+            </Toast.CloseTrigger>
           </Toast.Root>
         )}
       </ChakraToaster>

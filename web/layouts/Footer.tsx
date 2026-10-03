@@ -13,9 +13,17 @@ export const Footer = memo(function Footer() {
   return (
     <Box as="footer" borderTop="1px solid" borderColor="whiteAlpha.200" bg="zinc.950">
       <HStack maxW="6xl" mx="auto" px={6} h={16} justify="space-between" flexWrap="wrap">
-        <Link to="/">
+        <Box as={Link} to="/">
           <HStack gap={2}>
-            <Box w={6} h={6} borderRadius="md" bg="brand.500" display="flex" alignItems="center" justifyContent="center">
+            <Box
+              w={6}
+              h={6}
+              borderRadius="md"
+              bg="brand.500"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
               <Code2 size={14} color="white" strokeWidth={2.5} />
             </Box>
             <Text as="span" fontWeight="900" fontSize="xs" letterSpacing="tight">
@@ -25,27 +33,42 @@ export const Footer = memo(function Footer() {
               </Text>
             </Text>
           </HStack>
-        </Link>
+        </Box>
 
-        <Flex display={{ base: 'none', sm: 'flex' }} alignItems="center" gap={5} fontSize="xs" color="zinc.400">
+        <Flex
+          display={{ base: 'none', sm: 'flex' }}
+          alignItems="center"
+          gap={5}
+          fontSize="xs"
+          color="zinc.400"
+        >
           {footerLinks.map((link) => (
-            <a key={link.href} href={link.href} style={{ color: 'inherit', transition: 'color 0.2s' }}>
+            <Box
+              as="a"
+              key={link.href}
+              href={link.href}
+              color="inherit"
+              transition="color 0.2s"
+              _hover={{ color: 'fg' }}
+            >
               {link.label}
-            </a>
+            </Box>
           ))}
         </Flex>
 
         <HStack gap={3} fontSize="xs" color="zinc.400">
           <Text as="span">MIT License</Text>
-          <a
+          <Box
+            as="a"
             href="https://github.com"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub"
-            style={{ color: 'inherit' }}
+            color="inherit"
+            _hover={{ color: 'fg' }}
           >
             <Github size={16} />
-          </a>
+          </Box>
         </HStack>
       </HStack>
     </Box>

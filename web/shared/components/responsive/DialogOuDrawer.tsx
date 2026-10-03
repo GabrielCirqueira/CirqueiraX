@@ -28,7 +28,14 @@ export function DialogOuDrawer({
     <Dialog.Root open={state.isOpen} onOpenChange={(e) => state.setOpen(e.open)}>
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content bg="gray.900" border="1px solid" borderColor="gray.800" color="white" p={4} rounded="xl">
+        <Dialog.Content
+          bg="gray.900"
+          border="1px solid"
+          borderColor="gray.800"
+          color="white"
+          p={4}
+          rounded="xl"
+        >
           <Dialog.Header>
             <Dialog.Title fontSize="lg" fontWeight="bold">
               {titulo}

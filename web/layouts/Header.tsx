@@ -41,9 +41,17 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
       backdropFilter="blur(12px)"
     >
       <HStack maxW="6xl" mx="auto" px={6} h={14} justify="space-between">
-        <Link to={autenticado ? '/dashboard' : '/login'}>
+        <Box as={Link} to={autenticado ? '/dashboard' : '/login'}>
           <HStack gap={2}>
-            <Box w={7} h={7} borderRadius="lg" bg="brand.500" display="flex" alignItems="center" justifyContent="center">
+            <Box
+              w={7}
+              h={7}
+              borderRadius="lg"
+              bg="brand.500"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
               <Code2 size={16} color="white" strokeWidth={2.5} />
             </Box>
             <Text as="span" fontWeight="900" fontSize="sm" letterSpacing="tight">
@@ -68,22 +76,28 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
               </Text>
             </Text>
           </HStack>
-        </Link>
+        </Box>
 
         {autenticado && (
-          <Flex display={{ base: 'none', md: 'flex' }} alignItems="center" gap={6} fontSize="sm" color="zinc.400">
+          <Flex
+            display={{ base: 'none', md: 'flex' }}
+            alignItems="center"
+            gap={6}
+            fontSize="sm"
+            color="zinc.400"
+          >
             {navLinks.map((link) => (
-              <Link
+              <Box
+                as={Link}
                 key={link.href}
                 to={link.href}
-                style={{
-                  color: pathname === link.href ? '#a855f7' : undefined,
-                  fontWeight: pathname === link.href ? 600 : undefined,
-                  transition: 'color 0.2s',
-                }}
+                color={pathname === link.href ? 'brand.400' : 'inherit'}
+                fontWeight={pathname === link.href ? 'semibold' : 'normal'}
+                transition="color 0.2s"
+                _hover={{ color: 'fg' }}
               >
                 {link.label}
-              </Link>
+              </Box>
             ))}
           </Flex>
         )}
@@ -101,7 +115,16 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
 
           {autenticado ? (
             <HStack gap={2} alignItems="center">
-              <Badge colorPalette="green" variant="subtle" px={2} py={0.5} borderRadius="full" fontSize="xs" display="flex" alignItems="center">
+              <Badge
+                colorPalette="green"
+                variant="subtle"
+                px={2}
+                py={0.5}
+                borderRadius="full"
+                fontSize="xs"
+                display="flex"
+                alignItems="center"
+              >
                 <User size={12} style={{ marginRight: '4px' }} />
                 {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
               </Badge>
@@ -119,12 +142,22 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
             </HStack>
           ) : (
             !isLoginPage && (
-              <Link to="/login">
-                <Button size="sm" bg="brand.500" _hover={{ bg: 'brand.600' }} color="white" borderRadius="lg" px={3} py={1} fontSize="xs" fontWeight="semibold">
+              <Box as={Link} to="/login">
+                <Button
+                  size="sm"
+                  bg="brand.500"
+                  _hover={{ bg: 'brand.600' }}
+                  color="white"
+                  borderRadius="lg"
+                  px={3}
+                  py={1}
+                  fontSize="xs"
+                  fontWeight="semibold"
+                >
                   <LogIn size={14} style={{ marginRight: '4px' }} />
-                  Entrar
+                  <Text as="span">Entrar</Text>
                 </Button>
-              </Link>
+              </Box>
             )
           )}
         </HStack>

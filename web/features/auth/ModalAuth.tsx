@@ -80,26 +80,66 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
   }
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(e) => { if (!e.open) onClose() }}>
+    <Dialog.Root
+      open={isOpen}
+      onOpenChange={(e) => {
+        if (!e.open) onClose()
+      }}
+    >
       <Dialog.Backdrop />
       <Dialog.Positioner>
-        <Dialog.Content bg="zinc.950" border="1px solid" borderColor="whiteAlpha.200" color="white" borderRadius="2xl" p={0} maxW="md">
-          <Dialog.Header p={6} borderBottom="1px solid" borderColor="whiteAlpha.100" display="flex" alignItems="center" gap={3}>
-            <Box w={9} h={9} borderRadius="xl" bg="brand.500" display="flex" alignItems="center" justifyContent="center" shadow="lg">
+        <Dialog.Content
+          bg="zinc.950"
+          border="1px solid"
+          borderColor="whiteAlpha.200"
+          color="white"
+          borderRadius="2xl"
+          p={0}
+          maxW="md"
+        >
+          <Dialog.Header
+            p={6}
+            borderBottom="1px solid"
+            borderColor="whiteAlpha.100"
+            display="flex"
+            alignItems="center"
+            gap={3}
+          >
+            <Box
+              w={9}
+              h={9}
+              borderRadius="xl"
+              bg="brand.500"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              shadow="lg"
+            >
               <Code2 size={20} color="white" strokeWidth={2.5} />
             </Box>
             <VStack alignItems="flex-start" gap={0.5}>
               <Dialog.Title fontSize="lg" fontWeight="bold">
                 CirqueiraX Media
               </Dialog.Title>
-              <Text fontSize="xs" color="whiteAlpha.500">Entre com seu e-mail e senha</Text>
+              <Text fontSize="xs" color="whiteAlpha.500">
+                Entre com seu e-mail e senha
+              </Text>
             </VStack>
           </Dialog.Header>
 
           <Dialog.Body p={6}>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} noValidate>
+            <Box
+              as="form"
+              onSubmit={handleSubmit}
+              display="flex"
+              flexDirection="column"
+              gap={4}
+              noValidate
+            >
               <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">E-mail ou Usuário</Field.Label>
+                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                  E-mail ou Usuário
+                </Field.Label>
                 <Input
                   placeholder="usuario@cirqueira.com ou usuario"
                   value={form.emailOuUsuario}
@@ -115,11 +155,15 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                   _placeholder={{ color: 'whiteAlpha.400' }}
                   h={10}
                 />
-                <Field.ErrorText fontSize="xs" color="rose.400">{erros.emailOuUsuario}</Field.ErrorText>
+                <Field.ErrorText fontSize="xs" color="rose.400">
+                  {erros.emailOuUsuario}
+                </Field.ErrorText>
               </Field.Root>
 
               <Field.Root invalid={Boolean(erros.senha)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">Senha</Field.Label>
+                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                  Senha
+                </Field.Label>
                 <HStack position="relative" w="full">
                   <Input
                     type={mostrarSenha ? 'text' : 'password'}
@@ -151,14 +195,12 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                     p={0}
                     aria-label={mostrarSenha ? 'Ocultar senha' : 'Ver senha'}
                   >
-                    {mostrarSenha ? (
-                      <EyeOff size={14} />
-                    ) : (
-                      <Eye size={14} />
-                    )}
+                    {mostrarSenha ? <EyeOff size={14} /> : <Eye size={14} />}
                   </Button>
                 </HStack>
-                <Field.ErrorText fontSize="xs" color="rose.400">{erros.senha}</Field.ErrorText>
+                <Field.ErrorText fontSize="xs" color="rose.400">
+                  {erros.senha}
+                </Field.ErrorText>
               </Field.Root>
 
               <Button
@@ -176,9 +218,9 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                 shadow="lg"
               >
                 <Lock size={16} style={{ marginRight: '6px' }} />
-                <span>Entrar</span>
+                <Text as="span">Entrar</Text>
               </Button>
-            </form>
+            </Box>
           </Dialog.Body>
           <Dialog.CloseTrigger />
         </Dialog.Content>

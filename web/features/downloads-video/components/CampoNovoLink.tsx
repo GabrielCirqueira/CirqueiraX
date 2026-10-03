@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Flex, HStack, Input, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Card, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import { Clipboard, Download, Globe, Instagram, Loader2, Video, X, Youtube } from 'lucide-react'
 import { type FormEvent, memo, useState } from 'react'
 import { useCriarDownload } from '../hooks/useDownloadsVideo'
@@ -86,11 +86,22 @@ export const CampoNovoLink = memo(function CampoNovoLink({
   }
 
   return (
-    <Card.Root w="full" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="sm">
+    <Card.Root
+      w="full"
+      borderRadius="2xl"
+      borderWidth="1px"
+      borderColor="border.subtle"
+      bg="bg.panel"
+      shadow="sm"
+    >
       <Card.Body p={{ base: 4, sm: 5 }}>
-        <form onSubmit={handleSubmit}>
+        <Box as="form" onSubmit={handleSubmit}>
           <VStack gap={3} alignItems="stretch">
-            <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'center' }} gap={2.5}>
+            <Flex
+              direction={{ base: 'column', sm: 'row' }}
+              align={{ base: 'stretch', sm: 'center' }}
+              gap={2.5}
+            >
               <Box position="relative" flex={1} display="flex" alignItems="center">
                 <Input
                   type="url"
@@ -129,7 +140,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                       py={1}
                     >
                       <Clipboard size={14} style={{ marginRight: '4px' }} />
-                      <span>Colar</span>
+                      <Text as="span">Colar</Text>
                     </Button>
                   )}
                 </HStack>
@@ -148,13 +159,16 @@ export const CampoNovoLink = memo(function CampoNovoLink({
               >
                 {isPending ? (
                   <>
-                    <Loader2 size={16} style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }} />
-                    <span>Iniciando...</span>
+                    <Loader2
+                      size={16}
+                      style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                    />
+                    <Text as="span">Iniciando...</Text>
                   </>
                 ) : (
                   <>
                     <Download size={16} style={{ marginRight: '6px' }} />
-                    <span>Baixar Vídeo</span>
+                    <Text as="span">Baixar Vídeo</Text>
                   </>
                 )}
               </Button>
@@ -173,15 +187,14 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                 >
                   <HStack gap={1} alignItems="center">
                     <IconePlataforma size={14} />
-                    <span>{plataforma.nome} detectado</span>
+                    <Text as="span">{plataforma.nome} detectado</Text>
                   </HStack>
                 </Badge>
               </HStack>
             )}
           </VStack>
-        </form>
+        </Box>
       </Card.Body>
     </Card.Root>
   )
 })
-

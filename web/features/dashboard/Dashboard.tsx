@@ -124,19 +124,13 @@ const DashboardView = memo(function DashboardView() {
                   marginRight: '6px',
                 }}
               />
-              <span>{atualizandoManual ? 'Atualizando...' : 'Atualizar Dados'}</span>
+              <Text as="span">{atualizandoManual ? 'Atualizando...' : 'Atualizar Dados'}</Text>
             </Button>
           </HStack>
         </VStack>
 
-        {/* ════════════════════════════════════════════
-            CARDS DE RESUMO (KPIs)
-        ════════════════════════════════════════════ */}
         <CardsResumo resumo={resumo} carregando={carregandoResumo} />
 
-        {/* ════════════════════════════════════════════
-            ABAS DE NAVEGAÇÃO DO PAINEL
-        ════════════════════════════════════════════ */}
         <VStack w="full" gap={6} alignItems="stretch">
           <Tabs.Root value={abaAtiva} onValueChange={(e) => setAbaAtiva(e.value)} w="full">
             <Tabs.List
@@ -158,7 +152,7 @@ const DashboardView = memo(function DashboardView() {
               >
                 <HStack gap={2} align="center">
                   <LayoutDashboard size={16} />
-                  <span>Visão Geral & Gráficos</span>
+                  <Text as="span">Visão Geral & Gráficos</Text>
                 </HStack>
               </Tabs.Trigger>
 
@@ -172,7 +166,7 @@ const DashboardView = memo(function DashboardView() {
               >
                 <HStack gap={2} align="center">
                   <FolderTree size={16} />
-                  <span>Categorias ({categorias.length})</span>
+                  <Text as="span">Categorias ({categorias.length})</Text>
                 </HStack>
               </Tabs.Trigger>
 
@@ -186,7 +180,7 @@ const DashboardView = memo(function DashboardView() {
               >
                 <HStack gap={2} align="center">
                   <RefreshCw size={16} />
-                  <span>Sincronização ({pastasSync.length})</span>
+                  <Text as="span">Sincronização ({pastasSync.length})</Text>
                 </HStack>
               </Tabs.Trigger>
 
@@ -200,7 +194,7 @@ const DashboardView = memo(function DashboardView() {
               >
                 <HStack gap={2} align="center">
                   <AlertTriangle size={16} />
-                  <span>Fila de Erros</span>
+                  <Text as="span">Fila de Erros</Text>
                   {totalErros > 0 && (
                     <Badge
                       size="sm"

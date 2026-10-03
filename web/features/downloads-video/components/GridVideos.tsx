@@ -10,6 +10,7 @@ export interface GridVideosProps {
   selecionados: string[]
   onToggleSelect: (uuid: string) => void
   onToggleSelectAll?: () => void
+  onVisualizar?: (item: MediaItem) => void
   onEditarMetadata?: (item: MediaItem) => void
   onCategorizar?: (item: MediaItem) => void
   onRebaixar?: (uuid: string) => void
@@ -19,7 +20,16 @@ export interface GridVideosProps {
 
 function SkeletonCard() {
   return (
-    <Box display="flex" flexDirection="column" borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" overflow="hidden" shadow="sm">
+    <Box
+      display="flex"
+      flexDirection="column"
+      borderRadius="2xl"
+      borderWidth="1px"
+      borderColor="border.subtle"
+      bg="bg.panel"
+      overflow="hidden"
+      shadow="sm"
+    >
       <Box aspectRatio="16/9" w="full" bg="bg.muted" />
       <VStack p={4} gap={3} alignItems="stretch">
         <Box h={4} bg="bg.muted" borderRadius="md" w="80%" />
@@ -39,6 +49,7 @@ export const GridVideos = memo(function GridVideos({
   selecionados,
   onToggleSelect,
   onToggleSelectAll,
+  onVisualizar,
   onEditarMetadata,
   onCategorizar,
   onRebaixar,
@@ -50,7 +61,16 @@ export const GridVideos = memo(function GridVideos({
 
   if (carregando && itens.length === 0) {
     return (
-      <Grid w="full" templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
+      <Grid
+        w="full"
+        templateColumns={{
+          base: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(3, 1fr)',
+          lg: 'repeat(4, 1fr)',
+        }}
+        gap={4}
+      >
         {Array.from({ length: 8 }).map((_, index) => (
           <SkeletonCard key={`skeleton-${index + 1}`} />
         ))}
@@ -102,11 +122,7 @@ export const GridVideos = memo(function GridVideos({
             _hover={{ color: 'fg' }}
           >
             <HStack gap={2}>
-              {todosSelecionados ? (
-                <CheckSquare size={16} color="#8b5cf6" />
-              ) : (
-                <Square size={16} />
-              )}
+              {todosSelecionados ? <CheckSquare size={16} color="#8b5cf6" /> : <Square size={16} />}
               <Text as="span">
                 {todosSelecionados
                   ? 'Desmarcar todos'
@@ -119,13 +135,23 @@ export const GridVideos = memo(function GridVideos({
         </Flex>
       )}
 
-      <Grid w="full" templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
+      <Grid
+        w="full"
+        templateColumns={{
+          base: '1fr',
+          sm: 'repeat(2, 1fr)',
+          md: 'repeat(3, 1fr)',
+          lg: 'repeat(4, 1fr)',
+        }}
+        gap={4}
+      >
         {itens.map((item) => (
           <CardVideo
             key={item.uuid}
             item={item}
             selecionado={selecionados.includes(item.uuid)}
             onToggleSelect={onToggleSelect}
+            onVisualizar={onVisualizar}
             onEditarMetadata={onEditarMetadata}
             onCategorizar={onCategorizar}
             onRebaixar={onRebaixar}
@@ -137,4 +163,3 @@ export const GridVideos = memo(function GridVideos({
     </VStack>
   )
 })
-

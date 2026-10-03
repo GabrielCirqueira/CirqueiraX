@@ -72,14 +72,19 @@ const HomeContent = memo(function HomeContent() {
                 Gestão de Mídias
               </Text>
             </Text>
-            <Text fontSize={{ base: 'sm', sm: 'lg' }} color="zinc.400" maxW="2xl" lineHeight="relaxed">
+            <Text
+              fontSize={{ base: 'sm', sm: 'lg' }}
+              color="zinc.400"
+              maxW="2xl"
+              lineHeight="relaxed"
+            >
               Automação completa para download de vídeos de redes sociais, upload manual com triagem
               inteligente por hash e agentes de captura de tela em segundo plano.
             </Text>
           </VStack>
 
           <HStack gap={4} flexWrap="wrap" justifyContent="center" pt={2}>
-            <Link to="/dashboard">
+            <Box as={Link} to="/dashboard">
               <Button
                 size="lg"
                 bg="brand.500"
@@ -91,11 +96,11 @@ const HomeContent = memo(function HomeContent() {
                 shadow="lg"
               >
                 <LayoutDashboard size={20} style={{ marginRight: '8px' }} />
-                <span>Acessar Dashboard</span>
+                <Text as="span">Acessar Dashboard</Text>
               </Button>
-            </Link>
+            </Box>
 
-            <Link to="/downloads">
+            <Box as={Link} to="/downloads">
               <Button
                 variant="outline"
                 size="lg"
@@ -107,11 +112,11 @@ const HomeContent = memo(function HomeContent() {
                 _hover={{ bg: 'zinc.800' }}
               >
                 <DownloadCloud size={20} style={{ marginRight: '8px', color: '#8b5cf6' }} />
-                <span>Downloads de Vídeo</span>
+                <Text as="span">Downloads de Vídeo</Text>
               </Button>
-            </Link>
+            </Box>
 
-            <Link to="/upload-manual">
+            <Box as={Link} to="/upload-manual">
               <Button
                 variant="outline"
                 size="lg"
@@ -123,9 +128,9 @@ const HomeContent = memo(function HomeContent() {
                 _hover={{ bg: 'zinc.800' }}
               >
                 <UploadCloud size={20} style={{ marginRight: '8px', color: '#6366f1' }} />
-                <span>Upload Manual & Triagem</span>
+                <Text as="span">Upload Manual & Triagem</Text>
               </Button>
-            </Link>
+            </Box>
           </HStack>
 
           <HStack flexWrap="wrap" justifyContent="center" gap={2} pt={4}>
@@ -164,9 +169,27 @@ const HomeContent = memo(function HomeContent() {
         </VStack>
 
         <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
-            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
-              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+          >
+            <Card.Header
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              pb={2}
+            >
+              <Card.Title
+                fontSize="xs"
+                fontWeight="bold"
+                color="zinc.400"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
                 Mídias Processadas
               </Card.Title>
               <Box p={2} borderRadius="xl" bg="brand.500/10" color="brand.500">
@@ -183,9 +206,27 @@ const HomeContent = memo(function HomeContent() {
             </Card.Body>
           </Card.Root>
 
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
-            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
-              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+          >
+            <Card.Header
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              pb={2}
+            >
+              <Card.Title
+                fontSize="xs"
+                fontWeight="bold"
+                color="zinc.400"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
                 Categorias Ativas
               </Card.Title>
               <Box p={2} borderRadius="xl" bg="indigo.500/10" color="indigo.500">
@@ -202,9 +243,27 @@ const HomeContent = memo(function HomeContent() {
             </Card.Body>
           </Card.Root>
 
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
-            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
-              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+          >
+            <Card.Header
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              pb={2}
+            >
+              <Card.Title
+                fontSize="xs"
+                fontWeight="bold"
+                color="zinc.400"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
                 Agentes de Print
               </Card.Title>
               <Box p={2} borderRadius="xl" bg="emerald.500/10" color="emerald.500">
@@ -213,7 +272,18 @@ const HomeContent = memo(function HomeContent() {
             </Card.Header>
             <Card.Body>
               <HStack gap={2} alignItems="center" mb={1}>
-                <Badge colorPalette="green" variant="subtle" bg="emerald.500/10" color="emerald-400" border="1px solid" borderColor="emerald.500/20" fontWeight="bold" px={2} py={0.5} borderRadius="md">
+                <Badge
+                  colorPalette="green"
+                  variant="subtle"
+                  bg="emerald.500/10"
+                  color="emerald-400"
+                  border="1px solid"
+                  borderColor="emerald.500/20"
+                  fontWeight="bold"
+                  px={2}
+                  py={0.5}
+                  borderRadius="md"
+                >
                   2 Conectados
                 </Badge>
               </HStack>
@@ -223,9 +293,27 @@ const HomeContent = memo(function HomeContent() {
             </Card.Body>
           </Card.Root>
 
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl">
-            <Card.Header display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" pb={2}>
-              <Card.Title fontSize="xs" fontWeight="bold" color="zinc.400" textTransform="uppercase" letterSpacing="wider">
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+          >
+            <Card.Header
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              pb={2}
+            >
+              <Card.Title
+                fontSize="xs"
+                fontWeight="bold"
+                color="zinc.400"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
                 Google Fotos Pipeline
               </Card.Title>
               <Box p={2} borderRadius="xl" bg="amber.500/10" color="amber.500">
@@ -234,7 +322,18 @@ const HomeContent = memo(function HomeContent() {
             </Card.Header>
             <Card.Body>
               <HStack gap={2} alignItems="center" mb={1}>
-                <Badge colorPalette="amber" variant="subtle" bg="amber.500/10" color="amber.400" border="1px solid" borderColor="amber.500/20" fontWeight="bold" px={2} py={0.5} borderRadius="md">
+                <Badge
+                  colorPalette="amber"
+                  variant="subtle"
+                  bg="amber.500/10"
+                  color="amber.400"
+                  border="1px solid"
+                  borderColor="amber.500/20"
+                  fontWeight="bold"
+                  px={2}
+                  py={0.5}
+                  borderRadius="md"
+                >
                   OAuth2 Pronto
                 </Badge>
               </HStack>
@@ -257,9 +356,26 @@ const HomeContent = memo(function HomeContent() {
         </VStack>
 
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl" _hover={{ borderColor: 'brand.500/40' }}>
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+            _hover={{ borderColor: 'brand.500/40' }}
+          >
             <Card.Header>
-              <Box w={10} h={10} borderRadius="2xl" bg="brand.500/10" color="brand.500" display="flex" alignItems="center" justifyContent="center" mb={2}>
+              <Box
+                w={10}
+                h={10}
+                borderRadius="2xl"
+                bg="brand.500/10"
+                color="brand.500"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                mb={2}
+              >
                 <Video size={20} />
               </Box>
               <Card.Title fontSize="lg" fontWeight="bold" color="white">
@@ -284,7 +400,7 @@ const HomeContent = memo(function HomeContent() {
                 </Badge>
               </HStack>
 
-              <Link to="/downloads" style={{ width: '100%', paddingTop: '8px' }}>
+              <Box as={Link} to="/downloads" w="full" pt={2}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -294,16 +410,33 @@ const HomeContent = memo(function HomeContent() {
                   _hover={{ color: 'brand.400', bg: 'brand.500/10' }}
                   fontWeight="bold"
                 >
-                  <span>Acessar Downloads</span>
+                  <Text as="span">Acessar Downloads</Text>
                   <ArrowRight size={16} />
                 </Button>
-              </Link>
+              </Box>
             </Card.Body>
           </Card.Root>
 
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl" _hover={{ borderColor: 'brand.500/40' }}>
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+            _hover={{ borderColor: 'brand.500/40' }}
+          >
             <Card.Header>
-              <Box w={10} h={10} borderRadius="2xl" bg="indigo.500/10" color="indigo.500" display="flex" alignItems="center" justifyContent="center" mb={2}>
+              <Box
+                w={10}
+                h={10}
+                borderRadius="2xl"
+                bg="indigo.500/10"
+                color="indigo.500"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                mb={2}
+              >
                 <UploadCloud size={20} />
               </Box>
               <Card.Title fontSize="lg" fontWeight="bold" color="white">
@@ -328,7 +461,7 @@ const HomeContent = memo(function HomeContent() {
                 </Badge>
               </HStack>
 
-              <Link to="/upload-manual" style={{ width: '100%', paddingTop: '8px' }}>
+              <Box as={Link} to="/upload-manual" w="full" pt={2}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -338,16 +471,33 @@ const HomeContent = memo(function HomeContent() {
                   _hover={{ color: 'indigo.300', bg: 'indigo.500/10' }}
                   fontWeight="bold"
                 >
-                  <span>Acessar Upload Manual</span>
+                  <Text as="span">Acessar Upload Manual</Text>
                   <ArrowRight size={16} />
                 </Button>
-              </Link>
+              </Box>
             </Card.Body>
           </Card.Root>
 
-          <Card.Root border="1px solid" borderColor="zinc.800" bg="zinc.900" shadow="sm" borderRadius="2xl" _hover={{ borderColor: 'brand.500/40' }}>
+          <Card.Root
+            border="1px solid"
+            borderColor="zinc.800"
+            bg="zinc.900"
+            shadow="sm"
+            borderRadius="2xl"
+            _hover={{ borderColor: 'brand.500/40' }}
+          >
             <Card.Header>
-              <Box w={10} h={10} borderRadius="2xl" bg="emerald.500/10" color="emerald.500" display="flex" alignItems="center" justifyContent="center" mb={2}>
+              <Box
+                w={10}
+                h={10}
+                borderRadius="2xl"
+                bg="emerald.500/10"
+                color="emerald.500"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                mb={2}
+              >
                 <ShieldCheck size={20} />
               </Box>
               <Card.Title fontSize="lg" fontWeight="bold" color="white">
@@ -372,7 +522,7 @@ const HomeContent = memo(function HomeContent() {
                 </Badge>
               </HStack>
 
-              <Link to="/downloads" style={{ width: '100%', paddingTop: '8px' }}>
+              <Box as={Link} to="/downloads" w="full" pt={2}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -382,10 +532,10 @@ const HomeContent = memo(function HomeContent() {
                   _hover={{ color: 'emerald.300', bg: 'emerald.500/10' }}
                   fontWeight="bold"
                 >
-                  <span>Ver Mídias dos Agentes</span>
+                  <Text as="span">Ver Mídias dos Agentes</Text>
                   <ArrowRight size={16} />
                 </Button>
-              </Link>
+              </Box>
             </Card.Body>
           </Card.Root>
         </Grid>

@@ -1,10 +1,18 @@
-import { Button, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Text, VStack } from '@chakra-ui/react'
 import { MoveLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export function Component() {
   return (
-    <VStack flex={1} alignItems="center" justifyContent="center" gap={6} px={4} textAlign="center" py={20}>
+    <VStack
+      flex={1}
+      alignItems="center"
+      justifyContent="center"
+      gap={6}
+      px={4}
+      textAlign="center"
+      py={20}
+    >
       <VStack gap={2}>
         <Text as="span" fontSize="8xl" fontWeight="900" color="brand.500/20" lineHeight="none">
           404
@@ -17,7 +25,7 @@ export function Component() {
         </Text>
       </VStack>
 
-      <Link to="/">
+      <Box as={Link} to="/">
         <Button
           bg="brand.500"
           _hover={{ bg: 'brand.600' }}
@@ -32,9 +40,9 @@ export function Component() {
           gap={2}
         >
           <MoveLeft size={16} />
-          <span>Voltar para o início</span>
+          <Text as="span">Voltar para o início</Text>
         </Button>
-      </Link>
+      </Box>
     </VStack>
   )
 }

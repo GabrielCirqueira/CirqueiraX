@@ -1,5 +1,16 @@
 import { useLogin } from '@/features/auth'
-import { Badge, Box, Button, Card, Container, Field, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Container,
+  Field,
+  HStack,
+  Input,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { Code2, Eye, EyeOff, Lock, ShieldCheck } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { z } from 'zod'
@@ -36,7 +47,14 @@ export function Component() {
   }
 
   return (
-    <Container maxW="sm" minH="80vh" display="flex" alignItems="center" justifyContent="center" py={12}>
+    <Container
+      maxW="sm"
+      minH="80vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      py={12}
+    >
       <Box w="full" maxW="md" position="relative">
         <Box
           position="absolute"
@@ -51,10 +69,36 @@ export function Component() {
           pointerEvents="none"
         />
 
-        <Card.Root bg="zinc.950" borderColor="whiteAlpha.200" border="1px solid" borderRadius="3xl" overflow="hidden" position="relative" shadow="2xl">
-          <Card.Header display="flex" flexDirection="column" alignItems="center" gap={3} pb={2} pt={8} px={8} textAlign="center">
+        <Card.Root
+          bg="zinc.950"
+          borderColor="whiteAlpha.200"
+          border="1px solid"
+          borderRadius="3xl"
+          overflow="hidden"
+          position="relative"
+          shadow="2xl"
+        >
+          <Card.Header
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            gap={3}
+            pb={2}
+            pt={8}
+            px={8}
+            textAlign="center"
+          >
             <HStack gap={2.5} alignItems="center" justifyContent="center">
-              <Box w={10} h={10} borderRadius="2xl" bg="brand.500" display="flex" alignItems="center" justifyContent="center" shadow="lg">
+              <Box
+                w={10}
+                h={10}
+                borderRadius="2xl"
+                bg="brand.500"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                shadow="lg"
+              >
                 <Code2 size={20} color="white" strokeWidth={2.5} />
               </Box>
               <Text as="span" fontWeight="900" fontSize="xl" letterSpacing="tight" color="white">
@@ -107,9 +151,18 @@ export function Component() {
           </Card.Header>
 
           <Card.Body px={8} py={6}>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }} noValidate>
+            <Box
+              as="form"
+              onSubmit={handleSubmit}
+              display="flex"
+              flexDirection="column"
+              gap={4}
+              noValidate
+            >
               <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">E-mail ou Usuário</Field.Label>
+                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                  E-mail ou Usuário
+                </Field.Label>
                 <Input
                   placeholder="usuario@cirqueira.com ou usuario"
                   value={form.emailOuUsuario}
@@ -123,11 +176,15 @@ export function Component() {
                   _placeholder={{ color: 'whiteAlpha.400' }}
                   h={11}
                 />
-                <Field.ErrorText fontSize="xs" color="rose.400">{erros.emailOuUsuario}</Field.ErrorText>
+                <Field.ErrorText fontSize="xs" color="rose.400">
+                  {erros.emailOuUsuario}
+                </Field.ErrorText>
               </Field.Root>
 
               <Field.Root invalid={Boolean(erros.senha)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">Senha de Acesso</Field.Label>
+                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                  Senha de Acesso
+                </Field.Label>
                 <HStack position="relative" w="full">
                   <Input
                     type={mostrarSenha ? 'text' : 'password'}
@@ -160,7 +217,9 @@ export function Component() {
                     {mostrarSenha ? <EyeOff size={16} /> : <Eye size={16} />}
                   </Button>
                 </HStack>
-                <Field.ErrorText fontSize="xs" color="rose.400">{erros.senha}</Field.ErrorText>
+                <Field.ErrorText fontSize="xs" color="rose.400">
+                  {erros.senha}
+                </Field.ErrorText>
               </Field.Root>
 
               <Button
@@ -178,11 +237,17 @@ export function Component() {
                 shadow="lg"
               >
                 <Lock size={16} style={{ marginRight: '6px' }} />
-                <span>Entrar no Hub</span>
+                <Text as="span">Entrar no Hub</Text>
               </Button>
-            </form>
+            </Box>
 
-            <Box mt={6} pt={4} borderTop="1px solid" borderColor="whiteAlpha.100" textAlign="center">
+            <Box
+              mt={6}
+              pt={4}
+              borderTop="1px solid"
+              borderColor="whiteAlpha.100"
+              textAlign="center"
+            >
               <Text fontSize="11px" color="whiteAlpha.400">
                 Acesso restrito. Novos usuários são provisionados via CLI administrativa (
                 <Text as="span" fontFamily="mono" color="brand.400">
