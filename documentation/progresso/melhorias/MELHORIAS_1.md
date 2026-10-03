@@ -154,7 +154,7 @@
   - As thumbnails de vídeos e mídias ficavam dispersas apenas dentro do JSON de `metadata`, sem uma coluna própria na tabela `media_item` e sem getter/setter tipado na entidade.
 - **Solução**:
   - Adicionado o campo `thumbnailUrl` (`VARCHAR(1024) NULL`) na entidade `MediaItem` com métodos de acesso `thumbnailUrl()` e `setThumbnailUrl(?string $thumbnailUrl): self`.
-  - Criada e executada a migration `Version20261003201000.php` (`ALTER TABLE media_item ADD thumbnail_url VARCHAR(1024) DEFAULT NULL`).
+  - Gerada a migration oficial `Version20261003231841.php` via `make doctrine-diff` e aplicada com `make migrate` (`ALTER TABLE media_item ADD thumbnail_url VARCHAR(1024) DEFAULT NULL`).
   - Atualizado `CriarMediaItemDTO` e os métodos de fábrica `fromIngestaoDTO` e `fromDTO` para persistir automaticamente a thumbnail capturada.
   - Incluído `thumbnailUrl` no `MediaItemSerializer` e na tipagem TypeScript `MediaItem` do frontend.
   - Atualizados os componentes `CardVideo.tsx` e `ModalVisualizarMidia.tsx` para utilizar a propriedade `thumbnailUrl` tanto nos cards de grid quanto como `poster` no player de vídeo.
@@ -162,7 +162,7 @@
   - `src/Entity/MediaItem.php`
   - `src/DataObject/CriarMediaItemDTO.php`
   - `src/Serializer/MediaItemSerializer.php`
-  - `migrations/Version20261003201000.php` *(novo)*
+  - `migrations/Version20261003231841.php` *(novo, gerado via make doctrine-diff)*
   - `web/features/downloads-video/types.ts`
   - `web/features/downloads-video/components/CardVideo.tsx`
   - `web/features/downloads-video/components/ModalVisualizarMidia.tsx`
@@ -222,9 +222,44 @@
   - `web/features/downloads-video/components/ModalEditarMetadata.tsx` *(novo)*
   - `web/features/downloads-video/DownloadsVideo.tsx`
   - `web/features/downloads-video/types.ts`
-  - `src/DataObject/AtualizarMetadataMediaItemDTO.php`
-  - `src/Service/MediaItem/AtualizarMetadataMediaItemService.php`
+---
 
+### ✅ Melhoria 14 — Migração de Schema via Makefile, Backfill de Thumbnails e Correção de Erro 500
 
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - A adição do campo `thumbnailUrl` na entidade `MediaItem` causou erro HTTP 500 na listagem `GET /api/v1/media-itens` enquanto a migration não havia sido executada no banco de dados (`SQLSTATE[42S22]: Column not found: 1054 Unknown column 'm0_.thumbnail_url'`).
+- **Solução**:
+  - Aplicada a migração `Version20261003231841.php` utilizando os comandos canônicos `make doctrine-diff` e `make migrate`.
+  - Validado o schema Doctrine com `make doctrine-validate` obtendo 100% de conformidade.
+  - Executado script de backfill SQL para preencher a coluna `thumbnail_url` de itens já existentes a partir de seus `metadata.thumbnail`.
+  - Ajustadas as permissões de leitura das chaves JWT em `config/jwt/private.pem`.
+  - Validada a rota `GET /api/v1/media-itens` com retorno HTTP 200 OK e dados completos.
+- **Arquivos**:
+  - `migrations/Version20261003231841.php`
+  - `src/Entity/MediaItem.php`
+  - `src/Serializer/MediaItemSerializer.php`
+  - `documentation/progresso/melhorias/MELHORIAS_1.md`
 
+---
+
+### ✅ Melhoria 15 — Detalhamento Completo dos Cards de Vídeo (Data, Horário, Tamanho e Extensão)
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - Os cards de mídia exibiam apenas o título e uploader, sem mostrar de forma legível a data e o horário da mídia (publicação/captura/ingestão), nem o tamanho em bytes ou a extensão do arquivo.
+- **Solução**:
+  - Refatorado o componente `CardVideo.tsx` em `@chakra-ui/react` v3 sem tags HTML cruas e sem comentários.
+  - Implementado bloco de metadados em grid (`bg.muted`, border sutil) com:
+    - 📅 **Data da mídia formatada**: Suporte inteligente a formatos `YYYYMMDD`, `YYYY-MM-DD`, ISO e fallback para criação (`DD/MM/AAAA`).
+    - 🕒 **Horário da mídia**: Extração de horário dos metadados ou horário da ingestão (`HH:mm`).
+    - 💾 **Tamanho do Arquivo**: Conversão dinâmica de `tamanho_bytes` para KB/MB/GB.
+    - 🏷️ **Badge de Extensão**: Tag sutil da extensão (`MP4`, `WEBM`, etc.).
+  - Preservados os botões de ação (Download direto, Editar metadados completo, Categorizar, Rebaixar, Retentar e Excluir).
+  - Validado com `npx @biomejs/biome check` e `npm run build` do Vite.
+- **Arquivos**:
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_1.md`
 

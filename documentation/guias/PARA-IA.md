@@ -199,12 +199,17 @@ Handler de fila (módulo `async`): mesma regra — zero regra de negócio; chama
 
 ### 4.3 Migration
 
+> [!IMPORTANT]
+> **É ESTRITAMENTE PROIBIDO criar arquivos de migration manualmente na mão**. Toda migration deve ser gerada automaticamente a partir das diferenças do Schema Doctrine das entidades mapeadas utilizando os comandos oficiais do `Makefile`:
+
 ```bash
-make new-migration
-make migrate
+make doctrine-diff      # Gera automaticamente o arquivo de migration baseado no schema das entidades
+make migrate            # Executa todas as migrations pendentes no banco de dados
+make doctrine-validate  # Valida se o schema do banco está 100% sincronizado com o mapeamento ORM
+make rollback           # Reverte para a versão anterior da migration se necessário
 ```
 
-Revise o SQL antes de aplicar. Garanta índices e restrições de unicidade (`UNIQUE INDEX`) no banco para campos de unicidade de domínio (`hash`, `nome`, `origem`).
+Revise o SQL gerado antes de aplicar. Garanta índices e restrições de unicidade (`UNIQUE INDEX`) no banco para campos de unicidade de domínio (`hash`, `nome`, `origem`).
 
 ### 4.4 Repository
 

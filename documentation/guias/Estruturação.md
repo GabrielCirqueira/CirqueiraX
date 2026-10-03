@@ -623,6 +623,15 @@ Quando entidades só fazem sentido juntas (ex: `Pedido` e `ItemPedido`), todas a
 
 Regras de negócio reutilizáveis e combináveis. Use para validar condições complexas de domínio de forma isolada e testável.
 
+#### 13.5.5 Migrations Obrigatórias via Makefile
+
+* **PROIBIDO**: Criar arquivos de migration manualmente na mão em `migrations/`.
+* **SEMPRE**: Gerar migrations exclusivamente via comandos do `Makefile`:
+  * `make doctrine-diff`: Gera automaticamente a migration baseando-se no diff entre entidades Doctrine e o banco MySQL.
+  * `make migrate`: Executa todas as migrations pendentes.
+  * `make doctrine-validate`: Valida se os mappings e o schema do banco estão 100% sincronizados.
+  * `make rollback`: Reverte a migration anterior em caso de necessidade.
+
 ---
 
 ### 13.6 Message Handlers (Assíncrono)

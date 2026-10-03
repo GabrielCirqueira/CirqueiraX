@@ -24,6 +24,8 @@
 | M11 | Ajuste do `.gitignore` para Ignorar Mídias Baixadas e Storage em `devops/var/` | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-11--ajuste-do-gitignore-para-ignorar-mídias-baixadas-e-storage-em-devopsvar) |
 | M12 | Refatoração de `MediaItemController` e `BaixarVideoDownloadService` com Clean Code e Use Case Dedicado | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-12--refatoração-de-mediaitemcontroller-e-baixarvideodownloadservice-com-clean-code-e-use-case-dedicado) |
 | M13 | Modal Avançado de Edição de Metadados com Data, Horário, Duração, Thumbnail e Atalhos Rápidos | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-13--modal-avançado-de-edição-de-metadados-com-data-horário-duração-thumbnail-e-atalhos-rápidos) |
+| M14 | Migração de Schema via Makefile, Backfill de Thumbnails e Correção de Erro 500 | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-14--migração-de-schema-via-makefile-backfill-de-thumbnails-e-correção-de-erro-500) |
+| M15 | Detalhamento Completo dos Cards de Vídeo (Data, Horário, Tamanho e Extensão) | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-15--detalhamento-completo-dos-cards-de-vídeo-data-horário-tamanho-e-extensão) |
 
 
 

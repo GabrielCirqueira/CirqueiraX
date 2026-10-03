@@ -1,6 +1,7 @@
-import { Badge, Box, Card, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Card, Flex, Grid, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
+  Calendar,
   CheckCircle2,
   CheckSquare,
   Clock,
@@ -9,6 +10,7 @@ import {
   Edit3,
   ExternalLink,
   FolderPlus,
+  HardDrive,
   Loader2,
   Play,
   RotateCcw,
@@ -47,6 +49,93 @@ function formatarDuracao(segundos?: number): string | null {
   }
 
   return `${minutos}:${String(segRestantes).padStart(2, '0')}`
+}
+
+function formatarDataMidia(valorData?: string, fallbackIso?: string): string {
+  if (valorData) {
+    if (/^\d{8}$/.test(valorData)) {
+      const ano = valorData.substring(0, 4)
+      const mes = valorData.substring(4, 6)
+      const dia = valorData.substring(6, 8)
+      return `${dia}/${mes}/${ano}`
+    }
+
+    if (valorData.includes('-')) {
+      const apenasData = valorData.split('T')[0] ?? valorData
+      const partes = apenasData.split('-')
+      if (partes.length === 3 && partes[0] && partes[1] && partes[2]) {
+        const [ano, mes, dia] = partes
+        return `${dia}/${mes}/${ano}`
+      }
+    }
+
+    try {
+      const parsed = new Date(valorData)
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('pt-BR')
+      }
+    } catch {}
+  }
+
+  if (fallbackIso) {
+    try {
+      const fallbackData = new Date(fallbackIso)
+      if (!Number.isNaN(fallbackData.getTime())) {
+        return fallbackData.toLocaleDateString('pt-BR')
+      }
+    } catch {}
+  }
+
+  return 'Data não inf.'
+}
+
+function formatarHorarioMidia(item: MediaItem): string {
+  if (item.metadata?.horario && typeof item.metadata.horario === 'string') {
+    return item.metadata.horario.substring(0, 5)
+  }
+
+  const valorData = item.metadata?.data
+  if (valorData && typeof valorData === 'string') {
+    if (valorData.includes('T')) {
+      const horaParte = valorData.split('T')[1]
+      if (horaParte && horaParte.length >= 5) {
+        return horaParte.substring(0, 5)
+      }
+    }
+    if (valorData.includes(' ') && valorData.split(' ')[1]) {
+      const horaParte = valorData.split(' ')[1]
+      if (horaParte && horaParte.length >= 5) {
+        return horaParte.substring(0, 5)
+      }
+    }
+  }
+
+  if (item.criadoEm) {
+    try {
+      const dataCriacao = new Date(item.criadoEm)
+      if (!Number.isNaN(dataCriacao.getTime())) {
+        return dataCriacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      }
+    } catch {}
+  }
+
+  return '--:--'
+}
+
+function formatarTamanhoBytes(bytes?: number): string | null {
+  if (!bytes || bytes <= 0) {
+    return null
+  }
+  const kb = bytes / 1024
+  if (kb < 1024) {
+    return `${kb.toFixed(0)} KB`
+  }
+  const mb = kb / 1024
+  if (mb < 1024) {
+    return `${mb.toFixed(1)} MB`
+  }
+  const gb = mb / 1024
+  return `${gb.toFixed(2)} GB`
 }
 
 function tempoRelativoNativo(dataIso: string): string {
@@ -163,12 +252,30 @@ export const CardVideo = memo(function CardVideo({
   const [erroImagem, setErroImagem] = useState(false)
   const [baixando, setBaixando] = useState(false)
   const statusInfo = obterStatusConfig(item.status)
-  const duracaoFormatada = formatarDuracao(item.metadata?.duracao)
-  const titulo = item.metadata?.titulo || `Vídeo ${item.hash.slice(0, 10)}`
-  const uploader = item.metadata?.uploader || 'Uploader desconhecido'
-  const urlThumbnail = item.thumbnailUrl || item.metadata?.thumbnail
+  const duracaoNumero =
+    typeof item.metadata?.duracao === 'number' ? item.metadata.duracao : undefined
+  const duracaoFormatada = formatarDuracao(duracaoNumero)
+  const titulo =
+    typeof item.metadata?.titulo === 'string' && item.metadata.titulo
+      ? item.metadata.titulo
+      : `Vídeo ${item.hash.slice(0, 10)}`
+  const uploader =
+    typeof item.metadata?.uploader === 'string' && item.metadata.uploader
+      ? item.metadata.uploader
+      : 'Uploader desconhecido'
+  const urlThumbnail =
+    item.thumbnailUrl ||
+    (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined)
   const temThumbnail = Boolean(urlThumbnail) && !erroImagem
-  const urlOriginal = item.metadata?.url_original
+  const urlOriginal =
+    typeof item.metadata?.url_original === 'string' ? item.metadata.url_original : undefined
+  const dataString = typeof item.metadata?.data === 'string' ? item.metadata.data : undefined
+  const dataMidia = formatarDataMidia(dataString, item.criadoEm)
+  const horarioMidia = formatarHorarioMidia(item)
+  const tamanhoNumero =
+    typeof item.metadata?.tamanho_bytes === 'number' ? item.metadata.tamanho_bytes : undefined
+  const tamanhoFormatado = formatarTamanhoBytes(tamanhoNumero)
+  const extensao = typeof item.metadata?.extensao === 'string' ? item.metadata.extensao : undefined
 
   const handleDownloadDirecto = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -343,12 +450,63 @@ export const CardVideo = memo(function CardVideo({
           {titulo}
         </Text>
 
-        <HStack gap={1.5} fontSize="xs" color="fg.subtle" mb={2}>
-          <User size={12} style={{ flexShrink: 0 }} />
-          <Text as="span" truncate>
-            {uploader}
-          </Text>
-        </HStack>
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={2}
+          fontSize="xs"
+          color="fg.subtle"
+          mb={2.5}
+        >
+          <HStack gap={1.5} truncate flex={1}>
+            <User size={12} style={{ flexShrink: 0 }} />
+            <Text as="span" truncate>
+              {uploader}
+            </Text>
+          </HStack>
+
+          {(tamanhoFormatado || extensao) && (
+            <HStack gap={1.5} flexShrink={0}>
+              {extensao && (
+                <Badge size="xs" variant="outline" textTransform="uppercase" colorPalette="gray">
+                  {extensao}
+                </Badge>
+              )}
+              {tamanhoFormatado && (
+                <HStack gap={1} fontSize="xs" color="fg.subtle">
+                  <HardDrive size={11} />
+                  <Text as="span">{tamanhoFormatado}</Text>
+                </HStack>
+              )}
+            </HStack>
+          )}
+        </Flex>
+
+        <Grid
+          templateColumns="repeat(2, 1fr)"
+          gap={1.5}
+          px={2.5}
+          py={2}
+          borderRadius="xl"
+          bg="bg.muted"
+          borderWidth="1px"
+          borderColor="border.subtle"
+          mb={3}
+        >
+          <HStack gap={1.5} fontSize="xs" color="fg.muted">
+            <Calendar size={13} style={{ flexShrink: 0 }} />
+            <Text as="span" fontWeight="medium" truncate title={`Data da mídia: ${dataMidia}`}>
+              {dataMidia}
+            </Text>
+          </HStack>
+
+          <HStack gap={1.5} fontSize="xs" color="fg.muted" justify="flex-end">
+            <Clock size={13} style={{ flexShrink: 0 }} />
+            <Text as="span" fontWeight="medium" title={`Horário: ${horarioMidia}`}>
+              {horarioMidia}
+            </Text>
+          </HStack>
+        </Grid>
 
         <Flex
           align="center"
@@ -375,9 +533,15 @@ export const CardVideo = memo(function CardVideo({
               </Text>
             )}
           </Box>
-          <Text as="span" flexShrink={0}>
-            {tempoRelativoNativo(item.criadoEm)}
-          </Text>
+          <HStack
+            gap={1}
+            fontSize="xs"
+            color="fg.subtle"
+            flexShrink={0}
+            title={`Adicionado em: ${item.criadoEm}`}
+          >
+            <Text as="span">{tempoRelativoNativo(item.criadoEm)}</Text>
+          </HStack>
         </Flex>
 
         {item.status === 'erro' && item.erroMotivo && (
@@ -420,7 +584,7 @@ export const CardVideo = memo(function CardVideo({
               variant="ghost"
               onClick={() => onEditarMetadata(item)}
               aria-label="Editar metadados"
-              title="Editar título e uploader"
+              title="Editar título, autor, data, hora, duração e capa"
             >
               <Edit3 size={16} />
             </IconButton>
