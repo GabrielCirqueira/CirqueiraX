@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DataObject;
 
+use App\Support\MetadataKeys;
+
 final readonly class AtualizarMetadataMediaItemDTO
 {
     /**
@@ -14,6 +16,7 @@ final readonly class AtualizarMetadataMediaItemDTO
         public ?string $uploader = null,
         public ?string $data = null,
         public ?int $duracao = null,
+        public ?string $thumbnail = null,
         public array $metadata = [],
     ) {}
 
@@ -24,16 +27,19 @@ final readonly class AtualizarMetadataMediaItemDTO
     {
         $dados = $this->metadata;
         if (null !== $this->titulo) {
-            $dados['titulo'] = $this->titulo;
+            $dados[MetadataKeys::TITULO] = $this->titulo;
         }
         if (null !== $this->uploader) {
-            $dados['uploader'] = $this->uploader;
+            $dados[MetadataKeys::UPLOADER] = $this->uploader;
         }
         if (null !== $this->data) {
-            $dados['data'] = $this->data;
+            $dados[MetadataKeys::DATA] = $this->data;
         }
         if (null !== $this->duracao) {
-            $dados['duracao'] = $this->duracao;
+            $dados[MetadataKeys::DURACAO] = $this->duracao;
+        }
+        if (null !== $this->thumbnail) {
+            $dados[MetadataKeys::THUMBNAIL] = $this->thumbnail;
         }
 
         return $dados;

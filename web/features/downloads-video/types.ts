@@ -96,5 +96,6 @@ export interface AtualizarMetadataInput {
   uploader?: string
   data?: string
   duracao?: number
+  thumbnail?: string
   metadata?: Record<string, unknown>
 }

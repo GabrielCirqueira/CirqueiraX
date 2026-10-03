@@ -202,5 +202,29 @@
   - `src/DataObject/ArquivoMidiaDTO.php` *(novo)*
   - `src/Support/MetadataKeys.php`
 
+---
+
+### ✅ Melhoria 13 — Modal Avançado de Edição de Metadados com Data, Horário, Duração, Thumbnail e Atalhos Rápidos
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - A edição de metadados no frontend permitia apenas alterar o título e o uploader, sem suporte para edição de data de publicação/captura, horário, duração do vídeo ou URL de thumbnail, além de faltar atalhos ágeis de preenchimento.
+- **Solução**:
+  - Desenvolvido o componente dedicado `ModalEditarMetadata.tsx` com visual glassmorphism, divisão em abas temáticas (*Geral*, *Data & Horário*, *Duração*, *Capa / Thumbnail*) e prévia em tempo real.
+  - Implementados atalhos inteligentes de data: ⚡ *Agora/Hoje*, *Ontem*, *Há 1 semana*, *Há 1 mês* e *Restaurar Original*.
+  - Implementados atalhos rápidos de horário: *00:00 (Início)*, *08:00 (Manhã)*, *12:00 (Meio-dia)*, *18:00 (Tarde)*, *23:59 (Fim do dia)*.
+  - Implementados seletores e ajustes incrementais de duração (+/- 1 min, +/- 5 min, +10 min) com conversão automática de minutos/segundos para segundos totais.
+  - Adicionado suporte a edição e prévia visual de thumbnail.
+  - Atualizado `AtualizarMetadataMediaItemDTO.php` e `AtualizarMetadataMediaItemService.php` para sincronizar e persistir todos os campos e atualizar `thumbnailUrl` na entidade.
+  - Integrado o modal no `DownloadsVideo.tsx`.
+- **Arquivos**:
+  - `web/features/downloads-video/components/ModalEditarMetadata.tsx` *(novo)*
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/types.ts`
+  - `src/DataObject/AtualizarMetadataMediaItemDTO.php`
+  - `src/Service/MediaItem/AtualizarMetadataMediaItemService.php`
+
+
 
 

@@ -1,5 +1,5 @@
 import { AppContainer } from '@/layouts/AppContainer'
-import { Box, Button, Dialog, Field, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Dialog, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +13,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
 import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
+import { ModalEditarMetadata } from './components/ModalEditarMetadata'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import {
   useApagarLote,
@@ -25,7 +26,7 @@ import {
   useRetentarMediaItem,
   useRetentarTodos,
 } from './hooks/useDownloadsVideo'
-import type { FiltrosMediaItem, MediaItem } from './types'
+import type { AtualizarMetadataInput, FiltrosMediaItem, MediaItem } from './types'
 
 export default function DownloadsVideo() {
   const [pagina, setPagina] = useState(1)
@@ -36,8 +37,6 @@ export default function DownloadsVideo() {
 
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
   const [itemEditarMetadata, setItemEditarMetadata] = useState<MediaItem | null>(null)
-  const [novoTitulo, setNovoTitulo] = useState('')
-  const [novoUploader, setNovoUploader] = useState('')
 
   const [modalCategorizarAberto, setModalCategorizarAberto] = useState(false)
   const [categoriaAlvoUuid, setCategoriaAlvoUuid] = useState<string | null>(null)
@@ -104,19 +103,14 @@ export default function DownloadsVideo() {
 
   const handleAbrirEditarMetadata = (item: MediaItem) => {
     setItemEditarMetadata(item)
-    setNovoTitulo(item.metadata?.titulo || '')
-    setNovoUploader(item.metadata?.uploader || '')
   }
 
-  const handleSalvarMetadata = () => {
+  const handleSalvarMetadata = (input: AtualizarMetadataInput) => {
     if (!itemEditarMetadata) return
     atualizarMetadataMutate(
       {
         uuid: itemEditarMetadata.uuid,
-        input: {
-          titulo: novoTitulo.trim(),
-          uploader: novoUploader.trim(),
-        },
+        input,
       },
       {
         onSuccess: () => {
@@ -477,89 +471,13 @@ export default function DownloadsVideo() {
           processando={pendenteCategorizarLote || pendenteRebaixar || pendenteApagar}
         />
 
-        <Dialog.Root
-          open={Boolean(itemEditarMetadata)}
-          onOpenChange={(e) => !e.open && setItemEditarMetadata(null)}
-        >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content
-              bg="bg.panel"
-              borderWidth="1px"
-              borderColor="border.subtle"
-              color="fg"
-              borderRadius="2xl"
-              p={4}
-              maxW="lg"
-            >
-              <Dialog.Header>
-                <Dialog.Title fontSize="md" fontWeight="bold">
-                  Editar Metadados
-                </Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body py={4}>
-                <VStack gap={4} alignItems="stretch">
-                  <Field.Root>
-                    <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                      Título
-                    </Field.Label>
-                    <Input
-                      type="text"
-                      value={novoTitulo}
-                      onChange={(e) => setNovoTitulo(e.target.value)}
-                      bg="bg.muted"
-                      borderColor="border.subtle"
-                      borderRadius="xl"
-                    />
-                  </Field.Root>
-
-                  <Field.Root>
-                    <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                      Uploader / Canal
-                    </Field.Label>
-                    <Input
-                      type="text"
-                      value={novoUploader}
-                      onChange={(e) => setNovoUploader(e.target.value)}
-                      bg="bg.muted"
-                      borderColor="border.subtle"
-                      borderRadius="xl"
-                    />
-                  </Field.Root>
-
-                  <HStack
-                    justify="flex-end"
-                    gap={2}
-                    pt={3}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
-                  >
-                    <Button size="sm" variant="ghost" onClick={() => setItemEditarMetadata(null)}>
-                      Cancelar
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorPalette="brand"
-                      disabled={pendenteMetadata}
-                      onClick={handleSalvarMetadata}
-                      fontWeight="semibold"
-                      borderRadius="xl"
-                    >
-                      {pendenteMetadata && (
-                        <Loader2
-                          size={14}
-                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
-                        />
-                      )}
-                      <Text as="span">Salvar Alterações</Text>
-                    </Button>
-                  </HStack>
-                </VStack>
-              </Dialog.Body>
-              <Dialog.CloseTrigger />
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Dialog.Root>
+        <ModalEditarMetadata
+          item={itemEditarMetadata}
+          aberto={Boolean(itemEditarMetadata)}
+          onFechar={() => setItemEditarMetadata(null)}
+          onSalvar={handleSalvarMetadata}
+          pendente={pendenteMetadata}
+        />
 
         <Dialog.Root
           open={modalCategorizarAberto}

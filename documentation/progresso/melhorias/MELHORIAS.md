@@ -23,6 +23,8 @@
 | M10 | Campo Dedicado de Thumbnail na Entidade MediaItem e Migração de Banco | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-10--campo-dedicado-de-thumbnail-na-entidade-mediaitem-e-migração-de-banco) |
 | M11 | Ajuste do `.gitignore` para Ignorar Mídias Baixadas e Storage em `devops/var/` | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-11--ajuste-do-gitignore-para-ignorar-mídias-baixadas-e-storage-em-devopsvar) |
 | M12 | Refatoração de `MediaItemController` e `BaixarVideoDownloadService` com Clean Code e Use Case Dedicado | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-12--refatoração-de-mediaitemcontroller-e-baixarvideodownloadservice-com-clean-code-e-use-case-dedicado) |
+| M13 | Modal Avançado de Edição de Metadados com Data, Horário, Duração, Thumbnail e Atalhos Rápidos | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-13--modal-avançado-de-edição-de-metadados-com-data-horário-duração-thumbnail-e-atalhos-rápidos) |
+
 
 
 

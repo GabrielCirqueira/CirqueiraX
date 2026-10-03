@@ -32,6 +32,10 @@ final readonly class AtualizarMetadataMediaItemService
         $metadadosMesclados = array_merge($metadadosAtuais, $novosMetadados);
 
         $mediaItem->setMetadata($metadadosMesclados);
+        if (isset($metadadosMesclados[\App\Support\MetadataKeys::THUMBNAIL]) && is_string($metadadosMesclados[\App\Support\MetadataKeys::THUMBNAIL])) {
+            $mediaItem->setThumbnailUrl($metadadosMesclados[\App\Support\MetadataKeys::THUMBNAIL]);
+        }
+
         $this->mediaItemRepository->salvar($mediaItem);
 
         return $mediaItem;
