@@ -42,6 +42,7 @@ export interface MediaItem {
   googlePhotosMediaId: string | null
   categoriaId: string | null
   categoria: CategoriaVinculada | null
+  thumbnailUrl: string | null
   metadata: MetadataVideo
   erroMotivo: string | null
   historicoStatus: Array<{ de?: string; para: string; em: string }>

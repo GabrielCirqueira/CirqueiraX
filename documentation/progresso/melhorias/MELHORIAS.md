@@ -20,5 +20,10 @@
 | M7 | Migração completa de HeroUI + Tailwind CSS para Chakra UI v3 | ✅ Concluído | 29/09/2026 | [ver](MELHORIAS_1.md#melhoria-7--migração-de-heroui--tailwind-css-para-chakra-ui-v3) |
 | M8 | Visualização de Vídeo, Streaming com Range Headers, Prévia de Thumbnails e Download Direto | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-8--visualização-de-vídeo-streaming-com-range-headers-prévia-de-thumbnails-e-download-direto) |
 | M9 | Correção do Componente Toaster e Layout de Notificações Chakra UI v3 | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-9--correção-do-componente-toaster-e-layout-de-notificações-chakra-ui-v3) |
+| M10 | Campo Dedicado de Thumbnail na Entidade MediaItem e Migração de Banco | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-10--campo-dedicado-de-thumbnail-na-entidade-mediaitem-e-migração-de-banco) |
+| M11 | Ajuste do `.gitignore` para Ignorar Mídias Baixadas e Storage em `devops/var/` | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-11--ajuste-do-gitignore-para-ignorar-mídias-baixadas-e-storage-em-devopsvar) |
+| M12 | Refatoração de `MediaItemController` e `BaixarVideoDownloadService` com Clean Code e Use Case Dedicado | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-12--refatoração-de-mediaitemcontroller-e-baixarvideodownloadservice-com-clean-code-e-use-case-dedicado) |
+
+
 
 

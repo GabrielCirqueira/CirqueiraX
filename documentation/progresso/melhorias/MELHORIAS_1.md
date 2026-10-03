@@ -144,3 +144,63 @@
 - **Arquivos**:
   - `web/shared/components/ui/toaster.tsx`
 
+---
+
+### ✅ Melhoria 10 — Campo Dedicado de Thumbnail na Entidade MediaItem e Migração de Banco
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - As thumbnails de vídeos e mídias ficavam dispersas apenas dentro do JSON de `metadata`, sem uma coluna própria na tabela `media_item` e sem getter/setter tipado na entidade.
+- **Solução**:
+  - Adicionado o campo `thumbnailUrl` (`VARCHAR(1024) NULL`) na entidade `MediaItem` com métodos de acesso `thumbnailUrl()` e `setThumbnailUrl(?string $thumbnailUrl): self`.
+  - Criada e executada a migration `Version20261003201000.php` (`ALTER TABLE media_item ADD thumbnail_url VARCHAR(1024) DEFAULT NULL`).
+  - Atualizado `CriarMediaItemDTO` e os métodos de fábrica `fromIngestaoDTO` e `fromDTO` para persistir automaticamente a thumbnail capturada.
+  - Incluído `thumbnailUrl` no `MediaItemSerializer` e na tipagem TypeScript `MediaItem` do frontend.
+  - Atualizados os componentes `CardVideo.tsx` e `ModalVisualizarMidia.tsx` para utilizar a propriedade `thumbnailUrl` tanto nos cards de grid quanto como `poster` no player de vídeo.
+- **Arquivos**:
+  - `src/Entity/MediaItem.php`
+  - `src/DataObject/CriarMediaItemDTO.php`
+  - `src/Serializer/MediaItemSerializer.php`
+  - `migrations/Version20261003201000.php` *(novo)*
+  - `web/features/downloads-video/types.ts`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/components/ModalVisualizarMidia.tsx`
+
+---
+
+### ✅ Melhoria 11 — Ajuste do `.gitignore` para Ignorar Mídias Baixadas e Storage em `devops/var/`
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - Arquivos baixados pelo `yt-dlp` salvos no bind mount do Docker Compose (`devops/var/storage/downloads/*.mp4`) apareciam como arquivos não rastreados (*untracked*) no Git porque a regra de ignore continha apenas `/var/` referenciando estritamente a raiz.
+- **Solução**:
+  - Atualizado [.gitignore](file:///.gitignore) adicionando `devops/var/` e `var/` sem restrição de barra inicial, garantindo que todo o conteúdo temporário e mídias de storage gerados pelo Docker fiquem fora do controle de versão.
+- **Arquivos**:
+  - `.gitignore`
+
+---
+
+### ✅ Melhoria 12 — Refatoração de `MediaItemController` e `BaixarVideoDownloadService` com Clean Code e Use Case Dedicado
+
+- **Status**: Concluído
+- **Data**: 03 de outubro de 2026
+- **Problema**:
+  - `MediaItemController` continha manipulações de arquivo brutas (`file_exists`, `@mime_content_type`, sanitização por regex) e instanciação inline de `BinaryFileResponse` violando o princípio de **Lógica Zero**.
+  - `BaixarVideoDownloadService` apresentava condicionais `elseif` aninhadas, strings literais mágicas para metadados e acoplamento direto à classe de infraestrutura concreta.
+- **Solução**:
+  - Criado o serviço de aplicação `ObterArquivoMidiaService.php` e o DTO imutável `ArquivoMidiaDTO.php` para encapsular a validação física de existência no storage, cálculo do MIME type e geração de nome limpo para download.
+  - O `MediaItemController` foi simplificado, delegando o streaming e download para o novo Use Case e importando classes Symfony limpas no topo.
+  - `BaixarVideoDownloadService` foi refatorado seguindo **Object Calisthenics** (sem `else`, com guard clauses e métodos privados pequenos `extrairThumbnail`, `resolverDiretorioDestino`, `resolverCaminhoBaseStorage`).
+  - Constantes de chaves de metadados centralizadas em `MetadataKeys.php` (`TITULO`, `UPLOADER`, `DURACAO`, `DATA`, `EXTENSAO`, `THUMBNAIL`, `URL_ORIGINAL`).
+  - Injeção de dependência tipada com `ArmazenamentoInterface`.
+- **Arquivos**:
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `src/Service/Video/BaixarVideoDownloadService.php`
+  - `src/Service/MediaItem/ObterArquivoMidiaService.php` *(novo)*
+  - `src/DataObject/ArquivoMidiaDTO.php` *(novo)*
+  - `src/Support/MetadataKeys.php`
+
+
+

@@ -39,6 +39,9 @@ class MediaItem
     #[ORM\Column(type: 'string', length: 36, nullable: true)]
     private ?string $categoriaId = null;
 
+    #[ORM\Column(type: 'string', length: 1024, nullable: true)]
+    private ?string $thumbnailUrl = null;
+
     /**
      * @var array<string, mixed>
      */
@@ -72,6 +75,7 @@ class MediaItem
         $this->caminhoLocal = null;
         $this->googlePhotosMediaId = null;
         $this->categoriaId = null;
+        $this->thumbnailUrl = null;
         $this->metadata = [];
         $this->erroMotivo = null;
         $agora = new \DateTimeImmutable();
@@ -95,6 +99,9 @@ class MediaItem
         $item->setCaminhoLocal($dto->caminhoArquivo());
         if (!empty($dto->metadata())) {
             $item->setMetadata($dto->metadata());
+            if (isset($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]) && is_string($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL])) {
+                $item->setThumbnailUrl($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]);
+            }
         }
 
         return $item;
@@ -120,8 +127,15 @@ class MediaItem
             $item->setCategoriaId($dto->categoriaId());
         }
 
+        if (null !== $dto->thumbnailUrl()) {
+            $item->setThumbnailUrl($dto->thumbnailUrl());
+        }
+
         if (!empty($dto->metadata())) {
             $item->setMetadata($dto->metadata());
+            if (null === $item->thumbnailUrl() && isset($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]) && is_string($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL])) {
+                $item->setThumbnailUrl($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]);
+            }
         }
 
         return $item;
@@ -264,6 +278,19 @@ class MediaItem
     public function setCategoriaId(?string $categoriaId): self
     {
         $this->categoriaId = $categoriaId;
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function thumbnailUrl(): ?string
+    {
+        return $this->thumbnailUrl;
+    }
+
+    public function setThumbnailUrl(?string $thumbnailUrl): self
+    {
+        $this->thumbnailUrl = $thumbnailUrl;
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;

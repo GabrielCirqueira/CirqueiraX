@@ -25,6 +25,7 @@ final readonly class CriarMediaItemDTO
         public ?string $caminhoLocal = null,
         public ?string $googlePhotosMediaId = null,
         public ?string $categoriaId = null,
+        public ?string $thumbnailUrl = null,
         public array $metadata = [],
     ) {
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;
@@ -59,6 +60,11 @@ final readonly class CriarMediaItemDTO
     public function categoriaId(): ?string
     {
         return $this->categoriaId;
+    }
+
+    public function thumbnailUrl(): ?string
+    {
+        return $this->thumbnailUrl;
     }
 
     /**

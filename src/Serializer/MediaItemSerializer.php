@@ -42,6 +42,7 @@ final readonly class MediaItemSerializer
             'googlePhotosMediaId' => $item->googleFotosId(),
             'categoriaId' => $item->categoriaId(),
             'categoria' => $categoriaData,
+            'thumbnailUrl' => $item->thumbnailUrl(),
             'metadata' => $item->metadata(),
             'erroMotivo' => $item->erroMotivo(),
             'historicoStatus' => $item->historicoStatus(),

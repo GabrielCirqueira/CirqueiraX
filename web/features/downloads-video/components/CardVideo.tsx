@@ -166,7 +166,8 @@ export const CardVideo = memo(function CardVideo({
   const duracaoFormatada = formatarDuracao(item.metadata?.duracao)
   const titulo = item.metadata?.titulo || `Vídeo ${item.hash.slice(0, 10)}`
   const uploader = item.metadata?.uploader || 'Uploader desconhecido'
-  const temThumbnail = Boolean(item.metadata?.thumbnail) && !erroImagem
+  const urlThumbnail = item.thumbnailUrl || item.metadata?.thumbnail
+  const temThumbnail = Boolean(urlThumbnail) && !erroImagem
   const urlOriginal = item.metadata?.url_original
 
   const handleDownloadDirecto = async (e: React.MouseEvent) => {
@@ -197,7 +198,7 @@ export const CardVideo = memo(function CardVideo({
         {temThumbnail ? (
           <Box
             as="img"
-            src={item.metadata?.thumbnail}
+            src={urlThumbnail}
             alt={titulo}
             onError={() => setErroImagem(true)}
             w="full"

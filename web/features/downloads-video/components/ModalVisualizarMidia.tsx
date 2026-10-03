@@ -71,6 +71,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
   const duracao = (item.metadata?.duracao as number) || undefined
   const extensao = (item.metadata?.extensao as string) || 'mp4'
   const urlOriginal = item.metadata?.url_original
+  const urlThumbnail = item.thumbnailUrl || (item.metadata?.thumbnail as string)
 
   const handleBaixar = async () => {
     try {
@@ -154,6 +155,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 as="video"
                 key={streamUrl}
                 src={streamUrl}
+                poster={urlThumbnail}
                 controls
                 autoPlay
                 playsInline
