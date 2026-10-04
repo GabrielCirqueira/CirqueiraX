@@ -15,6 +15,7 @@ Se faltar detalhe, use a seção **Onde buscar mais contexto** no final deste ar
 5. Nomes em **português**: pastas, arquivos, variáveis, funções, DTOs, services, entidades.
 6. Sem comentários (`//`, `/* */`, `{/* */}`). Código se explica pelo nome. Exceção: DocBlock curto em Service PHP se o retorno for complexo.
 7. Não crie testes. Não instale PHPUnit.
+8. Importação explícita de classes (PHP): Proibido usar FQCN inline no meio do código (ex: `\App\...`, `\DateTime`, `\Symfony\...`). Todas as classes, DTOs, interfaces, exceções e enums devem ser importadas no topo do arquivo via `use` logo abaixo do `namespace`.
 
 ---
 
@@ -375,6 +376,15 @@ class YtDlpException extends \DomainException
 - **Injeção de Parâmetros via DI (`services.yaml`)**: Nunca use `$_ENV` ou `getenv()` dentro de métodos. Injete parâmetros no `services.yaml`.
 - **Value Resolvers HTTP**: Use `MapRequestPayload` / `MapQueryString` por padrão (exceto uploads multipart/form-data com arquivos, que usam `fromRequest()`).
 - **Mensageria**: MessageHandlers devem servir apenas como porta de entrada delegadora, sem conter lógica de negócio.
+
+### 4.14 Importação Explícita de Classes (Proibido FQCN Inline)
+
+> [!IMPORTANT]
+> **Regra de Importação**: É estritamente **PROIBIDO** usar FQCNs (Fully Qualified Class Names) inline com barra invertida no meio do código PHP (ex: `#[MapRequestPayload] \App\DataObject\MeuDTO $dto`, `\App\Support\TextoUtil::metodo()`, `\DateTimeInterface`, `\DomainException`, `\Throwable`).
+> 
+> - **SEMPRE**: Todas as classes, DTOs, interfaces, exceções, enums e traits devem ser importadas no topo do arquivo com declarações `use` explícitas, logo abaixo do `namespace`, organizadas em ordem alfabética.
+> - **No corpo do arquivo**: Use sempre o nome curto da classe importada (ex: `MeuDTO $dto`, `TextoUtil::naoEstaEmBranco(...)`, `DateTimeInterface::ATOM`, `DomainException`).
+
 
 ---
 

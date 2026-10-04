@@ -691,6 +691,12 @@ Toda comunicação HTTP com APIs/sistemas externos deve ser desacoplada na camad
   - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: `YtDlpException`, `ArmazenamentoLocalException`, `MediaItemException`).
   - **Métodos Construtores Estáticos (Static Factory Methods)**: Dentro de cada exceção personalizada, crie métodos estáticos nomeados para cada erro do contexto. O código lança a exceção exclusivamente chamando seu construtor estático (ex: `throw YtDlpException::erroExtrairMetadata();` ou `throw ArmazenamentoLocalException::erroCriarDiretorio();`).
 
+#### 13.13 Importação Explícita de Classes (Proibido FQCN Inline)
+
+* **PROIBIDO**: Utilizar classes com barra invertida inline no meio do código (ex: `\App\DataObject\VincularAlbumDTO`, `\App\Support\TextoUtil::metodo()`, `\DateTimeInterface`, `\DomainException`, `\Throwable`).
+* **OBRIGATÓRIO**: Todas as classes, DTOs, interfaces, exceções, enums e traits devem ser importadas no topo do arquivo via declaração `use` logo abaixo do `namespace`, mantendo as importações organizadas em ordem alfabética.
+* **No corpo do arquivo**: Utilize sempre o nome curto da classe importada diretamente (`VincularAlbumDTO $dto`, `TextoUtil::naoEstaEmBranco(...)`, `DateTimeInterface::ATOM`, `DomainException`).
+
 ---
 
 ## 14) Lints e Qualidade
