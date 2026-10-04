@@ -10,6 +10,7 @@ use App\Exception\GoogleFotos\GoogleFotosAPIException;
 use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
+use Psr\Log\LoggerInterface;
 
 final readonly class GoogleFotosAlbumService
 {
@@ -18,6 +19,7 @@ final readonly class GoogleFotosAlbumService
         private GoogleFotosOAuthService $oAuthService,
         private ContaGoogleFotosRepository $contaRepository,
         private CategoriaRepository $categoriaRepository,
+        private LoggerInterface $logger,
     ) {}
 
     public function obterOuCriarAlbumId(Categoria $categoria): string
@@ -40,6 +42,12 @@ final readonly class GoogleFotosAlbumService
         if ('' === $albumId) {
             throw GoogleFotosAPIException::falhaCriarAlbum($categoria->nome());
         }
+
+        $this->logger->warning(sprintf('Álbum criado automaticamente no Google Fotos para a categoria "%s" com ID "%s".', $categoria->nome(), $albumId), [
+            'categoria' => $categoria->nome(),
+            'categoriaUuid' => (string) $categoria->uuid(),
+            'albumId' => $albumId,
+        ]);
 
         $categoria->setGoogleFotosAlbumId($albumId);
         $this->categoriaRepository->salvar($categoria);

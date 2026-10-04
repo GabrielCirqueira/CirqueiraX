@@ -141,8 +141,8 @@
 | 124 | Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 125 | Cruzamento de álbuns com Categoria — campo vinculada/orfã | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 126 | Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
-| 127 | Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 128 | DTO e validação de criação de categoria já nomeando o álbum futuro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 127 | Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 128 | DTO e validação de criação de categoria já nomeando o álbum futuro | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 129 | Frontend — estrutura da feature google-fotos (types, api, hooks) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |

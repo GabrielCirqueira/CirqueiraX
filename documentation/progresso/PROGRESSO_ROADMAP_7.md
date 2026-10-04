@@ -77,11 +77,24 @@
   - `src/Exception/Categoria/CategoriaException.php`
   - `src/Controller/Categoria/CategoriaController.php`
 
-### ⏳ Tópico 127 — Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade
-- **Status**: Pendente
+### ✅ Tópico 127 — Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Injetado `LoggerInterface` em `GoogleFotosAlbumService.php`.
+  - Adicionado log de `warning` contextual quando um álbum é criado automaticamente para uma categoria nova sem vínculo manual prévio, garantindo rastreabilidade e auditoria de álbuns criados.
+  - Mantida a prioridade estrita de utilização de `googleFotosAlbumId` já existente antes de efetuar qualquer chamada à API do Google.
+- **Arquivos**:
+  - `src/Service/GoogleFotos/GoogleFotosAlbumService.php`
 
-### ⏳ Tópico 128 — DTO e validação de criação de categoria já nomeando o álbum futuro
-- **Status**: Pendente
+### ✅ Tópico 128 — DTO e validação de criação de categoria já nomeando o álbum futuro
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Atualizado `CriarCategoriaDTO.php` com mensagens de validação descritivas em português nos atributos de validação do Symfony (`Assert\NotBlank`, `Assert\Length`).
+  - Adicionada restrição de tamanho máximo para `googlePhotosAlbumId` e clareza contratual de que, se omitido, o álbum será gerado automaticamente com o nome da categoria.
+- **Arquivos**:
+  - `src/DataObject/CriarCategoriaDTO.php`
 
 ### ⏳ Tópico 129 — Frontend — estrutura da feature google-fotos (types, api, hooks)
 - **Status**: Pendente
