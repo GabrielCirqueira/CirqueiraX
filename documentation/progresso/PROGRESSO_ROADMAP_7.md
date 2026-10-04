@@ -17,8 +17,16 @@
   - `src/Service/GoogleFotos/ObterStatusContaGoogleFotosService.php`
   - `src/Controller/GoogleFotos/GoogleFotosController.php`
 
-### ⏳ Tópico 122 — Escopo readonly.appcreateddata — atualização da URL de autorização OAuth
-- **Status**: Pendente
+### ✅ Tópico 122 — Escopo readonly.appcreateddata — atualização da URL de autorização OAuth
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Atualizada a constante `SCOPES` em `AutorizarContaGoogleFotosCommand.php` para solicitar os escopos recomendados pela Google Photos Library API: `photoslibrary.appendonly`, `photoslibrary.readonly.appcreateddata`, `photoslibrary.edit.appcreateddata` e `userinfo.email`.
+  - Documentada a política e tabela de escopos oficiais em `documentation/stack/BACKEND.md`.
+  - Preparado o suporte para que a listagem de álbuns criados pelo app (`albums.list`) funcione com permissões estritas e atualizadas.
+- **Arquivos**:
+  - `src/Command/AutorizarContaGoogleFotosCommand.php`
+  - `documentation/stack/BACKEND.md`
 
 ### ⏳ Tópico 123 — GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list
 - **Status**: Pendente

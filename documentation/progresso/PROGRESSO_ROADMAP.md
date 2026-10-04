@@ -136,7 +136,7 @@
 | 119 | Frontend — gráficos Recharts | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 121 | Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
-| 122 | Escopo readonly.appcreateddata — atualização da URL de autorização OAuth | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 122 | Escopo readonly.appcreateddata — atualização da URL de autorização OAuth | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 123 | GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 124 | Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 125 | Cruzamento de álbuns com Categoria — campo vinculada/orfã | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |

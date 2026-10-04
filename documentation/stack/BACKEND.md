@@ -92,11 +92,26 @@ Service devolve o dado. Erro previsto: `throw new \DomainException('username_tak
 | `POST` | `/api/v1/dashboard/erros/retentar` | JWT | Reprocessa em lote todas as mídias com erro do dashboard |
 | `GET` | `/api/v1/sync/pastas` | JWT | Status e progresso das pastas no Syncthing |
 | `POST` | `/api/v1/sync/pastas/{id}/sincronizar` | JWT | Dispara rescan/sincronização de pasta no Syncthing |
+| `GET` | `/api/v1/google-fotos/status` | JWT | Verifica status de conexão da conta Google Fotos |
+
+## Google Fotos & Escopos OAuth2
+
+O CirqueiraX utiliza os escopos oficiais da Google Photos Library API para criação e gestão de álbuns criados pelo próprio aplicativo:
+
+| Escopo | Finalidade |
+| :--- | :--- |
+| `photoslibrary.appendonly` | Upload e criação de novas mídias e fotos |
+| `photoslibrary.readonly.appcreateddata` | Listagem de álbuns criados pelo CirqueiraX |
+| `photoslibrary.edit.appcreateddata` | Gerenciamento de itens e álbuns criados pelo app |
+| `userinfo.email` | Identificação do e-mail da conta vinculada |
+
+> [!NOTE]
+> Contas autorizadas antes da atualização de escopos granulares devem executar `make google-fotos-autorizar` para emitir novo refresh token com permissões de leitura/edição de álbuns.
 
 ## Regras de Ouro
 
 1. **Envelope HTTP**: Controller de API sempre extends `DefaultController` e retorna `Response` via `$this->success()` / `$this->error()`. Chaves JSON em inglês (`success`, `data`, `error`).
-2. **Early Return**: Ordene Guard Clauses pelo custo ? verificação local ? banco ? API externa.
+2. **Early Return**: Ordene Guard Clauses pelo custo — verificação local → banco → API externa.
 3. **Serializer obrigatório**: Todo endpoint que retorna dados de entidade usa `src/Serializer/`. Nunca retorne a entidade diretamente.
 4. **Readonly**: Use `readonly` em classes DTO e propriedades imutáveis.
 
@@ -104,7 +119,7 @@ Service devolve o dado. Erro previsto: `throw new \DomainException('username_tak
 
 ```bash
 make migrate          # Aplica migrations pendentes
-make new-migration    # Gera migration por diff do schema
+make doctrine-diff    # Gera migration por diff do schema
 make rollback         # Reverte a última migration (só em dev)
 ```
 
@@ -112,6 +127,7 @@ make rollback         # Reverte a última migration (só em dev)
 
 ```bash
 make phpstan          # Análise estática nível 6
-make phpcs            # Estilo PSR-12
+make check-naming     # Validação de nomenclatura e padrões
 make fix-php          # Auto-correção de estilo
 ```
+

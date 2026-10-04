@@ -180,4 +180,38 @@ final class GoogleFotosAPI extends GoogleFotosClient
 
         return $dados;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function listarAlbuns(string $accessToken, ?string $pageToken = null, int $pageSize = 50): array
+    {
+        $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
+            message: sprintf('Erro ao listar álbuns no Google Fotos: %s', $e->getMessage()),
+            code: (int) $e->getCode(),
+            previous: $e,
+        );
+
+        $query = [
+            'pageSize' => $pageSize,
+        ];
+        if (null !== $pageToken && '' !== trim($pageToken)) {
+            $query['pageToken'] = $pageToken;
+        }
+
+        /** @var array<string, mixed> $dados */
+        $dados = $this->request(
+            method: 'GET',
+            uri: $this->resolverUrl('/v1/albums'),
+            options: [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ],
+                'query' => $query,
+            ],
+            throw: $customThrow,
+        );
+
+        return $dados;
+    }
 }
