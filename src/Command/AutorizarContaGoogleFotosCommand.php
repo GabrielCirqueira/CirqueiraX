@@ -8,6 +8,7 @@ use App\Entity\ContaGoogleFotos;
 use App\Infra\GoogleOAuth\GoogleOAuthAPI;
 use App\Interface\CriptografiaInterface;
 use App\Repository\ContaGoogleFotosRepository;
+use DateTimeImmutable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -145,7 +146,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
                 }
             }
 
-            $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
+            $expiraEm = (new DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
             $refreshTokenCriptografado = $this->criptografia->criptografar($refreshToken);
 
             $conta = $this->contaRepository->buscarPorEmail($email);

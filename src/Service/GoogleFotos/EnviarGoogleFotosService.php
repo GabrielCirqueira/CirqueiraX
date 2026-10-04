@@ -84,8 +84,9 @@ final readonly class EnviarGoogleFotosService
         if (is_array($status)) {
             $code = (int) ($status['code'] ?? 0);
             $message = (string) ($status['message'] ?? '');
-            if (0 !== $code && 'Success' !== $message && 'OK' !== $message && '' !== $message) {
-                throw GoogleFotosAPIException::falhaBatchItem('' !== $message ? $message : sprintf('Código de erro HTTP/API %d', $code));
+            if (0 !== $code && 'Success' !== $message && 'OK' !== $message) {
+                $erroMsg = '' !== $message ? $message : sprintf('Código de erro HTTP/API %d', $code);
+                throw GoogleFotosAPIException::falhaBatchItem($erroMsg);
             }
         }
 

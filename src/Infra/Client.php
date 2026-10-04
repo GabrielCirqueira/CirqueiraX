@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Infra;
 
-use App\Exception\ClienteHTTPException;
+use App\Exception\HTTP\ClienteHTTPException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Throwable;
 use Webmozart\Assert\Assert;
 
 abstract class Client

@@ -23,7 +23,6 @@ final readonly class UploadManualService
     private const string EXTENSAO_FALLBACK = 'bin';
     private const string FORMATO_NOME_ARQUIVO = 'upload_%s_%s.%s';
     private const string FORMATO_DATA_SUFIXO = 'Ymd_His';
-    private const string ALGORITMO_HASH_SHA256 = 'sha256';
 
     public function __construct(
         private MediaItemRepository $mediaItemRepository,

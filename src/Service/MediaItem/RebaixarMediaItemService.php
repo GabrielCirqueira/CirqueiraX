@@ -9,6 +9,7 @@ use App\Entity\MediaItem;
 use App\Enum\StatusMediaItem;
 use App\Message\BaixarVideoMessage;
 use App\Repository\MediaItemRepository;
+use App\Support\TextoUtil;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class RebaixarMediaItemService
@@ -38,7 +39,7 @@ final readonly class RebaixarMediaItemService
             /** @var string|null $urlOriginal */
             $urlOriginal = $metadata['url_original'] ?? null;
 
-            if (\App\Support\TextoUtil::naoEstaEmBranco($urlOriginal)) {
+            if (TextoUtil::naoEstaEmBranco($urlOriginal)) {
                 $this->messageBus->dispatch(new BaixarVideoMessage(
                     $urlOriginal,
                     $mediaItem->origem()

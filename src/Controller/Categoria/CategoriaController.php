@@ -6,8 +6,10 @@ namespace App\Controller\Categoria;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\CriarCategoriaDTO;
+use App\DataObject\VincularAlbumDTO;
 use App\Serializer\CategoriaSerializer;
 use App\Service\Categoria\CategoriaService;
+use App\Service\Categoria\VincularAlbumCategoriaService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -55,8 +57,8 @@ final class CategoriaController extends DefaultController
     #[Route('/{uuid}/album', name: 'vincular_album', methods: ['PATCH'])]
     public function vincularAlbum(
         string $uuid,
-        #[MapRequestPayload] \App\DataObject\VincularAlbumDTO $dto,
-        \App\Service\Categoria\VincularAlbumCategoriaService $vincularAlbumService,
+        #[MapRequestPayload] VincularAlbumDTO $dto,
+        VincularAlbumCategoriaService $vincularAlbumService,
     ): Response {
         $categoria = $vincularAlbumService->executar($uuid, $dto);
 

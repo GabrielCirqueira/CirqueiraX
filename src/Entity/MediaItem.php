@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\DataObject\CriarMediaItemDTO;
+use App\DataObject\IngestarMediaDTO;
 use App\Enum\OrigemMedia;
 use App\Enum\StatusMediaItem;
+use App\Exception\MediaItem\MediaItemException;
 use App\Repository\MediaItemRepository;
+use App\Support\MetadataKeys;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -89,7 +92,7 @@ class MediaItem
         ];
     }
 
-    public static function fromIngestaoDTO(\App\DataObject\IngestarMediaDTO $dto, string $hash): self
+    public static function fromIngestaoDTO(IngestarMediaDTO $dto, string $hash): self
     {
         $item = new self(
             hash: $hash,
@@ -99,8 +102,8 @@ class MediaItem
         $item->setCaminhoLocal($dto->caminhoArquivo());
         if (!empty($dto->metadata())) {
             $item->setMetadata($dto->metadata());
-            if (isset($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]) && is_string($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL])) {
-                $item->setThumbnailUrl($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]);
+            if (isset($dto->metadata()[MetadataKeys::THUMBNAIL]) && is_string($dto->metadata()[MetadataKeys::THUMBNAIL])) {
+                $item->setThumbnailUrl($dto->metadata()[MetadataKeys::THUMBNAIL]);
             }
         }
 
@@ -133,8 +136,8 @@ class MediaItem
 
         if (!empty($dto->metadata())) {
             $item->setMetadata($dto->metadata());
-            if (null === $item->thumbnailUrl() && isset($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]) && is_string($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL])) {
-                $item->setThumbnailUrl($dto->metadata()[\App\Support\MetadataKeys::THUMBNAIL]);
+            if (null === $item->thumbnailUrl() && isset($dto->metadata()[MetadataKeys::THUMBNAIL]) && is_string($dto->metadata()[MetadataKeys::THUMBNAIL])) {
+                $item->setThumbnailUrl($dto->metadata()[MetadataKeys::THUMBNAIL]);
             }
         }
 
@@ -214,7 +217,7 @@ class MediaItem
         $statusAlvo = is_string($novoStatus) ? (StatusMediaItem::tryFrom($novoStatus) ?? StatusMediaItem::ERRO) : $novoStatus;
 
         if (!$this->status->podeTransicionarPara($statusAlvo)) {
-            throw \App\Exception\MediaItem\MediaItemException::transicaoDeStatusInvalida($this->status->value, $statusAlvo->value);
+            throw MediaItemException::transicaoDeStatusInvalida($this->status->value, $statusAlvo->value);
         }
 
         $deStatus = $this->status->value;

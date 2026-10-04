@@ -46,18 +46,18 @@ final class AppSeedCommand extends Command
 
     private function criarUsuarios(SymfonyStyle $io): void
     {
-        if ($this->usuarioRepository->usernameJaExiste('admin@projeto.com')) {
+        if ($this->usuarioRepository->usernameJaExiste('admin') || $this->usuarioRepository->usernameJaExiste('admin@projeto.com')) {
             $io->note('Usuários de exemplo já existem. Pulando...');
 
             return;
         }
 
-        $admin = new Usuario('Administrador Supremo', 'admin@projeto.com');
+        $admin = new Usuario('Administrador Supremo', 'admin', 'admin@projeto.com');
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'senha123'));
         $admin->setRoles(['ROLE_ADMIN']);
         $this->usuarioRepository->salvar($admin, false);
 
-        $user = new Usuario('Usuário de Teste', 'user@projeto.com');
+        $user = new Usuario('Usuário de Teste', 'user', 'user@projeto.com');
         $user->setPassword($this->passwordHasher->hashPassword($user, 'senha123'));
         $user->setRoles(['ROLE_USER']);
         $this->usuarioRepository->salvar($user, true);

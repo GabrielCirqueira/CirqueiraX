@@ -8,6 +8,7 @@ use App\DataObject\AtualizarMetadataMediaItemDTO;
 use App\Entity\MediaItem;
 use App\Exception\MediaItem\MediaItemException;
 use App\Repository\MediaItemRepository;
+use App\Support\MetadataKeys;
 use Symfony\Component\Uid\Uuid;
 
 final readonly class AtualizarMetadataMediaItemService
@@ -32,8 +33,8 @@ final readonly class AtualizarMetadataMediaItemService
         $metadadosMesclados = array_merge($metadadosAtuais, $novosMetadados);
 
         $mediaItem->setMetadata($metadadosMesclados);
-        if (isset($metadadosMesclados[\App\Support\MetadataKeys::THUMBNAIL]) && is_string($metadadosMesclados[\App\Support\MetadataKeys::THUMBNAIL])) {
-            $mediaItem->setThumbnailUrl($metadadosMesclados[\App\Support\MetadataKeys::THUMBNAIL]);
+        if (isset($metadadosMesclados[MetadataKeys::THUMBNAIL]) && is_string($metadadosMesclados[MetadataKeys::THUMBNAIL])) {
+            $mediaItem->setThumbnailUrl($metadadosMesclados[MetadataKeys::THUMBNAIL]);
         }
 
         $this->mediaItemRepository->salvar($mediaItem);

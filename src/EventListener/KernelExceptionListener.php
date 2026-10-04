@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\EventListener;
 
+use App\Exception\HTTP\ClienteHTTPException;
+use DomainException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -45,7 +47,7 @@ final class KernelExceptionListener
             foreach ($exception->getViolations() as $violation) {
                 $detalhes[$violation->getPropertyPath()] = $violation->getMessage();
             }
-        } elseif ($exception instanceof \DomainException || $exception instanceof \App\Exception\HTTP\ClienteHTTPException) {
+        } elseif ($exception instanceof DomainException || $exception instanceof ClienteHTTPException) {
             $code = $exception->getCode();
             $statusCode = (in_array($code, [400, 401, 403, 404, 409, 422], true))
             ? (int) $code

@@ -7,6 +7,7 @@ namespace App\Service\MediaItem;
 use App\DataObject\ApagarLoteDTO;
 use App\Interface\ArmazenamentoInterface;
 use App\Repository\MediaItemRepository;
+use App\Support\TextoUtil;
 use Psr\Log\LoggerInterface;
 
 final readonly class ApagarMediaItemService
@@ -62,7 +63,7 @@ final readonly class ApagarMediaItemService
         }
 
         $caminhoLocal = $mediaItem->caminhoLocal();
-        if (\App\Support\TextoUtil::naoEstaEmBranco($caminhoLocal)) {
+        if (TextoUtil::naoEstaEmBranco($caminhoLocal)) {
             try {
                 $this->armazenamentoClient->remover((string) $caminhoLocal);
             } catch (\Throwable $e) {

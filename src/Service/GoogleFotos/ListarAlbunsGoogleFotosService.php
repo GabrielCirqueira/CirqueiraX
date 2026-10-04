@@ -42,7 +42,7 @@ final readonly class ListarAlbunsGoogleFotosService
         $categoriasSemAlbum = [];
 
         foreach ($categorias as $cat) {
-            $albumId = $cat->googlePhotosAlbumId();
+            $albumId = $cat->googleFotosAlbumId();
             $catData = [
                 'uuid' => $cat->uuid()?->toString() ?? '',
                 'nome' => $cat->nome(),

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller\Sistema;
 
 use App\Controller\Common\DefaultController;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,7 +26,7 @@ final class HealthController extends DefaultController
 
         return $this->success([
             'status' => $isHealthy ? 'ok' : 'unhealthy',
-            'timestamp' => new \DateTime()->format(\DateTimeInterface::ATOM),
+            'timestamp' => (new DateTime())->format(DateTimeInterface::ATOM),
             'services' => [
                 'database' => $databaseStatus,
                 'disk' => $diskStatus,

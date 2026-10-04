@@ -279,4 +279,41 @@
   - `src/Command/AutorizarContaGoogleFotosCommand.php`
   - `documentation/progresso/melhorias/MELHORIAS_1.md`
 
+---
+
+### ✅ Melhoria 17 — Padronização de Importações Explícitas de Classes PHP (Zero FQCN Inline)
+
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **Problema**:
+  - Algumas classes, DTOs e serviços estavam sendo chamados inline com barra invertida e namespace completo (ex: `#[MapRequestPayload] \App\DataObject\VincularAlbumDTO $dto`, `\App\Support\TextoUtil::metodo()`, `\DateTimeInterface`).
+  - Esse padrão prejudicava a legibilidade e violava a padronização do código do projeto.
+- **Solução**:
+  - Refatorados todos os arquivos PHP do backend (`src/`), substituindo qualquer FQCN inline por declarações `use` explícitas no topo do arquivo abaixo do `namespace`, organizadas em ordem alfabética.
+  - No corpo dos métodos, o código passa a utilizar apenas os nomes curtos das classes.
+  - Documentada a regra mandatória em `documentation/guias/PARA-IA.md` (§ 0 e § 4.14) e `documentation/guias/Estruturação.md` (§ 13.13).
+  - Validado via `make phpstan` com 100% de aprovação (130 arquivos analisados, 0 erros).
+- **Arquivos**:
+  - `src/Controller/Categoria/CategoriaController.php`
+  - `src/Service/MediaItem/ApagarMediaItemService.php`
+  - `src/Service/MediaItem/AtualizarMetadataMediaItemService.php`
+  - `src/Entity/MediaItem.php`
+  - `src/EventListener/KernelExceptionListener.php`
+  - `src/Service/MediaItem/RebaixarMediaItemService.php`
+  - `src/Command/AutorizarContaGoogleFotosCommand.php`
+  - `src/Controller/Sistema/HealthController.php`
+  - `src/Schedule.php`
+  - `src/Command/AppSeedCommand.php`
+  - `src/Command/JwtMasterCommand.php`
+  - `src/Infra/Client.php`
+  - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
+  - `src/Service/GoogleFotos/ListarAlbunsGoogleFotosService.php`
+  - `src/Service/MediaItem/UploadManualService.php`
+  - `.tooling/quality/phpstan.neon`
+  - `documentation/guias/PARA-IA.md`
+  - `documentation/guias/Estruturação.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+  - `documentation/progresso/melhorias/MELHORIAS_1.md`
+
+
 

@@ -27,6 +27,7 @@
 | M14 | Migração de Schema via Makefile, Backfill de Thumbnails e Correção de Erro 500 | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-14--migração-de-schema-via-makefile-backfill-de-thumbnails-e-correção-de-erro-500) |
 | M15 | Detalhamento Completo dos Cards de Vídeo (Data, Horário, Tamanho e Extensão) | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-15--detalhamento-completo-dos-cards-de-vídeo-data-horário-tamanho-e-extensão) |
 | M16 | Extração Automática de Código OAuth2 no Comando de Autorização Google Fotos | ✅ Concluído | 04/10/2026 | [ver](MELHORIAS_1.md#melhoria-16--extração-automática-de-código-oauth2-no-comando-de-autorização-google-fotos) |
+| M17 | Padronização de Importações Explícitas de Classes PHP (Zero FQCN Inline) | ✅ Concluído | 04/10/2026 | [ver](MELHORIAS_1.md#melhoria-17--padronização-de-importações-explícitas-de-classes-php-zero-fqcn-inline) |
 
 
 

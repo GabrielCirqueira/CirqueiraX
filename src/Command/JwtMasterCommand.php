@@ -10,7 +10,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'app:jwt:master',
@@ -20,7 +19,6 @@ final class JwtMasterCommand extends Command
 {
     public function __construct(
         private readonly JWTEncoderInterface $jwtEncoder,
-        private readonly ParameterBagInterface $params,
     ) {
         parent::__construct();
     }
