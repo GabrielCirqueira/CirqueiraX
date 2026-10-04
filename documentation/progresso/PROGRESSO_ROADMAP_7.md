@@ -96,17 +96,62 @@
 - **Arquivos**:
   - `src/DataObject/CriarCategoriaDTO.php`
 
-### ⏳ Tópico 129 — Frontend — estrutura da feature google-fotos (types, api, hooks)
-- **Status**: Pendente
+### ✅ Tópico 129 — Frontend — estrutura da feature google-fotos (types, api, hooks)
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criada a estrutura da feature em `web/features/google-fotos/`.
+  - Definidas as interfaces TypeScript em `types.ts` (`StatusGoogleFotos`, `AlbumGoogleFotos`, `CategoriaVinculo`, `RespostaAlbunsGoogleFotos`, `ResumoAlbunsGoogleFotos`).
+  - Implementado o cliente HTTP em `api.ts` consumindo os endpoints `/api/v1/google-fotos/status`, `/api/v1/google-fotos/albuns` e `/api/v1/categorias/{uuid}/album`.
+  - Criados os hooks TanStack Query em `hooks/useGoogleFotos.ts` (`useStatusGoogleFotos`, `useAlbunsGoogleFotos`, `useVincularAlbum`) com invalidação automática de cache e notificações de toast.
+  - Exportação centralizada via `index.ts`.
+- **Arquivos**:
+  - `web/features/google-fotos/types.ts`
+  - `web/features/google-fotos/api.ts`
+  - `web/features/google-fotos/hooks/useGoogleFotos.ts`
+  - `web/features/google-fotos/index.ts`
+  - `documentation/stack/FRONTEND.md`
 
-### ⏳ Tópico 130 — Frontend — tela de status/conexão da conta Google Fotos (gate)
-- **Status**: Pendente
+### ✅ Tópico 130 — Frontend — tela de status/conexão da conta Google Fotos (gate)
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o componente `GateConexaoGoogle.tsx` utilizando Chakra UI v3, sem tags HTML cruas e sem comentários.
+  - Implementado estado de carregamento elegante com spinner centralizado.
+  - Implementado card de bloqueio quando a conta Google não está conectada (`conectado: false`), apresentando passo a passo explicativo, bloco com o comando CLI `make google-fotos-autorizar`, botão de copiar comando e botão de verificar conexão novamente.
+  - Implementado banner de conexão ativa com badge verde, exibição do e-mail autenticado e data de conexão formatada em PT-BR quando conectado (`conectado: true`), liberando o render dos componentes filhos (`children`).
+  - Validado com `npx @biomejs/biome check` e `npm run build` do Vite.
+- **Arquivos**:
+  - `web/features/google-fotos/components/GateConexaoGoogle.tsx`
+  - `web/features/google-fotos/index.ts`
 
-### ⏳ Tópico 131 — Frontend — grid de álbuns do CirqueiraX com capa e contagem
-- **Status**: Pendente
+### ✅ Tópico 131 — Frontend — grid de álbuns do CirqueiraX com capa e contagem
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o componente `GridAlbuns.tsx` com Chakra UI v3, sem tags HTML cruas e sem comentários.
+  - Implementado layout de grid responsivo (1 a 4 colunas) exibindo a capa do álbum com overlay degradê, contagem de mídias e status de vínculo.
+  - Badges visuais indicando categoria associada (verde com nome e pasta local) ou status órfão (âmbar, "Sem Vínculo").
+  - Estado de skeleton loading com 4 cards animados e estado vazio explicativo elegante quando o app ainda não possui álbuns criados.
+  - Botão de ação rápida para disparar o vínculo manual de cada álbum.
+- **Arquivos**:
+  - `web/features/google-fotos/components/GridAlbuns.tsx`
+  - `web/features/google-fotos/index.ts`
 
-### ⏳ Tópico 132 — Frontend — modal de vínculo manual de álbum à categoria
-- **Status**: Pendente
+### ✅ Tópico 132 — Frontend — modal de vínculo manual de álbum à categoria
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o componente `ModalVincularAlbum.tsx` com Chakra UI v3 (`Dialog.Root`), sem tags HTML cruas e sem comentários.
+  - Suporta dois fluxos de uso:
+    - **Álbum → Categoria**: Exibe prévia do álbum do Google Fotos e lista de categorias disponíveis para seleção via `useTodasCategorias()`, indicando se alguma já possui outro álbum.
+    - **Categoria → Álbum**: Exibe prévia da categoria e lista de álbuns do app para seleção via `useAlbunsGoogleFotos()`.
+  - Integração com `useVincularAlbum()` (`PATCH /api/v1/categorias/{uuid}/album`) disparando invalidação de cache e toast de confirmação.
+- **Arquivos**:
+  - `web/features/google-fotos/components/ModalVincularAlbum.tsx`
+  - `web/features/google-fotos/api.ts`
+  - `web/features/google-fotos/hooks/useGoogleFotos.ts`
+  - `web/features/google-fotos/index.ts`
 
 ### ⏳ Tópico 133 — Frontend — indicador de categorias sem álbum ainda vinculado
 - **Status**: Pendente

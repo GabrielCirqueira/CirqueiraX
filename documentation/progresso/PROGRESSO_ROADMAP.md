@@ -143,10 +143,10 @@
 | 126 | Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 127 | Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 128 | DTO e validação de criação de categoria já nomeando o álbum futuro | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
-| 129 | Frontend — estrutura da feature google-fotos (types, api, hooks) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 132 | Frontend — modal de vínculo manual de álbum à categoria | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 129 | Frontend — estrutura da feature google-fotos (types, api, hooks) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 132 | Frontend — modal de vínculo manual de álbum à categoria | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 133 | Frontend — indicador de categorias sem álbum ainda vinculado | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 134 | Frontend — aviso/guia de migração manual de álbuns antigos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
