@@ -45,8 +45,8 @@ A Library API do Google Fotos, desde a mudança de política de março de 2025, 
 
 - [x] **121. Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta**
 - [x] **122. Escopo readonly.appcreateddata — atualização da URL de autorização OAuth**
-- [ ] **123. GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list**
-- [ ] **124. Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app**
+- [x] **123. GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list**
+- [x] **124. Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app**
 - [ ] **125. Cruzamento de álbuns com Categoria — campo vinculada/orfã**
 - [ ] **126. Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId**
 - [ ] **127. Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade**

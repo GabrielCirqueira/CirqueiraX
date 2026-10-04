@@ -37,7 +37,7 @@ final readonly class GoogleFotosOAuthService
             throw GoogleFotosOAuthException::falhaAoRenovarAccessTokenDoGoogle();
         }
 
-        $expiraEm = new \DateTimeImmutable()->modify(sprintf('+%d seconds', $expiresIn));
+        $expiraEm = (new \DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
 
         $conta->setAccessTokenCache($accessToken, $expiraEm);
         $this->contaRepository->salvar($conta);

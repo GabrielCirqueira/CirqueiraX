@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\GoogleFotos;
 
 use App\Controller\Common\DefaultController;
+use App\Service\GoogleFotos\ListarAlbunsGoogleFotosService;
 use App\Service\GoogleFotos\ObterStatusContaGoogleFotosService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,6 +15,7 @@ final class GoogleFotosController extends DefaultController
 {
     public function __construct(
         private readonly ObterStatusContaGoogleFotosService $obterStatusContaService,
+        private readonly ListarAlbunsGoogleFotosService $listarAlbunsService,
     ) {}
 
     #[Route('/status', name: 'status', methods: ['GET'])]
@@ -22,5 +24,11 @@ final class GoogleFotosController extends DefaultController
         $statusDTO = $this->obterStatusContaService->obterStatus();
 
         return $this->success($statusDTO->paraArray());
+    }
+
+    #[Route('/albuns', name: 'albuns', methods: ['GET'])]
+    public function albuns(): Response
+    {
+        return $this->success($this->listarAlbunsService->listar());
     }
 }

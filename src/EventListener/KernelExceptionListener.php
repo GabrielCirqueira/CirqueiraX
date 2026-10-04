@@ -45,7 +45,7 @@ final class KernelExceptionListener
             foreach ($exception->getViolations() as $violation) {
                 $detalhes[$violation->getPropertyPath()] = $violation->getMessage();
             }
-        } elseif ($exception instanceof \DomainException) {
+        } elseif ($exception instanceof \DomainException || $exception instanceof \App\Exception\HTTP\ClienteHTTPException) {
             $code = $exception->getCode();
             $statusCode = (in_array($code, [400, 401, 403, 404, 409, 422], true))
             ? (int) $code
@@ -53,7 +53,7 @@ final class KernelExceptionListener
 
             $mensagem = $exception->getMessage();
 
-            $this->logger->warning('Domain Exception capturada', [
+            $this->logger->warning('Exception de negócio/HTTP capturada', [
                 'message' => $mensagem,
                 'code' => $statusCode,
                 'path' => $request->getPathInfo(),

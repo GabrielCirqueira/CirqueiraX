@@ -28,11 +28,29 @@
   - `src/Command/AutorizarContaGoogleFotosCommand.php`
   - `documentation/stack/BACKEND.md`
 
-### ⏳ Tópico 123 — GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list
-- **Status**: Pendente
+### ✅ Tópico 123 — GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Implementado o método `listarAlbuns()` na classe de infraestrutura `GoogleFotosAPI.php` realizando chamadas autenticadas paginadas para `GET /v1/albums` com `pageToken` e `pageSize`.
+  - Criado o DTO `AlbumGoogleFotosDTO.php` para encapsular `id`, `titulo`, `urlCapa` e `totalItens`.
+  - Adicionado o método `listarAlbunsDoApp(ContaGoogleFotos $conta)` no serviço de aplicação `GoogleFotosAlbumService.php`, acumulando todas as páginas do Google Fotos e tratando respostas vazias de forma resiliente.
+- **Arquivos**:
+  - `src/Infra/GoogleFotos/GoogleFotosAPI.php`
+  - `src/DataObject/AlbumGoogleFotosDTO.php`
+  - `src/Service/GoogleFotos/GoogleFotosAlbumService.php`
 
-### ⏳ Tópico 124 — Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app
-- **Status**: Pendente
+### ✅ Tópico 124 — Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o Use Case `ListarAlbunsGoogleFotosService.php` para encapsular a busca da conta ativa e delegação para o `GoogleFotosAlbumService`.
+  - Adicionada a rota `GET /api/v1/google-fotos/albuns` no `GoogleFotosController.php` estendendo `DefaultController`.
+  - Aprimorado o `KernelExceptionListener.php` para tratar `ClienteHTTPException` e exibir mensagens descritivas do Google com status HTTP adequado em vez de erros 500 opacos.
+- **Arquivos**:
+  - `src/Service/GoogleFotos/ListarAlbunsGoogleFotosService.php`
+  - `src/Controller/GoogleFotos/GoogleFotosController.php`
+  - `src/EventListener/KernelExceptionListener.php`
 
 ### ⏳ Tópico 125 — Cruzamento de álbuns com Categoria — campo vinculada/orfã
 - **Status**: Pendente
