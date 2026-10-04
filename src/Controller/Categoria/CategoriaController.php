@@ -52,6 +52,17 @@ final class CategoriaController extends DefaultController
         return $this->success($this->categoriaSerializer->normalizar($categoria));
     }
 
+    #[Route('/{uuid}/album', name: 'vincular_album', methods: ['PATCH'])]
+    public function vincularAlbum(
+        string $uuid,
+        #[MapRequestPayload] \App\DataObject\VincularAlbumDTO $dto,
+        \App\Service\Categoria\VincularAlbumCategoriaService $vincularAlbumService,
+    ): Response {
+        $categoria = $vincularAlbumService->executar($uuid, $dto);
+
+        return $this->success($this->categoriaSerializer->normalizar($categoria));
+    }
+
     #[Route('/{uuid}', name: 'remover', methods: ['DELETE'])]
     public function remover(string $uuid): Response
     {
@@ -60,3 +71,4 @@ final class CategoriaController extends DefaultController
         return $this->noContent();
     }
 }
+

@@ -52,11 +52,30 @@
   - `src/Controller/GoogleFotos/GoogleFotosController.php`
   - `src/EventListener/KernelExceptionListener.php`
 
-### ⏳ Tópico 125 — Cruzamento de álbuns com Categoria — campo vinculada/orfã
-- **Status**: Pendente
+### ✅ Tópico 125 — Cruzamento de álbuns com Categoria — campo vinculada/orfã
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Enriquecido o serviço `ListarAlbunsGoogleFotosService.php` para cruzar a lista de álbuns retornada pelo Google Fotos com todas as categorias cadastradas no sistema.
+  - Cada álbum é marcado com `vinculado: bool` e dados da categoria associada (`uuid`, `nome`, `pastaLocal`) ou `null` se órfão.
+  - Retornada também a lista de `categoriasSemAlbum` e um `resumo` agregado com totais de álbuns, vinculados, órfãos e categorias pendentes.
+- **Arquivos**:
+  - `src/Service/GoogleFotos/ListarAlbunsGoogleFotosService.php`
+  - `src/DataObject/AlbumGoogleFotosDTO.php`
 
-### ⏳ Tópico 126 — Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId
-- **Status**: Pendente
+### ✅ Tópico 126 — Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o DTO `VincularAlbumDTO.php` com validação de `googlePhotosAlbumId` não-em-branco.
+  - Implementado o serviço `VincularAlbumCategoriaService.php` que busca a categoria, valida se o álbum realmente existe na conta ativa do Google Fotos e persiste o vínculo.
+  - Adicionado método `albumNaoEncontradoNoGoogle()` em `CategoriaException.php`.
+  - Adicionada a rota `PATCH /api/v1/categorias/{uuid}/album` no `CategoriaController.php`.
+- **Arquivos**:
+  - `src/DataObject/VincularAlbumDTO.php`
+  - `src/Service/Categoria/VincularAlbumCategoriaService.php`
+  - `src/Exception/Categoria/CategoriaException.php`
+  - `src/Controller/Categoria/CategoriaController.php`
 
 ### ⏳ Tópico 127 — Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade
 - **Status**: Pendente

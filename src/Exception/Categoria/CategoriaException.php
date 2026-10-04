@@ -15,4 +15,9 @@ final class CategoriaException extends \DomainException
     {
         return new self(sprintf('Já existe uma categoria cadastrada com o nome "%s".', $nome), 409);
     }
+
+    public static function albumNaoEncontradoNoGoogle(string $albumId): self
+    {
+        return new self(sprintf('O álbum "%s" não foi encontrado entre os álbuns gerenciados pela conta do Google Fotos.', $albumId), 404);
+    }
 }
