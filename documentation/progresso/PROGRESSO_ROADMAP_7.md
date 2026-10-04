@@ -4,8 +4,18 @@
 
 ---
 
-### ⏳ Tópico 121 — Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta
-- **Status**: Pendente
+### ✅ Tópico 121 — Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o DTO `StatusContaGoogleFotosDTO.php` para retorno limpo e seguro sem expor tokens ou dados sensíveis.
+  - Implementado o serviço `ObterStatusContaGoogleFotosService.php` consultando a conta ativa no `ContaGoogleFotosRepository`.
+  - Criado o controller `GoogleFotosController.php` estendendo `DefaultController` com a rota `GET /api/v1/google-fotos/status`.
+  - Validado via chamada HTTP autenticada retornando `{ conectado: true, email: "...", conectadoEm: "..." }`.
+- **Arquivos**:
+  - `src/DataObject/StatusContaGoogleFotosDTO.php`
+  - `src/Service/GoogleFotos/ObterStatusContaGoogleFotosService.php`
+  - `src/Controller/GoogleFotos/GoogleFotosController.php`
 
 ### ⏳ Tópico 122 — Escopo readonly.appcreateddata — atualização da URL de autorização OAuth
 - **Status**: Pendente
