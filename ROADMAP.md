@@ -1,10 +1,16 @@
-# Roadmap — Feature 5: Dashboard Completo
+# Roadmap — Feature 6: Gestão de Álbuns do Google Fotos
 
 > Backlog e planejamento do projeto. Cada tópico descreve o que existe (ou faltava), por que importa e o que precisa acontecer. Marque `[x]` no checklist ao concluir.
 
-**Numeração:** tópicos 101–120.
+**Numeração:** tópicos 121–140.
 
-**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_6.md](documentation/progresso/PROGRESSO_ROADMAP_6.md)
+**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_7.md](documentation/progresso/PROGRESSO_ROADMAP_7.md)
+
+---
+
+## Restrição de API que molda esta feature
+
+A Library API do Google Fotos, desde a mudança de política de março de 2025, restringe os escopos disponíveis a `photoslibrary.appendonly`, `photoslibrary.readonly.appcreateddata` e `photoslibrary.edit.appcreateddata`. Isso significa que `albums.list`/`albums.get` **só retornam álbuns criados pelo próprio CirqueiraX** — álbuns feitos manualmente no Google Fotos antes do app existir são invisíveis para a API, e não há endpoint de "adoção" de álbum alheio (`sharedAlbums:join` exige que o app tenha criado e compartilhado o álbum originalmente). Por isso esta feature não lista "todos os seus álbuns do Google Fotos" — ela gerencia os álbuns que o **CirqueiraX cria e controla**, e a migração de conteúdo de álbuns antigos feitos manualmente continua sendo uma ação manual do usuário dentro do próprio app Google Fotos.
 
 ---
 
@@ -12,250 +18,348 @@
 
 | # | Tópico |
 |---|---|
-| 101 | Endpoint GET /api/v1/dashboard/resumo — totais por status |
-| 102 | Endpoint GET /api/v1/dashboard/resumo — totais por origem |
-| 103 | DashboardService — agregações via QueryBuilder |
-| 104 | Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho |
-| 105 | Cálculo de tamanho total (bytes) por categoria/origem |
-| 106 | SyncthingClient — cliente HTTP para a REST API do Syncthing |
-| 107 | Endpoint proxy GET /api/v1/sync/pastas |
-| 108 | Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar |
-| 109 | Configuração de credenciais da API do Syncthing |
-| 110 | Endpoint de fila de erros (status=erro) com motivo |
-| 111 | Ação de retry em lote na fila de erros |
-| 112 | Reclassificação manual — mover pasta local |
-| 113 | Reclassificação manual — trocar álbum no Google Fotos |
-| 114 | Frontend — estrutura da feature dashboard |
-| 115 | Frontend — cards de visão geral |
-| 116 | Frontend — visão por categoria com edição de mapeamento |
-| 117 | Frontend — painel de status de sincronização |
-| 118 | Frontend — fila de erros com ação de retry |
-| 119 | Frontend — gráficos Recharts |
-| 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final |
+| 121 | Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta |
+| 122 | Escopo readonly.appcreateddata — atualização da URL de autorização OAuth |
+| 123 | GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list |
+| 124 | Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app |
+| 125 | Cruzamento de álbuns com Categoria — campo vinculada/orfã |
+| 126 | Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId |
+| 127 | Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade |
+| 128 | DTO e validação de criação de categoria já nomeando o álbum futuro |
+| 129 | Frontend — estrutura da feature google-fotos (types, api, hooks) |
+| 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) |
+| 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem |
+| 132 | Frontend — modal de vínculo manual de álbum à categoria |
+| 133 | Frontend — indicador de categorias sem álbum ainda vinculado |
+| 134 | Frontend — aviso/guia de migração manual de álbuns antigos |
+| 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação |
+| 136 | Backend — BaixarVideoService aplica categoria já na criação do download |
+| 137 | Frontend — CampoNovoLink.tsx com seletor de categoria/álbum |
+| 138 | Página GoogleFotos.tsx completa, rota e item no Header |
+| 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) |
+| 140 | Teste end-to-end do fluxo completo e documentação atualizada |
 
 ---
 
 ## Checklist
 
-- [x] **101. Endpoint GET /api/v1/dashboard/resumo — totais por status**
-- [x] **102. Endpoint GET /api/v1/dashboard/resumo — totais por origem**
-- [x] **103. DashboardService — agregações via QueryBuilder**
-- [x] **104. Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho**
-- [x] **105. Cálculo de tamanho total (bytes) por categoria/origem**
-- [x] **106. SyncthingClient — cliente HTTP para a REST API do Syncthing**
-- [x] **107. Endpoint proxy GET /api/v1/sync/pastas**
-- [x] **108. Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar**
-- [x] **109. Configuração de credenciais da API do Syncthing**
-- [x] **110. Endpoint de fila de erros (status=erro) com motivo**
-- [x] **111. Ação de retry em lote na fila de erros**
-- [x] **112. Reclassificação manual — mover pasta local**
-- [x] **113. Reclassificação manual — trocar álbum no Google Fotos**
-- [x] **114. Frontend — estrutura da feature dashboard**
-- [x] **115. Frontend — cards de visão geral**
-- [x] **116. Frontend — visão por categoria com edição de mapeamento**
-- [x] **117. Frontend — painel de status de sincronização**
-- [x] **118. Frontend — fila de erros com ação de retry**
-- [x] **119. Frontend — gráficos Recharts**
-- [x] **120. Página Dashboard.tsx completa, teste end-to-end geral e documentação final**
+- [ ] **121. Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta**
+- [ ] **122. Escopo readonly.appcreateddata — atualização da URL de autorização OAuth**
+- [ ] **123. GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list**
+- [ ] **124. Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app**
+- [ ] **125. Cruzamento de álbuns com Categoria — campo vinculada/orfã**
+- [ ] **126. Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId**
+- [ ] **127. Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade**
+- [ ] **128. DTO e validação de criação de categoria já nomeando o álbum futuro**
+- [ ] **129. Frontend — estrutura da feature google-fotos (types, api, hooks)**
+- [ ] **130. Frontend — tela de status/conexão da conta Google Fotos (gate)**
+- [ ] **131. Frontend — grid de álbuns do CirqueiraX com capa e contagem**
+- [ ] **132. Frontend — modal de vínculo manual de álbum à categoria**
+- [ ] **133. Frontend — indicador de categorias sem álbum ainda vinculado**
+- [ ] **134. Frontend — aviso/guia de migração manual de álbuns antigos**
+- [ ] **135. Backend — BaixarVideoDTO aceita categoriaId opcional na criação**
+- [ ] **136. Backend — BaixarVideoService aplica categoria já na criação do download**
+- [ ] **137. Frontend — CampoNovoLink.tsx com seletor de categoria/álbum**
+- [ ] **138. Página GoogleFotos.tsx completa, rota e item no Header**
+- [ ] **139. Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)**
+- [ ] **140. Teste end-to-end do fluxo completo e documentação atualizada**
 
 ---
 
 ## Detalhamento
 
-### Tópico 101 — Endpoint GET /api/v1/dashboard/resumo — totais por status
+### 121. Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta
 
-**O que existe hoje:** `MediaItemRepository::paginarComFiltros()` já filtra por status (Feature 3, tópico 70), mas nenhum endpoint retorna uma contagem agregada — só listas paginadas.
+**O que existe hoje**
+O fluxo de autorização OAuth já existe (`AutorizarContaGoogleFotosCommand`, Feature 1 tópico 33) e salva a conta em `ContaGoogleFotos`, mas não há nenhum endpoint HTTP que o frontend possa consultar para saber se a autorização já foi feita. Hoje isso só é verificável olhando o banco direto.
 
-**Por que importa:** é o primeiro card que você vê ao abrir o sistema — "quantos baixados, quantos concluídos, quantos com erro" — sem precisar contar manualmente.
+**Por que importa**
+É o gate da feature inteira: a tela de gestão de álbuns não deve nem renderizar o conteúdo se não houver conta conectada, e precisa saber disso de forma reativa sem acoplar lógica de autenticação Google no frontend.
 
-**O que precisa acontecer:** `DashboardController extends DefaultController`, rota `GET /api/v1/dashboard/resumo`, retornando contagem de `MediaItem` agrupada por `StatusMediaItem`.
-
----
-
-### Tópico 102 — Endpoint GET /api/v1/dashboard/resumo — totais por origem
-
-**O que existe hoje:** filtro por `origem` já existe no repository (Feature 3, tópico 70), mas sem agregação.
-
-**Por que importa:** você precisa distinguir quanto vem do bot, dos dois agentes de print e do upload manual — são fontes com comportamento e volume bem diferentes.
-
-**O que precisa acontecer:** estender o mesmo endpoint do tópico 101 (ou endpoint irmão) somando a contagem por `OrigemMedia`.
+**O que precisa acontecer**
+- Criar `GoogleFotosController` (ou estender o existente) com `GET /api/v1/google-fotos/status`
+- Retornar `{ conectado: bool, email: string|null, conectadoEm: string|null }` consultando `ContaGoogleFotosRepository`
+- Não expor o `refreshTokenCriptografado` nem qualquer dado sensível no payload
 
 ---
 
-### Tópico 103 — DashboardService — agregações via QueryBuilder
+### 122. Escopo readonly.appcreateddata — atualização da URL de autorização OAuth
 
-**O que existe hoje:** nenhuma camada de serviço dedicada a métricas — os tópicos 101–102 dependeriam de lógica direto no controller se não for extraída agora.
+**O que existe hoje**
+A URL de autorização montada em `AutorizarContaGoogleFotosCommand` usa o escopo `photoslibrary` (acesso amplo, já parcialmente obsoleto) junto com `userinfo.email`, conforme visto na autorização já realizada.
 
-**Por que importa:** mantém a regra de "controller sem lógica de negócio" (guia de padrões) e centraliza toda query de agregação num único lugar, reaproveitável pelos tópicos seguintes.
+**Por que importa**
+Para o endpoint de listagem de álbuns (tópico 124) funcionar de forma confiável e alinhada à política atual do Google, o app deve pedir explicitamente `photoslibrary.readonly.appcreateddata` (leitura de álbuns/itens criados pelo próprio app) além de `photoslibrary.appendonly` (upload), evitando depender apenas do escopo amplo que pode ser descontinuado.
 
-**O que precisa acontecer:** `DashboardService` com métodos `resumoPorStatus()`, `resumoPorOrigem()`, usando `QueryBuilder` com `GROUP BY` em vez de carregar entidades completas na memória.
-
----
-
-### Tópico 104 — Endpoint GET /api/v1/dashboard/categorias — contagem e tamanho
-
-**O que existe hoje:** `CategoriaService`/`CategoriaController` já existem (Feature 2, tópicos 41–42), mas sem nenhuma métrica agregada — só CRUD puro.
-
-**Por que importa:** é a visão "por categoria" do dashboard — quantos itens e quanto espaço cada categoria (X, Y, Z, prints) está ocupando.
-
-**O que precisa acontecer:** `DashboardService::resumoPorCategoria()` — `JOIN` entre `Categoria` e `MediaItem`, contando itens e somando tamanho por `categoria_id`.
+**O que precisa acontecer**
+- Atualizar a montagem da URL de autorização para solicitar os três escopos válidos: `photoslibrary.appendonly`, `photoslibrary.readonly.appcreateddata`, `photoslibrary.edit.appcreateddata`
+- Documentar que contas já autorizadas antes dessa mudança (como a conta de teste já conectada) precisam passar por `make google-fotos-autorizar` novamente para emitir um novo refresh token com os escopos corretos
+- Atualizar `documentation/stack/BACKEND.md` com os escopos oficiais
 
 ---
 
-### Tópico 105 — Cálculo de tamanho total (bytes) por categoria/origem
+### 123. GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list
 
-**O que existe hoje:** nenhum campo de tamanho de arquivo persistido no `MediaItem` — só `metadata` genérica.
+**O que existe hoje**
+`GoogleFotosAlbumService` (Feature 2, tópico 54) só tem `criarOuObter()`, que cria ou retorna o ID já salvo — nunca consulta a lista real de álbuns existentes na conta.
 
-**Por que importa:** sem esse dado, o card "espaço usado" do dashboard não tem como existir.
+**Por que importa**
+É a peça central da feature: sem esse método não há como popular a tela de álbuns nem cruzar o que existe no Google Fotos com o que está salvo em `Categoria`.
 
-**O que precisa acontecer:** avaliar se o tamanho já está em `metadata` (alguns módulos podem já gravar) ou se precisa de um campo dedicado `tamanho_bytes` no `MediaItem`, preenchido na ingestão (`IngestarMediaService`, Feature 2).
-
----
-
-### Tópico 106 — SyncthingClient — cliente HTTP para a REST API do Syncthing
-
-**O que existe hoje:** nenhuma integração com o Syncthing feita a partir do backend — o volume compartilhado (Feature 1, tópico 27) só cobre o sistema de arquivos, não a API de controle.
-
-**Por que importa:** é o que permite o dashboard mostrar "pasta X: pausada" e oferecer o botão "sincronizar agora", sem você precisar abrir o app do Syncthing.
-
-**O que precisa acontecer:** `SyncthingClient` usando `HttpClientInterface`, consumindo a REST API local/remota do Syncthing (`GET /rest/db/status`, `POST /rest/db/scan`, etc.).
+**O que precisa acontecer**
+- Adicionar `listarAlbunsDoApp(ContaGoogleFotos $conta): array` em `GoogleFotosAlbumService`
+- Chamar `GET https://photoslibrary.googleapis.com/v1/albums` com paginação (`pageToken`), acumulando todas as páginas
+- Mapear cada álbum retornado para um array simples: `id`, `titulo`, `urlCapa` (`coverPhotoBaseUrl`), `totalItens` (`mediaItemsCount`)
+- Tratar resposta vazia (nenhum álbum criado pelo app ainda) sem lançar exceção
 
 ---
 
-### Tópico 107 — Endpoint proxy GET /api/v1/sync/pastas
+### 124. Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app
 
-**O que existe hoje:** `SyncthingClient` pronto (tópico 106), mas nenhuma rota exposta pro frontend.
+**O que existe hoje**
+Nenhum endpoint expõe os álbuns do Google Fotos ao frontend.
 
-**Por que importa:** o frontend nunca deve falar direto com o Syncthing (princípio de design do `CIRQUEIRAX.md`) — precisa passar pelo backend.
+**Por que importa**
+É o dado que alimenta a tela principal da feature — sem ele não há grid de álbuns para mostrar.
 
-**O que precisa acontecer:** `SyncController extends DefaultController`, rota `GET /api/v1/sync/pastas` retornando status de cada pasta observada.
-
----
-
-### Tópico 108 — Endpoint proxy POST /api/v1/sync/pastas/{id}/sincronizar
-
-**O que existe hoje:** só leitura de status (tópico 107) — nenhuma ação de controle exposta.
-
-**Por que importa:** é o botão "sincronizar agora" mencionado no design original — evita você precisar mexer no celular manualmente.
-
-**O que precisa acontecer:** rota `POST /api/v1/sync/pastas/{id}/sincronizar`, delegando ao `SyncthingClient` pra disparar rescan/sync da pasta correspondente.
+**O que precisa acontecer**
+- Adicionar `GET /api/v1/google-fotos/albuns` no `GoogleFotosController`
+- Delegar para `GoogleFotosAlbumService::listarAlbunsDoApp()` usando a conta ativa
+- Retornar `404`/payload vazio com mensagem clara se não houver conta conectada (reaproveitando a checagem do tópico 121)
+- Cache curto (ex: 60s) opcional para evitar bater na API do Google a cada refresh de tela
 
 ---
 
-### Tópico 109 — Configuração de credenciais da API do Syncthing
+### 125. Cruzamento de álbuns com Categoria — campo vinculada/orfã
 
-**O que existe hoje:** nenhuma variável de ambiente ou configuração pra autenticar contra a API do Syncthing (que normalmente exige uma API key).
+**O que existe hoje**
+`Categoria` já guarda `googlePhotosAlbumId` (Feature 1, tópico 35), mas não há lógica que cruze essa informação com a lista real de álbuns do Google.
 
-**Por que importa:** sem isso, `SyncthingClient` não consegue nem autenticar as chamadas dos tópicos 106–108.
+**Por que importa**
+O usuário precisa ver, de forma clara, quais álbuns do Google Fotos já estão amarrados a uma categoria do sistema e quais ainda estão "soltos" (criados pelo app mas sem categoria associada, ou vice-versa).
 
-**O que precisa acontecer:** variável `SYNCTHING_API_URL` e `SYNCTHING_API_KEY` no `.env`, documentadas no `DOCUMENTACAO_TECNICA.md`.
-
----
-
-### Tópico 110 — Endpoint de fila de erros (status=erro) com motivo
-
-**O que existe hoje:** `GET /api/v1/media-itens` já aceita filtro por `status` (Feature 3, tópico 71) e `erroMotivo` já é serializado (`MediaItemSerializer`, Feature 2).
-
-**Por que importa:** é praticamente reaproveitamento direto — a "fila de erros" do dashboard é a mesma listagem paginada, só com o filtro fixo em `status=erro`.
-
-**O que precisa acontecer:** confirmar que o endpoint existente cobre esse caso sem alteração; se precisar, adicionar um atalho semântico `GET /api/v1/dashboard/erros` que já aplica esse filtro por padrão.
+**O que precisa acontecer**
+- No `DashboardService` ou em um novo `GoogleFotosService`, cruzar a lista de `listarAlbunsDoApp()` com todas as `Categoria` cadastradas
+- Para cada álbum, marcar `categoriaVinculada: string|null` (nome da categoria, se houver)
+- Para cada categoria sem `googlePhotosAlbumId` preenchido, marcar como `pendente_vinculo: true`
+- Expor esse cruzamento no mesmo endpoint do tópico 124 ou em um endpoint dedicado `GET /api/v1/google-fotos/albuns/resumo`
 
 ---
 
-### Tópico 111 — Ação de retry em lote na fila de erros
+### 126. Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId
 
-**O que existe hoje:** `POST /api/v1/media-itens/lote/retentar` já existe desde a Feature 2 (tópico 59) e foi usado também pelo redownload da Feature 3.
+**O que existe hoje**
+O único jeito de uma `Categoria` ganhar um `googlePhotosAlbumId` hoje é automaticamente, via `criarOuObter()` na primeira mídia enviada (Feature 2, tópico 54). Não há endpoint para vincular manualmente.
 
-**Por que importa:** o botão "tentar de novo" da fila de erros do dashboard não precisa de nenhum endpoint novo — só precisa ser plugado no frontend.
+**Por que importa**
+É o botão central do fluxo pedido: usuário vê um álbum que o CirqueiraX já criou (por exemplo, de um teste anterior) e quer linkar explicitamente a uma categoria, ou trocar o vínculo.
 
-**O que precisa acontecer:** validar que o endpoint existente cobre os cenários de erro desta feature (falha de Syncthing/Google Fotos) sem ajuste adicional no backend.
-
----
-
-### Tópico 112 — Reclassificação manual — mover pasta local
-
-**O que existe hoje:** `PATCH /api/v1/media-itens/{uuid}/categoria` já existe (Feature 2, tópico 50), mas hoje só é usado pra classificar item que ainda **não** tinha categoria (`EM_FILA`) — não trata o caso de trocar categoria de item já `CONCLUIDO`.
-
-**Por que importa:** o design da Feature 5 pede reclassificação de item **já processado**, o que implica mover o arquivo fisicamente de uma pasta pra outra, não só atualizar o campo no banco.
-
-**O que precisa acontecer:** estender `MediaItemService` (ou criar `ReclassificarMediaService` dedicado) pra, quando o item já estiver `CONCLUIDO`, mover o arquivo de `categoriaAntiga.pastaLocal` pra `categoriaNova.pastaLocal` além de atualizar `categoria_id`.
+**O que precisa acontecer**
+- Criar `VincularAlbumDTO` com `googlePhotosAlbumId` (string, obrigatório)
+- Adicionar `PATCH /api/v1/categorias/{uuid}/album` no `CategoriaController`
+- Validar que o `albumId` informado realmente existe na lista retornada por `listarAlbunsDoApp()` antes de salvar (evita digitar um ID inválido)
+- Persistir via `CategoriaService`
 
 ---
 
-### Tópico 113 — Reclassificação manual — trocar álbum no Google Fotos
+### 127. Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade
 
-**O que existe hoje:** `google_photos_media_id` já é gravado desde a Feature 2 (tópico 56) — é exatamente o dado guardado com esse propósito, mas nunca usado até agora.
+**O que existe hoje**
+`criarOuObter()` cria um álbum novo sempre que a categoria não tem `googlePhotosAlbumId`. Com o vínculo manual do tópico 126 isso já resolve a maior parte do problema, mas falta uma trava explícita.
 
-**Por que importa:** é o motivo pelo qual aquele campo foi salvo desde o início — sem ele, a API do Google Fotos não permite mover um item entre álbuns.
+**Por que importa**
+Sem esse ajuste, existe uma janela entre "categoria criada" e "álbum vinculado manualmente" em que, se uma mídia for enviada antes do vínculo, o sistema cria um álbum duplicado por engano.
 
-**O que precisa acontecer:** no mesmo fluxo do tópico 112, chamar `mediaItems.batchAddMediaItems` no álbum novo e `batchRemoveMediaItems` no álbum antigo, usando o `google_photos_media_id` já salvo.
-
----
-
-### Tópico 114 — Frontend — estrutura da feature dashboard
-
-**O que existe hoje:** as features `downloads-video` (Feature 3) e `upload-manual` (Feature 4) já estabeleceram o padrão de estrutura — nada específico do dashboard existe ainda.
-
-**Por que importa:** mantém a consistência arquitetural do frontend em todas as telas do sistema.
-
-**O que precisa acontecer:** `web/features/dashboard/{api.ts, types.ts, hooks/, components/, index.ts}`.
+**O que precisa acontecer**
+- Nenhuma mudança funcional necessária em `criarOuObter()` em si (a lógica de "se já tem ID, usa; senão cria" já é a correta) — o ajuste é de **processo**: documentar e, na UI, incentivar vincular o álbum antes do primeiro envio daquela categoria
+- Adicionar log de warning quando um álbum é criado automaticamente para uma categoria nova, facilitando auditoria
 
 ---
 
-### Tópico 115 — Frontend — cards de visão geral
+### 128. DTO e validação de criação de categoria já nomeando o álbum futuro
 
-**O que existe hoje:** nenhum componente visual de métricas agregadas — só cards de mídia individual (`CardVideo`, Feature 3).
+**O que existe hoje**
+`CriarCategoriaDTO` (Feature 1, tópico 35) já aceita `nome`, `pastaLocal` e `googlePhotosAlbumId` opcional.
 
-**Por que importa:** é a primeira coisa que você vê ao abrir o dashboard — totais por status e por origem, como os cards que você já usa hoje no bot ("Total downloads", "Na VPS", etc.).
+**Por que importa**
+Pequeno ajuste de validação para deixar explícito, na hora da criação, que se o campo `googlePhotosAlbumId` for deixado em branco, um álbum será criado automaticamente com o nome da categoria — e isso precisa estar visível tanto na API (mensagem de validação) quanto na UI.
 
-**O que precisa acontecer:** componente `CardsResumo` consumindo os endpoints dos tópicos 101–102, com HeroUI + tailwindcss-motion pra transição de entrada.
-
----
-
-### Tópico 116 — Frontend — visão por categoria com edição de mapeamento
-
-**O que existe hoje:** `CategoriaController` (Feature 2) já permite `PATCH` de categoria via API, mas nenhuma tela usa isso.
-
-**Por que importa:** você precisa poder ajustar pasta local/álbum de uma categoria direto pela UI, sem precisar chamar a API manualmente.
-
-**O que precisa acontecer:** tabela/lista de categorias com contagem e tamanho (tópicos 104–105), com modal de edição reaproveitando `CategoriaService::atualizar()` já existente.
+**O que precisa acontecer**
+- Adicionar mensagem descritiva no DTO/documentação da API sobre esse comportamento
+- Nenhuma mudança de schema necessária, apenas clareza de contrato
 
 ---
 
-### Tópico 117 — Frontend — painel de status de sincronização
+### 129. Frontend — estrutura da feature google-fotos (types, api, hooks)
 
-**O que existe hoje:** endpoints proxy do Syncthing prontos (tópicos 107–108), mas nenhuma tela consumindo.
+**O que existe hoje**
+Não existe nenhuma pasta de feature dedicada a Google Fotos no frontend — o que existe hoje (`GoogleFotosOAuthService`, `GoogleFotosAlbumService`) é só backend.
 
-**Por que importa:** fecha o ciclo de "ver e agir" sobre a sincronização com o celular sem sair do dashboard.
+**Por que importa**
+Segue o mesmo padrão arquitetural já usado em `dashboard`, `downloads-video` e `upload-manual` — necessário antes de construir qualquer componente visual.
 
-**O que precisa acontecer:** componente listando pastas com status (ativa/pausada) e botão "sincronizar agora" por pasta.
-
----
-
-### Tópico 118 — Frontend — fila de erros com ação de retry
-
-**O que existe hoje:** `GridVideos`/`BarraAcoesEmLote` da Feature 3 já implementam seleção múltipla e ações em lote — reaproveitável aqui com filtro fixo em erro.
-
-**Por que importa:** é o painel operacional pra você ver o que falhou e agir rápido, sem precisar entrar no servidor ou nos logs.
-
-**O que precisa acontecer:** view filtrada por `status=erro` mostrando `erroMotivo` visível por item, com botão de retry individual/lote chamando o endpoint já existente (tópico 111).
+**O que precisa acontecer**
+- Criar `web/features/google-fotos/` com `types.ts` (interfaces `StatusGoogleFotos`, `AlbumGoogleFotos`, `CategoriaComAlbum`), `api.ts` (cliente para os endpoints dos tópicos 121/124/126) e `index.ts`
+- Criar hooks em `hooks/useGoogleFotos.ts` com TanStack Query: `useStatusGoogleFotos`, `useAlbunsGoogleFotos`, `useVincularAlbum`
 
 ---
 
-### Tópico 119 — Frontend — gráficos Recharts
+### 130. Frontend — tela de status/conexão da conta Google Fotos (gate)
 
-**O que existe hoje:** `web/shared/ui/chart.tsx` (`ChartContainer`, `ChartTooltip`, `ChartLegend`) já foi criado na Feature 1 (tópico 24), mas nenhum gráfico real foi montado ainda.
+**O que existe hoje**
+Nenhuma tela do frontend verifica ou exibe o status de conexão com o Google Fotos — a autorização só acontece via CLI (`make google-fotos-autorizar`).
 
-**Por que importa:** é o uso concreto do Recharts que justificou ativar o módulo `ui-extra` desde a fundação do projeto.
+**Por que importa**
+É exatamente o comportamento pedido: "se eu ainda não tiver logado no Google, ele não deixa eu entrar nessa página". Sem essa tela, o usuário não tem feedback visual do estado da conexão.
 
-**O que precisa acontecer:** gráficos de volume por categoria/origem ao longo do tempo e de espaço usado (VPS vs. Google Fotos), consumindo os endpoints de resumo (tópicos 101–105) através de `ChartContainer`.
+**O que precisa acontecer**
+- Criar `web/features/google-fotos/components/GateConexaoGoogle.tsx`
+- Usar `useStatusGoogleFotos()`: se `conectado: false`, mostrar card centralizado explicando que é preciso autorizar via `make google-fotos-autorizar` (ou, se houver endpoint de autorização iniciável pelo navegador, um botão "Conectar Google Fotos" apontando pra ele) e bloquear o restante da página
+- Se `conectado: true`, mostrar badge com o e-mail conectado e data de autorização, liberando o conteúdo
 
 ---
 
-### Tópico 120 — Página Dashboard.tsx completa, teste end-to-end geral e documentação final
+### 131. Frontend — grid de álbuns do CirqueiraX com capa e contagem
 
-**O que existe hoje:** componentes isolados dos tópicos 115–119, e todas as quatro features anteriores (1 a 4) já validadas ponta a ponta individualmente.
+**O que existe hoje**
+Nada — este é o componente visual central da feature.
 
-**Por que importa:** é o fechamento da v1 inteira do CirqueiraX — a partir daqui, todo o pipeline (ingestão → classificação → distribuição → upload → visualização/controle) está funcional e visível num único lugar.
+**Por que importa**
+É a "vitrine" que substitui a ideia original de "ver meus álbuns do Google Fotos", agora mostrando os álbuns que o próprio CirqueiraX gerencia, com dados reais (capa, nome, quantidade de itens).
 
-**O que precisa acontecer:** `web/pages/Dashboard/Dashboard.tsx` integrando todos os componentes das seções anteriores como rota inicial do sistema; teste manual cobrindo o ciclo completo (baixar vídeo, capturar print nos dois agentes, upload manual, ver tudo refletido no dashboard, forçar um erro e reprocessar, reclassificar um item concluído); `CIRQUEIRAX.md`, `DOCUMENTACAO_TECNICA.md` e `FRONTEND.md` atualizados como fechamento da v1.
+**O que precisa acontecer**
+- Criar `web/features/google-fotos/components/GridAlbuns.tsx`
+- Grid responsivo de cards usando `urlCapa` como imagem de fundo, `titulo`, `totalItens` e um badge indicando `categoriaVinculada` (verde, com nome) ou `pendente_vinculo` (âmbar, "sem categoria vinculada")
+- Estado vazio elegante quando `listarAlbunsDoApp()` não retorna nada ainda (nenhum álbum criado pelo CirqueiraX até o momento)
+- Skeleton de carregamento consistente com os demais grids do sistema (`GridVideos`, Feature 3)
+
+---
+
+### 132. Frontend — modal de vínculo manual de álbum à categoria
+
+**O que existe hoje**
+Nada no frontend; backend pronto a partir do tópico 126.
+
+**Por que importa**
+É a ação concreta que o usuário pediu: "selecionar e vincular na categoria".
+
+**O que precisa acontecer**
+- Criar `web/features/google-fotos/components/ModalVincularAlbum.tsx`
+- Ao clicar num álbum sem vínculo no grid, abrir modal com seletor das categorias existentes (via `useCategorias`, já usado em outras features)
+- Ao confirmar, chamar `useVincularAlbum()` (`PATCH /api/v1/categorias/{uuid}/album`) e invalidar a query de álbuns/categorias
+- Permitir também o caminho inverso: a partir da tela de categorias (`TabelaCategorias`, Feature 5 tópico 116), abrir o mesmo modal pré-filtrado pelos álbuns disponíveis
+
+---
+
+### 133. Frontend — indicador de categorias sem álbum ainda vinculado
+
+**O que existe hoje**
+`TabelaCategorias.tsx` (Feature 5, tópico 116) lista categorias com pasta local e indicador de vínculo com Google Fotos, mas de forma genérica.
+
+**Por que importa**
+Fecha o ciclo de visibilidade: o usuário precisa enxergar tanto "álbuns do Google sem categoria" (tópico 131) quanto "categorias sem álbum" — as duas pontas do mesmo problema.
+
+**O que precisa acontecer**
+- Atualizar `TabelaCategorias.tsx` para destacar visualmente (badge âmbar) categorias cujo `googlePhotosAlbumId` é nulo
+- Adicionar ação rápida "Vincular álbum" na linha da categoria, abrindo o `ModalVincularAlbum` do tópico 132
+
+---
+
+### 134. Frontend — aviso/guia de migração manual de álbuns antigos
+
+**O que existe hoje**
+Nada — esse é um ponto de educação do usuário, não uma função automatizável (ver a seção "Restrição de API" no topo deste documento).
+
+**Por que importa**
+Evita frustração: sem esse aviso, o usuário pode esperar que álbuns antigos feitos manualmente no Google Fotos apareçam na tela e, ao não verem, achar que há um bug.
+
+**O que precisa acontecer**
+- Adicionar um card informativo fixo na tela `GoogleFotos.tsx` explicando, em linguagem simples, por que álbuns criados fora do CirqueiraX não aparecem aqui, e o passo manual recomendado (abrir o Google Fotos, selecionar as fotos do álbum antigo, usar "Adicionar a álbum" apontando para o álbum novo criado pelo CirqueiraX)
+- Linkar esse texto também em `documentation/funcionalidades/CIRQUEIRAX.md`
+
+---
+
+### 135. Backend — BaixarVideoDTO aceita categoriaId opcional na criação
+
+**O que existe hoje**
+`BaixarVideoDTO` (Feature 3, tópico 61) só tem `url`. A classificação de categoria só acontece depois, manualmente, via modal na tela de downloads.
+
+**Por que importa**
+É o pedido explícito: "na página de download, toda vez que eu baixar uma mídia, eu consigo selecionar a categoria/álbum correspondente" — hoje isso só é possível depois do download concluído, não no momento de pedir o download.
+
+**O que precisa acontecer**
+- Adicionar campo opcional `categoriaId` (`?string`, validado como UUID existente) em `BaixarVideoDTO`
+- Manter compatibilidade: se não informado, comportamento atual (vai para `EM_FILA` aguardando classificação manual) continua igual
+
+---
+
+### 136. Backend — BaixarVideoService aplica categoria já na criação do download
+
+**O que existe hoje**
+`BaixarVideoService` (Feature 3, tópico 63) apenas valida a URL e despacha `BaixarVideoMessage`, sem qualquer noção de categoria.
+
+**Por que importa**
+Conecta o DTO atualizado (tópico 135) ao restante do pipeline — sem isso o campo novo seria apenas decorativo.
+
+**O que precisa acontecer**
+- `BaixarVideoMessage` ganha propriedade opcional `categoriaId`
+- Em `BaixarVideoMessageHandler` (Feature 3, tópico 65), após a ingestão via `IngestarMediaService`, se `categoriaId` foi informado, chamar imediatamente `MediaItemService::classificarManualmente()` (reaproveitando a lógica da Feature 2, tópico 50) — o item já nasce classificado e os dispatches de `DistribuirLocalMessage`/`EnviarGoogleFotosMessage` seguem automaticamente
+
+---
+
+### 137. Frontend — CampoNovoLink.tsx com seletor de categoria/álbum
+
+**O que existe hoje**
+`CampoNovoLink.tsx` (Feature 3, tópico 78) só tem o campo de URL, detecção de plataforma e botão de enviar.
+
+**Por que importa**
+É a peça de interface que entrega o pedido do usuário de forma direta — selecionar a categoria/álbum já no momento de colar o link.
+
+**O que precisa acontecer**
+- Adicionar um seletor de categoria (reaproveitando `useCategorias`) ao lado do campo de URL, com opção "Classificar depois" como padrão (mantém o comportamento atual se o usuário não escolher nada)
+- Ao enviar, incluir `categoriaId` selecionado no payload de `POST /api/v1/downloads`
+- Mostrar, junto a cada categoria no seletor, se ela já tem álbum vinculado (reaproveitando o cruzamento do tópico 125) — reforça visualmente que aquele vídeo vai cair num álbum real
+
+---
+
+### 138. Página GoogleFotos.tsx completa, rota e item no Header
+
+**O que existe hoje**
+Nenhuma rota de Google Fotos existe no `App.tsx` nem no `Header.tsx`.
+
+**Por que importa**
+Consolida todos os componentes da feature (gate, grid, modal) em uma página navegável de verdade.
+
+**O que precisa acontecer**
+- Criar `web/features/google-fotos/GoogleFotos.tsx` compondo `GateConexaoGoogle` → `GridAlbuns` → `ModalVincularAlbum` → card de aviso de migração (tópico 134)
+- Registrar rota `/google-fotos` em `web/App.tsx` dentro do `MainLayout`
+- Adicionar item de navegação no `web/layouts/Header.tsx`
+
+---
+
+### 139. Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)
+
+**O que existe hoje**
+`TabelaCategorias.tsx` no Dashboard (Feature 5) e a nova página `/google-fotos` resolveriam o mesmo problema a partir de pontos de entrada diferentes, sem se referenciar.
+
+**Por que importa**
+Evita que o usuário ache que são duas features desconectadas — reforça que é um único conceito (categoria ⇄ álbum) visto de dois ângulos.
+
+**O que precisa acontecer**
+- Adicionar link/botão "Gerenciar álbuns do Google Fotos" na aba de Categorias do Dashboard, apontando para `/google-fotos`
+- No sentido inverso, a partir de um álbum vinculado na página `/google-fotos`, permitir navegar direto para a categoria correspondente no Dashboard
+
+---
+
+### 140. Teste end-to-end do fluxo completo e documentação atualizada
+
+**O que existe hoje**
+Nenhum teste cobre especificamente o ciclo "ver álbuns → vincular → baixar vídeo já categorizado → conferir no Google Fotos".
+
+**Por que importa**
+Fecha a Feature 6 com confiança de que o fluxo pedido pelo usuário funciona ponta a ponta, não só em partes isoladas.
+
+**O que precisa acontecer**
+- Validar manualmente: reautorizar a conta com os novos escopos (tópico 122) → conferir que `/google-fotos` mostra o(s) álbum(ns) já criados em testes anteriores → vincular um álbum existente a uma categoria nova → baixar um vídeo já escolhendo essa categoria em `CampoNovoLink` → confirmar no Dashboard que o item chegou a `concluido` → confirmar no Google Fotos que caiu no álbum certo
+- Rodar `make lint-all` / `npx biome check` / `npm run build` sem erros
+- Atualizar `documentation/funcionalidades/CIRQUEIRAX.md` (nova seção 3.6 — Gestão de Álbuns do Google Fotos), `documentation/stack/FRONTEND.md` (nova feature na árvore de diretórios) e `documentation/stack/BACKEND.md` (novos endpoints e escopos OAuth)

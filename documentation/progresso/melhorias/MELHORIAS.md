@@ -26,6 +26,7 @@
 | M13 | Modal Avançado de Edição de Metadados com Data, Horário, Duração, Thumbnail e Atalhos Rápidos | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-13--modal-avançado-de-edição-de-metadados-com-data-horário-duração-thumbnail-e-atalhos-rápidos) |
 | M14 | Migração de Schema via Makefile, Backfill de Thumbnails e Correção de Erro 500 | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-14--migração-de-schema-via-makefile-backfill-de-thumbnails-e-correção-de-erro-500) |
 | M15 | Detalhamento Completo dos Cards de Vídeo (Data, Horário, Tamanho e Extensão) | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-15--detalhamento-completo-dos-cards-de-vídeo-data-horário-tamanho-e-extensão) |
+| M16 | Extração Automática de Código OAuth2 no Comando de Autorização Google Fotos | ✅ Concluído | 04/10/2026 | [ver](MELHORIAS_1.md#melhoria-16--extração-automática-de-código-oauth2-no-comando-de-autorização-google-fotos) |
 
 
 

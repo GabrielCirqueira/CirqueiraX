@@ -263,3 +263,20 @@
   - `web/features/downloads-video/components/CardVideo.tsx`
   - `documentation/progresso/melhorias/MELHORIAS_1.md`
 
+---
+
+### ✅ Melhoria 16 — Extração Automática de Código OAuth2 no Comando de Autorização Google Fotos
+
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **Problema**:
+  - Ao concluir a autorização no Google no fluxo CLI, o navegador redireciona para uma URL longa contendo parâmetros (`http://localhost/?iss=...&code=...&scope=...`). O usuário precisava inspecionar e extrair manualmente apenas o trecho do `code`.
+- **Solução**:
+  - Atualizado o comando `AutorizarContaGoogleFotosCommand.php` com o método `extrairCodigoAutorizacao()`.
+  - Agora o usuário pode simplesmente copiar e colar **toda a URL da barra de endereços** ou colar apenas o código. O comando analisa a query string com `parse_url` / `parse_str` e extrai o `code` de forma transparente.
+  - Adicionado tratamento para erros de consentimento (`error` / `error_description`) retornados pelo Google.
+- **Arquivos**:
+  - `src/Command/AutorizarContaGoogleFotosCommand.php`
+  - `documentation/progresso/melhorias/MELHORIAS_1.md`
+
+

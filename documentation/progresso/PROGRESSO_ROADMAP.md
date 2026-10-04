@@ -11,6 +11,7 @@
 > - **Tópicos 61+** → [PROGRESSO_ROADMAP_4.md](PROGRESSO_ROADMAP_4.md)
 > - **Tópicos 81+** → [PROGRESSO_ROADMAP_5.md](PROGRESSO_ROADMAP_5.md)
 > - **Tópicos 101+** → [PROGRESSO_ROADMAP_6.md](PROGRESSO_ROADMAP_6.md)
+> - **Tópicos 121+** → [PROGRESSO_ROADMAP_7.md](PROGRESSO_ROADMAP_7.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -134,4 +135,23 @@
 | 118 | Frontend — fila de erros com ação de retry | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 119 | Frontend — gráficos Recharts | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
 | 120 | Página Dashboard.tsx completa, teste end-to-end geral e documentação final | ✅ Concluído | [ver](PROGRESSO_ROADMAP_6.md) |
-
+| 121 | Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 122 | Escopo readonly.appcreateddata — atualização da URL de autorização OAuth | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 123 | GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 124 | Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 125 | Cruzamento de álbuns com Categoria — campo vinculada/orfã | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 126 | Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 127 | Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 128 | DTO e validação de criação de categoria já nomeando o álbum futuro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 129 | Frontend — estrutura da feature google-fotos (types, api, hooks) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 132 | Frontend — modal de vínculo manual de álbum à categoria | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 133 | Frontend — indicador de categorias sem álbum ainda vinculado | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 134 | Frontend — aviso/guia de migração manual de álbuns antigos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 136 | Backend — BaixarVideoService aplica categoria já na criação do download | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 137 | Frontend — CampoNovoLink.tsx com seletor de categoria/álbum | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 138 | Página GoogleFotos.tsx completa, rota e item no Header | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 140 | Teste end-to-end do fluxo completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |

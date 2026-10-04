@@ -44,7 +44,7 @@ PROD_SYMFONY  = $(COMPOSE_PROD_CMD) exec -T symfony
   docker-clean system-info dev-logs monitor \
   deploy update-prod migrate-prod rollback-prod \
   prod-logs prod-logs-all prod-shell prod-status cache-clear-prod backup-db ssl-renew setup-prod-env \
-  push progresso
+  push roadmap
 
 help: ## Listar todos os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-26s\033[0m %s\n", $$1, $$2}'
@@ -334,5 +334,5 @@ push: ## Commitar e enviar alterações para o repositório remoto (ARGS="mensag
 # PROGRESSO / ROADMAP
 # ══════════════════════════════════════════════════
 
-progresso: ## Sincronizar ROADMAP.md com documentation/progresso/
+roadmap: ## Sincronizar ROADMAP.md com documentation/progresso/
 	python3 $(SCRIPTS_DIR)/update_roadmap.py

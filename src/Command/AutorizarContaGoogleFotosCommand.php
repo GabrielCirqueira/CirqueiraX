@@ -22,8 +22,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final class AutorizarContaGoogleFotosCommand extends Command
 {
-    private const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
-    private const SCOPES = 'https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/userinfo.email';
+    private const string GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+    private const string SCOPES = 'https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/userinfo.email';
 
     public function __construct(
         private readonly GoogleOAuthAPI $googleOAuthApi,
@@ -52,7 +52,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
         if (empty($clientId)) {
             $clientId = $io->ask('Informe o GOOGLE_CLIENT_ID');
             if (empty($clientId)) {
-                $io->error('O GOOGLE_CLIENT_ID é obrigatório.');
+                $io->error('O    é obrigatório.');
 
                 return Command::FAILURE;
             }
@@ -86,9 +86,21 @@ final class AutorizarContaGoogleFotosCommand extends Command
         $io->writeln($urlAutorizacao);
         $io->newLine();
 
-        $code = $io->ask('Passo 2: Cole o código de autorização (campo "code" retornado na URL de redirecionamento)');
-        if (empty($code)) {
-            $io->error('O código de autorização é obrigatório.');
+        $io->section('Passo 2: Confirmação do Código ou URL');
+        $io->writeln('Após autorizar no Google, você será redirecionado para uma página.');
+        $io->writeln('Basta copiar toda a URL da barra de endereços (ou apenas o código) e colar abaixo.');
+        $io->newLine();
+
+        $entrada = $io->ask('Cole a URL completa ou o código retornado');
+        if (empty($entrada) || !is_string($entrada)) {
+            $io->error('Nenhuma entrada foi fornecida.');
+
+            return Command::FAILURE;
+        }
+
+        $code = $this->extrairCodigoAutorizacao($entrada);
+        if (null === $code) {
+            $io->error('Não foi possível identificar o parâmetro "code" na entrada fornecida.');
 
             return Command::FAILURE;
         }
@@ -99,7 +111,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
             $dadosToken = $this->googleOAuthApi->trocarCodigoPorToken(
                 $clientId,
                 $clientSecret,
-                trim($code),
+                $code,
                 $redirectUri
             );
 
@@ -160,5 +172,31 @@ final class AutorizarContaGoogleFotosCommand extends Command
 
             return Command::FAILURE;
         }
+    }
+
+    private function extrairCodigoAutorizacao(string $entrada): ?string
+    {
+        $limpo = trim($entrada);
+        if ('' === $limpo) {
+            return null;
+        }
+
+        if (str_starts_with($limpo, 'http://') || str_starts_with($limpo, 'https://') || str_contains($limpo, '?') || str_contains($limpo, 'code=')) {
+            $parsedUrl = parse_url($limpo);
+            $queryString = $parsedUrl['query'] ?? (str_contains($limpo, '?') ? explode('?', $limpo, 2)[1] : $limpo);
+
+            parse_str($queryString, $queryParams);
+
+            if (isset($queryParams['error'])) {
+                $descricaoErro = is_string($queryParams['error_description'] ?? null) ? $queryParams['error_description'] : (string) $queryParams['error'];
+                throw new \DomainException(sprintf('Google OAuth recusado: %s', $descricaoErro));
+            }
+
+            if (isset($queryParams['code']) && is_string($queryParams['code']) && '' !== trim($queryParams['code'])) {
+                return trim((string) $queryParams['code']);
+            }
+        }
+
+        return $limpo;
     }
 }
