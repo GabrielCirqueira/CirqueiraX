@@ -183,6 +183,26 @@ class MediaItem
         return $this;
     }
 
+    public function isClassificado(): bool
+    {
+        return null !== $this->categoriaId && '' !== trim($this->categoriaId);
+    }
+
+    public function isFinal(): bool
+    {
+        return $this->status->isFinal();
+    }
+
+    public function isClassificadoOuFinalizado(): bool
+    {
+        return $this->isFinal() || StatusMediaItem::CLASSIFICADO === $this->status || $this->isClassificado();
+    }
+
+    public function isElegivelParaClassificacao(): bool
+    {
+        return !$this->isClassificadoOuFinalizado();
+    }
+
     public function marcarParaDownload(): self
     {
         $this->erroMotivo = null;

@@ -26,7 +26,7 @@ final readonly class ClassificarMediaMessageHandler
     {
         try {
             $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
-            if (null === $mediaItem || $mediaItem->status()->isFinal() || StatusMediaItem::CLASSIFICADO === $mediaItem->status() || null !== $mediaItem->categoriaId()) {
+            if (null === $mediaItem || $mediaItem->isClassificadoOuFinalizado()) {
                 return;
             }
 
@@ -47,7 +47,7 @@ final readonly class ClassificarMediaMessageHandler
             $this->mediaItemRepository->salvar($mediaItem);
         } catch (\Throwable $e) {
             $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
-            if (null !== $mediaItem && !$mediaItem->status()->isFinal()) {
+            if (null !== $mediaItem && !$mediaItem->isFinal()) {
                 $mediaItem->setErroMotivo($e->getMessage());
                 $mediaItem->transicionarPara(StatusMediaItem::ERRO);
                 $this->mediaItemRepository->salvar($mediaItem);

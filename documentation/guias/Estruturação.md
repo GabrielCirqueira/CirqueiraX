@@ -590,6 +590,13 @@ private ?Uuid $uuid = null;
 Entidades seguem o padrão:
 * Getters: nome da propriedade (ex: `nome()`).
 * Setters: prefixo `set` retornando `self` (ex: `setNome(string $nome): self`).
+* Predicados e checagens de estado: prefixo `is` retornando `bool` (ex: `isClassificado(): bool`, `isFinal(): bool`, `isClassificadoOuFinalizado(): bool`, `isElegivelParaClassificacao(): bool`).
+
+#### Métodos de Verificação de Estado e Predicados (`is*`)
+
+É **terminantemente proibido** realizar validações complexas/inline de status ou atributos de entidade dentro de Controllers, Use Cases (Services) ou Message Handlers.
+* Todas as verificações de estado devem ser encapsuladas na própria **Entidade** ou no **Enum** correspondente.
+* Todo método que valida status ou retorna um predicado booleano deve usar o prefixo `is` (ex: `isClassificado()`, `isFinal()`, `isOnline()`, `isClassificadoOuFinalizado()`).
 
 #### Fábrica de Entidade (fromDTO)
 

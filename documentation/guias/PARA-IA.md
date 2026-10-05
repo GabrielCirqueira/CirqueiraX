@@ -16,6 +16,7 @@ Se faltar detalhe, use a seção **Onde buscar mais contexto** no final deste ar
 6. Sem comentários (`//`, `/* */`, `{/* */}`). Código se explica pelo nome. Exceção: DocBlock curto em Service PHP se o retorno for complexo.
 7. Não crie testes. Não instale PHPUnit.
 8. Importação explícita de classes (PHP): Proibido usar FQCN inline no meio do código (ex: `\App\...`, `\DateTime`, `\Symfony\...`). Todas as classes, DTOs, interfaces, exceções e enums devem ser importadas no topo do arquivo via `use` logo abaixo do `namespace`.
+9. Verificações de estado e predicados booleanos: Proibido fazer checagens complexas/inline de status, categoria ou flags de entidades nos Services, Handlers e Controllers. Crie métodos de domínio na própria Entidade ou Enum com prefixo `is` retornando `bool` (ex: `$mediaItem->isClassificado()`, `$mediaItem->isFinal()`, `$mediaItem->isClassificadoOuFinalizado()`, `$status->isFinal()`).
 
 ---
 
@@ -196,6 +197,7 @@ Handler de fila (módulo `async`): mesma regra — zero regra de negócio; chama
 - Getter **sem** `get`: `nome()`, não `getNome()` — salvo contrato do Symfony (`UserInterface`).
 - Setter `setNome(): self`.
 - Métodos de intenção de domínio (Tell, Don't Ask): `$mediaItem->classificarComo($categoria)`, `$mediaItem->marcarParaDownload()`, `$mediaItem->registrarErro($motivo)`. Proibido sequências de `set*()` soltos no Use Case quando existe uma operação de domínio.
+- Métodos de predicado e checagem de estado sempre com prefixo `is` retornando `bool`: `$mediaItem->isClassificado()`, `$mediaItem->isFinal()`, `$mediaItem->isClassificadoOuFinalizado()`, `$mediaItem->isElegivelParaClassificacao()`. Nunca faça checagens inline combinando status e flags fora da entidade/enum.
 - Conjunto fechado de valores → Enum em `src/Enum/`, não string solta.
 
 ### 4.3 Migration
