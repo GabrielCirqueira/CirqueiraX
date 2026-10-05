@@ -92,7 +92,12 @@ Service devolve o dado. Erro previsto: `throw new \DomainException('username_tak
 | `POST` | `/api/v1/dashboard/erros/retentar` | JWT | Reprocessa em lote todas as mídias com erro do dashboard |
 | `GET` | `/api/v1/sync/pastas` | JWT | Status e progresso das pastas no Syncthing |
 | `POST` | `/api/v1/sync/pastas/{id}/sincronizar` | JWT | Dispara rescan/sincronização de pasta no Syncthing |
-| `GET` | `/api/v1/google-fotos/status` | JWT | Verifica status de conexão da conta Google Fotos |
+| `POST` | `/api/v1/downloads` | JWT | Solicita download assíncrono de vídeo (aceita `categoriaId` opcional) |
+| `GET` | `/api/v1/categorias` | JWT | Lista todas as categorias cadastradas com seus álbuns vinculados |
+| `POST` | `/api/v1/categorias` | JWT | Cadastra categoria com criação automática do álbum correspondente |
+| `PATCH` | `/api/v1/categorias/{uuid}/album` | JWT | Vínculo/alteração manual de álbum do Google Fotos à categoria |
+| `GET` | `/api/v1/google-fotos/status` | JWT | Verifica status de conexão OAuth da conta Google Fotos |
+| `GET` | `/api/v1/google-fotos/albuns` | JWT | Lista álbuns criados pela app com status de vínculo e categorias órfãs |
 
 ## Google Fotos & Escopos OAuth2
 

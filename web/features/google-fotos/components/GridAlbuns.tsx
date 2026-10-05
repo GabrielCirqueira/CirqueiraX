@@ -20,8 +20,10 @@ import {
   Image as ImageIcon,
   Images,
   Layers,
+  LayoutDashboard,
 } from 'lucide-react'
 import { memo } from 'react'
+import { Link } from 'react-router-dom'
 import type { AlbumGoogleFotos } from '../types'
 
 export interface GridAlbunsProps {
@@ -220,17 +222,47 @@ export const GridAlbuns = memo(function GridAlbuns({
                   )}
                 </VStack>
 
-                <Button
-                  colorPalette={vinculado ? 'gray' : 'teal'}
-                  variant={vinculado ? 'outline' : 'solid'}
-                  size="sm"
-                  borderRadius="xl"
-                  w="full"
-                  onClick={() => onVincularAlbum?.(album)}
-                >
-                  <Icon as={Layers} />
-                  {vinculado ? 'Alterar Vínculo' : 'Vincular à Categoria'}
-                </Button>
+                {vinculado ? (
+                  <HStack gap={2} w="full">
+                    <Button
+                      colorPalette="gray"
+                      variant="outline"
+                      size="sm"
+                      borderRadius="xl"
+                      flex={1}
+                      onClick={() => onVincularAlbum?.(album)}
+                    >
+                      <Icon as={Layers} />
+                      Alterar
+                    </Button>
+
+                    <Link to="/dashboard">
+                      <Button
+                        variant="subtle"
+                        size="sm"
+                        borderRadius="xl"
+                        colorPalette="purple"
+                        px={2.5}
+                        title="Ver categoria no Dashboard"
+                      >
+                        <Icon as={LayoutDashboard} />
+                        <Text as="span">Dashboard</Text>
+                      </Button>
+                    </Link>
+                  </HStack>
+                ) : (
+                  <Button
+                    colorPalette="teal"
+                    variant="solid"
+                    size="sm"
+                    borderRadius="xl"
+                    w="full"
+                    onClick={() => onVincularAlbum?.(album)}
+                  >
+                    <Icon as={Layers} />
+                    Vincular à Categoria
+                  </Button>
+                )}
               </VStack>
             </Card.Body>
           </Card.Root>

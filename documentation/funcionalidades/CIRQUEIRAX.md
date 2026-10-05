@@ -172,6 +172,19 @@ Não é uma página — é o núcleo do sistema, usado pelos três módulos acim
 
 6. **Upload manual** (módulo 3.3, acessível a partir do dashboard)
 
+### 3.6 Gestão de Álbuns do Google Fotos
+
+**Objetivo**: Visualizar os álbuns criados e gerenciados pela aplicação, controlar status de vínculo com as categorias locais, vincular álbuns órfãos e integrar a escolha de álbum no momento do download.
+
+**Funcionalidades Implementadas**:
+- **Gate de Conexão Google (`GateConexaoGoogle`)**: Verificação de status da conta via `GET /api/v1/google-fotos/status` (`StatusContaGoogleFotosDTO`, `ObterStatusContaGoogleFotosService`), exibindo instruções de autenticação CLI (`make google-fotos-autorizar`) quando desconectado e liberando a interface com badge de e-mail e data de conexão quando ativo.
+- **Listagem e Cruzamento de Álbuns (`GridAlbuns`)**: Consumo de `GET /api/v1/google-fotos/albuns` (`ListarAlbunsGoogleFotosService`), cruzando os álbuns retornados pelo Google Fotos com a base de categorias do banco, identificando álbuns vinculados (`vinculado: true` com nome e pasta local) e álbuns órfãos (`vinculado: false`).
+- **Cards de Métricas Rápidas**: Contagem de total de álbuns, vinculados, órfãos e categorias sem álbum no Google Fotos.
+- **Vínculo Manual Bidirecional (`ModalVincularAlbum`)**: Vínculo e alteração de álbuns e categorias com persistência via `PATCH /api/v1/categorias/{uuid}/album` (`VincularAlbumDTO`, `VincularAlbumCategoriaService`).
+- **Guia de Migração Manual (`AvisoMigracaoAlbuns`)**: Card explicativo sobre as restrições de escopo da Google Photos API (`photoslibrary.readonly.appcreateddata`, `photoslibrary.appendonly`) e guia prático em 3 passos para migração de fotos de álbuns legados.
+- **Categorização Prévia no Download (`CampoNovoLink`)**: Seletor de categorias integrado com indicador de álbum Google Fotos, enviando `categoriaId` no `POST /api/v1/downloads` para que a mídia nasça classificada e seja despachada imediatamente para distribuição local e Google Fotos.
+- **Navegação Cruzada**: Atalho "Gerenciar Álbuns Google" no Dashboard (`TabelaCategorias`) e atalho "Dashboard" nos cards de álbuns vinculados (`GridAlbuns`).
+
 ---
 
 ## 4. Modelo de dados (essencial)

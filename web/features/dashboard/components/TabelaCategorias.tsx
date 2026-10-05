@@ -19,11 +19,13 @@ import {
   FileVideo,
   Folder,
   HardDrive,
+  Images,
   Layers,
   Link2,
   Search,
 } from 'lucide-react'
 import { memo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { CategoriaMetrica } from '../types'
 import { ModalEditarCategoria } from './ModalEditarCategoria'
 
@@ -91,31 +93,48 @@ export const TabelaCategorias = memo(function TabelaCategorias({
           </VStack>
         </HStack>
 
-        <Box position="relative" w={{ base: 'full', sm: '64' }}>
-          <Search
-            size={16}
-            style={{
-              position: 'absolute',
-              left: '12px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              pointerEvents: 'none',
-              zIndex: 10,
-              opacity: 0.5,
-            }}
-          />
-          <Input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar categoria..."
-            pl={9}
-            bg="bg.muted"
-            borderColor="border.subtle"
-            fontSize="xs"
-            h={9}
-            w="full"
-          />
-        </Box>
+        <HStack gap={2} flexWrap="wrap" w={{ base: 'full', sm: 'auto' }}>
+          <Box position="relative" w={{ base: 'full', sm: '56' }}>
+            <Search
+              size={16}
+              style={{
+                position: 'absolute',
+                left: '12px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none',
+                zIndex: 10,
+                opacity: 0.5,
+              }}
+            />
+            <Input
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              placeholder="Buscar categoria..."
+              pl={9}
+              bg="bg.muted"
+              borderColor="border.subtle"
+              fontSize="xs"
+              h={9}
+              w="full"
+            />
+          </Box>
+
+          <Link to="/google-fotos">
+            <Button
+              size="sm"
+              variant="subtle"
+              colorPalette="teal"
+              borderRadius="xl"
+              fontSize="xs"
+              h={9}
+              px={3}
+            >
+              <Images size={14} style={{ marginRight: '6px' }} />
+              <Text as="span">Gerenciar Álbuns Google</Text>
+            </Button>
+          </Link>
+        </HStack>
       </HStack>
 
       {categoriasFiltradas.length === 0 ? (

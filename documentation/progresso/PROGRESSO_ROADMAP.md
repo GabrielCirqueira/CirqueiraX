@@ -153,5 +153,5 @@
 | 136 | Backend — BaixarVideoService aplica categoria já na criação do download | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 137 | Frontend — CampoNovoLink.tsx com seletor de categoria/álbum | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 138 | Página GoogleFotos.tsx completa, rota e item no Header | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
-| 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 140 | Teste end-to-end do fluxo completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 140 | Teste end-to-end do fluxo completo e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |

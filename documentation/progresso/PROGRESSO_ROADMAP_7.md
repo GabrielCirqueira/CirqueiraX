@@ -234,8 +234,39 @@
   - `web/App.tsx`
   - `web/layouts/Header.tsx`
 
-### ⏳ Tópico 139 — Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)
-- **Status**: Pendente
+### ✅ Tópico 139 — Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Adicionado botão de atalho `"Gerenciar Álbuns Google"` na barra de ferramentas do mapeamento por categorias no Dashboard (`TabelaCategorias.tsx`), direcionando o usuário para `/google-fotos`.
+  - Adicionado botão de atalho `"Dashboard"` nos cards de álbuns vinculados no grid de álbuns (`GridAlbuns.tsx`), permitindo retornar rapidamente à visão de categorias.
+  - Conexão bidirecional sem fricção entre a gestão de pastas locais e a gestão de álbuns na nuvem.
+- **Arquivos**:
+  - `web/features/dashboard/components/TabelaCategorias.tsx`
+  - `web/features/google-fotos/components/GridAlbuns.tsx`
 
-### ⏳ Tópico 140 — Teste end-to-end do fluxo completo e documentação atualizada
-- **Status**: Pendente
+### ✅ Tópico 140 — Teste end-to-end do fluxo completo e documentação atualizada
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Validação end-to-end completa do fluxo da Feature 6:
+    - Verificação de conexão da conta Google via `GET /api/v1/google-fotos/status` e bloqueio via `GateConexaoGoogle`.
+    - Listagem de álbuns criados pelo app via `GET /api/v1/google-fotos/albuns` com cruzamento de categorias e status órfão/vinculado.
+    - Vínculo manual bidirecional via `PATCH /api/v1/categorias/{uuid}/album` no `ModalVincularAlbum`.
+    - Seleção de categoria e detecção de álbum no `CampoNovoLink` no ato do download de mídia com classificação imediata e disparo de workers assíncronos.
+    - Atalhos cruzados entre `/dashboard` e `/google-fotos`.
+  - Testes e validações de qualidade executados:
+    - `make phpstan`: 130/130 arquivos com 0 erros.
+    - `npx @biomejs/biome check --write web/`: 0 erros e formatação consistente.
+    - `npm run build`: bundle compilado com sucesso em 17.17s.
+  - Documentações completas atualizadas:
+    - `documentation/funcionalidades/CIRQUEIRAX.md` (Seção 3.6 e 5.2).
+    - `documentation/stack/FRONTEND.md` (Árvore de componentes de `google-fotos`).
+    - `documentation/stack/BACKEND.md` (Endpoints e escopos OAuth).
+    - `documentation/progresso/PROGRESSO_ROADMAP.md` (140/140 tópicos 100% concluídos).
+- **Arquivos**:
+  - `documentation/funcionalidades/CIRQUEIRAX.md`
+  - `documentation/stack/FRONTEND.md`
+  - `documentation/stack/BACKEND.md`
+  - `documentation/progresso/PROGRESSO_ROADMAP.md`
+  - `documentation/progresso/PROGRESSO_ROADMAP_7.md`
