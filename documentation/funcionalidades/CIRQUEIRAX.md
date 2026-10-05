@@ -213,7 +213,17 @@ Mapeia origem fixa → categoria automática (usado pelos agentes de print, que 
 ### 5.2 Google Photos API
 - Escopo `photoslibrary.appendonly` para upload e criação de álbum
 - Escopo `photoslibrary.edit.appcreateddata` para editar título/capa de álbum criado pela app
-- **Limitação aceita**: a API só gerencia conteúdo criado pela própria aplicação. Não há leitura da biblioteca existente do usuário, nem endpoint de delete. O sistema nunca tenta auditar o que já está na conta — apenas escreve.
+- Escopo `photoslibrary.readonly.appcreateddata` para listar álbuns gerenciados pela aplicação
+- **Limitação de Escopo & Política de Segurança do Google**: A API do Google Photos não permite listar nem auditar álbuns ou fotos criados previamente ou fora da aplicação. Apenas os recursos gerados pelo próprio CirqueiraX estão acessíveis para leitura e gestão.
+- **Guia de Migração Manual de Álbuns Antigos**:
+  1. *Criação da Categoria*: Crie a categoria no CirqueiraX para gerar o álbum correspondente no Google Fotos com controle total de ciclo de vida.
+  2. *Seleção Manual no Google Fotos*: Acesse [photos.google.com](https://photos.google.com), entre no álbum legado/antigo e selecione as mídias desejadas.
+  3. *Adição ao Álbum CirqueiraX*: Use a função "Adicionar a (+)" e escolha o álbum gerenciado pelo CirqueiraX. As fotos passarão a integrar o álbum sem perder a catalogação.
+- **Componentes no Frontend**:
+  - `GateConexaoGoogle.tsx`: Gate de autenticação e feedback do status OAuth da conta.
+  - `GridAlbuns.tsx`: Grid visual com capa, contagem de itens e status de vínculo com categorias.
+  - `ModalVincularAlbum.tsx`: Modal bidirecional de vinculação manual entre álbuns e categorias.
+  - `AvisoMigracaoAlbuns.tsx`: Card explicativo integrado orientando o usuário sobre a política da API e passos de migração.
 - Quota: 10.000 requisições/dia por projeto (upload, listagem, filtros); 75.000/dia pra acesso a bytes de mídia
 - Suporte a múltiplas contas (PC empresa e PC pessoal podem autenticar contas diferentes) — cada credencial OAuth gerenciada e renovada separadamente
 

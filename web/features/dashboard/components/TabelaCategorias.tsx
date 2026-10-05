@@ -1,3 +1,4 @@
+import { ModalVincularAlbum } from '@/features/google-fotos'
 import {
   Badge,
   Box,
@@ -11,7 +12,17 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Cloud, Edit3, FileVideo, Folder, HardDrive, Layers, Search } from 'lucide-react'
+import {
+  AlertTriangle,
+  Cloud,
+  Edit3,
+  FileVideo,
+  Folder,
+  HardDrive,
+  Layers,
+  Link2,
+  Search,
+} from 'lucide-react'
 import { memo, useState } from 'react'
 import type { CategoriaMetrica } from '../types'
 import { ModalEditarCategoria } from './ModalEditarCategoria'
@@ -27,6 +38,9 @@ export const TabelaCategorias = memo(function TabelaCategorias({
 }: TabelaCategoriasProps) {
   const [busca, setBusca] = useState('')
   const [categoriaEditando, setCategoriaEditando] = useState<CategoriaMetrica | null>(null)
+  const [categoriaVinculandoAlbum, setCategoriaVinculandoAlbum] = useState<CategoriaMetrica | null>(
+    null
+  )
 
   const categoriasFiltradas = categorias.filter((cat) => {
     const termo = busca.toLowerCase().trim()
@@ -209,7 +223,14 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     </HStack>
                   </HStack>
 
-                  <HStack pt={2} justify="space-between" align="center" fontSize="11px">
+                  <HStack
+                    pt={2}
+                    justify="space-between"
+                    align="center"
+                    fontSize="11px"
+                    flexWrap="wrap"
+                    gap={2}
+                  >
                     {cat.googlePhotosAlbumId ? (
                       <Badge size="sm" variant="subtle" colorPalette="green">
                         <HStack gap={1}>
@@ -218,23 +239,56 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                         </HStack>
                       </Badge>
                     ) : (
-                      <Badge size="sm" variant="subtle" colorPalette="gray">
-                        Local apenas
+                      <Badge size="sm" variant="subtle" colorPalette="amber">
+                        <HStack gap={1}>
+                          <AlertTriangle size={12} />
+                          <Text as="span">Sem Álbum Google</Text>
+                        </HStack>
                       </Badge>
                     )}
 
                     {!ehSemCategoria && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setCategoriaEditando(cat)}
-                        fontSize="11px"
-                        color="purple.500"
-                        p={0}
-                        h={6}
-                      >
-                        Editar pasta
-                      </Button>
+                      <HStack gap={1}>
+                        {!cat.googlePhotosAlbumId ? (
+                          <Button
+                            size="xs"
+                            variant="subtle"
+                            colorPalette="teal"
+                            onClick={() => setCategoriaVinculandoAlbum(cat)}
+                            fontSize="11px"
+                            h={6}
+                            px={2}
+                            borderRadius="md"
+                          >
+                            <Link2 size={12} style={{ marginRight: '4px' }} />
+                            Vincular Álbum
+                          </Button>
+                        ) : (
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            colorPalette="teal"
+                            onClick={() => setCategoriaVinculandoAlbum(cat)}
+                            fontSize="11px"
+                            h={6}
+                            px={2}
+                          >
+                            Trocar Álbum
+                          </Button>
+                        )}
+
+                        <Button
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => setCategoriaEditando(cat)}
+                          fontSize="11px"
+                          color="purple.500"
+                          p={1}
+                          h={6}
+                        >
+                          Editar pasta
+                        </Button>
+                      </HStack>
                     )}
                   </HStack>
                 </Card.Body>
@@ -248,6 +302,12 @@ export const TabelaCategorias = memo(function TabelaCategorias({
         categoria={categoriaEditando}
         aberto={Boolean(categoriaEditando)}
         onFechar={() => setCategoriaEditando(null)}
+      />
+
+      <ModalVincularAlbum
+        categoria={categoriaVinculandoAlbum}
+        aberto={Boolean(categoriaVinculandoAlbum)}
+        onFechar={() => setCategoriaVinculandoAlbum(null)}
       />
     </VStack>
   )

@@ -153,11 +153,30 @@
   - `web/features/google-fotos/hooks/useGoogleFotos.ts`
   - `web/features/google-fotos/index.ts`
 
-### ⏳ Tópico 133 — Frontend — indicador de categorias sem álbum ainda vinculado
-- **Status**: Pendente
+### ✅ Tópico 133 — Frontend — indicador de categorias sem álbum ainda vinculado
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Atualizado `TabelaCategorias.tsx` no dashboard para identificar categorias com `googlePhotosAlbumId` nulo e aplicar visualmente um badge de destaque âmbar (`colorPalette="amber"` com ícone `AlertTriangle` e texto "Sem Álbum Google").
+  - Adicionado botão de ação rápida "Vincular Álbum" que abre diretamente o `ModalVincularAlbum` pré-configurado com a categoria selecionada.
+  - Adicionado botão "Trocar Álbum" para categorias que já possuem vínculo prévio, permitindo alteração rápida de álbum do Google Fotos diretamente pela listagem.
+  - Integração sem recarregamento de página, acionando invalidação automática de cache no TanStack Query.
+- **Arquivos**:
+  - `web/features/dashboard/components/TabelaCategorias.tsx`
 
-### ⏳ Tópico 134 — Frontend — aviso/guia de migração manual de álbuns antigos
-- **Status**: Pendente
+### ✅ Tópico 134 — Frontend — aviso/guia de migração manual de álbuns antigos
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criado o componente `AvisoMigracaoAlbuns.tsx` no módulo `web/features/google-fotos/components/` com Chakra UI v3, sem tags HTML cruas e sem comentários.
+  - Apresenta explicação contextualizada sobre a política de privacidade e restrição de escopo da Google Photos Library API (`photoslibrary.readonly.appcreateddata` e `photoslibrary.appendonly`), elucidando por que álbuns legados e criados fora da aplicação não aparecem na listagem do CirqueiraX.
+  - Disponibiliza guia prático em 3 passos com link direto para o Google Fotos para orientar a migração manual de fotos e vídeos para os novos álbuns gerenciados pelo CirqueiraX.
+  - Componente com cabeçalho expansível e visual polido, exportado em `web/features/google-fotos/index.ts`.
+  - Documentação atualizada em `documentation/funcionalidades/CIRQUEIRAX.md`.
+- **Arquivos**:
+  - `web/features/google-fotos/components/AvisoMigracaoAlbuns.tsx`
+  - `web/features/google-fotos/index.ts`
+  - `documentation/funcionalidades/CIRQUEIRAX.md`
 
 ### ⏳ Tópico 135 — Backend — BaixarVideoDTO aceita categoriaId opcional na criação
 - **Status**: Pendente

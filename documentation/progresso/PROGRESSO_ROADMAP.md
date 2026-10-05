@@ -147,8 +147,8 @@
 | 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 132 | Frontend — modal de vínculo manual de álbum à categoria | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
-| 133 | Frontend — indicador de categorias sem álbum ainda vinculado | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 134 | Frontend — aviso/guia de migração manual de álbuns antigos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 133 | Frontend — indicador de categorias sem álbum ainda vinculado | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 134 | Frontend — aviso/guia de migração manual de álbuns antigos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 136 | Backend — BaixarVideoService aplica categoria já na criação do download | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 137 | Frontend — CampoNovoLink.tsx com seletor de categoria/álbum | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
