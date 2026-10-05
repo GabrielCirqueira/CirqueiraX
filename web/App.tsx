@@ -32,6 +32,10 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/upload-manual/UploadManual'))}
           />
           <Route
+            path="google-fotos"
+            lazy={() => lazyWithRetry(() => import('@/features/google-fotos/GoogleFotos'))}
+          />
+          <Route
             path="app"
             lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
           />

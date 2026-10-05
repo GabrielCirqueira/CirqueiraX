@@ -205,11 +205,34 @@
   - `src/Service/MediaItem/RebaixarMediaItemService.php`
   - `src/MessageHandler/ClassificarMediaMessageHandler.php`
 
-### ⏳ Tópico 137 — Frontend — CampoNovoLink.tsx com seletor de categoria/álbum
-- **Status**: Pendente
+### ✅ Tópico 137 — Frontend — CampoNovoLink.tsx com seletor de categoria/álbum
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Atualizado `CampoNovoLink.tsx` para incluir um seletor de categorias integrado (`NativeSelect.Root` consumindo `useCategorias()`).
+  - Opção padrão definida como "Classificar depois (manual)", mantendo total compatibilidade com o fluxo sem categoria prévia.
+  - Cada categoria no select exibe se já possui álbum correspondente no Google Fotos (`☁️ (Google Fotos)` vs `📁 (Local)`).
+  - Inclusão de badge informativo dinâmico destacando o destino selecionado e a sincronização com o álbum no Google Fotos.
+  - Atualizados `types.ts` e `api.ts` em `web/features/downloads-video/` para transportar `categoriaId?: string | null` no payload `PedidoDownloadInput`.
+- **Arquivos**:
+  - `web/features/downloads-video/components/CampoNovoLink.tsx`
+  - `web/features/downloads-video/types.ts`
+  - `web/features/downloads-video/api.ts`
 
-### ⏳ Tópico 138 — Página GoogleFotos.tsx completa, rota e item no Header
-- **Status**: Pendente
+### ✅ Tópico 138 — Página GoogleFotos.tsx completa, rota e item no Header
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Criada a página `GoogleFotos.tsx` em `web/features/google-fotos/` com Chakra UI v3, sem tags HTML cruas e sem comentários.
+  - Integrada a composição completa da feature: cabeçalho com ação de atualização, `GateConexaoGoogle` (bloqueio ou liberação com base no OAuth), grid de métricas de álbuns, `AvisoMigracaoAlbuns`, `GridAlbuns` e `ModalVincularAlbum`.
+  - Exportado `GoogleFotos` em `web/features/google-fotos/index.ts`.
+  - Registrada a rota protegida `/google-fotos` com `lazyWithRetry` em `web/App.tsx`.
+  - Adicionado o item de menu "Google Fotos" na navegação principal do `web/layouts/Header.tsx`.
+- **Arquivos**:
+  - `web/features/google-fotos/GoogleFotos.tsx`
+  - `web/features/google-fotos/index.ts`
+  - `web/App.tsx`
+  - `web/layouts/Header.tsx`
 
 ### ⏳ Tópico 139 — Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)
 - **Status**: Pendente

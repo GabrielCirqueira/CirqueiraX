@@ -63,6 +63,14 @@ export interface FiltrosMediaItem {
 
 export interface PedidoDownloadInput {
   url: string
+  categoriaId?: string | null
+}
+
+export interface CategoriaOpcao {
+  uuid: string
+  nome: string
+  pastaLocal?: string
+  googlePhotosAlbumId?: string | null
 }
 
 export interface PedidoDownloadResposta {

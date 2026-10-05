@@ -4,6 +4,7 @@ import type {
   ApagarLoteInput,
   ApagarLoteResposta,
   AtualizarMetadataInput,
+  CategoriaOpcao,
   CategorizarLoteInput,
   FiltrosMediaItem,
   MediaItem,
@@ -88,13 +89,10 @@ export async function retentarTodos(): Promise<MediaItem[]> {
   return data.data
 }
 
-export async function listarCategorias(): Promise<Array<{ uuid: string; nome: string }>> {
-  const { data } = await api.get<RespostaPaginada<{ uuid: string; nome: string }>>(
-    '/api/v1/categorias',
-    {
-      params: { limite: 100 },
-    }
-  )
+export async function listarCategorias(): Promise<CategoriaOpcao[]> {
+  const { data } = await api.get<RespostaPaginada<CategoriaOpcao>>('/api/v1/categorias', {
+    params: { limite: 100 },
+  })
   return data.data
 }
 

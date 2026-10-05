@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/downloads', label: 'Downloads' },
   { href: '/upload-manual', label: 'Upload' },
+  { href: '/google-fotos', label: 'Google Fotos' },
 ]
 
 interface HeaderProps {
