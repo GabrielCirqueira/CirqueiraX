@@ -26,7 +26,7 @@ final readonly class ClassificarMediaMessageHandler
     {
         try {
             $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
-            if (null === $mediaItem || $mediaItem->status()->isFinal()) {
+            if (null === $mediaItem || $mediaItem->status()->isFinal() || StatusMediaItem::CLASSIFICADO === $mediaItem->status() || null !== $mediaItem->categoriaId()) {
                 return;
             }
 

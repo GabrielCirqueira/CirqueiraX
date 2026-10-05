@@ -42,7 +42,8 @@ final readonly class RebaixarMediaItemService
             if (TextoUtil::naoEstaEmBranco($urlOriginal)) {
                 $this->messageBus->dispatch(new BaixarVideoMessage(
                     $urlOriginal,
-                    $mediaItem->origem()
+                    $mediaItem->origem(),
+                    $mediaItem->categoriaId()
                 ));
             }
 

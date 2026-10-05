@@ -17,6 +17,10 @@ final readonly class BaixarVideoMessageHandler
 
     public function __invoke(BaixarVideoMessage $message): void
     {
-        $this->baixarVideoService->executar($message->url());
+        $this->baixarVideoService->executar(
+            $message->url(),
+            $message->origem(),
+            $message->categoriaId()
+        );
     }
 }

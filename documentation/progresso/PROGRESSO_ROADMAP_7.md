@@ -178,11 +178,32 @@
   - `web/features/google-fotos/index.ts`
   - `documentation/funcionalidades/CIRQUEIRAX.md`
 
-### ⏳ Tópico 135 — Backend — BaixarVideoDTO aceita categoriaId opcional na criação
-- **Status**: Pendente
+### ✅ Tópico 135 — Backend — BaixarVideoDTO aceita categoriaId opcional na criação
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Adicionada a propriedade opcional `public ?string $categoriaId = null` no DTO `BaixarVideoDTO.php` com atributo de validação `#[Assert\Uuid(message: 'O ID da categoria deve ser um UUID válido.')]`.
+  - Adicionado método getter `categoriaId(): ?string`.
+  - Mantida compatibilidade total quando `categoriaId` não é enviado (continua `null` e vai para triagem manual/`EM_FILA`).
+- **Arquivos**:
+  - `src/DataObject/BaixarVideoDTO.php`
 
-### ⏳ Tópico 136 — Backend — BaixarVideoService aplica categoria já na criação do download
-- **Status**: Pendente
+### ✅ Tópico 136 — Backend — BaixarVideoService aplica categoria já na criação do download
+- **Status**: Concluído
+- **Data**: 04 de outubro de 2026
+- **O que foi feito**:
+  - Atualizado `BaixarVideoMessage.php` com propriedade opcional `categoriaId` e método acessor.
+  - Injetado `ClassificarMediaItemService` em `BaixarVideoService.php` e ajustada a assinatura de `executar(string $url, ?OrigemMedia $origem = null, ?string $categoriaId = null): MediaItem`.
+  - Ao receber `categoriaId`, executa `classificarManualmente()`, associando imediatamente a categoria, transicionando para `CLASSIFICADO` e despachando os jobs de distribuição local e envio para o álbum correspondente no Google Fotos.
+  - Atualizados `DownloadController.php`, `BaixarVideoMessageHandler.php` e `RebaixarMediaItemService.php` para repassar `categoriaId`.
+  - Aprimorado `ClassificarMediaMessageHandler.php` para manter idempotência e não sobrescrever mídias já classificadas.
+- **Arquivos**:
+  - `src/Message/BaixarVideoMessage.php`
+  - `src/Service/Video/BaixarVideoService.php`
+  - `src/Controller/Video/DownloadController.php`
+  - `src/MessageHandler/BaixarVideoMessageHandler.php`
+  - `src/Service/MediaItem/RebaixarMediaItemService.php`
+  - `src/MessageHandler/ClassificarMediaMessageHandler.php`
 
 ### ⏳ Tópico 137 — Frontend — CampoNovoLink.tsx com seletor de categoria/álbum
 - **Status**: Pendente

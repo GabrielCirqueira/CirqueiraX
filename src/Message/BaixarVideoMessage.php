@@ -13,6 +13,7 @@ final readonly class BaixarVideoMessage
     public function __construct(
         public string $url,
         OrigemMedia|string $origem = OrigemMedia::BOT_TELEGRAM,
+        public ?string $categoriaId = null,
     ) {
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::BOT_TELEGRAM) : $origem;
     }
@@ -25,5 +26,10 @@ final readonly class BaixarVideoMessage
     public function origem(): OrigemMedia
     {
         return $this->origem;
+    }
+
+    public function categoriaId(): ?string
+    {
+        return $this->categoriaId;
     }
 }

@@ -149,8 +149,8 @@
 | 132 | Frontend — modal de vínculo manual de álbum à categoria | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 133 | Frontend — indicador de categorias sem álbum ainda vinculado | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 134 | Frontend — aviso/guia de migração manual de álbuns antigos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
-| 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
-| 136 | Backend — BaixarVideoService aplica categoria já na criação do download | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
+| 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 136 | Backend — BaixarVideoService aplica categoria já na criação do download | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 137 | Frontend — CampoNovoLink.tsx com seletor de categoria/álbum | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 138 | Página GoogleFotos.tsx completa, rota e item no Header | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |
 | 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_7.md) |

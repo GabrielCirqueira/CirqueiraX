@@ -6,6 +6,7 @@ namespace App\Controller\Video;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\BaixarVideoDTO;
+use App\Enum\OrigemMedia;
 use App\Serializer\MediaItemSerializer;
 use App\Service\Video\BaixarVideoService;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +24,7 @@ final class DownloadController extends DefaultController
     #[Route('', name: 'solicitar', methods: ['POST'])]
     public function solicitar(#[MapRequestPayload] BaixarVideoDTO $dto): Response
     {
-        $mediaItem = $this->baixarVideoService->executar($dto->url());
+        $mediaItem = $this->baixarVideoService->executar($dto->url(), OrigemMedia::DOWNLOAD, $dto->categoriaId());
 
         return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
     }

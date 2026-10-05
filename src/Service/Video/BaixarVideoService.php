@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\Video;
 
+use App\DataObject\ClassificarManualDTO;
 use App\DataObject\IngestarMediaDTO;
 use App\Entity\MediaItem;
 use App\Enum\OrigemMedia;
 use App\Exception\Video\YtDlpException;
 use App\Service\Ingestao\IngestarMediaService;
+use App\Service\MediaItem\ClassificarMediaItemService;
+use App\Support\TextoUtil;
 
 final readonly class BaixarVideoService
 {
@@ -16,9 +19,10 @@ final readonly class BaixarVideoService
         private ValidadorUrlPlataforma $validadorUrl,
         private IngestarMediaService $ingestarMediaService,
         private BaixarVideoDownloadService $baixarVideoDownloadService,
+        private ClassificarMediaItemService $classificarMediaItemService,
     ) {}
 
-    public function executar(string $url, ?OrigemMedia $origem = null): MediaItem
+    public function executar(string $url, ?OrigemMedia $origem = null, ?string $categoriaId = null): MediaItem
     {
         if (!$this->validadorUrl->ehUrlSuportada($url)) {
             throw YtDlpException::urlInvalidaOuNaoSuportada($url);
@@ -33,6 +37,18 @@ final readonly class BaixarVideoService
             metadata: $metadataExtraida,
         );
 
-        return $this->ingestarMediaService->executar($dto);
+        $mediaItem = $this->ingestarMediaService->executar($dto);
+
+        if (null !== $categoriaId && TextoUtil::naoEstaEmBranco($categoriaId)) {
+            $uuid = $mediaItem->uuid()?->toString();
+            if (null !== $uuid && '' !== $uuid) {
+                $mediaItem = $this->classificarMediaItemService->classificarManualmente(
+                    $uuid,
+                    new ClassificarManualDTO($categoriaId)
+                );
+            }
+        }
+
+        return $mediaItem;
     }
 }
