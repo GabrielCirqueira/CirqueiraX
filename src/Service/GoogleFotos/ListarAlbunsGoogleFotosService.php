@@ -56,7 +56,12 @@ final readonly class ListarAlbunsGoogleFotosService
             }
         }
 
-        $albunsBrutos = $this->albumService->listarAlbunsDoApp($conta);
+        $albunsBrutos = [];
+        try {
+            $albunsBrutos = $this->albumService->listarAlbunsDoApp($conta);
+        } catch (\Throwable) {
+            $albunsBrutos = [];
+        }
         $albunsEnriquecidos = [];
         $totalVinculados = 0;
         $totalOrfaos = 0;

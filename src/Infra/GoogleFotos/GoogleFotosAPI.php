@@ -194,6 +194,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
 
         $query = [
             'pageSize' => $pageSize,
+            'excludeNonAppCreatedData' => 'true',
         ];
         if (null !== $pageToken && '' !== trim($pageToken)) {
             $query['pageToken'] = $pageToken;

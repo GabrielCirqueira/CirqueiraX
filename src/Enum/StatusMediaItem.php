@@ -54,7 +54,7 @@ enum StatusMediaItem: string
             self::DISTRIBUIDO_LOCAL => in_array($novoStatus, [self::ENVIANDO_GOOGLE_FOTOS, self::CONCLUIDO, self::ERRO], true),
             self::ENVIANDO_GOOGLE_FOTOS => in_array($novoStatus, [self::DISTRIBUIDO_LOCAL, self::CONCLUIDO, self::ERRO], true),
             self::CONCLUIDO => in_array($novoStatus, [self::CLASSIFICADO, self::RECEBIDO], true),
-            self::ERRO => in_array($novoStatus, [self::BAIXANDO, self::CLASSIFICADO, self::RECEBIDO, self::EM_FILA], true),
+            self::ERRO => in_array($novoStatus, [self::BAIXANDO, self::CLASSIFICADO, self::RECEBIDO, self::EM_FILA, self::DISTRIBUINDO, self::DISTRIBUIDO_LOCAL, self::ENVIANDO_GOOGLE_FOTOS, self::CONCLUIDO], true),
         };
     }
 }

@@ -22,11 +22,13 @@ import {
   Images,
   Layers,
   Link2,
+  Plus,
   Search,
 } from 'lucide-react'
 import { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { CategoriaMetrica } from '../types'
+import { ModalCriarCategoria } from './ModalCriarCategoria'
 import { ModalEditarCategoria } from './ModalEditarCategoria'
 
 export interface TabelaCategoriasProps {
@@ -39,6 +41,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
   carregando = false,
 }: TabelaCategoriasProps) {
   const [busca, setBusca] = useState('')
+  const [modalCriarAberto, setModalCriarAberto] = useState(false)
   const [categoriaEditando, setCategoriaEditando] = useState<CategoriaMetrica | null>(null)
   const [categoriaVinculandoAlbum, setCategoriaVinculandoAlbum] = useState<CategoriaMetrica | null>(
     null
@@ -120,6 +123,19 @@ export const TabelaCategorias = memo(function TabelaCategorias({
             />
           </Box>
 
+          <Button
+            size="sm"
+            colorPalette="brand"
+            borderRadius="xl"
+            fontSize="xs"
+            h={9}
+            px={3}
+            onClick={() => setModalCriarAberto(true)}
+          >
+            <Plus size={14} style={{ marginRight: '6px' }} />
+            <Text as="span">Nova Categoria</Text>
+          </Button>
+
           <Link to="/google-fotos">
             <Button
               size="sm"
@@ -150,12 +166,29 @@ export const TabelaCategorias = memo(function TabelaCategorias({
             flexDirection="column"
             alignItems="center"
             justifyContent="center"
-            gap={2}
+            gap={3}
           >
             <Folder size={32} style={{ opacity: 0.3 }} />
-            <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
-              {busca ? 'Nenhuma categoria corresponde à busca.' : 'Nenhuma categoria cadastrada.'}
-            </Text>
+            {busca ? (
+              <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
+                Nenhuma categoria corresponde à busca.
+              </Text>
+            ) : (
+              <VStack gap={3}>
+                <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
+                  Nenhuma categoria cadastrada no momento.
+                </Text>
+                <Button
+                  size="sm"
+                  colorPalette="brand"
+                  borderRadius="xl"
+                  onClick={() => setModalCriarAberto(true)}
+                >
+                  <Plus size={14} style={{ marginRight: '6px' }} />
+                  <Text as="span">Cadastrar Primeira Categoria</Text>
+                </Button>
+              </VStack>
+            )}
           </Card.Body>
         </Card.Root>
       ) : (
@@ -316,6 +349,8 @@ export const TabelaCategorias = memo(function TabelaCategorias({
           })}
         </Grid>
       )}
+
+      <ModalCriarCategoria aberto={modalCriarAberto} onFechar={() => setModalCriarAberto(false)} />
 
       <ModalEditarCategoria
         categoria={categoriaEditando}

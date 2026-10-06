@@ -67,6 +67,15 @@ export async function sincronizarPasta(pastaId: string): Promise<ResultadoSincro
   return data.data
 }
 
+export async function criarCategoria(dados: {
+  nome: string
+  pastaLocal: string
+  googlePhotosAlbumId?: string | null
+}): Promise<CategoriaMetrica> {
+  const { data } = await api.post<RespostaApi<CategoriaMetrica>>('/api/v1/categorias', dados)
+  return data.data
+}
+
 export async function atualizarMapeamentoCategoria(
   uuid: string,
   dados: { nome?: string; pastaLocal?: string }

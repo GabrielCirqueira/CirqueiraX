@@ -24,7 +24,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class AutorizarContaGoogleFotosCommand extends Command
 {
     private const string GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
-    private const string SCOPES = 'https://www.googleapis.com/auth/photoslibrary.appendonly https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata https://www.googleapis.com/auth/userinfo.email';
+    private const string SCOPES = 'https://www.googleapis.com/auth/photoslibrary.appendonly https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata https://www.googleapis.com/auth/photoslibrary.sharing https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/userinfo.email openid';
 
     public function __construct(
         private readonly GoogleOAuthAPI $googleOAuthApi,

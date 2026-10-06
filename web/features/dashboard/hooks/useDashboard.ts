@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   atualizarMapeamentoCategoria,
+  criarCategoria,
   obterCategoriasMetricas,
   obterFilaErros,
   obterPastasSync,
@@ -92,6 +93,24 @@ export function useRetentarErroIndividual() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    },
+  })
+}
+
+export function useCriarCategoria() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (dados: {
+      nome: string
+      pastaLocal: string
+      googlePhotosAlbumId?: string | null
+    }) => criarCategoria(dados),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.categorias })
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.resumo })
+      queryClient.invalidateQueries({ queryKey: ['categorias'] })
+      queryClient.invalidateQueries({ queryKey: ['google-fotos'] })
     },
   })
 }
