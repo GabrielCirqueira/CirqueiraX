@@ -36,9 +36,7 @@ export function useMediaItens(filtros: FiltrosMediaItem = {}) {
     queryFn: () => listarMediaItens(filtros),
     refetchInterval: (query) => {
       const temItensProcessando = query.state.data?.data.some((item) =>
-        ['baixando', 'recebido', 'em_fila', 'distribuindo', 'enviando_google_fotos'].includes(
-          item.status
-        )
+        ['baixando', 'recebido', 'distribuindo', 'enviando_google_fotos'].includes(item.status)
       )
       return temItensProcessando ? 3000 : false
     },

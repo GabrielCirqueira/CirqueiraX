@@ -33,6 +33,7 @@ services:
     volumes:
       - ..:/var/www/html
       - "${MEDIA_STORAGE_PATH:-./var/storage}:/var/www/html/var/storage"
+      - ./supervisord.conf:/etc/supervisord.conf
     depends_on:
       - database
 

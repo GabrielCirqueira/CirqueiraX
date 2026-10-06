@@ -43,7 +43,7 @@ final readonly class ClassificarMediaMessageHandler
                 return;
             }
 
-            $mediaItem->transicionarPara(StatusMediaItem::EM_FILA);
+            $mediaItem->transicionarPara(StatusMediaItem::SEM_CATEGORIA);
             $this->mediaItemRepository->salvar($mediaItem);
         } catch (\Throwable $e) {
             $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());

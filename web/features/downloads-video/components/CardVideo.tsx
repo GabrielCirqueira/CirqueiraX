@@ -191,7 +191,13 @@ function obterStatusConfig(status: StatusMediaItem) {
       return {
         label: 'Em Fila',
         colorPalette: 'blue',
-        animado: true,
+        animado: false,
+      }
+    case 'sem_categoria':
+      return {
+        label: 'Sem Categoria',
+        colorPalette: 'gray',
+        animado: false,
       }
     case 'classificado':
       return {

@@ -168,7 +168,7 @@ class MediaItemRepository extends ServiceEntityRepository
      */
     public function contarAgrupadoPorStatus(): array
     {
-        /** @var list<array{status: string, total: int|string}> $resultados */
+        /** @var list<array{status: StatusMediaItem|string, total: int|string}> $resultados */
         $resultados = $this->createQueryBuilder('m')
             ->select('m.status as status, COUNT(m.uuid) as total')
             ->groupBy('m.status')
@@ -182,7 +182,8 @@ class MediaItemRepository extends ServiceEntityRepository
 
         foreach ($resultados as $row) {
             if (isset($row['status'])) {
-                $totais[$row['status']] = (int) $row['total'];
+                $statusChave = $row['status'] instanceof StatusMediaItem ? $row['status']->value : (string) $row['status'];
+                $totais[$statusChave] = (int) $row['total'];
             }
         }
 
@@ -194,7 +195,7 @@ class MediaItemRepository extends ServiceEntityRepository
      */
     public function contarAgrupadoPorOrigem(): array
     {
-        /** @var list<array{origem: string, total: int|string}> $resultados */
+        /** @var list<array{origem: OrigemMedia|string, total: int|string}> $resultados */
         $resultados = $this->createQueryBuilder('m')
             ->select('m.origem as origem, COUNT(m.uuid) as total')
             ->groupBy('m.origem')
@@ -208,7 +209,8 @@ class MediaItemRepository extends ServiceEntityRepository
 
         foreach ($resultados as $row) {
             if (isset($row['origem'])) {
-                $totais[$row['origem']] = (int) $row['total'];
+                $origemChave = $row['origem'] instanceof OrigemMedia ? $row['origem']->value : (string) $row['origem'];
+                $totais[$origemChave] = (int) $row['total'];
             }
         }
 

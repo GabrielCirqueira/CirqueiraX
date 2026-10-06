@@ -315,5 +315,57 @@
   - `documentation/progresso/melhorias/MELHORIAS.md`
   - `documentation/progresso/melhorias/MELHORIAS_1.md`
 
+---
+
+### ✅ Melhoria 18 — Padronização de Métodos de Verificação de Estado em Entidades e Enums (`is...`)
+
+- **Status**: Concluído
+- **Data**: 05 de outubro de 2026
+- **Problema**:
+  - As checagens de estado das mídias estavam espalhadas em handlers e services com comparações diretas de propriedades ou operadores literais (ex: `null !== $mediaItem->getCategoriaId() || StatusMediaItem::CLASSIFICADO === $mediaItem->getStatus()`).
+- **Solução**:
+  - Centralizada a lógica de verificação dentro das próprias entidades e enums utilizando o prefixo semântico `is` (ex: `$mediaItem->isClassificadoOuFinalizado()`, `$mediaItem->isClassificado()`, `$mediaItem->isFinal()`, `$mediaItem->isSemCategoria()`).
+  - Definida e documentada como regra mandatória de desenvolvimento em `documentation/guias/PARA-IA.md` e `documentation/guias/Estruturação.md`.
+- **Arquivos**:
+  - `src/Entity/MediaItem.php`
+  - `src/Enum/StatusMediaItem.php`
+  - `src/MessageHandler/ClassificarMediaMessageHandler.php`
+  - `documentation/guias/PARA-IA.md`
+  - `documentation/guias/Estruturação.md`
+
+---
+
+### ✅ Melhoria 19 — Execução Automática em Background dos Workers do Messenger e Scheduler via Supervisord
+
+- **Status**: Concluído
+- **Data**: 05 de outubro de 2026
+- **Problema**:
+  - Era necessário executar manualmente comandos de terminal (`make messenger-consume` ou `php bin/console messenger:consume`) para consumir as mensagens assíncronas do Messenger e tarefas agendadas do Scheduler no ambiente de desenvolvimento.
+- **Solução**:
+  - Instalado e configurado o `supervisor` no container PHP `cirqueirax_symfony` via `devops/php/Dockerfile` e `devops/supervisord.conf`.
+  - O Supervisor inicializa automaticamente no container e gerencia em paralelo: `php-fpm` (porta 9000), 2 workers assíncronos (`messenger:consume async`) e o worker do Scheduler (`messenger:consume scheduler_default`), com reinício automático em caso de falha.
+  - Ajustadas permissões no diretório `var/storage` para suportar criação dinâmica de pastas de categorias pelos workers em background.
+- **Arquivos**:
+  - `devops/php/Dockerfile`
+  - `devops/supervisord.conf`
+  - `devops/php/supervisord-prod.conf`
+  - `devops/docker-compose.yaml`
+
+---
+
+### ✅ Melhoria 20 — Correção de Erro 500 no Dashboard (`TypeError: Cannot access offset of type App\Enum\StatusMediaItem on array`)
+
+- **Status**: Concluído
+- **Data**: 05 de outubro de 2026
+- **Problema**:
+  - A rota `GET /api/v1/dashboard/resumo` retornava erro 500 Internal Server Error. No `MediaItemRepository`, o Doctrine `getArrayResult()` retornava objetos Enum (`StatusMediaItem` e `OrigemMedia`) para colunas mapeadas com enumType. Ao tentar indexar o array de totais usando a chave do enum como objeto (`$totais[$row['status']]`), o PHP 8.4 lançava `TypeError: Cannot access offset of type App\Enum\StatusMediaItem on array`.
+- **Solução**:
+  - Atualizados os métodos `contarAgrupadoPorStatus()` e `contarAgrupadoPorOrigem()` no `MediaItemRepository.php` para extrair explicitamente o valor escalar string do enum (`$row['status'] instanceof StatusMediaItem ? $row['status']->value : (string) $row['status']`).
+  - Validada a resposta HTTP 200 via curl com token JWT.
+- **Arquivos**:
+  - `src/Repository/MediaItemRepository.php`
+  - `src/Service/Dashboard/DashboardService.php`
+
+
 
 

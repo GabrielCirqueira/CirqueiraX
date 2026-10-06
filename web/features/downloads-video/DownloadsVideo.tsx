@@ -349,6 +349,9 @@ export default function DownloadsVideo() {
               <Box as="option" value="em_fila">
                 Em Fila
               </Box>
+              <Box as="option" value="sem_categoria">
+                Sem Categoria
+              </Box>
               <Box as="option" value="classificado">
                 Classificado
               </Box>

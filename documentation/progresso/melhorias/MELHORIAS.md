@@ -8,6 +8,7 @@
 
 > Os detalhes de cada melhoria estão nos arquivos desta pasta:
 > - **M1–M20** → [MELHORIAS_1.md](MELHORIAS_1.md)
+> - **M21–M40** → [MELHORIAS_2.md](MELHORIAS_2.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -28,6 +29,11 @@
 | M15 | Detalhamento Completo dos Cards de Vídeo (Data, Horário, Tamanho e Extensão) | ✅ Concluído | 03/10/2026 | [ver](MELHORIAS_1.md#melhoria-15--detalhamento-completo-dos-cards-de-vídeo-data-horário-tamanho-e-extensão) |
 | M16 | Extração Automática de Código OAuth2 no Comando de Autorização Google Fotos | ✅ Concluído | 04/10/2026 | [ver](MELHORIAS_1.md#melhoria-16--extração-automática-de-código-oauth2-no-comando-de-autorização-google-fotos) |
 | M17 | Padronização de Importações Explícitas de Classes PHP (Zero FQCN Inline) | ✅ Concluído | 04/10/2026 | [ver](MELHORIAS_1.md#melhoria-17--padronização-de-importações-explícitas-de-classes-php-zero-fqcn-inline) |
+| M18 | Padronização de Métodos de Verificação de Estado em Entidades e Enums (`is...`) | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_1.md#melhoria-18--padronização-de-métodos-de-verificação-de-estado-em-entidades-e-enums-is) |
+| M19 | Execução Automática em Background dos Workers do Messenger e Scheduler via Supervisord | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_1.md#melhoria-19--execução-automática-em-background-dos-workers-do-messenger-e-scheduler-via-supervisord) |
+| M20 | Correção de Erro 500 no Dashboard (`TypeError: Cannot access offset of type App\Enum\StatusMediaItem on array`) | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_1.md#melhoria-20--correção-de-erro-500-no-dashboard-typeerror-cannot-access-offset-of-type-appenumstatusmediaitem-on-array) |
+| M21 | Status Explícito `sem_categoria` para Mídias Baixadas sem Categoria/Álbum | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_2.md#melhoria-21--status-explícito-sem_categoria-para-mídias-baixadas-sem-categoriaálbum) |
+
 
 
 

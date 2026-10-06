@@ -188,6 +188,11 @@ class MediaItem
         return null !== $this->categoriaId && '' !== trim($this->categoriaId);
     }
 
+    public function isSemCategoria(): bool
+    {
+        return $this->status->isSemCategoria();
+    }
+
     public function isFinal(): bool
     {
         return $this->status->isFinal();

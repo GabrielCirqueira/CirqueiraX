@@ -2,6 +2,7 @@ export type StatusMediaItem =
   | 'baixando'
   | 'recebido'
   | 'em_fila'
+  | 'sem_categoria'
   | 'classificado'
   | 'distribuindo'
   | 'distribuido_local'
