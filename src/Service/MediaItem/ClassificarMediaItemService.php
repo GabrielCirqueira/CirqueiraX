@@ -109,9 +109,7 @@ final readonly class ClassificarMediaItemService
             return;
         }
 
-        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
-        ? $this->mediaStoragePath
-        : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+        $baseStorage = $this->resolverBaseStorage();
 
         $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoriaNova->pastaLocal(), '/');
         $this->armazenamentoClient->criarDiretorio($diretorioDestino);
@@ -123,6 +121,19 @@ final readonly class ClassificarMediaItemService
             $this->armazenamentoClient->mover((string) $caminhoLocal, $caminhoDestinoFinal);
             $mediaItem->setCaminhoLocal($caminhoDestinoFinal);
         }
+    }
+
+    private function resolverBaseStorage(): string
+    {
+        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
+            ? $this->mediaStoragePath
+            : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+
+        if (!is_dir($baseStorage) && '' !== $this->projectDir && is_dir($this->projectDir . '/var/storage')) {
+            return $this->projectDir . '/var/storage';
+        }
+
+        return $baseStorage;
     }
 
     private function trocarAlbumGoogleFotosParaNovaCategoria(

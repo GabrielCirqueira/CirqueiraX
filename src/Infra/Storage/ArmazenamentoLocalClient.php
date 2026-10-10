@@ -9,12 +9,15 @@ use App\Interface\ArmazenamentoInterface;
 
 final class ArmazenamentoLocalClient implements ArmazenamentoInterface
 {
-    private const int PERMISSAO_DIRETORIO_PADRAO = 0o755;
+    private const int PERMISSAO_DIRETORIO_PADRAO = 0o775;
 
     public function criarDiretorio(string $caminho, int $permissao = self::PERMISSAO_DIRETORIO_PADRAO): void
     {
-        if (!is_dir($caminho) && !mkdir($caminho, $permissao, true) && !is_dir($caminho)) {
-            throw ArmazenamentoLocalException::falhaAoCriarDiretorioDeArmazenamento();
+        if (!is_dir($caminho)) {
+            if (!mkdir($caminho, $permissao, true) && !is_dir($caminho)) {
+                throw ArmazenamentoLocalException::falhaAoCriarDiretorioDeArmazenamento();
+            }
+            @chmod($caminho, $permissao);
         }
     }
 
@@ -43,6 +46,8 @@ final class ArmazenamentoLocalClient implements ArmazenamentoInterface
         if (!$copiado) {
             throw ArmazenamentoLocalException::falhaAoCopiarArquivoParaDestino();
         }
+
+        @chmod($destino, 0664);
     }
 
     public function mover(string $origem, string $destino): void
@@ -58,6 +63,8 @@ final class ArmazenamentoLocalClient implements ArmazenamentoInterface
         if (!$movido) {
             $this->copiar($origem, $destino);
             $this->remover($origem);
+        } else {
+            @chmod($destino, 0664);
         }
     }
 

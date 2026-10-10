@@ -34,6 +34,11 @@
 | M20 | Correção de Erro 500 no Dashboard (`TypeError: Cannot access offset of type App\Enum\StatusMediaItem on array`) | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_1.md#melhoria-20--correção-de-erro-500-no-dashboard-typeerror-cannot-access-offset-of-type-appenumstatusmediaitem-on-array) |
 | M21 | Status Explícito `sem_categoria` para Mídias Baixadas sem Categoria/Álbum | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_2.md#melhoria-21--status-explícito-sem_categoria-para-mídias-baixadas-sem-categoriaálbum) |
 | M22 | Port do Sistema de Paleta OKLCH Brand, Tokens de Tema e Documentação Técnica | ✅ Concluído | 09/10/2026 | [ver](MELHORIAS_2.md#melhoria-22--port-do-sistema-de-paleta-oklch-brand-tokens-de-tema-e-documentação-técnica) |
+| M23 | Redesenho da Central de Downloads com Alternador Grid/Lista e Componente Tabela | ✅ Concluído | 09/10/2026 | [ver](MELHORIAS_2.md#melhoria-23--redesenho-da-central-de-downloads-com-alternador-gridlista-e-componente-tabela) |
+| M24 | Padronização da Paleta Cirqueira, Refinamento de UI de Autenticação e Sidebar Global | ✅ Concluído | 09/10/2026 | [ver](MELHORIAS_2.md#melhoria-24--padronização-da-paleta-cirqueira-refinamento-de-ui-de-autenticação-e-sidebar-global) |
+| M25 | Ingestão Instantânea via Clipboard Global (Ctrl+V) e Detecção Automática de Mídias | ✅ Concluído | 10/10/2026 | [ver](MELHORIAS_2.md#melhoria-25--ingestão-instantânea-via-clipboard-global-ctrlv-e-detecção-automática-de-mídias) |
+| M26 | Separação de Lógica no Frontend, Utilitários Declarativos e Regra de Componentes Limpos | ✅ Concluído | 10/10/2026 | [ver](MELHORIAS_2.md#melhoria-26--separação-de-lógica-no-frontend-utilitários-declarativos-e-regra-de-componentes-limpos) |
+| M27 | Refatoração Global de Componentes com Lógica Extrema e Remoção de Dependência Externa | ✅ Concluído | 10/10/2026 | [ver](MELHORIAS_2.md#melhoria-27--refatoração-global-de-componentes-com-lógica-extrema-e-remoção-de-dependência-externa) |
 
 
 

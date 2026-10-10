@@ -35,7 +35,7 @@ PROD_SYMFONY  = $(COMPOSE_PROD_CMD) exec -T symfony
   logs-backend logs-frontend logs-db logs-scheduler logs-all \
   bash-backend bash-frontend bash-db supervisor-shell \
   sf \
-  doctrine-diff doctrine-validate doctrine-status doctrine-list doctrine-execute \
+  new-migration doctrine-diff doctrine-validate doctrine-status doctrine-list doctrine-execute \
   migrate rollback db-create db-drop db-reset db-shell db-restore \
   cache-clear cache-warmup \
   routes debug-container debug-env debug-event \
@@ -156,6 +156,9 @@ debug-event: ## Listar todos os event listeners registrados
 # ══════════════════════════════════════════════════
 # DOCTRINE — Migrations e Schema
 # ══════════════════════════════════════════════════
+
+new-migration: ## Gerar nova classe de migration vazia (doctrine:migrations:generate)
+	$(EXEC_BACKEND) php bin/console doctrine:migrations:generate
 
 doctrine-diff: ## Gerar migration com base nas diferenças do schema (doctrine:migrations:diff)
 	$(EXEC_BACKEND) php bin/console doctrine:migrations:diff

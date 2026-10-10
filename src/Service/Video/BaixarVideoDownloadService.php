@@ -76,10 +76,14 @@ final readonly class BaixarVideoDownloadService
 
     private function resolverCaminhoBaseStorage(): string
     {
-        if (str_starts_with($this->mediaStoragePath, '/')) {
-            return $this->mediaStoragePath;
+        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
+            ? $this->mediaStoragePath
+            : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+
+        if (!is_dir($baseStorage) && '' !== $this->projectDir && is_dir($this->projectDir . '/var/storage')) {
+            return $this->projectDir . '/var/storage';
         }
 
-        return rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+        return $baseStorage;
     }
 }

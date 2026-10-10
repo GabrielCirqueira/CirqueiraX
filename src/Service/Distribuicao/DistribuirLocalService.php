@@ -45,9 +45,7 @@ final readonly class DistribuirLocalService
             throw MediaItemException::arquivoDeOrigemNaoEncontrado();
         }
 
-        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
-        ? $this->mediaStoragePath
-        : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+        $baseStorage = $this->resolverBaseStorage();
 
         $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoria->pastaLocal(), '/');
         $this->armazenamentoClient->criarDiretorio($diretorioDestino);
@@ -64,5 +62,18 @@ final readonly class DistribuirLocalService
         $this->mediaItemRepository->salvar($mediaItem);
 
         return $mediaItem;
+    }
+
+    private function resolverBaseStorage(): string
+    {
+        $baseStorage = str_starts_with($this->mediaStoragePath, '/')
+            ? $this->mediaStoragePath
+            : rtrim($this->projectDir, '/') . '/' . ltrim($this->mediaStoragePath, './');
+
+        if (!is_dir($baseStorage) && '' !== $this->projectDir && is_dir($this->projectDir . '/var/storage')) {
+            return $this->projectDir . '/var/storage';
+        }
+
+        return $baseStorage;
     }
 }
