@@ -230,7 +230,7 @@ export default function DownloadsVideo() {
         >
           <VStack gap={1} alignItems="flex-start">
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="catalist.brand.500/10" color="catalist.brand.500">
+              <Box p={2} borderRadius="xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
                 <Video size={24} />
               </Box>
               <Text as="h1" fontSize="2xl" fontWeight="bold" color="fg">

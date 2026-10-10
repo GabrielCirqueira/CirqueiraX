@@ -311,12 +311,12 @@ export const CardVideo = memo(function CardVideo({
       flexDirection="column"
       borderRadius="2xl"
       borderWidth={selecionado ? '2px' : '1px'}
-      borderColor={selecionado ? 'catalist.brand.500' : 'border.subtle'}
+      borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       bg="bg.panel"
       overflow="hidden"
       shadow="none"
       transition="all 0.2s"
-      _hover={{ borderColor: selecionado ? 'catalist.brand.500' : 'border.muted' }}
+      _hover={{ borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted' }}
     >
       <Box position="relative" aspectRatio="16/9" w="full" bg="bg.muted" overflow="hidden">
         {temThumbnail ? (
@@ -353,7 +353,7 @@ export const CardVideo = memo(function CardVideo({
           <Box
             p={3.5}
             borderRadius="full"
-            bg="catalist.brand.500"
+            bg="cirqueira.brand.500"
             color="white"
             shadow="2xl"
             transform="scale(0.9)"
@@ -379,7 +379,7 @@ export const CardVideo = memo(function CardVideo({
             aria-label={`Selecionar ${titulo}`}
           >
             {selecionado ? (
-              <Box as="span" color="catalist.brand.400" display="inline-flex">
+              <Box as="span" color="cirqueira.brand.400" display="inline-flex">
                 <CheckSquare size={16} color="currentColor" />
               </Box>
             ) : (
@@ -463,7 +463,7 @@ export const CardVideo = memo(function CardVideo({
           mb={1.5}
           title={titulo}
           cursor="pointer"
-          _hover={{ color: 'catalist.brand.400' }}
+          _hover={{ color: 'cirqueira.brand.400' }}
           onClick={() => onVisualizar?.(item)}
         >
           {titulo}
@@ -640,7 +640,7 @@ export const CardVideo = memo(function CardVideo({
               onClick={() => onRetentar(item.uuid)}
               aria-label="Retentar processamento"
             >
-              <Box as="span" color="catalist.amber.500" display="inline-flex">
+              <Box as="span" color="cirqueira.amber.500" display="inline-flex">
                 <RotateCcw size={16} color="currentColor" />
               </Box>
             </IconButton>
@@ -654,7 +654,7 @@ export const CardVideo = memo(function CardVideo({
               aria-label="Apagar vídeo"
               title="Remover vídeo"
             >
-              <Box as="span" color="catalist.red.500" display="inline-flex">
+              <Box as="span" color="cirqueira.red.500" display="inline-flex">
                 <Trash2 size={16} color="currentColor" />
               </Box>
             </IconButton>

@@ -108,8 +108,8 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
             <Center
               boxSize={9}
               rounded="xl"
-              bg="catalist.brand.500"
-              color="catalist.grey.0"
+              bg="cirqueira.brand.500"
+              color="cirqueira.grey.0"
               shadow="lg"
             >
               <Code2 size={20} color="currentColor" strokeWidth={2.5} />
@@ -204,9 +204,9 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                 mt={2}
                 h={10}
                 fontWeight="bold"
-                bg="catalist.brand.500"
-                _hover={{ bg: 'catalist.brand.600' }}
-                color="catalist.grey.0"
+                bg="cirqueira.brand.500"
+                _hover={{ bg: 'cirqueira.brand.600' }}
+                color="cirqueira.grey.0"
                 w="full"
                 borderRadius="xl"
                 shadow="lg"

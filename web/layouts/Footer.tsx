@@ -15,7 +15,7 @@ export const Footer = memo(function Footer() {
       <HStack maxW="6xl" mx="auto" px={6} h={16} justify="space-between" flexWrap="wrap">
         <RouterLink to="/">
           <HStack gap={2}>
-            <Center boxSize={6} rounded="md" bg="catalist.brand.500" color="catalist.grey.0">
+            <Center boxSize={6} rounded="md" bg="cirqueira.brand.500" color="cirqueira.grey.0">
               <Code2 size={14} color="currentColor" strokeWidth={2.5} />
             </Center>
             <Text
@@ -26,7 +26,7 @@ export const Footer = memo(function Footer() {
               fontFamily="heading"
             >
               cirqueiraX{' '}
-              <Text as="span" color="catalist.brand.700">
+              <Text as="span" color="cirqueira.brand.700">
                 Skeleton
               </Text>
             </Text>
@@ -38,7 +38,7 @@ export const Footer = memo(function Footer() {
           alignItems="center"
           gap={5}
           fontSize="xs"
-          color="catalist.grey.600"
+          color="cirqueira.grey.600"
         >
           {footerLinks.map((link) => (
             <Link
@@ -46,14 +46,14 @@ export const Footer = memo(function Footer() {
               href={link.href}
               color="inherit"
               transition="color 0.2s"
-              _hover={{ color: 'catalist.grey.900' }}
+              _hover={{ color: 'cirqueira.grey.900' }}
             >
               {link.label}
             </Link>
           ))}
         </Flex>
 
-        <HStack gap={3} fontSize="xs" color="catalist.grey.600">
+        <HStack gap={3} fontSize="xs" color="cirqueira.grey.600">
           <Text as="span">MIT License</Text>
           <Link
             href="https://github.com"
@@ -61,7 +61,7 @@ export const Footer = memo(function Footer() {
             rel="noreferrer"
             aria-label="GitHub"
             color="inherit"
-            _hover={{ color: 'catalist.grey.900' }}
+            _hover={{ color: 'cirqueira.grey.900' }}
           >
             <Github size={16} />
           </Link>

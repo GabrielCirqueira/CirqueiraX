@@ -115,10 +115,10 @@ export const DropzoneUpload = memo(function DropzoneUpload({
         cursor="pointer"
         transition="all 0.2s"
         shadow="none"
-        borderColor={isDragOver ? 'catalist.brand.500' : 'border.subtle'}
-        bg={isDragOver ? 'catalist.brand.500/10' : 'bg.panel'}
+        borderColor={isDragOver ? 'cirqueira.brand.500' : 'border.subtle'}
+        bg={isDragOver ? 'cirqueira.brand.500/10' : 'bg.panel'}
         transform={isDragOver ? 'scale(1.01)' : 'none'}
-        _hover={{ borderColor: 'catalist.brand.500', bg: 'bg.muted' }}
+        _hover={{ borderColor: 'cirqueira.brand.500', bg: 'bg.muted' }}
       >
         <Card.Body
           display="flex"
@@ -137,7 +137,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             style={{ display: 'none' }}
           />
 
-          <Box p={4} borderRadius="2xl" bg="catalist.brand.500/10" color="catalist.brand.500">
+          <Box p={4} borderRadius="2xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
             <UploadCloud size={40} />
           </Box>
 
@@ -270,8 +270,8 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                     <Box
                       p={2.5}
                       borderRadius="xl"
-                      bg="catalist.brand.500/10"
-                      color="catalist.brand.400"
+                      bg="cirqueira.brand.500/10"
+                      color="cirqueira.brand.400"
                       flexShrink={0}
                     >
                       {item.tipoMime.startsWith('video/') ? (

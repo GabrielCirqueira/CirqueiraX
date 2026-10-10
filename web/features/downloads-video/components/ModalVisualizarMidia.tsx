@@ -107,10 +107,10 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
               <Box
                 p={2}
                 borderRadius="xl"
-                bg="catalist.brand.500/10"
-                color="catalist.brand.400"
+                bg="cirqueira.brand.500/10"
+                color="cirqueira.brand.400"
                 borderWidth="1px"
-                borderColor="catalist.brand.500/20"
+                borderColor="cirqueira.brand.500/20"
               >
                 <Film size={18} />
               </Box>
@@ -182,7 +182,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 <HStack gap={3} flexWrap="wrap" fontSize="xs" color="fg.subtle">
                   {duracao && (
                     <HStack gap={1.5}>
-                      <Box as="span" color="catalist.brand.400" display="inline-flex">
+                      <Box as="span" color="cirqueira.brand.400" display="inline-flex">
                         <Clock size={14} color="currentColor" />
                       </Box>
                       <Text as="span">{formatarDuracao(duracao)}</Text>
@@ -191,7 +191,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
 
                   {tamanhoBytes && (
                     <HStack gap={1.5}>
-                      <Box as="span" color="catalist.blue.400" display="inline-flex">
+                      <Box as="span" color="cirqueira.blue.400" display="inline-flex">
                         <HardDrive size={14} color="currentColor" />
                       </Box>
                       <Text as="span">{formatarTamanhoBytes(tamanhoBytes)}</Text>
@@ -199,7 +199,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                   )}
 
                   <HStack gap={1.5}>
-                    <Box as="span" color="catalist.green.400" display="inline-flex">
+                    <Box as="span" color="cirqueira.green.400" display="inline-flex">
                       <User size={14} color="currentColor" />
                     </Box>
                     <Text as="span">{uploader}</Text>

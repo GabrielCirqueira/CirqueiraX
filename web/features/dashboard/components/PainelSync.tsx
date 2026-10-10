@@ -132,7 +132,7 @@ export const PainelSync = memo(function PainelSync({
     <VStack w="full" gap={4} alignItems="stretch">
       <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
         <HStack gap={2.5}>
-          <Box p={2} borderRadius="xl" bg="catalist.cyan.500/10" color="catalist.cyan.500">
+          <Box p={2} borderRadius="xl" bg="cirqueira.cyan.500/10" color="cirqueira.cyan.500">
             <FolderSync size={20} />
           </Box>
           <VStack gap={0.5} alignItems="flex-start">
@@ -149,7 +149,7 @@ export const PainelSync = memo(function PainelSync({
           <Badge size="sm" variant="subtle" colorPalette={isOnline ? 'cyan' : 'gray'}>
             <HStack gap={1.5}>
               {isOnline ? (
-                <Box as="span" color="catalist.cyan.500" display="inline-flex">
+                <Box as="span" color="cirqueira.cyan.500" display="inline-flex">
                   <Wifi size={12} color="currentColor" />
                 </Box>
               ) : (
@@ -180,10 +180,10 @@ export const PainelSync = memo(function PainelSync({
         <Box
           p={3}
           borderRadius="xl"
-          bg="catalist.emerald.500/10"
+          bg="cirqueira.emerald.500/10"
           borderWidth="1px"
-          borderColor="catalist.emerald.500/20"
-          color="catalist.emerald.500"
+          borderColor="cirqueira.emerald.500/20"
+          color="cirqueira.emerald.500"
           fontSize="xs"
           display="flex"
           alignItems="center"
@@ -235,7 +235,7 @@ export const PainelSync = memo(function PainelSync({
                 bg="bg.panel"
                 shadow="md"
                 transition="all 0.2s"
-                _hover={{ borderColor: 'catalist.cyan.500' }}
+                _hover={{ borderColor: 'cirqueira.cyan.500' }}
               >
                 <Card.Header
                   display="flex"
@@ -248,8 +248,8 @@ export const PainelSync = memo(function PainelSync({
                     <Box
                       p={2}
                       borderRadius="xl"
-                      bg="catalist.cyan.500/10"
-                      color="catalist.cyan.400"
+                      bg="cirqueira.cyan.500/10"
+                      color="cirqueira.cyan.400"
                     >
                       <Smartphone size={16} />
                     </Box>
@@ -291,7 +291,7 @@ export const PainelSync = memo(function PainelSync({
                     color="fg.subtle"
                   >
                     <HStack gap={1.5}>
-                      <Box as="span" color="catalist.cyan.500" display="inline-flex">
+                      <Box as="span" color="cirqueira.cyan.500" display="inline-flex">
                         <HardDrive size={14} color="currentColor" />
                       </Box>
                       <Text as="span">{pasta.tamanhoFormatado || '0 B'}</Text>

@@ -53,7 +53,7 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
       <HStack maxW="6xl" mx="auto" px={6} h={14} justify="space-between">
         <RouterLink to={autenticado ? '/dashboard' : '/login'}>
           <HStack gap={2}>
-            <Center boxSize={7} rounded="lg" bg="catalist.brand.500" color="catalist.grey.0">
+            <Center boxSize={7} rounded="lg" bg="cirqueira.brand.500" color="cirqueira.grey.0">
               <Code2 size={16} color="currentColor" strokeWidth={2.5} />
             </Center>
             <Text
@@ -64,7 +64,7 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
               fontFamily="heading"
             >
               Cirqueira
-              <Text as="span" color="catalist.brand.700">
+              <Text as="span" color="cirqueira.brand.700">
                 X
               </Text>{' '}
               <Text
@@ -74,10 +74,10 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
                 px={2}
                 py={0.5}
                 borderRadius="full"
-                bg="catalist.brand.500/10"
-                color="catalist.brand.500"
+                bg="cirqueira.brand.500/10"
+                color="cirqueira.brand.500"
                 border="1px solid"
-                borderColor="catalist.brand.500/20"
+                borderColor="cirqueira.brand.500/20"
                 ml={1}
               >
                 Media
@@ -92,15 +92,15 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
             alignItems="center"
             gap={6}
             fontSize="sm"
-            color="catalist.grey.600"
+            color="cirqueira.grey.600"
           >
             {navLinks.map((link) => (
               <ChakraLink
                 asChild
                 key={link.href}
-                color={pathname === link.href ? 'catalist.brand.400' : 'inherit'}
+                color={pathname === link.href ? 'cirqueira.brand.400' : 'inherit'}
                 fontWeight={pathname === link.href ? 'semibold' : 'normal'}
-                _hover={{ color: 'catalist.grey.900' }}
+                _hover={{ color: 'cirqueira.grey.900' }}
               >
                 <RouterLink to={link.href}>{link.label}</RouterLink>
               </ChakraLink>
@@ -138,8 +138,8 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
                 size="xs"
                 variant="ghost"
                 onClick={handleLogout}
-                color="catalist.grey.600"
-                _hover={{ color: 'catalist.red.700' }}
+                color="cirqueira.grey.600"
+                _hover={{ color: 'cirqueira.red.700' }}
                 p={1.5}
                 aria-label="Sair da conta"
               >
@@ -151,9 +151,9 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
               <RouterLink to="/login">
                 <Button
                   size="sm"
-                  bg="catalist.brand.500"
-                  _hover={{ bg: 'catalist.brand.600' }}
-                  color="catalist.grey.0"
+                  bg="cirqueira.brand.500"
+                  _hover={{ bg: 'cirqueira.brand.600' }}
+                  color="cirqueira.grey.0"
                   borderRadius="lg"
                   px={3}
                   py={1}

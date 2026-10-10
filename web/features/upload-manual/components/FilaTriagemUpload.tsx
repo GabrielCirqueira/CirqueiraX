@@ -135,7 +135,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           >
             <HStack gap={2}>
               {todosSelecionados ? (
-                <Box as="span" color="catalist.purple.500" display="inline-flex">
+                <Box as="span" color="cirqueira.purple.500" display="inline-flex">
                   <CheckSquare size={16} color="currentColor" />
                 </Box>
               ) : (
@@ -225,12 +225,12 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 key={item.uuid}
                 borderRadius="2xl"
                 borderWidth={isSelected ? '2px' : '1px'}
-                borderColor={isSelected ? 'catalist.brand.500' : 'border.subtle'}
+                borderColor={isSelected ? 'cirqueira.brand.500' : 'border.subtle'}
                 bg="bg.panel"
                 overflow="hidden"
                 shadow="sm"
                 transition="all 0.2s"
-                _hover={{ borderColor: isSelected ? 'catalist.brand.500' : 'border.muted' }}
+                _hover={{ borderColor: isSelected ? 'cirqueira.brand.500' : 'border.muted' }}
               >
                 <Box position="relative" w="full" h={40} bg="bg.muted" overflow="hidden">
                   {item.metadata?.thumbnail ? (
@@ -259,7 +259,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       aria-label="Selecionar"
                     >
                       {isSelected ? (
-                        <Box as="span" color="catalist.brand.400" display="inline-flex">
+                        <Box as="span" color="cirqueira.brand.400" display="inline-flex">
                           <CheckSquare size={16} color="currentColor" />
                         </Box>
                       ) : (

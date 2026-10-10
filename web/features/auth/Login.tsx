@@ -62,9 +62,9 @@ export function Component() {
           inset={-1}
           borderRadius="3xl"
           bgGradient="to-r"
-          gradientFrom="catalist.brand.500/30"
-          gradientVia="catalist.purple.600/20"
-          gradientTo="catalist.blue.600/30"
+          gradientFrom="cirqueira.brand.500/30"
+          gradientVia="cirqueira.purple.600/20"
+          gradientTo="cirqueira.blue.600/30"
           filter="blur(16px)"
           opacity={0.7}
           pointerEvents="none"
@@ -93,8 +93,8 @@ export function Component() {
               <Center
                 boxSize={10}
                 rounded="2xl"
-                bg="catalist.brand.500"
-                color="catalist.grey.0"
+                bg="cirqueira.brand.500"
+                color="cirqueira.grey.0"
                 shadow="lg"
               >
                 <Code2 size={20} color="currentColor" strokeWidth={2.5} />
@@ -108,7 +108,7 @@ export function Component() {
                 fontFamily="heading"
               >
                 Cirqueira
-                <Text as="span" color="catalist.brand.700">
+                <Text as="span" color="cirqueira.brand.700">
                   X
                 </Text>{' '}
                 <Text
@@ -118,10 +118,10 @@ export function Component() {
                   px={2}
                   py={0.5}
                   borderRadius="full"
-                  bg="catalist.brand.500/10"
-                  color="catalist.brand.400"
+                  bg="cirqueira.brand.500/10"
+                  color="cirqueira.brand.400"
                   border="1px solid"
-                  borderColor="catalist.brand.500/20"
+                  borderColor="cirqueira.brand.500/20"
                   ml={1}
                 >
                   Media
@@ -150,7 +150,7 @@ export function Component() {
               py={1}
               borderRadius="full"
             >
-              <Box as="span" color="catalist.purple.400" display="inline-flex" alignItems="center">
+              <Box as="span" color="cirqueira.purple.400" display="inline-flex" alignItems="center">
                 <ShieldCheck size={14} style={{ marginRight: '4px' }} color="currentColor" />
               </Box>
               Autenticação Segura JWT RS256
@@ -233,9 +233,9 @@ export function Component() {
                 mt={2}
                 h={11}
                 fontWeight="bold"
-                bg="catalist.brand.500"
-                _hover={{ bg: 'catalist.brand.600' }}
-                color="catalist.grey.0"
+                bg="cirqueira.brand.500"
+                _hover={{ bg: 'cirqueira.brand.600' }}
+                color="cirqueira.grey.0"
                 w="full"
                 borderRadius="xl"
                 shadow="lg"
@@ -254,7 +254,7 @@ export function Component() {
             >
               <Text fontSize="11px" color="whiteAlpha.400">
                 Acesso restrito. Novos usuários são provisionados via CLI administrativa (
-                <Text as="span" fontFamily="mono" color="catalist.brand.400">
+                <Text as="span" fontFamily="mono" color="cirqueira.brand.400">
                   app:usuario:criar
                 </Text>
                 ).

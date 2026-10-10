@@ -193,7 +193,7 @@ const UploadManual = memo(function UploadManual() {
           alignItems="flex-start"
         >
           <HStack gap={2}>
-            <Box as="span" color="catalist.purple.500" display="inline-flex">
+            <Box as="span" color="cirqueira.purple.500" display="inline-flex">
               <FolderCheck size={20} color="currentColor" />
             </Box>
             <Text as="h2" fontSize="lg" fontWeight="bold" color="fg">

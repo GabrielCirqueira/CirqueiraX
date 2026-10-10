@@ -18,7 +18,7 @@ export function Component() {
           as="span"
           fontSize="8xl"
           fontWeight="900"
-          color="catalist.brand.200"
+          color="cirqueira.brand.200"
           lineHeight="none"
         >
           404
@@ -26,16 +26,16 @@ export function Component() {
         <Text as="h1" fontSize="2xl" fontWeight="bold" color="white">
           Página não encontrada
         </Text>
-        <Text fontSize="sm" color="catalist.grey.600" maxW="sm">
+        <Text fontSize="sm" color="cirqueira.grey.600" maxW="sm">
           A rota que você tentou acessar não existe ou foi removida.
         </Text>
       </VStack>
 
       <Link to="/">
         <Button
-          bg="catalist.brand.500"
-          _hover={{ bg: 'catalist.brand.600' }}
-          color="catalist.grey.0"
+          bg="cirqueira.brand.500"
+          _hover={{ bg: 'cirqueira.brand.600' }}
+          color="cirqueira.grey.0"
           borderRadius="xl"
           px={4}
           py={2}

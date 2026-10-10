@@ -166,10 +166,10 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
               <Box
                 p={2}
                 borderRadius="xl"
-                bg="catalist.brand.500/10"
-                color="catalist.brand.400"
+                bg="cirqueira.brand.500/10"
+                color="cirqueira.brand.400"
                 borderWidth="1px"
-                borderColor="catalist.brand.500/20"
+                borderColor="cirqueira.brand.500/20"
               >
                 <Film size={18} />
               </Box>
@@ -296,7 +296,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                   </Text>
                   <Grid templateColumns="repeat(2, 1fr)" gap={2} fontSize="xs">
                     <HStack gap={2}>
-                      <Box as="span" color="catalist.brand.400" display="inline-flex">
+                      <Box as="span" color="cirqueira.brand.400" display="inline-flex">
                         <Calendar size={13} color="currentColor" />
                       </Box>
                       <Text as="span" color="fg">
@@ -304,7 +304,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       </Text>
                     </HStack>
                     <HStack gap={2}>
-                      <Box as="span" color="catalist.blue.400" display="inline-flex">
+                      <Box as="span" color="cirqueira.blue.400" display="inline-flex">
                         <Clock size={13} color="currentColor" />
                       </Box>
                       <Text as="span" color="fg">
@@ -321,12 +321,12 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                 <Box
                   p={3}
                   borderRadius="xl"
-                  bg="catalist.brand.500/10"
+                  bg="cirqueira.brand.500/10"
                   borderWidth="1px"
-                  borderColor="catalist.brand.500/20"
+                  borderColor="cirqueira.brand.500/20"
                 >
                   <HStack justify="space-between" align="center" mb={2}>
-                    <HStack gap={1.5} color="catalist.brand.400" fontSize="xs" fontWeight="bold">
+                    <HStack gap={1.5} color="cirqueira.brand.400" fontSize="xs" fontWeight="bold">
                       <Sparkles size={14} />
                       <Text as="span">Atalhos Rápidos de Data</Text>
                     </HStack>
@@ -418,12 +418,12 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                 <Box
                   p={3}
                   borderRadius="xl"
-                  bg="catalist.brand.500/10"
+                  bg="cirqueira.brand.500/10"
                   borderWidth="1px"
-                  borderColor="catalist.brand.500/20"
+                  borderColor="cirqueira.brand.500/20"
                 >
                   <HStack justify="space-between" align="center" mb={2}>
-                    <HStack gap={1.5} color="catalist.brand.400" fontSize="xs" fontWeight="bold">
+                    <HStack gap={1.5} color="cirqueira.brand.400" fontSize="xs" fontWeight="bold">
                       <Clock size={14} />
                       <Text as="span">Ajuste Rápido de Duração</Text>
                     </HStack>

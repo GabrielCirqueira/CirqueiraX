@@ -44,8 +44,8 @@ const HomeContent = memo(function HomeContent() {
             variant="subtle"
             colorPalette="purple"
             border="1px solid"
-            borderColor="catalist.brand.500/30"
-            color="catalist.brand.400"
+            borderColor="cirqueira.brand.500/30"
+            color="cirqueira.brand.400"
             fontWeight="semibold"
             px={3}
             py={1}
@@ -68,7 +68,7 @@ const HomeContent = memo(function HomeContent() {
               color="white"
             >
               Central Inteligente de Ingestão &{' '}
-              <Text as="span" color="catalist.brand.500">
+              <Text as="span" color="cirqueira.brand.500">
                 Gestão de Mídias
               </Text>
             </Text>
@@ -87,8 +87,8 @@ const HomeContent = memo(function HomeContent() {
             <Link to="/dashboard">
               <Button
                 size="lg"
-                bg="catalist.brand.500"
-                _hover={{ bg: 'catalist.brand.600' }}
+                bg="cirqueira.brand.500"
+                _hover={{ bg: 'cirqueira.brand.600' }}
                 color="white"
                 fontWeight="bold"
                 px={6}
@@ -111,7 +111,7 @@ const HomeContent = memo(function HomeContent() {
                 borderRadius="xl"
                 _hover={{ bg: 'zinc.800' }}
               >
-                <Box as="span" color="catalist.brand.500" display="inline-flex" mr={2}>
+                <Box as="span" color="cirqueira.brand.500" display="inline-flex" mr={2}>
                   <DownloadCloud size={20} color="currentColor" />
                 </Box>
                 <Text as="span">Downloads de Vídeo</Text>
@@ -129,7 +129,7 @@ const HomeContent = memo(function HomeContent() {
                 borderRadius="xl"
                 _hover={{ bg: 'zinc.800' }}
               >
-                <Box as="span" color="catalist.indigo.500" display="inline-flex" mr={2}>
+                <Box as="span" color="cirqueira.indigo.500" display="inline-flex" mr={2}>
                   <UploadCloud size={20} color="currentColor" />
                 </Box>
                 <Text as="span">Upload Manual & Triagem</Text>
@@ -196,7 +196,7 @@ const HomeContent = memo(function HomeContent() {
               >
                 Mídias Processadas
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="catalist.brand.500/10" color="catalist.brand.500">
+              <Box p={2} borderRadius="xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
                 <Film size={20} />
               </Box>
             </Card.Header>
@@ -366,15 +366,15 @@ const HomeContent = memo(function HomeContent() {
             bg="zinc.900"
             shadow="sm"
             borderRadius="2xl"
-            _hover={{ borderColor: 'catalist.brand.500/40' }}
+            _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
                 borderRadius="2xl"
-                bg="catalist.brand.500/10"
-                color="catalist.brand.500"
+                bg="cirqueira.brand.500/10"
+                color="cirqueira.brand.500"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -411,8 +411,8 @@ const HomeContent = memo(function HomeContent() {
                     size="sm"
                     w="full"
                     justifyContent="space-between"
-                    color="catalist.brand.500"
-                    _hover={{ color: 'catalist.brand.400', bg: 'catalist.brand.500/10' }}
+                    color="cirqueira.brand.500"
+                    _hover={{ color: 'cirqueira.brand.400', bg: 'cirqueira.brand.500/10' }}
                     fontWeight="bold"
                   >
                     <Text as="span">Acessar Downloads</Text>
@@ -429,15 +429,15 @@ const HomeContent = memo(function HomeContent() {
             bg="zinc.900"
             shadow="sm"
             borderRadius="2xl"
-            _hover={{ borderColor: 'catalist.brand.500/40' }}
+            _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
                 borderRadius="2xl"
-                bg="catalist.indigo.500/10"
-                color="catalist.indigo.500"
+                bg="cirqueira.indigo.500/10"
+                color="cirqueira.indigo.500"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -474,8 +474,8 @@ const HomeContent = memo(function HomeContent() {
                     size="sm"
                     w="full"
                     justifyContent="space-between"
-                    color="catalist.indigo.400"
-                    _hover={{ color: 'catalist.indigo.300', bg: 'catalist.indigo.500/10' }}
+                    color="cirqueira.indigo.400"
+                    _hover={{ color: 'cirqueira.indigo.300', bg: 'cirqueira.indigo.500/10' }}
                     fontWeight="bold"
                   >
                     <Text as="span">Acessar Upload Manual</Text>
@@ -492,15 +492,15 @@ const HomeContent = memo(function HomeContent() {
             bg="zinc.900"
             shadow="sm"
             borderRadius="2xl"
-            _hover={{ borderColor: 'catalist.brand.500/40' }}
+            _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
                 borderRadius="2xl"
-                bg="catalist.green.500/10"
-                color="catalist.green.500"
+                bg="cirqueira.green.500/10"
+                color="cirqueira.green.500"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -537,8 +537,8 @@ const HomeContent = memo(function HomeContent() {
                     size="sm"
                     w="full"
                     justifyContent="space-between"
-                    color="catalist.green.400"
-                    _hover={{ color: 'catalist.green.300', bg: 'catalist.green.500/10' }}
+                    color="cirqueira.green.400"
+                    _hover={{ color: 'cirqueira.green.300', bg: 'cirqueira.green.500/10' }}
                     fontWeight="bold"
                   >
                     <Text as="span">Ver Mídias dos Agentes</Text>

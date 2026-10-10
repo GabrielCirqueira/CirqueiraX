@@ -401,7 +401,7 @@ class YtDlpException extends \DomainException
 ## 6. Checklist rápido (antes de encerrar)
 
 - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` / `className` — só componentes Chakra (`Box`, `HStack`, `Heading`…)
-- [x] Cores só da paleta gerada (`catalist.grey.700` / `paletteToken(...)`) — sem hex
+- [x] Cores só da paleta gerada (`cirqueira.grey.700` / `paletteToken(...)`) — sem hex
 - [ ] Sem Header/Footer na página
 - [ ] Sem `any`, sem `ts-ignore`
 - [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return

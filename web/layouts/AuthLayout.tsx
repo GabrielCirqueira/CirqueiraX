@@ -10,8 +10,8 @@ export function AuthLayout() {
           <Center
             boxSize={8}
             rounded="xl"
-            bg="catalist.brand.500"
-            color="catalist.grey.0"
+            bg="cirqueira.brand.500"
+            color="cirqueira.grey.0"
             shadow="md"
           >
             <Code2 size={16} color="currentColor" strokeWidth={2.5} />

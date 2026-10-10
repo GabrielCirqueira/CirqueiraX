@@ -458,6 +458,7 @@ ${semantics}
 })
 
 export const theme = createSystem(defaultConfig, config)
+export const system = theme
 `
 }
 

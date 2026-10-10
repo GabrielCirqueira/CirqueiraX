@@ -48,27 +48,27 @@ function renderizarIconeToast(type?: string) {
   switch (type) {
     case 'success':
       return (
-        <Box as="span" color="catalist.green.500" display="inline-flex">
+        <Box as="span" color="cirqueira.green.500" display="inline-flex">
           <CheckCircle2 size={18} color="currentColor" />
         </Box>
       )
     case 'error':
       return (
-        <Box as="span" color="catalist.red.500" display="inline-flex">
+        <Box as="span" color="cirqueira.red.500" display="inline-flex">
           <AlertCircle size={18} color="currentColor" />
         </Box>
       )
     case 'warning':
       return (
-        <Box as="span" color="catalist.amber.500" display="inline-flex">
+        <Box as="span" color="cirqueira.amber.500" display="inline-flex">
           <AlertTriangle size={18} color="currentColor" />
         </Box>
       )
     case 'loading':
-      return <Spinner size="xs" color="catalist.blue.500" />
+      return <Spinner size="xs" color="cirqueira.blue.500" />
     default:
       return (
-        <Box as="span" color="catalist.blue.500" display="inline-flex">
+        <Box as="span" color="cirqueira.blue.500" display="inline-flex">
           <Info size={18} color="currentColor" />
         </Box>
       )

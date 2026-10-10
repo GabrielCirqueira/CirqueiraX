@@ -23,11 +23,11 @@ export interface GraficosDashboardProps {
 }
 
 const CORES_ORIGEM = {
-  print_empresa: 'var(--chakra-colors-catalist-blue-500)',
-  print_pessoal: 'var(--chakra-colors-catalist-green-500)',
-  bot_telegram: 'var(--chakra-colors-catalist-cyan-500)',
-  download: 'var(--chakra-colors-catalist-amber-500)',
-  manual: 'var(--chakra-colors-catalist-brand-500)',
+  print_empresa: 'var(--chakra-colors-cirqueira-blue-500)',
+  print_pessoal: 'var(--chakra-colors-cirqueira-green-500)',
+  bot_telegram: 'var(--chakra-colors-cirqueira-cyan-500)',
+  download: 'var(--chakra-colors-cirqueira-amber-500)',
+  manual: 'var(--chakra-colors-cirqueira-brand-500)',
 }
 
 const NOMES_ORIGEM = {
@@ -113,7 +113,7 @@ function CustomTooltipBar({
       <VStack gap={1} color="fg.subtle" alignItems="stretch">
         <HStack justify="space-between" gap={4}>
           <Text as="span">Tamanho:</Text>
-          <Text as="span" fontWeight="bold" color="catalist.brand.400">
+          <Text as="span" fontWeight="bold" color="cirqueira.brand.400">
             {data.payload.tamanhoFormatado}
           </Text>
         </HStack>
@@ -313,7 +313,7 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                   <Tooltip content={<CustomTooltipBar />} />
                   <Bar
                     dataKey="tamanhoMb"
-                    fill="var(--chakra-colors-catalist-brand-500)"
+                    fill="var(--chakra-colors-cirqueira-brand-500)"
                     radius={[6, 6, 0, 0]}
                   >
                     {dadosCategorias.map((cat, index) => (
@@ -321,8 +321,8 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                         key={`bar-${cat.name}`}
                         fill={
                           index % 2 === 0
-                            ? 'var(--chakra-colors-catalist-brand-500)'
-                            : 'var(--chakra-colors-catalist-brand-400)'
+                            ? 'var(--chakra-colors-cirqueira-brand-500)'
+                            : 'var(--chakra-colors-cirqueira-brand-400)'
                         }
                       />
                     ))}

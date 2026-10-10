@@ -123,7 +123,7 @@ export const GridVideos = memo(function GridVideos({
           >
             <HStack gap={2}>
               {todosSelecionados ? (
-                <Box as="span" color="catalist.purple.500" display="inline-flex">
+                <Box as="span" color="cirqueira.purple.500" display="inline-flex">
                   <CheckSquare size={16} color="currentColor" />
                 </Box>
               ) : (

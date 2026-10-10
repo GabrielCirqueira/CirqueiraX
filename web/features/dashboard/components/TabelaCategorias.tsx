@@ -209,7 +209,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                 bg="bg.panel"
                 shadow="md"
                 transition="all 0.2s"
-                _hover={{ borderColor: 'catalist.brand.500' }}
+                _hover={{ borderColor: 'cirqueira.brand.500' }}
               >
                 <Card.Header
                   display="flex"
@@ -222,8 +222,8 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     <Box
                       p={2}
                       borderRadius="xl"
-                      bg="catalist.purple.500/10"
-                      color="catalist.purple.400"
+                      bg="cirqueira.purple.500/10"
+                      color="cirqueira.purple.400"
                     >
                       <Folder size={16} />
                     </Box>
@@ -266,7 +266,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     color="fg.subtle"
                   >
                     <HStack gap={1.5}>
-                      <Box as="span" color="catalist.blue.500" display="inline-flex">
+                      <Box as="span" color="cirqueira.blue.500" display="inline-flex">
                         <FileVideo size={14} color="currentColor" />
                       </Box>
                       <Text as="span">
@@ -275,7 +275,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     </HStack>
 
                     <HStack gap={1.5}>
-                      <Box as="span" color="catalist.purple.500" display="inline-flex">
+                      <Box as="span" color="cirqueira.purple.500" display="inline-flex">
                         <HardDrive size={14} color="currentColor" />
                       </Box>
                       <Text as="span" fontWeight="semibold" color="fg">
