@@ -11,7 +11,7 @@ const footerLinks = [
 
 export const Footer = memo(function Footer() {
   return (
-    <Box as="footer" borderTop="1px solid" borderColor="whiteAlpha.200" bg="zinc.950">
+    <Box as="footer" borderTop="1px solid" borderColor="cirqueira.grey.900" bg="cirqueira.grey.950">
       <HStack maxW="6xl" mx="auto" px={6} h={16} justify="space-between" flexWrap="wrap">
         <RouterLink to="/">
           <HStack gap={2}>

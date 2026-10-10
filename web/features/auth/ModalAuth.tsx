@@ -6,13 +6,13 @@ import { Button, Center, Dialog, Field, HStack, Input, Text, VStack } from '@cha
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { Code2, Eye, EyeOff, Lock } from 'lucide-react'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, memo, useState } from 'react'
 import { z } from 'zod'
 import type { LoginInput, RespostaLogin, RespostaMe } from './types'
 
 const loginSchema = z.object({
   emailOuUsuario: z.string().min(1, 'Informe seu e-mail ou nome de usuário.'),
-  senha: z.string().min(1, 'Informe a senha.'),
+  senha: z.string().min(1, 'Informe sua senha de acesso.'),
 })
 
 interface ModalAuthProps {
@@ -20,12 +20,12 @@ interface ModalAuthProps {
   onClose: () => void
 }
 
-export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
+export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
   const { setAutenticado } = useAuthStore()
 
   const [form, setForm] = useState<LoginInput>({ emailOuUsuario: '', senha: '' })
-  const [mostrarSenha, setMostrarSenha] = useState(false)
   const [erros, setErros] = useState<Record<string, string>>({})
+  const [mostrarSenha, setMostrarSenha] = useState(false)
 
   const loginMutation = useMutation({
     mutationFn: async (input: LoginInput) => {
@@ -67,6 +67,8 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    setErros({})
+
     const resultado = loginSchema.safeParse(form)
     if (!resultado.success) {
       const errosCampos: Record<string, string> = {}
@@ -76,6 +78,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
       setErros(errosCampos)
       return
     }
+
     loginMutation.mutate(resultado.data)
   }
 
@@ -89,10 +92,10 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content
-          bg="zinc.950"
+          bg="cirqueira.grey.950"
           border="1px solid"
-          borderColor="whiteAlpha.200"
-          color="white"
+          borderColor="cirqueira.grey.800"
+          color="cirqueira.grey.0"
           borderRadius="2xl"
           p={0}
           maxW="md"
@@ -100,7 +103,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
           <Dialog.Header
             p={6}
             borderBottom="1px solid"
-            borderColor="whiteAlpha.100"
+            borderColor="cirqueira.grey.900"
             display="flex"
             alignItems="center"
             gap={3}
@@ -118,7 +121,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
               <Dialog.Title fontSize="lg" fontWeight="bold">
                 CirqueiraX Media
               </Dialog.Title>
-              <Text fontSize="xs" color="whiteAlpha.500">
+              <Text fontSize="xs" color="cirqueira.grey.500">
                 Entre com seu e-mail e senha
               </Text>
             </VStack>
@@ -131,7 +134,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
               style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
             >
               <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
                   E-mail ou Usuário
                 </Field.Label>
                 <Input
@@ -143,19 +146,19 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                   }}
                   autoFocus
                   w="full"
-                  bg="whiteAlpha.50"
-                  borderColor="whiteAlpha.200"
-                  color="white"
-                  _placeholder={{ color: 'whiteAlpha.400' }}
+                  bg="cirqueira.grey.900/40"
+                  borderColor="cirqueira.grey.800"
+                  color="cirqueira.grey.0"
+                  _placeholder={{ color: 'cirqueira.grey.500' }}
                   h={10}
                 />
-                <Field.ErrorText fontSize="xs" color="rose.400">
+                <Field.ErrorText fontSize="xs" color="cirqueira.red.500">
                   {erros.emailOuUsuario}
                 </Field.ErrorText>
               </Field.Root>
 
               <Field.Root invalid={Boolean(erros.senha)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
                   Senha
                 </Field.Label>
                 <HStack position="relative" w="full">
@@ -168,10 +171,10 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                       setErros((p) => ({ ...p, senha: '' }))
                     }}
                     w="full"
-                    bg="whiteAlpha.50"
-                    borderColor="whiteAlpha.200"
-                    color="white"
-                    _placeholder={{ color: 'whiteAlpha.400' }}
+                    bg="cirqueira.grey.900/40"
+                    borderColor="cirqueira.grey.800"
+                    color="cirqueira.grey.0"
+                    _placeholder={{ color: 'cirqueira.grey.500' }}
                     h={10}
                     pr={9}
                   />
@@ -182,8 +185,8 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                     onClick={() => setMostrarSenha((v) => !v)}
                     position="absolute"
                     right={1.5}
-                    color="whiteAlpha.400"
-                    _hover={{ color: 'whiteAlpha.800' }}
+                    color="cirqueira.grey.500"
+                    _hover={{ color: 'cirqueira.grey.200' }}
                     h={7}
                     w={7}
                     p={0}
@@ -192,7 +195,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                     {mostrarSenha ? <EyeOff size={14} /> : <Eye size={14} />}
                   </Button>
                 </HStack>
-                <Field.ErrorText fontSize="xs" color="rose.400">
+                <Field.ErrorText fontSize="xs" color="cirqueira.red.500">
                   {erros.senha}
                 </Field.ErrorText>
               </Field.Root>
@@ -221,4 +224,4 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
       </Dialog.Positioner>
     </Dialog.Root>
   )
-}
+})

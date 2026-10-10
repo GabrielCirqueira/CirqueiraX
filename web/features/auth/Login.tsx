@@ -20,7 +20,6 @@ import {
   Eye,
   EyeOff,
   FolderSync,
-  Layers,
   Lock,
   Mail,
   ShieldCheck,
@@ -31,8 +30,8 @@ import { Link } from 'react-router-dom'
 import { z } from 'zod'
 
 const loginSchema = z.object({
-  emailOuUsuario: z.string().min(1, 'Informe seu e-mail ou usuário.'),
-  senha: z.string().min(1, 'Informe sua senha.'),
+  emailOuUsuario: z.string().min(1, 'Informe seu e-mail ou nome de usuário.'),
+  senha: z.string().min(1, 'Informe sua senha de acesso.'),
 })
 
 export function Component() {
@@ -48,13 +47,17 @@ export function Component() {
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    setErros({})
+
     const resultado = loginSchema.safeParse(form)
     if (!resultado.success) {
-      const errosCampos: Record<string, string> = {}
+      const mapaErros: Record<string, string> = {}
       for (const erro of resultado.error.issues) {
-        errosCampos[erro.path[0] as string] = erro.message
+        if (erro.path[0]) {
+          mapaErros[String(erro.path[0])] = erro.message
+        }
       }
-      setErros(errosCampos)
+      setErros(mapaErros)
       return
     }
 
@@ -65,8 +68,8 @@ export function Component() {
     <Box
       minH="100vh"
       w="full"
-      bg="zinc.950"
-      color="white"
+      bg="cirqueira.grey.950"
+      color="cirqueira.grey.0"
       position="relative"
       overflow="hidden"
       display="flex"
@@ -107,23 +110,23 @@ export function Component() {
         position="relative"
         zIndex={10}
       >
-        <Link to="/" style={{ textDecoration: 'none' }}>
-          <HStack gap={2.5} align="center">
+        <Link to="/login">
+          <HStack gap={3}>
             <Center
-              boxSize={9}
+              boxSize={10}
               rounded="xl"
               bg="cirqueira.brand.500"
               color="cirqueira.grey.0"
-              shadow="0 4px 15px -2px rgba(0, 186, 156, 0.4)"
+              shadow="md"
             >
-              <Code2 size={18} color="currentColor" strokeWidth={2.5} />
+              <Code2 size={22} color="currentColor" strokeWidth={2.5} />
             </Center>
             <Text
               as="span"
               fontWeight="900"
               fontSize="lg"
               letterSpacing="tight"
-              color="white"
+              color="cirqueira.grey.0"
               fontFamily="heading"
             >
               Cirqueira
@@ -158,43 +161,39 @@ export function Component() {
         py={{ base: 8, md: 12 }}
         px={{ base: 6, md: 10 }}
         position="relative"
-        zIndex={1}
+        zIndex={10}
       >
         <Grid
-          templateColumns={{ base: '1fr', lg: '1.15fr 0.85fr' }}
+          templateColumns={{ base: '1fr', lg: '1.1fr 0.9fr' }}
           gap={{ base: 12, lg: 16 }}
           alignItems="center"
           w="full"
         >
-          <VStack align="flex-start" gap={8}>
-            <VStack align="flex-start" gap={4}>
+          <VStack align="flex-start" gap={8} display={{ base: 'none', lg: 'flex' }}>
+            <VStack align="flex-start" gap={3}>
               <Badge
                 variant="subtle"
                 colorPalette="brand"
-                border="1px solid"
-                borderColor="cirqueira.brand.500/30"
-                color="cirqueira.brand.400"
-                fontWeight="semibold"
-                px={3.5}
-                py={1.5}
+                px={3}
+                py={1}
                 borderRadius="full"
                 fontSize="xs"
+                fontWeight="semibold"
                 display="inline-flex"
                 alignItems="center"
+                gap={1.5}
               >
-                <Box as="span" display="inline-flex" mr={1.5}>
-                  <Sparkles size={14} color="currentColor" />
-                </Box>
-                Sua Central Pessoal de Mídias
+                <Sparkles size={14} />
+                Gestão Inteligente de Conteúdo
               </Badge>
 
               <Text
                 as="h1"
                 fontSize={{ base: '3xl', sm: '4xl', xl: '5xl' }}
                 fontWeight="black"
+                lineHeight="1.1"
                 letterSpacing="tight"
-                lineHeight="1.15"
-                color="white"
+                color="cirqueira.grey.0"
               >
                 Todas as suas mídias centralizadas em um{' '}
                 <Text as="span" color="cirqueira.brand.400">
@@ -204,7 +203,7 @@ export function Component() {
 
               <Text
                 fontSize={{ base: 'sm', sm: 'md' }}
-                color="whiteAlpha.700"
+                color="cirqueira.grey.300"
                 lineHeight="relaxed"
                 maxW="xl"
               >
@@ -217,9 +216,9 @@ export function Component() {
               <Box
                 p={4}
                 borderRadius="2xl"
-                bg="whiteAlpha.50"
+                bg="cirqueira.grey.900/40"
                 borderWidth="1px"
-                borderColor="whiteAlpha.100"
+                borderColor="cirqueira.grey.800/60"
                 backdropFilter="blur(10px)"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.brand.500/40', transform: 'translateY(-2px)' }}
@@ -233,10 +232,10 @@ export function Component() {
                 >
                   <DownloadCloud size={20} color="currentColor" />
                 </Center>
-                <Text fontSize="sm" fontWeight="bold" color="white" mb={1}>
+                <Text fontSize="sm" fontWeight="bold" color="cirqueira.grey.0" mb={1}>
                   Downloads
                 </Text>
-                <Text fontSize="xs" color="whiteAlpha.600" lineHeight="short">
+                <Text fontSize="xs" color="cirqueira.grey.400" lineHeight="short">
                   YouTube, TikTok, Twitter e Instagram em 1 clique.
                 </Text>
               </Box>
@@ -244,9 +243,9 @@ export function Component() {
               <Box
                 p={4}
                 borderRadius="2xl"
-                bg="whiteAlpha.50"
+                bg="cirqueira.grey.900/40"
                 borderWidth="1px"
-                borderColor="whiteAlpha.100"
+                borderColor="cirqueira.grey.800/60"
                 backdropFilter="blur(10px)"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.brand.500/40', transform: 'translateY(-2px)' }}
@@ -260,20 +259,20 @@ export function Component() {
                 >
                   <FolderSync size={20} color="currentColor" />
                 </Center>
-                <Text fontSize="sm" fontWeight="bold" color="white" mb={1}>
+                <Text fontSize="sm" fontWeight="bold" color="cirqueira.grey.0" mb={1}>
                   Sincronização
                 </Text>
-                <Text fontSize="xs" color="whiteAlpha.600" lineHeight="short">
-                  Fotos do celular enviadas direto ao seu storage.
+                <Text fontSize="xs" color="cirqueira.grey.400" lineHeight="short">
+                  Pastas Syncthing e backup no Google Fotos.
                 </Text>
               </Box>
 
               <Box
                 p={4}
                 borderRadius="2xl"
-                bg="whiteAlpha.50"
+                bg="cirqueira.grey.900/40"
                 borderWidth="1px"
-                borderColor="whiteAlpha.100"
+                borderColor="cirqueira.grey.800/60"
                 backdropFilter="blur(10px)"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.brand.500/40', transform: 'translateY(-2px)' }}
@@ -281,17 +280,17 @@ export function Component() {
                 <Center
                   boxSize={10}
                   rounded="xl"
-                  bg="cirqueira.purple.500/15"
-                  color="cirqueira.purple.400"
+                  bg="cirqueira.brand.500/15"
+                  color="cirqueira.brand.400"
                   mb={3}
                 >
-                  <Layers size={20} color="currentColor" />
+                  <Sparkles size={20} color="currentColor" />
                 </Center>
-                <Text fontSize="sm" fontWeight="bold" color="white" mb={1}>
+                <Text fontSize="sm" fontWeight="bold" color="cirqueira.grey.0" mb={1}>
                   Organização
                 </Text>
-                <Text fontSize="xs" color="whiteAlpha.600" lineHeight="short">
-                  Álbuns categorizados e integrados ao Google Fotos.
+                <Text fontSize="xs" color="cirqueira.grey.400" lineHeight="short">
+                  Categorização estruturada por diretório e finalidade.
                 </Text>
               </Box>
             </Grid>
@@ -309,8 +308,8 @@ export function Component() {
             />
 
             <Card.Root
-              bg="zinc.900/90"
-              borderColor="whiteAlpha.200"
+              bg="cirqueira.grey.900/90"
+              borderColor="cirqueira.grey.800"
               borderWidth="1px"
               borderRadius="3xl"
               shadow="2xl"
@@ -326,10 +325,16 @@ export function Component() {
                 pb={2}
                 px={{ base: 6, sm: 8 }}
               >
-                <Text as="h2" fontSize="2xl" fontWeight="black" color="white" letterSpacing="tight">
+                <Text
+                  as="h2"
+                  fontSize="2xl"
+                  fontWeight="black"
+                  color="cirqueira.grey.0"
+                  letterSpacing="tight"
+                >
                   Bem-vindo de volta
                 </Text>
-                <Text fontSize="xs" color="whiteAlpha.600">
+                <Text fontSize="xs" color="cirqueira.grey.400">
                   Informe suas credenciais para gerenciar suas mídias
                 </Text>
               </Card.Header>
@@ -341,7 +346,7 @@ export function Component() {
                   style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
                 >
                   <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
-                    <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                    <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
                       E-mail ou Usuário
                     </Field.Label>
                     <HStack position="relative" w="full">
@@ -349,7 +354,7 @@ export function Component() {
                         position="absolute"
                         left={3.5}
                         zIndex={2}
-                        color="whiteAlpha.400"
+                        color="cirqueira.grey.500"
                         pointerEvents="none"
                         display="inline-flex"
                       >
@@ -365,14 +370,14 @@ export function Component() {
                         pl={10}
                         h={12}
                         borderRadius="xl"
-                        bg="whiteAlpha.50"
-                        borderColor="whiteAlpha.200"
-                        color="white"
+                        bg="cirqueira.grey.950"
+                        borderColor="cirqueira.grey.800"
+                        color="cirqueira.grey.0"
                         fontSize="sm"
-                        _placeholder={{ color: 'whiteAlpha.400' }}
+                        _placeholder={{ color: 'cirqueira.grey.500' }}
                         _focus={{
                           borderColor: 'cirqueira.brand.500',
-                          bg: 'whiteAlpha.100',
+                          bg: 'cirqueira.grey.900',
                           boxShadow: '0 0 0 1px var(--chakra-colors-cirqueira-brand-500)',
                         }}
                       />
@@ -383,7 +388,7 @@ export function Component() {
                   </Field.Root>
 
                   <Field.Root invalid={Boolean(erros.senha)}>
-                    <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
+                    <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
                       Senha
                     </Field.Label>
                     <HStack position="relative" w="full">
@@ -391,7 +396,7 @@ export function Component() {
                         position="absolute"
                         left={3.5}
                         zIndex={2}
-                        color="whiteAlpha.400"
+                        color="cirqueira.grey.500"
                         pointerEvents="none"
                         display="inline-flex"
                       >
@@ -408,14 +413,14 @@ export function Component() {
                         pr={10}
                         h={12}
                         borderRadius="xl"
-                        bg="whiteAlpha.50"
-                        borderColor="whiteAlpha.200"
-                        color="white"
+                        bg="cirqueira.grey.950"
+                        borderColor="cirqueira.grey.800"
+                        color="cirqueira.grey.0"
                         fontSize="sm"
-                        _placeholder={{ color: 'whiteAlpha.400' }}
+                        _placeholder={{ color: 'cirqueira.grey.500' }}
                         _focus={{
                           borderColor: 'cirqueira.brand.500',
-                          bg: 'whiteAlpha.100',
+                          bg: 'cirqueira.grey.900',
                           boxShadow: '0 0 0 1px var(--chakra-colors-cirqueira-brand-500)',
                         }}
                       />
@@ -426,8 +431,8 @@ export function Component() {
                         onClick={() => setMostrarSenha((v) => !v)}
                         position="absolute"
                         right={2}
-                        color="whiteAlpha.400"
-                        _hover={{ color: 'white', bg: 'transparent' }}
+                        color="cirqueira.grey.500"
+                        _hover={{ color: 'cirqueira.grey.0', bg: 'transparent' }}
                         h={8}
                         w={8}
                         p={0}
@@ -473,11 +478,11 @@ export function Component() {
                   justify="center"
                   gap={1.5}
                   fontSize="xs"
-                  color="whiteAlpha.400"
+                  color="cirqueira.grey.500"
                   mt={6}
                   pt={4}
                   borderTopWidth="1px"
-                  borderColor="whiteAlpha.100"
+                  borderColor="cirqueira.grey.900"
                 >
                   <Box as="span" color="cirqueira.brand.400" display="inline-flex">
                     <ShieldCheck size={14} color="currentColor" />
@@ -500,7 +505,7 @@ export function Component() {
         position="relative"
         zIndex={10}
       >
-        <Text fontSize="xs" color="whiteAlpha.400">
+        <Text fontSize="xs" color="cirqueira.grey.500">
           CirqueiraX • Plataforma de Gestão de Mídias
         </Text>
       </HStack>
