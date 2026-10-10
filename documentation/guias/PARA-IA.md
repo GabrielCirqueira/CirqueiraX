@@ -402,7 +402,7 @@ class YtDlpException extends \DomainException
 
 - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` / `className` — só componentes Chakra (`Box`, `HStack`, `Heading`…)
 - [x] Cores só da paleta gerada (`cirqueira.grey.700` / `paletteToken(...)`) — sem hex
-- [ ] Sem Header/Footer na página
+- [x] Sem Header/Footer na página
 - [ ] Sem `any`, sem `ts-ignore`
 - [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return
 - [ ] Nenhum Service usa `\DomainException` genérica — sempre exceção por contexto com método estático

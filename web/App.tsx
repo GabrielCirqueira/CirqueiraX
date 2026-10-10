@@ -12,11 +12,9 @@ import { lazyWithRetry } from '@/shared/utils/lazyWithRetry'
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/">
-      <Route element={<MainLayout />}>
-        {/* Rota pública de autenticação */}
-        <Route path="login" lazy={() => lazyWithRetry(() => import('@/features/auth/Login'))} />
+      <Route path="login" lazy={() => lazyWithRetry(() => import('@/features/auth/Login'))} />
 
-        {/* Rotas protegidas — exigem login */}
+      <Route element={<MainLayout />}>
         <Route element={<RotaProtegida />}>
           <Route index lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))} />
           <Route
