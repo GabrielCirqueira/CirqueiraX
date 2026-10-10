@@ -417,34 +417,18 @@ export const CardVideo = memo(function CardVideo({
           )}
         </Flex>
 
-        <HStack
-          justify="space-between"
-          align="center"
-          gap={2}
-          fontSize="xs"
-          color="fg.subtle"
-          py={1.5}
-          px={2.5}
-          borderRadius="lg"
-          bg="bg.muted/60"
-          borderWidth="1px"
-          borderColor="border.subtle"
-        >
-          <HStack gap={2} fontSize="xs" color="fg.muted" truncate>
+        <Flex align="center" justify="space-between" gap={2} fontSize="xs" color="fg.subtle">
+          <HStack gap={2} color="fg.muted" truncate>
             <HStack gap={1}>
               <Calendar size={12} style={{ flexShrink: 0 }} />
-              <Text as="span" fontWeight="medium">
-                {dataMidia}
-              </Text>
+              <Text as="span">{dataMidia}</Text>
             </HStack>
             <Text as="span" opacity={0.4}>
               •
             </Text>
             <HStack gap={1}>
               <Clock size={12} style={{ flexShrink: 0 }} />
-              <Text as="span" fontWeight="medium">
-                {horarioMidia}
-              </Text>
+              <Text as="span">{horarioMidia}</Text>
             </HStack>
           </HStack>
 
@@ -464,7 +448,7 @@ export const CardVideo = memo(function CardVideo({
               </Text>
             )}
           </Box>
-        </HStack>
+        </Flex>
 
         {item.status === 'erro' && item.erroMotivo && (
           <Box
