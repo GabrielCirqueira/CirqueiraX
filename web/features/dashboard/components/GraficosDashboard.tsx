@@ -60,7 +60,7 @@ function CustomTooltipPie({
   }
   return (
     <Box
-      borderRadius="xl"
+      borderRadius="lg"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -99,7 +99,7 @@ function CustomTooltipBar({
   }
   return (
     <Box
-      borderRadius="xl"
+      borderRadius="lg"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -137,9 +137,16 @@ export const GraficosDashboard = memo(function GraficosDashboard({
     return (
       <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
         {['grafico-sk-1', 'grafico-sk-2'].map((chave) => (
-          <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={4}>
+          <Card.Root
+            key={chave}
+            borderWidth="1px"
+            borderColor="border.subtle"
+            bg="bg.panel"
+            borderRadius="xl"
+            p={4}
+          >
             <Skeleton h={6} w={48} borderRadius="md" mb={4} />
-            <Skeleton h={64} w="full" borderRadius="xl" />
+            <Skeleton h={64} w="full" borderRadius="lg" />
           </Card.Root>
         ))}
       </Grid>
@@ -186,7 +193,13 @@ export const GraficosDashboard = memo(function GraficosDashboard({
 
   return (
     <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
-      <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="lg">
+      <Card.Root
+        borderWidth="1px"
+        borderColor="border.subtle"
+        bg="bg.panel"
+        borderRadius="xl"
+        shadow="lg"
+      >
         <Card.Header
           display="flex"
           flexDirection="row"
@@ -195,7 +208,7 @@ export const GraficosDashboard = memo(function GraficosDashboard({
           pb={2}
         >
           <HStack gap={2.5}>
-            <Box p={2} borderRadius="xl" bg="blue.500/10" color="blue.500">
+            <Box p={2} borderRadius="lg" bg="cirqueira.blue.500/10" color="cirqueira.blue.500">
               <PieChartIcon size={20} />
             </Box>
             <VStack gap={0.5} alignItems="flex-start">
@@ -257,7 +270,13 @@ export const GraficosDashboard = memo(function GraficosDashboard({
         </Card.Body>
       </Card.Root>
 
-      <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="lg">
+      <Card.Root
+        borderWidth="1px"
+        borderColor="border.subtle"
+        bg="bg.panel"
+        borderRadius="xl"
+        shadow="lg"
+      >
         <Card.Header
           display="flex"
           flexDirection="row"
@@ -266,7 +285,7 @@ export const GraficosDashboard = memo(function GraficosDashboard({
           pb={2}
         >
           <HStack gap={2.5}>
-            <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+            <Box p={2} borderRadius="lg" bg="cirqueira.purple.500/10" color="cirqueira.purple.500">
               <HardDrive size={20} />
             </Box>
             <VStack gap={0.5} alignItems="flex-start">

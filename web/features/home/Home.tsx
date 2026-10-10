@@ -74,7 +74,7 @@ const HomeContent = memo(function HomeContent() {
             </Text>
             <Text
               fontSize={{ base: 'sm', sm: 'lg' }}
-              color="zinc.400"
+              color="cirqueira.grey.400"
               maxW="2xl"
               lineHeight="relaxed"
             >
@@ -104,12 +104,12 @@ const HomeContent = memo(function HomeContent() {
               <Button
                 variant="outline"
                 size="lg"
-                borderColor="zinc.700"
-                color="zinc.200"
+                borderColor="cirqueira.grey.700"
+                color="cirqueira.grey.200"
                 fontWeight="bold"
                 px={6}
                 borderRadius="xl"
-                _hover={{ bg: 'zinc.800' }}
+                _hover={{ bg: 'cirqueira.grey.800' }}
               >
                 <Box as="span" color="cirqueira.brand.500" display="inline-flex" mr={2}>
                   <DownloadCloud size={20} color="currentColor" />
@@ -122,12 +122,12 @@ const HomeContent = memo(function HomeContent() {
               <Button
                 variant="outline"
                 size="lg"
-                borderColor="zinc.700"
-                color="zinc.200"
+                borderColor="cirqueira.grey.700"
+                color="cirqueira.grey.200"
                 fontWeight="bold"
                 px={6}
                 borderRadius="xl"
-                _hover={{ bg: 'zinc.800' }}
+                _hover={{ bg: 'cirqueira.grey.800' }}
               >
                 <Box as="span" color="cirqueira.indigo.500" display="inline-flex" mr={2}>
                   <UploadCloud size={20} color="currentColor" />
@@ -144,10 +144,10 @@ const HomeContent = memo(function HomeContent() {
                   key={tag}
                   variant="subtle"
                   colorPalette="gray"
-                  bg="zinc.800"
-                  color="zinc.400"
+                  bg="cirqueira.grey.800"
+                  color="cirqueira.grey.400"
                   border="1px solid"
-                  borderColor="zinc.700"
+                  borderColor="cirqueira.grey.700"
                   fontSize="xs"
                   fontWeight="medium"
                   px={2.5}
@@ -167,7 +167,7 @@ const HomeContent = memo(function HomeContent() {
           <Text as="h2" fontSize="2xl" fontWeight="800" color="white">
             Métricas & Status do Sistema
           </Text>
-          <Text fontSize="xs" color="zinc.400">
+          <Text fontSize="xs" color="cirqueira.grey.400">
             Resumo em tempo real dos pipelines de ingestão, categorias e agentes conectados.
           </Text>
         </VStack>
@@ -175,10 +175,10 @@ const HomeContent = memo(function HomeContent() {
         <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }} gap={4}>
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
           >
             <Card.Header
               display="flex"
@@ -190,7 +190,7 @@ const HomeContent = memo(function HomeContent() {
               <Card.Title
                 fontSize="xs"
                 fontWeight="bold"
-                color="zinc.400"
+                color="cirqueira.grey.400"
                 textTransform="uppercase"
                 letterSpacing="wider"
               >
@@ -204,7 +204,7 @@ const HomeContent = memo(function HomeContent() {
               <Text fontSize="3xl" fontWeight="900" color="white" mb={1}>
                 {carregandoMedia ? '...' : totalMedia}
               </Text>
-              <Text fontSize="xs" color="zinc.400">
+              <Text fontSize="xs" color="cirqueira.grey.400">
                 Vídeos e imagens registrados no banco de dados
               </Text>
             </Card.Body>
@@ -212,10 +212,10 @@ const HomeContent = memo(function HomeContent() {
 
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
           >
             <Card.Header
               display="flex"
@@ -227,13 +227,18 @@ const HomeContent = memo(function HomeContent() {
               <Card.Title
                 fontSize="xs"
                 fontWeight="bold"
-                color="zinc.400"
+                color="cirqueira.grey.400"
                 textTransform="uppercase"
                 letterSpacing="wider"
               >
                 Categorias Ativas
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="indigo.500/10" color="indigo.500">
+              <Box
+                p={2}
+                borderRadius="xl"
+                bg="cirqueira.indigo.500/10"
+                color="cirqueira.indigo.500"
+              >
                 <FolderCheck size={20} />
               </Box>
             </Card.Header>
@@ -241,7 +246,7 @@ const HomeContent = memo(function HomeContent() {
               <Text fontSize="3xl" fontWeight="900" color="white" mb={1}>
                 {categorias.length}
               </Text>
-              <Text fontSize="xs" color="zinc.400">
+              <Text fontSize="xs" color="cirqueira.grey.400">
                 Categorias para organização e triagem automática
               </Text>
             </Card.Body>
@@ -249,10 +254,10 @@ const HomeContent = memo(function HomeContent() {
 
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
           >
             <Card.Header
               display="flex"
@@ -264,13 +269,18 @@ const HomeContent = memo(function HomeContent() {
               <Card.Title
                 fontSize="xs"
                 fontWeight="bold"
-                color="zinc.400"
+                color="cirqueira.grey.400"
                 textTransform="uppercase"
                 letterSpacing="wider"
               >
                 Agentes de Print
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="emerald.500/10" color="emerald.500">
+              <Box
+                p={2}
+                borderRadius="xl"
+                bg="cirqueira.emerald.500/10"
+                color="cirqueira.emerald.500"
+              >
                 <Monitor size={20} />
               </Box>
             </Card.Header>
@@ -279,10 +289,10 @@ const HomeContent = memo(function HomeContent() {
                 <Badge
                   colorPalette="green"
                   variant="subtle"
-                  bg="emerald.500/10"
-                  color="emerald-400"
+                  bg="cirqueira.emerald.500/10"
+                  color="cirqueira.emerald.400"
                   border="1px solid"
-                  borderColor="emerald.500/20"
+                  borderColor="cirqueira.emerald.500/20"
                   fontWeight="bold"
                   px={2}
                   py={0.5}
@@ -291,7 +301,7 @@ const HomeContent = memo(function HomeContent() {
                   2 Conectados
                 </Badge>
               </HStack>
-              <Text fontSize="xs" color="zinc.400">
+              <Text fontSize="xs" color="cirqueira.grey.400">
                 Agente PC Empresa e Agente PC Pessoal ativos via X-Agent-Token
               </Text>
             </Card.Body>
@@ -299,10 +309,10 @@ const HomeContent = memo(function HomeContent() {
 
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
           >
             <Card.Header
               display="flex"
@@ -314,13 +324,13 @@ const HomeContent = memo(function HomeContent() {
               <Card.Title
                 fontSize="xs"
                 fontWeight="bold"
-                color="zinc.400"
+                color="cirqueira.grey.400"
                 textTransform="uppercase"
                 letterSpacing="wider"
               >
                 Google Fotos Pipeline
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="amber.500/10" color="amber.500">
+              <Box p={2} borderRadius="xl" bg="cirqueira.amber.500/10" color="cirqueira.amber.500">
                 <Cloud size={20} />
               </Box>
             </Card.Header>
@@ -329,10 +339,10 @@ const HomeContent = memo(function HomeContent() {
                 <Badge
                   colorPalette="amber"
                   variant="subtle"
-                  bg="amber.500/10"
-                  color="amber.400"
+                  bg="cirqueira.amber.500/10"
+                  color="cirqueira.amber.400"
                   border="1px solid"
-                  borderColor="amber.500/20"
+                  borderColor="cirqueira.amber.500/20"
                   fontWeight="bold"
                   px={2}
                   py={0.5}
@@ -341,7 +351,7 @@ const HomeContent = memo(function HomeContent() {
                   OAuth2 Pronto
                 </Badge>
               </HStack>
-              <Text fontSize="xs" color="zinc.400">
+              <Text fontSize="xs" color="cirqueira.grey.400">
                 Sincronização com renovação automática de tokens
               </Text>
             </Card.Body>
@@ -354,7 +364,7 @@ const HomeContent = memo(function HomeContent() {
           <Text as="h2" fontSize="2xl" fontWeight="800" color="white">
             Recursos Principais do CirqueiraX
           </Text>
-          <Text fontSize="xs" color="zinc.400">
+          <Text fontSize="xs" color="cirqueira.grey.400">
             Conheça as ferramentas e pipelines integrados ao ecossistema.
           </Text>
         </VStack>
@@ -362,17 +372,17 @@ const HomeContent = memo(function HomeContent() {
         <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
             _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
-                borderRadius="2xl"
+                borderRadius="xl"
                 bg="cirqueira.brand.500/10"
                 color="cirqueira.brand.500"
                 display="flex"
@@ -387,7 +397,7 @@ const HomeContent = memo(function HomeContent() {
               </Card.Title>
             </Card.Header>
             <Card.Body display="flex" flexDirection="column" gap={4}>
-              <Text fontSize="xs" color="zinc.400" lineHeight="relaxed">
+              <Text fontSize="xs" color="cirqueira.grey.400" lineHeight="relaxed">
                 Suporte completo a URLs do YouTube, TikTok, X (Twitter) e Instagram com extração
                 automática de metadados (título, uploader, duração e thumbnail).
               </Text>
@@ -425,17 +435,17 @@ const HomeContent = memo(function HomeContent() {
 
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
             _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
-                borderRadius="2xl"
+                borderRadius="xl"
                 bg="cirqueira.indigo.500/10"
                 color="cirqueira.indigo.500"
                 display="flex"
@@ -450,7 +460,7 @@ const HomeContent = memo(function HomeContent() {
               </Card.Title>
             </Card.Header>
             <Card.Body display="flex" flexDirection="column" gap={4}>
-              <Text fontSize="xs" color="zinc.400" lineHeight="relaxed">
+              <Text fontSize="xs" color="cirqueira.grey.400" lineHeight="relaxed">
                 Área de drag-and-drop interativa para fotos e vídeos com verificação imediata de
                 hash contra arquivos duplicados e atribuição rápida de categorias em lote.
               </Text>
@@ -488,17 +498,17 @@ const HomeContent = memo(function HomeContent() {
 
           <Card.Root
             border="1px solid"
-            borderColor="zinc.800"
-            bg="zinc.900"
+            borderColor="cirqueira.grey.800"
+            bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="2xl"
+            borderRadius="xl"
             _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
-                borderRadius="2xl"
+                borderRadius="xl"
                 bg="cirqueira.green.500/10"
                 color="cirqueira.green.500"
                 display="flex"
@@ -513,7 +523,7 @@ const HomeContent = memo(function HomeContent() {
               </Card.Title>
             </Card.Header>
             <Card.Body display="flex" flexDirection="column" gap={4}>
-              <Text fontSize="xs" color="zinc.400" lineHeight="relaxed">
+              <Text fontSize="xs" color="cirqueira.grey.400" lineHeight="relaxed">
                 Agentes autônomos para PC Empresa e PC Pessoal com monitoramento de pastas em tempo
                 real, debounce, cliente HTTP com retry e salvamento seguro.
               </Text>

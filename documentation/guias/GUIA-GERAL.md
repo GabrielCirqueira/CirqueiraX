@@ -31,11 +31,12 @@
 
   * **React 19** com **TypeScript**
   * **Vite**
+  * **Chakra UI v3** (layout, componentes base acessíveis e design system)
+  * **Paleta Cirqueira** (`cirqueira.*` via `web/config/theme/theme.ts`)
   * **TanStack Query** (gerenciamento de estado do servidor e cache)
   * **Zustand** (gerenciamento de estado global)
   * **Axios** (via instância centralizada `api.ts`)
-  * **HeroUI v3** (componentes base acessíveis, inclui toast)
-  * **Tailwind CSS 4** + **tailwindcss-motion** (estilo e animações padrão)
+  * **tailwindcss-motion** (micro-animações declarativas)
   * **Recharts** (gráficos)
 
   ### DevOps

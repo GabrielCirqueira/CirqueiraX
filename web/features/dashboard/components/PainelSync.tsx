@@ -132,7 +132,7 @@ export const PainelSync = memo(function PainelSync({
     <VStack w="full" gap={4} alignItems="stretch">
       <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
         <HStack gap={2.5}>
-          <Box p={2} borderRadius="xl" bg="cirqueira.cyan.500/10" color="cirqueira.cyan.500">
+          <Box p={2} borderRadius="lg" bg="cirqueira.cyan.500/10" color="cirqueira.cyan.500">
             <FolderSync size={20} />
           </Box>
           <VStack gap={0.5} alignItems="flex-start">
@@ -146,7 +146,12 @@ export const PainelSync = memo(function PainelSync({
         </HStack>
 
         <HStack gap={2}>
-          <Badge size="sm" variant="subtle" colorPalette={isOnline ? 'cyan' : 'gray'}>
+          <Badge
+            size="sm"
+            variant="subtle"
+            colorPalette={isOnline ? 'cyan' : 'gray'}
+            borderRadius="md"
+          >
             <HStack gap={1.5}>
               {isOnline ? (
                 <Box as="span" color="cirqueira.cyan.500" display="inline-flex">
@@ -164,6 +169,7 @@ export const PainelSync = memo(function PainelSync({
           <IconButton
             size="sm"
             variant="ghost"
+            borderRadius="lg"
             onClick={() => refetch()}
             disabled={isFetching}
             aria-label="Atualizar Status"
@@ -179,7 +185,7 @@ export const PainelSync = memo(function PainelSync({
       {mensagemSucesso && (
         <Box
           p={3}
-          borderRadius="xl"
+          borderRadius="lg"
           bg="cirqueira.emerald.500/10"
           borderWidth="1px"
           borderColor="cirqueira.emerald.500/20"
@@ -233,6 +239,7 @@ export const PainelSync = memo(function PainelSync({
                 borderWidth="1px"
                 borderColor="border.subtle"
                 bg="bg.panel"
+                borderRadius="xl"
                 shadow="md"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.cyan.500' }}
@@ -247,7 +254,7 @@ export const PainelSync = memo(function PainelSync({
                   <HStack gap={2.5}>
                     <Box
                       p={2}
-                      borderRadius="xl"
+                      borderRadius="lg"
                       bg="cirqueira.cyan.500/10"
                       color="cirqueira.cyan.400"
                     >
@@ -269,7 +276,12 @@ export const PainelSync = memo(function PainelSync({
                     </VStack>
                   </HStack>
 
-                  <Badge size="sm" variant="subtle" colorPalette={badge.colorPalette}>
+                  <Badge
+                    size="sm"
+                    variant="subtle"
+                    colorPalette={badge.colorPalette}
+                    borderRadius="md"
+                  >
                     <HStack gap={1}>
                       <BadgeIcon
                         size={12}

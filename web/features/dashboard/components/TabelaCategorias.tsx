@@ -83,7 +83,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
     <VStack w="full" gap={4} alignItems="stretch">
       <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
         <HStack gap={2.5}>
-          <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+          <Box p={2} borderRadius="lg" bg="cirqueira.purple.500/10" color="cirqueira.purple.500">
             <Layers size={20} />
           </Box>
           <VStack gap={0.5} alignItems="flex-start">
@@ -126,7 +126,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
           <Button
             size="sm"
             colorPalette="brand"
-            borderRadius="xl"
+            borderRadius="lg"
             fontSize="xs"
             h={9}
             px={3}
@@ -141,7 +141,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
               size="sm"
               variant="subtle"
               colorPalette="teal"
-              borderRadius="xl"
+              borderRadius="lg"
               fontSize="xs"
               h={9}
               px={3}
@@ -221,7 +221,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                   <HStack gap={2.5}>
                     <Box
                       p={2}
-                      borderRadius="xl"
+                      borderRadius="lg"
                       bg="cirqueira.purple.500/10"
                       color="cirqueira.purple.400"
                     >
@@ -343,7 +343,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                           variant="ghost"
                           onClick={() => setCategoriaEditando(cat)}
                           fontSize="11px"
-                          color="purple.500"
+                          color="cirqueira.purple.500"
                           p={1}
                           h={6}
                         >

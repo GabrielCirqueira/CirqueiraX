@@ -76,13 +76,13 @@ export const GridAlbuns = memo(function GridAlbuns({
       <Card.Root
         w="full"
         p={8}
-        borderRadius="2xl"
+        borderRadius="xl"
         border="1px dashed"
         borderColor="border.subtle"
         bg="bg.subtle"
       >
         <VStack gap={4} align="center" textAlign="center" py={8}>
-          <Box p={4} borderRadius="full" bg="teal.500/10" color="teal.500">
+          <Box p={4} borderRadius="full" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
             <Icon as={FolderPlus} boxSize={10} />
           </Box>
           <VStack gap={1}>
@@ -114,17 +114,17 @@ export const GridAlbuns = memo(function GridAlbuns({
         return (
           <Card.Root
             key={album.id}
-            borderRadius="2xl"
+            borderRadius="xl"
             overflow="hidden"
             border="1px solid"
-            borderColor={vinculado ? 'border.subtle' : 'amber.500/30'}
+            borderColor={vinculado ? 'border.subtle' : 'cirqueira.amber.500/30'}
             bg="bg.panel"
             shadow="sm"
             transition="all 0.2s ease"
             _hover={{
               shadow: 'md',
               transform: 'translateY(-2px)',
-              borderColor: vinculado ? 'teal.500/40' : 'amber.500/60',
+              borderColor: vinculado ? 'cirqueira.teal.500/40' : 'cirqueira.amber.500/60',
             }}
           >
             <Box position="relative" h="180px" w="full" overflow="hidden" bg="bg.muted">
@@ -144,8 +144,8 @@ export const GridAlbuns = memo(function GridAlbuns({
                   h="full"
                   align="center"
                   justify="center"
-                  bg="teal.500/5"
-                  color="teal.500"
+                  bg="cirqueira.teal.500/5"
+                  color="cirqueira.teal.500"
                 >
                   <Icon as={Images} boxSize={12} opacity={0.6} />
                 </Flex>
@@ -206,7 +206,7 @@ export const GridAlbuns = memo(function GridAlbuns({
 
                   {vinculado && album.categoria ? (
                     <HStack gap={1.5} fontSize="xs" color="fg.muted">
-                      <Icon as={Folder} boxSize={3.5} color="teal.500" />
+                      <Icon as={Folder} boxSize={3.5} color="cirqueira.teal.500" />
                       <Text lineClamp={1}>
                         Pasta:{' '}
                         <Text as="span" fontFamily="mono">
@@ -215,7 +215,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                       </Text>
                     </HStack>
                   ) : (
-                    <HStack gap={1.5} fontSize="xs" color="amber.600">
+                    <HStack gap={1.5} fontSize="xs" color="cirqueira.amber.600">
                       <Icon as={AlertCircle} boxSize={3.5} />
                       <Text lineClamp={1}>Álbum órfão (sem categoria associada)</Text>
                     </HStack>
@@ -228,7 +228,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                       colorPalette="gray"
                       variant="outline"
                       size="sm"
-                      borderRadius="xl"
+                      borderRadius="lg"
                       flex={1}
                       onClick={() => onVincularAlbum?.(album)}
                     >
@@ -240,7 +240,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                       <Button
                         variant="subtle"
                         size="sm"
-                        borderRadius="xl"
+                        borderRadius="lg"
                         colorPalette="purple"
                         px={2.5}
                         title="Ver categoria no Dashboard"
@@ -255,7 +255,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                     colorPalette="teal"
                     variant="solid"
                     size="sm"
-                    borderRadius="xl"
+                    borderRadius="lg"
                     w="full"
                     onClick={() => onVincularAlbum?.(album)}
                   >

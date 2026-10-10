@@ -73,7 +73,7 @@ const DashboardView = memo(function DashboardView() {
                 fontWeight="semibold"
                 cursor="pointer"
                 onClick={() => setAbaAtiva('erros')}
-                borderRadius="full"
+                borderRadius="md"
                 px={2.5}
                 py={1}
               >
@@ -86,7 +86,7 @@ const DashboardView = memo(function DashboardView() {
                 size="sm"
                 colorPalette="green"
                 fontWeight="semibold"
-                borderRadius="full"
+                borderRadius="md"
                 px={2.5}
                 py={1}
               >
@@ -101,7 +101,7 @@ const DashboardView = memo(function DashboardView() {
               disabled={atualizandoManual}
               onClick={handleAtualizarTudo}
               fontWeight="medium"
-              borderRadius="xl"
+              borderRadius="lg"
             >
               <RefreshCw
                 size={14}
@@ -124,7 +124,7 @@ const DashboardView = memo(function DashboardView() {
               borderWidth="1px"
               borderColor="border.subtle"
               p={1}
-              borderRadius="2xl"
+              borderRadius="xl"
               flexWrap="wrap"
               gap={1}
             >
@@ -134,7 +134,7 @@ const DashboardView = memo(function DashboardView() {
                 py={2}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 <HStack gap={2} align="center">
                   <LayoutDashboard size={15} />
@@ -148,7 +148,7 @@ const DashboardView = memo(function DashboardView() {
                 py={2}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 <HStack gap={2} align="center">
                   <FolderTree size={15} />
@@ -162,7 +162,7 @@ const DashboardView = memo(function DashboardView() {
                 py={2}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 <HStack gap={2} align="center">
                   <RefreshCw size={15} />
@@ -176,7 +176,7 @@ const DashboardView = memo(function DashboardView() {
                 py={2}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 <HStack gap={2} align="center">
                   <AlertTriangle size={15} />
@@ -189,6 +189,7 @@ const DashboardView = memo(function DashboardView() {
                       px={1.5}
                       fontSize="10px"
                       fontWeight="bold"
+                      borderRadius="md"
                     >
                       {totalErros}
                     </Badge>

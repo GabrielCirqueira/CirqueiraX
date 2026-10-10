@@ -56,7 +56,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
     return (
       <Flex w="full" minH="400px" align="center" justify="center" p={8}>
         <VStack gap={4}>
-          <Spinner size="xl" color="teal.500" />
+          <Spinner size="xl" color="cirqueira.teal.500" />
           <Text fontSize="sm" color="fg.muted">
             Verificando status de conexão com o Google Fotos...
           </Text>
@@ -68,10 +68,22 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
   if (isError || !status?.conectado) {
     return (
       <Flex w="full" minH="500px" align="center" justify="center" py={12} px={4}>
-        <Card.Root maxW="2xl" w="full" shadow="lg" border="1px solid" borderColor="border.subtle">
+        <Card.Root
+          maxW="2xl"
+          w="full"
+          borderRadius="xl"
+          shadow="lg"
+          border="1px solid"
+          borderColor="border.subtle"
+        >
           <Card.Header>
             <VStack gap={3} align="center" textAlign="center">
-              <Box p={3} borderRadius="full" bg="amber.500/10" color="amber.500">
+              <Box
+                p={3}
+                borderRadius="full"
+                bg="cirqueira.amber.500/10"
+                color="cirqueira.amber.500"
+              >
                 <Icon as={CloudOff} boxSize={8} />
               </Box>
               <VStack gap={1}>
@@ -95,7 +107,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
               >
                 <VStack gap={3} align="stretch">
                   <HStack gap={2}>
-                    <Icon as={Terminal} color="teal.500" />
+                    <Icon as={Terminal} color="cirqueira.teal.500" />
                     <Text
                       fontSize="xs"
                       fontWeight="bold"
@@ -125,11 +137,12 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                       aria-label="Copiar comando"
                       size="xs"
                       variant="ghost"
+                      borderRadius="lg"
                       onClick={handleCopiarComando}
                     >
                       <Icon
                         as={copiado ? Check : Copy}
-                        color={copiado ? 'green.500' : 'fg.muted'}
+                        color={copiado ? 'cirqueira.green.500' : 'fg.muted'}
                       />
                     </IconButton>
                   </HStack>
@@ -149,6 +162,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 <Button
                   colorPalette="teal"
                   size="md"
+                  borderRadius="lg"
                   onClick={() => refetch()}
                   loading={isRefetching}
                 >
@@ -170,12 +184,12 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
         borderRadius="xl"
         bg="bg.subtle"
         border="1px solid"
-        borderColor="teal.500/20"
+        borderColor="cirqueira.teal.500/20"
         shadow="xs"
       >
         <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <HStack gap={3}>
-            <Box p={2.5} borderRadius="lg" bg="teal.500/10" color="teal.500">
+            <Box p={2.5} borderRadius="lg" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
               <Icon as={ShieldCheck} boxSize={5} />
             </Box>
             <VStack align="flex-start" gap={0.5}>

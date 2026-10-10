@@ -87,11 +87,11 @@ function FormularioCriarCategoria({
           {erro && (
             <Box
               p={3}
-              borderRadius="xl"
-              bg="red.500/10"
+              borderRadius="lg"
+              bg="cirqueira.red.500/10"
               borderWidth="1px"
-              borderColor="red.500/20"
-              color="red.500"
+              borderColor="cirqueira.red.500/20"
+              color="cirqueira.red.500"
               fontSize="xs"
             >
               {erro}
@@ -109,7 +109,7 @@ function FormularioCriarCategoria({
               mt={1}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="xl"
+              borderRadius="lg"
               autoFocus
             />
           </Field.Root>
@@ -127,7 +127,7 @@ function FormularioCriarCategoria({
               borderColor="border.subtle"
               fontFamily="mono"
               fontSize="xs"
-              borderRadius="xl"
+              borderRadius="lg"
             />
             <Text fontSize="11px" color="fg.subtle" mt={1}>
               Subdiretório dentro da pasta organizada onde as mídias desta categoria serão salvas.
@@ -136,7 +136,7 @@ function FormularioCriarCategoria({
 
           <Box
             p={3}
-            borderRadius="xl"
+            borderRadius="lg"
             bg="cirqueira.brand.500/5"
             borderWidth="1px"
             borderColor="cirqueira.brand.500/20"
@@ -165,7 +165,7 @@ function FormularioCriarCategoria({
           colorPalette="brand"
           disabled={isPending}
           fontWeight="medium"
-          borderRadius="xl"
+          borderRadius="lg"
         >
           {isPending ? (
             <HStack gap={2}>
@@ -194,7 +194,7 @@ export function ModalCriarCategoria({ aberto, onFechar, onSucesso }: ModalCriarC
           borderWidth="1px"
           borderColor="border.subtle"
           color="fg"
-          borderRadius="2xl"
+          borderRadius="xl"
           p={0}
           maxW="md"
           w="full"
@@ -209,7 +209,7 @@ export function ModalCriarCategoria({ aberto, onFechar, onSucesso }: ModalCriarC
             borderColor="border.subtle"
           >
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
+              <Box p={2} borderRadius="lg" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
                 <FolderPlus size={20} />
               </Box>
               <VStack gap={0.5} alignItems="flex-start">

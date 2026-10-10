@@ -98,7 +98,7 @@ export const FilaErros = memo(function FilaErros() {
     <VStack w="full" gap={4} alignItems="stretch">
       <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
         <HStack gap={2.5}>
-          <Box p={2} borderRadius="xl" bg="red.500/10" color="red.500">
+          <Box p={2} borderRadius="lg" bg="cirqueira.red.500/10" color="cirqueira.red.500">
             <AlertTriangle size={20} />
           </Box>
           <VStack gap={0.5} alignItems="flex-start">
@@ -107,7 +107,13 @@ export const FilaErros = memo(function FilaErros() {
                 Fila Operacional de Erros
               </Text>
               {total > 0 && (
-                <Badge size="sm" variant="subtle" colorPalette="red" fontWeight="semibold">
+                <Badge
+                  size="sm"
+                  variant="subtle"
+                  colorPalette="red"
+                  fontWeight="semibold"
+                  borderRadius="md"
+                >
                   {total} {total === 1 ? 'falha' : 'falhas'}
                 </Badge>
               )}
@@ -128,7 +134,7 @@ export const FilaErros = memo(function FilaErros() {
             fontSize="xs"
             fontWeight="medium"
             h={9}
-            borderRadius="xl"
+            borderRadius="lg"
           >
             {retentandoTodos ? (
               <HStack gap={1.5}>
@@ -148,17 +154,17 @@ export const FilaErros = memo(function FilaErros() {
       {mensagemSucesso && (
         <Box
           p={3}
-          borderRadius="xl"
-          bg="emerald.500/10"
+          borderRadius="lg"
+          bg="cirqueira.emerald.500/10"
           borderWidth="1px"
-          borderColor="emerald.500/20"
-          color="emerald.500"
+          borderColor="cirqueira.emerald.500/20"
+          color="cirqueira.emerald.500"
           fontSize="xs"
           display="flex"
           alignItems="center"
           gap={2}
         >
-          <CheckCircle2 size={16} flexShrink={0} />
+          <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
           <Text as="span">{mensagemSucesso}</Text>
         </Box>
       )}
@@ -166,8 +172,9 @@ export const FilaErros = memo(function FilaErros() {
       {itens.length === 0 ? (
         <Card.Root
           borderWidth="1px"
-          borderColor="emerald.500/20"
-          bg="emerald.500/5"
+          borderColor="cirqueira.emerald.500/20"
+          bg="cirqueira.emerald.500/5"
+          borderRadius="xl"
           p={8}
           textAlign="center"
           shadow="lg"
@@ -179,10 +186,15 @@ export const FilaErros = memo(function FilaErros() {
             justifyContent="center"
             gap={2.5}
           >
-            <Box p={3} borderRadius="full" bg="emerald.500/10" color="emerald.500">
+            <Box
+              p={3}
+              borderRadius="full"
+              bg="cirqueira.emerald.500/10"
+              color="cirqueira.emerald.500"
+            >
               <CheckCircle2 size={32} />
             </Box>
-            <Text fontSize="sm" fontWeight="semibold" color="emerald.500">
+            <Text fontSize="sm" fontWeight="semibold" color="cirqueira.emerald.500">
               Nenhuma falha ativa no pipeline
             </Text>
             <Text fontSize="xs" color="fg.subtle" maxW="md">
@@ -205,16 +217,22 @@ export const FilaErros = memo(function FilaErros() {
               <Card.Root
                 key={item.uuid}
                 borderWidth="1px"
-                borderColor="red.500/30"
-                bg="red.500/5"
+                borderColor="cirqueira.red.500/30"
+                bg="cirqueira.red.500/5"
+                borderRadius="xl"
                 shadow="md"
                 transition="all 0.2s"
-                _hover={{ borderColor: 'red.500/50' }}
+                _hover={{ borderColor: 'cirqueira.red.500/50' }}
               >
                 <Card.Body p={4}>
                   <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={2} mb={3}>
                     <HStack gap={2.5} align="center">
-                      <Box p={2} borderRadius="xl" bg="red.500/10" color="red.500">
+                      <Box
+                        p={2}
+                        borderRadius="lg"
+                        bg="cirqueira.red.500/10"
+                        color="cirqueira.red.500"
+                      >
                         <IconeOrigem size={16} />
                       </Box>
                       <VStack gap={0.5} alignItems="flex-start">
@@ -239,6 +257,7 @@ export const FilaErros = memo(function FilaErros() {
                       size="sm"
                       variant="ghost"
                       colorPalette="red"
+                      borderRadius="lg"
                       disabled={estaRetentando || retentandoTodos}
                       onClick={() => handleRetentarItem(item.uuid)}
                       fontSize="xs"
@@ -261,20 +280,20 @@ export const FilaErros = memo(function FilaErros() {
 
                   <Box
                     p={3}
-                    borderRadius="xl"
-                    bg="red.500/10"
+                    borderRadius="lg"
+                    bg="cirqueira.red.500/10"
                     borderWidth="1px"
-                    borderColor="red.500/20"
-                    color="red.500"
+                    borderColor="cirqueira.red.500/20"
+                    color="cirqueira.red.500"
                     fontSize="xs"
                     display="flex"
                     alignItems="flex-start"
                     gap={2.5}
                     mb={3}
                   >
-                    <AlertCircle size={16} flexShrink={0} style={{ marginTop: '2px' }} />
+                    <AlertCircle size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
                     <VStack gap={0.5} flex={1} alignItems="flex-start">
-                      <Text fontWeight="semibold" color="red.500">
+                      <Text fontWeight="semibold" color="cirqueira.red.500">
                         Motivo da Falha:
                       </Text>
                       <Text fontFamily="mono" fontSize="11px" wordBreak="break-all">
@@ -330,6 +349,7 @@ export const FilaErros = memo(function FilaErros() {
                 <Button
                   size="sm"
                   variant="ghost"
+                  borderRadius="lg"
                   disabled={pagina <= 1}
                   onClick={() => setPagina((p) => Math.max(1, p - 1))}
                   h={8}
@@ -340,6 +360,7 @@ export const FilaErros = memo(function FilaErros() {
                 <Button
                   size="sm"
                   variant="ghost"
+                  borderRadius="lg"
                   disabled={pagina >= totalPaginas}
                   onClick={() => setPagina((p) => p + 1)}
                   h={8}

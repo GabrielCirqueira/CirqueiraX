@@ -567,12 +567,12 @@ export const CardVideo = memo(function CardVideo({
           <Box
             mb={3}
             borderRadius="lg"
-            bg="red.500/10"
+            bg="cirqueira.red.500/10"
             p={2}
             fontSize="xs"
-            color="red.500"
+            color="cirqueira.red.500"
             borderWidth="1px"
-            borderColor="red.500/20"
+            borderColor="cirqueira.red.500/20"
             lineClamp={2}
           >
             {item.erroMotivo}
@@ -587,8 +587,8 @@ export const CardVideo = memo(function CardVideo({
             disabled={baixando}
             aria-label="Baixar arquivo MP4"
             title="Baixar arquivo MP4 para seu computador"
-            color="cyan.400"
-            _hover={{ bg: 'cyan.500/10' }}
+            color="cirqueira.cyan.400"
+            _hover={{ bg: 'cirqueira.cyan.500/10' }}
           >
             {baixando ? (
               <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />

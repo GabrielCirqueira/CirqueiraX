@@ -52,6 +52,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
               aria-label="Abrir menu de navegação"
               variant="ghost"
               size="sm"
+              borderRadius="lg"
               color="cirqueira.grey.300"
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               onClick={onToggleMobileSidebar}
@@ -63,7 +64,12 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
           <HStack display={{ base: 'flex', md: 'none' }} gap={2} align="center">
             <RouterLink to={autenticado ? '/dashboard' : '/login'}>
               <HStack gap={1.5}>
-                <Center boxSize={7} rounded="lg" bg="cirqueira.brand.500" color="cirqueira.grey.0">
+                <Center
+                  boxSize={7}
+                  borderRadius="lg"
+                  bg="cirqueira.brand.500"
+                  color="cirqueira.grey.0"
+                >
                   <Code2 size={16} strokeWidth={2.5} />
                 </Center>
                 <Text
@@ -94,7 +100,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
               display="inline-flex"
               alignItems="center"
               gap={1}
-              borderRadius="full"
+              borderRadius="md"
               px={2}
               py={0.5}
             >
@@ -110,6 +116,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
           <IconButton
             size="xs"
             variant="ghost"
+            borderRadius="lg"
             onClick={toggleTheme}
             aria-label="Alternar tema"
             color="cirqueira.grey.400"
@@ -126,7 +133,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
                 variant="subtle"
                 px={2.5}
                 py={0.5}
-                borderRadius="full"
+                borderRadius="md"
                 fontSize="xs"
                 alignItems="center"
                 gap={1.5}
@@ -137,6 +144,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
               <IconButton
                 size="xs"
                 variant="ghost"
+                borderRadius="lg"
                 onClick={handleLogout}
                 color="cirqueira.grey.400"
                 _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}

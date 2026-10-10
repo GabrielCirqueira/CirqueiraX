@@ -77,11 +77,11 @@ function FormularioEditarCategoria({
           {erro && (
             <Box
               p={3}
-              borderRadius="xl"
-              bg="red.500/10"
+              borderRadius="lg"
+              bg="cirqueira.red.500/10"
               borderWidth="1px"
-              borderColor="red.500/20"
-              color="red.500"
+              borderColor="cirqueira.red.500/20"
+              color="cirqueira.red.500"
               fontSize="xs"
             >
               {erro}
@@ -99,7 +99,7 @@ function FormularioEditarCategoria({
               mt={1}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="xl"
+              borderRadius="lg"
             />
           </Field.Root>
 
@@ -116,7 +116,7 @@ function FormularioEditarCategoria({
               borderColor="border.subtle"
               fontFamily="mono"
               fontSize="xs"
-              borderRadius="xl"
+              borderRadius="lg"
             />
             <Text fontSize="11px" color="fg.subtle" mt={1}>
               Os arquivos associados a esta categoria serão movidos para esta pasta.
@@ -126,7 +126,7 @@ function FormularioEditarCategoria({
           {categoria.googlePhotosAlbumId && (
             <VStack
               p={3}
-              borderRadius="xl"
+              borderRadius="lg"
               bg="bg.muted"
               borderWidth="1px"
               borderColor="border.subtle"
@@ -160,7 +160,7 @@ function FormularioEditarCategoria({
           colorPalette="brand"
           disabled={isPending}
           fontWeight="medium"
-          borderRadius="xl"
+          borderRadius="lg"
         >
           {isPending ? (
             <HStack gap={2}>
@@ -196,7 +196,7 @@ export function ModalEditarCategoria({
           borderWidth="1px"
           borderColor="border.subtle"
           color="fg"
-          borderRadius="2xl"
+          borderRadius="xl"
           p={0}
           maxW="md"
           w="full"
@@ -211,7 +211,12 @@ export function ModalEditarCategoria({
             borderColor="border.subtle"
           >
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+              <Box
+                p={2}
+                borderRadius="lg"
+                bg="cirqueira.purple.500/10"
+                color="cirqueira.purple.500"
+              >
                 <FolderCheck size={20} />
               </Box>
               <VStack gap={0.5} alignItems="flex-start">

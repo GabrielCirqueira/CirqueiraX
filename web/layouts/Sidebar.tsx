@@ -63,7 +63,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             <HStack gap={3}>
               <Center
                 boxSize={8}
-                rounded="lg"
+                borderRadius="lg"
                 bg="cirqueira.brand.500"
                 color="cirqueira.grey.0"
                 shadow="sm"
@@ -107,6 +107,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
               aria-label="Fechar menu"
               variant="ghost"
               size="xs"
+              borderRadius="lg"
               color="cirqueira.grey.400"
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               onClick={onClose}
@@ -142,7 +143,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
                     w="full"
                     px={3}
                     py={2.5}
-                    borderRadius="xl"
+                    borderRadius="lg"
                     gap={3}
                     transition="all 0.15s ease"
                     bg={ativo ? 'cirqueira.brand.500/15' : 'transparent'}
@@ -199,7 +200,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
           <HStack gap={2.5} minW={0}>
             <Center
               boxSize={8}
-              rounded="lg"
+              borderRadius="lg"
               bg="cirqueira.brand.500/20"
               color="cirqueira.brand.300"
               flexShrink={0}
@@ -226,6 +227,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             <IconButton
               size="xs"
               variant="ghost"
+              borderRadius="lg"
               onClick={toggleTheme}
               aria-label="Alternar tema"
               color="cirqueira.grey.400"
@@ -237,6 +239,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             <IconButton
               size="xs"
               variant="ghost"
+              borderRadius="lg"
               onClick={handleLogout}
               aria-label="Sair da conta"
               color="cirqueira.grey.400"

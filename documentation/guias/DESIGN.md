@@ -23,51 +23,34 @@ A estética é baseada em **sofisticação tecnológica**, **ritmo visual** e **
 
 ### 2.1 Regra de Ouro
 
-> **Nunca use `className` nem hex.** Cores só da paleta gerada (`cirqueira.grey.700`, `cirqueira.brand.500`) em `web/config/theme/theme.ts`. `colorPalette` só com escalas dessa paleta.
+> **Nunca use `className` nem hex.** Cores no Chakra UI devem SEMPRE usar a paleta gerada (`cirqueira.<escala>.<tom>`) em `web/config/theme/theme.ts`.
+> É proibido o uso de cores cruas sem prefixo (como `red.500`, `purple.500`, `teal.500`) ou hexes arbitrários.
 
-Isso garante que a troca de tema (light/dark) funcione automaticamente e que a identidade visual seja consistente em todas as telas.
+Isso garante que a troca de tema (light/dark) e a identidade visual funcionem de maneira uniforme em todas as telas.
 
-### 2.2 Tokens de Cor
+### 2.2 Tokens de Cor da Paleta `cirqueira`
 
-| Token | Propósito | Light | Dark |
-| :--- | :--- | :--- | :--- |
-| **brand-500** | Cor principal — CTAs, destaques, ícones ativos | `#1cc39d` | `#1cc39d` |
-| **brand-600** | Hover sobre brand (contraste AA garantido) | `#11967c` | `#11967c` |
-| **brand-500/10** | Fundo sutil de destaque | Alpha 0.1 | Alpha 0.1 |
-| **brand-500/15** | Fundo de destaque no dark | — | Alpha 0.15 |
-| **background-50** | Superfície alternada / fundo de seção | `#f9fafb` | — |
-| **background-100** | Hover de itens, fundo de inputs | `#f3f4f6` | — |
-| **background-800** | Surface secundária no dark | — | `#1f2937` |
-| **background-900** | Surface de cards no dark | — | `#111827` |
-| **background-950** | Fundo de página no dark | — | `#030712` |
-| **typography-950** | Títulos e texto de ênfase | `#171717` | `#f9fafb` |
-| **typography-600** | Corpo de texto neutro | `#525252` | `#d4d4d4` |
-| **typography-400** | Texto secundário/muted | `#a3a3a3` | `#737373` |
-| **outline-100** | Bordas no light | `#f3f4f6` | — |
-| **outline-900** | Bordas no dark | — | `#1f2937` |
-| **success-500** | Estados de sucesso | `#22c55e` | `#22c55e` |
-| **error-500** | Estados de erro | `#ef4444` | `#ef4444` |
-| **warning-500** | Estados de alerta | `#f59e0b` | `#f59e0b` |
+| Escala / Token | Propósito | Exemplo no Chakra |
+| :--- | :--- | :--- |
+| **`cirqueira.brand.500`** | Cor primária da marca — destaques, botões ativos, progressos | `bg="cirqueira.brand.500"` / `color="cirqueira.brand.500"` |
+| **`cirqueira.brand.600`** | Hover de botões primários | `_hover={{ bg: 'cirqueira.brand.600' }}` |
+| **`cirqueira.brand.500/10`** | Fundo translúcido sutil de destaque | `bg="cirqueira.brand.500/10"` |
+| **`cirqueira.brand.500/20`** | Bordas com destaque da marca | `borderColor="cirqueira.brand.500/20"` |
+| **`cirqueira.red.500`** | Estados de erro, falhas, deleção | `color="cirqueira.red.500"` / `bg="cirqueira.red.500/10"` |
+| **`cirqueira.green.500`** / **`cirqueira.emerald.500`** | Estados de sucesso e confirmação | `color="cirqueira.green.500"` / `bg="cirqueira.green.500/10"` |
+| **`cirqueira.amber.500`** | Avisos, pendências, estados de alerta | `color="cirqueira.amber.500"` / `bg="cirqueira.amber.500/10"` |
+| **`cirqueira.teal.500`** | Integração Google Fotos e sincronizações | `color="cirqueira.teal.500"` / `bg="cirqueira.teal.500/10"` |
+| **`cirqueira.purple.500`** | Categorias, metadados e tags especiais | `color="cirqueira.purple.500"` / `bg="cirqueira.purple.500/10"` |
+| **`cirqueira.grey.900`** | Superfícies escuras de cards/painéis | `bg="cirqueira.grey.900"` (ou `bg="bg.panel"`) |
+| **`cirqueira.grey.800`** | Bordas e superfícies secundárias | `bg="cirqueira.grey.800"` / `borderColor="border.subtle"` |
+| **`cirqueira.grey.400`** | Texto secundário / muted | `color="cirqueira.grey.400"` (ou `color="fg.subtle"`) |
 
-### 2.3 Uso da Cor Brand
+### 2.3 Tokens Semânticos Nativos Permitidos
 
-A cor `brand` é o fio condutor de toda a interface. Aplique-a em:
-
-- Botões primários, ícones de ação, indicadores de progresso
-- Item ativo em menus e tabs (`bg-brand-500/10 text-brand-600 dark:text-brand-400`)
-- Bordas de foco (`focus:ring-brand-500`)
-- Badges de destaque, glows de seção, blobs decorativos
-- Underlines de links ativos, linhas de divisão em tabelas com destaque
-
-**Quando usar variantes de brand:**
-
-| Situação | Token |
-| :--- | :--- |
-| Fundo de botão primário | `bg-brand-500 hover:bg-brand-600` |
-| Fundo sutil (badge, chip, ativo) | `bg-brand-500/10` |
-| Texto de destaque | `text-brand-600 dark:text-brand-400` |
-| Borda de foco | `ring-brand-500/50` |
-| Glow/sombra decorativa | `shadow-brand-500/20` |
+Para neutros estruturais, utilize os tokens semânticos do tema:
+- **Fundos**: `bg="bg.panel"`, `bg="bg.subtle"`, `bg="bg.muted"`
+- **Bordas**: `borderColor="border.subtle"`
+- **Tipografia**: `color="fg"` (texto principal), `color="fg.subtle"`, `color="fg.muted"`
 
 ---
 
@@ -75,53 +58,31 @@ A cor `brand` é o fio condutor de toda a interface. Aplique-a em:
 
 ### 3.1 Famílias de Fonte
 
-- **Headings — Poppins:** `font-poppins` para H1 a H3. Estilo padrão: `font-black` (900) com `tracking-tight`.
-- **Body — Lato:** `font-lato` para parágrafos, labels e textos de interface. Estilo padrão: `font-medium` (500).
+- **Headings — Poppins:** para títulos e números em destaque (`Heading`, `fontFamily="heading"`).
+- **Body — Lato:** para parágrafos, labels e textos de interface (`Text`, `fontFamily="body"`).
 
-**Nunca misturar fontes** — Poppins exclusivo para headings, Lato para todo o resto.
+### 3.2 Escala de Headings e Textos
 
-### 3.2 Escala de Headings
-
-| Nível | Uso | Classes |
-| :--- | :--- | :--- |
-| **Display (H1 hero)** | Títulos de hero, destaque máximo | `text-4xl sm:text-6xl font-black leading-[1.1] tracking-tight` |
-| **H1 de página** | Título principal de cada tela | `text-3xl sm:text-4xl font-black leading-tight` |
-| **H2 de seção** | Divisões de conteúdo | `text-2xl font-bold` |
-| **H3 de card** | Títulos de cards e panels | `text-xl font-bold` |
-| **H4 de subitem** | Subtítulos, grupos | `text-lg font-semibold` |
-| **Label de seção** | Labels de categoria, eyebrow | `text-xs font-bold uppercase tracking-widest text-typography-400` |
-
-### 3.3 Escala de Texto (Body)
-
-| Tamanho | Uso |
-| :--- | :--- |
-| `text-lg leading-relaxed` | Descrições de hero, parágrafos de introdução |
-| `text-base` | Corpo de texto padrão |
-| `text-sm` | Metadados, rodapés, labels de inputs |
-| `text-xs font-bold uppercase` | Badges, etiquetas de status, eyebrow labels |
-
-### 3.4 Regras de Peso
-
-- `font-black` (900): headings principais e displays
-- `font-bold` (700): sub-headings e destaques em body
-- `font-semibold` (600): labels, itens de menu ativos
-- `font-medium` (500): corpo padrão
-- Nunca usar `font-light` ou `font-thin` — perdem legibilidade no dark mode
+- Display / H1: `<Heading as="h1" size="2xl">`
+- H2 de Seção: `<Heading as="h2" size="xl">`
+- H3 de Card: `<Heading as="h3" size="md">`
+- Body: `<Text fontSize="sm">` ou `<Text fontSize="base">`
+- Subtítulos / Muted: `<Text fontSize="xs" color="fg.subtle">`
 
 ---
 
-## 4. Sistema de Arredondamento (Hierarquia L1–L4)
+## 4. Sistema de Arredondamento Padronizado (`borderRadius`)
 
-A hierarquia de `border-radius` comunica importância e camada. Elementos mais próximos do usuário têm arredondamento maior.
+A hierarquia de curvatura é uniforme em todo o sistema. É proibido usar valores arbitrários (`2xl`, `sm`) fora do padrão:
 
-| Nível | Token Tailwind | Uso |
-| :--- | :--- | :--- |
-| **L1** | `rounded-md` | Inputs, selects, tags, badges pequenos |
-| **L2** | `rounded-lg` / `rounded-xl` | Cards, dropdowns, tooltips |
-| **L3** | `rounded-xl` | Painéis destacados, banners, modais internos |
-| **L4** | `rounded-2xl` | Modais, drawers, hero containers |
+| Nível | Prop Chakra | Uso Exclusivo | Componentes Exemplos |
+| :--- | :--- | :--- | :--- |
+| **Superfície** | `borderRadius="xl"` | Cards, modais, caixas de diálogo, painéis | `Card.Root`, `Dialog.Content`, painéis principais |
+| **Controle** | `borderRadius="lg"` | Elementos interativos e formulários | `Input`, `Select`, `Button`, `IconButton`, ícones (`Box p={2}`) |
+| **Etiqueta** | `borderRadius="md"` | Badges, chips, tags | `Badge` |
+| **Circular** | `borderRadius="full"` | Exclusivo para círculos reais | Avatares, pills 100% redondos, botões flutuantes circulares |
 
-**Regra:** nunca use `rounded-full` em retângulos — apenas em pills e avatares circulares. Nunca use `rounded` (sem sufixo) — sem distinção visual.
+> **Regra:** Nunca use `borderRadius="full"` em retângulos ou cards. Mantenha cards sempre em `borderRadius="xl"` e botões/inputs sempre em `borderRadius="lg"`.
 
 ---
 

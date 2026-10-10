@@ -392,7 +392,7 @@ class YtDlpException extends \DomainException
 
 1. Entender a tela e o contrato JSON.
 2. Backend: **Controller primeiro**. Service atômico. Lógica grande/repetida → vários services + interface + `TaggedIterator` na Feature. Nunca um arquivo com toda a lógica. Repository para toda consulta → Entidade / migration / DTO / Serializer.
-3. Frontend: `types.ts` → `api.ts` → hook → componentes HeroUI + layout → página `Component` → rota lazy em `App.tsx`.
+3. Frontend: `types.ts` → `api.ts` → hook → componentes Chakra UI + layout → página `Component` → rota lazy em `App.tsx`.
 4. Se a rota for autenticada, registrar em `RotaProtegida`.
 5. `make lint-all`. Corrigir o que o Biome/PHP apontar.
 
@@ -401,8 +401,10 @@ class YtDlpException extends \DomainException
 ## 6. Checklist rápido (antes de encerrar)
 
 - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` / `className` — só componentes Chakra (`Box`, `HStack`, `Heading`…)
-- [x] Cores só da paleta gerada (`cirqueira.grey.700` / `paletteToken(...)`) — sem hex
-- [x] Sem Header/Footer na página
+- [x] Cores só da paleta gerada (`cirqueira.<escala>.<tom>`) — proibido cores cruas (`red.500`, `teal.500`...) e hex
+- [x] Arredondamento padronizado: `xl` (cards/dialogs/painéis), `lg` (inputs/botões/ícones), `md` (badges)
+- [x] ZERO comentários no código fonte — nenhum `//` ou `/* */` em `.ts`, `.tsx`, `.php`
+- [x] Sem Header/Footer na página individual (usar layout padrão / Sidebar)
 - [ ] Sem `any`, sem `ts-ignore`
 - [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return
 - [ ] Nenhum Service usa `\DomainException` genérica — sempre exceção por contexto com método estático

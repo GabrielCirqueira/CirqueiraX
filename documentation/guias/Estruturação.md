@@ -337,26 +337,25 @@ import { Box, Container, Heading, HStack, SimpleGrid, Text, VStack } from '@chak
 ```
 
 ```tsx
-<Box p="4" rounded="xl" bg="bg.panel" />
+<Box p="4" borderRadius="xl" bg="bg.panel" />
 <HStack justify="space-between" gap="4" />
 <VStack gap="6" align="start" />
 <SimpleGrid columns={3} gap="4" />
 <Container maxW="6xl" py="12" />
 <Text fontSize="sm" color="fg.muted">Parágrafo</Text>
 <Heading as="h1" size="4xl">Título</Heading>
-<Text as="span" color="brand.fg">Destaque inline</Text>
+<Text as="span" color="cirqueira.brand.500">Destaque inline</Text>
 ```
 
 Tamanhos disponíveis para `<Container>`: `sm`, `md`, `lg`, `xl` (padrão), `2xl`, `full`.
 
 ### 9.3 Estilização obrigatória
 
-* Todo estilo deve ser feito com props do Chakra (`p`, `gap`, `bg`, `colorPalette`).
-
+* Todo estilo deve ser feito com props do Chakra (`p`, `gap`, `bg`, `color`, `borderColor`, `borderRadius`, `colorPalette`).
+* **PROIBIDO** o uso de `className` ou classes utilitárias manuais em componentes de páginas e features.
 * O sistema deve sempre manter:
-
-  * transições
-  * animações
+  * transições suaves
+  * micro-interações em elementos clicáveis
   * sensação moderna e fluida
 
 ---

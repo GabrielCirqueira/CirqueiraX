@@ -28,7 +28,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
       borderWidth="1px"
       borderColor="cirqueira.brand.500/20"
       bg="bg.panel"
-      borderRadius="2xl"
+      borderRadius="xl"
       overflow="hidden"
       shadow="sm"
     >
@@ -52,7 +52,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
             <Flex
               w={10}
               h={10}
-              borderRadius="xl"
+              borderRadius="lg"
               bg="cirqueira.brand.500/15"
               color="cirqueira.brand.400"
               align="center"
@@ -66,7 +66,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                 <Text fontSize="sm" fontWeight="bold" color="fg">
                   Por que meus álbuns antigos do Google Fotos não aparecem aqui?
                 </Text>
-                <Badge size="xs" variant="subtle" colorPalette="brand">
+                <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
                   Guia de Migração
                 </Badge>
               </HStack>
@@ -102,16 +102,22 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
           <VStack gap={5} align="stretch">
             <Box
               p={4}
-              borderRadius="xl"
-              bg="amber.500/10"
+              borderRadius="lg"
+              bg="cirqueira.amber.500/10"
               borderWidth="1px"
-              borderColor="amber.500/20"
+              borderColor="cirqueira.amber.500/20"
               color="fg"
             >
               <HStack align="flex-start" gap={3}>
-                <Icon as={ShieldAlert} boxSize={5} color="amber.500" flexShrink={0} mt={0.5} />
+                <Icon
+                  as={ShieldAlert}
+                  boxSize={5}
+                  color="cirqueira.amber.500"
+                  flexShrink={0}
+                  mt={0.5}
+                />
                 <VStack align="flex-start" gap={1}>
-                  <Text fontSize="xs" fontWeight="bold" color="amber.500">
+                  <Text fontSize="xs" fontWeight="bold" color="cirqueira.amber.500">
                     Restrição de Segurança da API do Google
                   </Text>
                   <Text fontSize="xs" color="fg.subtle" lineHeight="relaxed">
@@ -259,7 +265,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                     </Flex>
                     <VStack align="flex-start" gap={1}>
                       <HStack gap={1.5}>
-                        <Icon as={CheckCircle2} boxSize={4} color="green.400" />
+                        <Icon as={CheckCircle2} boxSize={4} color="cirqueira.green.400" />
                         <Text fontSize="xs" fontWeight="semibold" color="fg">
                           Adicione as Fotos ao Álbum Gerenciado pelo CirqueiraX
                         </Text>
@@ -277,7 +283,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
 
             <HStack
               p={3}
-              borderRadius="xl"
+              borderRadius="lg"
               bg="bg.muted"
               justify="space-between"
               align="center"
@@ -285,13 +291,13 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
               color="fg.subtle"
             >
               <HStack gap={2}>
-                <Icon as={Info} boxSize={4} color="teal.500" />
+                <Icon as={Info} boxSize={4} color="cirqueira.teal.500" />
                 <Text>
                   Novos downloads e uploads realizados pelo CirqueiraX são enviados e catalogados
                   automaticamente.
                 </Text>
               </HStack>
-              <HStack gap={1} color="teal.500" fontWeight="medium">
+              <HStack gap={1} color="cirqueira.teal.500" fontWeight="medium">
                 <Icon as={ArrowRight} boxSize={3.5} />
                 <Text as="span">Automação 100% ativa</Text>
               </HStack>

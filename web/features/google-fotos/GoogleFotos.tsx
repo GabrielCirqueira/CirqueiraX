@@ -34,7 +34,7 @@ export default function GoogleFotos() {
         >
           <VStack gap={1} alignItems="flex-start">
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="teal.500/10" color="teal.500">
+              <Box p={2} borderRadius="lg" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
                 <Icon as={Images} boxSize={6} />
               </Box>
               <Text as="h1" fontSize="2xl" fontWeight="bold" color="fg">
@@ -52,7 +52,7 @@ export default function GoogleFotos() {
             variant="ghost"
             disabled={isFetching}
             onClick={() => refetch()}
-            borderRadius="xl"
+            borderRadius="lg"
           >
             <RefreshCw
               size={14}
@@ -75,7 +75,13 @@ export default function GoogleFotos() {
             gap={4}
             w="full"
           >
-            <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="sm">
+            <Card.Root
+              borderWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.panel"
+              borderRadius="xl"
+              shadow="sm"
+            >
               <Card.Body p={4}>
                 <HStack justify="space-between" align="flex-start">
                   <VStack align="flex-start" gap={1}>
@@ -86,61 +92,99 @@ export default function GoogleFotos() {
                       {isLoading ? '...' : resumo.totalAlbuns}
                     </Text>
                   </VStack>
-                  <Box p={2} borderRadius="xl" bg="teal.500/10" color="teal.500">
+                  <Box
+                    p={2}
+                    borderRadius="lg"
+                    bg="cirqueira.teal.500/10"
+                    color="cirqueira.teal.500"
+                  >
                     <Icon as={Images} boxSize={5} />
                   </Box>
                 </HStack>
               </Card.Body>
             </Card.Root>
 
-            <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="sm">
+            <Card.Root
+              borderWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.panel"
+              borderRadius="xl"
+              shadow="sm"
+            >
               <Card.Body p={4}>
                 <HStack justify="space-between" align="flex-start">
                   <VStack align="flex-start" gap={1}>
                     <Text fontSize="xs" fontWeight="medium" color="fg.subtle">
                       Álbuns Vinculados
                     </Text>
-                    <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                    <Text fontSize="2xl" fontWeight="bold" color="cirqueira.green.500">
                       {isLoading ? '...' : resumo.totalVinculados}
                     </Text>
                   </VStack>
-                  <Box p={2} borderRadius="xl" bg="green.500/10" color="green.500">
+                  <Box
+                    p={2}
+                    borderRadius="lg"
+                    bg="cirqueira.green.500/10"
+                    color="cirqueira.green.500"
+                  >
                     <Icon as={CheckCircle2} boxSize={5} />
                   </Box>
                 </HStack>
               </Card.Body>
             </Card.Root>
 
-            <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="sm">
+            <Card.Root
+              borderWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.panel"
+              borderRadius="xl"
+              shadow="sm"
+            >
               <Card.Body p={4}>
                 <HStack justify="space-between" align="flex-start">
                   <VStack align="flex-start" gap={1}>
                     <Text fontSize="xs" fontWeight="medium" color="fg.subtle">
                       Álbuns Sem Vínculo (Órfãos)
                     </Text>
-                    <Text fontSize="2xl" fontWeight="bold" color="amber.500">
+                    <Text fontSize="2xl" fontWeight="bold" color="cirqueira.amber.500">
                       {isLoading ? '...' : resumo.totalOrfaos}
                     </Text>
                   </VStack>
-                  <Box p={2} borderRadius="xl" bg="amber.500/10" color="amber.500">
+                  <Box
+                    p={2}
+                    borderRadius="lg"
+                    bg="cirqueira.amber.500/10"
+                    color="cirqueira.amber.500"
+                  >
                     <Icon as={AlertTriangle} boxSize={5} />
                   </Box>
                 </HStack>
               </Card.Body>
             </Card.Root>
 
-            <Card.Root borderWidth="1px" borderColor="border.subtle" bg="bg.panel" shadow="sm">
+            <Card.Root
+              borderWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.panel"
+              borderRadius="xl"
+              shadow="sm"
+            >
               <Card.Body p={4}>
                 <HStack justify="space-between" align="flex-start">
                   <VStack align="flex-start" gap={1}>
                     <Text fontSize="xs" fontWeight="medium" color="fg.subtle">
                       Categorias Sem Álbum
                     </Text>
-                    <Text fontSize="2xl" fontWeight="bold" color="purple.500">
+                    <Text fontSize="2xl" fontWeight="bold" color="cirqueira.purple.500">
                       {isLoading ? '...' : resumo.totalCategoriasSemAlbum}
                     </Text>
                   </VStack>
-                  <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.500">
+                  <Box
+                    p={2}
+                    borderRadius="lg"
+                    bg="cirqueira.purple.500/10"
+                    color="cirqueira.purple.500"
+                  >
                     <Icon as={FolderSync} boxSize={5} />
                   </Box>
                 </HStack>

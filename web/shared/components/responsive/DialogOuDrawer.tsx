@@ -29,19 +29,19 @@ export function DialogOuDrawer({
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content
-          bg="gray.900"
+          bg="bg.panel"
           border="1px solid"
-          borderColor="gray.800"
-          color="white"
+          borderColor="border.subtle"
+          color="fg"
           p={4}
-          rounded="xl"
+          borderRadius="xl"
         >
           <Dialog.Header>
             <Dialog.Title fontSize="lg" fontWeight="bold">
               {titulo}
             </Dialog.Title>
             {descricao && (
-              <Dialog.Description textStyle="sm" color="gray.400" mt={1}>
+              <Dialog.Description textStyle="sm" color="fg.subtle" mt={1}>
                 {descricao}
               </Dialog.Description>
             )}

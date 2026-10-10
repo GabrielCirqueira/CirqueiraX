@@ -96,7 +96,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
           border="1px solid"
           borderColor="cirqueira.grey.800"
           color="cirqueira.grey.0"
-          borderRadius="2xl"
+          borderRadius="xl"
           p={0}
           maxW="md"
         >
@@ -110,7 +110,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
           >
             <Center
               boxSize={9}
-              rounded="xl"
+              borderRadius="lg"
               bg="cirqueira.brand.500"
               color="cirqueira.grey.0"
               shadow="lg"
@@ -146,6 +146,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
                   }}
                   autoFocus
                   w="full"
+                  borderRadius="lg"
                   bg="cirqueira.grey.900/40"
                   borderColor="cirqueira.grey.800"
                   color="cirqueira.grey.0"
@@ -171,6 +172,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
                       setErros((p) => ({ ...p, senha: '' }))
                     }}
                     w="full"
+                    borderRadius="lg"
                     bg="cirqueira.grey.900/40"
                     borderColor="cirqueira.grey.800"
                     color="cirqueira.grey.0"
@@ -182,6 +184,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
                     type="button"
                     variant="ghost"
                     size="xs"
+                    borderRadius="lg"
                     onClick={() => setMostrarSenha((v) => !v)}
                     position="absolute"
                     right={1.5}
@@ -211,7 +214,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
                 _hover={{ bg: 'cirqueira.brand.600' }}
                 color="cirqueira.grey.0"
                 w="full"
-                borderRadius="xl"
+                borderRadius="lg"
                 shadow="lg"
               >
                 <Lock size={16} style={{ marginRight: '6px' }} />

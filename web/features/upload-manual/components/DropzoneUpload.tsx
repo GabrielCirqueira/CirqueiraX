@@ -137,7 +137,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             style={{ display: 'none' }}
           />
 
-          <Box p={4} borderRadius="2xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
+          <Box p={4} borderRadius="xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
             <UploadCloud size={40} />
           </Box>
 
@@ -336,7 +336,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       )}
 
                       {item.mensagemErro && (
-                        <Text fontSize="xs" fontWeight="medium" color="red.500" mt={1}>
+                        <Text fontSize="xs" fontWeight="medium" color="cirqueira.red.500" mt={1}>
                           {item.mensagemErro}
                         </Text>
                       )}

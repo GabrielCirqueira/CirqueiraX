@@ -12,20 +12,20 @@ Este documento explica a estrutura e o fluxo do frontend React que vive em `web/
 | :--- | :--- |
 | **React 19** + **TypeScript 5.9** | UI reativa, modo strict |
 | **Vite 7** | Build tool e dev server com HMR ultra-rápido |
-| **Tailwind CSS 4** | Motor de estilo CSS-first; sem `tailwind.config.js` |
-| **HeroUI v3** (`@heroui/react` + `@heroui/styles`) | Componentes prontos e acessíveis |
+| **Chakra UI v3** (`@chakra-ui/react`) | Biblioteca de componentes, layout e design system |
+| **Paleta Cirqueira** (`cirqueira.*`) | Design tokens estritos gerados via `scripts/gerar-paleta-brand.mjs` |
 | **React Router 7** | Roteamento via `createBrowserRouter` + lazy loading |
 | **TanStack Query 5** | Estado do servidor, cache e invalidação |
 | **Zustand 5** | Estado global — só para o que não vem da API (auth, UI global) |
 | **Zod 4** | Validação de respostas da API e de formulários críticos |
 | **Axios** | HTTP client centralizado com interceptores JWT |
-| **tailwindcss-motion** | Animações simples via classe Tailwind — zero JS |
+| **tailwindcss-motion** | Micro-animações declarativas |
 | **Recharts** | Gráficos SVG reativos (dashboards, totais por categoria/origem) |
 | **Biome 1.9** | Linter, formatter e organizador de imports |
 
 > **Regra de Zustand**: não criar store por feature "por precaução". Começar com estado local/Context e migrar pra Zustand só quando sentir dor real de estado espalhado.
 >
-> **Regra de animação**: `tailwindcss-motion` é o padrão, inclusive dentro de gráficos Recharts (`isAnimationActive` nativo). `motion`/`AnimatePresence` do Framer Motion (módulo `ui-extra`) só entra quando há necessidade concreta de animar montagem/desmontagem condicional.
+> **Regra de cores**: Toda cor deve usar exclusivamente tokens `cirqueira.<escala>.<tom>` (ex: `cirqueira.brand.500`, `cirqueira.red.500`, `cirqueira.teal.500`) ou tokens semânticos neutros (`bg.panel`, `border.subtle`, `fg`). Proibido cores cruas do Chakra (`red.500`, `blue.500`), hexadecimais soltos ou `className`.
 
 ### Módulo `ui-extra` (opt-in — ative no setup.sh)
 
@@ -37,93 +37,67 @@ Este documento explica a estrutura e o fluxo do frontend React que vive em `web/
 
 ```
 web/
-├── main.tsx              Entry point — QueryClient, HeroUIProvider, ToastProvider
+├── main.tsx              Entry point — QueryClient, Chakra Provider (system)
 ├── App.tsx               Router raiz (createBrowserRouter)
-├── index.css             @import tailwindcss + @heroui/styles + tailwindcss-motion
-├── config/api.ts         Instância Axios centralizada com interceptores JWT
+├── index.css             tailwindcss-motion e @theme brand
+├── config/
+│   ├── api.ts            Instância Axios centralizada com interceptores JWT
+│   └── theme/theme.ts    Definição de design system Chakra e paleta cirqueira
 ├── features/
-│   ├── auth/                 hooks, api, types de autenticação
-│   ├── cadastro/             Página e formulário de cadastro
+│   ├── auth/                 hooks, api, types de autenticação, Login
 │   ├── dashboard/            Dashboard central: CardsResumo, GraficosDashboard, TabelaCategorias, PainelSync, FilaErros
-│   ├── downloads-video/      Feature de downloads: CampoNovoLink (com seletor de álbum), GridVideos, hooks, api, types
-│   ├── google-fotos/         Feature de Google Fotos: GoogleFotos, GateConexaoGoogle, GridAlbuns, ModalVincularAlbum, AvisoMigracaoAlbuns, hooks, api, types
+│   ├── downloads-video/      Feature de downloads: CampoNovoLink, CardVideo, GridVideos, hooks, api, types
+│   ├── google-fotos/         Feature de Google Fotos: GoogleFotos, GateConexaoGoogle, GridAlbuns, ModalVincularAlbum, AvisoMigracaoAlbuns
 │   ├── upload-manual/        Feature de upload manual: DropzoneUpload, hooks, api, types
-│   ├── home/                 Home page
+│   ├── home/                 Home page pública
 │   └── not-found/            Página 404
 ├── layouts/
-│   ├── MainLayout.tsx    Header + Outlet + Footer
-│   ├── Header.tsx        Navbar global (tema, auth)
-│   ├── Footer.tsx        Rodapé global
-│   ├── AuthLayout.tsx    Layout centrado para Login/Cadastro
-│   └── AppContainer.tsx  Container responsivo de conteúdo
-├── pages/
-│   ├── Home/             Landing page pública
-│   ├── Login/            Página de login
-│   ├── Cadastro/         Página de cadastro
-│   ├── DownloadsVideo/   Página de downloads de vídeo
-│   └── NotFound/         404
+│   ├── MainLayout.tsx    Layout com Sidebar + Header + Outlet
+│   ├── Sidebar.tsx       Menu lateral de navegação
+│   ├── Header.tsx        Barra superior (avatar, status)
+│   └── Footer.tsx        Rodapé
 ├── routes/               RotaProtegida.tsx
 ├── shared/
-│   ├── lib/cn.ts         Utilitário cn() — clsx + tailwind-merge
-│   ├── ui/layout.tsx     Primitivos: Flex, HStack, VStack, Box, Grid, Container
-│   ├── hooks/            useDebounce, useMountEffect, useMediaQuery, useFiltrosUrl
+│   ├── hooks/            useDebounce, useMountEffect, useMediaQuery, useSEO
 │   ├── components/       ErrorBoundary, DialogOuDrawer
 │   └── utils/            lazyWithRetry, animacoes, formatadores
 └── stores/useAuthStore.ts Estado de autenticação (Zustand + localStorage)
 ```
 
-> `web/test/`, `e2e/` e `.storybook/` só passam a existir quando a ferramenta correspondente for adicionada — ver Apêndice.
+## Primitivos de Layout e Componentes do Chakra UI
 
-## Setup do CSS (`web/index.css`)
-
-Tailwind v4 é CSS-first — nenhum `tailwind.config.js` necessário:
-
-```css
-@import "tailwindcss";
-@import "@heroui/styles";
-@plugin "tailwindcss-motion";
-```
-
-## Primitivos de Layout e Texto (`web/shared/ui/layout.tsx`)
-
-> **Regra obrigatória:** nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` diretamente. Usar sempre o componente correspondente.
+> **Regra obrigatória:** nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` diretamente, nem `className`. Usar sempre componentes de `@chakra-ui/react`.
 
 ```tsx
-import { Box, HStack, VStack, Flex, Grid, Container, Text } from '@/shared/ui/layout'
+import { Box, Button, Container, Heading, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
 ```
 
-**Layout (estrutura):**
+**Layout e Tipografia:**
 
-| Componente | Equivalente | Quando usar |
-| :--- | :--- | :--- |
-| `<Box>` | `<div>` | Container genérico |
-| `<HStack>` | `<div className="flex flex-row items-center gap-2">` | Filhos lado a lado |
-| `<VStack>` | `<div className="flex flex-col gap-2">` | Filhos empilhados |
-| `<Flex>` | `<div className="flex gap-2">` | Flex com direção manual |
-| `<Grid>` | `<div className="grid gap-4">` | Grid de colunas |
-| `<Container>` | `<div className="mx-auto w-full px-4 max-w-screen-xl">` | Seção centralizada |
+| Componente | Papel |
+| :--- | :--- |
+| `<Box>` | Container genérico |
+| `<HStack>` | Filhos lado a lado (`align="center"`, `gap={4}`) |
+| `<VStack>` | Filhos empilhados (`align="stretch"`, `gap={4}`) |
+| `<Flex>` | Flexbox com direção e alinhamentos customizados |
+| `<Grid>` | Grid de colunas (`templateColumns=...`) |
+| `<Container>` | Wrapper de página centralizado (`maxW="6xl"`) |
+| `<Heading>` | Títulos (`as="h1"`, `size="2xl"`, etc.) |
+| `<Text>` | Parágrafos e labels (`fontSize="sm"`, etc.) |
 
-**Texto (tipografia):**
-
-| Componente | Equivalente | Quando usar |
-| :--- | :--- | :--- |
-| `<Text>` | `<p>` | Parágrafo (padrão) |
-| `<Text as="h1">` … `<Text as="h6">` | `<h1>`–`<h6>` | Títulos |
-| `<Text as="span">` | `<span>` | Texto inline |
-| `<Text as="strong">` | `<strong>` | Negrito semântico |
-| `<Text as="small">` | `<small>` | Texto auxiliar |
-
-Tags de estrutura de página (`<section>`, `<header>`, `<nav>`, `<main>`) são permitidas. Componentes HeroUI gerenciam os elementos de formulário.
-
+**Padrão de Arredondamento (`borderRadius`):**
+- `borderRadius="xl"`: Cards (`Card.Root`), Modais / Diálogos (`Dialog.Content`), Painéis de Seção
+- `borderRadius="lg"`: Inputs (`Input`), Selects (`NativeSelect.Field`), Botões (`Button`, `IconButton`), Caixas de ícones (`Box p={2}`)
+- `borderRadius="md"`: Badges (`Badge`) e chips
+- `borderRadius="full"`: Avatares e pills circulares
 ```tsx
-<HStack className="justify-between">...</HStack>
-<VStack className="gap-4">...</VStack>
-<Container size="lg" className="py-12">...</Container>
-<Box className="rounded-xl border p-4">...</Box>
-<Grid className="grid-cols-3 gap-6">...</Grid>
-<Text className="text-sm text-muted">Parágrafo</Text>
-<Text as="h1" className="text-4xl font-black">Título</Text>
-<Text as="span" className="text-brand-500">Inline</Text>
+<Container maxW="6xl" py={12}>
+  <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={4}>
+    <Heading as="h1" size="2xl" color="fg">Título</Heading>
+    <Text fontSize="sm" color="fg.subtle">Parágrafo</Text>
+    <Text as="span" color="cirqueira.brand.500">Destaque</Text>
+  </Box>
+</Container>
 ```
 
 ## Roteamento (`web/App.tsx`)

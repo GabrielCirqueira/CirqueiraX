@@ -28,7 +28,13 @@ export const CardsResumo = memo(function CardsResumo({
         gap={4}
       >
         {['skeleton-1', 'skeleton-2', 'skeleton-3', 'skeleton-4'].map((chave) => (
-          <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+          <Card.Root
+            key={chave}
+            borderWidth="1px"
+            borderColor="border.subtle"
+            bg="bg.panel"
+            borderRadius="xl"
+          >
             <Card.Header
               display="flex"
               flexDirection="row"
@@ -75,6 +81,7 @@ export const CardsResumo = memo(function CardsResumo({
         borderWidth="1px"
         borderColor="border.subtle"
         bg="bg.panel"
+        borderRadius="xl"
         shadow="md"
         transition="all 0.2s"
         _hover={{ borderColor: 'border.muted' }}
@@ -95,7 +102,7 @@ export const CardsResumo = memo(function CardsResumo({
           >
             Total Ingerido
           </Card.Title>
-          <Box p={2} borderRadius="lg" bg="blue.500/10" color="blue.500">
+          <Box p={2} borderRadius="lg" bg="cirqueira.blue.500/10" color="cirqueira.blue.500">
             <Layers size={18} />
           </Box>
         </Card.Header>
@@ -114,11 +121,12 @@ export const CardsResumo = memo(function CardsResumo({
 
       <Card.Root
         borderWidth="1px"
-        borderColor="emerald.500/20"
-        bg="emerald.500/5"
+        borderColor="cirqueira.emerald.500/20"
+        bg="cirqueira.emerald.500/5"
+        borderRadius="xl"
         shadow="md"
         transition="all 0.2s"
-        _hover={{ borderColor: 'emerald.500/40' }}
+        _hover={{ borderColor: 'cirqueira.emerald.500/40' }}
       >
         <Card.Header
           display="flex"
@@ -130,21 +138,26 @@ export const CardsResumo = memo(function CardsResumo({
           <Card.Title
             fontSize="xs"
             fontWeight="semibold"
-            color="emerald.500"
+            color="cirqueira.emerald.500"
             textTransform="uppercase"
             letterSpacing="wider"
           >
             Concluídas
           </Card.Title>
-          <Box p={2} borderRadius="lg" bg="emerald.500/10" color="emerald.500">
+          <Box p={2} borderRadius="lg" bg="cirqueira.emerald.500/10" color="cirqueira.emerald.500">
             <CheckCircle2 size={18} />
           </Box>
         </Card.Header>
         <Card.Body>
-          <Text fontSize="2xl" fontWeight="black" letterSpacing="tight" color="emerald.500">
+          <Text
+            fontSize="2xl"
+            fontWeight="black"
+            letterSpacing="tight"
+            color="cirqueira.emerald.500"
+          >
             {concluidos}
           </Text>
-          <HStack mt={1.5} fontSize="xs" color="emerald.500" gap={1.5}>
+          <HStack mt={1.5} fontSize="xs" color="cirqueira.emerald.500" gap={1.5}>
             <Badge size="xs" variant="subtle" colorPalette="green" borderRadius="md" px={1.5}>
               {taxaConclusao}% sucesso
             </Badge>
@@ -155,11 +168,12 @@ export const CardsResumo = memo(function CardsResumo({
 
       <Card.Root
         borderWidth="1px"
-        borderColor="cyan.500/20"
-        bg="cyan.500/5"
+        borderColor="cirqueira.cyan.500/20"
+        bg="cirqueira.cyan.500/5"
+        borderRadius="xl"
         shadow="md"
         transition="all 0.2s"
-        _hover={{ borderColor: 'cyan.500/40' }}
+        _hover={{ borderColor: 'cirqueira.cyan.500/40' }}
       >
         <Card.Header
           display="flex"
@@ -171,13 +185,13 @@ export const CardsResumo = memo(function CardsResumo({
           <Card.Title
             fontSize="xs"
             fontWeight="semibold"
-            color="cyan.500"
+            color="cirqueira.cyan.500"
             textTransform="uppercase"
             letterSpacing="wider"
           >
             Em Processamento
           </Card.Title>
-          <Box p={2} borderRadius="lg" bg="cyan.500/10" color="cyan.500">
+          <Box p={2} borderRadius="lg" bg="cirqueira.cyan.500/10" color="cirqueira.cyan.500">
             {emProcessamento > 0 ? (
               <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
@@ -186,10 +200,10 @@ export const CardsResumo = memo(function CardsResumo({
           </Box>
         </Card.Header>
         <Card.Body>
-          <Text fontSize="2xl" fontWeight="black" letterSpacing="tight" color="cyan.500">
+          <Text fontSize="2xl" fontWeight="black" letterSpacing="tight" color="cirqueira.cyan.500">
             {emProcessamento}
           </Text>
-          <HStack mt={1.5} fontSize="xs" color="cyan.500" gap={1.5}>
+          <HStack mt={1.5} fontSize="xs" color="cirqueira.cyan.500" gap={1.5}>
             <Text as="span">{emProcessamento > 0 ? 'Fila ativa em execução' : 'Fila ociosa'}</Text>
           </HStack>
         </Card.Body>
@@ -197,11 +211,12 @@ export const CardsResumo = memo(function CardsResumo({
 
       <Card.Root
         borderWidth="1px"
-        borderColor={totalErros > 0 ? 'red.500/40' : 'border.subtle'}
-        bg={totalErros > 0 ? 'red.500/5' : 'bg.panel'}
+        borderColor={totalErros > 0 ? 'cirqueira.red.500/40' : 'border.subtle'}
+        bg={totalErros > 0 ? 'cirqueira.red.500/5' : 'bg.panel'}
+        borderRadius="xl"
         shadow="md"
         transition="all 0.2s"
-        _hover={{ borderColor: totalErros > 0 ? 'red.500/60' : 'border.muted' }}
+        _hover={{ borderColor: totalErros > 0 ? 'cirqueira.red.500/60' : 'border.muted' }}
       >
         <Card.Header
           display="flex"
@@ -213,7 +228,7 @@ export const CardsResumo = memo(function CardsResumo({
           <Card.Title
             fontSize="xs"
             fontWeight="semibold"
-            color={totalErros > 0 ? 'red.500' : 'fg.subtle'}
+            color={totalErros > 0 ? 'cirqueira.red.500' : 'fg.subtle'}
             textTransform="uppercase"
             letterSpacing="wider"
           >
@@ -222,8 +237,8 @@ export const CardsResumo = memo(function CardsResumo({
           <Box
             p={2}
             borderRadius="lg"
-            bg={totalErros > 0 ? 'red.500/20' : 'bg.muted'}
-            color={totalErros > 0 ? 'red.500' : 'fg.subtle'}
+            bg={totalErros > 0 ? 'cirqueira.red.500/20' : 'bg.muted'}
+            color={totalErros > 0 ? 'cirqueira.red.500' : 'fg.subtle'}
           >
             {totalErros > 0 ? <AlertTriangle size={18} /> : <AlertCircle size={18} />}
           </Box>
@@ -233,13 +248,13 @@ export const CardsResumo = memo(function CardsResumo({
             fontSize="2xl"
             fontWeight="black"
             letterSpacing="tight"
-            color={totalErros > 0 ? 'red.500' : 'fg.subtle'}
+            color={totalErros > 0 ? 'cirqueira.red.500' : 'fg.subtle'}
           >
             {totalErros}
           </Text>
           <HStack mt={1.5} fontSize="xs" color="fg.subtle" gap={1.5}>
             {totalErros > 0 ? (
-              <Text color="red.500" fontWeight="medium">
+              <Text color="cirqueira.red.500" fontWeight="medium">
                 Requer atenção
               </Text>
             ) : (
