@@ -146,7 +146,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
           borderWidth="1px"
           borderColor="border.subtle"
           color="fg"
-          borderRadius="2xl"
+          borderRadius="xl"
           p={0}
           maxW="2xl"
           w="full"
@@ -165,11 +165,14 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
             <HStack gap={3}>
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="lg"
                 bg="cirqueira.brand.500/10"
                 color="cirqueira.brand.400"
                 borderWidth="1px"
                 borderColor="cirqueira.brand.500/20"
+                display="inline-flex"
+                alignItems="center"
+                justifyContent="center"
               >
                 <Film size={18} />
               </Box>
@@ -190,10 +193,17 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                 onClick={restaurarOriginal}
                 aria-label="Restaurar originais"
                 title="Restaurar metadados originais"
+                borderRadius="lg"
               >
                 <RotateCcw size={14} />
               </IconButton>
-              <IconButton size="xs" variant="ghost" onClick={onFechar} aria-label="Fechar modal">
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={onFechar}
+                aria-label="Fechar modal"
+                borderRadius="lg"
+              >
                 <X size={16} />
               </IconButton>
             </HStack>
@@ -263,7 +273,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                     placeholder="Ex: Highlights do Jogo"
                     bg="bg.muted"
                     borderColor="border.subtle"
-                    borderRadius="xl"
+                    borderRadius="lg"
                     fontSize="sm"
                   />
                 </Field.Root>
@@ -279,7 +289,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                     placeholder="Ex: @criador"
                     bg="bg.muted"
                     borderColor="border.subtle"
-                    borderRadius="xl"
+                    borderRadius="lg"
                     fontSize="sm"
                   />
                 </Field.Root>
@@ -330,21 +340,47 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       <Sparkles size={14} />
                       <Text as="span">Atalhos Rápidos de Data</Text>
                     </HStack>
-                    <Button size="2xs" variant="subtle" colorPalette="brand" onClick={aplicarAgora}>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={aplicarAgora}
+                      borderRadius="lg"
+                    >
                       ⚡ Agora
                     </Button>
                   </HStack>
                   <HStack gap={2} flexWrap="wrap">
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoData(0)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoData(0)}
+                      borderRadius="lg"
+                    >
                       Hoje
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoData(-1)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoData(-1)}
+                      borderRadius="lg"
+                    >
                       Ontem
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoData(-7)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoData(-7)}
+                      borderRadius="lg"
+                    >
                       Há 1 semana
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoData(-30)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoData(-30)}
+                      borderRadius="lg"
+                    >
                       Há 1 mês
                     </Button>
                   </HStack>
@@ -361,7 +397,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       onChange={(e) => setDataIso(e.target.value)}
                       bg="bg.muted"
                       borderColor="border.subtle"
-                      borderRadius="xl"
+                      borderRadius="lg"
                       fontSize="sm"
                     />
                   </Field.Root>
@@ -376,7 +412,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       onChange={(e) => setHora(e.target.value)}
                       bg="bg.muted"
                       borderColor="border.subtle"
-                      borderRadius="xl"
+                      borderRadius="lg"
                       fontSize="sm"
                     />
                   </Field.Root>
@@ -393,19 +429,44 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                     Atalhos Rápidos de Horário
                   </Text>
                   <HStack gap={2} flexWrap="wrap">
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoHora('00:00')}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('00:00')}
+                      borderRadius="lg"
+                    >
                       00:00 (Início)
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoHora('08:00')}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('08:00')}
+                      borderRadius="lg"
+                    >
                       08:00 (Manhã)
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoHora('12:00')}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('12:00')}
+                      borderRadius="lg"
+                    >
                       12:00 (Meio-dia)
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoHora('18:00')}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('18:00')}
+                      borderRadius="lg"
+                    >
                       18:00 (Tarde)
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => aplicarAtalhoHora('23:59')}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('23:59')}
+                      borderRadius="lg"
+                    >
                       23:59 (Fim do dia)
                     </Button>
                   </HStack>
@@ -427,24 +488,49 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       <Clock size={14} />
                       <Text as="span">Ajuste Rápido de Duração</Text>
                     </HStack>
-                    <Badge size="sm" variant="subtle" colorPalette="brand">
+                    <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
                       Total: {(Number(minutos) || 0) * 60 + (Number(segundos) || 0)} segundos
                     </Badge>
                   </HStack>
                   <HStack gap={2} flexWrap="wrap">
-                    <Button size="2xs" variant="outline" onClick={() => ajustarMinutos(-5)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => ajustarMinutos(-5)}
+                      borderRadius="lg"
+                    >
                       -5 min
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => ajustarMinutos(-1)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => ajustarMinutos(-1)}
+                      borderRadius="lg"
+                    >
                       -1 min
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => ajustarMinutos(1)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => ajustarMinutos(1)}
+                      borderRadius="lg"
+                    >
                       +1 min
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => ajustarMinutos(5)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => ajustarMinutos(5)}
+                      borderRadius="lg"
+                    >
                       +5 min
                     </Button>
-                    <Button size="2xs" variant="outline" onClick={() => ajustarMinutos(10)}>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => ajustarMinutos(10)}
+                      borderRadius="lg"
+                    >
                       +10 min
                     </Button>
                   </HStack>
@@ -462,7 +548,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       onChange={(e) => setMinutos(e.target.value)}
                       bg="bg.muted"
                       borderColor="border.subtle"
-                      borderRadius="xl"
+                      borderRadius="lg"
                       fontSize="sm"
                     />
                   </Field.Root>
@@ -479,7 +565,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                       onChange={(e) => setSegundos(e.target.value)}
                       bg="bg.muted"
                       borderColor="border.subtle"
-                      borderRadius="xl"
+                      borderRadius="lg"
                       fontSize="sm"
                     />
                   </Field.Root>
@@ -500,7 +586,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                     placeholder="https://exemplo.com/capa.jpg"
                     bg="bg.muted"
                     borderColor="border.subtle"
-                    borderRadius="xl"
+                    borderRadius="lg"
                     fontSize="sm"
                   />
                 </Field.Root>
@@ -545,7 +631,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
             borderColor="border.subtle"
             bg="bg.muted/20"
           >
-            <Button size="sm" variant="ghost" onClick={onFechar}>
+            <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="lg">
               Cancelar
             </Button>
 
@@ -555,7 +641,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
               disabled={pendente}
               onClick={handleSubmeter}
               fontWeight="semibold"
-              borderRadius="xl"
+              borderRadius="lg"
             >
               {pendente ? (
                 <>

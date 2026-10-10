@@ -23,7 +23,7 @@ function SkeletonCard() {
     <Box
       display="flex"
       flexDirection="column"
-      borderRadius="2xl"
+      borderRadius="xl"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -87,22 +87,31 @@ export const GridVideos = memo(function GridVideos({
         py={16}
         px={4}
         textAlign="center"
-        borderRadius="2xl"
+        borderRadius="xl"
         borderWidth="1px"
         borderStyle="dashed"
         borderColor="border.subtle"
         bg="bg.panel"
         gap={2}
       >
-        <Box p={4} borderRadius="full" bg="bg.muted" color="fg.subtle" mb={2}>
-          <Film size={40} strokeWidth={1.5} />
+        <Box
+          p={3.5}
+          borderRadius="lg"
+          bg="cirqueira.brand.500/10"
+          color="cirqueira.brand.500"
+          mb={2}
+          display="inline-flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Film size={36} strokeWidth={1.5} />
         </Box>
-        <Text as="h3" fontSize="md" fontWeight="semibold" color="fg">
+        <Text as="h3" fontSize="md" fontWeight="bold" color="fg">
           Nenhum vídeo encontrado
         </Text>
-        <Text fontSize="sm" color="fg.subtle" maxW="sm">
-          Cole o link de um vídeo do YouTube, TikTok, Twitter ou Instagram acima para iniciar o
-          download.
+        <Text fontSize="xs" color="fg.subtle" maxW="md">
+          Cole o link de um vídeo do YouTube, TikTok, Instagram ou X acima para iniciar a ingestão e
+          download automático.
         </Text>
       </VStack>
     )
@@ -111,7 +120,7 @@ export const GridVideos = memo(function GridVideos({
   return (
     <VStack w="full" gap={4} alignItems="stretch">
       {itens.length > 0 && onToggleSelectAll && (
-        <Flex align="center" justify="space-between" px={1} py={1}>
+        <Flex align="center" justify="space-between" px={1}>
           <Button
             size="sm"
             variant="ghost"
@@ -120,24 +129,29 @@ export const GridVideos = memo(function GridVideos({
             fontWeight="medium"
             color="fg.subtle"
             _hover={{ color: 'fg' }}
+            borderRadius="lg"
           >
             <HStack gap={2}>
               {todosSelecionados ? (
-                <Box as="span" color="cirqueira.purple.500" display="inline-flex">
-                  <CheckSquare size={16} color="currentColor" />
+                <Box as="span" color="cirqueira.brand.500" display="inline-flex">
+                  <CheckSquare size={15} color="currentColor" />
                 </Box>
               ) : (
-                <Square size={16} />
+                <Square size={15} />
               )}
               <Text as="span">
                 {todosSelecionados
                   ? 'Desmarcar todos'
                   : algunsSelecionados
                     ? `Selecionados (${selecionados.length}/${itens.length})`
-                    : 'Selecionar todos'}
+                    : 'Selecionar todos os vídeos'}
               </Text>
             </HStack>
           </Button>
+
+          <Text fontSize="xs" color="fg.subtle">
+            {itens.length} {itens.length === 1 ? 'vídeo nesta página' : 'vídeos nesta página'}
+          </Text>
         </Flex>
       )}
 

@@ -1,13 +1,33 @@
-import { AppContainer } from '@/layouts/AppContainer'
-import { Box, Button, Dialog, Flex, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  Dialog,
+  Flex,
+  Grid,
+  HStack,
+  IconButton,
+  Input,
+  NativeSelect,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import {
+  AlertTriangle,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Filter,
+  LayoutGrid,
+  List,
   Loader2,
   RefreshCw,
   RotateCcw,
+  Search,
   Video,
+  X,
 } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
@@ -15,6 +35,7 @@ import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
 import { ModalEditarMetadata } from './components/ModalEditarMetadata'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
+import { TabelaVideos } from './components/TabelaVideos'
 import {
   useApagarLote,
   useAtualizarMetadata,
@@ -34,6 +55,7 @@ export default function DownloadsVideo() {
   const [statusFiltro, setStatusFiltro] = useState<string>('')
   const [origemFiltro, setOrigemFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
+  const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'lista'>('grid')
 
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
   const [itemEditarMetadata, setItemEditarMetadata] = useState<MediaItem | null>(null)
@@ -81,7 +103,36 @@ export default function DownloadsVideo() {
   const total = respostaPaginada?.total ?? 0
   const porPagina = respostaPaginada?.porPagina ?? 12
   const totalPaginas = Math.ceil(total / porPagina) || 1
-  const temItensComErro = itens.some((item) => item.status === 'erro')
+
+  const concluidosCount = useMemo(
+    () => itens.filter((i) => i.status === 'concluido' || i.status === 'distribuido_local').length,
+    [itens]
+  )
+  const processandoCount = useMemo(
+    () =>
+      itens.filter((i) =>
+        ['baixando', 'recebido', 'em_fila', 'distribuindo', 'enviando_google_fotos'].includes(
+          i.status
+        )
+      ).length,
+    [itens]
+  )
+  const errosCount = useMemo(() => itens.filter((i) => i.status === 'erro').length, [itens])
+  const temItensComErro = errosCount > 0
+
+  const porcentagemConcluido = useMemo(() => {
+    if (total === 0) return 0
+    return Math.round((concluidosCount / Math.max(itens.length, 1)) * 100)
+  }, [total, concluidosCount, itens.length])
+
+  const filtrosAtivos = Boolean(busca.trim() || statusFiltro || origemFiltro)
+
+  const handleLimparFiltros = () => {
+    setBusca('')
+    setStatusFiltro('')
+    setOrigemFiltro('')
+    setPagina(1)
+  }
 
   const handleToggleSelect = useCallback((uuid: string) => {
     setSelecionados((prev) =>
@@ -217,33 +268,46 @@ export default function DownloadsVideo() {
   }
 
   return (
-    <AppContainer maxWidth="7xl" paddingY="8" paddingX="6">
-      <VStack w="full" gap={8} alignItems="stretch">
+    <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 4, md: 8 }}>
+      <VStack w="full" gap={6} alignItems="stretch">
         <Flex
           direction={{ base: 'column', md: 'row' }}
           align={{ base: 'flex-start', md: 'center' }}
           justify="space-between"
           gap={4}
-          borderBottomWidth="1px"
-          borderColor="border.subtle"
-          pb={6}
+          pb={2}
         >
           <VStack gap={1} alignItems="flex-start">
-            <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
+            <HStack gap={3}>
+              <Box
+                p={2.5}
+                borderRadius="lg"
+                bg="cirqueira.brand.500/10"
+                color="cirqueira.brand.500"
+                display="inline-flex"
+                alignItems="center"
+                justifyContent="center"
+              >
                 <Video size={24} />
               </Box>
-              <Text as="h1" fontSize="2xl" fontWeight="bold" color="fg">
-                Downloads de Vídeo
-              </Text>
+              <VStack align="start" gap={0}>
+                <Text
+                  as="h1"
+                  fontSize={{ base: 'xl', md: '2xl' }}
+                  fontWeight="bold"
+                  color="fg"
+                  letterSpacing="tight"
+                >
+                  Downloads de Vídeo
+                </Text>
+                <Text fontSize="xs" color="fg.subtle">
+                  Central de ingestão de mídias de redes sociais e biblioteca inteligente
+                </Text>
+              </VStack>
             </HStack>
-            <Text fontSize="sm" color="fg.subtle">
-              Cole links de vídeos do YouTube, TikTok, Twitter e Instagram para ingestão e
-              processamento automático.
-            </Text>
           </VStack>
 
-          <HStack gap={2}>
+          <HStack gap={2.5} flexWrap="wrap">
             {temItensComErro && (
               <Button
                 size="sm"
@@ -251,7 +315,7 @@ export default function DownloadsVideo() {
                 variant="subtle"
                 disabled={pendenteRetentarTodos}
                 onClick={() => retentarTodosMutate()}
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 {pendenteRetentarTodos ? (
                   <Loader2
@@ -261,16 +325,16 @@ export default function DownloadsVideo() {
                 ) : (
                   <RotateCcw size={14} style={{ marginRight: '6px' }} />
                 )}
-                <Text as="span">Retentar Falhas</Text>
+                <Text as="span">Retentar Falhas ({errosCount})</Text>
               </Button>
             )}
 
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               disabled={isFetching}
               onClick={() => refetch()}
-              borderRadius="xl"
+              borderRadius="lg"
             >
               <RefreshCw
                 size={14}
@@ -284,20 +348,179 @@ export default function DownloadsVideo() {
           </HStack>
         </Flex>
 
-        <CampoNovoLink onDownloadIniciado={() => refetch()} />
+        <Grid
+          templateColumns={{
+            base: '1fr',
+            lg: 'repeat(12, 1fr)',
+          }}
+          gap={4}
+          w="full"
+          alignItems="stretch"
+        >
+          <Box gridColumn={{ base: 'span 1', lg: 'span 8' }} display="flex">
+            <CampoNovoLink onDownloadIniciado={() => refetch()} />
+          </Box>
+
+          <Box gridColumn={{ base: 'span 1', lg: 'span 4' }} display="flex">
+            <Card.Root
+              borderWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.panel"
+              borderRadius="xl"
+              shadow="sm"
+              w="full"
+              display="flex"
+              flexDirection="column"
+              justifyContent="space-between"
+            >
+              <Card.Body p={{ base: 4, md: 5 }}>
+                <VStack gap={3.5} align="stretch" h="full" justify="space-between">
+                  <Flex align="center" justify="space-between">
+                    <HStack gap={2}>
+                      <Box
+                        w={2}
+                        h={2}
+                        borderRadius="full"
+                        bg={errosCount > 0 ? 'cirqueira.red.500' : 'cirqueira.green.500'}
+                      />
+                      <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        textTransform="uppercase"
+                        color="fg.subtle"
+                      >
+                        Status do Pipeline
+                      </Text>
+                    </HStack>
+
+                    <Badge
+                      size="xs"
+                      variant="subtle"
+                      colorPalette={errosCount > 0 ? 'red' : 'green'}
+                      borderRadius="md"
+                    >
+                      {errosCount > 0 ? `${errosCount} com erro` : 'Operacional'}
+                    </Badge>
+                  </Flex>
+
+                  <Box>
+                    <Flex justify="space-between" align="baseline" mb={1.5}>
+                      <Text fontSize="2xl" fontWeight="bold" color="fg">
+                        {isLoading ? '...' : `${total}`}
+                      </Text>
+                      <Text fontSize="xs" color="fg.subtle">
+                        {porcentagemConcluido}% concluídos
+                      </Text>
+                    </Flex>
+
+                    <Box w="full" h={2} bg="bg.muted" borderRadius="full" overflow="hidden">
+                      <Box
+                        h="full"
+                        w={`${Math.min(100, Math.max(0, porcentagemConcluido))}%`}
+                        bg="cirqueira.brand.500"
+                        borderRadius="full"
+                        transition="width 0.4s ease"
+                      />
+                    </Box>
+                  </Box>
+
+                  <Grid templateColumns="repeat(3, 1fr)" gap={2} pt={2}>
+                    <Box
+                      p={2}
+                      borderRadius="lg"
+                      bg="bg.muted/60"
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                      textAlign="center"
+                    >
+                      <HStack gap={1} justify="center" mb={0.5} color="cirqueira.green.500">
+                        <CheckCircle2 size={12} />
+                        <Text fontSize="10px" fontWeight="semibold" color="fg.subtle">
+                          Prontos
+                        </Text>
+                      </HStack>
+                      <Text fontSize="sm" fontWeight="bold" color="fg">
+                        {concluidosCount}
+                      </Text>
+                    </Box>
+
+                    <Box
+                      p={2}
+                      borderRadius="lg"
+                      bg="bg.muted/60"
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                      textAlign="center"
+                    >
+                      <HStack gap={1} justify="center" mb={0.5} color="cirqueira.blue.500">
+                        <Clock size={12} />
+                        <Text fontSize="10px" fontWeight="semibold" color="fg.subtle">
+                          Fila
+                        </Text>
+                      </HStack>
+                      <Text fontSize="sm" fontWeight="bold" color="fg">
+                        {processandoCount}
+                      </Text>
+                    </Box>
+
+                    <Box
+                      p={2}
+                      borderRadius="lg"
+                      bg="bg.muted/60"
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                      textAlign="center"
+                    >
+                      <HStack
+                        gap={1}
+                        justify="center"
+                        mb={0.5}
+                        color={errosCount > 0 ? 'cirqueira.red.500' : 'fg.subtle'}
+                      >
+                        <AlertTriangle size={12} />
+                        <Text fontSize="10px" fontWeight="semibold" color="fg.subtle">
+                          Erros
+                        </Text>
+                      </HStack>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="bold"
+                        color={errosCount > 0 ? 'cirqueira.red.500' : 'fg'}
+                      >
+                        {errosCount}
+                      </Text>
+                    </Box>
+                  </Grid>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
+          </Box>
+        </Grid>
 
         <Flex
-          direction={{ base: 'column', sm: 'row' }}
-          align={{ base: 'stretch', sm: 'center' }}
+          direction={{ base: 'column', md: 'row' }}
+          align={{ base: 'stretch', md: 'center' }}
           justify="space-between"
           gap={3}
           bg="bg.panel"
           p={3}
-          borderRadius="2xl"
+          borderRadius="xl"
           borderWidth="1px"
           borderColor="border.subtle"
+          shadow="sm"
         >
-          <Box flex={1} maxW="md">
+          <Box position="relative" flex={1} maxW={{ base: 'full', md: 'md' }}>
+            <Box
+              position="absolute"
+              left={3}
+              top="50%"
+              transform="translateY(-50%)"
+              pointerEvents="none"
+              zIndex={2}
+              color="fg.subtle"
+            >
+              <Search size={15} />
+            </Box>
             <Input
               value={busca}
               onChange={(e) => {
@@ -308,93 +531,169 @@ export default function DownloadsVideo() {
               bg="bg.muted"
               borderColor="border.subtle"
               fontSize="xs"
-              h={10}
-              borderRadius="xl"
+              h={9}
+              pl={9}
+              pr={busca ? 8 : 3}
+              borderRadius="lg"
             />
+            {busca && (
+              <Button
+                size="xs"
+                variant="ghost"
+                position="absolute"
+                right={1.5}
+                top="50%"
+                transform="translateY(-50%)"
+                onClick={() => {
+                  setBusca('')
+                  setPagina(1)
+                }}
+                p={1}
+                borderRadius="lg"
+                aria-label="Limpar busca"
+              >
+                <X size={14} />
+              </Button>
+            )}
           </Box>
 
-          <HStack gap={2}>
-            <HStack gap={1} fontSize="xs" color="fg.subtle">
-              <Filter size={14} />
-              <Text as="span">Status:</Text>
+          <HStack gap={2} flexWrap="wrap" justify={{ base: 'stretch', md: 'flex-end' }}>
+            <HStack gap={1} fontSize="xs" color="fg.subtle" display={{ base: 'none', lg: 'flex' }}>
+              <Filter size={13} />
             </HStack>
-            <select
-              value={statusFiltro}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                setStatusFiltro(e.target.value)
-                setPagina(1)
-              }}
-              style={{
-                height: '2.5rem',
-                padding: '0 0.75rem',
-                borderRadius: '0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                backgroundColor: 'var(--chakra-colors-bg-muted)',
-                borderColor: 'var(--chakra-colors-border-subtle)',
-                color: 'inherit',
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <option value="">Todos os status</option>
-              <option value="baixando">Baixando</option>
-              <option value="recebido">Recebido</option>
-              <option value="em_fila">Em Fila</option>
-              <option value="sem_categoria">Sem Categoria</option>
-              <option value="classificado">Classificado</option>
-              <option value="distribuindo">Distribuindo</option>
-              <option value="distribuido_local">Distribuído</option>
-              <option value="enviando_google_fotos">Google Fotos</option>
-              <option value="concluido">Concluído</option>
-              <option value="erro">Com Erro</option>
-            </select>
 
-            <select
-              value={origemFiltro}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                setOrigemFiltro(e.target.value)
-                setPagina(1)
-              }}
-              style={{
-                height: '2.5rem',
-                padding: '0 0.75rem',
-                borderRadius: '0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                backgroundColor: 'var(--chakra-colors-bg-muted)',
-                borderColor: 'var(--chakra-colors-border-subtle)',
-                color: 'inherit',
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                outline: 'none',
-                cursor: 'pointer',
-              }}
+            <Box w={{ base: 'full', sm: '44' }}>
+              <NativeSelect.Root size="sm" w="full">
+                <NativeSelect.Field
+                  value={statusFiltro}
+                  onChange={(e) => {
+                    setStatusFiltro(e.target.value)
+                    setPagina(1)
+                  }}
+                  bg="bg.muted"
+                  borderColor="border.subtle"
+                  borderRadius="lg"
+                  fontSize="xs"
+                  h={9}
+                >
+                  <option value="">Todos os status</option>
+                  <option value="baixando">Baixando</option>
+                  <option value="recebido">Recebido</option>
+                  <option value="em_fila">Em Fila</option>
+                  <option value="sem_categoria">Sem Categoria</option>
+                  <option value="classificado">Classificado</option>
+                  <option value="distribuindo">Distribuindo</option>
+                  <option value="distribuido_local">Distribuído</option>
+                  <option value="enviando_google_fotos">Google Fotos</option>
+                  <option value="concluido">Concluído</option>
+                  <option value="erro">Com Erro</option>
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </Box>
+
+            <Box w={{ base: 'full', sm: '40' }}>
+              <NativeSelect.Root size="sm" w="full">
+                <NativeSelect.Field
+                  value={origemFiltro}
+                  onChange={(e) => {
+                    setOrigemFiltro(e.target.value)
+                    setPagina(1)
+                  }}
+                  bg="bg.muted"
+                  borderColor="border.subtle"
+                  borderRadius="lg"
+                  fontSize="xs"
+                  h={9}
+                >
+                  <option value="">Todas as origens</option>
+                  <option value="manual">Manual / Web</option>
+                  <option value="bot_telegram">Bot Telegram</option>
+                  <option value="print_empresa">Print Empresa</option>
+                  <option value="print_pessoal">Print Pessoal</option>
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </Box>
+
+            {filtrosAtivos && (
+              <Button
+                size="xs"
+                variant="ghost"
+                onClick={handleLimparFiltros}
+                fontSize="xs"
+                borderRadius="lg"
+                color="fg.subtle"
+                _hover={{ color: 'fg' }}
+                h={9}
+              >
+                Limpar
+              </Button>
+            )}
+
+            <HStack
+              gap={1}
+              p={0.5}
+              bg="bg.muted"
+              borderRadius="lg"
+              borderWidth="1px"
+              borderColor="border.subtle"
             >
-              <option value="">Todas as origens</option>
-              <option value="manual">Manual / Web</option>
-              <option value="bot_telegram">Bot Telegram</option>
-              <option value="print_empresa">Print Empresa</option>
-              <option value="print_pessoal">Print Pessoal</option>
-            </select>
+              <IconButton
+                size="xs"
+                variant={modoVisualizacao === 'grid' ? 'subtle' : 'ghost'}
+                colorPalette={modoVisualizacao === 'grid' ? 'brand' : 'gray'}
+                onClick={() => setModoVisualizacao('grid')}
+                aria-label="Visualização em Grid"
+                title="Cards em grade"
+                borderRadius="md"
+              >
+                <LayoutGrid size={15} />
+              </IconButton>
+              <IconButton
+                size="xs"
+                variant={modoVisualizacao === 'lista' ? 'subtle' : 'ghost'}
+                colorPalette={modoVisualizacao === 'lista' ? 'brand' : 'gray'}
+                onClick={() => setModoVisualizacao('lista')}
+                aria-label="Visualização em Lista"
+                title="Tabela detalhada"
+                borderRadius="md"
+              >
+                <List size={15} />
+              </IconButton>
+            </HStack>
           </HStack>
         </Flex>
 
-        <GridVideos
-          itens={itens}
-          carregando={isLoading}
-          selecionados={selecionados}
-          onToggleSelect={handleToggleSelect}
-          onToggleSelectAll={handleToggleSelectAll}
-          onVisualizar={(item) => setItemVisualizar(item)}
-          onEditarMetadata={handleAbrirEditarMetadata}
-          onCategorizar={handleAbrirCategorizarIndividual}
-          onRebaixar={handleAbrirRebaixarIndividual}
-          onRetentar={(uuid) => retentarItemMutate(uuid)}
-          onApagar={handleAbrirApagarIndividual}
-        />
+        {modoVisualizacao === 'grid' ? (
+          <GridVideos
+            itens={itens}
+            carregando={isLoading}
+            selecionados={selecionados}
+            onToggleSelect={handleToggleSelect}
+            onToggleSelectAll={handleToggleSelectAll}
+            onVisualizar={(item) => setItemVisualizar(item)}
+            onEditarMetadata={handleAbrirEditarMetadata}
+            onCategorizar={handleAbrirCategorizarIndividual}
+            onRebaixar={handleAbrirRebaixarIndividual}
+            onRetentar={(uuid) => retentarItemMutate(uuid)}
+            onApagar={handleAbrirApagarIndividual}
+          />
+        ) : (
+          <TabelaVideos
+            itens={itens}
+            carregando={isLoading}
+            selecionados={selecionados}
+            onToggleSelect={handleToggleSelect}
+            onToggleSelectAll={handleToggleSelectAll}
+            onVisualizar={(item) => setItemVisualizar(item)}
+            onEditarMetadata={handleAbrirEditarMetadata}
+            onCategorizar={handleAbrirCategorizarIndividual}
+            onRebaixar={handleAbrirRebaixarIndividual}
+            onRetentar={(uuid) => retentarItemMutate(uuid)}
+            onApagar={handleAbrirApagarIndividual}
+          />
+        )}
 
         {total > 0 && (
           <Flex
@@ -402,7 +701,7 @@ export default function DownloadsVideo() {
             align="center"
             justify="space-between"
             gap={4}
-            pt={4}
+            pt={3}
             borderTopWidth="1px"
             borderColor="border.subtle"
           >
@@ -413,10 +712,10 @@ export default function DownloadsVideo() {
             <HStack gap={2}>
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 disabled={pagina <= 1 || isFetching}
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 <ChevronLeft size={16} style={{ marginRight: '4px' }} />
                 <Text as="span">Anterior</Text>
@@ -424,10 +723,10 @@ export default function DownloadsVideo() {
 
               <Button
                 size="sm"
-                variant="ghost"
+                variant="outline"
                 disabled={pagina >= totalPaginas || isFetching}
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                borderRadius="xl"
+                borderRadius="lg"
               >
                 <Text as="span">Próxima</Text>
                 <ChevronRight size={16} style={{ marginLeft: '4px' }} />
@@ -465,49 +764,41 @@ export default function DownloadsVideo() {
               borderWidth="1px"
               borderColor="border.subtle"
               color="fg"
-              borderRadius="2xl"
-              p={4}
+              borderRadius="xl"
+              p={5}
               maxW="md"
             >
-              <Dialog.Header>
+              <Dialog.Header p={0} mb={3}>
                 <Dialog.Title fontSize="md" fontWeight="bold">
                   {categoriaAlvoUuid
                     ? 'Categorizar Vídeo'
                     : `Categorizar ${selecionados.length} Itens`}
                 </Dialog.Title>
               </Dialog.Header>
-              <Dialog.Body py={4}>
+              <Dialog.Body p={0} py={2}>
                 <VStack gap={4} alignItems="stretch">
                   <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
                     Selecione a Categoria de Destino
                   </Text>
-                  <select
-                    value={categoriaSelecionadaId}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setCategoriaSelecionadaId(e.target.value)
-                    }
-                    style={{
-                      width: '100%',
-                      height: '2.75rem',
-                      padding: '0 0.75rem',
-                      borderRadius: '0.75rem',
-                      fontSize: '0.75rem',
-                      fontWeight: 500,
-                      backgroundColor: 'var(--chakra-colors-bg-muted)',
-                      borderColor: 'var(--chakra-colors-border-subtle)',
-                      color: 'inherit',
-                      borderWidth: '1px',
-                      borderStyle: 'solid',
-                      outline: 'none',
-                    }}
-                  >
-                    <option value="">Selecione uma categoria...</option>
-                    {categorias.map((cat) => (
-                      <option key={cat.uuid} value={cat.uuid}>
-                        {cat.nome}
-                      </option>
-                    ))}
-                  </select>
+                  <NativeSelect.Root size="md" w="full">
+                    <NativeSelect.Field
+                      value={categoriaSelecionadaId}
+                      onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
+                      bg="bg.muted"
+                      borderColor="border.subtle"
+                      borderRadius="lg"
+                      fontSize="xs"
+                      h={10}
+                    >
+                      <option value="">Selecione uma categoria...</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.uuid} value={cat.uuid}>
+                          {cat.nome} {cat.googlePhotosAlbumId ? '☁️ (Google Fotos)' : '📁 (Local)'}
+                        </option>
+                      ))}
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
 
                   <HStack
                     justify="flex-end"
@@ -520,6 +811,7 @@ export default function DownloadsVideo() {
                       size="sm"
                       variant="ghost"
                       onClick={() => setModalCategorizarAberto(false)}
+                      borderRadius="lg"
                     >
                       Cancelar
                     </Button>
@@ -533,7 +825,7 @@ export default function DownloadsVideo() {
                       }
                       onClick={handleConfirmarCategorizar}
                       fontWeight="semibold"
-                      borderRadius="xl"
+                      borderRadius="lg"
                     >
                       {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
                         <Loader2
@@ -562,16 +854,16 @@ export default function DownloadsVideo() {
               borderWidth="1px"
               borderColor="border.subtle"
               color="fg"
-              borderRadius="2xl"
-              p={4}
+              borderRadius="xl"
+              p={5}
               maxW="md"
             >
-              <Dialog.Header>
+              <Dialog.Header p={0} mb={3}>
                 <Dialog.Title fontSize="md" fontWeight="bold">
                   Confirmar Exclusão
                 </Dialog.Title>
               </Dialog.Header>
-              <Dialog.Body py={4}>
+              <Dialog.Body p={0} py={2}>
                 <VStack gap={4} alignItems="stretch">
                   <Text fontSize="xs" color="fg.subtle">
                     Tem certeza que deseja apagar{' '}
@@ -594,6 +886,7 @@ export default function DownloadsVideo() {
                       size="sm"
                       variant="ghost"
                       onClick={() => setModalConfirmarApagar(false)}
+                      borderRadius="lg"
                     >
                       Cancelar
                     </Button>
@@ -603,7 +896,7 @@ export default function DownloadsVideo() {
                       disabled={pendenteApagar}
                       onClick={handleConfirmarApagar}
                       fontWeight="semibold"
-                      borderRadius="xl"
+                      borderRadius="lg"
                     >
                       {pendenteApagar && (
                         <Loader2
@@ -632,16 +925,16 @@ export default function DownloadsVideo() {
               borderWidth="1px"
               borderColor="border.subtle"
               color="fg"
-              borderRadius="2xl"
-              p={4}
+              borderRadius="xl"
+              p={5}
               maxW="md"
             >
-              <Dialog.Header>
+              <Dialog.Header p={0} mb={3}>
                 <Dialog.Title fontSize="md" fontWeight="bold">
                   Rebaixar Vídeo(s)
                 </Dialog.Title>
               </Dialog.Header>
-              <Dialog.Body py={4}>
+              <Dialog.Body p={0} py={2}>
                 <VStack gap={4} alignItems="stretch">
                   <Text fontSize="xs" color="fg.subtle">
                     O download será reenfileirado a partir da URL original gravada nos metadados.
@@ -658,6 +951,7 @@ export default function DownloadsVideo() {
                       size="sm"
                       variant="ghost"
                       onClick={() => setModalConfirmarRebaixar(false)}
+                      borderRadius="lg"
                     >
                       Cancelar
                     </Button>
@@ -667,7 +961,7 @@ export default function DownloadsVideo() {
                       disabled={pendenteRebaixar}
                       onClick={handleConfirmarRebaixar}
                       fontWeight="semibold"
-                      borderRadius="xl"
+                      borderRadius="lg"
                     >
                       {pendenteRebaixar && (
                         <Loader2
@@ -684,6 +978,7 @@ export default function DownloadsVideo() {
             </Dialog.Content>
           </Dialog.Positioner>
         </Dialog.Root>
+
         <ModalVisualizarMidia
           item={itemVisualizar}
           aberto={Boolean(itemVisualizar)}
@@ -692,7 +987,7 @@ export default function DownloadsVideo() {
           onEditarMetadata={handleAbrirEditarMetadata}
         />
       </VStack>
-    </AppContainer>
+    </Box>
   )
 }
 

@@ -41,8 +41,8 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
         gap={3}
         p={3}
         px={{ sm: 5 }}
-        py={{ sm: 3.5 }}
-        borderRadius="2xl"
+        py={{ sm: 3 }}
+        borderRadius="xl"
         borderWidth="1px"
         borderColor="border.subtle"
         bg="bg.panel"
@@ -63,8 +63,9 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             onClick={onLimparSelecao}
             aria-label="Desmarcar todos"
             p={1}
+            borderRadius="lg"
           >
-            <X size={16} />
+            <X size={15} />
           </Button>
         </HStack>
 
@@ -74,7 +75,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             variant="ghost"
             disabled={processando}
             onClick={onCategorizarLote}
-            borderRadius="xl"
+            borderRadius="lg"
           >
             {processando ? (
               <Loader2
@@ -94,7 +95,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             variant="ghost"
             disabled={processando}
             onClick={onRebaixarLote}
-            borderRadius="xl"
+            borderRadius="lg"
           >
             {processando ? (
               <Loader2
@@ -115,7 +116,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
             colorPalette="red"
             disabled={processando}
             onClick={onApagarLote}
-            borderRadius="xl"
+            borderRadius="lg"
           >
             {processando ? (
               <Loader2

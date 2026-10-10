@@ -87,7 +87,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content
-          borderRadius="2xl"
+          borderRadius="xl"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -106,11 +106,14 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
             <HStack gap={2.5}>
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="lg"
                 bg="cirqueira.brand.500/10"
                 color="cirqueira.brand.400"
                 borderWidth="1px"
                 borderColor="cirqueira.brand.500/20"
+                display="inline-flex"
+                alignItems="center"
+                justifyContent="center"
               >
                 <Film size={18} />
               </Box>
@@ -124,7 +127,13 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
               </VStack>
             </HStack>
 
-            <IconButton size="sm" variant="ghost" onClick={onFechar} aria-label="Fechar modal">
+            <IconButton
+              size="sm"
+              variant="ghost"
+              onClick={onFechar}
+              aria-label="Fechar modal"
+              borderRadius="lg"
+            >
               <X size={18} />
             </IconButton>
           </Flex>
@@ -145,7 +154,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 <Text fontSize="sm">
                   Não foi possível reproduzir este vídeo diretamente no navegador.
                 </Text>
-                <Button size="sm" colorPalette="brand" onClick={handleBaixar}>
+                <Button size="sm" colorPalette="brand" onClick={handleBaixar} borderRadius="lg">
                   <Download size={14} />
                   <Text as="span">Baixar Arquivo MP4</Text>
                 </Button>
@@ -206,7 +215,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                   </HStack>
 
                   {item.categoria?.nome && (
-                    <Badge size="sm" variant="subtle" colorPalette="brand">
+                    <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
                       {item.categoria.nome}
                     </Badge>
                   )}
@@ -219,6 +228,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                     size="sm"
                     variant="outline"
                     onClick={() => window.open(urlOriginal, '_blank', 'noopener,noreferrer')}
+                    borderRadius="lg"
                   >
                     <ExternalLink size={14} />
                     <Text as="span">Link Original</Text>
@@ -233,6 +243,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                       onFechar()
                       onEditarMetadata(item)
                     }}
+                    borderRadius="lg"
                   >
                     <Edit3 size={14} />
                     <Text as="span">Metadados</Text>
@@ -247,6 +258,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                       onFechar()
                       onCategorizar(item)
                     }}
+                    borderRadius="lg"
                   >
                     <FolderPlus size={14} />
                     <Text as="span">Categorizar</Text>
@@ -259,6 +271,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                   onClick={handleBaixar}
                   disabled={baixando}
                   fontWeight="semibold"
+                  borderRadius="lg"
                 >
                   {baixando ? (
                     <>

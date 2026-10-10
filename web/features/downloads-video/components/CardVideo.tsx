@@ -1,15 +1,4 @@
-import {
-  Badge,
-  Box,
-  Card,
-  Flex,
-  Grid,
-  HStack,
-  IconButton,
-  Link,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Card, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
   Calendar,
@@ -20,6 +9,7 @@ import {
   DownloadCloud,
   Edit3,
   ExternalLink,
+  Folder,
   FolderPlus,
   HardDrive,
   Loader2,
@@ -46,77 +36,57 @@ export interface CardVideoProps {
   onApagar?: (uuid: string) => void
 }
 
-function formatarDuracao(segundos?: number): string | null {
-  if (segundos === undefined || segundos === null || Number.isNaN(segundos) || segundos <= 0) {
-    return null
-  }
-
-  const horas = Math.floor(segundos / 3600)
-  const minutos = Math.floor((segundos % 3600) / 60)
-  const segRestantes = Math.floor(segundos % 60)
-
-  if (horas > 0) {
-    return `${horas}:${String(minutos).padStart(2, '0')}:${String(segRestantes).padStart(2, '0')}`
-  }
-
-  return `${minutos}:${String(segRestantes).padStart(2, '0')}`
-}
-
 function formatarDataMidia(valorData?: string, fallbackIso?: string): string {
-  if (valorData) {
-    if (/^\d{8}$/.test(valorData)) {
-      const ano = valorData.substring(0, 4)
-      const mes = valorData.substring(4, 6)
-      const dia = valorData.substring(6, 8)
-      return `${dia}/${mes}/${ano}`
-    }
+  const candidato = valorData || fallbackIso
+  if (!candidato) return 'Data não inf.'
 
-    if (valorData.includes('-')) {
-      const apenasData = valorData.split('T')[0] ?? valorData
-      const partes = apenasData.split('-')
-      if (partes.length === 3 && partes[0] && partes[1] && partes[2]) {
-        const [ano, mes, dia] = partes
-        return `${dia}/${mes}/${ano}`
-      }
-    }
-
-    try {
-      const parsed = new Date(valorData)
-      if (!Number.isNaN(parsed.getTime())) {
-        return parsed.toLocaleDateString('pt-BR')
-      }
-    } catch {}
+  if (/^\d{8}$/.test(candidato)) {
+    const ano = candidato.substring(0, 4)
+    const mes = candidato.substring(4, 6)
+    const dia = candidato.substring(6, 8)
+    return `${dia}/${mes}/${ano}`
   }
 
-  if (fallbackIso) {
-    try {
-      const fallbackData = new Date(fallbackIso)
-      if (!Number.isNaN(fallbackData.getTime())) {
-        return fallbackData.toLocaleDateString('pt-BR')
-      }
-    } catch {}
+  const dataApenas = candidato.split(/[T ]/)[0] ?? ''
+  if (dataApenas.includes('-')) {
+    const partes = dataApenas.split('-')
+    if (partes.length === 3 && partes[0] && partes[1] && partes[2]) {
+      const [ano, mes, dia] = partes
+      return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
+    }
   }
+
+  try {
+    const parsed = new Date(candidato)
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleDateString('pt-BR')
+    }
+  } catch {}
 
   return 'Data não inf.'
 }
 
 function formatarHorarioMidia(item: MediaItem): string {
   if (item.metadata?.horario && typeof item.metadata.horario === 'string') {
-    return item.metadata.horario.substring(0, 5)
+    const limpo = item.metadata.horario.trim()
+    const partes = limpo.split(':')
+    const h = partes[0]
+    const m = partes[1]
+    if (h !== undefined && m !== undefined) {
+      return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`
+    }
   }
 
   const valorData = item.metadata?.data
   if (valorData && typeof valorData === 'string') {
-    if (valorData.includes('T')) {
-      const horaParte = valorData.split('T')[1]
-      if (horaParte && horaParte.length >= 5) {
-        return horaParte.substring(0, 5)
-      }
-    }
-    if (valorData.includes(' ') && valorData.split(' ')[1]) {
-      const horaParte = valorData.split(' ')[1]
-      if (horaParte && horaParte.length >= 5) {
-        return horaParte.substring(0, 5)
+    const partesEspaco = valorData.split(/[T ]/)
+    const horaRaw = partesEspaco[1]
+    if (horaRaw) {
+      const partesHora = horaRaw.split(':')
+      const hh = partesHora[0]
+      const mm = partesHora[1]
+      if (hh !== undefined && mm !== undefined) {
+        return `${hh.padStart(2, '0')}:${mm.padStart(2, '0')}`
       }
     }
   }
@@ -133,18 +103,25 @@ function formatarHorarioMidia(item: MediaItem): string {
   return '--:--'
 }
 
-function formatarTamanhoBytes(bytes?: number): string | null {
-  if (!bytes || bytes <= 0) {
+function formatarDuracao(segundos?: number): string | null {
+  if (segundos === undefined || segundos === null || Number.isNaN(segundos) || segundos <= 0) {
     return null
   }
+  const horas = Math.floor(segundos / 3600)
+  const minutos = Math.floor((segundos % 3600) / 60)
+  const segRestantes = Math.floor(segundos % 60)
+  if (horas > 0) {
+    return `${horas}:${String(minutos).padStart(2, '0')}:${String(segRestantes).padStart(2, '0')}`
+  }
+  return `${minutos}:${String(segRestantes).padStart(2, '0')}`
+}
+
+function formatarTamanhoBytes(bytes?: number): string | null {
+  if (!bytes || bytes <= 0) return null
   const kb = bytes / 1024
-  if (kb < 1024) {
-    return `${kb.toFixed(0)} KB`
-  }
+  if (kb < 1024) return `${kb.toFixed(0)} KB`
   const mb = kb / 1024
-  if (mb < 1024) {
-    return `${mb.toFixed(1)} MB`
-  }
+  if (mb < 1024) return `${mb.toFixed(1)} MB`
   const gb = mb / 1024
   return `${gb.toFixed(2)} GB`
 }
@@ -152,32 +129,16 @@ function formatarTamanhoBytes(bytes?: number): string | null {
 function tempoRelativoNativo(dataIso: string): string {
   try {
     const data = new Date(dataIso)
-    if (Number.isNaN(data.getTime())) {
-      return dataIso
-    }
-
+    if (Number.isNaN(data.getTime())) return dataIso
     const agora = new Date()
     const diffSegundos = Math.floor((agora.getTime() - data.getTime()) / 1000)
-
-    if (diffSegundos < 60) {
-      return 'agora há pouco'
-    }
-
+    if (diffSegundos < 60) return 'agora há pouco'
     const diffMinutos = Math.floor(diffSegundos / 60)
-    if (diffMinutos < 60) {
-      return `há ${diffMinutos} min`
-    }
-
+    if (diffMinutos < 60) return `há ${diffMinutos} min`
     const diffHoras = Math.floor(diffMinutos / 60)
-    if (diffHoras < 24) {
-      return `há ${diffHoras} ${diffHoras === 1 ? 'hora' : 'horas'}`
-    }
-
+    if (diffHoras < 24) return `há ${diffHoras} ${diffHoras === 1 ? 'hora' : 'horas'}`
     const diffDias = Math.floor(diffHoras / 24)
-    if (diffDias < 30) {
-      return `há ${diffDias} ${diffDias === 1 ? 'dia' : 'dias'}`
-    }
-
+    if (diffDias < 30) return `há ${diffDias} ${diffDias === 1 ? 'dia' : 'dias'}`
     return data.toLocaleDateString('pt-BR')
   } catch {
     return dataIso
@@ -187,71 +148,27 @@ function tempoRelativoNativo(dataIso: string): string {
 function obterStatusConfig(status: StatusMediaItem) {
   switch (status) {
     case 'baixando':
-      return {
-        label: 'Baixando',
-        colorPalette: 'amber',
-        animado: true,
-      }
+      return { label: 'Baixando', colorPalette: 'amber', animado: true }
     case 'recebido':
-      return {
-        label: 'Recebido',
-        colorPalette: 'gray',
-        animado: false,
-      }
+      return { label: 'Recebido', colorPalette: 'gray', animado: false }
     case 'em_fila':
-      return {
-        label: 'Em Fila',
-        colorPalette: 'blue',
-        animado: false,
-      }
+      return { label: 'Em Fila', colorPalette: 'blue', animado: false }
     case 'sem_categoria':
-      return {
-        label: 'Sem Categoria',
-        colorPalette: 'gray',
-        animado: false,
-      }
+      return { label: 'Sem Categoria', colorPalette: 'gray', animado: false }
     case 'classificado':
-      return {
-        label: 'Classificado',
-        colorPalette: 'purple',
-        animado: false,
-      }
+      return { label: 'Classificado', colorPalette: 'purple', animado: false }
     case 'distribuindo':
-      return {
-        label: 'Distribuindo',
-        colorPalette: 'cyan',
-        animado: true,
-      }
+      return { label: 'Distribuindo', colorPalette: 'cyan', animado: true }
     case 'distribuido_local':
-      return {
-        label: 'Distribuído',
-        colorPalette: 'teal',
-        animado: false,
-      }
+      return { label: 'Distribuído', colorPalette: 'teal', animado: false }
     case 'enviando_google_fotos':
-      return {
-        label: 'Google Fotos',
-        colorPalette: 'purple',
-        animado: true,
-      }
+      return { label: 'Google Fotos', colorPalette: 'purple', animado: true }
     case 'concluido':
-      return {
-        label: 'Concluído',
-        colorPalette: 'green',
-        animado: false,
-      }
+      return { label: 'Concluído', colorPalette: 'green', animado: false }
     case 'erro':
-      return {
-        label: 'Erro',
-        colorPalette: 'red',
-        animado: false,
-      }
+      return { label: 'Erro', colorPalette: 'red', animado: false }
     default:
-      return {
-        label: status,
-        colorPalette: 'gray',
-        animado: false,
-      }
+      return { label: status, colorPalette: 'gray', animado: false }
   }
 }
 
@@ -292,7 +209,7 @@ export const CardVideo = memo(function CardVideo({
   const tamanhoNumero =
     typeof item.metadata?.tamanho_bytes === 'number' ? item.metadata.tamanho_bytes : undefined
   const tamanhoFormatado = formatarTamanhoBytes(tamanhoNumero)
-  const extensao = typeof item.metadata?.extensao === 'string' ? item.metadata.extensao : undefined
+  const extensao = typeof item.metadata?.extensao === 'string' ? item.metadata.extensao : 'mp4'
 
   const handleDownloadDirecto = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -309,14 +226,14 @@ export const CardVideo = memo(function CardVideo({
       position="relative"
       display="flex"
       flexDirection="column"
-      borderRadius="2xl"
+      borderRadius="xl"
       borderWidth={selecionado ? '2px' : '1px'}
       borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       bg="bg.panel"
       overflow="hidden"
-      shadow="none"
+      shadow="sm"
       transition="all 0.2s"
-      _hover={{ borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted' }}
+      _hover={{ borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted', shadow: 'md' }}
     >
       <Box position="relative" aspectRatio="16/9" w="full" bg="bg.muted" overflow="hidden">
         {temThumbnail ? (
@@ -329,7 +246,7 @@ export const CardVideo = memo(function CardVideo({
           />
         ) : (
           <VStack h="full" w="full" align="center" justify="center" gap={2} color="fg.subtle">
-            <Video size={40} strokeWidth={1.5} />
+            <Video size={36} strokeWidth={1.5} />
             <Text fontSize="xs" fontWeight="medium">
               Clique para assistir
             </Text>
@@ -342,7 +259,7 @@ export const CardVideo = memo(function CardVideo({
           display="flex"
           alignItems="center"
           justifyContent="center"
-          bg="blackAlpha.500"
+          bg="blackAlpha.600"
           opacity={0}
           _hover={{ opacity: 1 }}
           cursor="pointer"
@@ -351,22 +268,22 @@ export const CardVideo = memo(function CardVideo({
           zIndex={5}
         >
           <Box
-            p={3.5}
+            p={3}
             borderRadius="full"
             bg="cirqueira.brand.500"
             color="white"
             shadow="2xl"
-            transform="scale(0.9)"
+            transform="scale(0.95)"
             _hover={{ transform: 'scale(1.08)' }}
             transition="transform 0.15s ease"
           >
-            <Play size={22} fill="white" />
+            <Play size={20} fill="white" />
           </Box>
         </Box>
 
-        <Box position="absolute" top={2.5} left={2.5} zIndex={10}>
+        <Box position="absolute" top={2} left={2} zIndex={10}>
           <IconButton
-            size="sm"
+            size="xs"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation()
@@ -376,34 +293,36 @@ export const CardVideo = memo(function CardVideo({
             _hover={{ bg: 'blackAlpha.800' }}
             color="white"
             backdropFilter="blur(8px)"
+            borderRadius="lg"
             aria-label={`Selecionar ${titulo}`}
           >
             {selecionado ? (
               <Box as="span" color="cirqueira.brand.400" display="inline-flex">
-                <CheckSquare size={16} color="currentColor" />
+                <CheckSquare size={15} color="currentColor" />
               </Box>
             ) : (
-              <Square size={16} />
+              <Square size={15} />
             )}
           </IconButton>
         </Box>
 
-        <Box position="absolute" top={2.5} right={2.5} zIndex={10}>
+        <Box position="absolute" top={2} right={2} zIndex={10}>
           <Badge
             size="sm"
             variant="subtle"
             colorPalette={statusInfo.colorPalette}
             backdropFilter="blur(8px)"
+            borderRadius="md"
           >
             <HStack gap={1} alignItems="center">
               {statusInfo.animado ? (
-                <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
               ) : item.status === 'erro' ? (
-                <AlertCircle size={12} />
+                <AlertCircle size={11} />
               ) : item.status === 'concluido' ? (
-                <CheckCircle2 size={12} />
+                <CheckCircle2 size={11} />
               ) : (
-                <Clock size={12} />
+                <Clock size={11} />
               )}
               <Text as="span">{statusInfo.label}</Text>
             </HStack>
@@ -413,15 +332,15 @@ export const CardVideo = memo(function CardVideo({
         {duracaoFormatada && (
           <Box
             position="absolute"
-            bottom={2.5}
-            right={2.5}
+            bottom={2}
+            right={2}
             zIndex={10}
             borderRadius="md"
             bg="blackAlpha.800"
             px={2}
             py={0.5}
             fontSize="xs"
-            fontWeight="medium"
+            fontWeight="bold"
             color="white"
             backdropFilter="blur(4px)"
           >
@@ -436,31 +355,31 @@ export const CardVideo = memo(function CardVideo({
             rel="noopener noreferrer"
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             position="absolute"
-            bottom="10px"
-            left="10px"
+            bottom={2}
+            left={2}
             zIndex={10}
-            p={1}
+            p={1.5}
             borderRadius="md"
-            bg="blackAlpha.600"
-            color="whiteAlpha.800"
+            bg="blackAlpha.700"
+            color="whiteAlpha.900"
             display="inline-flex"
             alignItems="center"
             justifyContent="center"
             title="Abrir link original"
+            _hover={{ bg: 'blackAlpha.900' }}
           >
-            <ExternalLink size={14} />
+            <ExternalLink size={13} />
           </Link>
         )}
       </Box>
 
-      <Card.Body display="flex" flex={1} flexDirection="column" p={4}>
+      <Card.Body display="flex" flex={1} flexDirection="column" p={4} gap={2.5}>
         <Text
           as="h3"
           fontWeight="semibold"
           fontSize="sm"
           color="fg"
           lineClamp={2}
-          mb={1.5}
           title={titulo}
           cursor="pointer"
           _hover={{ color: 'cirqueira.brand.400' }}
@@ -469,16 +388,9 @@ export const CardVideo = memo(function CardVideo({
           {titulo}
         </Text>
 
-        <Flex
-          align="center"
-          justify="space-between"
-          gap={2}
-          fontSize="xs"
-          color="fg.subtle"
-          mb={2.5}
-        >
+        <Flex align="center" justify="space-between" gap={2} fontSize="xs" color="fg.subtle">
           <HStack gap={1.5} truncate flex={1}>
-            <User size={12} style={{ flexShrink: 0 }} />
+            <User size={13} style={{ flexShrink: 0 }} />
             <Text as="span" truncate>
               {uploader}
             </Text>
@@ -486,11 +398,15 @@ export const CardVideo = memo(function CardVideo({
 
           {(tamanhoFormatado || extensao) && (
             <HStack gap={1.5} flexShrink={0}>
-              {extensao && (
-                <Badge size="xs" variant="outline" textTransform="uppercase" colorPalette="gray">
-                  {extensao}
-                </Badge>
-              )}
+              <Badge
+                size="xs"
+                variant="outline"
+                textTransform="uppercase"
+                colorPalette="gray"
+                borderRadius="md"
+              >
+                {extensao}
+              </Badge>
               {tamanhoFormatado && (
                 <HStack gap={1} fontSize="xs" color="fg.subtle">
                   <HardDrive size={11} />
@@ -501,71 +417,57 @@ export const CardVideo = memo(function CardVideo({
           )}
         </Flex>
 
-        <Grid
-          templateColumns="repeat(2, 1fr)"
-          gap={1.5}
-          px={2.5}
-          py={2}
-          borderRadius="xl"
-          bg="bg.muted"
-          borderWidth="1px"
-          borderColor="border.subtle"
-          mb={3}
-        >
-          <HStack gap={1.5} fontSize="xs" color="fg.muted">
-            <Calendar size={13} style={{ flexShrink: 0 }} />
-            <Text as="span" fontWeight="medium" truncate title={`Data da mídia: ${dataMidia}`}>
-              {dataMidia}
-            </Text>
-          </HStack>
-
-          <HStack gap={1.5} fontSize="xs" color="fg.muted" justify="flex-end">
-            <Clock size={13} style={{ flexShrink: 0 }} />
-            <Text as="span" fontWeight="medium" title={`Horário: ${horarioMidia}`}>
-              {horarioMidia}
-            </Text>
-          </HStack>
-        </Grid>
-
-        <Flex
-          align="center"
+        <HStack
           justify="space-between"
+          align="center"
           gap={2}
           fontSize="xs"
           color="fg.subtle"
-          pt={1}
-          borderTopWidth="1px"
+          py={1.5}
+          px={2.5}
+          borderRadius="lg"
+          bg="bg.muted/60"
+          borderWidth="1px"
           borderColor="border.subtle"
-          mb={3}
         >
-          <Box truncate>
+          <HStack gap={2} fontSize="xs" color="fg.muted" truncate>
+            <HStack gap={1}>
+              <Calendar size={12} style={{ flexShrink: 0 }} />
+              <Text as="span" fontWeight="medium">
+                {dataMidia}
+              </Text>
+            </HStack>
+            <Text as="span" opacity={0.4}>
+              •
+            </Text>
+            <HStack gap={1}>
+              <Clock size={12} style={{ flexShrink: 0 }} />
+              <Text as="span" fontWeight="medium">
+                {horarioMidia}
+              </Text>
+            </HStack>
+          </HStack>
+
+          <Box flexShrink={0}>
             {item.categoria?.nome ? (
-              <Badge size="sm" variant="subtle" colorPalette="brand">
+              <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
                 <HStack gap={1} alignItems="center">
-                  <FolderPlus size={12} />
-                  <Text as="span">{item.categoria.nome}</Text>
+                  <Folder size={11} />
+                  <Text as="span" maxW="24" truncate>
+                    {item.categoria.nome}
+                  </Text>
                 </HStack>
               </Badge>
             ) : (
-              <Text as="span" fontStyle="italic" color="fg.subtle">
+              <Text as="span" fontStyle="italic" color="fg.subtle" fontSize="xs">
                 Sem categoria
               </Text>
             )}
           </Box>
-          <HStack
-            gap={1}
-            fontSize="xs"
-            color="fg.subtle"
-            flexShrink={0}
-            title={`Adicionado em: ${item.criadoEm}`}
-          >
-            <Text as="span">{tempoRelativoNativo(item.criadoEm)}</Text>
-          </HStack>
-        </Flex>
+        </HStack>
 
         {item.status === 'erro' && item.erroMotivo && (
           <Box
-            mb={3}
             borderRadius="lg"
             bg="cirqueira.red.500/10"
             p={2}
@@ -579,87 +481,108 @@ export const CardVideo = memo(function CardVideo({
           </Box>
         )}
 
-        <HStack mt="auto" align="center" justify="flex-end" gap={1} pt={2}>
-          <IconButton
-            size="sm"
-            variant="ghost"
-            onClick={handleDownloadDirecto}
-            disabled={baixando}
-            aria-label="Baixar arquivo MP4"
-            title="Baixar arquivo MP4 para seu computador"
-            color="cirqueira.cyan.400"
-            _hover={{ bg: 'cirqueira.cyan.500/10' }}
-          >
-            {baixando ? (
-              <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
-            ) : (
-              <Download size={16} />
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={2}
+          pt={2}
+          mt="auto"
+          borderTopWidth="1px"
+          borderColor="border.subtle"
+        >
+          <Text as="span" fontSize="xs" color="fg.subtle" truncate>
+            {tempoRelativoNativo(item.criadoEm)}
+          </Text>
+
+          <HStack gap={1} flexShrink={0}>
+            <IconButton
+              size="xs"
+              variant="ghost"
+              onClick={handleDownloadDirecto}
+              disabled={baixando}
+              aria-label="Baixar arquivo MP4"
+              title="Baixar arquivo MP4"
+              color="cirqueira.brand.500"
+              _hover={{ bg: 'cirqueira.brand.500/10' }}
+              borderRadius="lg"
+            >
+              {baixando ? (
+                <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+              ) : (
+                <Download size={14} />
+              )}
+            </IconButton>
+
+            {onEditarMetadata && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={() => onEditarMetadata(item)}
+                aria-label="Editar metadados"
+                title="Editar metadados"
+                borderRadius="lg"
+              >
+                <Edit3 size={14} />
+              </IconButton>
             )}
-          </IconButton>
 
-          {onEditarMetadata && (
-            <IconButton
-              size="sm"
-              variant="ghost"
-              onClick={() => onEditarMetadata(item)}
-              aria-label="Editar metadados"
-              title="Editar título, autor, data, hora, duração e capa"
-            >
-              <Edit3 size={16} />
-            </IconButton>
-          )}
+            {onCategorizar && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={() => onCategorizar(item)}
+                aria-label="Categorizar vídeo"
+                title="Categorizar"
+                borderRadius="lg"
+              >
+                <FolderPlus size={14} />
+              </IconButton>
+            )}
 
-          {onCategorizar && (
-            <IconButton
-              size="sm"
-              variant="ghost"
-              onClick={() => onCategorizar(item)}
-              aria-label="Categorizar vídeo"
-              title="Mover para categoria"
-            >
-              <FolderPlus size={16} />
-            </IconButton>
-          )}
+            {onRebaixar && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={() => onRebaixar(item.uuid)}
+                aria-label="Rebaixar vídeo"
+                title="Baixar novamente"
+                borderRadius="lg"
+              >
+                <DownloadCloud size={14} />
+              </IconButton>
+            )}
 
-          {onRebaixar && (
-            <IconButton
-              size="sm"
-              variant="ghost"
-              onClick={() => onRebaixar(item.uuid)}
-              aria-label="Rebaixar vídeo"
-              title="Baixar novamente"
-            >
-              <DownloadCloud size={16} />
-            </IconButton>
-          )}
+            {item.status === 'erro' && onRetentar && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={() => onRetentar(item.uuid)}
+                aria-label="Retentar processamento"
+                title="Retentar"
+                borderRadius="lg"
+              >
+                <Box as="span" color="cirqueira.amber.500" display="inline-flex">
+                  <RotateCcw size={14} color="currentColor" />
+                </Box>
+              </IconButton>
+            )}
 
-          {item.status === 'erro' && onRetentar && (
-            <IconButton
-              size="sm"
-              variant="ghost"
-              onClick={() => onRetentar(item.uuid)}
-              aria-label="Retentar processamento"
-            >
-              <Box as="span" color="cirqueira.amber.500" display="inline-flex">
-                <RotateCcw size={16} color="currentColor" />
-              </Box>
-            </IconButton>
-          )}
-
-          {onApagar && (
-            <IconButton
-              size="sm"
-              variant="ghost"
-              onClick={() => onApagar(item.uuid)}
-              aria-label="Apagar vídeo"
-              title="Remover vídeo"
-            >
-              <Box as="span" color="cirqueira.red.500" display="inline-flex">
-                <Trash2 size={16} color="currentColor" />
-              </Box>
-            </IconButton>
-          )}
-        </HStack>
+            {onApagar && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={() => onApagar(item.uuid)}
+                aria-label="Apagar vídeo"
+                title="Apagar"
+                borderRadius="lg"
+              >
+                <Box as="span" color="cirqueira.red.500" display="inline-flex">
+                  <Trash2 size={14} color="currentColor" />
+                </Box>
+              </IconButton>
+            )}
+          </HStack>
+        </Flex>
       </Card.Body>
     </Card.Root>
   )
