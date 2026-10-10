@@ -27,41 +27,21 @@ import {
 import { memo, useState } from 'react'
 import type { AtualizarMetadataInput, MediaItem } from '../types'
 
+import {
+  calcularDataComOffset,
+  calcularDuracaoTotalSegundos,
+  combinarDataHora,
+  extrairDataHoraInicial,
+  extrairMinutosSegundos,
+  obterDataHoraAtual,
+} from '../utils/metadataEdicao'
+
 export interface ModalEditarMetadataProps {
   item: MediaItem | null
   aberto: boolean
   onFechar: () => void
   onSalvar: (input: AtualizarMetadataInput) => void
   pendente?: boolean
-}
-
-function extrairDataHoraInicial(item: MediaItem | null): { data: string; hora: string } {
-  if (!item) return { data: '', hora: '12:00' }
-
-  const valorData = item.metadata?.data || item.criadoEm
-  if (!valorData) {
-    const hoje = new Date().toISOString().split('T')[0] ?? ''
-    return { data: hoje, hora: '12:00' }
-  }
-
-  if (/^\d{8}$/.test(valorData)) {
-    const ano = valorData.substring(0, 4)
-    const mes = valorData.substring(4, 6)
-    const dia = valorData.substring(6, 8)
-    return { data: `${ano}-${mes}-${dia}`, hora: '12:00' }
-  }
-
-  if (valorData.includes('T')) {
-    const [d = '', h = '12:00'] = valorData.split('T')
-    return { data: d, hora: h.substring(0, 5) || '12:00' }
-  }
-
-  if (valorData.includes(' ')) {
-    const [d = '', h = '12:00'] = valorData.split(' ')
-    return { data: d, hora: h.substring(0, 5) || '12:00' }
-  }
-
-  return { data: valorData, hora: '12:00' }
 }
 
 export const ModalEditarMetadata = memo(function ModalEditarMetadata({
@@ -74,23 +54,19 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
   if (!item) return null
 
   const dataHoraInicial = extrairDataHoraInicial(item)
-  const duracaoInicial = Number(item.metadata?.duracao) || 0
-  const minutosIniciais = Math.floor(duracaoInicial / 60)
-  const segundosIniciais = duracaoInicial % 60
+  const duracaoInicial = extrairMinutosSegundos(item.metadata?.duracao)
 
   const [titulo, setTitulo] = useState(item.metadata?.titulo || '')
   const [uploader, setUploader] = useState(item.metadata?.uploader || '')
   const [dataIso, setDataIso] = useState(dataHoraInicial.data)
   const [hora, setHora] = useState(dataHoraInicial.hora)
-  const [minutos, setMinutos] = useState(String(minutosIniciais))
-  const [segundos, setSegundos] = useState(String(segundosIniciais))
+  const [minutos, setMinutos] = useState(duracaoInicial.minutos)
+  const [segundos, setSegundos] = useState(duracaoInicial.segundos)
   const [thumbnail, setThumbnail] = useState(item.thumbnailUrl || item.metadata?.thumbnail || '')
   const [abaAtiva, setAbaAtiva] = useState<'geral' | 'data' | 'duracao' | 'capa'>('geral')
 
   const aplicarAtalhoData = (diasOffset: number) => {
-    const dataAlvo = new Date()
-    dataAlvo.setDate(dataAlvo.getDate() + diasOffset)
-    setDataIso(dataAlvo.toISOString().split('T')[0] ?? '')
+    setDataIso(calcularDataComOffset(diasOffset))
   }
 
   const aplicarAtalhoHora = (novaHora: string) => {
@@ -98,21 +74,20 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
   }
 
   const aplicarAgora = () => {
-    const agora = new Date()
-    setDataIso(agora.toISOString().split('T')[0] ?? '')
-    const hh = String(agora.getHours()).padStart(2, '0')
-    const mm = String(agora.getMinutes()).padStart(2, '0')
-    setHora(`${hh}:${mm}`)
+    const atual = obterDataHoraAtual()
+    setDataIso(atual.data)
+    setHora(atual.hora)
   }
 
   const restaurarOriginal = () => {
     const original = extrairDataHoraInicial(item)
+    const duracaoReset = extrairMinutosSegundos(item.metadata?.duracao)
     setTitulo(item.metadata?.titulo || '')
     setUploader(item.metadata?.uploader || '')
     setDataIso(original.data)
     setHora(original.hora)
-    setMinutos(String(minutosIniciais))
-    setSegundos(String(segundosIniciais))
+    setMinutos(duracaoReset.minutos)
+    setSegundos(duracaoReset.segundos)
     setThumbnail(item.thumbnailUrl || item.metadata?.thumbnail || '')
   }
 
@@ -122,17 +97,14 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
   }
 
   const handleSubmeter = () => {
-    const totalSegundos = (Number(minutos) || 0) * 60 + (Number(segundos) || 0)
-    let dataFinal = dataIso
-    if (dataIso && hora) {
-      dataFinal = `${dataIso} ${hora}:00`
-    }
+    const totalSegundos = calcularDuracaoTotalSegundos(minutos, segundos)
+    const dataFinal = combinarDataHora(dataIso, hora)
 
     onSalvar({
       titulo: titulo.trim(),
       uploader: uploader.trim(),
-      data: dataFinal || undefined,
-      duracao: totalSegundos > 0 ? totalSegundos : undefined,
+      data: dataFinal,
+      duracao: totalSegundos,
       thumbnail: thumbnail.trim() || undefined,
     })
   }

@@ -9,6 +9,7 @@ import {
   Grid,
   HStack,
   Input,
+  NativeSelect,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -23,6 +24,11 @@ import {
   Upload,
 } from 'lucide-react'
 import { memo, useState } from 'react'
+import {
+  extrairHashCurto,
+  extrairNomeExibicao,
+  identificarTipoMidia,
+} from '../utils/arquivosUpload'
 
 export interface FilaTriagemUploadProps {
   itens: MediaItem[]
@@ -213,17 +219,15 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           gap={4}
         >
           {itens.map((item) => {
-            const isVideo =
-              Boolean(item.metadata?.duracao) ||
-              Boolean(item.caminhoLocal?.match(/\.(mp4|mkv|webm|mov)$/i)) ||
-              Boolean(String(item.metadata?.extensao ?? '').match(/^(mp4|mkv|webm|mov)$/i))
-
+            const tipoInfo = identificarTipoMidia(item)
+            const nomeExibicao = extrairNomeExibicao(item)
+            const hashCurto = extrairHashCurto(item.hash)
             const isSelected = selecionados.includes(item.uuid)
 
             return (
               <Card.Root
                 key={item.uuid}
-                borderRadius="2xl"
+                borderRadius="xl"
                 borderWidth={isSelected ? '2px' : '1px'}
                 borderColor={isSelected ? 'cirqueira.brand.500' : 'border.subtle'}
                 bg="bg.panel"
@@ -238,10 +242,11 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       src={String(item.metadata.thumbnail)}
                       alt={item.hash}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      loading="lazy"
                     />
                   ) : (
                     <VStack h="full" w="full" align="center" justify="center" color="fg.subtle">
-                      {isVideo ? <FileVideo size={40} /> : <FileImage size={40} />}
+                      {tipoInfo.isVideo ? <FileVideo size={40} /> : <FileImage size={40} />}
                     </VStack>
                   )}
 
@@ -272,10 +277,11 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                     <Badge
                       size="sm"
                       variant="subtle"
-                      colorPalette={isVideo ? 'purple' : 'blue'}
+                      colorPalette={tipoInfo.colorPalette}
                       backdropFilter="blur(8px)"
+                      borderRadius="md"
                     >
-                      {isVideo ? 'Vídeo' : 'Imagem'}
+                      {tipoInfo.label}
                     </Badge>
                   </Box>
                 </Box>
@@ -289,11 +295,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 >
                   <VStack gap={1.5} alignItems="flex-start" w="full">
                     <Text as="h4" fontWeight="bold" fontSize="xs" color="fg" truncate w="full">
-                      {String(
-                        item.metadata?.nome_original ??
-                          item.caminhoLocal?.split('/').pop() ??
-                          item.uuid
-                      )}
+                      {nomeExibicao}
                     </Text>
 
                     <HStack gap={2} w="full">
@@ -323,7 +325,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       )}
 
                       <Text as="span" fontSize="10px" fontFamily="mono" color="fg.subtle">
-                        {item.hash.substring(0, 8)}...
+                        {hashCurto}...
                       </Text>
                     </HStack>
                   </VStack>
@@ -339,32 +341,25 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                     <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                       Atribuir Categoria:
                     </Text>
-                    <select
-                      value={item.categoriaId ?? ''}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        onClassificarIndividual(item.uuid, e.target.value)
-                      }
-                      style={{
-                        width: '100%',
-                        height: '2rem',
-                        padding: '0 0.5rem',
-                        borderRadius: '0.5rem',
-                        fontSize: '0.75rem',
-                        fontWeight: 500,
-                        backgroundColor: 'var(--chakra-colors-bg-muted)',
-                        borderColor: 'var(--chakra-colors-border-subtle)',
-                        color: 'inherit',
-                        borderWidth: '1px',
-                        outline: 'none',
-                      }}
-                    >
-                      <option value="">Selecione uma categoria...</option>
-                      {categorias.map((cat) => (
-                        <option key={cat.uuid} value={cat.uuid}>
-                          {cat.nome}
-                        </option>
-                      ))}
-                    </select>
+                    <NativeSelect.Root size="sm" w="full">
+                      <NativeSelect.Field
+                        value={item.categoriaId ?? ''}
+                        onChange={(e) => onClassificarIndividual(item.uuid, e.target.value)}
+                        bg="bg.muted"
+                        borderColor="border.subtle"
+                        borderRadius="lg"
+                        fontSize="xs"
+                        h={8}
+                      >
+                        <option value="">Selecione uma categoria...</option>
+                        {categorias.map((cat) => (
+                          <option key={cat.uuid} value={cat.uuid}>
+                            {cat.nome}
+                          </option>
+                        ))}
+                      </NativeSelect.Field>
+                      <NativeSelect.Indicator />
+                    </NativeSelect.Root>
                   </VStack>
                 </Card.Body>
 

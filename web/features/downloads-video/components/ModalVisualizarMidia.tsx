@@ -25,6 +25,7 @@ import {
 import { memo, useState } from 'react'
 import { baixarArquivoMidia, obterUrlStreamMediaItem } from '../api'
 import type { MediaItem } from '../types'
+import { formatarDuracao, formatarTamanhoBytes } from '../utils/formatadores'
 
 export interface ModalVisualizarMidiaProps {
   item: MediaItem | null
@@ -32,24 +33,6 @@ export interface ModalVisualizarMidiaProps {
   onFechar: () => void
   onCategorizar?: (item: MediaItem) => void
   onEditarMetadata?: (item: MediaItem) => void
-}
-
-function formatarTamanhoBytes(bytes?: number): string {
-  if (!bytes || bytes <= 0) return 'Tamanho desconhecido'
-  const unidades = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / 1024 ** i).toFixed(1)} ${unidades[i]}`
-}
-
-function formatarDuracao(segundos?: number): string {
-  if (!segundos || segundos <= 0) return '0:00'
-  const h = Math.floor(segundos / 3600)
-  const m = Math.floor((segundos % 3600) / 60)
-  const s = Math.floor(segundos % 60)
-  if (h > 0) {
-    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-  }
-  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({

@@ -18,6 +18,7 @@ import {
 import { memo, useState } from 'react'
 import { useFilaErros, useRetentarErroIndividual, useRetentarErros } from '../hooks/useDashboard'
 import type { OrigemMedia } from '../types'
+import { extrairTituloErro, formatarDataHoraErro } from '../utils/formatadoresDashboard'
 
 const ORIGEM_ICON: Record<OrigemMedia, typeof Bot> = {
   print_empresa: Building2,
@@ -207,11 +208,7 @@ export const FilaErros = memo(function FilaErros() {
           {itens.map((item) => {
             const IconeOrigem = ORIGEM_ICON[item.origem] || FileVideo
             const estaRetentando = retentandoIndividual && itemEmAcao === item.uuid
-            const tituloMedia =
-              (item.metadata?.titulo as string) ||
-              (item.metadata?.nome_original as string) ||
-              item.caminhoLocal?.split('/').pop() ||
-              `Mídia ${item.hash.substring(0, 8)}`
+            const tituloMedia = extrairTituloErro(item)
 
             return (
               <Card.Root
@@ -324,8 +321,7 @@ export const FilaErros = memo(function FilaErros() {
                       )}
                     </HStack>
                     <Text as="span">
-                      Registrado em:{' '}
-                      {new Date(item.atualizadoEm || item.criadoEm).toLocaleString('pt-BR')}
+                      Registrado em: {formatarDataHoraErro(item.atualizadoEm || item.criadoEm)}
                     </Text>
                   </HStack>
                 </Card.Body>

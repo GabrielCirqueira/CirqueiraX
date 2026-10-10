@@ -11,12 +11,10 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import {
-  AlertTriangle,
   CheckCircle2,
   FolderSync,
   HardDrive,
   Loader2,
-  PauseCircle,
   RefreshCw,
   Smartphone,
   Wifi,
@@ -25,55 +23,11 @@ import {
 import { memo, useState } from 'react'
 import { useSincronizarPasta, useStatusSync } from '../hooks/useDashboard'
 import type { PastaSync } from '../types'
+import { obterEstadoBadge } from '../utils/statusSync'
 
 export interface PainelSyncProps {
   pastas?: PastaSync[]
   carregando?: boolean
-}
-
-function estadoBadge(estado: string, emSincronizacao: boolean) {
-  if (emSincronizacao || estado === 'syncing' || estado === 'scanning') {
-    return {
-      label: 'Sincronizando...',
-      icon: Loader2,
-      animate: true,
-      colorPalette: 'blue',
-    }
-  }
-
-  if (estado === 'idle' || estado === 'ok') {
-    return {
-      label: 'Sincronizado',
-      icon: CheckCircle2,
-      animate: false,
-      colorPalette: 'green',
-    }
-  }
-
-  if (estado === 'paused') {
-    return {
-      label: 'Pausado',
-      icon: PauseCircle,
-      animate: false,
-      colorPalette: 'amber',
-    }
-  }
-
-  if (estado === 'offline') {
-    return {
-      label: 'Daemon Offline',
-      icon: WifiOff,
-      animate: false,
-      colorPalette: 'gray',
-    }
-  }
-
-  return {
-    label: estado || 'Ocioso',
-    icon: AlertTriangle,
-    animate: false,
-    colorPalette: 'purple',
-  }
 }
 
 export const PainelSync = memo(function PainelSync({
@@ -229,7 +183,7 @@ export const PainelSync = memo(function PainelSync({
       ) : (
         <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
           {pastas.map((pasta) => {
-            const badge = estadoBadge(pasta.estado, pasta.emSincronizacao)
+            const badge = obterEstadoBadge(pasta.estado, pasta.emSincronizacao)
             const BadgeIcon = badge.icon
             const estaSincronizandoEstaPasta = sincronizando && pastaEmAcao === pasta.id
 

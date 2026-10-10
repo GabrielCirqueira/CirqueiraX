@@ -1,3 +1,4 @@
+import { formatarDataHora } from '@/shared/utils/formatarData'
 import {
   Badge,
   Box,
@@ -34,22 +35,6 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
       setCopiado(true)
       setTimeout(() => setCopiado(false), 2000)
     })
-  }
-
-  function formatarDataConexao(dataIso: string | null): string {
-    if (!dataIso) return ''
-    try {
-      const d = new Date(dataIso)
-      return d.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    } catch {
-      return dataIso
-    }
   }
 
   if (isLoading) {
@@ -207,7 +192,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 {status.conectadoEm && (
                   <>
                     <Text>•</Text>
-                    <Text>Autorizado em {formatarDataConexao(status.conectadoEm)}</Text>
+                    <Text>Autorizado em {formatarDataHora(status.conectadoEm)}</Text>
                   </>
                 )}
               </HStack>

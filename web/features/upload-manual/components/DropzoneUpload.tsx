@@ -6,6 +6,7 @@ import {
   Flex,
   Grid,
   HStack,
+  NativeSelect,
   Progress,
   Text,
   VStack,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react'
 import { type ChangeEvent, type DragEvent, memo, useRef, useState } from 'react'
 import type { ArquivoFilaUpload } from '../types'
+import { formatarTamanhoBytes } from '../utils/arquivosUpload'
 
 export interface DropzoneUploadProps {
   fila: ArquivoFilaUpload[]
@@ -37,14 +39,6 @@ export interface DropzoneUploadProps {
   onLimparConcluidos: () => void
   onEnviarTodos: () => void
   onReenviarItem: (id: string) => void
-}
-
-function formatarTamanho(bytes: number): string {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const tamanhos = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${(bytes / k ** i).toFixed(1)} ${tamanhos[i]}`
 }
 
 export const DropzoneUpload = memo(function DropzoneUpload({
@@ -287,42 +281,42 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       </Text>
 
                       <HStack gap={2} fontSize="xs" color="fg.subtle">
-                        <Text as="span">{formatarTamanho(item.tamanhoBytes)}</Text>
+                        <Text as="span">{formatarTamanhoBytes(item.tamanhoBytes)}</Text>
                         <Text as="span">•</Text>
                         <Text as="span" fontFamily="mono" fontSize="11px">
                           {item.tipoMime || 'desconhecido'}
                         </Text>
                       </HStack>
 
-                      <HStack gap={2} mt={1}>
+                      <HStack gap={2} mt={1} align="center">
                         <Text as="span" fontSize="xs" color="fg.subtle">
                           Categoria:
                         </Text>
-                        <select
-                          value={item.categoriaId ?? ''}
+                        <NativeSelect.Root
+                          size="xs"
+                          w="44"
                           disabled={item.status === 'enviando' || item.status === 'sucesso'}
-                          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                            onAtualizarCategoriaItem(item.id, e.target.value || null)
-                          }
-                          style={{
-                            height: '1.5rem',
-                            padding: '0 0.5rem',
-                            borderRadius: '0.25rem',
-                            fontSize: '0.75rem',
-                            backgroundColor: 'var(--chakra-colors-bg-muted)',
-                            borderColor: 'var(--chakra-colors-border-subtle)',
-                            color: 'inherit',
-                            borderWidth: '1px',
-                            outline: 'none',
-                          }}
                         >
-                          <option value="">Sem Categoria</option>
-                          {categorias.map((cat) => (
-                            <option key={cat.uuid} value={cat.uuid}>
-                              {cat.nome}
-                            </option>
-                          ))}
-                        </select>
+                          <NativeSelect.Field
+                            value={item.categoriaId ?? ''}
+                            onChange={(e) =>
+                              onAtualizarCategoriaItem(item.id, e.target.value || null)
+                            }
+                            bg="bg.muted"
+                            borderColor="border.subtle"
+                            borderRadius="lg"
+                            fontSize="xs"
+                            h={6}
+                          >
+                            <option value="">Sem Categoria</option>
+                            {categorias.map((cat) => (
+                              <option key={cat.uuid} value={cat.uuid}>
+                                {cat.nome}
+                              </option>
+                            ))}
+                          </NativeSelect.Field>
+                          <NativeSelect.Indicator />
+                        </NativeSelect.Root>
                       </HStack>
 
                       {item.status === 'enviando' && (
