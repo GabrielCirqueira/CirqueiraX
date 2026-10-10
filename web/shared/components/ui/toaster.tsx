@@ -47,15 +47,31 @@ export const addToast = (options: ToastOptions) => {
 function renderizarIconeToast(type?: string) {
   switch (type) {
     case 'success':
-      return <CheckCircle2 size={18} color="#22c55e" />
+      return (
+        <Box as="span" color="catalist.green.500" display="inline-flex">
+          <CheckCircle2 size={18} color="currentColor" />
+        </Box>
+      )
     case 'error':
-      return <AlertCircle size={18} color="#ef4444" />
+      return (
+        <Box as="span" color="catalist.red.500" display="inline-flex">
+          <AlertCircle size={18} color="currentColor" />
+        </Box>
+      )
     case 'warning':
-      return <AlertTriangle size={18} color="#f59e0b" />
+      return (
+        <Box as="span" color="catalist.amber.500" display="inline-flex">
+          <AlertTriangle size={18} color="currentColor" />
+        </Box>
+      )
     case 'loading':
       return <Spinner size="xs" color="catalist.blue.500" />
     default:
-      return <Info size={18} color="#3b82f6" />
+      return (
+        <Box as="span" color="catalist.blue.500" display="inline-flex">
+          <Info size={18} color="currentColor" />
+        </Box>
+      )
   }
 }
 

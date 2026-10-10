@@ -124,20 +124,21 @@ const UploadManual = memo(function UploadManual() {
       <Container maxW="6xl" py={8} spaceY={8}>
         <VStack gap={4} alignItems="stretch">
           <HStack justify="space-between">
-            <Box
-              as={Link}
+            <Link
               to="/downloads"
-              display="inline-flex"
-              alignItems="center"
-              gap={1.5}
-              fontSize="xs"
-              fontWeight="semibold"
-              color="fg.subtle"
-              _hover={{ color: 'fg' }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--chakra-colors-fg-subtle)',
+                textDecoration: 'none',
+              }}
             >
               <ArrowLeft size={16} />
-              <Text as="span">Voltar para Downloads</Text>
-            </Box>
+              <span>Voltar para Downloads</span>
+            </Link>
 
             <HStack gap={2}>
               <Button
@@ -146,8 +147,10 @@ const UploadManual = memo(function UploadManual() {
                 onClick={() => queryClient.invalidateQueries({ queryKey: ['media-itens'] })}
                 aria-label="Atualizar lista"
                 p={1.5}
+                color="fg.subtle"
+                _hover={{ color: 'fg' }}
               >
-                <RefreshCw size={16} color="#d4d4d8" />
+                <RefreshCw size={16} />
               </Button>
             </HStack>
           </HStack>
@@ -190,7 +193,9 @@ const UploadManual = memo(function UploadManual() {
           alignItems="flex-start"
         >
           <HStack gap={2}>
-            <FolderCheck size={20} color="#8b5cf6" />
+            <Box as="span" color="catalist.purple.500" display="inline-flex">
+              <FolderCheck size={20} color="currentColor" />
+            </Box>
             <Text as="h2" fontSize="lg" fontWeight="bold" color="fg">
               Triagem de Mídias Recebidas
             </Text>

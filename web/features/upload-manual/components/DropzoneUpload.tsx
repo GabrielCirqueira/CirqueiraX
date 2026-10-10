@@ -115,10 +115,10 @@ export const DropzoneUpload = memo(function DropzoneUpload({
         cursor="pointer"
         transition="all 0.2s"
         shadow="none"
-        borderColor={isDragOver ? 'brand.500' : 'border.subtle'}
-        bg={isDragOver ? 'brand.500/10' : 'bg.panel'}
+        borderColor={isDragOver ? 'catalist.brand.500' : 'border.subtle'}
+        bg={isDragOver ? 'catalist.brand.500/10' : 'bg.panel'}
         transform={isDragOver ? 'scale(1.01)' : 'none'}
-        _hover={{ borderColor: 'brand.500', bg: 'bg.muted' }}
+        _hover={{ borderColor: 'catalist.brand.500', bg: 'bg.muted' }}
       >
         <Card.Body
           display="flex"
@@ -128,17 +128,16 @@ export const DropzoneUpload = memo(function DropzoneUpload({
           gap={3}
           p={0}
         >
-          <Box
-            as="input"
+          <input
             ref={inputRef}
             type="file"
             multiple
             accept="image/*,video/*"
             onChange={handleFileSelect}
-            display="none"
+            style={{ display: 'none' }}
           />
 
-          <Box p={4} borderRadius="2xl" bg="brand.500/10" color="brand.500">
+          <Box p={4} borderRadius="2xl" bg="catalist.brand.500/10" color="catalist.brand.500">
             <UploadCloud size={40} />
           </Box>
 
@@ -157,32 +156,31 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             <Text as="span" fontSize="xs" fontWeight="medium" color="fg.subtle">
               Categoria pré-definida:
             </Text>
-            <Box
-              as="select"
+            <select
               value={categoriaPadraoId ?? ''}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 onSetCategoriaPadraoId(e.target.value || null)
               }
-              h={8}
-              px={3}
-              borderRadius="md"
-              fontSize="xs"
-              fontWeight="medium"
-              bg="bg.muted"
-              borderColor="border.subtle"
-              color="inherit"
-              borderWidth="1px"
-              outline="none"
+              style={{
+                height: '2rem',
+                padding: '0 0.75rem',
+                borderRadius: '0.375rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                backgroundColor: 'var(--chakra-colors-bg-muted)',
+                borderColor: 'var(--chakra-colors-border-subtle)',
+                color: 'inherit',
+                borderWidth: '1px',
+                outline: 'none',
+              }}
             >
-              <Box as="option" value="">
-                Nenhuma (triagem posterior)
-              </Box>
+              <option value="">Nenhuma (triagem posterior)</option>
               {categorias.map((cat) => (
-                <Box as="option" key={cat.uuid} value={cat.uuid}>
+                <option key={cat.uuid} value={cat.uuid}>
                   {cat.nome}
-                </Box>
+                </option>
               ))}
-            </Box>
+            </select>
           </HStack>
         </Card.Body>
       </Card.Root>
@@ -272,8 +270,8 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                     <Box
                       p={2.5}
                       borderRadius="xl"
-                      bg="brand.500/10"
-                      color="brand.400"
+                      bg="catalist.brand.500/10"
+                      color="catalist.brand.400"
                       flexShrink={0}
                     >
                       {item.tipoMime.startsWith('video/') ? (
@@ -300,32 +298,31 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                         <Text as="span" fontSize="xs" color="fg.subtle">
                           Categoria:
                         </Text>
-                        <Box
-                          as="select"
+                        <select
                           value={item.categoriaId ?? ''}
                           disabled={item.status === 'enviando' || item.status === 'sucesso'}
                           onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                             onAtualizarCategoriaItem(item.id, e.target.value || null)
                           }
-                          h={6}
-                          px={2}
-                          borderRadius="sm"
-                          fontSize="xs"
-                          bg="bg.muted"
-                          borderColor="border.subtle"
-                          color="inherit"
-                          borderWidth="1px"
-                          outline="none"
+                          style={{
+                            height: '1.5rem',
+                            padding: '0 0.5rem',
+                            borderRadius: '0.25rem',
+                            fontSize: '0.75rem',
+                            backgroundColor: 'var(--chakra-colors-bg-muted)',
+                            borderColor: 'var(--chakra-colors-border-subtle)',
+                            color: 'inherit',
+                            borderWidth: '1px',
+                            outline: 'none',
+                          }}
                         >
-                          <Box as="option" value="">
-                            Sem Categoria
-                          </Box>
+                          <option value="">Sem Categoria</option>
                           {categorias.map((cat) => (
-                            <Box as="option" key={cat.uuid} value={cat.uuid}>
+                            <option key={cat.uuid} value={cat.uuid}>
                               {cat.nome}
-                            </Box>
+                            </option>
                           ))}
-                        </Box>
+                        </select>
                       </HStack>
 
                       {item.status === 'enviando' && (

@@ -38,6 +38,8 @@
   - Gerada a configuração completa de tema e paletas OKLCH em `web/config/theme/theme.ts`, preservando re-export em `web/theme.ts` para total retrocompatibilidade.
   - Criado `web/shared/ui/toaster.tsx` e atualizado `web/shared/components/ui/toaster.tsx` com tokens de paleta.
   - Atualizados os componentes de UI (`Header.tsx`, `Footer.tsx`, `AuthLayout.tsx`, `NotFound.tsx`, `ErrorBoundary.tsx`, `Login.tsx`, `ModalAuth.tsx`) para utilizarem `Center`, tokens `catalist.*` e remoção de polimorfismo inválido no Chakra UI v3.
+  - Varredura e substituição completa em todas as features de `web/` (`Home`, `Dashboard`, `DownloadsVideo`, `GoogleFotos`, `UploadManual`) de cores hexadecimais brutas e tokens `brand.*` legados por tokens estritos da paleta gerada OKLCH (`catalist.brand.*`, `catalist.purple.*`, `catalist.blue.*`, `catalist.emerald.*`, `catalist.cyan.*`, `catalist.amber.*`, `catalist.red.*`, `catalist.green.*`, `catalist.grey.*`).
+  - Resolução de polimorfismo quebra de tipagem do Chakra v3 (`Box as="select"`, `Box as="img"`, `Box as="video"`, `Box as="a"`, `Box as={Link}`) para elementos nativos estilizados ou wrappers tipados.
   - Atualizadas as documentações técnicas (`DESIGN.md`, `Estruturação.md`, `PARA-IA.md`, `MAKEFILE.md`, `DOCUMENTACAO_TECNICA.md`, `BACKEND.md`).
 - **Arquivos**:
   - `scripts/gerar-paleta-brand.mjs`
@@ -53,6 +55,22 @@
   - `web/features/not-found/NotFound.tsx`
   - `web/features/auth/Login.tsx`
   - `web/features/auth/ModalAuth.tsx`
+  - `web/features/home/Home.tsx`
+  - `web/features/dashboard/components/CardsResumo.tsx`
+  - `web/features/dashboard/components/GraficosDashboard.tsx`
+  - `web/features/dashboard/components/ModalCriarCategoria.tsx`
+  - `web/features/dashboard/components/PainelSync.tsx`
+  - `web/features/dashboard/components/TabelaCategorias.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/BarraAcoesEmLote.tsx`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/components/GridVideos.tsx`
+  - `web/features/downloads-video/components/ModalEditarMetadata.tsx`
+  - `web/features/downloads-video/components/ModalVisualizarMidia.tsx`
+  - `web/features/google-fotos/components/AvisoMigracaoAlbuns.tsx`
+  - `web/features/upload-manual/UploadManual.tsx`
+  - `web/features/upload-manual/components/DropzoneUpload.tsx`
+  - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
   - `web/shared/components/ErrorBoundary.tsx`
   - `documentation/guias/DESIGN.md`
   - `documentation/guias/Estruturação.md`

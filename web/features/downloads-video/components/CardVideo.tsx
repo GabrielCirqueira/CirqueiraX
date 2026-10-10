@@ -1,4 +1,15 @@
-import { Badge, Box, Card, Flex, Grid, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Card,
+  Flex,
+  Grid,
+  HStack,
+  IconButton,
+  Link,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import {
   AlertCircle,
   Calendar,
@@ -300,23 +311,20 @@ export const CardVideo = memo(function CardVideo({
       flexDirection="column"
       borderRadius="2xl"
       borderWidth={selecionado ? '2px' : '1px'}
-      borderColor={selecionado ? 'brand.500' : 'border.subtle'}
+      borderColor={selecionado ? 'catalist.brand.500' : 'border.subtle'}
       bg="bg.panel"
       overflow="hidden"
       shadow="none"
       transition="all 0.2s"
-      _hover={{ borderColor: selecionado ? 'brand.500' : 'border.muted' }}
+      _hover={{ borderColor: selecionado ? 'catalist.brand.500' : 'border.muted' }}
     >
       <Box position="relative" aspectRatio="16/9" w="full" bg="bg.muted" overflow="hidden">
         {temThumbnail ? (
-          <Box
-            as="img"
+          <img
             src={urlThumbnail}
             alt={titulo}
             onError={() => setErroImagem(true)}
-            w="full"
-            h="full"
-            objectFit="cover"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             loading="lazy"
           />
         ) : (
@@ -345,7 +353,7 @@ export const CardVideo = memo(function CardVideo({
           <Box
             p={3.5}
             borderRadius="full"
-            bg="brand.500"
+            bg="catalist.brand.500"
             color="white"
             shadow="2xl"
             transform="scale(0.9)"
@@ -370,7 +378,13 @@ export const CardVideo = memo(function CardVideo({
             backdropFilter="blur(8px)"
             aria-label={`Selecionar ${titulo}`}
           >
-            {selecionado ? <CheckSquare size={16} color="#a78bfa" /> : <Square size={16} />}
+            {selecionado ? (
+              <Box as="span" color="catalist.brand.400" display="inline-flex">
+                <CheckSquare size={16} color="currentColor" />
+              </Box>
+            ) : (
+              <Square size={16} />
+            )}
           </IconButton>
         </Box>
 
@@ -416,8 +430,7 @@ export const CardVideo = memo(function CardVideo({
         )}
 
         {urlOriginal && (
-          <Box
-            as="a"
+          <Link
             href={urlOriginal}
             target="_blank"
             rel="noopener noreferrer"
@@ -436,7 +449,7 @@ export const CardVideo = memo(function CardVideo({
             title="Abrir link original"
           >
             <ExternalLink size={14} />
-          </Box>
+          </Link>
         )}
       </Box>
 
@@ -450,7 +463,7 @@ export const CardVideo = memo(function CardVideo({
           mb={1.5}
           title={titulo}
           cursor="pointer"
-          _hover={{ color: 'brand.400' }}
+          _hover={{ color: 'catalist.brand.400' }}
           onClick={() => onVisualizar?.(item)}
         >
           {titulo}
@@ -627,7 +640,9 @@ export const CardVideo = memo(function CardVideo({
               onClick={() => onRetentar(item.uuid)}
               aria-label="Retentar processamento"
             >
-              <RotateCcw size={16} color="#d97706" />
+              <Box as="span" color="catalist.amber.500" display="inline-flex">
+                <RotateCcw size={16} color="currentColor" />
+              </Box>
             </IconButton>
           )}
 
@@ -639,7 +654,9 @@ export const CardVideo = memo(function CardVideo({
               aria-label="Apagar vídeo"
               title="Remover vídeo"
             >
-              <Trash2 size={16} color="#ef4444" />
+              <Box as="span" color="catalist.red.500" display="inline-flex">
+                <Trash2 size={16} color="currentColor" />
+              </Box>
             </IconButton>
           )}
         </HStack>

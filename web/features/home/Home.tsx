@@ -44,8 +44,8 @@ const HomeContent = memo(function HomeContent() {
             variant="subtle"
             colorPalette="purple"
             border="1px solid"
-            borderColor="brand.500/30"
-            color="brand.400"
+            borderColor="catalist.brand.500/30"
+            color="catalist.brand.400"
             fontWeight="semibold"
             px={3}
             py={1}
@@ -68,7 +68,7 @@ const HomeContent = memo(function HomeContent() {
               color="white"
             >
               Central Inteligente de Ingestão &{' '}
-              <Text as="span" color="brand.500">
+              <Text as="span" color="catalist.brand.500">
                 Gestão de Mídias
               </Text>
             </Text>
@@ -84,11 +84,11 @@ const HomeContent = memo(function HomeContent() {
           </VStack>
 
           <HStack gap={4} flexWrap="wrap" justifyContent="center" pt={2}>
-            <Box as={Link} to="/dashboard">
+            <Link to="/dashboard">
               <Button
                 size="lg"
-                bg="brand.500"
-                _hover={{ bg: 'brand.600' }}
+                bg="catalist.brand.500"
+                _hover={{ bg: 'catalist.brand.600' }}
                 color="white"
                 fontWeight="bold"
                 px={6}
@@ -98,9 +98,9 @@ const HomeContent = memo(function HomeContent() {
                 <LayoutDashboard size={20} style={{ marginRight: '8px' }} />
                 <Text as="span">Acessar Dashboard</Text>
               </Button>
-            </Box>
+            </Link>
 
-            <Box as={Link} to="/downloads">
+            <Link to="/downloads">
               <Button
                 variant="outline"
                 size="lg"
@@ -111,12 +111,14 @@ const HomeContent = memo(function HomeContent() {
                 borderRadius="xl"
                 _hover={{ bg: 'zinc.800' }}
               >
-                <DownloadCloud size={20} style={{ marginRight: '8px', color: '#8b5cf6' }} />
+                <Box as="span" color="catalist.brand.500" display="inline-flex" mr={2}>
+                  <DownloadCloud size={20} color="currentColor" />
+                </Box>
                 <Text as="span">Downloads de Vídeo</Text>
               </Button>
-            </Box>
+            </Link>
 
-            <Box as={Link} to="/upload-manual">
+            <Link to="/upload-manual">
               <Button
                 variant="outline"
                 size="lg"
@@ -127,10 +129,12 @@ const HomeContent = memo(function HomeContent() {
                 borderRadius="xl"
                 _hover={{ bg: 'zinc.800' }}
               >
-                <UploadCloud size={20} style={{ marginRight: '8px', color: '#6366f1' }} />
+                <Box as="span" color="catalist.indigo.500" display="inline-flex" mr={2}>
+                  <UploadCloud size={20} color="currentColor" />
+                </Box>
                 <Text as="span">Upload Manual & Triagem</Text>
               </Button>
-            </Box>
+            </Link>
           </HStack>
 
           <HStack flexWrap="wrap" justifyContent="center" gap={2} pt={4}>
@@ -192,7 +196,7 @@ const HomeContent = memo(function HomeContent() {
               >
                 Mídias Processadas
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="brand.500/10" color="brand.500">
+              <Box p={2} borderRadius="xl" bg="catalist.brand.500/10" color="catalist.brand.500">
                 <Film size={20} />
               </Box>
             </Card.Header>
@@ -362,15 +366,15 @@ const HomeContent = memo(function HomeContent() {
             bg="zinc.900"
             shadow="sm"
             borderRadius="2xl"
-            _hover={{ borderColor: 'brand.500/40' }}
+            _hover={{ borderColor: 'catalist.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
                 borderRadius="2xl"
-                bg="brand.500/10"
-                color="brand.500"
+                bg="catalist.brand.500/10"
+                color="catalist.brand.500"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -400,19 +404,21 @@ const HomeContent = memo(function HomeContent() {
                 </Badge>
               </HStack>
 
-              <Box as={Link} to="/downloads" w="full" pt={2}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  w="full"
-                  justifyContent="space-between"
-                  color="brand.500"
-                  _hover={{ color: 'brand.400', bg: 'brand.500/10' }}
-                  fontWeight="bold"
-                >
-                  <Text as="span">Acessar Downloads</Text>
-                  <ArrowRight size={16} />
-                </Button>
+              <Box w="full" pt={2}>
+                <Link to="/downloads" style={{ width: '100%' }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    w="full"
+                    justifyContent="space-between"
+                    color="catalist.brand.500"
+                    _hover={{ color: 'catalist.brand.400', bg: 'catalist.brand.500/10' }}
+                    fontWeight="bold"
+                  >
+                    <Text as="span">Acessar Downloads</Text>
+                    <ArrowRight size={16} />
+                  </Button>
+                </Link>
               </Box>
             </Card.Body>
           </Card.Root>
@@ -423,15 +429,15 @@ const HomeContent = memo(function HomeContent() {
             bg="zinc.900"
             shadow="sm"
             borderRadius="2xl"
-            _hover={{ borderColor: 'brand.500/40' }}
+            _hover={{ borderColor: 'catalist.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
                 borderRadius="2xl"
-                bg="indigo.500/10"
-                color="indigo.500"
+                bg="catalist.indigo.500/10"
+                color="catalist.indigo.500"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -461,19 +467,21 @@ const HomeContent = memo(function HomeContent() {
                 </Badge>
               </HStack>
 
-              <Box as={Link} to="/upload-manual" w="full" pt={2}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  w="full"
-                  justifyContent="space-between"
-                  color="indigo.400"
-                  _hover={{ color: 'indigo.300', bg: 'indigo.500/10' }}
-                  fontWeight="bold"
-                >
-                  <Text as="span">Acessar Upload Manual</Text>
-                  <ArrowRight size={16} />
-                </Button>
+              <Box w="full" pt={2}>
+                <Link to="/upload-manual" style={{ width: '100%' }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    w="full"
+                    justifyContent="space-between"
+                    color="catalist.indigo.400"
+                    _hover={{ color: 'catalist.indigo.300', bg: 'catalist.indigo.500/10' }}
+                    fontWeight="bold"
+                  >
+                    <Text as="span">Acessar Upload Manual</Text>
+                    <ArrowRight size={16} />
+                  </Button>
+                </Link>
               </Box>
             </Card.Body>
           </Card.Root>
@@ -484,15 +492,15 @@ const HomeContent = memo(function HomeContent() {
             bg="zinc.900"
             shadow="sm"
             borderRadius="2xl"
-            _hover={{ borderColor: 'brand.500/40' }}
+            _hover={{ borderColor: 'catalist.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
                 borderRadius="2xl"
-                bg="emerald.500/10"
-                color="emerald.500"
+                bg="catalist.green.500/10"
+                color="catalist.green.500"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -522,19 +530,21 @@ const HomeContent = memo(function HomeContent() {
                 </Badge>
               </HStack>
 
-              <Box as={Link} to="/downloads" w="full" pt={2}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  w="full"
-                  justifyContent="space-between"
-                  color="emerald.400"
-                  _hover={{ color: 'emerald.300', bg: 'emerald.500/10' }}
-                  fontWeight="bold"
-                >
-                  <Text as="span">Ver Mídias dos Agentes</Text>
-                  <ArrowRight size={16} />
-                </Button>
+              <Box w="full" pt={2}>
+                <Link to="/downloads" style={{ width: '100%' }}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    w="full"
+                    justifyContent="space-between"
+                    color="catalist.green.400"
+                    _hover={{ color: 'catalist.green.300', bg: 'catalist.green.500/10' }}
+                    fontWeight="bold"
+                  >
+                    <Text as="span">Ver Mídias dos Agentes</Text>
+                    <ArrowRight size={16} />
+                  </Button>
+                </Link>
               </Box>
             </Card.Body>
           </Card.Root>

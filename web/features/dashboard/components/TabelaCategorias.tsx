@@ -209,7 +209,7 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                 bg="bg.panel"
                 shadow="md"
                 transition="all 0.2s"
-                _hover={{ borderColor: 'brand.500' }}
+                _hover={{ borderColor: 'catalist.brand.500' }}
               >
                 <Card.Header
                   display="flex"
@@ -219,7 +219,12 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                   pb={2}
                 >
                   <HStack gap={2.5}>
-                    <Box p={2} borderRadius="xl" bg="purple.500/10" color="purple.400">
+                    <Box
+                      p={2}
+                      borderRadius="xl"
+                      bg="catalist.purple.500/10"
+                      color="catalist.purple.400"
+                    >
                       <Folder size={16} />
                     </Box>
                     <VStack gap={0.5} alignItems="flex-start">
@@ -261,14 +266,18 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     color="fg.subtle"
                   >
                     <HStack gap={1.5}>
-                      <FileVideo size={14} color="#3b82f6" />
+                      <Box as="span" color="catalist.blue.500" display="inline-flex">
+                        <FileVideo size={14} color="currentColor" />
+                      </Box>
                       <Text as="span">
                         {cat.totalItens} {cat.totalItens === 1 ? 'mídia' : 'mídias'}
                       </Text>
                     </HStack>
 
                     <HStack gap={1.5}>
-                      <HardDrive size={14} color="#a855f7" />
+                      <Box as="span" color="catalist.purple.500" display="inline-flex">
+                        <HardDrive size={14} color="currentColor" />
+                      </Box>
                       <Text as="span" fontWeight="semibold" color="fg">
                         {cat.tamanhoFormatado}
                       </Text>

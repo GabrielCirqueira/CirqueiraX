@@ -134,7 +134,7 @@ Proibido no JSX: `<div>`, `<p>`, `<h1>`–`<h6>`, `<span>`.
 import { Box, Button, Field, Heading, HStack, Input, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 ```
 
-Estilo: **só props do Chakra** (`p`, `gap`, `bg`, `color`). Cores **somente** da paleta gerada (`skeleton.grey.700`, `skeleton.brand.500`…). Proibido hex e tokens fora da paleta (`fg.muted`, `gray.500`, `red.500` cru do Chakra). `colorPalette` só com escalas da paleta (`brand`, `green`, `red`…). Trocar o nome: `bash scripts/gerar-paleta-brand.sh`. Toast: `toast.success` / `toast.danger` de `@/shared/ui/toaster`. Framer Motion só se o módulo `ui-extra` estiver ativo.
+Estilo: **só props do Chakra** (`p`, `gap`, `bg`, `color`). Cores **somente** da paleta gerada (`catalist.grey.700`, `catalist.brand.500`…). Proibido hex e tokens fora da paleta (`fg.muted`, `gray.500`, `red.500` cru do Chakra). `colorPalette` só com escalas da paleta (`brand`, `green`, `red`…). Trocar o nome: `bash scripts/gerar-paleta-brand.sh`. Toast: `toast.success` / `toast.danger` de `@/shared/ui/toaster`. Framer Motion só se o módulo `ui-extra` estiver ativo.
 
 ### 3.3 Dados e estado
 
@@ -401,7 +401,7 @@ class YtDlpException extends \DomainException
 ## 6. Checklist rápido (antes de encerrar)
 
 - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` / `className` — só componentes Chakra (`Box`, `HStack`, `Heading`…)
-- [ ] Cores só da paleta gerada (`skeleton.grey.700` / `paletteToken(...)`) — sem hex
+- [x] Cores só da paleta gerada (`catalist.grey.700` / `paletteToken(...)`) — sem hex
 - [ ] Sem Header/Footer na página
 - [ ] Sem `any`, sem `ts-ignore`
 - [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return

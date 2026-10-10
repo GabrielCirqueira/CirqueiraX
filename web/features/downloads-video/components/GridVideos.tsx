@@ -122,7 +122,13 @@ export const GridVideos = memo(function GridVideos({
             _hover={{ color: 'fg' }}
           >
             <HStack gap={2}>
-              {todosSelecionados ? <CheckSquare size={16} color="#8b5cf6" /> : <Square size={16} />}
+              {todosSelecionados ? (
+                <Box as="span" color="catalist.purple.500" display="inline-flex">
+                  <CheckSquare size={16} color="currentColor" />
+                </Box>
+              ) : (
+                <Square size={16} />
+              )}
               <Text as="span">
                 {todosSelecionados
                   ? 'Desmarcar todos'

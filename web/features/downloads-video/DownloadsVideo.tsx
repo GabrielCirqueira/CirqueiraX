@@ -230,7 +230,7 @@ export default function DownloadsVideo() {
         >
           <VStack gap={1} alignItems="flex-start">
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="brand.500/10" color="brand.500">
+              <Box p={2} borderRadius="xl" bg="catalist.brand.500/10" color="catalist.brand.500">
                 <Video size={24} />
               </Box>
               <Text as="h1" fontSize="2xl" fontWeight="bold" color="fg">
@@ -318,95 +318,67 @@ export default function DownloadsVideo() {
               <Filter size={14} />
               <Text as="span">Status:</Text>
             </HStack>
-            <Box
-              as="select"
+            <select
               value={statusFiltro}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 setStatusFiltro(e.target.value)
                 setPagina(1)
               }}
-              h={10}
-              px={3}
-              borderRadius="xl"
-              fontSize="xs"
-              fontWeight="medium"
-              bg="bg.muted"
-              borderColor="border.subtle"
-              color="inherit"
-              borderWidth="1px"
-              outline="none"
-              cursor="pointer"
+              style={{
+                height: '2.5rem',
+                padding: '0 0.75rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                backgroundColor: 'var(--chakra-colors-bg-muted)',
+                borderColor: 'var(--chakra-colors-border-subtle)',
+                color: 'inherit',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
-              <Box as="option" value="">
-                Todos os status
-              </Box>
-              <Box as="option" value="baixando">
-                Baixando
-              </Box>
-              <Box as="option" value="recebido">
-                Recebido
-              </Box>
-              <Box as="option" value="em_fila">
-                Em Fila
-              </Box>
-              <Box as="option" value="sem_categoria">
-                Sem Categoria
-              </Box>
-              <Box as="option" value="classificado">
-                Classificado
-              </Box>
-              <Box as="option" value="distribuindo">
-                Distribuindo
-              </Box>
-              <Box as="option" value="distribuido_local">
-                Distribuído
-              </Box>
-              <Box as="option" value="enviando_google_fotos">
-                Google Fotos
-              </Box>
-              <Box as="option" value="concluido">
-                Concluído
-              </Box>
-              <Box as="option" value="erro">
-                Com Erro
-              </Box>
-            </Box>
+              <option value="">Todos os status</option>
+              <option value="baixando">Baixando</option>
+              <option value="recebido">Recebido</option>
+              <option value="em_fila">Em Fila</option>
+              <option value="sem_categoria">Sem Categoria</option>
+              <option value="classificado">Classificado</option>
+              <option value="distribuindo">Distribuindo</option>
+              <option value="distribuido_local">Distribuído</option>
+              <option value="enviando_google_fotos">Google Fotos</option>
+              <option value="concluido">Concluído</option>
+              <option value="erro">Com Erro</option>
+            </select>
 
-            <Box
-              as="select"
+            <select
               value={origemFiltro}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                 setOrigemFiltro(e.target.value)
                 setPagina(1)
               }}
-              h={10}
-              px={3}
-              borderRadius="xl"
-              fontSize="xs"
-              fontWeight="medium"
-              bg="bg.muted"
-              borderColor="border.subtle"
-              color="inherit"
-              borderWidth="1px"
-              outline="none"
-              cursor="pointer"
+              style={{
+                height: '2.5rem',
+                padding: '0 0.75rem',
+                borderRadius: '0.75rem',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                backgroundColor: 'var(--chakra-colors-bg-muted)',
+                borderColor: 'var(--chakra-colors-border-subtle)',
+                color: 'inherit',
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
             >
-              <Box as="option" value="">
-                Todas as origens
-              </Box>
-              <Box as="option" value="manual">
-                Manual / Web
-              </Box>
-              <Box as="option" value="bot_telegram">
-                Bot Telegram
-              </Box>
-              <Box as="option" value="print_empresa">
-                Print Empresa
-              </Box>
-              <Box as="option" value="print_pessoal">
-                Print Pessoal
-              </Box>
-            </Box>
+              <option value="">Todas as origens</option>
+              <option value="manual">Manual / Web</option>
+              <option value="bot_telegram">Bot Telegram</option>
+              <option value="print_empresa">Print Empresa</option>
+              <option value="print_pessoal">Print Pessoal</option>
+            </select>
           </HStack>
         </Flex>
 
@@ -509,33 +481,33 @@ export default function DownloadsVideo() {
                   <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
                     Selecione a Categoria de Destino
                   </Text>
-                  <Box
-                    as="select"
+                  <select
                     value={categoriaSelecionadaId}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setCategoriaSelecionadaId(e.target.value)
                     }
-                    w="full"
-                    h={11}
-                    px={3}
-                    borderRadius="xl"
-                    fontSize="xs"
-                    fontWeight="medium"
-                    bg="bg.muted"
-                    borderColor="border.subtle"
-                    color="inherit"
-                    borderWidth="1px"
-                    outline="none"
+                    style={{
+                      width: '100%',
+                      height: '2.75rem',
+                      padding: '0 0.75rem',
+                      borderRadius: '0.75rem',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      backgroundColor: 'var(--chakra-colors-bg-muted)',
+                      borderColor: 'var(--chakra-colors-border-subtle)',
+                      color: 'inherit',
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      outline: 'none',
+                    }}
                   >
-                    <Box as="option" value="">
-                      Selecione uma categoria...
-                    </Box>
+                    <option value="">Selecione uma categoria...</option>
                     {categorias.map((cat) => (
-                      <Box as="option" key={cat.uuid} value={cat.uuid}>
+                      <option key={cat.uuid} value={cat.uuid}>
                         {cat.nome}
-                      </Box>
+                      </option>
                     ))}
-                  </Box>
+                  </select>
 
                   <HStack
                     justify="flex-end"

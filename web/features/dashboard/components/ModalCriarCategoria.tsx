@@ -137,11 +137,11 @@ function FormularioCriarCategoria({
           <Box
             p={3}
             borderRadius="xl"
-            bg="brand.500/5"
+            bg="catalist.brand.500/5"
             borderWidth="1px"
-            borderColor="brand.500/20"
+            borderColor="catalist.brand.500/20"
           >
-            <Text fontSize="11px" color="brand.400">
+            <Text fontSize="11px" color="catalist.brand.400">
               💡 Um álbum com o mesmo nome no Google Fotos será automaticamente criado ou poderá ser
               vinculado manualmente na aba Google Fotos.
             </Text>
@@ -209,7 +209,7 @@ export function ModalCriarCategoria({ aberto, onFechar, onSucesso }: ModalCriarC
             borderColor="border.subtle"
           >
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="xl" bg="brand.500/10" color="brand.500">
+              <Box p={2} borderRadius="xl" bg="catalist.brand.500/10" color="catalist.brand.500">
                 <FolderPlus size={20} />
               </Box>
               <VStack gap={0.5} alignItems="flex-start">

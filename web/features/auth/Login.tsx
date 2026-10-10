@@ -62,9 +62,9 @@ export function Component() {
           inset={-1}
           borderRadius="3xl"
           bgGradient="to-r"
-          gradientFrom="brand.500/30"
-          gradientVia="purple.600/20"
-          gradientTo="blue.600/30"
+          gradientFrom="catalist.brand.500/30"
+          gradientVia="catalist.purple.600/20"
+          gradientTo="catalist.blue.600/30"
           filter="blur(16px)"
           opacity={0.7}
           pointerEvents="none"
@@ -150,7 +150,9 @@ export function Component() {
               py={1}
               borderRadius="full"
             >
-              <ShieldCheck size={14} style={{ marginRight: '4px' }} color="#c084fc" />
+              <Box as="span" color="catalist.purple.400" display="inline-flex" alignItems="center">
+                <ShieldCheck size={14} style={{ marginRight: '4px' }} color="currentColor" />
+              </Box>
               Autenticação Segura JWT RS256
             </Badge>
           </Card.Header>

@@ -26,7 +26,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
     <Card.Root
       w="full"
       borderWidth="1px"
-      borderColor="brand.500/20"
+      borderColor="catalist.brand.500/20"
       bg="bg.panel"
       borderRadius="2xl"
       overflow="hidden"
@@ -34,13 +34,13 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
     >
       <Card.Header
         p={5}
-        bg="brand.500/5"
+        bg="catalist.brand.500/5"
         borderBottomWidth={expandido ? '1px' : '0px'}
         borderColor="border.subtle"
         cursor="pointer"
         onClick={() => setExpandido(!expandido)}
         transition="background 0.2s"
-        _hover={{ bg: 'brand.500/10' }}
+        _hover={{ bg: 'catalist.brand.500/10' }}
       >
         <Flex
           direction={{ base: 'column', md: 'row' }}
@@ -53,8 +53,8 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
               w={10}
               h={10}
               borderRadius="xl"
-              bg="brand.500/15"
-              color="brand.400"
+              bg="catalist.brand.500/15"
+              color="catalist.brand.400"
               align="center"
               justify="center"
               flexShrink={0}
@@ -134,7 +134,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
 
             <VStack align="flex-start" gap={3}>
               <HStack gap={2}>
-                <Icon as={Layers} boxSize={4} color="brand.400" />
+                <Icon as={Layers} boxSize={4} color="catalist.brand.400" />
                 <Text
                   fontSize="xs"
                   fontWeight="bold"
@@ -159,8 +159,8 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                       w={6}
                       h={6}
                       borderRadius="full"
-                      bg="brand.500/20"
-                      color="brand.400"
+                      bg="catalist.brand.500/20"
+                      color="catalist.brand.400"
                       fontSize="xs"
                       fontWeight="bold"
                       align="center"
@@ -171,7 +171,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                     </Flex>
                     <VStack align="flex-start" gap={1}>
                       <HStack gap={1.5}>
-                        <Icon as={FolderPlus} boxSize={4} color="brand.400" />
+                        <Icon as={FolderPlus} boxSize={4} color="catalist.brand.400" />
                         <Text fontSize="xs" fontWeight="semibold" color="fg">
                           Crie ou Vincule a Categoria no CirqueiraX
                         </Text>
@@ -197,8 +197,8 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                       w={6}
                       h={6}
                       borderRadius="full"
-                      bg="brand.500/20"
-                      color="brand.400"
+                      bg="catalist.brand.500/20"
+                      color="catalist.brand.400"
                       fontSize="xs"
                       fontWeight="bold"
                       align="center"
@@ -209,7 +209,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                     </Flex>
                     <VStack align="flex-start" gap={1}>
                       <HStack gap={1.5}>
-                        <Icon as={ExternalLink} boxSize={4} color="brand.400" />
+                        <Icon as={ExternalLink} boxSize={4} color="catalist.brand.400" />
                         <Text fontSize="xs" fontWeight="semibold" color="fg">
                           Abra o Google Fotos e Acesse seu Álbum Antigo
                         </Text>
@@ -223,7 +223,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                         target="_blank"
                         rel="noreferrer"
                         fontSize="xs"
-                        color="brand.400"
+                        color="catalist.brand.400"
                         display="inline-flex"
                         alignItems="center"
                         gap={1}
@@ -247,8 +247,8 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                       w={6}
                       h={6}
                       borderRadius="full"
-                      bg="brand.500/20"
-                      color="brand.400"
+                      bg="catalist.brand.500/20"
+                      color="catalist.brand.400"
                       fontSize="xs"
                       fontWeight="bold"
                       align="center"

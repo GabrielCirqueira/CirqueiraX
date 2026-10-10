@@ -82,7 +82,9 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
                 style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
               />
             ) : (
-              <FolderPlus size={14} color="#8b5cf6" style={{ marginRight: '6px' }} />
+              <Box as="span" color="catalist.purple.500" display="inline-flex" mr={1.5}>
+                <FolderPlus size={14} color="currentColor" />
+              </Box>
             )}
             <Text as="span">Categorizar</Text>
           </Button>
@@ -100,7 +102,9 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
                 style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
               />
             ) : (
-              <DownloadCloud size={14} color="#3b82f6" style={{ marginRight: '6px' }} />
+              <Box as="span" color="catalist.blue.500" display="inline-flex" mr={1.5}>
+                <DownloadCloud size={14} color="currentColor" />
+              </Box>
             )}
             <Text as="span">Rebaixar</Text>
           </Button>

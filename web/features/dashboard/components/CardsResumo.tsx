@@ -138,7 +138,9 @@ export const CardsResumo = memo(function CardsResumo({
               {totalGeral}
             </Text>
             <HStack mt={2} fontSize="xs" color="fg.subtle" gap={1.5}>
-              <Sparkles size={14} color="#3b82f6" />
+              <Box as="span" color="catalist.blue.500" display="inline-flex">
+                <Sparkles size={14} color="currentColor" />
+              </Box>
               <Text as="span">Espaço: {resumo?.tamanhoTotalFormatado ?? '0 B'}</Text>
             </HStack>
           </Card.Body>
@@ -303,7 +305,7 @@ export const CardsResumo = memo(function CardsResumo({
                 borderColor="border.subtle"
                 bg="bg.panel"
                 transition="all 0.2s"
-                _hover={{ borderColor: 'brand.500' }}
+                _hover={{ borderColor: 'catalist.brand.500' }}
               >
                 <Card.Body p={3.5}>
                   <HStack justify="space-between" align="flex-start" mb={2}>

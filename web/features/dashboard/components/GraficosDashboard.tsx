@@ -23,11 +23,11 @@ export interface GraficosDashboardProps {
 }
 
 const CORES_ORIGEM = {
-  print_empresa: '#3b82f6',
-  print_pessoal: '#10b981',
-  bot_telegram: '#06b6d4',
-  download: '#f59e0b',
-  manual: '#a855f7',
+  print_empresa: 'var(--chakra-colors-catalist-blue-500)',
+  print_pessoal: 'var(--chakra-colors-catalist-green-500)',
+  bot_telegram: 'var(--chakra-colors-catalist-cyan-500)',
+  download: 'var(--chakra-colors-catalist-amber-500)',
+  manual: 'var(--chakra-colors-catalist-brand-500)',
 }
 
 const NOMES_ORIGEM = {
@@ -113,7 +113,7 @@ function CustomTooltipBar({
       <VStack gap={1} color="fg.subtle" alignItems="stretch">
         <HStack justify="space-between" gap={4}>
           <Text as="span">Tamanho:</Text>
-          <Text as="span" fontWeight="bold" color="#a855f7">
+          <Text as="span" fontWeight="bold" color="catalist.brand.400">
             {data.payload.tamanhoFormatado}
           </Text>
         </HStack>
@@ -311,11 +311,19 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                   />
                   <YAxis tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 11 }} unit=" MB" />
                   <Tooltip content={<CustomTooltipBar />} />
-                  <Bar dataKey="tamanhoMb" fill="#a855f7" radius={[6, 6, 0, 0]}>
+                  <Bar
+                    dataKey="tamanhoMb"
+                    fill="var(--chakra-colors-catalist-brand-500)"
+                    radius={[6, 6, 0, 0]}
+                  >
                     {dadosCategorias.map((cat, index) => (
                       <Cell
                         key={`bar-${cat.name}`}
-                        fill={index % 2 === 0 ? '#a855f7' : '#8b5cf6'}
+                        fill={
+                          index % 2 === 0
+                            ? 'var(--chakra-colors-catalist-brand-500)'
+                            : 'var(--chakra-colors-catalist-brand-400)'
+                        }
                       />
                     ))}
                   </Bar>

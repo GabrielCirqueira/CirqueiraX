@@ -107,10 +107,10 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
               <Box
                 p={2}
                 borderRadius="xl"
-                bg="brand.500/10"
-                color="brand.400"
+                bg="catalist.brand.500/10"
+                color="catalist.brand.400"
                 borderWidth="1px"
-                borderColor="brand.500/20"
+                borderColor="catalist.brand.500/20"
               >
                 <Film size={18} />
               </Box>
@@ -151,8 +151,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 </Button>
               </VStack>
             ) : (
-              <Box
-                as="video"
+              <video
                 key={streamUrl}
                 src={streamUrl}
                 poster={urlThumbnail}
@@ -160,13 +159,15 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 autoPlay
                 playsInline
                 onError={() => setErroStream(true)}
-                w="full"
-                h="full"
-                objectFit="contain"
-                maxH="65vh"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  maxHeight: '65vh',
+                }}
               >
-                <Box as="track" kind="captions" />
-              </Box>
+                <track kind="captions" />
+              </video>
             )}
           </Box>
 
@@ -181,20 +182,26 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 <HStack gap={3} flexWrap="wrap" fontSize="xs" color="fg.subtle">
                   {duracao && (
                     <HStack gap={1.5}>
-                      <Clock size={14} color="#a78bfa" />
+                      <Box as="span" color="catalist.brand.400" display="inline-flex">
+                        <Clock size={14} color="currentColor" />
+                      </Box>
                       <Text as="span">{formatarDuracao(duracao)}</Text>
                     </HStack>
                   )}
 
                   {tamanhoBytes && (
                     <HStack gap={1.5}>
-                      <HardDrive size={14} color="#38bdf8" />
+                      <Box as="span" color="catalist.blue.400" display="inline-flex">
+                        <HardDrive size={14} color="currentColor" />
+                      </Box>
                       <Text as="span">{formatarTamanhoBytes(tamanhoBytes)}</Text>
                     </HStack>
                   )}
 
                   <HStack gap={1.5}>
-                    <User size={14} color="#4ade80" />
+                    <Box as="span" color="catalist.green.400" display="inline-flex">
+                      <User size={14} color="currentColor" />
+                    </Box>
                     <Text as="span">{uploader}</Text>
                   </HStack>
 

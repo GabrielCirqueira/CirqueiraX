@@ -134,7 +134,13 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             _hover={{ color: 'fg' }}
           >
             <HStack gap={2}>
-              {todosSelecionados ? <CheckSquare size={16} color="#8b5cf6" /> : <Square size={16} />}
+              {todosSelecionados ? (
+                <Box as="span" color="catalist.purple.500" display="inline-flex">
+                  <CheckSquare size={16} color="currentColor" />
+                </Box>
+              ) : (
+                <Square size={16} />
+              )}
               <Text as="span">
                 {todosSelecionados
                   ? 'Desmarcar todos'
@@ -208,9 +214,9 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         >
           {itens.map((item) => {
             const isVideo =
-              item.mimeType?.startsWith('video/') ||
               Boolean(item.metadata?.duracao) ||
-              item.caminhoLocal?.match(/\.(mp4|mkv|webm|mov)$/i)
+              Boolean(item.caminhoLocal?.match(/\.(mp4|mkv|webm|mov)$/i)) ||
+              Boolean(String(item.metadata?.extensao ?? '').match(/^(mp4|mkv|webm|mov)$/i))
 
             const isSelected = selecionados.includes(item.uuid)
 
@@ -219,22 +225,19 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 key={item.uuid}
                 borderRadius="2xl"
                 borderWidth={isSelected ? '2px' : '1px'}
-                borderColor={isSelected ? 'brand.500' : 'border.subtle'}
+                borderColor={isSelected ? 'catalist.brand.500' : 'border.subtle'}
                 bg="bg.panel"
                 overflow="hidden"
                 shadow="sm"
                 transition="all 0.2s"
-                _hover={{ borderColor: isSelected ? 'brand.500' : 'border.muted' }}
+                _hover={{ borderColor: isSelected ? 'catalist.brand.500' : 'border.muted' }}
               >
                 <Box position="relative" w="full" h={40} bg="bg.muted" overflow="hidden">
                   {item.metadata?.thumbnail ? (
-                    <Box
-                      as="img"
+                    <img
                       src={String(item.metadata.thumbnail)}
                       alt={item.hash}
-                      w="full"
-                      h="full"
-                      objectFit="cover"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                   ) : (
                     <VStack h="full" w="full" align="center" justify="center" color="fg.subtle">
@@ -256,7 +259,9 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       aria-label="Selecionar"
                     >
                       {isSelected ? (
-                        <CheckSquare size={16} color="#a78bfa" />
+                        <Box as="span" color="catalist.brand.400" display="inline-flex">
+                          <CheckSquare size={16} color="currentColor" />
+                        </Box>
                       ) : (
                         <Square size={16} />
                       )}
@@ -334,33 +339,32 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                     <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                       Atribuir Categoria:
                     </Text>
-                    <Box
-                      as="select"
+                    <select
                       value={item.categoriaId ?? ''}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                         onClassificarIndividual(item.uuid, e.target.value)
                       }
-                      w="full"
-                      h={8}
-                      px={2}
-                      borderRadius="lg"
-                      fontSize="xs"
-                      fontWeight="medium"
-                      bg="bg.muted"
-                      borderColor="border.subtle"
-                      color="inherit"
-                      borderWidth="1px"
-                      outline="none"
+                      style={{
+                        width: '100%',
+                        height: '2rem',
+                        padding: '0 0.5rem',
+                        borderRadius: '0.5rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        backgroundColor: 'var(--chakra-colors-bg-muted)',
+                        borderColor: 'var(--chakra-colors-border-subtle)',
+                        color: 'inherit',
+                        borderWidth: '1px',
+                        outline: 'none',
+                      }}
                     >
-                      <Box as="option" value="">
-                        Selecione uma categoria...
-                      </Box>
+                      <option value="">Selecione uma categoria...</option>
                       {categorias.map((cat) => (
-                        <Box as="option" key={cat.uuid} value={cat.uuid}>
+                        <option key={cat.uuid} value={cat.uuid}>
                           {cat.nome}
-                        </Box>
+                        </option>
                       ))}
-                    </Box>
+                    </select>
                   </VStack>
                 </Card.Body>
 
@@ -482,33 +486,32 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                   Escolha a categoria que será atribuída a todas as mídias selecionadas:
                 </Text>
 
-                <Box
-                  as="select"
+                <select
                   value={categoriaLoteId}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                     setCategoriaLoteId(e.target.value)
                   }
-                  w="full"
-                  h={10}
-                  px={3}
-                  borderRadius="xl"
-                  fontSize="xs"
-                  fontWeight="medium"
-                  bg="bg.muted"
-                  borderColor="border.subtle"
-                  color="inherit"
-                  borderWidth="1px"
-                  outline="none"
+                  style={{
+                    width: '100%',
+                    height: '2.5rem',
+                    padding: '0 0.75rem',
+                    borderRadius: '0.75rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    backgroundColor: 'var(--chakra-colors-bg-muted)',
+                    borderColor: 'var(--chakra-colors-border-subtle)',
+                    color: 'inherit',
+                    borderWidth: '1px',
+                    outline: 'none',
+                  }}
                 >
-                  <Box as="option" value="">
-                    Selecione a categoria...
-                  </Box>
+                  <option value="">Selecione a categoria...</option>
                   {categorias.map((cat) => (
-                    <Box as="option" key={cat.uuid} value={cat.uuid}>
+                    <option key={cat.uuid} value={cat.uuid}>
                       {cat.nome}
-                    </Box>
+                    </option>
                   ))}
-                </Box>
+                </select>
 
                 <HStack justify="flex-end" gap={2} pt={2}>
                   <Button
