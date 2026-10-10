@@ -139,9 +139,9 @@ const router = createBrowserRouter(
 ## Regras de Ouro
 
 1. **Sem `useEffect` em pages/features**: use TanStack Query para dados, event handlers para ações, `useMemo` para derivações, `useMountEffect` para efeitos de montagem.
-2. **Componentes atômicos**: lógica pesada vai para hooks no diretório `hooks/` da própria feature.
+2. **Componentes limpos e atômicos**: Proibido colocar lógica pesada, encadeamentos longos de `if/else`, parsers complexos de URL/strings, identificadores de formatos/plataformas ou formatações avançadas diretamente dentro de componentes visuais (`.tsx`). Componentes devem focar exclusivamente na renderização e interação. Toda lógica de negócio, detecção, transformação ou parsing deve ser extraída para utilitários (`utils/`), serviços ou hooks dedicados.
 3. **Tipagem estrita**: sem `any`. Respostas de API validadas com schema Zod.
-4. **Nunca editar `node_modules/@heroui`**: customização via `className` (Tailwind), CSS variables e slots expostos.
+4. **Aderência aos design tokens**: usar exclusivamente tokens da paleta `cirqueira.*` e tokens semânticos neutros (`bg.panel`, `border.subtle`, `fg`). Nunca usar cores arbitrárias, hexadecimais soltos ou `className`.
 5. **Sem tags HTML brutas**: nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` — usar `Box`/`HStack`/`VStack`/`Grid`/`Container` para layout e `Text`/`Text as="h1"`/`Text as="span"` para tipografia, todos de `@/shared/ui/layout`.
 
 ## Execução e Build

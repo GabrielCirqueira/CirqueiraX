@@ -17,6 +17,7 @@ Se faltar detalhe, use a seção **Onde buscar mais contexto** no final deste ar
 7. Não crie testes. Não instale PHPUnit.
 8. Importação explícita de classes (PHP): Proibido usar FQCN inline no meio do código (ex: `\App\...`, `\DateTime`, `\Symfony\...`). Todas as classes, DTOs, interfaces, exceções e enums devem ser importadas no topo do arquivo via `use` logo abaixo do `namespace`.
 9. Verificações de estado e predicados booleanos: Proibido fazer checagens complexas/inline de status, categoria ou flags de entidades nos Services, Handlers e Controllers. Crie métodos de domínio na própria Entidade ou Enum com prefixo `is` retornando `bool` (ex: `$mediaItem->isClassificado()`, `$mediaItem->isFinal()`, `$mediaItem->isClassificadoOuFinalizado()`, `$status->isFinal()`).
+10. Separação de Lógica no Frontend (Componentes Limpos): Proibido colocar lógica pesada, encadeamentos longos de `if/else`, parsers complexos de URL/strings, identificadores de formatos/plataformas ou regras de transformação diretamente dentro de componentes visuais (`.tsx`). Componentes devem focar exclusivamente na renderização, interação e composição. Toda lógica de negócio, detecção, transformação ou parsing deve ser extraída para utilitários (`utils/`) ou serviços dedicados.
 
 ---
 
