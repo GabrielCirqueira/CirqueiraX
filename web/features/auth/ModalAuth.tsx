@@ -2,7 +2,7 @@ import { api } from '@/config/api'
 import { addToast } from '@/shared/components/ui/toaster'
 import type { RespostaApi } from '@/shared/types/api'
 import { useAuthStore } from '@/stores'
-import { Box, Button, Dialog, Field, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Button, Center, Dialog, Field, HStack, Input, Text, VStack } from '@chakra-ui/react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { Code2, Eye, EyeOff, Lock } from 'lucide-react'
@@ -105,18 +105,15 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
             alignItems="center"
             gap={3}
           >
-            <Box
-              w={9}
-              h={9}
-              borderRadius="xl"
-              bg="brand.500"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
+            <Center
+              boxSize={9}
+              rounded="xl"
+              bg="catalist.brand.500"
+              color="catalist.grey.0"
               shadow="lg"
             >
-              <Code2 size={20} color="white" strokeWidth={2.5} />
-            </Box>
+              <Code2 size={20} color="currentColor" strokeWidth={2.5} />
+            </Center>
             <VStack alignItems="flex-start" gap={0.5}>
               <Dialog.Title fontSize="lg" fontWeight="bold">
                 CirqueiraX Media
@@ -128,13 +125,10 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
           </Dialog.Header>
 
           <Dialog.Body p={6}>
-            <Box
-              as="form"
+            <form
               onSubmit={handleSubmit}
-              display="flex"
-              flexDirection="column"
-              gap={4}
               noValidate
+              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
             >
               <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
                 <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
@@ -210,9 +204,9 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                 mt={2}
                 h={10}
                 fontWeight="bold"
-                bg="brand.500"
-                _hover={{ bg: 'brand.600' }}
-                color="white"
+                bg="catalist.brand.500"
+                _hover={{ bg: 'catalist.brand.600' }}
+                color="catalist.grey.0"
                 w="full"
                 borderRadius="xl"
                 shadow="lg"
@@ -220,7 +214,7 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
                 <Lock size={16} style={{ marginRight: '6px' }} />
                 <Text as="span">Entrar</Text>
               </Button>
-            </Box>
+            </form>
           </Dialog.Body>
           <Dialog.CloseTrigger />
         </Dialog.Content>

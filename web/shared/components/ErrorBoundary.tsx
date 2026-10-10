@@ -1,4 +1,4 @@
-import { Box, Button, Text, VStack } from '@chakra-ui/react'
+import { Button, Center, Text, VStack } from '@chakra-ui/react'
 import { AlertTriangle } from 'lucide-react'
 import * as React from 'react'
 
@@ -39,22 +39,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           p={8}
           textAlign="center"
         >
-          <Box
-            w={12}
-            h={12}
-            borderRadius="xl"
-            bg="rose.500/10"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <AlertTriangle size={24} color="#f43f5e" />
-          </Box>
+          <Center boxSize={12} rounded="xl" bg="catalist.red.100" color="catalist.red.700">
+            <AlertTriangle size={24} />
+          </Center>
           <VStack gap={1}>
             <Text fontWeight="semibold" color="white">
               Algo deu errado
             </Text>
-            <Text fontSize="sm" color="zinc.400">
+            <Text fontSize="sm" color="catalist.grey.600">
               {this.state.error?.message ?? 'Erro inesperado'}
             </Text>
           </VStack>

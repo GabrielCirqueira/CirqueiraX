@@ -1,9 +1,18 @@
 import { useTheme } from '@/contexts'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Center,
+  Link as ChakraLink,
+  Flex,
+  HStack,
+  Text,
+} from '@chakra-ui/react'
 import { Code2, LogIn, LogOut, Moon, Sun, User } from 'lucide-react'
 import { memo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -42,22 +51,20 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
       backdropFilter="blur(12px)"
     >
       <HStack maxW="6xl" mx="auto" px={6} h={14} justify="space-between">
-        <Box as={Link} to={autenticado ? '/dashboard' : '/login'}>
+        <RouterLink to={autenticado ? '/dashboard' : '/login'}>
           <HStack gap={2}>
-            <Box
-              w={7}
-              h={7}
-              borderRadius="lg"
-              bg="brand.500"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
+            <Center boxSize={7} rounded="lg" bg="catalist.brand.500" color="catalist.grey.0">
+              <Code2 size={16} color="currentColor" strokeWidth={2.5} />
+            </Center>
+            <Text
+              as="span"
+              fontWeight="900"
+              fontSize="sm"
+              letterSpacing="tight"
+              fontFamily="heading"
             >
-              <Code2 size={16} color="white" strokeWidth={2.5} />
-            </Box>
-            <Text as="span" fontWeight="900" fontSize="sm" letterSpacing="tight">
               Cirqueira
-              <Text as="span" color="brand.500">
+              <Text as="span" color="catalist.brand.700">
                 X
               </Text>{' '}
               <Text
@@ -67,17 +74,17 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
                 px={2}
                 py={0.5}
                 borderRadius="full"
-                bg="brand.500/10"
-                color="brand.500"
+                bg="catalist.brand.500/10"
+                color="catalist.brand.500"
                 border="1px solid"
-                borderColor="brand.500/20"
+                borderColor="catalist.brand.500/20"
                 ml={1}
               >
                 Media
               </Text>
             </Text>
           </HStack>
-        </Box>
+        </RouterLink>
 
         {autenticado && (
           <Flex
@@ -85,20 +92,18 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
             alignItems="center"
             gap={6}
             fontSize="sm"
-            color="zinc.400"
+            color="catalist.grey.600"
           >
             {navLinks.map((link) => (
-              <Box
-                as={Link}
+              <ChakraLink
+                asChild
                 key={link.href}
-                to={link.href}
-                color={pathname === link.href ? 'brand.400' : 'inherit'}
+                color={pathname === link.href ? 'catalist.brand.400' : 'inherit'}
                 fontWeight={pathname === link.href ? 'semibold' : 'normal'}
-                transition="color 0.2s"
-                _hover={{ color: 'fg' }}
+                _hover={{ color: 'catalist.grey.900' }}
               >
-                {link.label}
-              </Box>
+                <RouterLink to={link.href}>{link.label}</RouterLink>
+              </ChakraLink>
             ))}
           </Flex>
         )}
@@ -133,8 +138,8 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
                 size="xs"
                 variant="ghost"
                 onClick={handleLogout}
-                color="zinc.400"
-                _hover={{ color: 'rose.400' }}
+                color="catalist.grey.600"
+                _hover={{ color: 'catalist.red.700' }}
                 p={1.5}
                 aria-label="Sair da conta"
               >
@@ -143,12 +148,12 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
             </HStack>
           ) : (
             !isLoginPage && (
-              <Box as={Link} to="/login">
+              <RouterLink to="/login">
                 <Button
                   size="sm"
-                  bg="brand.500"
-                  _hover={{ bg: 'brand.600' }}
-                  color="white"
+                  bg="catalist.brand.500"
+                  _hover={{ bg: 'catalist.brand.600' }}
+                  color="catalist.grey.0"
                   borderRadius="lg"
                   px={3}
                   py={1}
@@ -158,7 +163,7 @@ export const Header = memo(function Header({ onAbrirModal: _onAbrirModal }: Head
                   <LogIn size={14} style={{ marginRight: '4px' }} />
                   <Text as="span">Entrar</Text>
                 </Button>
-              </Box>
+              </RouterLink>
             )
           )}
         </HStack>

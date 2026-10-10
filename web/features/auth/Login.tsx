@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Card,
+  Center,
   Container,
   Field,
   HStack,
@@ -89,21 +90,25 @@ export function Component() {
             textAlign="center"
           >
             <HStack gap={2.5} alignItems="center" justifyContent="center">
-              <Box
-                w={10}
-                h={10}
-                borderRadius="2xl"
-                bg="brand.500"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
+              <Center
+                boxSize={10}
+                rounded="2xl"
+                bg="catalist.brand.500"
+                color="catalist.grey.0"
                 shadow="lg"
               >
-                <Code2 size={20} color="white" strokeWidth={2.5} />
-              </Box>
-              <Text as="span" fontWeight="900" fontSize="xl" letterSpacing="tight" color="white">
+                <Code2 size={20} color="currentColor" strokeWidth={2.5} />
+              </Center>
+              <Text
+                as="span"
+                fontWeight="900"
+                fontSize="xl"
+                letterSpacing="tight"
+                color="white"
+                fontFamily="heading"
+              >
                 Cirqueira
-                <Text as="span" color="brand.500">
+                <Text as="span" color="catalist.brand.700">
                   X
                 </Text>{' '}
                 <Text
@@ -113,10 +118,10 @@ export function Component() {
                   px={2}
                   py={0.5}
                   borderRadius="full"
-                  bg="brand.500/10"
-                  color="brand.400"
+                  bg="catalist.brand.500/10"
+                  color="catalist.brand.400"
                   border="1px solid"
-                  borderColor="brand.500/20"
+                  borderColor="catalist.brand.500/20"
                   ml={1}
                 >
                   Media
@@ -151,13 +156,10 @@ export function Component() {
           </Card.Header>
 
           <Card.Body px={8} py={6}>
-            <Box
-              as="form"
+            <form
               onSubmit={handleSubmit}
-              display="flex"
-              flexDirection="column"
-              gap={4}
               noValidate
+              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
             >
               <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
                 <Field.Label fontSize="xs" fontWeight="semibold" color="whiteAlpha.800">
@@ -229,9 +231,9 @@ export function Component() {
                 mt={2}
                 h={11}
                 fontWeight="bold"
-                bg="brand.500"
-                _hover={{ bg: 'brand.600' }}
-                color="white"
+                bg="catalist.brand.500"
+                _hover={{ bg: 'catalist.brand.600' }}
+                color="catalist.grey.0"
                 w="full"
                 borderRadius="xl"
                 shadow="lg"
@@ -239,7 +241,7 @@ export function Component() {
                 <Lock size={16} style={{ marginRight: '6px' }} />
                 <Text as="span">Entrar no Hub</Text>
               </Button>
-            </Box>
+            </form>
 
             <Box
               mt={6}
@@ -250,7 +252,7 @@ export function Component() {
             >
               <Text fontSize="11px" color="whiteAlpha.400">
                 Acesso restrito. Novos usuários são provisionados via CLI administrativa (
-                <Text as="span" fontFamily="mono" color="brand.400">
+                <Text as="span" fontFamily="mono" color="catalist.brand.400">
                   app:usuario:criar
                 </Text>
                 ).

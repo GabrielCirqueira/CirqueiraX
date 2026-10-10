@@ -53,7 +53,7 @@ function renderizarIconeToast(type?: string) {
     case 'warning':
       return <AlertTriangle size={18} color="#f59e0b" />
     case 'loading':
-      return <Spinner size="xs" color="brand.500" />
+      return <Spinner size="xs" color="catalist.blue.500" />
     default:
       return <Info size={18} color="#3b82f6" />
   }

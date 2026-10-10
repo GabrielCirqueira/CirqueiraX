@@ -34,7 +34,8 @@ Guia: [progresso/README.md](../progresso/README.md). Script: `scripts/update_roa
 ## Banco de Dados (Doctrine)
 - `make migrate`: executa migrations pendentes no ambiente local.
 - `make rollback`: reverte a última migração executada (útil em desenvolvimento).
-- `make new-migration`: gera uma nova classe de migração comparando o schema das Entidades com o Banco.
+- `make doctrine-diff`: gera a migration comparando o schema das Entidades com o Banco. **Proibido** criar arquivo em `migrations/` na mão.
+- `make doctrine-validate`: valida se mappings e schema estão 100% sincronizados.
 
 ## Produção (DevOps)
 - `make deploy`: realiza o build de produção das imagens e sobe a stack no `docker-compose.prod.yaml`.

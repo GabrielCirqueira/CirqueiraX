@@ -1,7 +1,7 @@
-import { Box, Flex, HStack, Text } from '@chakra-ui/react'
+import { Box, Center, Flex, HStack, Link, Text } from '@chakra-ui/react'
 import { Code2, Github } from 'lucide-react'
 import { memo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 
 const footerLinks = [
   { href: '/#showcase', label: 'Componentes' },
@@ -13,62 +13,58 @@ export const Footer = memo(function Footer() {
   return (
     <Box as="footer" borderTop="1px solid" borderColor="whiteAlpha.200" bg="zinc.950">
       <HStack maxW="6xl" mx="auto" px={6} h={16} justify="space-between" flexWrap="wrap">
-        <Box as={Link} to="/">
+        <RouterLink to="/">
           <HStack gap={2}>
-            <Box
-              w={6}
-              h={6}
-              borderRadius="md"
-              bg="brand.500"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
+            <Center boxSize={6} rounded="md" bg="catalist.brand.500" color="catalist.grey.0">
+              <Code2 size={14} color="currentColor" strokeWidth={2.5} />
+            </Center>
+            <Text
+              as="span"
+              fontWeight="900"
+              fontSize="xs"
+              letterSpacing="tight"
+              fontFamily="heading"
             >
-              <Code2 size={14} color="white" strokeWidth={2.5} />
-            </Box>
-            <Text as="span" fontWeight="900" fontSize="xs" letterSpacing="tight">
               cirqueiraX{' '}
-              <Text as="span" color="brand.500">
+              <Text as="span" color="catalist.brand.700">
                 Skeleton
               </Text>
             </Text>
           </HStack>
-        </Box>
+        </RouterLink>
 
         <Flex
           display={{ base: 'none', sm: 'flex' }}
           alignItems="center"
           gap={5}
           fontSize="xs"
-          color="zinc.400"
+          color="catalist.grey.600"
         >
           {footerLinks.map((link) => (
-            <Box
-              as="a"
+            <Link
               key={link.href}
               href={link.href}
               color="inherit"
               transition="color 0.2s"
-              _hover={{ color: 'fg' }}
+              _hover={{ color: 'catalist.grey.900' }}
             >
               {link.label}
-            </Box>
+            </Link>
           ))}
         </Flex>
 
-        <HStack gap={3} fontSize="xs" color="zinc.400">
+        <HStack gap={3} fontSize="xs" color="catalist.grey.600">
           <Text as="span">MIT License</Text>
-          <Box
-            as="a"
+          <Link
             href="https://github.com"
             target="_blank"
             rel="noreferrer"
             aria-label="GitHub"
             color="inherit"
-            _hover={{ color: 'fg' }}
+            _hover={{ color: 'catalist.grey.900' }}
           >
             <Github size={16} />
-          </Box>
+          </Link>
         </HStack>
       </HStack>
     </Box>

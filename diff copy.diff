@@ -1,0 +1,2040 @@
+diff --git a/documentation/guias/DESIGN.md b/documentation/guias/DESIGN.md
+index d8afbd3..8a17b57 100644
+--- a/documentation/guias/DESIGN.md
++++ b/documentation/guias/DESIGN.md
+@@ -23,7 +23,7 @@ A estética é baseada em **sofisticação tecnológica**, **ritmo visual** e **
+ 
+ ### 2.1 Regra de Ouro
+ 
+-> **Nunca use `className`.** Cores só via tokens Chakra (`brand.solid`, `fg.muted`, `bg.panel`, `colorPalette="brand"`) em `web/config/theme/theme.ts`.
++> **Nunca use `className` nem hex.** Cores só da paleta gerada (`skeleton.grey.700`, `skeleton.brand.500`) em `web/config/theme/theme.ts`. `colorPalette` só com escalas dessa paleta.
+ 
+ Isso garante que a troca de tema (light/dark) funcione automaticamente e que a identidade visual seja consistente em todas as telas.
+ 
+diff --git "a/documentation/guias/Estrutura\303\247\303\243o.md" "b/documentation/guias/Estrutura\303\247\303\243o.md"
+index 4cc82a0..44b78cc 100644
+--- "a/documentation/guias/Estrutura\303\247\303\243o.md"
++++ "b/documentation/guias/Estrutura\303\247\303\243o.md"
+@@ -19,8 +19,7 @@ Este documento define o padrão oficial de arquitetura, organização de pastas,
+ * **React 19** com **TypeScript**
+ * **Vite 6**
+ * **Axios**
+-* **HeroUI v3** (componentes base acessíveis)
+-* **Tailwind CSS 4** + **tailwindcss-motion** (estilo e animações padrão)
++* **Chakra UI v3** (layout, tema, componentes)
+ * **Recharts** (gráficos)
+ * **TanStack Query v5** (gerenciamento de estado de servidor)
+ * **Zustand** (gerenciamento de estado global)
+@@ -74,15 +73,13 @@ Dentro de `./web`, o projeto segue o padrão de **Features & Shared**:
+ ```text
+ App.tsx
+ main.tsx
+-index.css
+ vite-env.d.ts
+ 
+ assets/                 ← imagens, fontes, SVGs estáticos
+-config/                 ← instância axios, constantes globais
++config/                 ← axios, constantes, theme/theme.ts
+ contexts/               ← Context API (tema, I18n — não estado de UI)
+ layouts/                ← sidebar, header, wrappers de página
+ routes/                 ← proteção de rotas (nunca dentro da página)
+-shared/ui/layout.tsx    ← primitivos de layout/texto (Box, VStack, Text…)
+ stores/                 ← Zustand stores (useAuthStore, etc.)
+ 
+ features/               ← módulos com feature própria
+@@ -95,7 +92,7 @@ features/               ← módulos com feature própria
+ 
+ shared/                 ← tudo que é global e sem feature
+   components/           ← ErrorBoundary, Layouts
+-  ui/layout.tsx          ← primitivos de layout/texto (Box, VStack, Text…)
++  ui/                   ← toaster, chart
+   hooks/                ← useDebounce, usePaginacao, useSEO
+   api/                  ← configuração axios, tipos globais de API
+   stores/               ← Zustand stores globais (useAuthStore)
+@@ -306,7 +303,7 @@ Exemplo:
+ 
+ ### 9.1 Proibido usar tags HTML brutas
+ 
+-Nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` diretamente. Sempre usar o componente correspondente de `web/shared/ui/layout.tsx`:
++Nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` diretamente. Sempre o componente de `@chakra-ui/react`:
+ 
+ **Layout (estrutura):**
+ 
+@@ -324,48 +321,37 @@ Nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` diretamente. Sempre usar
+ | Situação | Componente |
+ | :--- | :--- |
+ | Parágrafo (`<p>`) | `<Text>` |
+-| Títulos (`<h1>`–`<h6>`) | `<Text as="h1">` … `<Text as="h6">` |
++| Títulos (`<h1>`–`<h6>`) | `<Heading as="h1">` |
+ | Inline (`<span>`) | `<Text as="span">` |
+ | Negrito semântico | `<Text as="strong">` |
+ | Texto pequeno | `<Text as="small">` |
+ 
+-> **Exceção permitida:** tags de estrutura semântica de página (`<section>`, `<header>`, `<footer>`, `<nav>`, `<main>`, `<article>`, `<aside>`) são permitidas quando têm valor semântico real para acessibilidade/SEO. Componentes HeroUI (`TextField`, `Label`, `Input`, `Button`) gerenciam os elementos de formulário.
++> **Exceção permitida:** tags de estrutura semântica de página (`<section>`, `<header>`, `<footer>`, `<nav>`, `<main>`, `<article>`, `<aside>`) são permitidas quando têm valor semântico real para acessibilidade/SEO. Componentes Chakra UI (`Field`, `Input`, `Button`, `Dialog`) gerenciam os elementos de formulário.
+ 
+-### 9.2 Primitivos de layout e texto oficiais
+-
+-Todos os primitivos ficam em:
+-
+-```text
+-web/shared/ui/layout.tsx
+-```
++### 9.2 Primitivos oficiais
+ 
+ Importação:
+ 
+ ```tsx
+-import { Box, HStack, VStack, Flex, Grid, Container, Text } from '@/shared/ui/layout'
++import { Box, Container, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+ ```
+ 
+-Referência:
+-
+ ```tsx
+-<Box className="p-4 rounded-xl bg-surface" />
+-<HStack className="justify-between gap-4" />
+-<VStack className="gap-6 items-start" />
+-<Grid className="grid-cols-3 gap-4" />
+-<Container size="lg" className="py-12" />
+-<Text className="text-sm text-muted">Parágrafo</Text>
+-<Text as="h1" className="text-4xl font-black">Título</Text>
+-<Text as="span" className="text-brand-500">Destaque inline</Text>
++<Box p="4" rounded="xl" bg="bg.panel" />
++<HStack justify="space-between" gap="4" />
++<VStack gap="6" align="start" />
++<SimpleGrid columns={3} gap="4" />
++<Container maxW="6xl" py="12" />
++<Text fontSize="sm" color="fg.muted">Parágrafo</Text>
++<Heading as="h1" size="4xl">Título</Heading>
++<Text as="span" color="brand.fg">Destaque inline</Text>
+ ```
+ 
+ Tamanhos disponíveis para `<Container>`: `sm`, `md`, `lg`, `xl` (padrão), `2xl`, `full`.
+ 
+ ### 9.3 Estilização obrigatória
+ 
+-* Todo estilo deve ser feito com:
+-
+-  * `className`
+-  * **TailwindCSS v4**
++* Todo estilo deve ser feito com props do Chakra (`p`, `gap`, `bg`, `colorPalette`).
+ 
+ * O sistema deve sempre manter:
+ 
+@@ -379,7 +365,7 @@ Tamanhos disponíveis para `<Container>`: `sm`, `md`, `lg`, `xl` (padrão), `2xl
+ 
+ O sistema deve ter animações consistentes e agradáveis.
+ 
+-Padrão oficial: **tailwindcss-motion** (classes Tailwind, zero JS). `motion`/`AnimatePresence` do **Framer Motion** só entra via módulo opcional `ui-extra`, e apenas quando há necessidade concreta de animar montagem/desmontagem condicional (modais, drawers) — ver `documentation/stack/FRONTEND.md`.
++Padrão oficial: props do Chakra. `motion`/`AnimatePresence` do **Framer Motion** só entra via módulo opcional `ui-extra`.
+ 
+ Regras:
+ 
+@@ -603,6 +589,7 @@ private ?Uuid $uuid = null;
+ Entidades seguem o padrão:
+ * Getters: nome da propriedade (ex: `nome()`).
+ * Setters: prefixo `set` retornando `self` (ex: `setNome(string $nome): self`).
++* Predicados de estado: prefixo `is` retornando `bool` (ex: `isPago()`, `isFinal()`, `isPagoOuCancelado()`). Proibido checar status/flags inline no Service, Handler ou Controller.
+ 
+ #### Fábrica de Entidade (fromDTO)
+ 
+@@ -636,6 +623,15 @@ Quando entidades só fazem sentido juntas (ex: `Pedido` e `ItemPedido`), todas a
+ 
+ Regras de negócio reutilizáveis e combináveis. Use para validar condições complexas de domínio de forma isolada e testável.
+ 
++#### 13.5.5 Migrations Obrigatórias via Makefile
++
++* **PROIBIDO**: Criar arquivos de migration manualmente na mão em `migrations/`.
++* **SEMPRE**: Gerar migrations exclusivamente via comandos do `Makefile`:
++  * `make doctrine-diff`: Gera automaticamente a migration baseando-se no diff entre entidades Doctrine e o banco MySQL.
++  * `make migrate`: Executa todas as migrations pendentes.
++  * `make doctrine-validate`: Valida se os mappings e o schema do banco estão 100% sincronizados.
++  * `make rollback`: Reverte a migration anterior em caso de necessidade.
++
+ ---
+ 
+ ### 13.6 Message Handlers (Assíncrono)
+@@ -719,7 +715,7 @@ make auto-fix   # Corrige automaticamente o que é possível (biome e phpcbf)
+ Antes de abrir PR:
+ 
+ * [ ] Rode `make lint-all`
+-* [ ] Não existe `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` direto no frontend (usar `Box`, `HStack`, `VStack`, `Grid`, `Container`, `Text` de `@/shared/ui/layout`)
++* [ ] Não existe `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` direto no frontend (usar `Box`, `HStack`, `VStack`, `Grid`, `Container`, `Text` de `@chakra-ui/react`)
+ * [ ] Página segue padrão `AppContainer -> Container`
+ * [ ] Hooks consumindo `api.ts`
+ * [ ] Lógicas grandes movidas para `services/`
+@@ -749,11 +745,9 @@ Antes de abrir PR:
+ * TanStack Query: [https://tanstack.com/query/latest](https://tanstack.com/query/latest)
+ * Zustand: [https://zustand-demo.pmnd.rs/](https://zustand-demo.pmnd.rs/)
+ * Biome JS: [https://biomejs.dev/](https://biomejs.dev/)
+-* HeroUI: [https://www.heroui.com/](https://www.heroui.com/)
+-* tailwindcss-motion: [https://tailwindcss-motion.rombo.co/](https://tailwindcss-motion.rombo.co/)
++* Chakra UI: [https://www.chakra-ui.com/](https://www.chakra-ui.com/)
+ * Framer Motion (módulo `ui-extra`): [https://www.framer.com/motion/](https://www.framer.com/motion/)
+ * Recharts: [https://recharts.org/](https://recharts.org/)
+-* TailwindCSS: [https://tailwindcss.com/docs](https://tailwindcss.com/docs)
+ 
+ ### Referências de DevOps
+ 
+diff --git a/documentation/guias/PARA-IA.md b/documentation/guias/PARA-IA.md
+index df42c58..9fa2ccb 100644
+--- a/documentation/guias/PARA-IA.md
++++ b/documentation/guias/PARA-IA.md
+@@ -15,6 +15,8 @@ Se faltar detalhe, use a seção **Onde buscar mais contexto** no final deste ar
+ 5. Nomes em **português**: pastas, arquivos, variáveis, funções, DTOs, services, entidades.
+ 6. Sem comentários (`//`, `/* */`, `{/* */}`). Código se explica pelo nome. Exceção: DocBlock curto em Service PHP se o retorno for complexo.
+ 7. Não crie testes. Não instale PHPUnit.
++8. Importação explícita de classes (PHP): Proibido usar FQCN inline no meio do código (ex: `\App\...`, `\DateTime`, `\Symfony\...`). Todas as classes, DTOs, interfaces, exceções e enums devem ser importadas no topo do arquivo via `use` logo abaixo do `namespace`.
++9. Verificações de estado e predicados booleanos: Proibido fazer checagens complexas/inline de status, categoria ou flags de entidades nos Services, Handlers e Controllers. Crie métodos de domínio na própria Entidade ou Enum com prefixo `is` retornando `bool` (ex: `$pedido->isPago()`, `$pedido->isFinal()`, `$pedido->isPagoOuCancelado()`, `$status->isFinal()`).
+ 
+ ---
+ 
+@@ -134,7 +136,7 @@ Proibido no JSX: `<div>`, `<p>`, `<h1>`–`<h6>`, `<span>`, `className`.
+ import { Box, Button, Field, Heading, HStack, Input, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+ ```
+ 
+-Estilo: **só props do Chakra** (`p`, `gap`, `bg`, `color`, `colorPalette`). Toast: `toast.success` / `toast.danger` de `@/shared/ui/toaster`. Framer Motion só se o módulo `ui-extra` estiver ativo.
++Estilo: **só props do Chakra** (`p`, `gap`, `bg`, `color`). Cores **somente** da paleta gerada (`skeleton.grey.700`, `skeleton.brand.500`…). Proibido hex e tokens fora da paleta (`fg.muted`, `gray.500`, `red.500` cru do Chakra). `colorPalette` só com escalas da paleta (`brand`, `green`, `red`…). Trocar o nome: `bash scripts/gerar-paleta-brand.sh`. Toast: `toast.success` / `toast.danger` de `@/shared/ui/toaster`. Framer Motion só se o módulo `ui-extra` estiver ativo.
+ 
+ ### 3.3 Dados e estado
+ 
+@@ -197,16 +199,22 @@ Handler de fila (módulo `async`): zero regra de negócio; chama um Service.
+ - Setter `setNome(): self`.
+ - Fábrica `fromDTO`.
+ - **Tell, Don't Ask:** mudança de estado via método de intenção (`classificarComo()`, `transicionarPara()`), não sequência de `set*()` soltos no Service.
++- Métodos de predicado e checagem de estado sempre com prefixo `is` retornando `bool`: `$pedido->isPago()`, `$pedido->isFinal()`, `$pedido->isPagoOuCancelado()`, `$pedido->isElegivelParaCancelamento()`. Nunca faça checagens inline combinando status e flags fora da entidade/enum.
+ - Conjunto fechado de valores → Enum em `src/Enum/`, não string solta.
+ 
+ ### 4.3 Migration
+ 
++> [!IMPORTANT]
++> **É ESTRITAMENTE PROIBIDO criar arquivos de migration manualmente na mão**. Toda migration deve ser gerada automaticamente a partir das diferenças do Schema Doctrine das entidades mapeadas utilizando os comandos oficiais do `Makefile`:
++
+ ```bash
+-make new-migration
+-make migrate
++make doctrine-diff      # Gera automaticamente o arquivo de migration baseado no schema das entidades
++make migrate            # Executa todas as migrations pendentes no banco de dados
++make doctrine-validate  # Valida se o schema do banco está 100% sincronizado com o mapeamento ORM
++make rollback           # Reverte para a versão anterior da migration se necessário
+ ```
+ 
+-Revise o SQL antes de aplicar. Garanta índice/`UNIQUE` para unicidade de domínio (hash, nome, origem).
++Revise o SQL gerado antes de aplicar. Garanta índice/`UNIQUE` para unicidade de domínio (hash, nome, origem).
+ 
+ ### 4.4 Repository
+ 
+@@ -237,7 +245,7 @@ Toda lógica de negócio fica **aqui**. Um service = **uma ação**. Nome: `Cria
+ - **Sem `new Service()`** — só construtor DI.
+ - **Sem** `$_ENV` / `getenv()` — parâmetro via `services.yaml` / `#[Autowire('%env(...)%')]`.
+ - **Sem** `mkdir`, `copy`, `unlink`, `@unlink`, `Process`, `HttpClientInterface` / `$client->request()` — isso é `src/Infra/`.
+-- **Sem** FQCN inline (`\App\DataObject\Foo`) — `use` no topo.
++- **Sem** FQCN inline — ver § 4.11.
+ - Erro previsto → **exceção do contexto** com factory estático (`throw PedidoException::codigoJaCadastrado()`). **PROIBIDO** `throw new \DomainException(...)`, `\RuntimeException`, `\Exception`.
+ - Guard clauses baratas primeiro (dado local → memória → Repository → API externa).
+ - Sem `else` — inverta e retorne cedo.
+@@ -337,7 +345,7 @@ Nunca devolva entidade crua. Array estável: `uuid`, campos, timestamps. Pasta:
+ 
+ **SEMPRE:**
+ 
+-- Uma classe por contexto em `src/Exception/{Contexto}/{Nome}Exception.php` estendendo `\DomainException`.
++- Uma classe por contexto em `src/Exception/{Contexto}/{Nome}Exception.php` estendendo `DomainException`.
+ - HTTP de cliente: estende `App\Exception\HTTP\ClienteHTTPException` (que já estende `\DomainException`).
+ - Métodos **estáticos descritivos em camelCase**, frase da causa em português (`falhaAoExtrairMetadataDoVideo()`).
+ - Primeiro argumento: **frase completa em português**, não identificador. O `KernelExceptionListener` devolve essa frase em `{ error }`.
+@@ -346,7 +354,9 @@ Nunca devolva entidade crua. Array estável: `uuid`, campos, timestamps. Pasta:
+ ```php
+ namespace App\Exception\Pedido;
+ 
+-class PedidoException extends \DomainException
++use DomainException;
++
++class PedidoException extends DomainException
+ {
+     public static function codigoJaCadastrado(): self
+     {
+@@ -372,6 +382,14 @@ Prefixo de pasta temporária compartilhado → parâmetro em `services.yaml`, n
+ 
+ Se ao ler o método você precisa adivinhar por que aquele valor está ali, ele precisava de nome.
+ 
++### 4.11 Importação Explícita de Classes (Proibido FQCN Inline)
++
++> [!IMPORTANT]
++> **Regra de Importação**: É estritamente **PROIBIDO** usar FQCNs (Fully Qualified Class Names) inline com barra invertida no meio do código PHP (ex: `#[MapRequestPayload] \App\DataObject\MeuDTO $dto`, `\App\Support\TextoUtil::metodo()`, `\DateTimeInterface`, `\DomainException`, `\Throwable`).
++>
++> - **SEMPRE**: Todas as classes, DTOs, interfaces, exceções, enums e traits devem ser importadas no topo do arquivo com declarações `use` explícitas, logo abaixo do `namespace`, organizadas em ordem alfabética.
++> - **No corpo do arquivo**: Use sempre o nome curto da classe importada (ex: `MeuDTO $dto`, `TextoUtil::naoEstaEmBranco(...)`, `DateTimeInterface::ATOM`, `DomainException`).
++
+ ---
+ 
+ ## 5. Passo a passo de uma feature nova
+@@ -388,6 +406,7 @@ Se ao ler o método você precisa adivinhar por que aquele valor está ali, ele
+ 
+ - [ ] Sem arquivo solto na raiz de `src/Controller/`, `src/Service/`, `src/Exception/`, `src/Feature/`
+ - [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` / `className` — só componentes Chakra (`Box`, `HStack`, `Heading`…)
++- [ ] Cores só da paleta gerada (`skeleton.grey.700` / `paletteToken(...)`) — sem hex
+ - [ ] Sem Header/Footer na página
+ - [ ] Sem `useEffect`
+ - [ ] Sem Axios fora de `config/api.ts` e dos `api.ts` da feature
+@@ -397,7 +416,10 @@ Se ao ler o método você precisa adivinhar por que aquele valor está ali, ele
+ - [ ] Zero query / EntityManager fora do Repository
+ - [ ] Zero `new Service()`, zero `$_ENV`/`getenv()`
+ - [ ] Zero `mkdir`/`copy`/`unlink`/`Process`/HTTP cru no Service — só `src/Infra/`
+-- [ ] Zero `throw new \DomainException` — factory estático descritivo, mensagem frase completa em PT
++- [ ] Zero `throw new DomainException` — factory estático descritivo, mensagem frase completa em PT
++- [ ] Sem FQCN inline (`\App\...`, `\DateTime`, `\Throwable`) — todo tipo via `use` no topo, ordem alfabética
++- [ ] Predicados `is*` na entidade/enum — zero checagem inline de status/flag no Service/Handler/Controller
++- [ ] Migration só via `make doctrine-diff` — nunca arquivo criado à mão em `migrations/`
+ - [ ] Magic values viraram `private const` (não código de erro)
+ - [ ] Lote captura exceção **esperada** por item e devolve relatório; um `flush()` no fim
+ - [ ] DTO sem I/O; retorno composto vira DTO de saída
+diff --git a/documentation/ops/MAKEFILE.md b/documentation/ops/MAKEFILE.md
+index 305a825..7aebee0 100644
+--- a/documentation/ops/MAKEFILE.md
++++ b/documentation/ops/MAKEFILE.md
+@@ -32,9 +32,10 @@ Este documento resume as principais receitas do `Makefile` para gerenciar a stac
+ Guia: [progresso/README.md](../progresso/README.md). Script: `scripts/update_roadmap.py`.
+ 
+ ## Banco de Dados (Doctrine)
++- `make doctrine-diff`: gera a migration comparando o schema das Entidades com o Banco. **Proibido** criar arquivo em `migrations/` à mão.
+ - `make migrate`: executa migrations pendentes no ambiente local.
++- `make doctrine-validate`: valida se mappings e schema estão 100% sincronizados.
+ - `make rollback`: reverte a última migração executada (útil em desenvolvimento).
+-- `make new-migration`: gera uma nova classe de migração comparando o schema das Entidades com o Banco.
+ 
+ ## Produção (DevOps)
+ - `make deploy`: realiza o build de produção das imagens e sobe a stack no `docker-compose.prod.yaml`.
+diff --git a/documentation/referencia/DOCUMENTACAO_TECNICA.md b/documentation/referencia/DOCUMENTACAO_TECNICA.md
+index 5e25e81..85acdf9 100644
+--- a/documentation/referencia/DOCUMENTACAO_TECNICA.md
++++ b/documentation/referencia/DOCUMENTACAO_TECNICA.md
+@@ -697,11 +697,14 @@ class Usuario
+ 
+ ```bash
+ # 1. Altere a Entity (adicione campo, mude tipo, etc.)
+-# 2. Gere a migration
+-make new-migration
++# 2. Gere a migration (PROIBIDO criar arquivo à mão em migrations/)
++make doctrine-diff
+ 
+ # 3. Revise o arquivo gerado em migrations/
+-# 4. Aplique
++# 4. Valide o schema
++make doctrine-validate
++
++# 5. Aplique
+ make migrate
+ 
+ # Reverter a última migration (apenas em dev)
+@@ -1032,8 +1035,9 @@ Script interativo que gera a estrutura completa de uma nova feature. Para a feat
+ | `make logs` | Tail de logs do container principal |
+ | `make bash` | Abre shell no container PHP |
+ | `make install` | `composer install` + `npm install` |
++| `make doctrine-diff` | Gera nova migration (diff do schema) — nunca à mão |
+ | `make migrate` | Executa migrations pendentes |
+-| `make new-migration` | Gera nova migration (diff do schema) |
++| `make doctrine-validate` | Valida mappings e schema sincronizados |
+ | `make rollback` | Reverte a última migration |
+ | `make phpstan` | Roda PHPStan |
+ | `make phpcs` | Roda PHP_CodeSniffer |
+diff --git a/documentation/stack/BACKEND.md b/documentation/stack/BACKEND.md
+index 25cbe2a..e04c62f 100644
+--- a/documentation/stack/BACKEND.md
++++ b/documentation/stack/BACKEND.md
+@@ -94,9 +94,10 @@ Service devolve o dado. Erro previsto: `throw AuthException::nomeDeUsuarioJaCada
+ ## Banco de Dados e Migrations
+ 
+ ```bash
+-make migrate          # Aplica migrations pendentes
+-make new-migration    # Gera migration por diff do schema
+-make rollback         # Reverte a última migration (só em dev)
++make doctrine-diff      # Gera migration por diff do schema (nunca criar arquivo à mão)
++make migrate            # Aplica migrations pendentes
++make doctrine-validate  # Valida mappings e schema 100% sincronizados
++make rollback           # Reverte a última migration (só em dev)
+ ```
+ 
+ ## Qualidade (QA)
+diff --git a/package.json b/package.json
+index 15ab84d..baf117e 100644
+--- a/package.json
++++ b/package.json
+@@ -22,6 +22,7 @@
+     "validate": "npm run type-check && npm run check",
+     "watch": "vite build --watch --mode development --config .tooling/frontend/vite.config.js",
+     "preview": "vite preview --config .tooling/frontend/vite.config.js",
++    "theme:brand": "bash scripts/gerar-paleta-brand.sh",
+     "prepare": "husky"
+   },
+   "lint-staged": {
+diff --git a/scripts/gerar-paleta-brand.mjs b/scripts/gerar-paleta-brand.mjs
+new file mode 100755
+index 0000000..bc39756
+--- /dev/null
++++ b/scripts/gerar-paleta-brand.mjs
+@@ -0,0 +1,566 @@
++#!/usr/bin/env node
++// este script e responsavel por gerar a paleta de cores do brand
++import { mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
++import { dirname, join } from 'node:path'
++
++const STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]
++
++const NATURAL_L = {
++  50: 0.97,
++  100: 0.93,
++  200: 0.87,
++  300: 0.78,
++  400: 0.7,
++  500: 0.6,
++  600: 0.52,
++  700: 0.44,
++  800: 0.35,
++  900: 0.28,
++  950: 0.22,
++}
++
++const NEUTRALS = {
++  grey: { chroma: 0.08, hueShift: 0 },
++  stone: { chroma: 0.05, hueShift: 45 },
++}
++
++const SEMANTIC = {
++  blue: { hue: 255, chroma: 0.17, yellowLift: false, maxShift: 15 },
++  green: { hue: 145, chroma: 0.15, yellowLift: false, maxShift: 15 },
++  red: { hue: 25, chroma: 0.21, yellowLift: false, maxShift: 5, hueMin: 20, hueMax: 30 },
++  yellow: { hue: 95, chroma: 0.17, yellowLift: true, maxShift: 5, hueMin: 88, hueMax: 102 },
++  orange: { hue: 55, chroma: 0.18, yellowLift: false, maxShift: 15 },
++  pink: { hue: 340, chroma: 0.18, yellowLift: false, maxShift: 15 },
++  purple: { hue: 300, chroma: 0.16, yellowLift: false, maxShift: 15 },
++  brown: { hue: 50, chroma: 0.12, yellowLift: false, maxShift: 15 },
++  cyan: { hue: 210, chroma: 0.16, yellowLift: false, maxShift: 15 },
++  emerald: { hue: 160, chroma: 0.15, yellowLift: false, maxShift: 15 },
++  teal: { hue: 175, chroma: 0.15, yellowLift: false, maxShift: 15 },
++  indigo: { hue: 275, chroma: 0.16, yellowLift: false, maxShift: 15 },
++  rose: { hue: 12, chroma: 0.21, yellowLift: false, maxShift: 5, hueMin: 8, hueMax: 18 },
++  amber: { hue: 78, chroma: 0.17, yellowLift: true, maxShift: 6, hueMin: 70, hueMax: 85 },
++  lime: { hue: 125, chroma: 0.16, yellowLift: false, maxShift: 15 },
++  violet: { hue: 290, chroma: 0.16, yellowLift: false, maxShift: 15 },
++}
++
++const PALETTE_ORDER = ['brand', ...Object.keys(NEUTRALS), ...Object.keys(SEMANTIC)]
++
++const GREY_STEPS = [0, 25, ...STEPS]
++
++function parseArgs(argv) {
++  const args = { hex: '', anchor: 'auto', out: '', name: 'skeleton', prevName: '', web: '' }
++  for (let i = 2; i < argv.length; i += 1) {
++    const key = argv[i]
++    const val = argv[i + 1]
++    if (key === '--hex') {
++      args.hex = val
++      i += 1
++    } else if (key === '--anchor') {
++      args.anchor = val
++      i += 1
++    } else if (key === '--out') {
++      args.out = val
++      i += 1
++    } else if (key === '--name') {
++      args.name = val
++      i += 1
++    } else if (key === '--prev-name') {
++      args.prevName = val ?? ''
++      i += 1
++    } else if (key === '--web') {
++      args.web = val
++      i += 1
++    } else {
++      fail(`Argumento desconhecido: ${key}`)
++    }
++  }
++  return args
++}
++
++function fail(message) {
++  process.stderr.write(`${message}\n`)
++  process.exit(1)
++}
++
++function normalizeHex(input) {
++  const hex = String(input).trim().replace(/^#/, '')
++  if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
++    fail(`Hex inválido: ${input}. Use 6 dígitos, com ou sem #.`)
++  }
++  return `#${hex.toLowerCase()}`
++}
++
++function parseAnchor(value) {
++  if (value === 'auto' || value === '') return 'auto'
++  const step = Number(value)
++  if (!STEPS.includes(step)) {
++    fail(`Degrau inválido: ${value}. Use auto ou um de: ${STEPS.join(', ')}.`)
++  }
++  return step
++}
++
++function normalizePaletteName(value) {
++  const name = String(value ?? '')
++    .trim()
++    .toLowerCase()
++  if (!/^[a-z][a-z0-9]{0,31}$/.test(name)) {
++    fail(`Nome de paleta inválido: ${value}. Use só letras minúsculas e números, começando com letra.`)
++  }
++  return name
++}
++
++function hexToRgb(hex) {
++  return [
++    Number.parseInt(hex.slice(1, 3), 16),
++    Number.parseInt(hex.slice(3, 5), 16),
++    Number.parseInt(hex.slice(5, 7), 16),
++  ]
++}
++
++function rgbToHex(r, g, b) {
++  const to = (n) =>
++    Math.max(0, Math.min(255, Math.round(n)))
++      .toString(16)
++      .padStart(2, '0')
++  return `#${to(r)}${to(g)}${to(b)}`
++}
++
++function srgbToLinear(c) {
++  const x = c / 255
++  return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4
++}
++
++function linearToSrgb(x) {
++  const y = x <= 0.0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - 0.055
++  return y * 255
++}
++
++function hexToOklch(hex) {
++  const [r8, g8, b8] = hexToRgb(hex)
++  const r = srgbToLinear(r8)
++  const g = srgbToLinear(g8)
++  const b = srgbToLinear(b8)
++
++  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b
++  const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b
++  const s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b
++
++  const l_ = Math.cbrt(l)
++  const m_ = Math.cbrt(m)
++  const s_ = Math.cbrt(s)
++
++  const L = 0.2104542553 * l_ + 0.793617785 * m_ - 0.0040720468 * s_
++  const a = 1.9779984951 * l_ - 2.428592205 * m_ + 0.4505937099 * s_
++  const bLab = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_
++
++  const C = Math.hypot(a, bLab)
++  let H = (Math.atan2(bLab, a) * 180) / Math.PI
++  if (H < 0) H += 360
++
++  return { L, C, H }
++}
++
++function oklchToLinearRgb(L, C, H) {
++  const hRad = (H * Math.PI) / 180
++  const a = C * Math.cos(hRad)
++  const b = C * Math.sin(hRad)
++
++  const l_ = L + 0.3963377774 * a + 0.2158037573 * b
++  const m_ = L - 0.1055613458 * a - 0.0638541728 * b
++  const s_ = L - 0.0894841775 * a - 1.291485548 * b
++
++  const l = l_ ** 3
++  const m = m_ ** 3
++  const s = s_ ** 3
++
++  return {
++    r: 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
++    g: -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
++    b: -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
++  }
++}
++
++function inSrgb(L, C, H) {
++  const { r, g, b } = oklchToLinearRgb(L, C, H)
++  return r >= 0 && r <= 1 && g >= 0 && g <= 1 && b >= 0 && b <= 1
++}
++
++function oklchToHex(L, C, H) {
++  const { r, g, b } = oklchToLinearRgb(L, C, H)
++  return rgbToHex(linearToSrgb(r), linearToSrgb(g), linearToSrgb(b))
++}
++
++function fitToSrgb(L, C, H) {
++  if (inSrgb(L, C, H)) return { L, C, H }
++  let lo = 0
++  let hi = C
++  for (let i = 0; i < 24; i += 1) {
++    const mid = (lo + hi) / 2
++    if (inSrgb(L, mid, H)) lo = mid
++    else hi = mid
++  }
++  return { L, C: lo, H }
++}
++
++function lerp(a, b, t) {
++  return a + (b - a) * t
++}
++
++function mixHex(a, b, t) {
++  const [ar, ag, ab] = hexToRgb(a)
++  const [br, bg, bb] = hexToRgb(b)
++  return rgbToHex(lerp(ar, br, t), lerp(ag, bg, t), lerp(ab, bb, t))
++}
++
++function hueDelta(from, to) {
++  return ((to - from + 540) % 360) - 180
++}
++
++function hueDistance(a, b) {
++  return Math.abs(hueDelta(a, b))
++}
++
++function pickAnchor(L, requested) {
++  if (requested !== 'auto') return requested
++  let best = 500
++  let bestDiff = Infinity
++  for (const step of STEPS) {
++    const diff = Math.abs(L - NATURAL_L[step])
++    if (diff < bestDiff) {
++      best = step
++      bestDiff = diff
++    }
++  }
++  return best
++}
++
++function lightnessCurve(anchorStep, LAnchor) {
++  const iA = STEPS.indexOf(anchorStep)
++  const offset = LAnchor - NATURAL_L[anchorStep]
++  const last = STEPS.length - 1
++
++  return STEPS.map((step, i) => {
++    if (step === anchorStep) return LAnchor
++    let weight = 0
++    if (i < iA) weight = iA === 0 ? 1 : i / iA
++    else {
++      const span = last - iA
++      weight = span === 0 ? 1 : 1 - (i - iA) / span
++    }
++    return NATURAL_L[step] + offset * weight
++  })
++}
++
++function chromaCurve(anchorStep, CAnchor) {
++  const iA = STEPS.indexOf(anchorStep)
++  const sigma = 3.2
++  const raw = STEPS.map((_, i) => Math.exp(-0.5 * ((i - iA) / sigma) ** 2))
++  const peak = raw[iA] || 1
++
++  return STEPS.map((step, i) => {
++    if (step === anchorStep) return CAnchor
++    const bell = raw[i] / peak
++    const floor = lerp(CAnchor * 0.1, CAnchor * 0.2, i / (STEPS.length - 1))
++    return lerp(floor, CAnchor, bell)
++  })
++}
++
++function hueCurve(anchorStep, HAnchor, drift) {
++  const iA = STEPS.indexOf(anchorStep)
++  return STEPS.map((step, i) => {
++    if (step === anchorStep || drift === 0) return HAnchor
++    const t = (i - iA) / Math.max(1, STEPS.length - 1)
++    return (HAnchor - t * drift + 360) % 360
++  })
++}
++
++function enforceDescending(values) {
++  const next = [...values]
++  for (let i = 1; i < next.length; i += 1) {
++    if (next[i] >= next[i - 1]) next[i] = next[i - 1] - 0.008
++  }
++  return next
++}
++
++function applyYellowLift(Ls) {
++  const lifted = [...Ls]
++  const bump = { 400: 0.12, 500: 0.22, 600: 0.1 }
++  STEPS.forEach((step, i) => {
++    if (bump[step]) lifted[i] += bump[step]
++  })
++  return enforceDescending(lifted)
++}
++
++function buildScale({
++  L,
++  C,
++  H,
++  anchorStep,
++  intactHex,
++  chromaScale = 1,
++  yellowLift = false,
++  hueDrift = 0,
++}) {
++  let Ls = enforceDescending(lightnessCurve(anchorStep, L))
++  if (yellowLift) Ls = applyYellowLift(Ls)
++  const Cs = chromaCurve(anchorStep, C * chromaScale)
++  const Hs = hueCurve(anchorStep, H, hueDrift)
++  const scale = {}
++
++  STEPS.forEach((step, i) => {
++    if (intactHex && step === anchorStep) {
++      scale[step] = intactHex
++      return
++    }
++    const fitted = fitToSrgb(Ls[i], Math.max(0, Cs[i]), Hs[i])
++    scale[step] = oklchToHex(fitted.L, fitted.C, fitted.H)
++  })
++
++  return scale
++}
++
++function clampHue(h, min, max) {
++  return Math.min(max, Math.max(min, h))
++}
++
++function mixChroma(absolute, brandC) {
++  return absolute * 0.8 + brandC * 0.2
++}
++
++function harmonizeHue(target, brandHue, maxShift) {
++  if (hueDistance(target, brandHue) < 30) return target
++  const delta = hueDelta(target, brandHue)
++  const shift = Math.sign(delta) * Math.min(Math.abs(delta) * 0.5, maxShift)
++  return (target + shift + 360) % 360
++}
++
++function semanticHue(spec, brandHue) {
++  let h = harmonizeHue(spec.hue, brandHue, spec.maxShift ?? 15)
++  if (spec.hueMin != null && spec.hueMax != null) h = clampHue(h, spec.hueMin, spec.hueMax)
++  return h
++}
++
++function relativeLuminance(hex) {
++  const [r8, g8, b8] = hexToRgb(hex)
++  const [r, g, b] = [r8, g8, b8].map(srgbToLinear)
++  return 0.2126 * r + 0.7152 * g + 0.0722 * b
++}
++
++function contrastRatio(a, b) {
++  const L1 = relativeLuminance(a)
++  const L2 = relativeLuminance(b)
++  const light = Math.max(L1, L2)
++  const dark = Math.min(L1, L2)
++  return (light + 0.05) / (dark + 0.05)
++}
++
++function isDarker(a, b) {
++  return hexToOklch(a).L < hexToOklch(b).L - 0.001
++}
++
++function validate(palettes, brandHue) {
++  const warnings = []
++
++  for (const [name, scale] of Object.entries(palettes)) {
++    for (let i = 1; i < STEPS.length; i += 1) {
++      if (!isDarker(scale[STEPS[i]], scale[STEPS[i - 1]])) {
++        warnings.push(`${name}: o degrau ${STEPS[i]} não ficou mais escuro que ${STEPS[i - 1]}.`)
++      }
++    }
++
++    const whiteOn600 = contrastRatio('#ffffff', scale[600])
++    const whiteOn700 = contrastRatio('#ffffff', scale[700])
++    const darkOn50 = contrastRatio(scale[700], scale[50])
++
++    if (whiteOn600 < 4.5) {
++      warnings.push(
++        `${name}.600: texto branco tem contraste ${whiteOn600.toFixed(2)}:1 (mínimo 4.5:1).`
++      )
++    }
++    if (whiteOn700 < 4.5) {
++      warnings.push(
++        `${name}.700: texto branco tem contraste ${whiteOn700.toFixed(2)}:1 (mínimo 4.5:1).`
++      )
++    }
++    if (darkOn50 < 4.5) {
++      warnings.push(
++        `${name}: ${name}.700 sobre ${name}.50 tem contraste ${darkOn50.toFixed(2)}:1 (mínimo 4.5:1).`
++      )
++    }
++  }
++
++  const redLch = hexToOklch(palettes.red[500])
++  if (redLch.C < 0.17) {
++    warnings.push(`red.500: croma ${redLch.C.toFixed(3)} abaixo de 0.17.`)
++  }
++  const dist = hueDistance(brandHue, redLch.H)
++  if (dist < 40) {
++    warnings.push(
++      `Brand e red ficaram próximas (ΔH ${dist.toFixed(1)}°). O giro do vermelho foi reduzido para afastar o erro da marca.`
++    )
++  }
++
++  return warnings
++}
++
++function renderScale(name, scale, indent = '          ') {
++  const steps = name === 'grey' ? GREY_STEPS : STEPS
++  const lines = steps.map((step) => `${indent}  ${step}: { value: '${scale[step]}' },`).join('\n')
++  return `${indent}${name}: {\n${lines}\n${indent}}`
++}
++
++function renderSemanticScale(ns, scale) {
++  const p = `{colors.${ns}.${scale}`
++  return `        ${scale}: {
++          contrast: { value: '{colors.${ns}.grey.0}' },
++          fg: { value: { _light: '${p}.700}', _dark: '${p}.300}' } },
++          subtle: { value: { _light: '${p}.100}', _dark: '${p}.900}' } },
++          muted: { value: { _light: '${p}.200}', _dark: '${p}.800}' } },
++          emphasized: { value: { _light: '${p}.300}', _dark: '${p}.700}' } },
++          solid: { value: { _light: '${p}.600}', _dark: '${p}.500}' } },
++          focusRing: { value: '${p}.500}' },
++        }`
++}
++
++function renderTheme(palettes, ns) {
++  const colors = PALETTE_ORDER.map((name) => renderScale(name, palettes[name])).join(',\n')
++  const semantics = ['brand', ...Object.keys(SEMANTIC)]
++    .map((scale) => renderSemanticScale(ns, scale))
++    .join(',\n')
++
++  return `// Generated by scripts/gerar-paleta-brand.sh — do not edit palettes by hand.
++import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
++
++export const PALETTE_NAME = '${ns}' as const
++
++export function paletteToken(scale: string, shade: number | string) {
++  return \`\${PALETTE_NAME}.\${scale}.\${shade}\`
++}
++
++const config = defineConfig({
++  theme: {
++    tokens: {
++      fonts: {
++        heading: { value: 'Poppins, ui-sans-serif, system-ui, sans-serif' },
++        body: { value: 'Lato, ui-sans-serif, system-ui, sans-serif' },
++      },
++      colors: {
++        ${ns}: {
++${colors}
++        },
++      },
++    },
++    semanticTokens: {
++      colors: {
++${semantics}
++      },
++    },
++  },
++})
++
++export const theme = createSystem(defaultConfig, config)
++`
++}
++
++function walkTsFiles(dir, acc = []) {
++  for (const entry of readdirSync(dir, { withFileTypes: true })) {
++    if (entry.name === 'node_modules') continue
++    const p = join(dir, entry.name)
++    if (entry.isDirectory()) walkTsFiles(p, acc)
++    else if (/\.(tsx|ts)$/.test(entry.name) && entry.name !== 'theme.ts') acc.push(p)
++  }
++  return acc
++}
++
++function escapeRegExp(value) {
++  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
++}
++
++function replaceFrontendPalette(webDir, prevName, nextName) {
++  if (!webDir || !prevName || prevName === nextName) return 0
++  const scales = [...new Set([...PALETTE_ORDER, 'grey', 'gray'])].join('|')
++  const tokenRe = new RegExp(`\\b${escapeRegExp(prevName)}\\.(${scales})\\.`, 'g')
++  let files = 0
++  for (const file of walkTsFiles(webDir)) {
++    const src = readFileSync(file, 'utf8')
++    const next = src.replace(tokenRe, `${nextName}.$1.`)
++    if (next !== src) {
++      writeFileSync(file, next, 'utf8')
++      files += 1
++    }
++  }
++  return files
++}
++
++function printSummary(palettes, anchor, hex, warnings) {
++  process.stdout.write(`Âncora: ${anchor}  ·  Hex intacto: ${hex}\n\n`)
++  process.stdout.write(`${['paleta', ...STEPS.map(String)].join('\t')}\n`)
++  for (const name of PALETTE_ORDER) {
++    process.stdout.write(`${[name, ...STEPS.map((step) => palettes[name][step])].join('\t')}\n`)
++  }
++  if (warnings.length > 0) {
++    process.stderr.write('\nAvisos:\n')
++    for (const warning of warnings) process.stderr.write(`- ${warning}\n`)
++  }
++}
++
++function generate(hex, requestedAnchor) {
++  const brand = hexToOklch(hex)
++  const anchorStep = pickAnchor(brand.L, requestedAnchor)
++  const palettes = {
++    brand: buildScale({ ...brand, anchorStep, intactHex: hex, hueDrift: 12 }),
++  }
++
++  for (const [name, spec] of Object.entries(SEMANTIC)) {
++    palettes[name] = buildScale({
++      L: brand.L,
++      C: mixChroma(spec.chroma, brand.C),
++      H: semanticHue(spec, brand.H),
++      anchorStep,
++      yellowLift: spec.yellowLift,
++      hueDrift: 5,
++    })
++  }
++
++  for (const [name, spec] of Object.entries(NEUTRALS)) {
++    palettes[name] = buildScale({
++      L: brand.L,
++      C: Math.max(0.008, brand.C * spec.chroma),
++      H: (brand.H + spec.hueShift + 360) % 360,
++      anchorStep,
++    })
++  }
++
++  palettes.grey = {
++    0: '#ffffff',
++    25: mixHex('#ffffff', palettes.grey[50], 0.45),
++    ...palettes.grey,
++  }
++
++  return { palettes, anchorStep, warnings: validate(palettes, brand.H) }
++}
++
++const args = parseArgs(process.argv)
++if (!args.hex || !args.out) {
++  fail(
++    'Uso: gerar-paleta-brand.mjs --hex "#8b5cf6" --anchor auto --name skeleton --out web/config/theme/theme.ts --web web'
++  )
++}
++
++const hex = normalizeHex(args.hex)
++const name = normalizePaletteName(args.name || 'skeleton')
++const prevName = args.prevName ? normalizePaletteName(args.prevName) : ''
++const { palettes, anchorStep, warnings } = generate(hex, parseAnchor(args.anchor))
++
++mkdirSync(dirname(args.out), { recursive: true })
++const tmp = `${args.out}.${process.pid}.tmp`
++writeFileSync(tmp, renderTheme(palettes, name), 'utf8')
++renameSync(tmp, args.out)
++
++const renamed = replaceFrontendPalette(args.web, prevName, name)
++if (renamed > 0) {
++  process.stdout.write(`Paleta "${prevName}" → "${name}" em ${renamed} arquivo(s).\n`)
++}
++
++printSummary(palettes, anchorStep, hex, warnings)
++process.stdout.write(`\nNamespace: ${name}  ·  ex.: color="${name}.grey.700"\n`)
+diff --git a/scripts/gerar-paleta-brand.sh b/scripts/gerar-paleta-brand.sh
+new file mode 100755
+index 0000000..5c6af63
+--- /dev/null
++++ b/scripts/gerar-paleta-brand.sh
+@@ -0,0 +1,64 @@
++#!/usr/bin/env bash
++
++set -euo pipefail
++export LC_ALL=C
++
++YELLOW='\033[0;33m'
++GREEN='\033[0;32m'
++RED='\033[0;31m'
++NC='\033[0m'
++
++ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
++ENGINE="$ROOT_DIR/scripts/gerar-paleta-brand.mjs"
++OUT="$ROOT_DIR/web/config/theme/theme.ts"
++WEB="$ROOT_DIR/web"
++STEPS='auto 50 100 200 300 400 500 600 700 800 900 950'
++DEFAULT_NAME='skeleton'
++
++if ! command -v node >/dev/null 2>&1; then
++  echo -e "${RED}Node.js não encontrado.${NC}"
++  exit 1
++fi
++
++HEX="${1:-}"
++ANCHOR="${2:-}"
++NAME="${3:-}"
++
++PREV_NAME=''
++if [[ -f "$OUT" ]]; then
++  PREV_NAME="$(sed -n "s/^export const PALETTE_NAME = '\\([^']*\\)' as const/\\1/p" "$OUT" | head -n 1 || true)"
++fi
++
++if [[ -z "$HEX" ]]; then
++  echo -e "${YELLOW}Qual o hex da cor brand? (ex: #8b5cf6)${NC}"
++  read -r -p '> ' HEX
++fi
++
++if [[ -z "$HEX" ]]; then
++  echo -e "${RED}O hex não pode ser vazio.${NC}"
++  exit 1
++fi
++
++if [[ -z "$ANCHOR" ]]; then
++  echo -e "${YELLOW}Degrau âncora? [${STEPS}] (Enter = auto)${NC}"
++  read -r -p '> ' ANCHOR
++  ANCHOR="${ANCHOR:-auto}"
++fi
++
++if [[ -z "$NAME" ]]; then
++  HINT="${PREV_NAME:-$DEFAULT_NAME}"
++  echo -e "${YELLOW}Nome da paleta? (Enter = ${HINT})${NC}"
++  read -r -p '> ' NAME
++  NAME="${NAME:-$HINT}"
++fi
++
++echo -e "\n${GREEN}Gerando paleta \"${NAME}\" a partir de ${HEX} (âncora: ${ANCHOR})…${NC}\n"
++
++CMD=(node "$ENGINE" --hex "$HEX" --anchor "$ANCHOR" --name "$NAME" --out "$OUT" --web "$WEB")
++if [[ -n "$PREV_NAME" ]]; then
++  CMD+=(--prev-name "$PREV_NAME")
++fi
++
++"${CMD[@]}"
++
++echo -e "\n${GREEN}Gravado em ${OUT}${NC}"
+diff --git a/web/config/theme/theme.ts b/web/config/theme/theme.ts
+index 062d7e3..e6b2de8 100644
+--- a/web/config/theme/theme.ts
++++ b/web/config/theme/theme.ts
+@@ -1,5 +1,12 @@
++// Generated by scripts/gerar-paleta-brand.sh — do not edit palettes by hand.
+ import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+ 
++export const PALETTE_NAME = 'catalist' as const
++
++export function paletteToken(scale: string, shade: number | string) {
++  return `${PALETTE_NAME}.${scale}.${shade}`
++}
++
+ const config = defineConfig({
+   theme: {
+     tokens: {
+@@ -8,32 +15,414 @@ const config = defineConfig({
+         body: { value: 'Lato, ui-sans-serif, system-ui, sans-serif' },
+       },
+       colors: {
+-        brand: {
+-          50: { value: '#f5f3ff' },
+-          100: { value: '#ede9fe' },
+-          200: { value: '#ddd6fe' },
+-          300: { value: '#c4b5fd' },
+-          400: { value: '#a78bfa' },
+-          500: { value: '#8b5cf6' },
+-          600: { value: '#7c3aed' },
+-          700: { value: '#6d28d9' },
+-          800: { value: '#5b21b6' },
+-          900: { value: '#4c1d95' },
+-          950: { value: '#2e1065' },
++        catalist: {
++          brand: {
++            50: { value: '#dbfdff' },
++            100: { value: '#bff3f6' },
++            200: { value: '#9ce3e6' },
++            300: { value: '#6fc9cb' },
++            400: { value: '#44b1b3' },
++            500: { value: '#009394' },
++            600: { value: '#007978' },
++            700: { value: '#005f5e' },
++            800: { value: '#004443' },
++            900: { value: '#00302e' },
++            950: { value: '#00201e' },
++          },
++          grey: {
++            0: { value: '#ffffff' },
++            25: { value: '#fafbfb' },
++            50: { value: '#f3f6f6' },
++            100: { value: '#e5e9e9' },
++            200: { value: '#d0d5d5' },
++            300: { value: '#b3b9b9' },
++            400: { value: '#99a0a0' },
++            500: { value: '#7b8282' },
++            600: { value: '#646b6a' },
++            700: { value: '#4e5454' },
++            800: { value: '#373c3b' },
++            900: { value: '#262a2a' },
++            950: { value: '#191b1b' },
++          },
++          stone: {
++            50: { value: '#f3f5f7' },
++            100: { value: '#e5e8ea' },
++            200: { value: '#d1d5d8' },
++            300: { value: '#b4b8bb' },
++            400: { value: '#9b9fa3' },
++            500: { value: '#7c8185' },
++            600: { value: '#656a6d' },
++            700: { value: '#4f5356' },
++            800: { value: '#383b3d' },
++            900: { value: '#27292b' },
++            950: { value: '#191b1c' },
++          },
++          blue: {
++            50: { value: '#edf7ff' },
++            100: { value: '#d3ecff' },
++            200: { value: '#acdbff' },
++            300: { value: '#68c1ff' },
++            400: { value: '#29a9f2' },
++            500: { value: '#0089ca' },
++            600: { value: '#0070a5' },
++            700: { value: '#005983' },
++            800: { value: '#003f5e' },
++            900: { value: '#002c44' },
++            950: { value: '#001d2e' },
++          },
++          green: {
++            50: { value: '#dcffec' },
++            100: { value: '#bdf8d9' },
++            200: { value: '#99e9c0' },
++            300: { value: '#6acf9f' },
++            400: { value: '#3db882' },
++            500: { value: '#009864' },
++            600: { value: '#007d50' },
++            700: { value: '#00633d' },
++            800: { value: '#00472a' },
++            900: { value: '#00321c' },
++            950: { value: '#002211' },
++          },
++          red: {
++            50: { value: '#fff2ef' },
++            100: { value: '#ffe0d9' },
++            200: { value: '#ffc4b8' },
++            300: { value: '#ff9784' },
++            400: { value: '#fb6a55' },
++            500: { value: '#da4534' },
++            600: { value: '#bb2c20' },
++            700: { value: '#981b14' },
++            800: { value: '#700b09' },
++            900: { value: '#510706' },
++            950: { value: '#380303' },
++          },
++          yellow: {
++            50: { value: '#fcf7cb' },
++            100: { value: '#f2ebac' },
++            200: { value: '#e3d782' },
++            300: { value: '#caba4a' },
++            400: { value: '#cbb729' },
++            500: { value: '#cab40f' },
++            600: { value: '#998700' },
++            700: { value: '#5f5300' },
++            800: { value: '#443b00' },
++            900: { value: '#312900' },
++            950: { value: '#201a00' },
++          },
++          orange: {
++            50: { value: '#fff3e5' },
++            100: { value: '#ffe3c1' },
++            200: { value: '#ffc988' },
++            300: { value: '#efa746' },
++            400: { value: '#d98b00' },
++            500: { value: '#b17000' },
++            600: { value: '#925b00' },
++            700: { value: '#744700' },
++            800: { value: '#543200' },
++            900: { value: '#3c2200' },
++            950: { value: '#291500' },
++          },
++          pink: {
++            50: { value: '#ffeffe' },
++            100: { value: '#ffdafe' },
++            200: { value: '#fcbafc' },
++            300: { value: '#e597e7' },
++            400: { value: '#cf79d3' },
++            500: { value: '#b058b6' },
++            600: { value: '#94429b' },
++            700: { value: '#76317d' },
++            800: { value: '#56205c' },
++            900: { value: '#3d1543' },
++            950: { value: '#290c2e' },
++          },
++          purple: {
++            50: { value: '#f4f4ff' },
++            100: { value: '#e6e5ff' },
++            200: { value: '#d0cfff' },
++            300: { value: '#b1acff' },
++            400: { value: '#9790f3' },
++            500: { value: '#7970d4' },
++            600: { value: '#6259b7' },
++            700: { value: '#4c4595' },
++            800: { value: '#35306f' },
++            900: { value: '#242150' },
++            950: { value: '#171537' },
++          },
++          brown: {
++            50: { value: '#fff3e7' },
++            100: { value: '#ffe2c6' },
++            200: { value: '#f9cb9c' },
++            300: { value: '#e3ab72' },
++            400: { value: '#ce904e' },
++            500: { value: '#b07028' },
++            600: { value: '#95590f' },
++            700: { value: '#784501' },
++            800: { value: '#573000' },
++            900: { value: '#3e2100' },
++            950: { value: '#2b1400' },
++          },
++          cyan: {
++            50: { value: '#e3faff' },
++            100: { value: '#bbf3ff' },
++            200: { value: '#7ce7fb' },
++            300: { value: '#32cde5' },
++            400: { value: '#00b2c9' },
++            500: { value: '#0091a3' },
++            600: { value: '#007785' },
++            700: { value: '#005e69' },
++            800: { value: '#00434b' },
++            900: { value: '#002f35' },
++            950: { value: '#001f24' },
++          },
++          emerald: {
++            50: { value: '#d9fff5' },
++            100: { value: '#b4f9e7' },
++            200: { value: '#8bead2' },
++            300: { value: '#52d0b5' },
++            400: { value: '#00b99b' },
++            500: { value: '#00967d' },
++            600: { value: '#007b65' },
++            700: { value: '#00614f' },
++            800: { value: '#004638' },
++            900: { value: '#003126' },
++            950: { value: '#002118' },
++          },
++          teal: {
++            50: { value: '#d9fff5' },
++            100: { value: '#b4f9e7' },
++            200: { value: '#8bead2' },
++            300: { value: '#52d0b5' },
++            400: { value: '#00b99b' },
++            500: { value: '#00967d' },
++            600: { value: '#007b65' },
++            700: { value: '#00614f' },
++            800: { value: '#004638' },
++            900: { value: '#003126' },
++            950: { value: '#002118' },
++          },
++          indigo: {
++            50: { value: '#f0f5ff' },
++            100: { value: '#dce9ff' },
++            200: { value: '#bed5ff' },
++            300: { value: '#8fb8ff' },
++            400: { value: '#6a9ef6' },
++            500: { value: '#487ed8' },
++            600: { value: '#3367ba' },
++            700: { value: '#225097' },
++            800: { value: '#133970' },
++            900: { value: '#0b2851' },
++            950: { value: '#051a38' },
++          },
++          rose: {
++            50: { value: '#fff1f3' },
++            100: { value: '#ffdfe2' },
++            200: { value: '#ffc2ca' },
++            300: { value: '#ff92a6' },
++            400: { value: '#f86588' },
++            500: { value: '#d7406b' },
++            600: { value: '#b82756' },
++            700: { value: '#951743' },
++            800: { value: '#6e082f' },
++            900: { value: '#4f0521' },
++            950: { value: '#370315' },
++          },
++          amber: {
++            50: { value: '#fff4dc' },
++            100: { value: '#ffe5ad' },
++            200: { value: '#f4cf7f' },
++            300: { value: '#deb046' },
++            400: { value: '#e1ac24' },
++            500: { value: '#e1a803' },
++            600: { value: '#ab7e00' },
++            700: { value: '#6b4d00' },
++            800: { value: '#4d3600' },
++            900: { value: '#372500' },
++            950: { value: '#251800' },
++          },
++          lime: {
++            50: { value: '#e1ffde' },
++            100: { value: '#ccf6c6' },
++            200: { value: '#afe6a7' },
++            300: { value: '#89cc7f' },
++            400: { value: '#6ab45c' },
++            500: { value: '#4a9539' },
++            600: { value: '#367c21' },
++            700: { value: '#276211' },
++            800: { value: '#194704' },
++            900: { value: '#103202' },
++            950: { value: '#092101' },
++          },
++          violet: {
++            50: { value: '#f2f4ff' },
++            100: { value: '#e2e6ff' },
++            200: { value: '#c9d1ff' },
++            300: { value: '#a4b1ff' },
++            400: { value: '#8695f6' },
++            500: { value: '#6876d8' },
++            600: { value: '#525fba' },
++            700: { value: '#3f4997' },
++            800: { value: '#2a3370' },
++            900: { value: '#1c2451' },
++            950: { value: '#111738' },
++          }
+         },
+       },
+     },
+     semanticTokens: {
+       colors: {
+         brand: {
+-          contrast: { value: 'white' },
+-          fg: { value: { _light: '{colors.brand.700}', _dark: '{colors.brand.300}' } },
+-          subtle: { value: { _light: '{colors.brand.100}', _dark: '{colors.brand.900}' } },
+-          muted: { value: { _light: '{colors.brand.200}', _dark: '{colors.brand.800}' } },
+-          emphasized: { value: { _light: '{colors.brand.300}', _dark: '{colors.brand.700}' } },
+-          solid: { value: { _light: '{colors.brand.600}', _dark: '{colors.brand.500}' } },
+-          focusRing: { value: '{colors.brand.500}' },
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.brand.700}', _dark: '{colors.catalist.brand.300}' } },
++          subtle: { value: { _light: '{colors.catalist.brand.100}', _dark: '{colors.catalist.brand.900}' } },
++          muted: { value: { _light: '{colors.catalist.brand.200}', _dark: '{colors.catalist.brand.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.brand.300}', _dark: '{colors.catalist.brand.700}' } },
++          solid: { value: { _light: '{colors.catalist.brand.600}', _dark: '{colors.catalist.brand.500}' } },
++          focusRing: { value: '{colors.catalist.brand.500}' },
++        },
++        blue: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.blue.700}', _dark: '{colors.catalist.blue.300}' } },
++          subtle: { value: { _light: '{colors.catalist.blue.100}', _dark: '{colors.catalist.blue.900}' } },
++          muted: { value: { _light: '{colors.catalist.blue.200}', _dark: '{colors.catalist.blue.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.blue.300}', _dark: '{colors.catalist.blue.700}' } },
++          solid: { value: { _light: '{colors.catalist.blue.600}', _dark: '{colors.catalist.blue.500}' } },
++          focusRing: { value: '{colors.catalist.blue.500}' },
++        },
++        green: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.green.700}', _dark: '{colors.catalist.green.300}' } },
++          subtle: { value: { _light: '{colors.catalist.green.100}', _dark: '{colors.catalist.green.900}' } },
++          muted: { value: { _light: '{colors.catalist.green.200}', _dark: '{colors.catalist.green.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.green.300}', _dark: '{colors.catalist.green.700}' } },
++          solid: { value: { _light: '{colors.catalist.green.600}', _dark: '{colors.catalist.green.500}' } },
++          focusRing: { value: '{colors.catalist.green.500}' },
++        },
++        red: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.red.700}', _dark: '{colors.catalist.red.300}' } },
++          subtle: { value: { _light: '{colors.catalist.red.100}', _dark: '{colors.catalist.red.900}' } },
++          muted: { value: { _light: '{colors.catalist.red.200}', _dark: '{colors.catalist.red.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.red.300}', _dark: '{colors.catalist.red.700}' } },
++          solid: { value: { _light: '{colors.catalist.red.600}', _dark: '{colors.catalist.red.500}' } },
++          focusRing: { value: '{colors.catalist.red.500}' },
++        },
++        yellow: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.yellow.700}', _dark: '{colors.catalist.yellow.300}' } },
++          subtle: { value: { _light: '{colors.catalist.yellow.100}', _dark: '{colors.catalist.yellow.900}' } },
++          muted: { value: { _light: '{colors.catalist.yellow.200}', _dark: '{colors.catalist.yellow.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.yellow.300}', _dark: '{colors.catalist.yellow.700}' } },
++          solid: { value: { _light: '{colors.catalist.yellow.600}', _dark: '{colors.catalist.yellow.500}' } },
++          focusRing: { value: '{colors.catalist.yellow.500}' },
++        },
++        orange: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.orange.700}', _dark: '{colors.catalist.orange.300}' } },
++          subtle: { value: { _light: '{colors.catalist.orange.100}', _dark: '{colors.catalist.orange.900}' } },
++          muted: { value: { _light: '{colors.catalist.orange.200}', _dark: '{colors.catalist.orange.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.orange.300}', _dark: '{colors.catalist.orange.700}' } },
++          solid: { value: { _light: '{colors.catalist.orange.600}', _dark: '{colors.catalist.orange.500}' } },
++          focusRing: { value: '{colors.catalist.orange.500}' },
++        },
++        pink: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.pink.700}', _dark: '{colors.catalist.pink.300}' } },
++          subtle: { value: { _light: '{colors.catalist.pink.100}', _dark: '{colors.catalist.pink.900}' } },
++          muted: { value: { _light: '{colors.catalist.pink.200}', _dark: '{colors.catalist.pink.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.pink.300}', _dark: '{colors.catalist.pink.700}' } },
++          solid: { value: { _light: '{colors.catalist.pink.600}', _dark: '{colors.catalist.pink.500}' } },
++          focusRing: { value: '{colors.catalist.pink.500}' },
++        },
++        purple: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.purple.700}', _dark: '{colors.catalist.purple.300}' } },
++          subtle: { value: { _light: '{colors.catalist.purple.100}', _dark: '{colors.catalist.purple.900}' } },
++          muted: { value: { _light: '{colors.catalist.purple.200}', _dark: '{colors.catalist.purple.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.purple.300}', _dark: '{colors.catalist.purple.700}' } },
++          solid: { value: { _light: '{colors.catalist.purple.600}', _dark: '{colors.catalist.purple.500}' } },
++          focusRing: { value: '{colors.catalist.purple.500}' },
++        },
++        brown: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.brown.700}', _dark: '{colors.catalist.brown.300}' } },
++          subtle: { value: { _light: '{colors.catalist.brown.100}', _dark: '{colors.catalist.brown.900}' } },
++          muted: { value: { _light: '{colors.catalist.brown.200}', _dark: '{colors.catalist.brown.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.brown.300}', _dark: '{colors.catalist.brown.700}' } },
++          solid: { value: { _light: '{colors.catalist.brown.600}', _dark: '{colors.catalist.brown.500}' } },
++          focusRing: { value: '{colors.catalist.brown.500}' },
++        },
++        cyan: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.cyan.700}', _dark: '{colors.catalist.cyan.300}' } },
++          subtle: { value: { _light: '{colors.catalist.cyan.100}', _dark: '{colors.catalist.cyan.900}' } },
++          muted: { value: { _light: '{colors.catalist.cyan.200}', _dark: '{colors.catalist.cyan.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.cyan.300}', _dark: '{colors.catalist.cyan.700}' } },
++          solid: { value: { _light: '{colors.catalist.cyan.600}', _dark: '{colors.catalist.cyan.500}' } },
++          focusRing: { value: '{colors.catalist.cyan.500}' },
++        },
++        emerald: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.emerald.700}', _dark: '{colors.catalist.emerald.300}' } },
++          subtle: { value: { _light: '{colors.catalist.emerald.100}', _dark: '{colors.catalist.emerald.900}' } },
++          muted: { value: { _light: '{colors.catalist.emerald.200}', _dark: '{colors.catalist.emerald.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.emerald.300}', _dark: '{colors.catalist.emerald.700}' } },
++          solid: { value: { _light: '{colors.catalist.emerald.600}', _dark: '{colors.catalist.emerald.500}' } },
++          focusRing: { value: '{colors.catalist.emerald.500}' },
++        },
++        teal: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.teal.700}', _dark: '{colors.catalist.teal.300}' } },
++          subtle: { value: { _light: '{colors.catalist.teal.100}', _dark: '{colors.catalist.teal.900}' } },
++          muted: { value: { _light: '{colors.catalist.teal.200}', _dark: '{colors.catalist.teal.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.teal.300}', _dark: '{colors.catalist.teal.700}' } },
++          solid: { value: { _light: '{colors.catalist.teal.600}', _dark: '{colors.catalist.teal.500}' } },
++          focusRing: { value: '{colors.catalist.teal.500}' },
++        },
++        indigo: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.indigo.700}', _dark: '{colors.catalist.indigo.300}' } },
++          subtle: { value: { _light: '{colors.catalist.indigo.100}', _dark: '{colors.catalist.indigo.900}' } },
++          muted: { value: { _light: '{colors.catalist.indigo.200}', _dark: '{colors.catalist.indigo.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.indigo.300}', _dark: '{colors.catalist.indigo.700}' } },
++          solid: { value: { _light: '{colors.catalist.indigo.600}', _dark: '{colors.catalist.indigo.500}' } },
++          focusRing: { value: '{colors.catalist.indigo.500}' },
++        },
++        rose: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.rose.700}', _dark: '{colors.catalist.rose.300}' } },
++          subtle: { value: { _light: '{colors.catalist.rose.100}', _dark: '{colors.catalist.rose.900}' } },
++          muted: { value: { _light: '{colors.catalist.rose.200}', _dark: '{colors.catalist.rose.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.rose.300}', _dark: '{colors.catalist.rose.700}' } },
++          solid: { value: { _light: '{colors.catalist.rose.600}', _dark: '{colors.catalist.rose.500}' } },
++          focusRing: { value: '{colors.catalist.rose.500}' },
++        },
++        amber: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.amber.700}', _dark: '{colors.catalist.amber.300}' } },
++          subtle: { value: { _light: '{colors.catalist.amber.100}', _dark: '{colors.catalist.amber.900}' } },
++          muted: { value: { _light: '{colors.catalist.amber.200}', _dark: '{colors.catalist.amber.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.amber.300}', _dark: '{colors.catalist.amber.700}' } },
++          solid: { value: { _light: '{colors.catalist.amber.600}', _dark: '{colors.catalist.amber.500}' } },
++          focusRing: { value: '{colors.catalist.amber.500}' },
++        },
++        lime: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.lime.700}', _dark: '{colors.catalist.lime.300}' } },
++          subtle: { value: { _light: '{colors.catalist.lime.100}', _dark: '{colors.catalist.lime.900}' } },
++          muted: { value: { _light: '{colors.catalist.lime.200}', _dark: '{colors.catalist.lime.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.lime.300}', _dark: '{colors.catalist.lime.700}' } },
++          solid: { value: { _light: '{colors.catalist.lime.600}', _dark: '{colors.catalist.lime.500}' } },
++          focusRing: { value: '{colors.catalist.lime.500}' },
+         },
++        violet: {
++          contrast: { value: '{colors.catalist.grey.0}' },
++          fg: { value: { _light: '{colors.catalist.violet.700}', _dark: '{colors.catalist.violet.300}' } },
++          subtle: { value: { _light: '{colors.catalist.violet.100}', _dark: '{colors.catalist.violet.900}' } },
++          muted: { value: { _light: '{colors.catalist.violet.200}', _dark: '{colors.catalist.violet.800}' } },
++          emphasized: { value: { _light: '{colors.catalist.violet.300}', _dark: '{colors.catalist.violet.700}' } },
++          solid: { value: { _light: '{colors.catalist.violet.600}', _dark: '{colors.catalist.violet.500}' } },
++          focusRing: { value: '{colors.catalist.violet.500}' },
++        }
+       },
+     },
+   },
+diff --git a/web/features/auth/Login.tsx b/web/features/auth/Login.tsx
+index 873e56a..5189e3d 100644
+--- a/web/features/auth/Login.tsx
++++ b/web/features/auth/Login.tsx
+@@ -39,7 +39,7 @@ export function Component() {
+         <Heading as="h1" size="xl">
+           Entrar
+         </Heading>
+-        <Text fontSize="sm" textAlign="center" color="fg.muted">
++        <Text fontSize="sm" textAlign="center" color="catalist.grey.600">
+           Acesse sua conta com seu usuário e senha
+         </Text>
+       </Card.Header>
+@@ -82,9 +82,9 @@ export function Component() {
+           </Button>
+         </Stack>
+ 
+-        <Text mt="5" textAlign="center" fontSize="sm" color="fg.muted">
++        <Text mt="5" textAlign="center" fontSize="sm" color="catalist.grey.600">
+           Não tem uma conta?{' '}
+-          <Link asChild color="brand.fg" fontWeight="medium">
++          <Link asChild color="catalist.brand.700" fontWeight="medium">
+             <RouterLink to="/cadastro">Criar conta</RouterLink>
+           </Link>
+         </Text>
+diff --git a/web/features/auth/ModalAuth.tsx b/web/features/auth/ModalAuth.tsx
+index abef429..44f641d 100644
+--- a/web/features/auth/ModalAuth.tsx
++++ b/web/features/auth/ModalAuth.tsx
+@@ -143,8 +143,8 @@ export function ModalAuth({ isOpen, onClose }: ModalAuthProps) {
+         <Dialog.Positioner>
+           <Dialog.Content>
+             <Dialog.Header>
+-              <Center boxSize="7" rounded="lg" bg="brand.solid">
+-                <Code2 size={16} color="white" strokeWidth={2.5} />
++              <Center boxSize="7" rounded="lg" bg="catalist.brand.500" color="catalist.grey.0">
++                <Code2 size={16} color="currentColor" strokeWidth={2.5} />
+               </Center>
+               <Dialog.Title>Catalyst Skeleton</Dialog.Title>
+             </Dialog.Header>
+diff --git a/web/features/cadastro/Cadastro.tsx b/web/features/cadastro/Cadastro.tsx
+index 2502699..cfd0162 100644
+--- a/web/features/cadastro/Cadastro.tsx
++++ b/web/features/cadastro/Cadastro.tsx
+@@ -59,7 +59,7 @@ export function Component() {
+         <Heading as="h1" size="xl">
+           Criar conta
+         </Heading>
+-        <Text fontSize="sm" textAlign="center" color="fg.muted">
++        <Text fontSize="sm" textAlign="center" color="catalist.grey.600">
+           Preencha os dados abaixo para se cadastrar
+         </Text>
+       </Card.Header>
+@@ -125,9 +125,9 @@ export function Component() {
+           </Button>
+         </Stack>
+ 
+-        <Text mt="5" textAlign="center" fontSize="sm" color="fg.muted">
++        <Text mt="5" textAlign="center" fontSize="sm" color="catalist.grey.600">
+           Já tem uma conta?{' '}
+-          <Link asChild color="brand.fg" fontWeight="medium">
++          <Link asChild color="catalist.brand.700" fontWeight="medium">
+             <RouterLink to="/login">Fazer login</RouterLink>
+           </Link>
+         </Text>
+diff --git a/web/features/home/Home.tsx b/web/features/home/Home.tsx
+index 7220cc2..fc76b3f 100644
+--- a/web/features/home/Home.tsx
++++ b/web/features/home/Home.tsx
+@@ -155,13 +155,13 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               lineHeight="1"
+             >
+               Catalyst{' '}
+-              <Text as="span" color="brand.fg">
++              <Text as="span" color="catalist.brand.700">
+                 Skeleton
+               </Text>
+             </Heading>
+-            <Text fontSize="lg" color="fg.muted" maxW="xl">
++            <Text fontSize="lg" color="catalist.grey.600" maxW="xl">
+               Fundação opinativa para aplicações{' '}
+-              <Text as="span" color="fg" fontWeight="semibold">
++              <Text as="span" color="catalist.grey.900" fontWeight="semibold">
+                 Symfony + React
+               </Text>
+               . Core enxuto, módulos opt-in, pronto para produção.
+@@ -173,10 +173,10 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               px="4"
+               py="2"
+               rounded="xl"
+-              bg="green.subtle"
++              bg="catalist.green.100"
+               borderWidth="1px"
+-              borderColor="green.muted"
+-              color="green.fg"
++              borderColor="catalist.green.200"
++              color="catalist.green.700"
+               fontSize="sm"
+               fontWeight="medium"
+             >
+@@ -216,7 +216,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+           <Heading as="h2" size="2xl">
+             Tudo que você precisa, pronto
+           </Heading>
+-          <Text color="fg.muted" fontSize="sm" maxW="md">
++          <Text color="catalist.grey.600" fontSize="sm" maxW="md">
+             Chakra UI v3. Veja os componentes em ação.
+           </Text>
+         </VStack>
+@@ -225,14 +225,14 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+           <Card.Root>
+             <Card.Header pb="2">
+               <HStack mb="1">
+-                <Center boxSize="7" rounded="lg" bg="brand.subtle" color="brand.fg">
++                <Center boxSize="7" rounded="lg" bg="catalist.brand.100" color="catalist.brand.700">
+                   <Shield size={16} strokeWidth={1.5} />
+                 </Center>
+                 <Card.Title fontSize="sm" fontWeight="semibold">
+                   Autenticação
+                 </Card.Title>
+               </HStack>
+-              <Text fontSize="xs" color="fg.muted">
++              <Text fontSize="xs" color="catalist.grey.600">
+                 JWT RS256 com refresh token integrado
+               </Text>
+             </Card.Header>
+@@ -266,11 +266,11 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               </Button>
+ 
+               <HStack gap="3">
+-                <Box flex="1" h="1px" bg="border" />
+-                <Text as="span" fontSize="xs" color="fg.muted">
++                <Box flex="1" h="1px" bg="catalist.grey.200" />
++                <Text as="span" fontSize="xs" color="catalist.grey.600">
+                   ou
+                 </Text>
+-                <Box flex="1" h="1px" bg="border" />
++                <Box flex="1" h="1px" bg="catalist.grey.200" />
+               </HStack>
+ 
+               <SimpleGrid columns={2} gap="2">
+@@ -301,14 +301,14 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+           <Card.Root>
+             <Card.Header pb="2">
+               <HStack mb="1">
+-                <Center boxSize="7" rounded="lg" bg="brand.subtle" color="brand.fg">
++                <Center boxSize="7" rounded="lg" bg="catalist.brand.100" color="catalist.brand.700">
+                   <Activity size={16} strokeWidth={1.5} />
+                 </Center>
+                 <Card.Title fontSize="sm" fontWeight="semibold">
+                   Controles & Progresso
+                 </Card.Title>
+               </HStack>
+-              <Text fontSize="xs" color="fg.muted">
++              <Text fontSize="xs" color="catalist.grey.600">
+                 Switches, barras de progresso e tema
+               </Text>
+             </Card.Header>
+@@ -404,14 +404,14 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+           <Card.Root>
+             <Card.Header pb="2">
+               <HStack mb="1">
+-                <Center boxSize="7" rounded="lg" bg="green.subtle" color="green.fg">
++                <Center boxSize="7" rounded="lg" bg="catalist.green.100" color="catalist.green.700">
+                   <Zap size={16} strokeWidth={1.5} />
+                 </Center>
+                 <Card.Title fontSize="sm" fontWeight="semibold">
+                   Botões & Feedback
+                 </Card.Title>
+               </HStack>
+-              <Text fontSize="xs" color="fg.muted">
++              <Text fontSize="xs" color="catalist.grey.600">
+                 Variantes, estados e notificações
+               </Text>
+             </Card.Header>
+@@ -436,7 +436,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               <Separator />
+ 
+               <Box>
+-                <Text fontSize="xs" fontWeight="medium" color="fg.muted" mb="3">
++                <Text fontSize="xs" fontWeight="medium" color="catalist.grey.600" mb="3">
+                   Time do projeto
+                 </Text>
+                 <HStack wrap="wrap" gap="3">
+@@ -445,8 +445,8 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                       <Center
+                         boxSize="8"
+                         rounded="xl"
+-                        bg={`${m.palette}.subtle`}
+-                        color={`${m.palette}.fg`}
++                        bg={`skeleton.${m.palette}.100`}
++                        color={`skeleton.${m.palette}.700`}
+                         fontSize="xs"
+                         fontWeight="black"
+                         fontFamily="heading"
+@@ -457,7 +457,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                         <Text fontSize="xs" fontWeight="semibold" lineHeight="1">
+                           {m.name}
+                         </Text>
+-                        <Text fontSize="xs" color="fg.muted">
++                        <Text fontSize="xs" color="catalist.grey.600">
+                           {m.role}
+                         </Text>
+                       </VStack>
+@@ -476,9 +476,9 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                     py="2"
+                     rounded="lg"
+                     borderWidth="1px"
+-                    bg={`${a.palette}.subtle`}
+-                    borderColor={`${a.palette}.muted`}
+-                    color={`${a.palette}.fg`}
++                    bg={`skeleton.${a.palette}.100`}
++                    borderColor={`skeleton.${a.palette}.200`}
++                    color={`skeleton.${a.palette}.700`}
+                     fontSize="xs"
+                     fontWeight="medium"
+                     w="full"
+@@ -502,15 +502,15 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               p="4"
+               rounded="xl"
+               borderWidth="1px"
+-              bg="bg.panel"
++              bg="catalist.grey.0"
+               boxShadow="sm"
+             >
+               <Center
+                 boxSize="10"
+                 rounded="xl"
+                 flexShrink="0"
+-                bg={`${s.palette}.subtle`}
+-                color={`${s.palette}.fg`}
++                bg={`skeleton.${s.palette}.100`}
++                color={`skeleton.${s.palette}.700`}
+               >
+                 <s.icon size={20} />
+               </Center>
+@@ -518,7 +518,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                 <Text fontSize="2xl" fontWeight="black" fontFamily="heading" lineHeight="1">
+                   {s.value}
+                 </Text>
+-                <Text fontSize="xs" color="fg.muted">
++                <Text fontSize="xs" color="catalist.grey.600">
+                   {s.label}
+                 </Text>
+               </VStack>
+@@ -529,7 +529,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+ 
+       <Separator />
+ 
+-      <Box as="section" id="stack" bg="bg.muted" borderBottomWidth="1px">
++      <Box as="section" id="stack" bg="catalist.grey.100" borderBottomWidth="1px">
+         <Container px="6" py="16">
+           <VStack align="center" gap="2" mb="10" textAlign="center">
+             <Badge variant="subtle" colorPalette="brand">
+@@ -547,8 +547,8 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                   <Center
+                     boxSize="8"
+                     rounded="lg"
+-                    bg="brand.subtle"
+-                    color="brand.fg"
++                    bg="catalist.brand.100"
++                    color="catalist.brand.700"
+                     flexShrink="0"
+                   >
+                     <t.icon size={16} />
+@@ -556,7 +556,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                   <Text as="span" fontWeight="semibold" fontSize="sm">
+                     {t.category}
+                   </Text>
+-                  <Text as="span" ml="auto" fontSize="xs" color="fg.muted">
++                  <Text as="span" ml="auto" fontSize="xs" color="catalist.grey.600">
+                     {t.items.length} tecnologias
+                   </Text>
+                   <Accordion.ItemIndicator />
+@@ -597,7 +597,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               p="6"
+               rounded="2xl"
+               borderWidth="1px"
+-              bg="bg.panel"
++              bg="catalist.grey.0"
+               boxShadow="sm"
+               align="start"
+             >
+@@ -608,7 +608,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                   top="8"
+                   right="0"
+                   transform="translateX(50%)"
+-                  color="border"
++                  color="catalist.grey.300"
+                 >
+                   <ArrowRight size={16} />
+                 </Box>
+@@ -616,16 +616,16 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+               <Center
+                 boxSize="10"
+                 rounded="xl"
+-                bg="brand.subtle"
++                bg="catalist.brand.100"
+                 borderWidth="1px"
+-                borderColor="brand.muted"
++                borderColor="catalist.brand.200"
+               >
+                 <Text
+                   as="span"
+                   fontSize="sm"
+                   fontWeight="black"
+                   fontFamily="heading"
+-                  color="brand.fg"
++                  color="catalist.brand.700"
+                 >
+                   {s.n}
+                 </Text>
+@@ -634,7 +634,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+                 <Heading as="h3" size="sm" mb="2">
+                   {s.title}
+                 </Heading>
+-                <Text fontSize="xs" color="fg.muted" lineHeight="relaxed">
++                <Text fontSize="xs" color="catalist.grey.600" lineHeight="relaxed">
+                   {s.desc}
+                 </Text>
+               </Box>
+@@ -643,23 +643,29 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+         </SimpleGrid>
+       </Box>
+ 
+-      <Box as="section" borderTopWidth="1px" bg="bg.panel">
++      <Box as="section" borderTopWidth="1px" bg="catalist.grey.0">
+         <VStack maxW="6xl" mx="auto" px="6" py="20" align="center" gap="6" textAlign="center">
+-          <Center boxSize="16" rounded="2xl" bg="brand.solid" boxShadow="lg">
+-            <Rocket size={32} color="white" />
++          <Center
++            boxSize="16"
++            rounded="2xl"
++            bg="catalist.brand.500"
++            color="catalist.grey.0"
++            boxShadow="lg"
++          >
++            <Rocket size={32} color="currentColor" />
+           </Center>
+ 
+           <Box>
+             <Heading as="h2" size="4xl" fontWeight="black" mb="3">
+               Pronto para começar?
+             </Heading>
+-            <Text color="fg.muted" maxW="md" fontSize="sm">
++            <Text color="catalist.grey.600" maxW="md" fontSize="sm">
+               Clone, configure e tenha um projeto full-stack profissional rodando em minutos.
+             </Text>
+           </Box>
+ 
+           <HStack
+-            bg="bg.muted"
++            bg="catalist.grey.100"
+             borderWidth="1px"
+             rounded="xl"
+             px="5"
+@@ -670,7 +676,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+             maxW="lg"
+           >
+             <Terminal size={16} />
+-            <Text as="span" color="fg.muted" userSelect="none">
++            <Text as="span" color="catalist.grey.600" userSelect="none">
+               $
+             </Text>
+             <Text as="span">git clone catalyst-skeleton && ./setup.sh</Text>
+@@ -697,7 +703,7 @@ const HomeContent = memo(function HomeContent({ onAbrirModal }: { onAbrirModal:
+             </Button>
+           </HStack>
+ 
+-          <HStack gap="2" fontSize="xs" color="fg.muted">
++          <HStack gap="2" fontSize="xs" color="catalist.grey.600">
+             <CheckCircle2 size={12} />
+             MIT License · Open Source · Sem vendor lock-in
+           </HStack>
+diff --git a/web/features/not-found/NotFound.tsx b/web/features/not-found/NotFound.tsx
+index 6794d63..3633d4f 100644
+--- a/web/features/not-found/NotFound.tsx
++++ b/web/features/not-found/NotFound.tsx
+@@ -11,7 +11,7 @@ export function Component() {
+           fontSize="8xl"
+           fontWeight="black"
+           fontFamily="heading"
+-          color="brand.muted"
++          color="catalist.brand.200"
+           lineHeight="1"
+         >
+           404
+@@ -19,7 +19,7 @@ export function Component() {
+         <Heading as="h1" size="xl">
+           Página não encontrada
+         </Heading>
+-        <Text color="fg.muted" maxW="sm">
++        <Text color="catalist.grey.600" maxW="sm">
+           A rota que você tentou acessar não existe ou foi removida.
+         </Text>
+       </VStack>
+diff --git a/web/layouts/AuthLayout.tsx b/web/layouts/AuthLayout.tsx
+index ca0a987..aef040d 100644
+--- a/web/layouts/AuthLayout.tsx
++++ b/web/layouts/AuthLayout.tsx
+@@ -8,8 +8,14 @@ export function AuthLayout() {
+       <Link asChild mb="8">
+         <RouterLink to="/">
+           <HStack>
+-            <Center boxSize="8" rounded="xl" bg="brand.solid" boxShadow="md">
+-              <Code2 size={16} color="white" strokeWidth={2.5} />
++            <Center
++              boxSize="8"
++              rounded="xl"
++              bg="catalist.brand.500"
++              color="catalist.grey.0"
++              boxShadow="md"
++            >
++              <Code2 size={16} color="currentColor" strokeWidth={2.5} />
+             </Center>
+             <Text as="span" fontWeight="bold" fontSize="xl" fontFamily="heading">
+               Catalyst
+diff --git a/web/layouts/Footer.tsx b/web/layouts/Footer.tsx
+index 08fd948..c0d53fb 100644
+--- a/web/layouts/Footer.tsx
++++ b/web/layouts/Footer.tsx
+@@ -11,13 +11,13 @@ const footerLinks = [
+ 
+ export const Footer = memo(function Footer() {
+   return (
+-    <Box as="footer" borderTopWidth="1px" bg="bg.panel">
++    <Box as="footer" borderTopWidth="1px" bg="catalist.grey.0">
+       <HStack maxW="6xl" mx="auto" px="6" h="16" justify="space-between" wrap="wrap">
+         <Link asChild>
+           <RouterLink to="/">
+             <HStack>
+-              <Center boxSize="6" rounded="md" bg="brand.solid">
+-                <Code2 size={14} color="white" strokeWidth={2.5} />
++              <Center boxSize="6" rounded="md" bg="catalist.brand.500" color="catalist.grey.0">
++                <Code2 size={14} color="currentColor" strokeWidth={2.5} />
+               </Center>
+               <Text
+                 as="span"
+@@ -27,7 +27,7 @@ export const Footer = memo(function Footer() {
+                 fontFamily="heading"
+               >
+                 Catalyst{' '}
+-                <Text as="span" color="brand.fg">
++                <Text as="span" color="catalist.brand.700">
+                   Skeleton
+                 </Text>
+               </Text>
+@@ -35,15 +35,15 @@ export const Footer = memo(function Footer() {
+           </RouterLink>
+         </Link>
+ 
+-        <HStack as="nav" hideBelow="sm" gap="5" fontSize="xs" color="fg.muted">
++        <HStack as="nav" hideBelow="sm" gap="5" fontSize="xs" color="catalist.grey.600">
+           {footerLinks.map((link) => (
+-            <Link key={link.href} href={link.href} _hover={{ color: 'fg' }}>
++            <Link key={link.href} href={link.href} _hover={{ color: 'catalist.grey.900' }}>
+               {link.label}
+             </Link>
+           ))}
+         </HStack>
+ 
+-        <HStack gap="3" fontSize="xs" color="fg.muted">
++        <HStack gap="3" fontSize="xs" color="catalist.grey.600">
+           <Text as="span">MIT License</Text>
+           <Link href="https://github.com" target="_blank" rel="noreferrer" aria-label="GitHub">
+             <Github size={16} />
+diff --git a/web/layouts/Header.tsx b/web/layouts/Header.tsx
+index a6bf3c5..4a29f5b 100644
+--- a/web/layouts/Header.tsx
++++ b/web/layouts/Header.tsx
+@@ -29,15 +29,15 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
+       top="0"
+       zIndex="sticky"
+       borderBottomWidth="1px"
+-      bg="bg/80"
++      bg="catalist.grey.0/80"
+       backdropFilter="blur(12px)"
+     >
+       <HStack maxW="6xl" mx="auto" px="6" h="14" justify="space-between">
+         <Link asChild>
+           <RouterLink to="/">
+             <HStack>
+-              <Center boxSize="7" rounded="lg" bg="brand.solid">
+-                <Code2 size={16} color="white" strokeWidth={2.5} />
++              <Center boxSize="7" rounded="lg" bg="catalist.brand.500" color="catalist.grey.0">
++                <Code2 size={16} color="currentColor" strokeWidth={2.5} />
+               </Center>
+               <Text
+                 as="span"
+@@ -47,7 +47,7 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
+                 fontFamily="heading"
+               >
+                 Catalyst{' '}
+-                <Text as="span" color="brand.fg">
++                <Text as="span" color="catalist.brand.700">
+                   Skeleton
+                 </Text>
+               </Text>
+@@ -55,9 +55,9 @@ export const Header = memo(function Header({ onAbrirModal }: HeaderProps) {
+           </RouterLink>
+         </Link>
+ 
+-        <HStack as="nav" hideBelow="md" gap="6" fontSize="sm" color="fg.muted">
++        <HStack as="nav" hideBelow="md" gap="6" fontSize="sm" color="catalist.grey.600">
+           {navLinks.map((link) => (
+-            <Link key={link.href} href={link.href} _hover={{ color: 'fg' }}>
++            <Link key={link.href} href={link.href} _hover={{ color: 'catalist.grey.900' }}>
+               {link.label}
+             </Link>
+           ))}
+diff --git a/web/layouts/MainLayout.tsx b/web/layouts/MainLayout.tsx
+index 89cf5b8..ebd1bbf 100644
+--- a/web/layouts/MainLayout.tsx
++++ b/web/layouts/MainLayout.tsx
+@@ -15,7 +15,7 @@ export function MainLayout() {
+   const ctx = useMemo<MainLayoutContext>(() => ({ abrirModal }), [abrirModal])
+ 
+   return (
+-    <Flex minH="100vh" direction="column" gap="0" bg="bg" color="fg">
++    <Flex minH="100vh" direction="column" gap="0" bg="catalist.grey.50" color="catalist.grey.900">
+       <Header onAbrirModal={abrirModal} />
+       <Box as="main" flex="1" display="flex" flexDirection="column">
+         <Outlet context={ctx} />
+diff --git a/web/shared/components/ErrorBoundary.tsx b/web/shared/components/ErrorBoundary.tsx
+index 881a4e0..22c0d0c 100644
+--- a/web/shared/components/ErrorBoundary.tsx
++++ b/web/shared/components/ErrorBoundary.tsx
+@@ -32,12 +32,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
+ 
+       return (
+         <VStack minH="50" align="center" justify="center" gap="4" p="8" textAlign="center">
+-          <Center boxSize="12" rounded="xl" bg="red.subtle" color="red.fg">
++          <Center boxSize="12" rounded="xl" bg="catalist.red.100" color="catalist.red.700">
+             <AlertTriangle size={24} />
+           </Center>
+           <VStack gap="1">
+             <Text fontWeight="semibold">Algo deu errado</Text>
+-            <Text fontSize="sm" color="fg.muted">
++            <Text fontSize="sm" color="catalist.grey.600">
+               {this.state.error?.message ?? 'Erro inesperado'}
+             </Text>
+           </VStack>
+diff --git a/web/shared/ui/chart.tsx b/web/shared/ui/chart.tsx
+index c9a858c..d38ed09 100644
+--- a/web/shared/ui/chart.tsx
++++ b/web/shared/ui/chart.tsx
+@@ -160,7 +160,7 @@ export const ChartTooltipContent = React.forwardRef<
+         gap="1.5"
+         rounded="lg"
+         borderWidth="1px"
+-        bg="bg.panel"
++        bg="catalist.grey.0"
+         px="2.5"
+         py="1.5"
+         fontSize="xs"
+@@ -212,7 +212,7 @@ export const ChartTooltipContent = React.forwardRef<
+                       >
+                         <Grid gap="1.5">
+                           {nestLabel ? tooltipLabel : null}
+-                          <Text color="fg.muted">{itemConfig?.label || item.name}</Text>
++                          <Text color="catalist.grey.600">{itemConfig?.label || item.name}</Text>
+                         </Grid>
+                         {item.value && (
+                           <Text fontFamily="mono" fontWeight="medium">
+diff --git a/web/shared/ui/toaster.tsx b/web/shared/ui/toaster.tsx
+index 9dd5a58..21e72bd 100644
+--- a/web/shared/ui/toaster.tsx
++++ b/web/shared/ui/toaster.tsx
+@@ -24,7 +24,7 @@ export function Toaster() {
+         {(toastItem) => (
+           <Toast.Root width={{ md: 'sm' }}>
+             {toastItem.type === 'loading' ? (
+-              <Spinner size="sm" color="blue.solid" />
++              <Spinner size="sm" color="catalist.blue.500" />
+             ) : (
+               <Toast.Indicator />
+             )}

@@ -123,9 +123,10 @@ O CirqueiraX utiliza os escopos oficiais da Google Photos Library API para cria�
 ## Banco de Dados e Migrations
 
 ```bash
-make migrate          # Aplica migrations pendentes
-make doctrine-diff    # Gera migration por diff do schema
-make rollback         # Reverte a última migration (só em dev)
+make doctrine-diff      # Gera migration por diff do schema (nunca criar arquivo à mão)
+make migrate            # Aplica migrations pendentes
+make doctrine-validate  # Valida mappings e schema 100% sincronizados
+make rollback           # Reverte a última migration (só em dev)
 ```
 
 ## Qualidade (QA)

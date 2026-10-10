@@ -131,12 +131,10 @@ Proibido no JSX: `<div>`, `<p>`, `<h1>`–`<h6>`, `<span>`.
 | Texto / título | `Text` / `Text as="h1"` / `Text as="span"` |
 
 ```tsx
-import { Box, HStack, VStack, Flex, Grid, Container, Text } from '@/shared/ui/layout'
+import { Box, Button, Field, Heading, HStack, Input, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 ```
 
-Exceção: `<main>`, `<header>`, `<footer>`, `<nav>`, `<section>` só se forem semântica real. Botões, inputs e cards: **HeroUI** (`@heroui/react`), não HTML cru.
-
-Estilo: só `className` + Tailwind 4. Animação padrão: classes `tailwindcss-motion`. Framer Motion só se o módulo `ui-extra` estiver ativo e houver montar/desmontar de verdade.
+Estilo: **só props do Chakra** (`p`, `gap`, `bg`, `color`). Cores **somente** da paleta gerada (`skeleton.grey.700`, `skeleton.brand.500`…). Proibido hex e tokens fora da paleta (`fg.muted`, `gray.500`, `red.500` cru do Chakra). `colorPalette` só com escalas da paleta (`brand`, `green`, `red`…). Trocar o nome: `bash scripts/gerar-paleta-brand.sh`. Toast: `toast.success` / `toast.danger` de `@/shared/ui/toaster`. Framer Motion só se o módulo `ui-extra` estiver ativo.
 
 ### 3.3 Dados e estado
 
@@ -402,7 +400,8 @@ class YtDlpException extends \DomainException
 
 ## 6. Checklist rápido (antes de encerrar)
 
-- [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` — só primitivos de `@/shared/ui/layout`
+- [ ] Sem `<div>` / `<p>` / `<h*>` / `<span>` / `className` — só componentes Chakra (`Box`, `HStack`, `Heading`…)
+- [ ] Cores só da paleta gerada (`skeleton.grey.700` / `paletteToken(...)`) — sem hex
 - [ ] Sem Header/Footer na página
 - [ ] Sem `any`, sem `ts-ignore`
 - [ ] Nenhum `else` em Service/Controller — sempre guard clause com early return

@@ -33,6 +33,7 @@
 | M19 | Execução Automática em Background dos Workers do Messenger e Scheduler via Supervisord | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_1.md#melhoria-19--execução-automática-em-background-dos-workers-do-messenger-e-scheduler-via-supervisord) |
 | M20 | Correção de Erro 500 no Dashboard (`TypeError: Cannot access offset of type App\Enum\StatusMediaItem on array`) | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_1.md#melhoria-20--correção-de-erro-500-no-dashboard-typeerror-cannot-access-offset-of-type-appenumstatusmediaitem-on-array) |
 | M21 | Status Explícito `sem_categoria` para Mídias Baixadas sem Categoria/Álbum | ✅ Concluído | 05/10/2026 | [ver](MELHORIAS_2.md#melhoria-21--status-explícito-sem_categoria-para-mídias-baixadas-sem-categoriaálbum) |
+| M22 | Port do Sistema de Paleta OKLCH Brand, Tokens de Tema e Documentação Técnica | ✅ Concluído | 09/10/2026 | [ver](MELHORIAS_2.md#melhoria-22--port-do-sistema-de-paleta-oklch-brand-tokens-de-tema-e-documentação-técnica) |
 
 
 

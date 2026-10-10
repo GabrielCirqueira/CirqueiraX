@@ -1,4 +1,4 @@
-import { Box, Button, Text, VStack } from '@chakra-ui/react'
+import { Button, Text, VStack } from '@chakra-ui/react'
 import { MoveLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
@@ -14,22 +14,28 @@ export function Component() {
       py={20}
     >
       <VStack gap={2}>
-        <Text as="span" fontSize="8xl" fontWeight="900" color="brand.500/20" lineHeight="none">
+        <Text
+          as="span"
+          fontSize="8xl"
+          fontWeight="900"
+          color="catalist.brand.200"
+          lineHeight="none"
+        >
           404
         </Text>
         <Text as="h1" fontSize="2xl" fontWeight="bold" color="white">
           Página não encontrada
         </Text>
-        <Text fontSize="sm" color="zinc.400" maxW="sm">
+        <Text fontSize="sm" color="catalist.grey.600" maxW="sm">
           A rota que você tentou acessar não existe ou foi removida.
         </Text>
       </VStack>
 
-      <Box as={Link} to="/">
+      <Link to="/">
         <Button
-          bg="brand.500"
-          _hover={{ bg: 'brand.600' }}
-          color="white"
+          bg="catalist.brand.500"
+          _hover={{ bg: 'catalist.brand.600' }}
+          color="catalist.grey.0"
           borderRadius="xl"
           px={4}
           py={2}
@@ -42,7 +48,7 @@ export function Component() {
           <MoveLeft size={16} />
           <Text as="span">Voltar para o início</Text>
         </Button>
-      </Box>
+      </Link>
     </VStack>
   )
 }
