@@ -39,10 +39,11 @@ Todas as portas externas estão centralizadas em `ports.env`. Edite se houver co
 
 | Variável | Padrão | Acesso |
 | :--- | :--- | :--- |
-| `BACKEND_PORT` | `8080` | API Symfony |
-| `FRONTEND_PORT` | `5173` | Dev server React |
-| `DATABASE_HOST_PORT` | `3307` | MySQL Client externo |
-| `SUPERVISOR_PORT` | `9001` | Painel Supervisord |
+| `BACKEND_PORT` | `4010` | API Symfony (Nginx) |
+| `FRONTEND_PORT` | `4012` | Dev server React (Vite) |
+| `DATABASE_HOST_PORT` | `4013` | MySQL Client externo |
+| `SUPERVISOR_PORT` | `4011` | Painel Supervisord |
+| `MEDIA_STORAGE_PATH` | `/home/gabriel/cirqueirax/sync_media` | Pasta externa de sincronização Syncthing |
 
 ## Comandos Essenciais
 

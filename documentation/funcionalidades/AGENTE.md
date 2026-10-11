@@ -111,11 +111,11 @@ agente/
 O arquivo `config.py` carrega o `.env` do diretório do agente:
 
 ```bash
-# URL do endpoint de ingestão de prints no backend
-SERVER_URL=http://localhost:8080/api/v1/ingestao/print
+# URL do endpoint de ingestão de prints no backend (Porta 4010 no Nginx de desenvolvimento)
+SERVER_URL=http://localhost:4010/api/v1/ingestao/print
 
 # Token de serviço emitido no backend (obrigatório)
-AGENT_TOKEN=cx_ag_a837a4f7d64170c2c2f9778522d32658250d5289b0945fb8
+AGENT_TOKEN=cx_ag_seu_token_aqui
 
 # Diretório a ser monitorado onde o SO salva screenshots
 WATCH_DIR=~/Pictures/Screenshots
@@ -213,18 +213,18 @@ Para testar o agente localmente e alternar dinamicamente para VPS ou produção:
 python3 agente/agente.py url
 
 # Alterar a URL diretamente pelo terminal (grava automaticamente no .env)
-python3 agente/agente.py url http://localhost:8080
+python3 agente/agente.py url http://localhost:4010
 python3 agente/agente.py url https://cirqueirax.com
 
 # Alternar rapidamente entre perfis de ambiente:
-python3 agente/agente.py env local             # http://localhost:8080/api/v1/ingestao/print
-python3 agente/agente.py env local 8000        # http://localhost:8000/api/v1/ingestao/print
+python3 agente/agente.py env local             # http://localhost:4010/api/v1/ingestao/print
+python3 agente/agente.py env local 4010        # http://localhost:4010/api/v1/ingestao/print
 python3 agente/agente.py env prod https://meusite.com  # Produção HTTPS
 python3 agente/agente.py env vps 72.60.14.61   # http://72.60.14.61:8080/api/v1/ingestao/print
 ```
 
 > [!TIP]
-> O agente normaliza URLs automaticamente: ao informar apenas `http://localhost:8080` ou `https://meusite.com`, o caminho `/api/v1/ingestao/print` é anexado automaticamente.
+> O agente normaliza URLs automaticamente: ao informar apenas `http://localhost:4010` ou `https://meusite.com`, o caminho `/api/v1/ingestao/print` é anexado automaticamente.
 
 ### 7.2. Painel e Gerenciador de Configurações (`config`)
 

@@ -109,7 +109,7 @@ agente/
 - **Endpoint**: Envia uma requisição `POST` para a URL configurada em `SERVER_URL` (geralmente `.../api/v1/ingestao/print`).
 - **Autenticação**: Envia o token estático no cabeçalho HTTP:
   ```http
-  X-Agent-Token: cx_ag_a837a4f7d64170c2c2f9778522d32658250d5289b0945fb8
+  X-Agent-Token: cx_ag_seu_token_aqui
   ```
 - **Payload (`multipart/form-data`)**:
   - `arquivo`: Stream binário da imagem com MIME type inferido da extensão.
@@ -281,19 +281,19 @@ Para testar localmente e depois alternar para produção ou VPS:
 python3 agente.py url
 
 # Alterar a URL diretamente pelo terminal (salva automaticamente no .env)
-python3 agente.py url http://localhost:8080
+python3 agente.py url http://localhost:4010
 # Ou especificando HTTPS / produção:
 python3 agente.py url https://cirqueirax.com
 
 # Alternar rapidamente entre ambientes pré-configurados:
-python3 agente.py env local             # Configura para http://localhost:8080/api/v1/ingestao/print
-python3 agente.py env local 8000        # Configura para porta customizada (ex: 8000)
+python3 agente.py env local             # Configura para http://localhost:4010/api/v1/ingestao/print
+python3 agente.py env local 4010        # Configura para porta customizada (ex: 4010)
 python3 agente.py env prod https://dominio.com  # Configura para ambiente de produção
 python3 agente.py env vps 72.60.14.61   # Configura para IP da VPS
 ```
 
 > [!TIP]
-> A URL informada é normalizada automaticamente. Se você digitar apenas `http://localhost:8080` ou `https://meusite.com`, o agente anexa `/api/v1/ingestao/print` automaticamente.
+> A URL informada é normalizada automaticamente. Se você digitar apenas `http://localhost:4010` ou `https://meusite.com`, o agente anexa `/api/v1/ingestao/print` automaticamente.
 
 ---
 

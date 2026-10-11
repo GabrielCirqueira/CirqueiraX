@@ -150,7 +150,7 @@ def executar_comando_env(args: argparse.Namespace) -> None:
     url_final = ""
 
     if tipo in ("local", "dev", "desenvolvimento"):
-        porta = alvo if alvo and alvo.isdigit() else "8080"
+        porta = alvo if alvo and alvo.isdigit() else "4010"
         url_final = f"http://localhost:{porta}/api/v1/ingestao/print"
 
     elif tipo in ("prod", "producao", "production"):

@@ -290,7 +290,7 @@
     - Sem argumentos: exibe a URL atual, tipo de ambiente identificado (Local, Rede Local ou Produção) e executa ping de conectividade.
     - Com argumento: normaliza inteligentemente a URL (anexando automaticamente protocolo HTTP/HTTPS e endpoint `/api/v1/ingestao/print`), grava no arquivo `.env` e valida a conexão imediatamente.
   - Implementado o comando `python3 agente.py env [local|prod|vps|custom] [ALVO]`:
-    - Alternador instantâneo com presets prontos (`local` aponta para localhost:8080 ou porta customizada; `prod` para domínio HTTPS; `vps` para IP de servidor).
+    - Alternador instantâneo com presets prontos (`local` aponta para localhost:4010 ou porta customizada; `prod` para domínio HTTPS; `vps` para IP de servidor).
   - Implementado o comando `python3 agente.py config [show|set|get]`:
     - Exibe painel detalhado de integridade de todas as variáveis configuradas com status de arquivos e diretórios no disco.
     - Permite definir valores via `config set CHAVE VALOR` ou flags convenientes (`--url`, `--token`, `--watch-dir`, `--name`).

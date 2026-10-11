@@ -1,59 +1,100 @@
-# Autenticação e Segurança (JWT)
+# Autenticação e Segurança (JWT & Token de Agente)
 
-O cirqueiraX utiliza uma estratégia de autenticação **stateless** baseada em **JWT (JSON Web Tokens)** com assinatura assimétrica **RS256** (RSA com SHA-256).
+O **CirqueiraX** adota uma estratégia de autenticação dupla e totalmente *stateless*, atendendo tanto aos usuários humanos na interface web quanto aos processos clientes autônomos em segundo plano (agentes de captura de prints nas máquinas cliente).
 
-## Subsistema Backend
-A segurança é garantida por dois bundles principais:
-- **LexikJWTAuthenticationBundle**: Gerencia a emissão do `access_token` (curta duração).
-- **GesdinetJWTRefreshTokenBundle**: Gerencia o `refresh_token` (longa duração, persistido no banco).
+---
 
-### Fluxo de Chaves (RSA)
-As chaves privadas e públicas residem em `config/jwt/`.
-- `private.pem`: Usada pelo backend para assinar tokens. **Nunca deve ser exposta.**
-- `public.pem`: Pode ser usada para validar a assinatura sem possuir a chave privada.
+## 1. Visão Geral dos Mecanismos de Autenticação
 
-Para gerar novas chaves (setup inicial):
+| Canal de Acesso | Mecanismo | Identificador | Destinatário | Escopo |
+| :--- | :--- | :--- | :--- | :--- |
+| **Interface Web (React / SPA)** | **JWT (RS256)** | `Authorization: Bearer <token>` | Usuários autenticados | Acesso total à API e Dashboard |
+| **Agente de Prints (Python CLI)** | **Token de Agente** | `X-Agent-Token: cx_ag_...` | Máquinas do usuário (PC Empresa / PC Casa) | Ingestão dedicada em `/api/v1/ingestao/print` |
+| **Google Photos API** | **OAuth 2.0** | Refresh Token persistido | Backend CirqueiraX | Uploads append-only e gestão de álbuns |
+
+---
+
+## 2. Autenticação de Usuários Web (JWT)
+
+A autenticação web utiliza **LexikJWTAuthenticationBundle** e **GesdinetJWTRefreshTokenBundle** com assinatura assimétrica **RS256** (RSA 4096 bits com SHA-256).
+
+### 2.1. Chaves Criptográficas (RSA)
+As chaves residem no diretório protegido `config/jwt/`:
+- `private.pem`: Assina os tokens de acesso emitidos pelo backend. Nunca deve ser exposta.
+- `public.pem`: Valida a assinatura de tokens recebidos em cada requisição.
+
+Para gerar novas chaves (setup inicial ou rotação):
 ```bash
 php bin/console lexik:jwt:generate-keypair
 ```
 
-### Endpoints de Autenticação
-1. `POST /api/v1/auth/login`: Recebe `username` e `senha`, retorna `token` e `refresh_token`.
-2. `POST /api/v1/auth/registro`: Cria novo usuário (público).
-3. `POST /api/v1/token/refresh`: Recebe o `refresh_token` e retorna um novo `access_token`.
-4. `GET /api/v1/auth/me`: Retorna os dados do usuário logado (requer `Bearer` token).
+### 2.2. Ciclo de Vida dos Tokens
+- **Access Token (`JWT`)**: Tempo de vida curto (**1 hora**). Carrega os claims do usuário (`id`, `username`, `roles`).
+- **Refresh Token**: Tempo de vida longo (**30 dias**), persistido no banco na tabela `refresh_tokens`.
+
+### 2.3. Endpoints de Autenticação de Usuários
+| Método | Endpoint | Acesso | Descrição |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/login` | Público | Autentica com credenciais, retornando `{ token, refresh_token }` |
+| `POST` | `/api/v1/auth/registro` | Público | Cadastro de novos usuários |
+| `POST` | `/api/v1/token/refresh` | Público | Emite novo access token a partir de um refresh token válido |
+| `GET` | `/api/v1/auth/me` | Bearer JWT | Retorna perfil e permissões do usuário logado |
+
+### 2.4. Renovação Automática no Frontend (`web/config/api.ts`)
+O cliente Axios possui interceptores reativos:
+1. Ao receber resposta `401 Unauthorized`, pausa requisições pendentes.
+2. Faz chamada silenciosa para `POST /api/v1/token/refresh`.
+3. Atualiza o token no Zustand store (`useAuthStore`) e `localStorage`.
+4. Re-executa as requisições que estavam pausadas.
+5. Se o refresh token expirar ou for inválido, limpa o estado e redireciona para `/login`.
 
 ---
 
-## Subsistema Frontend
-O estado de autenticação é centralizado no **Zustand** (`web/stores/useAuthStore.ts`) e sincronizado com o `localStorage`.
+## 3. Autenticação de Agentes (`TokenAgenteAuthenticator`)
 
-### Persistência e Recuperação
-O `useAuthStore` utiliza o middleware `persist`. Ao carregar a página:
-1. O React recupera os tokens do `localStorage`.
-2. O Axios Interceptor injeta o `token` em todas as requisições via header `Authorization: Bearer <token>`.
+Para permitir que agentes Python rodando no Windows, Linux ou WSL enviem prints sem expor credenciais de login interativo, o sistema implementa o autenticador customizado `TokenAgenteAuthenticator`.
 
-### Fluxo do Refresh Automático (`web/config/api.ts`)
-Caso uma requisição retorne `401 Unauthorized`:
-1. O interceptor de resposta pausa as requisições pendentes.
-2. Dispara uma chamada silenciosa para `/api/v1/token/refresh`.
-3. Se bem-sucedido, atualiza o Store e re-executa as requisições pausadas.
-4. Se falhar (refresh token expirado), o Store é limpo e o usuário é redirecionado para o login.
+### 3.1. Como Funciona
+- O agente envia cada print no cabeçalho HTTP:
+  ```http
+  X-Agent-Token: cx_ag_seu_token_aqui
+  ```
+- O autenticador consulta a entidade `TokenAgente` no banco:
+  - Valida se o token existe e está ativo (`ativo = 1`).
+  - Obtém a `origem` configurada para aquela máquina (ex: `OrigemMedia::PRINT_EMPRESA` ou `OrigemMedia::PRINT_PESSOAL`).
+  - Atualiza o carimbo de data/hora do último uso (`ultimo_uso_em`).
+  - Injeta a identidade e origem do agente no contexto da requisição.
 
-### Proteção de Rotas
-Utilizamos o componente `RotaProtegida.tsx`:
-```tsx
-export function RotaProtegida() {
-  const autenticado = useAuthStore(s => s.autenticado);
-  return autenticado ? <Outlet /> : <Navigate to="/login" replace />;
-}
+### 3.2. Como Emitir Tokens para Máquinas
+No terminal do backend (via Makefile):
+
+```bash
+# Emitir token para a máquina corporativa
+make agente-token ARGS="\"PC Empresa\" print_empresa"
+
+# Emitir token para o computador pessoal
+make agente-token ARGS="\"PC Pessoal\" print_pessoal"
 ```
 
-## Resumo de Segurança
-| Elemento | Detalhe |
+A chave gerada (`cx_ag_...`) é salva no `.env` do respectivo agente (`AGENT_TOKEN`).
+
+---
+
+## 4. Rate Limiting e Proteção contra Abuso
+
+O sistema utiliza o componente **Symfony Rate Limiter** configurado em `config/packages/rate_limiter.yaml`:
+- **Login Web**: Limite estrito de **5 tentativas por minuto** por IP, mitigando ataques de força bruta.
+- **Ingestão de Prints**: Limite generoso de **300 requisições por minuto** por token de agente, permitindo envios rápidos em sequência sem interrupção.
+
+---
+
+## 5. Resumo de Segurança e Parâmetros
+
+| Parâmetro | Valor |
 | :--- | :--- |
-| **Algoritmo** | RS256 (Asymmetric) |
-| **Access Token TTL** | 1 hora |
-| **Refresh Token TTL** | 30 dias |
-| **Storage Frontend** | LocalStorage (via Zustand Persist) |
-| **Firewall** | Stateless (JWT) |
+| **Assinatura JWT** | RS256 (RSA assimétrico) |
+| **Validade Access Token** | 3600 segundos (1 hora) |
+| **Validade Refresh Token** | 2.592.000 segundos (30 dias) |
+| **Hashing de Senhas** | `auto` (Argon2id ou Bcrypt com salt nativo) |
+| **Formato de Token de Agente** | Chave opaca prefixada `cx_ag_` (SHA-256) |
+| **Políticas de CORS** | Restrito a domínios autorizados via `nelmio_cors.yaml` |

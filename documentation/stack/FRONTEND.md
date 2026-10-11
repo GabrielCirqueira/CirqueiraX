@@ -1,164 +1,103 @@
 # Frontend (web/)
 
-Este documento explica a estrutura e o fluxo do frontend React que vive em `web/`.
+Este documento descreve a arquitetura, estrutura modular, convenções de estilo e padrões de componentes do frontend **React** localizado no diretório `web/`.
 
-> Versão enxuta — prioriza o mínimo necessário pra rodar bem, com uma trilha clara do que adicionar depois e em que ordem, em vez de instalar tudo de uma vez.
+---
 
-## Tecnologias
+## 1. Stack Tecnológica
 
-### Núcleo (sempre instalado)
-
-| Tecnologia | Papel |
-| :--- | :--- |
-| **React 19** + **TypeScript 5.9** | UI reativa, modo strict |
-| **Vite 7** | Build tool e dev server com HMR ultra-rápido |
-| **Chakra UI v3** (`@chakra-ui/react`) | Biblioteca de componentes, layout e design system |
-| **Paleta Cirqueira** (`cirqueira.*`) | Design tokens estritos gerados via `scripts/gerar-paleta-brand.mjs` |
-| **React Router 7** | Roteamento via `createBrowserRouter` + lazy loading |
-| **TanStack Query 5** | Estado do servidor, cache e invalidação |
-| **Zustand 5** | Estado global — só para o que não vem da API (auth, UI global) |
-| **Zod 4** | Validação de respostas da API e de formulários críticos |
-| **Axios** | HTTP client centralizado com interceptores JWT |
-| **tailwindcss-motion** | Micro-animações declarativas |
-| **Recharts** | Gráficos SVG reativos (dashboards, totais por categoria/origem) |
-| **Biome 1.9** | Linter, formatter e organizador de imports |
-
-> **Regra de Zustand**: não criar store por feature "por precaução". Começar com estado local/Context e migrar pra Zustand só quando sentir dor real de estado espalhado.
->
-> **Regra de cores**: Toda cor deve usar exclusivamente tokens `cirqueira.<escala>.<tom>` (ex: `cirqueira.brand.500`, `cirqueira.red.500`, `cirqueira.teal.500`) ou tokens semânticos neutros (`bg.panel`, `border.subtle`, `fg`). Proibido cores cruas do Chakra (`red.500`, `blue.500`), hexadecimais soltos ou `className`.
-
-### Módulo `ui-extra` (opt-in — ative no setup.sh)
-
-| Tecnologia | Papel |
-| :--- | :--- |
-| **Framer Motion** | Animações declarativas com `AnimatePresence` |
-
-## Estrutura de Diretórios
-
-```
-web/
-├── main.tsx              Entry point — QueryClient, Chakra Provider (system)
-├── App.tsx               Router raiz (createBrowserRouter)
-├── index.css             tailwindcss-motion e @theme brand
-├── config/
-│   ├── api.ts            Instância Axios centralizada com interceptores JWT
-│   └── theme/theme.ts    Definição de design system Chakra e paleta cirqueira
-├── features/
-│   ├── auth/                 hooks, api, types de autenticação, Login
-│   ├── dashboard/            Dashboard central: CardsResumo, GraficosDashboard, TabelaCategorias, PainelSync, FilaErros
-│   ├── downloads-video/      Feature de downloads: CampoNovoLink, CardVideo, GridVideos, hooks, api, types
-│   ├── google-fotos/         Feature de Google Fotos: GoogleFotos, GateConexaoGoogle, GridAlbuns, ModalVincularAlbum, AvisoMigracaoAlbuns
-│   ├── upload-manual/        Feature de upload manual: DropzoneUpload, hooks, api, types
-│   ├── home/                 Home page pública
-│   └── not-found/            Página 404
-├── layouts/
-│   ├── MainLayout.tsx    Layout com Sidebar + Header + Outlet
-│   ├── Sidebar.tsx       Menu lateral de navegação
-│   ├── Header.tsx        Barra superior (avatar, status)
-│   └── Footer.tsx        Rodapé
-├── routes/               RotaProtegida.tsx
-├── shared/
-│   ├── hooks/            useDebounce, useMountEffect, useMediaQuery, useSEO
-│   ├── components/       ErrorBoundary, DialogOuDrawer
-│   └── utils/            lazyWithRetry, animacoes, formatadores
-└── stores/useAuthStore.ts Estado de autenticação (Zustand + localStorage)
-```
-
-## Primitivos de Layout e Componentes do Chakra UI
-
-> **Regra obrigatória:** nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` diretamente, nem `className`. Usar sempre componentes de `@chakra-ui/react`.
-
-```tsx
-import { Box, Button, Container, Heading, HStack, IconButton, Input, Text, VStack } from '@chakra-ui/react'
-```
-
-**Layout e Tipografia:**
-
-| Componente | Papel |
-| :--- | :--- |
-| `<Box>` | Container genérico |
-| `<HStack>` | Filhos lado a lado (`align="center"`, `gap={4}`) |
-| `<VStack>` | Filhos empilhados (`align="stretch"`, `gap={4}`) |
-| `<Flex>` | Flexbox com direção e alinhamentos customizados |
-| `<Grid>` | Grid de colunas (`templateColumns=...`) |
-| `<Container>` | Wrapper de página centralizado (`maxW="6xl"`) |
-| `<Heading>` | Títulos (`as="h1"`, `size="2xl"`, etc.) |
-| `<Text>` | Parágrafos e labels (`fontSize="sm"`, etc.) |
-
-**Padrão de Arredondamento (`borderRadius`):**
-- `borderRadius="xl"`: Cards (`Card.Root`), Modais / Diálogos (`Dialog.Content`), Painéis de Seção
-- `borderRadius="lg"`: Inputs (`Input`), Selects (`NativeSelect.Field`), Botões (`Button`, `IconButton`), Caixas de ícones (`Box p={2}`)
-- `borderRadius="md"`: Badges (`Badge`) e chips
-- `borderRadius="full"`: Avatares e pills circulares
-```tsx
-<Container maxW="6xl" py={12}>
-  <Box borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel" p={4}>
-    <Heading as="h1" size="2xl" color="fg">Título</Heading>
-    <Text fontSize="sm" color="fg.subtle">Parágrafo</Text>
-    <Text as="span" color="cirqueira.brand.500">Destaque</Text>
-  </Box>
-</Container>
-```
-
-## Roteamento (`web/App.tsx`)
-
-```tsx
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/">
-      <Route element={<MainLayout />}>
-        <Route index lazy={() => import('@pages/Home/Home')} />
-        <Route path="login" lazy={() => import('@pages/Login/Login')} />
-        <Route path="cadastro" lazy={() => import('@pages/Cadastro/Cadastro')} />
-        <Route path="*" lazy={() => import('@pages/NotFound/NotFound')} />
-      </Route>
-      <Route element={<MainLayout />}>
-        <Route element={<RotaProtegida />}>
-          <Route path="app" lazy={() => import('@pages/Home/Home')} />
-        </Route>
-      </Route>
-    </Route>
-  )
-)
-```
-
-## Aliases de Importação
-
-| Alias | Resolve para |
-| :--- | :--- |
-| `@/` | `web/` |
-| `@app/` | `web/` |
-| `@pages` | `web/pages/` |
-| `@layouts` | `web/layouts/` |
-| `@features/` | `web/features/` |
-| `@shared/` | `web/shared/` |
-| `@stores` | `web/stores/` |
-| `@config` | `web/config/` |
-| `@routes` | `web/routes/` |
-
-## Regras de Ouro
-
-1. **Sem `useEffect` em pages/features**: use TanStack Query para dados, event handlers para ações, `useMemo` para derivações, `useMountEffect` para efeitos de montagem.
-2. **Componentes limpos e atômicos**: Proibido colocar lógica pesada, encadeamentos longos de `if/else`, parsers complexos de URL/strings, identificadores de formatos/plataformas ou formatações avançadas diretamente dentro de componentes visuais (`.tsx`). Componentes devem focar exclusivamente na renderização e interação. Toda lógica de negócio, detecção, transformação ou parsing deve ser extraída para utilitários (`utils/`), serviços ou hooks dedicados.
-3. **Tipagem estrita**: sem `any`. Respostas de API validadas com schema Zod.
-4. **Aderência aos design tokens**: usar exclusivamente tokens da paleta `cirqueira.*` e tokens semânticos neutros (`bg.panel`, `border.subtle`, `fg`). Nunca usar cores arbitrárias, hexadecimais soltos ou `className`.
-5. **Sem tags HTML brutas**: nunca usar `<div>`, `<p>`, `<h1>`–`<h6>` ou `<span>` — usar `Box`/`HStack`/`VStack`/`Grid`/`Container` para layout e `Text`/`Text as="h1"`/`Text as="span"` para tipografia, todos de `@/shared/ui/layout`.
-
-## Execução e Build
-
-```bash
-npm run dev        # Dev server (ou make up-d no container)
-npm run build      # Build de produção
-npm run type-check # tsc --noEmit
-npm run validate   # type-check + lint Biome
-```
-
-## Apêndice: quando adicionar cada peça opcional
-
-| Ferramenta | Gatilho | Instalação |
+| Tecnologia | Papel | Detalhes |
 | :--- | :--- | :--- |
-| Vitest + RTL | Primeira lógica que dói quebrar | `npm i -D vitest @testing-library/react` |
-| Motion (Framer) | Primeira necessidade real de `AnimatePresence` | módulo `ui-extra` no setup.sh |
-| Husky + lint-staged | Time cresce além de 1 pessoa | já incluso no cirqueirax |
-| Playwright | Primeiro fluxo crítico de negócio | `npm i -D @playwright/test` |
-| Storybook | Mais de uma pessoa nos mesmos componentes | `npm i -D storybook` |
+| **React 19** + **TypeScript 5.9** | Camada de Apresentação | Componentes funcionais estritos com hooks e tipagem forte |
+| **Vite 7** | Bundler & Dev Server | HMR ultrarrápido na porta `4012` |
+| **Chakra UI v3** (`@chakra-ui/react`) | Design System & Layout | Primitivos semânticos de acessibilidade e layout |
+| **Paleta Cirqueira** (`cirqueira.*`) | Design Tokens | Cores corporativas geradas via `scripts/gerar-paleta-brand.mjs` |
+| **React Router 7** | Roteamento SPA | `createBrowserRouter` com lazy-loading e `RotaProtegida` |
+| **TanStack Query 5** | Cache e Estado de Servidor | Sincronização, paginação, mutações e invalidação reativa |
+| **Zustand 5** | Estado Global de UI/Sessão | Store de autenticação com persistência no `localStorage` |
+| **Axios** | Cliente HTTP | Instância centralizada com interceptores de injeção de JWT e refresh automático |
+| **Recharts** | Gráficos SVG | Visualização de métricas por categoria e status no dashboard |
+| **Biome 1.9** | Linter & Formatter | Validação estática de estilo e organização de imports |
+
+---
+
+## 2. Estrutura de Diretórios e Módulos
+
+```text
+web/
+├── main.tsx                    # Entry point — QueryClient, Chakra Provider
+├── App.tsx                     # Definição canônica de rotas com createBrowserRouter
+├── index.css                   # Tokens base, micro-animações e temas CSS
+│
+├── config/
+│   ├── api.ts                  # Instância Axios central com interceptores JWT e refresh
+│   └── theme/theme.ts          # Definição do design system Chakra UI e paleta cirqueira
+│
+├── features/                   # Features orientadas a domínio (Domain-Driven UI)
+│   ├── auth/                   # Telas de Login, formulários e hooks de sessão
+│   ├── dashboard/              # Painel analítico: métricas, gráficos, status Syncthing e erros
+│   ├── prints/                 # Galeria minimalista de prints estilo Google Fotos com lightbox
+│   ├── downloads-video/        # Downloads yt-dlp: grid, tabela, player, edição de metadata e horários
+│   ├── google-fotos/           # Gerenciamento de álbuns, status de conexão OAuth e vinculações
+│   ├── upload-manual/          # Dropzone para envio manual de fotos e vídeos com progresso
+│   ├── home/                   # Landing page pública de apresentação
+│   └── not-found/              # Página de erro 404
+│
+├── layouts/
+│   ├── MainLayout.tsx          # Shell do aplicativo com Sidebar responsiva, Header e Content
+│   ├── Sidebar.tsx             # Menu lateral de navegação com contadores
+│   ├── Header.tsx              # Barra superior (perfil, conexões e ações rápidas)
+│   └── Footer.tsx              # Rodapé do sistema
+│
+├── routes/
+│   └── RotaProtegida.tsx       # Guard de rota que exige autenticação ativa
+│
+├── shared/
+│   ├── hooks/                  # Hooks utilitários: useDebounce, useMediaQuery, useSEO
+│   ├── components/             # Primitivos compartilhados: ErrorBoundary, DialogOuDrawer
+│   └── utils/                  # Formatadores de data, tamanho e helpers visuais
+│
+└── stores/
+    └── useAuthStore.ts         # Store Zustand de autenticação (token, usuário e persistência)
+```
+
+---
+
+## 3. Features Principais
+
+### 3.1. Prints (`web/features/prints/`)
+Interface moderna e limpa inspirada no Google Fotos:
+- **Layout Minimalista**: Grid de imagens sem molduras pesadas ou caixas de botões poluídas.
+- **Ações Contextuais no Hover**: Botões discretos no canto inferior esquerdo do card com transição suave (Download direto, Copiar imagem para a área de transferência, Excluir e Categorizar).
+- **Visualizador em Tela Cheia (Lightbox)**: Ao clicar no print, abre o modal de visualização em alta definição com zoom, navegação e metadados.
+- **Cópia Instantânea**: Botão de cópia que escreve a imagem binária diretamente na área de transferência do SO via `navigator.clipboard.write([ClipboardItem])`.
+
+### 3.2. Downloads de Vídeos (`web/features/downloads-video/`)
+- **Triagem Flexível**: Alternância entre visualização em Grid (cards com player embutido e duração) e Tabela compacta.
+- **Ações em Lote**: Barra flutuante ao selecionar múltiplos itens permitindo categorizar, apagar ou distribuir horários.
+- **Distribuição de Horários em Lote (`ModalDistribuirHorariosLote.tsx`)**: Permite selecionar múltiplos vídeos e escalonar suas datas e horários em intervalos regulares para organizar cronologias.
+- **Edição Individual de Metadados**: Modal com abas para ajustar título, data/hora da captura e capa.
+
+### 3.3. Google Fotos (`web/features/google-fotos/`)
+- **Status de Conexão**: Indicador em tempo real se o backend está autenticado com o Google OAuth.
+- **Grid de Álbuns**: Exibe todos os álbuns criados pela aplicação, quantidade de mídias e status de vínculo com categorias locais.
+- **Modal de Vinculação**: Permite associar categorias locais a álbuns remotos com um clique.
+
+### 3.4. Upload Manual (`web/features/upload-manual/`)
+- **Dropzone Inteligente**: Arraste e solte ou seleção de múltiplos arquivos simultâneos.
+- **Pré-categorização**: Escolha da categoria no momento do envio ou ingestão em fila para triagem posterior.
+- **Barra de Progresso**: Acompanhamento individual e total de upload via Axios `onUploadProgress`.
+
+---
+
+## 4. Regras de Design e Chakra UI v3
+
+1. **Uso Obrigatório de Primitivos Chakra**:
+   Nunca utilizar tags HTML cruas como `<div>`, `<p>`, `<span>`, `<h1>`–`<h6>` ou propriedades `className` para estilização. Sempre utilizar componentes semânticos do Chakra UI (`Box`, `Flex`, `HStack`, `VStack`, `Grid`, `Text`, `Heading`, `Badge`, `Button`).
+2. **Tokens Estritos da Paleta Cirqueira**:
+   Cores e tonalidades devem utilizar exclusivamente tokens `cirqueira.<escala>.<tom>` (ex: `cirqueira.brand.500`, `cirqueira.purple.500`, `cirqueira.blue.500`) ou tokens neutros semânticos (`bg.panel`, `border.subtle`, `fg`). É proibido o uso de cores genéricas ou hexadecimais soltos.
+3. **Padrão de Arredondamento (`borderRadius`)**:
+   - `borderRadius="xl"`: Cards, modais de diálogo e painéis principais.
+   - `borderRadius="lg"`: Botões, caixas de input e seletores.
+   - `borderRadius="md"`: Badges e tags.
+   - `borderRadius="full"`: Avatares e botões circulares de ação.
