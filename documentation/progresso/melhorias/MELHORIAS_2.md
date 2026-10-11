@@ -192,3 +192,29 @@
   - `web/features/dashboard/components/FilaErros.tsx`
   - `web/features/google-fotos/components/GateConexaoGoogle.tsx`
   - `web/shared/utils/formatarData.ts`
+
+---
+
+## Melhoria 28 — Migração Automática de Categorias Padrão, Resiliência de Armazenamento Local e Guia Syncthing
+
+- **Data**: 10/10/2026
+- **Contexto**: Para garantir que o ambiente de produção registre as categorias iniciais (`Print Empresa`, `Print Pessoal`, `videos/memes`, `Shingeki no Kyojin`) e regras de origem sem depender de chamadas manuais via API ou seeds avulsos, foi solicitada a criação de uma migration oficial via Doctrine. Também foi necessária a validação da criação automática de subpastas no sistema de arquivos para distribuição de mídia, resiliência na resolução de diretórios de armazenamento (`MEDIA_STORAGE_PATH`) montados no Docker, permissões POSIX (`0775`/`0664`) e documentação detalhada da integração do Syncthing entre a VPS e o celular (Android).
+- **O que foi feito**:
+  - Criado o comando `make new-migration` no [Makefile](file:///home/gabriel/dev/CirqueiraX/Makefile) para gerar classes vazias de migration via `doctrine:migrations:generate`.
+  - Desenvolvida a migration [Version20261010215918.php](file:///home/gabriel/dev/CirqueiraX/migrations/Version20261010215918.php) que insere de forma idempotente (`WHERE NOT EXISTS`) as categorias padrão `Print Empresa`, `Print Pessoal`, `videos/memes`, `Shingeki no Kyojin` e as regras de origem correspondentes para ingestão automática.
+  - Atualizado [ArmazenamentoLocalClient.php](file:///home/gabriel/dev/CirqueiraX/src/Infra/Storage/ArmazenamentoLocalClient.php) com permissão padrão de diretório `0775` e aplicação explícita de `chmod` em diretórios e arquivos (`0664`), garantindo que o Syncthing rodando no host como root e o container rodando como UID 1000 compartilhem leitura e escrita sem atrito.
+  - Adicionado fallback defensivo em [DistribuirLocalService.php](file:///home/gabriel/dev/CirqueiraX/src/Service/Distribuicao/DistribuirLocalService.php), [ClassificarMediaItemService.php](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/ClassificarMediaItemService.php) e [BaixarVideoDownloadService.php](file:///home/gabriel/dev/CirqueiraX/src/Service/Video/BaixarVideoDownloadService.php) para redirecionar automaticamente para `/var/www/html/var/storage` caso uma rota absoluta de host seja configurada em `MEDIA_STORAGE_PATH`.
+  - Padronizada a variável de ambiente `MEDIA_STORAGE_PATH: /var/www/html/var/storage` no container Symfony em [docker-compose.prod.yaml](file:///home/gabriel/dev/CirqueiraX/devops/docker-compose.prod.yaml) e [docker-compose.yaml](file:///home/gabriel/dev/CirqueiraX/devops/docker-compose.yaml).
+  - Elaborado o guia completo de infraestrutura em [SYNCTHING.md](file:///home/gabriel/dev/CirqueiraX/documentation/guias/SYNCTHING.md) detalhando túnel SSH, criação da pasta `cirqueirax-media`, aceite no Syncthing-Fork, flags de permissão e testes ponta a ponta.
+- **Arquivos**:
+  - `Makefile`
+  - `migrations/Version20261010215918.php`
+  - `src/Infra/Storage/ArmazenamentoLocalClient.php`
+  - `src/Service/Distribuicao/DistribuirLocalService.php`
+  - `src/Service/MediaItem/ClassificarMediaItemService.php`
+  - `src/Service/Video/BaixarVideoDownloadService.php`
+  - `devops/docker-compose.prod.yaml`
+  - `devops/docker-compose.yaml`
+  - `documentation/guias/SYNCTHING.md`
+  - `documentation/guias/Syncthing.md`
+
