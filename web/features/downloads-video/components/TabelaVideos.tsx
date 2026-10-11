@@ -39,7 +39,7 @@ export interface TabelaVideosProps {
   onToggleSelect: (uuid: string) => void
   onToggleSelectAll?: () => void
   onVisualizar?: (item: MediaItem) => void
-  onEditarMetadata?: (item: MediaItem) => void
+  onEditarMetadata?: (item: MediaItem, abaInicial?: 'geral' | 'data' | 'duracao' | 'capa') => void
   onCategorizar?: (item: MediaItem) => void
   onRebaixar?: (uuid: string) => void
   onRetentar?: (uuid: string) => void
@@ -365,16 +365,39 @@ export const TabelaVideos = memo(function TabelaVideos({
                   </Box>
 
                   <Box as="td" p={3.5} verticalAlign="middle">
-                    <VStack align="start" gap={0} fontSize="xs" color="fg.subtle">
-                      <HStack gap={1}>
-                        <Calendar size={11} />
-                        <Text as="span">{dataMidia}</Text>
+                    <Box
+                      as="button"
+                      onClick={() => onEditarMetadata?.(item, 'data')}
+                      textAlign="left"
+                      p={1.5}
+                      px={2}
+                      borderRadius="md"
+                      borderWidth="1px"
+                      borderColor="cirqueira.brand.500/20"
+                      bg="cirqueira.brand.500/5"
+                      _hover={{
+                        borderColor: 'cirqueira.brand.500/50',
+                        bg: 'cirqueira.brand.500/12',
+                      }}
+                      cursor="pointer"
+                      title="Clique para editar data e horário"
+                    >
+                      <HStack gap={2} justify="space-between">
+                        <VStack align="start" gap={0} fontSize="xs">
+                          <HStack gap={1} color="cirqueira.brand.300" fontWeight="semibold">
+                            <Calendar size={11} />
+                            <Text as="span">{dataMidia}</Text>
+                          </HStack>
+                          <HStack gap={1} color="fg.muted" fontSize="11px">
+                            <Clock size={11} />
+                            <Text as="span">{horarioMidia}</Text>
+                          </HStack>
+                        </VStack>
+                        <Badge size="xs" variant="subtle" colorPalette="brand" px={1} py={0.2}>
+                          Editar
+                        </Badge>
                       </HStack>
-                      <HStack gap={1} color="fg.muted">
-                        <Clock size={11} />
-                        <Text as="span">{horarioMidia}</Text>
-                      </HStack>
-                    </VStack>
+                    </Box>
                   </Box>
 
                   <Box as="td" p={3.5} verticalAlign="middle">

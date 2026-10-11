@@ -109,3 +109,13 @@ export interface AtualizarMetadataInput {
   thumbnail?: string
   metadata?: Record<string, unknown>
 }
+
+export interface ItemDistribuicaoHorario {
+  uuid: string
+  data: string
+}
+
+export interface DistribuirHorariosLoteInput {
+  itens: ItemDistribuicaoHorario[]
+}
+

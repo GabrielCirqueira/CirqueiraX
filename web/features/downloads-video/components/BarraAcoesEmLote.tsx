@@ -1,11 +1,12 @@
 import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
-import { DownloadCloud, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
+import { CalendarClock, DownloadCloud, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
 import { memo } from 'react'
 
 export interface BarraAcoesEmLoteProps {
   totalSelecionados: number
   selecionados: string[]
   onLimparSelecao: () => void
+  onDistribuirHorariosLote?: () => void
   onCategorizarLote: () => void
   onRebaixarLote: () => void
   onApagarLote: () => void
@@ -15,6 +16,7 @@ export interface BarraAcoesEmLoteProps {
 export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
   totalSelecionados,
   onLimparSelecao,
+  onDistribuirHorariosLote,
   onCategorizarLote,
   onRebaixarLote,
   onApagarLote,
@@ -70,6 +72,20 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
         </HStack>
 
         <HStack gap={2} w={{ base: 'full', sm: 'auto' }} justify="flex-end">
+          {onDistribuirHorariosLote && (
+            <Button
+              size="sm"
+              variant="subtle"
+              colorPalette="brand"
+              disabled={processando}
+              onClick={onDistribuirHorariosLote}
+              borderRadius="lg"
+            >
+              <CalendarClock size={14} style={{ marginRight: '6px' }} />
+              <Text as="span">Distribuir Horários</Text>
+            </Button>
+          )}
+
           <Button
             size="sm"
             variant="ghost"

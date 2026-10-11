@@ -44,6 +44,8 @@
 | M30 | Reestruturação e Modularização Limpa do Agente Python (`agente/core/`, `env/`, `scripts/`) | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-30--reestruturação-e-modularização-limpa-do-agente-python-agente) |
 | M31 | Suíte de Comandos Utilitários do Terminal e Troca Dinâmica de Ambientes no Agente | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-31--suíte-de-comandos-utilitários-do-terminal-e-troca-dinâmica-de-ambientes-no-agente) |
 | M32 | Suporte e Detecção Automática de WSL, PollingObserver para DrvFs e Instalador Dedicado | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-32--suporte-e-detecção-automática-de-wsl-pollingobserver-para-drvfs-e-instalador-dedicado) |
+| M33 | Separação Estrita de Mídias: Módulo Exclusivo de Prints & Capturas (`/prints`) e Isolamento de Downloads | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-33--separação-estrita-de-mídias-módulo-exclusivo-de-prints--capturas-prints-e-isolamento-de-downloads) |
+| M34 | Distribuição Temporal de Vídeos: Atalhos Retroativos Estilo Franky e Distribuição em Lote | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-34--distribuição-temporal-de-vídeos-atalhos-retroativos-estilo-franky-e-distribuição-em-lote) |
 
 
 

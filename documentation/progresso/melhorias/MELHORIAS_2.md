@@ -346,6 +346,98 @@
   - `agente/README.md`
   - `documentation/guias/AGENTE.md`
 
+---
+
+## Melhoria 33 — Separação Estrita de Mídias: Módulo Exclusivo de Prints & Capturas (`/prints`) e Isolamento de Downloads
+
+- **Data**: 11/10/2026
+- **Contexto**: A tela de Downloads de Vídeo estava listando capturas de tela/prints do Windows ingeridos pelo agente como se fossem vídeos com falha na reprodução (ex.: `hash c624d5ea5d` e `89d3bfc0b1`), tentando rodar arquivos `.png` dentro de tags HTML5 `<video>`. O usuário solicitou que imagens e capturas de tela não fossem misturadas na tela de downloads e que fosse criada uma nova página dedicada para exibir e gerenciar prints.
+- **O que foi feito**:
+  - **Identificação da Causa Raiz**: O serviço de ingestão do agente (`IngestarPrintService.php`) persistia imagens com origem `print_pessoal`, porém sem campos explícitos de `tipo` e `extensao` no JSON de metadata. A listagem de mídia consultava `/api/v1/media-itens` sem segregação de tipo.
+  - **Ajustes no Backend**:
+    - Atualizado [`src/Service/Ingestao/IngestarPrintService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/Ingestao/IngestarPrintService.php) para gravar metadados completos: `tipo: 'imagem'`, `tipo_midia: 'imagem'`, `extensao: 'png'`, `mimetype: 'image/png'` e `titulo` com o nome original do screenshot.
+    - Executada migração corretiva no banco de dados normalizando registros existentes de prints.
+    - Atualizado [`src/DataObject/FiltrarMediaItemDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/FiltrarMediaItemDTO.php) para aceitar o parâmetro `tipo` e suporte a múltiplas origens separadas por vírgula.
+    - Atualizado [`src/Repository/MediaItemRepository.php`](file:///home/gabriel/dev/CirqueiraX/src/Repository/MediaItemRepository.php) para filtrar estritamente `tipo = 'video'` (excluindo prints) ou `origem = 'prints'` (englobando `print_pessoal` e `print_empresa`).
+  - **Isolamento da Central de Downloads**:
+    - Em [`web/features/downloads-video/DownloadsVideo.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/DownloadsVideo.tsx), definido filtro fixo `tipo: 'video'`.
+    - Removidas as opções de prints (`print_pessoal` e `print_empresa`) do filtro seletor de origens.
+  - **Criação do Novo Módulo de Prints & Capturas (`/prints`)**:
+    - Desenvolvida a feature completa em `web/features/prints/`:
+      - [`Prints.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/Prints.tsx): Página principal com busca, paginação, filtros por categoria, alternador Grade/Lista e seleção em lote.
+      - [`components/CardPrint.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/CardPrint.tsx): Card otimizado para exibição de imagens em alta resolução, badges de formato PNG, dimensões em pixels (ex.: 1920x1080), host/computador de origem e ações rápidas.
+      - [`components/ModalVisualizarPrint.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/ModalVisualizarPrint.tsx): Visualizador em tela cheia com zoom, download direto de PNG e cópia instantânea para a Área de Transferência (`navigator.clipboard.write` com Blob `image/png`).
+      - [`components/GridPrints.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/GridPrints.tsx) e [`components/TabelaPrints.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/TabelaPrints.tsx): Visualizações responsivas em grade de mosaico e tabela detalhada.
+      - [`components/ModalCategorizarPrint.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/ModalCategorizarPrint.tsx): Categorização individual e em lote.
+      - [`hooks/usePrints.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/hooks/usePrints.ts) e [`api.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/prints/api.ts): Camada de dados TanStack Query isolada.
+    - Registrada a nova rota `/prints` com lazy loading em [`web/App.tsx`](file:///home/gabriel/dev/CirqueiraX/web/App.tsx).
+    - Adicionado o link "Prints & Capturas" com ícone `Camera` no menu lateral em [`web/layouts/Sidebar.tsx`](file:///home/gabriel/dev/CirqueiraX/web/layouts/Sidebar.tsx).
+    - Configurado o título dinâmico "Prints & Capturas" em [`web/layouts/Header.tsx`](file:///home/gabriel/dev/CirqueiraX/web/layouts/Header.tsx).
+- **Arquivos**:
+  - `src/Service/Ingestao/IngestarPrintService.php`
+  - `src/DataObject/FiltrarMediaItemDTO.php`
+  - `src/Repository/MediaItemRepository.php`
+  - `web/App.tsx`
+  - `web/layouts/Sidebar.tsx`
+  - `web/layouts/Header.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/prints/Prints.tsx`
+  - `web/features/prints/api.ts`
+  - `web/features/prints/types.ts`
+  - `web/features/prints/index.ts`
+  - `web/features/prints/hooks/usePrints.ts`
+  - `web/features/prints/components/CardPrint.tsx`
+  - `web/features/prints/components/GridPrints.tsx`
+  - `web/features/prints/components/TabelaPrints.tsx`
+  - `web/features/prints/components/ModalVisualizarPrint.tsx`
+  - `web/features/prints/components/ModalCategorizarPrint.tsx`
+
+---
+
+## Melhoria 34 — Distribuição Temporal de Vídeos: Atalhos Retroativos Estilo Franky e Distribuição em Lote
+
+- **Data**: 11/10/2026
+- **Contexto**: O usuário frequentemente baixa múltiplos vídeos de uma só vez no final do dia ou no dia seguinte, resultando no mesmo horário exato de download em todos os itens (por exemplo, 8 vídeos às 22:46). No sistema anterior ("Franky"), ele alterava manualmente os metadados de cada vídeo para que ficassem distribuídos em horários diferentes ao longo do dia (ex.: 08:45, 09:45, 13:45, 16:46, 20:46). Foi solicitado suporte e atalhos tanto nos cards de vídeo (reproduzindo o container clicável do Franky) quanto em lote para agilizar e automatizar essa distribuição.
+- **O que foi feito**:
+  - **Bloco de Data/Hora Interativo nos Cards (Estilo Franky)**:
+    - Em [`web/features/downloads-video/components/CardVideo.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/components/CardVideo.tsx), implementado container clicável com borda e destaque roxo `[ 📅 10/10/2026, 20:46 | EDITAR ]`.
+    - Ao clicar no bloco, o modal abre diretamente na aba "Data & Horário" (`abaInicial='data'`).
+    - Na visualização em lista ([`TabelaVideos.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/components/TabelaVideos.tsx)), a coluna de Data foi transformada em botão interativo com badge de edição.
+  - **Super Atalhos no Modal de Edição Individual**:
+    - Em [`web/features/downloads-video/components/ModalEditarMetadata.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/components/ModalEditarMetadata.tsx), adicionados:
+      - **Atalhos de Horas Retroativas**: Botões para subtrair tempo relativo à hora atual (`-30 min`, `-1h`, `-2h`, `-3h`, `-4h`, `-6h`, `-8h`, `-12h`, `-24h` e `+1h`, `+2h`). Clicar em `-2h` em um vídeo das 22:46 recalcula imediatamente para 20:46 em 1 clique.
+      - **Presets de Turnos Estratégicos**: Horários pré-configurados (`08:30`, `10:15`, `12:30`, `14:30`, `17:00`, `19:30`, `20:46`, `22:30`).
+      - **Sorteio Aleatório**: Botão `🎲 Aleatório (08h - 22h)` para gerar horários naturais dentro do dia.
+      - **Ajustes Finos**: Botões `[-15m]` e `[+15m]` ao lado do input de hora.
+  - **Mecanismo de Distribuição Automática em Lote**:
+    - Criado o modal [`web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx):
+      - Adicionado botão **"Distribuir Horários"** com ícone `CalendarClock` na barra flutuante [`BarraAcoesEmLote.tsx`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/components/BarraAcoesEmLote.tsx).
+      - **3 Algoritmos de Cálculo Automático**:
+        1. *Retroativo do Download*: Define o passo (ex.: a cada 2 horas) e projeta retroativamente do download: `22:46`, `20:46`, `18:46`, `16:46`, `14:46`, `12:46`, `10:46`, `08:46`.
+        2. *Espalhar pelo Dia (Uniforme)*: Divide o intervalo entre o início (ex.: 08:30) e fim (ex.: 22:30) igualmente pela quantidade de itens selecionados.
+        3. *Orgânico / Turnos Reais*: Distribui pelos turnos habituais com minutos variados para simular postagens manuais.
+      - **Tabela de Pré-visualização**: Exibe cada vídeo com horário original e horário calculado, com edição direta de data/hora e botões de deslocamento de 15 minutos em cada linha.
+  - **Backend Symfony para Persistência em Lote**:
+    - Criado [`src/DataObject/DistribuirHorariosLoteDTO.php`](file:///home/gabriel/dev/CirqueiraX/src/DataObject/DistribuirHorariosLoteDTO.php).
+    - Implementado método `distribuirHorarios()` em [`src/Service/MediaItem/AtualizarMetadataMediaItemService.php`](file:///home/gabriel/dev/CirqueiraX/src/Service/MediaItem/AtualizarMetadataMediaItemService.php), atualizando `data` e `horario` no JSON de metadados em lote.
+    - Criado endpoint `POST /api/v1/media-itens/lote/distribuir-horarios` em [`src/Controller/MediaItem/MediaItemController.php`](file:///home/gabriel/dev/CirqueiraX/src/Controller/MediaItem/MediaItemController.php).
+    - Integrado no cliente HTTP frontend via `distribuirHorariosLote` em [`api.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/api.ts) e hook TanStack Query `useDistribuirHorariosLote` em [`hooks/useDownloadsVideo.ts`](file:///home/gabriel/dev/CirqueiraX/web/features/downloads-video/hooks/useDownloadsVideo.ts).
+- **Arquivos**:
+  - `src/DataObject/DistribuirHorariosLoteDTO.php`
+  - `src/Service/MediaItem/AtualizarMetadataMediaItemService.php`
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/types.ts`
+  - `web/features/downloads-video/api.ts`
+  - `web/features/downloads-video/hooks/useDownloadsVideo.ts`
+  - `web/features/downloads-video/utils/metadataEdicao.ts`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/components/TabelaVideos.tsx`
+  - `web/features/downloads-video/components/BarraAcoesEmLote.tsx`
+  - `web/features/downloads-video/components/ModalEditarMetadata.tsx`
+  - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
+
+
 
 
 

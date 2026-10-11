@@ -6,6 +6,7 @@ import type {
   AtualizarMetadataInput,
   CategoriaOpcao,
   CategorizarLoteInput,
+  DistribuirHorariosLoteInput,
   FiltrosMediaItem,
   MediaItem,
   PedidoDownloadInput,
@@ -63,6 +64,16 @@ export async function atualizarMetadata(
   input: AtualizarMetadataInput
 ): Promise<MediaItem> {
   const { data } = await api.patch<RespostaApi<MediaItem>>(`/api/v1/media-itens/${uuid}`, input)
+  return data.data
+}
+
+export async function distribuirHorariosLote(
+  input: DistribuirHorariosLoteInput
+): Promise<MediaItem[]> {
+  const { data } = await api.post<RespostaApi<MediaItem[]>>(
+    '/api/v1/media-itens/lote/distribuir-horarios',
+    input
+  )
   return data.data
 }
 

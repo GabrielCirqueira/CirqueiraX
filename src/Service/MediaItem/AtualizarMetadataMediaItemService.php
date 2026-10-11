@@ -41,4 +41,39 @@ final readonly class AtualizarMetadataMediaItemService
 
         return $mediaItem;
     }
+
+    /**
+     * @param list<array{uuid: string, data: string}> $itens
+     * @return list<MediaItem>
+     */
+    public function distribuirHorarios(array $itens): array
+    {
+        $atualizados = [];
+        foreach ($itens as $item) {
+            $uuid = $item['uuid'] ?? null;
+            $data = $item['data'] ?? null;
+            if (!$uuid || !$data) {
+                continue;
+            }
+
+            $mediaItem = $this->mediaItemRepository->buscarPorUuid((string) $uuid);
+            if (null === $mediaItem) {
+                continue;
+            }
+
+            $metadados = $mediaItem->metadata();
+            $metadados[MetadataKeys::DATA] = (string) $data;
+
+            $partes = explode(' ', (string) $data);
+            if (isset($partes[1])) {
+                $metadados['horario'] = substr($partes[1], 0, 5);
+            }
+
+            $mediaItem->setMetadata($metadados);
+            $this->mediaItemRepository->salvar($mediaItem);
+            $atualizados[] = $mediaItem;
+        }
+
+        return $atualizados;
+    }
 }

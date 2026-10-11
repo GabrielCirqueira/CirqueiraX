@@ -24,15 +24,17 @@ import {
   User,
   X,
 } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import type { AtualizarMetadataInput, MediaItem } from '../types'
 
 import {
   calcularDataComOffset,
   calcularDuracaoTotalSegundos,
   combinarDataHora,
+  deslocarDataHora,
   extrairDataHoraInicial,
   extrairMinutosSegundos,
+  gerarHorarioAleatorio,
   obterDataHoraAtual,
 } from '../utils/metadataEdicao'
 
@@ -42,6 +44,7 @@ export interface ModalEditarMetadataProps {
   onFechar: () => void
   onSalvar: (input: AtualizarMetadataInput) => void
   pendente?: boolean
+  abaInicial?: 'geral' | 'data' | 'duracao' | 'capa'
 }
 
 export const ModalEditarMetadata = memo(function ModalEditarMetadata({
@@ -50,6 +53,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
   onFechar,
   onSalvar,
   pendente = false,
+  abaInicial = 'geral',
 }: ModalEditarMetadataProps) {
   if (!item) return null
 
@@ -63,7 +67,24 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
   const [minutos, setMinutos] = useState(duracaoInicial.minutos)
   const [segundos, setSegundos] = useState(duracaoInicial.segundos)
   const [thumbnail, setThumbnail] = useState(item.thumbnailUrl || item.metadata?.thumbnail || '')
-  const [abaAtiva, setAbaAtiva] = useState<'geral' | 'data' | 'duracao' | 'capa'>('geral')
+  const [abaAtiva, setAbaAtiva] = useState<'geral' | 'data' | 'duracao' | 'capa'>(abaInicial)
+
+  useEffect(() => {
+    if (aberto && item) {
+      const d = extrairDataHoraInicial(item)
+      const dur = extrairMinutosSegundos(item.metadata?.duracao)
+      setTitulo(item.metadata?.titulo || '')
+      setUploader(item.metadata?.uploader || '')
+      setDataIso(d.data)
+      setHora(d.hora)
+      setMinutos(dur.minutos)
+      setSegundos(dur.segundos)
+      setThumbnail(item.thumbnailUrl || item.metadata?.thumbnail || '')
+      if (abaInicial) {
+        setAbaAtiva(abaInicial)
+      }
+    }
+  }, [aberto, item, abaInicial])
 
   const aplicarAtalhoData = (diasOffset: number) => {
     setDataIso(calcularDataComOffset(diasOffset))
@@ -71,6 +92,16 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
 
   const aplicarAtalhoHora = (novaHora: string) => {
     setHora(novaHora)
+  }
+
+  const aplicarOffsetHoras = (deltaHoras: number, deltaMinutos = 0) => {
+    const res = deslocarDataHora(dataIso, hora, deltaHoras, deltaMinutos)
+    setDataIso(res.data)
+    setHora(res.hora)
+  }
+
+  const aplicarAleatorio = () => {
+    setHora(gerarHorarioAleatorio(8, 22))
   }
 
   const aplicarAgora = () => {
@@ -358,7 +389,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                   </HStack>
                 </Box>
 
-                <Grid templateColumns={{ base: '1fr', sm: '2fr 1fr' }} gap={3}>
+                <Grid templateColumns={{ base: '1fr', sm: '1fr 1fr' }} gap={3}>
                   <Field.Root>
                     <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
                       Data (Dia / Mês / Ano)
@@ -378,17 +409,156 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                     <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
                       Horário (Hora : Minuto)
                     </Field.Label>
-                    <Input
-                      type="time"
-                      value={hora}
-                      onChange={(e) => setHora(e.target.value)}
-                      bg="bg.muted"
-                      borderColor="border.subtle"
-                      borderRadius="lg"
-                      fontSize="sm"
-                    />
+                    <HStack gap={1.5}>
+                      <Input
+                        type="time"
+                        value={hora}
+                        onChange={(e) => setHora(e.target.value)}
+                        bg="bg.muted"
+                        borderColor="border.subtle"
+                        borderRadius="lg"
+                        fontSize="sm"
+                      />
+                      <Button
+                        size="2xs"
+                        variant="outline"
+                        onClick={() => aplicarOffsetHoras(0, -15)}
+                        title="Subtrair 15 minutos"
+                        borderRadius="md"
+                        px={1.5}
+                      >
+                        -15m
+                      </Button>
+                      <Button
+                        size="2xs"
+                        variant="outline"
+                        onClick={() => aplicarOffsetHoras(0, 15)}
+                        title="Adicionar 15 minutos"
+                        borderRadius="md"
+                        px={1.5}
+                      >
+                        +15m
+                      </Button>
+                    </HStack>
                   </Field.Root>
                 </Grid>
+
+                <Box
+                  p={3}
+                  borderRadius="xl"
+                  bg="cirqueira.brand.500/10"
+                  borderWidth="1px"
+                  borderColor="cirqueira.brand.500/20"
+                >
+                  <HStack justify="space-between" align="center" mb={2}>
+                    <HStack gap={1.5} color="cirqueira.brand.400" fontSize="xs" fontWeight="bold">
+                      <Clock size={14} />
+                      <Text as="span">Atalhos Retroativos (Deslocar Horas do Download)</Text>
+                    </HStack>
+                    <Text fontSize="10px" color="fg.subtle">
+                      Altera a hora em relação ao valor atual
+                    </Text>
+                  </HStack>
+                  <HStack gap={1.5} flexWrap="wrap">
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(0, -30)}
+                      borderRadius="lg"
+                    >
+                      -30 min
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-1)}
+                      borderRadius="lg"
+                    >
+                      -1 hora
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-2)}
+                      borderRadius="lg"
+                    >
+                      -2 horas
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-3)}
+                      borderRadius="lg"
+                    >
+                      -3 horas
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-4)}
+                      borderRadius="lg"
+                    >
+                      -4 horas
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-6)}
+                      borderRadius="lg"
+                    >
+                      -6 horas
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-8)}
+                      borderRadius="lg"
+                    >
+                      -8 horas
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-12)}
+                      borderRadius="lg"
+                    >
+                      -12 horas
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="subtle"
+                      colorPalette="brand"
+                      onClick={() => aplicarOffsetHoras(-24)}
+                      borderRadius="lg"
+                    >
+                      -24h (Ontem)
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarOffsetHoras(1)}
+                      borderRadius="lg"
+                    >
+                      +1 hora
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarOffsetHoras(2)}
+                      borderRadius="lg"
+                    >
+                      +2 horas
+                    </Button>
+                  </HStack>
+                </Box>
 
                 <Box
                   p={3}
@@ -397,49 +567,84 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
                   borderWidth="1px"
                   borderColor="border.subtle"
                 >
-                  <Text fontSize="xs" fontWeight="semibold" color="fg.subtle" mb={2}>
-                    Atalhos Rápidos de Horário
-                  </Text>
-                  <HStack gap={2} flexWrap="wrap">
+                  <HStack justify="space-between" align="center" mb={2}>
+                    <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                      Turnos & Horários Estratégicos
+                    </Text>
                     <Button
                       size="2xs"
                       variant="outline"
-                      onClick={() => aplicarAtalhoHora('00:00')}
+                      onClick={aplicarAleatorio}
+                      borderRadius="lg"
+                      title="Sortear horário orgânico hoje"
+                    >
+                      🎲 Aleatório (08h - 22h)
+                    </Button>
+                  </HStack>
+                  <HStack gap={1.5} flexWrap="wrap">
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('08:30')}
                       borderRadius="lg"
                     >
-                      00:00 (Início)
+                      08:30 (Manhã cedo)
                     </Button>
                     <Button
                       size="2xs"
                       variant="outline"
-                      onClick={() => aplicarAtalhoHora('08:00')}
+                      onClick={() => aplicarAtalhoHora('10:15')}
                       borderRadius="lg"
                     >
-                      08:00 (Manhã)
+                      10:15 (Meio da manhã)
                     </Button>
                     <Button
                       size="2xs"
                       variant="outline"
-                      onClick={() => aplicarAtalhoHora('12:00')}
+                      onClick={() => aplicarAtalhoHora('12:30')}
                       borderRadius="lg"
                     >
-                      12:00 (Meio-dia)
+                      12:30 (Almoço)
                     </Button>
                     <Button
                       size="2xs"
                       variant="outline"
-                      onClick={() => aplicarAtalhoHora('18:00')}
+                      onClick={() => aplicarAtalhoHora('14:30')}
                       borderRadius="lg"
                     >
-                      18:00 (Tarde)
+                      14:30 (Início da tarde)
                     </Button>
                     <Button
                       size="2xs"
                       variant="outline"
-                      onClick={() => aplicarAtalhoHora('23:59')}
+                      onClick={() => aplicarAtalhoHora('17:00')}
                       borderRadius="lg"
                     >
-                      23:59 (Fim do dia)
+                      17:00 (Fim de tarde)
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('19:30')}
+                      borderRadius="lg"
+                    >
+                      19:30 (Começo da noite)
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('20:46')}
+                      borderRadius="lg"
+                    >
+                      20:46 (Pico da noite)
+                    </Button>
+                    <Button
+                      size="2xs"
+                      variant="outline"
+                      onClick={() => aplicarAtalhoHora('22:30')}
+                      borderRadius="lg"
+                    >
+                      22:30 (Fim da noite)
                     </Button>
                   </HStack>
                 </Box>

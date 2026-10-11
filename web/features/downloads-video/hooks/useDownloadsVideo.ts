@@ -7,6 +7,7 @@ import {
   classificarCategoriaIndividual,
   criarPedidoDownload,
   detalharMediaItem,
+  distribuirHorariosLote,
   listarCategorias,
   listarMediaItens,
   rebaixarLote,
@@ -17,6 +18,7 @@ import type {
   ApagarLoteInput,
   AtualizarMetadataInput,
   CategorizarLoteInput,
+  DistribuirHorariosLoteInput,
   FiltrosMediaItem,
   PedidoDownloadInput,
   RebaixarLoteInput,
@@ -145,6 +147,24 @@ export function useAtualizarMetadata() {
     },
     onError: () => {
       addToast({ title: 'Falha ao atualizar metadados.', color: 'danger' })
+    },
+  })
+}
+
+export function useDistribuirHorariosLote() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: DistribuirHorariosLoteInput) => distribuirHorariosLote(input),
+    onSuccess: (_, variables) => {
+      addToast({
+        title: `${variables.itens.length} horários distribuídos com sucesso!`,
+        color: 'success',
+      })
+      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    },
+    onError: () => {
+      addToast({ title: 'Falha ao distribuir horários em lote.', color: 'danger' })
     },
   })
 }

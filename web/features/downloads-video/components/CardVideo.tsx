@@ -42,7 +42,7 @@ export interface CardVideoProps {
   selecionado: boolean
   onToggleSelect: (uuid: string) => void
   onVisualizar?: (item: MediaItem) => void
-  onEditarMetadata?: (item: MediaItem) => void
+  onEditarMetadata?: (item: MediaItem, abaInicial?: 'geral' | 'data' | 'duracao' | 'capa') => void
   onCategorizar?: (item: MediaItem) => void
   onRebaixar?: (uuid: string) => void
   onRetentar?: (uuid: string) => void
@@ -306,38 +306,76 @@ export const CardVideo = memo(function CardVideo({
           )}
         </Flex>
 
-        <Flex align="center" justify="space-between" gap={2} fontSize="xs" color="fg.subtle">
-          <HStack gap={2} color="fg.muted" truncate>
-            <HStack gap={1}>
-              <Calendar size={12} style={{ flexShrink: 0 }} />
-              <Text as="span">{dataMidia}</Text>
-            </HStack>
-            <Text as="span" opacity={0.4}>
-              •
-            </Text>
-            <HStack gap={1}>
-              <Clock size={12} style={{ flexShrink: 0 }} />
-              <Text as="span">{horarioMidia}</Text>
-            </HStack>
+        <Flex align="center" justify="space-between" gap={2} fontSize="11px" color="fg.subtle">
+          <HStack gap={1} color="fg.muted">
+            <Clock size={11} />
+            <Text as="span">Baixado: {tempoRelativoNativo(item.criadoEm)}</Text>
           </HStack>
 
           <Box flexShrink={0}>
             {item.categoria?.nome ? (
               <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
                 <HStack gap={1} alignItems="center">
-                  <Folder size={11} />
-                  <Text as="span" maxW="24" truncate>
+                  <Folder size={10} />
+                  <Text as="span" maxW="20" truncate>
                     {item.categoria.nome}
                   </Text>
                 </HStack>
               </Badge>
             ) : (
-              <Text as="span" fontStyle="italic" color="fg.subtle" fontSize="xs">
+              <Text as="span" fontStyle="italic" color="fg.subtle" fontSize="10px">
                 Sem categoria
               </Text>
             )}
           </Box>
         </Flex>
+
+        <Box
+          as="button"
+          w="full"
+          px={2.5}
+          py={1.5}
+          borderRadius="lg"
+          borderWidth="1px"
+          borderColor="cirqueira.brand.500/30"
+          bg="cirqueira.brand.500/5"
+          _hover={{
+            borderColor: 'cirqueira.brand.500/60',
+            bg: 'cirqueira.brand.500/12',
+            transform: 'translateY(-1px)',
+          }}
+          transition="all 0.15s ease"
+          onClick={(e) => {
+            e.stopPropagation()
+            onEditarMetadata?.(item, 'data')
+          }}
+          cursor="pointer"
+          textAlign="left"
+          title="Clique para editar a data e horário desta mídia"
+        >
+          <HStack justify="space-between" align="center" w="full">
+            <HStack gap={2}>
+              <Box color="cirqueira.brand.400" display="inline-flex">
+                <Calendar size={13} />
+              </Box>
+              <Text fontSize="xs" fontWeight="semibold" color="cirqueira.brand.200">
+                {dataMidia}, {horarioMidia}
+              </Text>
+            </HStack>
+            <Badge
+              size="xs"
+              variant="subtle"
+              colorPalette="brand"
+              px={1.5}
+              py={0.5}
+              fontSize="10px"
+              fontWeight="bold"
+              borderRadius="md"
+            >
+              EDITAR
+            </Badge>
+          </HStack>
+        </Box>
 
         {item.status === 'erro' && item.erroMotivo && (
           <Box
@@ -363,8 +401,8 @@ export const CardVideo = memo(function CardVideo({
           borderTopWidth="1px"
           borderColor="border.subtle"
         >
-          <Text as="span" fontSize="xs" color="fg.subtle" truncate>
-            {tempoRelativoNativo(item.criadoEm)}
+          <Text as="span" fontSize="10px" color="fg.subtle" truncate>
+            #{item.hash.slice(0, 6)}
           </Text>
 
           <HStack gap={1} flexShrink={0}>

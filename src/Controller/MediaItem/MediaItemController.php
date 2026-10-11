@@ -9,6 +9,7 @@ use App\DataObject\ApagarLoteDTO;
 use App\DataObject\AtualizarMetadataMediaItemDTO;
 use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
+use App\DataObject\DistribuirHorariosLoteDTO;
 use App\DataObject\FiltrarMediaItemDTO;
 use App\DataObject\RebaixarLoteDTO;
 use App\DataObject\UploadManualDTO;
@@ -111,6 +112,14 @@ final class MediaItemController extends DefaultController
         $resultado = $this->apagarMediaItemService->apagarEmLote($dto);
 
         return $this->success($resultado);
+    }
+
+    #[Route('/lote/distribuir-horarios', name: 'distribuir_horarios_lote', methods: ['POST'])]
+    public function distribuirHorariosLote(#[MapRequestPayload] DistribuirHorariosLoteDTO $dto): Response
+    {
+        $itens = $this->atualizarMetadataMediaItemService->distribuirHorarios($dto->itens());
+
+        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/retentar', name: 'retentar_lote', methods: ['POST'])]

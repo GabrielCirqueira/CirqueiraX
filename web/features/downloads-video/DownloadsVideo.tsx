@@ -27,6 +27,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
 import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
+import { ModalDistribuirHorariosLote } from './components/ModalDistribuirHorariosLote'
 import { ModalEditarMetadata } from './components/ModalEditarMetadata'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import { TabelaVideos } from './components/TabelaVideos'
@@ -36,12 +37,13 @@ import {
   useCategorias,
   useCategorizarLote,
   useClassificarIndividual,
+  useDistribuirHorariosLote,
   useMediaItens,
   useRebaixarLote,
   useRetentarMediaItem,
   useRetentarTodos,
 } from './hooks/useDownloadsVideo'
-import type { AtualizarMetadataInput, FiltrosMediaItem, MediaItem } from './types'
+import type { AtualizarMetadataInput, FiltrosMediaItem, ItemDistribuicaoHorario, MediaItem } from './types'
 
 export default function DownloadsVideo() {
   const [pagina, setPagina] = useState(1)
@@ -53,7 +55,11 @@ export default function DownloadsVideo() {
 
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
   const [itemEditarMetadata, setItemEditarMetadata] = useState<MediaItem | null>(null)
+  const [abaInicialEditarMetadata, setAbaInicialEditarMetadata] = useState<
+    'geral' | 'data' | 'duracao' | 'capa'
+  >('geral')
 
+  const [modalDistribuirAberto, setModalDistribuirAberto] = useState(false)
   const [modalCategorizarAberto, setModalCategorizarAberto] = useState(false)
   const [categoriaAlvoUuid, setCategoriaAlvoUuid] = useState<string | null>(null)
   const [categoriaSelecionadaId, setCategoriaSelecionadaId] = useState<string>('')
@@ -91,6 +97,8 @@ export default function DownloadsVideo() {
   const { mutate: rebaixarLoteMutate, isPending: pendenteRebaixar } = useRebaixarLote()
   const { mutate: apagarLoteMutate, isPending: pendenteApagar } = useApagarLote()
   const { mutate: atualizarMetadataMutate, isPending: pendenteMetadata } = useAtualizarMetadata()
+  const { mutate: distribuirHorariosMutate, isPending: pendenteDistribuir } =
+    useDistribuirHorariosLote()
   const { mutate: retentarItemMutate } = useRetentarMediaItem()
   const { mutate: retentarTodosMutate, isPending: pendenteRetentarTodos } = useRetentarTodos()
 
@@ -98,6 +106,11 @@ export default function DownloadsVideo() {
   const total = respostaPaginada?.total ?? 0
   const porPagina = respostaPaginada?.porPagina ?? 12
   const totalPaginas = Math.ceil(total / porPagina) || 1
+
+  const itensSelecionados = useMemo(
+    () => itens.filter((i) => selecionados.includes(i.uuid)),
+    [itens, selecionados]
+  )
 
   const concluidosCount = useMemo(
     () => itens.filter((i) => i.status === 'concluido' || i.status === 'distribuido_local').length,
@@ -146,8 +159,12 @@ export default function DownloadsVideo() {
     setSelecionados([])
   }, [])
 
-  const handleAbrirEditarMetadata = (item: MediaItem) => {
+  const handleAbrirEditarMetadata = (
+    item: MediaItem,
+    aba: 'geral' | 'data' | 'duracao' | 'capa' = 'geral'
+  ) => {
     setItemEditarMetadata(item)
+    setAbaInicialEditarMetadata(aba)
   }
 
   const handleSalvarMetadata = (input: AtualizarMetadataInput) => {
@@ -160,6 +177,18 @@ export default function DownloadsVideo() {
       {
         onSuccess: () => {
           setItemEditarMetadata(null)
+        },
+      }
+    )
+  }
+
+  const handleSalvarDistribuicaoLote = (itensDistribuicao: ItemDistribuicaoHorario[]) => {
+    distribuirHorariosMutate(
+      { itens: itensDistribuicao },
+      {
+        onSuccess: () => {
+          setModalDistribuirAberto(false)
+          setSelecionados([])
         },
       }
     )
@@ -661,10 +690,21 @@ export default function DownloadsVideo() {
           totalSelecionados={selecionados.length}
           selecionados={selecionados}
           onLimparSelecao={handleLimparSelecao}
+          onDistribuirHorariosLote={() => setModalDistribuirAberto(true)}
           onCategorizarLote={handleAbrirCategorizarLote}
           onRebaixarLote={handleAbrirRebaixarLote}
           onApagarLote={handleAbrirApagarLote}
-          processando={pendenteCategorizarLote || pendenteRebaixar || pendenteApagar}
+          processando={
+            pendenteCategorizarLote || pendenteRebaixar || pendenteApagar || pendenteDistribuir
+          }
+        />
+
+        <ModalDistribuirHorariosLote
+          aberto={modalDistribuirAberto}
+          itens={itensSelecionados}
+          onFechar={() => setModalDistribuirAberto(false)}
+          onSalvar={handleSalvarDistribuicaoLote}
+          pendente={pendenteDistribuir}
         />
 
         <ModalEditarMetadata
@@ -673,6 +713,7 @@ export default function DownloadsVideo() {
           onFechar={() => setItemEditarMetadata(null)}
           onSalvar={handleSalvarMetadata}
           pendente={pendenteMetadata}
+          abaInicial={abaInicialEditarMetadata}
         />
 
         <Dialog.Root

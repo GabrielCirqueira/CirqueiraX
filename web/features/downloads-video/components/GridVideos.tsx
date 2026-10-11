@@ -11,7 +11,7 @@ export interface GridVideosProps {
   onToggleSelect: (uuid: string) => void
   onToggleSelectAll?: () => void
   onVisualizar?: (item: MediaItem) => void
-  onEditarMetadata?: (item: MediaItem) => void
+  onEditarMetadata?: (item: MediaItem, abaInicial?: 'geral' | 'data' | 'duracao' | 'capa') => void
   onCategorizar?: (item: MediaItem) => void
   onRebaixar?: (uuid: string) => void
   onRetentar?: (uuid: string) => void
