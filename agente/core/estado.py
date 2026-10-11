@@ -8,11 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
 
-_agente_dir = str(Path(__file__).resolve().parent)
-if _agente_dir not in sys.path:
-    sys.path.insert(0, _agente_dir)
-
-import config
+try:
+    from . import config
+except ImportError:
+    from core import config
 
 _lock = Lock()
 

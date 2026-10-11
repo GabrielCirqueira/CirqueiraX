@@ -244,4 +244,40 @@
   - `documentation/guias/AGENTE.md`
   - `.gitignore`
 
+---
+
+## Melhoria 30 — Reestruturação e Modularização Limpa do Agente Python (`./agente/`)
+
+- **Data**: 11/10/2026
+- **Contexto**: A raiz do diretório `agente/` acumulava mais de 14 arquivos avulsos misturando lógica interna do daemon, wrappers de CLI, scripts de inicialização de SO, arquivos batch e múltiplos templates `.env`. Foi solicitada uma reorganização limpa e profissional para os arquivos Python, eliminando a poluição visual sem quebrar a compatibilidade com os daemons de sistema operacional já instalados (systemd, launchd, tarefas agendadas do Windows).
+- **O que foi feito**:
+  - Criado o pacote interno Python `agente/core/` encapsulando todos os módulos e responsabilidades internas:
+    - [`core/__init__.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/__init__.py): exportações do pacote com lazy loading de `iniciar_watcher` (evitando import eager de dependências opcionais como `watchdog` em comandos leves como `status` e `test`).
+    - [`core/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/config.py): descoberta dinâmica e carregamento de `.env` em múltiplos caminhos candidatos, cálculo automático de paths de runtime e estatísticas isolados por perfil.
+    - [`core/estado.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/estado.py): deduplicação thread-safe por SHA-256 e persistência de histórico e batimento cardíaco.
+    - [`core/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/cliente.py): cliente HTTP multipart resiliente com retentativas e backoff exponencial.
+    - [`core/watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/watcher.py): observador do sistema de arquivos com debounce de 3.0s.
+    - [`core/status.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/status.py): dashboard ANSI para o terminal (modo snapshot e live monitor).
+  - Criada a pasta `agente/env/` agrupando os templates de configuração (`.env.example`, `.env.empresa.example`, `.env.pessoal.example`).
+  - Criada a pasta `agente/scripts/` para utilitários de shell do usuário (`status.sh`, `status.bat`).
+  - Refatorado [`agente/agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py) como ponto de entrada canônico e enxuto na raiz, preservando 100% de compatibilidade retroativa com os daemons configurados em `agente/servico/`.
+  - Atualizados guias técnicos e documentação em [`agente/README.md`](file:///home/gabriel/dev/CirqueiraX/agente/README.md) e [`documentation/guias/AGENTE.md`](file:///home/gabriel/dev/CirqueiraX/documentation/guias/AGENTE.md).
+- **Arquivos**:
+  - `agente/agente.py`
+  - `agente/core/__init__.py`
+  - `agente/core/config.py`
+  - `agente/core/estado.py`
+  - `agente/core/cliente.py`
+  - `agente/core/watcher.py`
+  - `agente/core/status.py`
+  - `agente/env/.env.example`
+  - `agente/env/.env.empresa.example`
+  - `agente/env/.env.pessoal.example`
+  - `agente/scripts/status.sh`
+  - `agente/scripts/status.bat`
+  - `agente/README.md`
+  - `documentation/guias/AGENTE.md`
+  - `.gitignore`
+
+
 

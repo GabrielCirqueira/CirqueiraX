@@ -43,20 +43,29 @@ O agente funciona desacoplado do servidor e opera no modelo *fire-and-forget* co
 
 ```
 agente/
-├── agente.py                     # Ponto de entrada (valida configs, inicia o watcher e gerencia o loop)
-├── watcher.py                    # Monitoramento de eventos do sistema de arquivos via watchdog
-├── cliente.py                    # Envio HTTP multipart via requests com retry e backoff
-├── estado.py                     # Gerenciamento de idempotência e histórico local via hash SHA-256
-├── config.py                     # Carregamento e sanitização de variáveis de ambiente (.env)
+├── agente.py                     # Entrypoint CLI unificado (start, status, test)
 ├── requirements.txt              # Dependências Python (requests, watchdog, python-dotenv)
-├── .env.example                  # Exemplo padrão de configuração
-├── .env.empresa.example          # Exemplo para PC do trabalho (origem: print_empresa)
-├── .env.pessoal.example          # Exemplo para PC pessoal (origem: print_pessoal)
-└── servico/                      # Scripts para instalação como serviço contínuo do SO
+├── README.md                     # Documentação completa do agente
+├── .env.example                  # Template base de configuração de ambiente
+├── core/                         # Pacote Python interno modular
+│   ├── __init__.py               # Exports limpos e lazy loading do pacote
+│   ├── config.py                 # Descoberta de .env, caminhos isolados e sanitização
+│   ├── watcher.py                # Monitoramento de filesystem com watchdog e debounce
+│   ├── cliente.py                # Envio HTTP multipart com retry e backoff
+│   ├── estado.py                 # Persistência de hash, deduplicação e métricas
+│   └── status.py                 # Renderizador de status/dashboard ANSI multiplataforma
+├── env/                          # Templates de configuração organizados
+│   ├── .env.example              # Exemplo padrão
+│   ├── .env.empresa.example      # Perfil PC Empresa (origem: print_empresa)
+│   └── .env.pessoal.example      # Perfil PC Pessoal (origem: print_pessoal)
+├── scripts/                      # Scripts de terminal para acesso rápido
+│   ├── status.sh                 # Atalho de status para Linux e macOS
+│   └── status.bat                # Atalho de status para Windows
+└── servico/                      # Integrações com gerenciadores de serviço do SO
     ├── cirqueirax-agente.service # Unidade Systemd para Linux
-    ├── instalar-servico-linux.sh # Script de instalação automática no Systemd do usuário
+    ├── instalar-servico-linux.sh # Instalador automático para Systemd do usuário
     ├── com.cirqueirax.agente.plist # Configuração Launchd para macOS
-    └── instalar-servico-windows.bat # Script de registro no Agendador de Tarefas do Windows
+    └── instalar-servico-windows.bat # Instalador para Agendador de Tarefas do Windows
 ```
 
 ---

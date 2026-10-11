@@ -41,6 +41,7 @@
 | M27 | Refatoração Global de Componentes com Lógica Extrema e Remoção de Dependência Externa | ✅ Concluído | 10/10/2026 | [ver](MELHORIAS_2.md#melhoria-27--refatoração-global-de-componentes-com-lógica-extrema-e-remoção-de-dependência-externa) |
 | M28 | Migração Automática de Categorias Padrão, Resiliência de Armazenamento Local e Guia Syncthing | ✅ Concluído | 10/10/2026 | [ver](MELHORIAS_2.md#melhoria-28--migração-automática-de-categorias-padrão-resiliência-de-armazenamento-local-e-guia-syncthing) |
 | M29 | Monitoramento de Aplicação, Métricas e Painel de Status Multiplataforma para o Agente | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-29--monitoramento-de-aplicação-métricas-e-painel-de-status-multiplataforma-para-o-agente) |
+| M30 | Reestruturação e Modularização Limpa do Agente Python (`agente/core/`, `env/`, `scripts/`) | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-30--reestruturação-e-modularização-limpa-do-agente-python-agente) |
 
 
 

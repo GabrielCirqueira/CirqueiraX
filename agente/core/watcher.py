@@ -1,17 +1,17 @@
 import logging
 from pathlib import Path
-import sys
 import time
 from threading import Thread
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-_agente_dir = str(Path(__file__).resolve().parent)
-if _agente_dir not in sys.path:
-    sys.path.insert(0, _agente_dir)
+try:
+    from . import config
+    from .cliente import EXTENSOES_PERMITIDAS, enviar_print
+except ImportError:
+    from core import config
+    from core.cliente import EXTENSOES_PERMITIDAS, enviar_print
 
-import config
-from cliente import EXTENSOES_PERMITIDAS, enviar_print
 
 class ScreenshotEventHandler(FileSystemEventHandler):
     def __init__(self, callback_envio=enviar_print):
@@ -62,6 +62,7 @@ class ScreenshotEventHandler(FileSystemEventHandler):
 
         logging.error(f"Timeout ao aguardar estabilização do arquivo: {caminho.name}")
         return False
+
 
 def iniciar_watcher(callback_envio=enviar_print):
     pasta = Path(config.WATCH_DIR)

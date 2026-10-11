@@ -1,16 +1,15 @@
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-import sys
 import time
 import requests
 
-_agente_dir = str(Path(__file__).resolve().parent)
-if _agente_dir not in sys.path:
-    sys.path.insert(0, _agente_dir)
-
-import config
-from estado import ja_enviado, marcar_enviado, registrar_sucesso, registrar_falha
+try:
+    from . import config
+    from .estado import ja_enviado, marcar_enviado, registrar_falha, registrar_sucesso
+except ImportError:
+    from core import config
+    from core.estado import ja_enviado, marcar_enviado, registrar_falha, registrar_sucesso
 
 EXTENSOES_PERMITIDAS = {".png", ".jpg", ".jpeg", ".webp"}
 

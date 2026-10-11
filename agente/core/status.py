@@ -4,13 +4,14 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-_agente_dir = str(Path(__file__).resolve().parent)
-if _agente_dir not in sys.path:
-    sys.path.insert(0, _agente_dir)
-
-import config
-from cliente import testar_conexao_servidor
-from estado import obter_estatisticas, obter_status_processo
+try:
+    from . import config
+    from .cliente import testar_conexao_servidor
+    from .estado import obter_estatisticas, obter_status_processo
+except ImportError:
+    from core import config
+    from core.cliente import testar_conexao_servidor
+    from core.estado import obter_estatisticas, obter_status_processo
 
 # Ativa suporte a cores ANSI no Windows 10/11
 if sys.platform == "win32":

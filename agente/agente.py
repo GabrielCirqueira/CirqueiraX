@@ -4,12 +4,13 @@ import sys
 import time
 from pathlib import Path
 
-_agente_dir = str(Path(__file__).resolve().parent)
-if _agente_dir not in sys.path:
-    sys.path.insert(0, _agente_dir)
+# Garante que o diretório raiz do agente está no sys.path para importações do pacote core
+DIRETORIO_RAIZ = Path(__file__).resolve().parent
+if str(DIRETORIO_RAIZ) not in sys.path:
+    sys.path.insert(0, str(DIRETORIO_RAIZ))
 
-import config
-from estado import (
+from core import config
+from core.estado import (
     atualizar_heartbeat,
     registrar_encerramento_processo,
     registrar_inicio_processo,
@@ -40,7 +41,7 @@ def validar_configuracao():
 
 def executar_daemon():
     validar_configuracao()
-    from watcher import iniciar_watcher
+    from core.watcher import iniciar_watcher
 
     registrar_inicio_processo()
     observer = iniciar_watcher()
@@ -67,7 +68,7 @@ def executar_daemon():
 
 
 def executar_teste_conexao():
-    from cliente import testar_conexao_servidor
+    from core.cliente import testar_conexao_servidor
 
     print(f"Testando conectividade com o servidor: {config.SERVER_URL}...")
     sucesso, codigo, detalhe = testar_conexao_servidor()
@@ -103,7 +104,7 @@ def main():
     args = parser.parse_args()
 
     if args.comando == "status":
-        from status import exibir_status
+        from core.status import exibir_status
 
         exibir_status(modo_watch=args.watch)
     elif args.comando == "test":

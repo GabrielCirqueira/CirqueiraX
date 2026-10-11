@@ -62,18 +62,47 @@ Com o **Agente CirqueiraX**, esse atrito é **reduzido a zero**:
 
 ## 3. Estrutura do Diretório `./agente/`
 
-| Arquivo | Responsabilidade |
+O agente adota uma arquitetura modular limpa, isolando o núcleo de código Python, os templates de configuração e os utilitários de inicialização:
+
+```text
+agente/
+├── agente.py                # Ponto de entrada canônico (CLI: start, status, test)
+├── requirements.txt         # Dependências do pacote (watchdog, requests, python-dotenv)
+├── README.md                # Guia rápido de uso local
+├── .env.example             # Template padrão de variáveis de ambiente
+│
+├── core/                    # Módulo Python interno com as responsabilidades desacopladas
+│   ├── __init__.py          # Exportações do pacote
+│   ├── config.py            # Validação e carregamento de configurações e caminhos
+│   ├── estado.py            # Deduplicação SHA-256 e persistência de estatísticas/status
+│   ├── cliente.py           # Cliente HTTP multipart resiliente com backoff exponencial
+│   ├── watcher.py           # Observer watchdog do sistema de arquivos com debounce
+│   └── status.py            # Dashboard visual ANSI para o terminal (modo snapshot e live)
+│
+├── env/                     # Modelos de configuração prontos por perfil
+│   ├── .env.example         # Exemplo base
+│   ├── .env.empresa.example # Exemplo pronto para máquina corporativa (print_empresa)
+│   └── .env.pessoal.example # Exemplo pronto para máquina pessoal (print_pessoal)
+│
+├── scripts/                 # Atalhos convenientes para terminal do usuário
+│   ├── status.sh            # Script rápido de status para Linux / macOS
+│   └── status.bat           # Script rápido de status para Windows
+│
+└── servico/                 # Daemons e serviços de segundo plano do SO
+    ├── cirqueirax-agente.service     # Definição Systemd User Service (Linux)
+    ├── instalar-servico-linux.sh     # Instalador automático para Linux
+    ├── instalar-servico-windows.bat  # Instalador de tarefa agendada (Windows)
+    └── com.cirqueirax.agente.plist   # Definição Launchd Daemon (macOS)
+```
+
+| Componente | Responsabilidade |
 | :--- | :--- |
-| [`agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py) | Ponto de entrada: valida variáveis de ambiente, inicializa o watcher e gerencia o ciclo de vida. |
-| [`watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/watcher.py) | Observador do sistema de arquivos (`watchdog`): captura eventos, filtra extensões e aguarda estabilização. |
-| [`estado.py`](file:///home/gabriel/dev/CirqueiraX/agente/estado.py) | Gerenciador de estado local e deduplicação: cálculo de hash SHA-256 e persistência em arquivo JSON com thread locking. |
-| [`cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/cliente.py) | Cliente HTTP (`requests`): envio multipart/form-data com retry e backoff exponencial para falhas de rede. |
-| [`config.py`](file:///home/gabriel/dev/CirqueiraX/agente/config.py) | Configurações dinâmicas carregadas a partir de variáveis de ambiente e `.env`. |
-| [`requirements.txt`](file:///home/gabriel/dev/CirqueiraX/agente/requirements.txt) | Especificação das dependências Python (`requests`, `watchdog`, `python-dotenv`). |
-| [`.env.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.example) | Modelo base de configuração de ambiente. |
-| [`.env.empresa.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.empresa.example) | Exemplo pronto para a máquina de trabalho (`print_empresa`). |
-| [`.env.pessoal.example`](file:///home/gabriel/dev/CirqueiraX/agente/.env.pessoal.example) | Exemplo pronto para a máquina pessoal (`print_pessoal`). |
-| [`servico/`](file:///home/gabriel/dev/CirqueiraX/agente/servico/) | Scripts e definições de serviço para execução persistente em Linux, Windows e macOS. |
+| [`agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py) | CLI canônico do agente: `start`, `status`, `test` e `version`. |
+| [`core/watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/watcher.py) | Observador do sistema de arquivos (`watchdog`): captura eventos e estabiliza arquivos com debounce de 3s. |
+| [`core/estado.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/estado.py) | Gerenciador de estado local e deduplicação: cálculo de hash SHA-256 e métricas diárias/acumuladas. |
+| [`core/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/cliente.py) | Cliente HTTP (`requests`): envio multipart/form-data com retry e backoff exponencial para falhas de rede. |
+| [`core/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/config.py) | Configurações dinâmicas carregadas a partir de variáveis de ambiente e arquivos `.env`. |
+| [`core/status.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/status.py) | Formatador e renderizador do dashboard ANSI no terminal (com suporte ao flag `--watch`). |
 
 ---
 
@@ -166,13 +195,12 @@ O agente fornece um comando de status visual no terminal (semelhante ao `systemc
 ### 7.1. Comandos de Visualização de Status
 
 ```bash
-# Via script do agente
+# Via CLI canônico do agente
 python3 agente/agente.py status
 
-# Ou diretamente pelo script status.py / status.sh / status.bat
-./agente/status.sh          # No Linux / macOS
-agente\status.bat           # No Windows
-python agente/status.py     # Em qualquer sistema operacional
+# Ou diretamente pelos atalhos em scripts/
+./agente/scripts/status.sh          # No Linux / macOS
+agente\scripts\status.bat           # No Windows
 ```
 
 ### 7.2. Modo Live Monitor (`--watch` / `-w`)
@@ -181,9 +209,10 @@ Para acompanhar os envios e o status em tempo real (atualizado a cada 2 segundos
 
 ```bash
 python3 agente/agente.py status --watch
-# Ou de forma abreviada:
-./agente/status.sh -w
-agente\status.bat -w
+
+# Ou via atalhos:
+./agente/scripts/status.sh -w
+agente\scripts\status.bat -w
 ```
 
 ### 7.3. Exemplo de Saída do Terminal

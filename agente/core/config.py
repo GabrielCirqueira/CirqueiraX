@@ -3,8 +3,23 @@ import socket
 from pathlib import Path
 from dotenv import load_dotenv
 
-env_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path=env_path)
+# Diretório base do agente (pasta pai de core/)
+DIRETORIO_RAIZ = Path(__file__).resolve().parent.parent
+
+# Busca o arquivo .env na raiz do agente ou na pasta env/
+candidatos_env = [
+    DIRETORIO_RAIZ / ".env",
+    DIRETORIO_RAIZ / "env" / ".env",
+    Path.cwd() / ".env",
+]
+
+for candidato in candidatos_env:
+    if candidato.exists() and candidato.is_file():
+        load_dotenv(dotenv_path=candidato)
+        break
+else:
+    # Fallback padrão
+    load_dotenv(dotenv_path=DIRETORIO_RAIZ / ".env")
 
 SERVER_URL = os.getenv("SERVER_URL", "http://localhost:8080/api/v1/ingestao/print")
 AGENT_TOKEN = os.getenv("AGENT_TOKEN", "")
