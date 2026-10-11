@@ -208,9 +208,29 @@ Tire um screenshot na sua máquina e observe os logs:
 
 ## 6. Execução em Segundo Plano (Como Serviço do Sistema)
 
-Na pasta `agente/servico/`, há configurações prontas para transformar o agente em um serviço que inicia automaticamente com o sistema operacional.
+Na pasta `agente/servico/`, há configurações prontas para transformar o agente em um serviço que inicia automaticamente com o sistema operacional, com suporte especializado para **WSL2**, **Linux nativo**, **Windows nativo** e **macOS**.
 
-### 6.1. No Linux (Systemd de Usuário)
+### 6.1. No WSL2 (Vigiando a Pasta de Screenshots do Windows)
+
+Se você roda o ambiente no WSL2 mas tira capturas de tela no Windows (`Win + Shift + S`, `PrtScn` ou Ferramenta de Captura), os arquivos são salvos no disco do Windows (`C:\Users\<usuario>\Pictures\Screenshots`), que o WSL enxerga montado em `/mnt/c/Users/<usuario>/Pictures/Screenshots`.
+
+> [!IMPORTANT]
+> **Por que o WSL precisa do PollingObserver?**
+> O sistema de arquivos DrvFs (`/mnt/c/...`) não repassa eventos de kernel `inotify` do Windows para o Linux. Para resolver isso, o agente ativa automaticamente o `PollingObserver` (varredura periódica configurada em `USE_POLLING=true`), detectando novos prints do Windows instantaneamente com 100% de confiabilidade.
+
+Execute o instalador dedicado para WSL:
+```bash
+chmod +x servico/instalar-servico-wsl.sh
+./servico/instalar-servico-wsl.sh
+```
+
+Ou de forma universal via CLI:
+```bash
+python3 agente.py install
+```
+O assistente detecta o usuário do Windows automaticamente, configura o caminho `/mnt/c/...`, ativa o `PollingObserver` e registra o serviço no Systemd do WSL.
+
+### 6.2. No Linux Nativo (Systemd de Usuário)
 Não requer privilégios de `root` (executa na sessão do seu usuário):
 
 ```bash
@@ -230,20 +250,21 @@ journalctl --user -u cirqueirax-agente.service -f
 systemctl --user restart cirqueirax-agente.service
 ```
 
-### 6.2. No Windows (Agendador de Tarefas)
-Execute o arquivo batch como Administrador ou abra o Prompt de Comando na pasta `servico`:
+### 6.3. No Windows Nativo (Agendador de Tarefas)
+Caso prefira executar o Python diretamente no Windows (fora do WSL), execute o arquivo batch no Prompt de Comando do Windows:
 ```cmd
 servico\instalar-servico-windows.bat
 ```
 Isso criará uma tarefa agendada chamada `CirqueiraX_Agente` configurada para iniciar sempre que você fizer login (`ONLOGON`).
 
-### 6.3. No macOS (Launchd)
+### 6.4. No macOS (Launchd)
 Copie o arquivo plist para sua pasta de agentes do usuário:
 ```bash
 mkdir -p ~/Library/LaunchAgents
 cp servico/com.cirqueirax.agente.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
 ```
+
 
 ---
 

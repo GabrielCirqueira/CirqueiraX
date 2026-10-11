@@ -85,7 +85,6 @@ final readonly class ClassificarMediaItemService
             try {
                 $resultado[] = $this->classificarManualmente($uuid, new ClassificarManualDTO($dto->categoriaId()));
             } catch (\Throwable) {
-                // Silently skip item failure in batch to remain resilient
                 continue;
             }
         }
@@ -165,7 +164,6 @@ final readonly class ClassificarMediaItemService
                 }
             }
         } catch (\Throwable) {
-            // Falha não bloqueia o fluxo de reclassificação
         }
     }
 }

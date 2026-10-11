@@ -50,7 +50,6 @@ final readonly class SyncthingClient implements SyncthingClientInterface
         }
 
         try {
-            // Obter status do sistema
             $statusResp = $this->client->request('GET', $this->resolverUrl('/rest/system/status'), [
                 'headers' => $this->headers(),
                 'timeout' => 3.0,
@@ -59,7 +58,6 @@ final readonly class SyncthingClient implements SyncthingClientInterface
             $statusData = json_decode((string) $statusResp->getBody(), true) ?? [];
             $versao = isset($statusData['version']) ? (string) $statusData['version'] : null;
 
-            // Obter configuração de pastas
             $configResp = $this->client->request('GET', $this->resolverUrl('/rest/config/folders'), [
                 'headers' => $this->headers(),
                 'timeout' => 3.0,

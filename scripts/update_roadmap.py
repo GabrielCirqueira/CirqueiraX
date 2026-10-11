@@ -14,12 +14,10 @@ import re
 import sys
 from typing import TypedDict
 
-
 class Topic(TypedDict):
     id: int
     title: str
     status: str
-
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROADMAP_PATH = os.path.join(ROOT, "ROADMAP.md")
@@ -28,10 +26,8 @@ INDEX_PATH = os.path.join(PROGRESSO_DIR, "PROGRESSO_ROADMAP.md")
 
 SKIP_TITLES = {"Tópico", "---", ""}
 
-
 def file_index(topic_id: int) -> int:
     return math.ceil(topic_id / 20)
-
 
 def parse_roadmap(content: str) -> tuple[str, list[Topic]]:
     title_match = re.search(r"^# Roadmap —\s*(.+)$", content, re.MULTILINE)
@@ -72,7 +68,6 @@ def parse_roadmap(content: str) -> tuple[str, list[Topic]]:
 
     return lote_title, [topics[i] for i in sorted(topics)]
 
-
 def parse_index(path: str) -> dict[int, Topic]:
     if not os.path.isfile(path):
         return {}
@@ -93,7 +88,6 @@ def parse_index(path: str) -> dict[int, Topic]:
                 continue
             topics[topic_id] = {"id": topic_id, "title": title, "status": status}
     return topics
-
 
 def write_paginated_file(lote_title: str, lote: list[Topic]) -> str | None:
     start = lote[0]["id"]
@@ -120,7 +114,6 @@ def write_paginated_file(lote_title: str, lote: list[Topic]) -> str | None:
         handle.writelines(lines)
 
     return filename
-
 
 def write_index(topics: list[Topic]) -> None:
     max_id = topics[-1]["id"]
@@ -153,7 +146,6 @@ def write_index(topics: list[Topic]) -> None:
     with open(INDEX_PATH, "w", encoding="utf-8") as handle:
         handle.write(content)
 
-
 def main() -> None:
     if not os.path.isfile(ROADMAP_PATH):
         print("ROADMAP.md não encontrado.", file=sys.stderr)
@@ -176,7 +168,6 @@ def main() -> None:
         print(f"Criado {created}.")
     else:
         print("Página paginada do lote já existia — conteúdo preservado.")
-
 
 if __name__ == "__main__":
     main()

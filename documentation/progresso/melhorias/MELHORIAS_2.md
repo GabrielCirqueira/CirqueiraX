@@ -313,6 +313,40 @@
   - `documentation/guias/AGENTE.md`
   - `.gitignore`
 
+---
+
+## Melhoria 32 — Suporte e Detecção Automática de WSL, PollingObserver para DrvFs e Instalador Dedicado
+
+- **Data**: 11/10/2026
+- **Contexto**: O usuário desenvolve e executa os serviços dentro do ambiente WSL2 (Linux), mas tira capturas de tela no sistema operacional hospedeiro (Windows). No WSL, a pasta do Windows é montada em `/mnt/c/Users/<usuario>/Pictures/Screenshots` (sistema de arquivos DrvFs). Por limitações conhecidas do kernel, o subsistema `inotify` do Linux não recebe eventos de arquivos gravados pelo Windows nesse ponto de montagem, fazendo com que o agente tradicional não detecte os screenshots. Foi solicitado melhorar o processo de instalação para WSL sem remover os instaladores existentes de outros sistemas operacionais.
+- **O que foi feito**:
+  - Implementado suporte nativo ao `PollingObserver` em [`agente/core/watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/watcher.py):
+    - Detecta automaticamente se a pasta monitorada está em `/mnt/` ou se o parâmetro `USE_POLLING=true` está ativo no `.env`.
+    - Realiza varredura periódica a cada 1.5s (`POLLING_INTERVAL`), garantindo detecção instantânea e 100% confiável de arquivos salvos pelo Windows no DrvFs.
+  - Implementada detecção automática de ambiente WSL e conversor de caminhos em [`agente/core/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/config.py):
+    - Converte caminhos copiados no formato Windows (ex: `C:\Users\...`) para o padrão WSL (`/mnt/c/Users/...`).
+    - Varre candidatos de pastas de prints de usuários do Windows (`/mnt/c/Users/*/Pictures/Screenshots` e OneDrive).
+  - Criado o comando CLI `python3 agente.py install` em [`agente/core/comandos.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/comandos.py) e [`agente/agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py):
+    - Detecta automaticamente se está no WSL, seleciona a pasta de screenshots correta do Windows, cria o virtualenv `.venv`, instala dependências (`requirements.txt`), configura `.env` com polling e registra o serviço no Systemd do usuário.
+  - Criado o script dedicado [`agente/servico/instalar-servico-wsl.sh`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-wsl.sh).
+  - Aprimorado [`agente/servico/instalar-servico-linux.sh`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-linux.sh) com criação automática de venv e compatibilidade com WSL.
+  - Preservados 100% dos instaladores originais: [`instalar-servico-windows.bat`](file:///home/gabriel/dev/CirqueiraX/agente/servico/instalar-servico-windows.bat) e [`com.cirqueirax.agente.plist`](file:///home/gabriel/dev/CirqueiraX/agente/servico/com.cirqueirax.agente.plist).
+  - Atualizado o dashboard de status em [`agente/core/status.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/status.py) exibindo o ambiente WSL2, a montagem DrvFs e o modo PollingObserver ativo.
+  - Atualizados templates `.env.example` e documentação técnica em [`agente/README.md`](file:///home/gabriel/dev/CirqueiraX/agente/README.md) e [`documentation/guias/AGENTE.md`](file:///home/gabriel/dev/CirqueiraX/documentation/guias/AGENTE.md).
+- **Arquivos**:
+  - `agente/core/watcher.py`
+  - `agente/core/config.py`
+  - `agente/core/comandos.py`
+  - `agente/core/status.py`
+  - `agente/agente.py`
+  - `agente/servico/instalar-servico-wsl.sh`
+  - `agente/servico/instalar-servico-linux.sh`
+  - `agente/.env.example`
+  - `agente/env/.env.example`
+  - `agente/README.md`
+  - `documentation/guias/AGENTE.md`
+
+
 
 
 

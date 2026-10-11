@@ -23,12 +23,10 @@ from core.estado import (
 )
 from core.status import exibir_status
 
-
 def iniciar_watcher(*args, **kwargs):
     from core.watcher import iniciar_watcher as _iniciar
 
     return _iniciar(*args, **kwargs)
-
 
 __all__ = [
     "config",
@@ -53,4 +51,3 @@ __all__ = [
     "executar_comando_send",
     "executar_comando_reset",
 ]
-

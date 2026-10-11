@@ -19,13 +19,11 @@ final class Version20261003231841 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE media_item ADD thumbnail_url VARCHAR(1024) DEFAULT NULL');
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE media_item DROP thumbnail_url');
     }
 }

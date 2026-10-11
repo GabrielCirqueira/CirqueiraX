@@ -15,18 +15,12 @@ except ImportError:
 
 _lock = Lock()
 
-
 def calcular_hash(caminho_arquivo: Path) -> str:
     hasher = hashlib.sha256()
     with open(caminho_arquivo, "rb") as f:
         for chunk in iter(lambda: f.read(65536), b""):
             hasher.update(chunk)
     return hasher.hexdigest()
-
-
-# ─────────────────────────────────────────────────────────────
-# Gerenciamento de Estado de Arquivos Enviados (Deduplicação)
-# ─────────────────────────────────────────────────────────────
 
 def _carregar_estado() -> dict:
     arquivo_estado = Path(config.STATE_FILE)
@@ -41,7 +35,6 @@ def _carregar_estado() -> dict:
         logging.warning(f"Erro ao ler arquivo de estado [{config.STATE_FILE}]: {e}")
     return {"enviados": {}}
 
-
 def _salvar_estado(estado: dict) -> None:
     arquivo_estado = Path(config.STATE_FILE)
     try:
@@ -51,7 +44,6 @@ def _salvar_estado(estado: dict) -> None:
     except Exception as e:
         logging.error(f"Erro ao salvar arquivo de estado [{config.STATE_FILE}]: {e}")
 
-
 def ja_enviado(caminho_arquivo: Path) -> bool:
     if not caminho_arquivo.exists() or not caminho_arquivo.is_file():
         return False
@@ -59,13 +51,14 @@ def ja_enviado(caminho_arquivo: Path) -> bool:
     try:
         hash_arquivo = calcular_hash(caminho_arquivo)
     except Exception as e:
-        logging.warning(f"Falha ao calcular hash do arquivo [{caminho_arquivo.name}]: {e}")
+        logging.warning(
+            f"Falha ao calcular hash do arquivo [{caminho_arquivo.name}]: {e}"
+        )
         return False
 
     with _lock:
         estado = _carregar_estado()
         return hash_arquivo in estado.get("enviados", {})
-
 
 def marcar_enviado(caminho_arquivo: Path) -> None:
     if not caminho_arquivo.exists() or not caminho_arquivo.is_file():
@@ -74,7 +67,9 @@ def marcar_enviado(caminho_arquivo: Path) -> None:
     try:
         hash_arquivo = calcular_hash(caminho_arquivo)
     except Exception as e:
-        logging.error(f"Falha ao calcular hash ao marcar enviado [{caminho_arquivo.name}]: {e}")
+        logging.error(
+            f"Falha ao calcular hash ao marcar enviado [{caminho_arquivo.name}]: {e}"
+        )
         return
 
     with _lock:
@@ -86,12 +81,9 @@ def marcar_enviado(caminho_arquivo: Path) -> None:
             "enviado_em": datetime.now(timezone.utc).isoformat(),
         }
         _salvar_estado(estado)
-        logging.debug(f"Arquivo marcado como enviado no estado local: {caminho_arquivo.name}")
-
-
-# ─────────────────────────────────────────────────────────────
-# Gerenciamento de Métricas e Estatísticas Persistentes
-# ─────────────────────────────────────────────────────────────
+        logging.debug(
+            f"Arquivo marcado como enviado no estado local: {caminho_arquivo.name}"
+        )
 
 def _estrutura_stats_vazia() -> dict:
     return {
@@ -104,7 +96,6 @@ def _estrutura_stats_vazia() -> dict:
         "historico_recente": [],
     }
 
-
 def _carregar_stats() -> dict:
     arquivo_stats = Path(config.STATS_FILE)
     if not arquivo_stats.exists():
@@ -115,10 +106,10 @@ def _carregar_stats() -> dict:
             if isinstance(dados, dict):
                 return dados
     except Exception as e:
-        logging.warning(f"Erro ao ler arquivo de estatísticas [{config.STATS_FILE}]: {e}")
+        logging.warning(
+            f"Erro ao ler arquivo de estatísticas [{config.STATS_FILE}]: {e}"
+        )
     return _estrutura_stats_vazia()
-
-
 
 def _salvar_stats(stats: dict) -> None:
     arquivo_stats = Path(config.STATS_FILE)
@@ -127,8 +118,9 @@ def _salvar_stats(stats: dict) -> None:
         with open(arquivo_stats, "w", encoding="utf-8") as f:
             json.dump(stats, f, indent=2, ensure_ascii=False)
     except Exception as e:
-        logging.error(f"Erro ao salvar arquivo de estatísticas [{config.STATS_FILE}]: {e}")
-
+        logging.error(
+            f"Erro ao salvar arquivo de estatísticas [{config.STATS_FILE}]: {e}"
+        )
 
 def registrar_sucesso(caminho_arquivo: Path, tamanho_bytes: int) -> None:
     agora = datetime.now(timezone.utc)
@@ -147,22 +139,26 @@ def registrar_sucesso(caminho_arquivo: Path, tamanho_bytes: int) -> None:
         }
 
         diario = stats.setdefault("diario", {})
-        dia_info = diario.setdefault(chave_dia, {"enviados": 0, "bytes": 0, "falhas": 0})
+        dia_info = diario.setdefault(
+            chave_dia, {"enviados": 0, "bytes": 0, "falhas": 0}
+        )
         dia_info["enviados"] = dia_info.get("enviados", 0) + 1
         dia_info["bytes"] = dia_info.get("bytes", 0) + tamanho_bytes
 
         historico = stats.setdefault("historico_recente", [])
-        historico.insert(0, {
-            "tipo": "sucesso",
-            "arquivo": caminho_arquivo.name,
-            "tamanho": tamanho_bytes,
-            "motivo": None,
-            "timestamp": agora_iso,
-        })
+        historico.insert(
+            0,
+            {
+                "tipo": "sucesso",
+                "arquivo": caminho_arquivo.name,
+                "tamanho": tamanho_bytes,
+                "motivo": None,
+                "timestamp": agora_iso,
+            },
+        )
         stats["historico_recente"] = historico[:20]
 
         _salvar_stats(stats)
-
 
 def registrar_falha(caminho_arquivo: Path, motivo: str) -> None:
     agora = datetime.now(timezone.utc)
@@ -180,30 +176,31 @@ def registrar_falha(caminho_arquivo: Path, motivo: str) -> None:
         }
 
         diario = stats.setdefault("diario", {})
-        dia_info = diario.setdefault(chave_dia, {"enviados": 0, "bytes": 0, "falhas": 0})
+        dia_info = diario.setdefault(
+            chave_dia, {"enviados": 0, "bytes": 0, "falhas": 0}
+        )
         dia_info["falhas"] = dia_info.get("falhas", 0) + 1
 
         historico = stats.setdefault("historico_recente", [])
-        historico.insert(0, {
-            "tipo": "falha",
-            "arquivo": caminho_arquivo.name,
-            "tamanho": caminho_arquivo.stat().st_size if caminho_arquivo.exists() else 0,
-            "motivo": motivo,
-            "timestamp": agora_iso,
-        })
+        historico.insert(
+            0,
+            {
+                "tipo": "falha",
+                "arquivo": caminho_arquivo.name,
+                "tamanho": caminho_arquivo.stat().st_size
+                if caminho_arquivo.exists()
+                else 0,
+                "motivo": motivo,
+                "timestamp": agora_iso,
+            },
+        )
         stats["historico_recente"] = historico[:20]
 
         _salvar_stats(stats)
 
-
 def obter_estatisticas() -> dict:
     with _lock:
         return _carregar_stats()
-
-
-# ─────────────────────────────────────────────────────────────
-# Gerenciamento de Runtime e Heartbeat do Processo
-# ─────────────────────────────────────────────────────────────
 
 def processo_esta_vivo(pid: int) -> bool:
     if pid <= 0:
@@ -211,6 +208,7 @@ def processo_esta_vivo(pid: int) -> bool:
     if sys.platform == "win32":
         try:
             import ctypes
+
             kernel32 = ctypes.windll.kernel32
             process_query = 0x1000
             synchronize = 0x00100000
@@ -232,7 +230,6 @@ def processo_esta_vivo(pid: int) -> bool:
         except Exception:
             return False
 
-
 def registrar_inicio_processo() -> None:
     arquivo_runtime = Path(config.RUNTIME_FILE)
     arquivo_runtime.parent.mkdir(parents=True, exist_ok=True)
@@ -248,7 +245,6 @@ def registrar_inicio_processo() -> None:
     with _lock:
         with open(arquivo_runtime, "w", encoding="utf-8") as f:
             json.dump(dados, f, indent=2)
-
 
 def atualizar_heartbeat() -> None:
     arquivo_runtime = Path(config.RUNTIME_FILE)
@@ -267,7 +263,6 @@ def atualizar_heartbeat() -> None:
     except Exception:
         pass
 
-
 def registrar_encerramento_processo() -> None:
     arquivo_runtime = Path(config.RUNTIME_FILE)
     if not arquivo_runtime.exists():
@@ -282,7 +277,6 @@ def registrar_encerramento_processo() -> None:
                 json.dump(dados, f, indent=2)
     except Exception:
         pass
-
 
 def obter_status_processo() -> dict:
     arquivo_runtime = Path(config.RUNTIME_FILE)
@@ -322,13 +316,14 @@ def obter_status_processo() -> dict:
     esta_vivo = processo_esta_vivo(pid)
     tempo_desde_hb = time.time() - ultimo_hb if ultimo_hb else 999999
 
-    # Ativo se o PID responde e o heartbeat ocorreu nos últimos 15 segundos
     if declarado_ativo and esta_vivo and tempo_desde_hb < 15:
         uptime = 0.0
         if iniciado_em:
             try:
                 dt_inicio = datetime.fromisoformat(iniciado_em)
-                uptime = max(0.0, (datetime.now(timezone.utc) - dt_inicio).total_seconds())
+                uptime = max(
+                    0.0, (datetime.now(timezone.utc) - dt_inicio).total_seconds()
+                )
             except Exception:
                 pass
         return {
@@ -356,7 +351,6 @@ def obter_status_processo() -> dict:
         "instancia": dados.get("instancia", config.INSTANCE_NAME),
     }
 
-
 def limpar_historico_enviados() -> int:
     """Limpa a lista de hashes de arquivos já enviados no arquivo de estado."""
     with _lock:
@@ -365,13 +359,11 @@ def limpar_historico_enviados() -> int:
         _salvar_estado({"enviados": {}})
     return qtd
 
-
 def limpar_estatisticas() -> bool:
     """Zera o arquivo de estatísticas locais."""
     with _lock:
         _salvar_stats(_estrutura_stats_vazia())
     return True
-
 
 def limpar_tudo() -> tuple[int, bool]:
     """Limpa tanto os hashes de envio quanto as estatísticas acumuladas."""

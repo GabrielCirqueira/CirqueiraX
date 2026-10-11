@@ -163,7 +163,19 @@ python3 agente.py
 
 ### 6.2. Em Produção como Serviço de Sistema Operacional
 
-#### Linux (Systemd User Service)
+#### WSL2 (Vigiando a Pasta do Windows com PollingObserver)
+Para rodar no WSL2 monitorando a pasta de prints do Windows (`/mnt/c/Users/<usuario>/Pictures/Screenshots`), utilize o instalador com suporte automático a `PollingObserver`:
+
+```bash
+chmod +x agente/servico/instalar-servico-wsl.sh
+./agente/servico/instalar-servico-wsl.sh
+```
+Ou via comando CLI:
+```bash
+python3 agente/agente.py install
+```
+
+#### Linux Nativo (Systemd User Service)
 O script configura o serviço no systemd do próprio usuário (sem necessidade de privilégios de root):
 ```bash
 chmod +x agente/servico/instalar-servico-linux.sh
@@ -172,8 +184,8 @@ chmod +x agente/servico/instalar-servico-linux.sh
 - Status: `systemctl --user status cirqueirax-agente.service`
 - Logs: `journalctl --user -u cirqueirax-agente.service -f`
 
-#### Windows (Agendador de Tarefas)
-Execute o script em lote na pasta `servico`:
+#### Windows Nativo (Agendador de Tarefas)
+Execute o script em lote na pasta `servico` (caso queira rodar o Python nativo do Windows em vez de rodar dentro do WSL):
 ```cmd
 agente\servico\instalar-servico-windows.bat
 ```

@@ -4,7 +4,6 @@ import sys
 import time
 from pathlib import Path
 
-# Garante que o diretório raiz do agente está no sys.path para importações do pacote core
 DIRETORIO_RAIZ = Path(__file__).resolve().parent
 if str(DIRETORIO_RAIZ) not in sys.path:
     sys.path.insert(0, str(DIRETORIO_RAIZ))
@@ -13,6 +12,7 @@ from core import config
 from core.comandos import (
     executar_comando_config,
     executar_comando_env,
+    executar_comando_install,
     executar_comando_reset,
     executar_comando_send,
     executar_comando_test,
@@ -23,6 +23,7 @@ from core.estado import (
     registrar_encerramento_processo,
     registrar_inicio_processo,
 )
+
 from core.status import exibir_status
 
 logging.basicConfig(
@@ -30,11 +31,12 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 
-
 def validar_configuracao():
     if not config.AGENT_TOKEN:
         logging.error("ERRO: AGENT_TOKEN não configurado no arquivo .env")
-        logging.error("Gere um token no backend via: make agente-token ARGS=\"nome origem\"")
+        logging.error(
+            'Gere um token no backend via: make agente-token ARGS="nome origem"'
+        )
         logging.error("E configure com: python3 agente.py config --token cx_ag_...")
         sys.exit(1)
 
@@ -49,9 +51,7 @@ def validar_configuracao():
     logging.info(f"Servidor: {config.SERVER_URL}")
     logging.info(f"Pasta monitorada: {config.WATCH_DIR}")
 
-
 def executar_daemon(args: argparse.Namespace = None):
-    # Aplica overrides temporários via flags do start (se fornecidos)
     if args:
         if getattr(args, "url", None):
             config.SERVER_URL = config.normalizar_url_ingestao(args.url)
@@ -86,7 +86,6 @@ def executar_daemon(args: argparse.Namespace = None):
         registrar_encerramento_processo()
         logging.info("Agente encerrado com sucesso.")
 
-
 def main():
     parser = argparse.ArgumentParser(
         description="Agente CirqueiraX — Captura, Monitoramento e Utilitários de Ingestão de Prints",
@@ -94,14 +93,20 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="comando", help="Comandos disponíveis:")
 
-    # 1. Comando 'start' (inicia o daemon de segundo plano)
-    parser_start = subparsers.add_parser("start", help="Inicia o observador de prints em segundo plano")
-    parser_start.add_argument("--url", help="Override temporário da URL do servidor para este start")
+    parser_start = subparsers.add_parser(
+        "start", help="Inicia o observador de prints em segundo plano"
+    )
+    parser_start.add_argument(
+        "--url", help="Override temporário da URL do servidor para este start"
+    )
     parser_start.add_argument("--token", help="Override temporário do AGENT_TOKEN")
-    parser_start.add_argument("--watch-dir", help="Override temporário da pasta monitorada")
+    parser_start.add_argument(
+        "--watch-dir", help="Override temporário da pasta monitorada"
+    )
 
-    # 2. Comando 'status' (painel de status e métricas estilo systemctl)
-    parser_status = subparsers.add_parser("status", help="Exibe o painel de status do processo e métricas de envio")
+    parser_status = subparsers.add_parser(
+        "status", help="Exibe o painel de status do processo e métricas de envio"
+    )
     parser_status.add_argument(
         "-w",
         "--watch",
@@ -109,42 +114,104 @@ def main():
         help="Atualiza continuamente o status em tempo real (modo live monitor)",
     )
 
-    # 3. Comando 'url' (exibe ou altera a SERVER_URL do .env)
-    parser_url = subparsers.add_parser("url", help="Exibe ou atualiza a URL do servidor no arquivo .env")
-    parser_url.add_argument("nova_url", nargs="?", help="Nova URL do servidor (ex: http://localhost:8080 ou https://exemplo.com)")
-    parser_url.add_argument("--no-test", action="store_true", help="Não executa teste de ping após configurar")
+    parser_url = subparsers.add_parser(
+        "url", help="Exibe ou atualiza a URL do servidor no arquivo .env"
+    )
+    parser_url.add_argument(
+        "nova_url",
+        nargs="?",
+        help="Nova URL do servidor (ex: http://localhost:8080 ou https://exemplo.com)",
+    )
+    parser_url.add_argument(
+        "--no-test",
+        action="store_true",
+        help="Não executa teste de ping após configurar",
+    )
 
-    # 4. Comando 'env' (alternador rápido de perfis: local, prod, vps, custom)
-    parser_env = subparsers.add_parser("env", help="Alterna rapidamente entre ambientes (local, prod, vps)")
-    parser_env.add_argument("tipo", nargs="?", choices=["local", "prod", "vps", "custom", "show"], help="Ambiente alvo")
-    parser_env.add_argument("alvo", nargs="?", help="URL, IP da VPS ou porta local (ex: 8080 ou https://meudominio.com)")
+    parser_env = subparsers.add_parser(
+        "env", help="Alterna rapidamente entre ambientes (local, prod, vps)"
+    )
+    parser_env.add_argument(
+        "tipo",
+        nargs="?",
+        choices=["local", "prod", "vps", "custom", "show"],
+        help="Ambiente alvo",
+    )
+    parser_env.add_argument(
+        "alvo",
+        nargs="?",
+        help="URL, IP da VPS ou porta local (ex: 8080 ou https://meudominio.com)",
+    )
 
-    # 5. Comando 'config' (visualiza ou define variáveis de configuração)
-    parser_config = subparsers.add_parser("config", help="Gerencia as variáveis de configuração no .env")
-    parser_config.add_argument("subacao", nargs="?", default="show", choices=["show", "set", "get"], help="Ação de configuração")
-    parser_config.add_argument("chave", nargs="?", help="Nome da variável para 'set' ou 'get'")
+    parser_config = subparsers.add_parser(
+        "config", help="Gerencia as variáveis de configuração no .env"
+    )
+    parser_config.add_argument(
+        "subacao",
+        nargs="?",
+        default="show",
+        choices=["show", "set", "get"],
+        help="Ação de configuração",
+    )
+    parser_config.add_argument(
+        "chave", nargs="?", help="Nome da variável para 'set' ou 'get'"
+    )
     parser_config.add_argument("valor", nargs="?", help="Valor da variável para 'set'")
     parser_config.add_argument("--url", help="Atalho para alterar SERVER_URL")
     parser_config.add_argument("--token", help="Atalho para alterar AGENT_TOKEN")
     parser_config.add_argument("--watch-dir", help="Atalho para alterar WATCH_DIR")
     parser_config.add_argument("--name", help="Atalho para alterar INSTANCE_NAME")
 
-    # 6. Comando 'test' (testa conectividade com a API de saúde)
-    parser_test = subparsers.add_parser("test", help="Testa conectividade e resposta do servidor")
-    parser_test.add_argument("--url", help="URL alternativa para testar antes de salvar no .env")
+    parser_test = subparsers.add_parser(
+        "test", help="Testa conectividade e resposta do servidor"
+    )
+    parser_test.add_argument(
+        "--url", help="URL alternativa para testar antes de salvar no .env"
+    )
     parser_test.add_argument("--token", help="Token alternativo para teste")
 
-    # 7. Comando 'send' (envio de imagem avulsa para teste manual)
-    parser_send = subparsers.add_parser("send", help="Envia manualmente um print ou imagem para validação da API")
+    parser_send = subparsers.add_parser(
+        "send", help="Envia manualmente um print ou imagem para validação da API"
+    )
     parser_send.add_argument("arquivo", help="Caminho do arquivo de imagem a enviar")
-    parser_send.add_argument("-f", "--force", action="store_true", help="Força envio mesmo se o hash já foi enviado")
+    parser_send.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Força envio mesmo se o hash já foi enviado",
+    )
     parser_send.add_argument("--url", help="URL alternativa de destino para o teste")
 
-    # 8. Comando 'reset' (limpa hashes já enviados ou estatísticas locais)
-    parser_reset = subparsers.add_parser("reset", help="Limpa o histórico de arquivos enviados ou estatísticas locais")
-    parser_reset.add_argument("--hashes", action="store_true", help="Limpa apenas o histórico de hashes enviados")
-    parser_reset.add_argument("--stats", action="store_true", help="Zera apenas as estatísticas acumuladas")
-    parser_reset.add_argument("--all", action="store_true", help="Limpa tanto os hashes quanto as estatísticas")
+    parser_reset = subparsers.add_parser(
+        "reset", help="Limpa o histórico de arquivos enviados ou estatísticas locais"
+    )
+    parser_reset.add_argument(
+        "--hashes",
+        action="store_true",
+        help="Limpa apenas o histórico de hashes enviados",
+    )
+    parser_reset.add_argument(
+        "--stats", action="store_true", help="Zera apenas as estatísticas acumuladas"
+    )
+    parser_reset.add_argument(
+        "--all",
+        action="store_true",
+        help="Limpa tanto os hashes quanto as estatísticas",
+    )
+
+    parser_install = subparsers.add_parser(
+        "install", help="Configura e instala o agente (detecta WSL/Windows e Linux)"
+    )
+    parser_install.add_argument(
+        "--watch-dir", help="Pasta a monitorar (no WSL pode ser C:\\... ou /mnt/c/...)"
+    )
+    parser_install.add_argument("--token", help="Token do agente (AGENT_TOKEN)")
+    parser_install.add_argument("--url", help="URL do servidor (SERVER_URL)")
+    parser_install.add_argument(
+        "--no-service",
+        action="store_true",
+        help="Não registrar serviço systemd de segundo plano",
+    )
 
     args = parser.parse_args()
 
@@ -162,10 +229,10 @@ def main():
         executar_comando_send(args)
     elif args.comando == "reset":
         executar_comando_reset(args)
+    elif args.comando == "install":
+        executar_comando_install(args)
     else:
-        # Padrão: sem argumentos ou 'start' inicia o daemon
         executar_daemon(args)
-
 
 if __name__ == "__main__":
     main()

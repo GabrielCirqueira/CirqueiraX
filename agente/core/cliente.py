@@ -9,24 +9,31 @@ try:
     from .estado import ja_enviado, marcar_enviado, registrar_falha, registrar_sucesso
 except ImportError:
     from core import config
-    from core.estado import ja_enviado, marcar_enviado, registrar_falha, registrar_sucesso
+    from core.estado import (
+        ja_enviado,
+        marcar_enviado,
+        registrar_falha,
+        registrar_sucesso,
+    )
 
 EXTENSOES_PERMITIDAS = {".png", ".jpg", ".jpeg", ".webp"}
 
-
-def testar_conexao_servidor(url_custom: str | None = None, token_custom: str | None = None) -> tuple[bool, int, str]:
+def testar_conexao_servidor(
+    url_custom: str | None = None, token_custom: str | None = None
+) -> tuple[bool, int, str]:
     alvo = url_custom or config.SERVER_URL
     token = token_custom if token_custom is not None else config.AGENT_TOKEN
     headers = {
         "X-Agent-Token": token,
     }
-    url_base = alvo.split("/api/v1/")[0] + "/api/v1/health" if "/api/v1/" in alvo else alvo
+    url_base = (
+        alvo.split("/api/v1/")[0] + "/api/v1/health" if "/api/v1/" in alvo else alvo
+    )
     try:
         res = requests.get(url_base, headers=headers, timeout=5.0)
         return True, res.status_code, "Online"
     except requests.RequestException as e:
         return False, 0, str(e)
-
 
 def enviar_print(
     caminho_arquivo: Path,
@@ -43,7 +50,6 @@ def enviar_print(
         token_override=token_override,
     )
     return sucesso
-
 
 def enviar_print_manual(
     caminho_arquivo: Path,
@@ -95,7 +101,11 @@ def enviar_print_manual(
         try:
             with open(caminho_arquivo, "rb") as f:
                 arquivos = {
-                    "arquivo": (caminho_arquivo.name, f, f"image/{caminho_arquivo.suffix.lstrip('.')}")
+                    "arquivo": (
+                        caminho_arquivo.name,
+                        f,
+                        f"image/{caminho_arquivo.suffix.lstrip('.')}",
+                    )
                 }
                 response = requests.post(
                     url_alvo,
@@ -113,29 +123,43 @@ def enviar_print_manual(
 
             if response.status_code in (200, 201):
                 tamanho = caminho_arquivo.stat().st_size
-                logging.info(f"Print enviado com sucesso! [{caminho_arquivo.name}] (Status HTTP {response.status_code})")
+                logging.info(
+                    f"Print enviado com sucesso! [{caminho_arquivo.name}] (Status HTTP {response.status_code})"
+                )
                 marcar_enviado(caminho_arquivo)
                 registrar_sucesso(caminho_arquivo, tamanho)
-                return True, response.status_code, "Upload realizado com sucesso", dados_resposta
+                return (
+                    True,
+                    response.status_code,
+                    "Upload realizado com sucesso",
+                    dados_resposta,
+                )
             elif 400 <= response.status_code < 500:
-                ultimo_motivo = f"Erro cliente HTTP {response.status_code}: {response.text[:140]}"
-                logging.error(f"Erro cliente ao enviar print [{caminho_arquivo.name}]: {ultimo_motivo}")
+                ultimo_motivo = (
+                    f"Erro cliente HTTP {response.status_code}: {response.text[:140]}"
+                )
+                logging.error(
+                    f"Erro cliente ao enviar print [{caminho_arquivo.name}]: {ultimo_motivo}"
+                )
                 registrar_falha(caminho_arquivo, ultimo_motivo)
                 return False, response.status_code, ultimo_motivo, dados_resposta
             else:
                 ultimo_motivo = f"Erro servidor HTTP {response.status_code}"
-                logging.warning(f"{ultimo_motivo} [{caminho_arquivo.name}]. Tentativa {tentativa}/{max_tentativas}...")
+                logging.warning(
+                    f"{ultimo_motivo} [{caminho_arquivo.name}]. Tentativa {tentativa}/{max_tentativas}..."
+                )
 
         except requests.RequestException as exc:
             ultimo_motivo = f"Erro de conexão: {exc}"
-            logging.warning(f"Erro de conexão ao enviar [{caminho_arquivo.name}]: {exc}. Tentativa {tentativa}/{max_tentativas}...")
+            logging.warning(
+                f"Erro de conexão ao enviar [{caminho_arquivo.name}]: {exc}. Tentativa {tentativa}/{max_tentativas}..."
+            )
 
         if tentativa < max_tentativas:
-            tempo_espera = 2 ** tentativa
+            tempo_espera = 2**tentativa
             time.sleep(tempo_espera)
 
     motivo_final = f"Falha após {max_tentativas} tentativas ({ultimo_motivo})"
     logging.error(f"Falha ao enviar [{caminho_arquivo.name}]: {motivo_final}")
     registrar_falha(caminho_arquivo, motivo_final)
     return False, ultimo_status, motivo_final, dados_resposta
-
