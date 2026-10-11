@@ -55,4 +55,6 @@ yarn-error.log
 /.deploy-done
 /.setup-progress
 /.deploy-progress
+__pycache__/
+*.pyc
 ###< gerados automaticamente ###

@@ -238,12 +238,85 @@ launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
 
 ---
 
-## 7. Diagnóstico e Resolução de Problemas
+## 7. Monitoramento, Métricas e Status do Agente
+
+O agente conta com um sistema de métricas da aplicação e um comando de status visual no terminal (semelhante ao `systemctl status`), funcionando de maneira idêntica no **Linux**, **Windows** e **macOS**.
+
+### 7.1. Comandos de Visualização de Status
+
+```bash
+# Via script do agente
+python3 agente.py status
+
+# Ou diretamente pelo script status.py / status.sh / status.bat
+./status.sh          # No Linux / macOS
+status.bat           # No Windows
+python status.py     # Em qualquer sistema operacional
+```
+
+### 7.2. Modo Live Monitor (`--watch` / `-w`)
+
+Para acompanhar os envios e o status em tempo real (atualizado a cada 2 segundos):
+
+```bash
+python3 agente.py status --watch
+# Ou de forma abreviada:
+./status.sh -w
+status.bat -w
+```
+
+### 7.3. Exemplo de Saída do Terminal
+
+```text
+● CirqueiraX Agente — Ingestão de Prints
+──────────────────────────────────────────────────────────────
+  Status:            ● Ativo (em execução) (PID 28419, rodando há 2h 15m)
+  Perfil/Máquina:    PC Empresa
+  Pasta Vigiada:     /home/usuario/Pictures/Screenshots [OK]
+  Servidor:          https://cirqueirax.com/api/v1/ingestao/print
+  Conexão API:       ● Online (HTTP 200)
+  Token de Acesso:   cx_ag_a8...5fb8
+
+  Estatísticas de Hoje (11/10/2026):
+  ├─ Enviados hoje:       14 prints (32.4 MB)
+  ├─ Falhas hoje:         0
+  └─ Taxa de sucesso:     100.0%
+
+  Métricas Acumuladas (Histórico Geral):
+  ├─ Total de envios:     342 arquivos (891.2 MB)
+  └─ Total de falhas:     1
+
+  Último Envio Concluído:
+  └─ ✔ Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
+
+  Última Falha Registrada:
+  └─ ✖ Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
+     Motivo: Falha após 3 tentativas (Timeout de rede)
+
+  Atividades Recentes (Últimos Eventos):
+  • ✔ Sucesso: Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
+  • ✔ Sucesso: Screenshot_20261011_181512.png (1.8 MB) — 18:15:12 (há 17m)
+  • ✖ Falha:   Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
+──────────────────────────────────────────────────────────────
+```
+
+### 7.4. Teste Rápido de Conectividade
+
+Para testar se o servidor CirqueiraX está online e respondendo sem precisar enviar nenhum arquivo:
+
+```bash
+python3 agente.py test
+```
+
+---
+
+## 8. Diagnóstico e Resolução de Problemas
 
 | Sintoma | Causa Mais Comum | Como Resolver |
 | :--- | :--- | :--- |
 | `ERRO: AGENT_TOKEN não configurado no arquivo .env` | Variável ausente ou vazia no `.env`. | Gere o token via `make agente-token` e cole no `.env`. |
 | `Status HTTP 401 / 403` | Token inválido, revogado ou formato incorreto. | Verifique se o token gerado está registrado no banco e ativo na tabela `token_agente`. |
-| `Erro de conexão ao enviar` | Servidor CirqueiraX offline ou porta bloqueada por firewall. | Teste a conexão via `curl -I <SERVER_URL>`. Se usar VPS, certifique-se de que a porta está exposta ou túnel ativo. |
+| `Erro de conexão ao enviar` | Servidor CirqueiraX offline ou porta bloqueada por firewall. | Teste a conexão via `python3 agente.py test` ou `curl -I <SERVER_URL>`. |
 | O print é detectado mas não é enviado | Arquivo com extensão não suportada ou tamanho 0. | O agente só processa `.png`, `.jpg`, `.jpeg`, `.webp`. Verifique se o utilitário de screenshot salvou o arquivo completamente. |
 | Print ignorado com mensagem "já enviado anteriormente" | Hash SHA-256 já existe no `STATE_FILE`. | Comportamento normal para evitar duplicatas. Para forçar o reenvio de testes, apague o arquivo de estado `~/.cirqueirax_enviados*.json`. |
+

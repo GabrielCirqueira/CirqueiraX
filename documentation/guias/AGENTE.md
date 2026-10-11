@@ -159,7 +159,77 @@ launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
 
 ---
 
-## 7. Tolerância a Falhas e Resiliência
+## 7. Monitoramento, Métricas e Status do Agente
+
+O agente fornece um comando de status visual no terminal (semelhante ao `systemctl status`), funcionando de maneira idêntica no **Linux**, **Windows** e **macOS**, sem depender exclusivamente das ferramentas do SO para saber sobre métricas da aplicação.
+
+### 7.1. Comandos de Visualização de Status
+
+```bash
+# Via script do agente
+python3 agente/agente.py status
+
+# Ou diretamente pelo script status.py / status.sh / status.bat
+./agente/status.sh          # No Linux / macOS
+agente\status.bat           # No Windows
+python agente/status.py     # Em qualquer sistema operacional
+```
+
+### 7.2. Modo Live Monitor (`--watch` / `-w`)
+
+Para acompanhar os envios e o status em tempo real (atualizado a cada 2 segundos):
+
+```bash
+python3 agente/agente.py status --watch
+# Ou de forma abreviada:
+./agente/status.sh -w
+agente\status.bat -w
+```
+
+### 7.3. Exemplo de Saída do Terminal
+
+```text
+● CirqueiraX Agente — Ingestão de Prints
+──────────────────────────────────────────────────────────────
+  Status:            ● Ativo (em execução) (PID 28419, rodando há 2h 15m)
+  Perfil/Máquina:    PC Empresa
+  Pasta Vigiada:     /home/usuario/Pictures/Screenshots [OK]
+  Servidor:          https://cirqueirax.com/api/v1/ingestao/print
+  Conexão API:       ● Online (HTTP 200)
+  Token de Acesso:   cx_ag_a8...5fb8
+
+  Estatísticas de Hoje (11/10/2026):
+  ├─ Enviados hoje:       14 prints (32.4 MB)
+  ├─ Falhas hoje:         0
+  └─ Taxa de sucesso:     100.0%
+
+  Métricas Acumuladas (Histórico Geral):
+  ├─ Total de envios:     342 arquivos (891.2 MB)
+  └─ Total de falhas:     1
+
+  Último Envio Concluído:
+  └─ ✔ Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
+
+  Última Falha Registrada:
+  └─ ✖ Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
+     Motivo: Falha após 3 tentativas (Timeout de rede)
+
+  Atividades Recentes (Últimos Eventos):
+  • ✔ Sucesso: Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
+  • ✔ Sucesso: Screenshot_20261011_181512.png (1.8 MB) — 18:15:12 (há 17m)
+  • ✖ Falha:   Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
+──────────────────────────────────────────────────────────────
+```
+
+### 7.4. Teste de Conexão Rápido
+
+```bash
+python3 agente/agente.py test
+```
+
+---
+
+## 8. Tolerância a Falhas e Resiliência
 
 1. **Escrita Incompleta do Arquivo (Debounce)**:
    Aguardar `DEBOUNCE_SECONDS` com comparação contínua de tamanho em bytes (`st_size`) previne uploads de imagens cortadas ou corrompidas.
@@ -169,3 +239,4 @@ launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
    Se o agente reiniciar ou o sistema operacional disparar múltiplos eventos para o mesmo arquivo, o hash SHA-256 gravado no `STATE_FILE` garante que a imagem não será duplicada no banco nem consumirá banda desnecessária.
 4. **Desacoplamento Assíncrono**:
    O processamento pesado (geração de thumbnails, categorização, cópia para o Syncthing e upload para o Google Fotos) ocorre via Symfony Messenger no servidor; a resposta HTTP para o agente é rápida e assíncrona.
+

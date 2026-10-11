@@ -214,7 +214,34 @@
   - `src/Service/MediaItem/ClassificarMediaItemService.php`
   - `src/Service/Video/BaixarVideoDownloadService.php`
   - `devops/docker-compose.prod.yaml`
-  - `devops/docker-compose.yaml`
   - `documentation/guias/SYNCTHING.md`
   - `documentation/guias/Syncthing.md`
+
+---
+
+## Melhoria 29 — Monitoramento de Aplicação, Métricas e Painel de Status Multiplataforma para o Agente
+
+- **Data**: 11/10/2026
+- **Contexto**: O agente Python de ingestão de capturas de tela (`./agente/`) opera de forma isolada do servidor. Embora gerenciadores de processos do sistema operacional (como `systemctl` no Linux ou Agendador de Tarefas no Windows) informem se o processo está em execução, eles não possuem visibilidade sobre métricas da aplicação (quantos prints foram transferidos hoje, falhas de envio, tamanho em MB/GB transferido, último envio e última falha com motivo). Foi solicitado um comando de status completo no terminal que funcione tanto no Linux quanto no Windows.
+- **O que foi feito**:
+  - Implementado sistema de métricas persistentes em [estado.py](file:///home/gabriel/dev/CirqueiraX/agente/estado.py) gravando histórico diário, totais acumulados, volume em bytes e lista de atividades recentes (`registrar_sucesso` e `registrar_falha`) em arquivo JSON dedicado (`STATS_FILE`).
+  - Implementado rastreamento de runtime com PID e batimento cardíaco (*heartbeat*) periódico a cada 3 segundos, permitindo detectar com precisão se o processo está vivo, há quanto tempo está ativo e tempo desde o último batimento de forma 100% multiplataforma.
+  - Criado o módulo [status.py](file:///home/gabriel/dev/CirqueiraX/agente/status.py) e comandos CLI em [agente.py](file:///home/gabriel/dev/CirqueiraX/agente/agente.py):
+    - `python3 agente.py status` (ou `./agente/status.sh` / `agente\status.bat`): exibe painel detalhado no terminal estilizado com cores ANSI (estilo `systemctl status`), incluindo status do processo, perfil da máquina, pasta vigiada com verificação no disco, servidor com teste de ping/conectividade, token mascarado, estatísticas de hoje (prints e MB), taxa de sucesso percentual, totais acumulados, último print enviado com data relativa e tamanho, última falha com mensagem de erro e últimas atividades com badges coloridos.
+    - `python3 agente.py status --watch` (ou `-w`): modo *live monitor* atualizado a cada 2 segundos.
+    - `python3 agente.py test`: teste de conectividade e resposta da API de saúde do servidor.
+  - Atualizada a documentação em [agente/README.md](file:///home/gabriel/dev/CirqueiraX/agente/README.md) e [documentation/guias/AGENTE.md](file:///home/gabriel/dev/CirqueiraX/documentation/guias/AGENTE.md).
+- **Arquivos**:
+  - `agente/config.py`
+  - `agente/estado.py`
+  - `agente/cliente.py`
+  - `agente/watcher.py`
+  - `agente/agente.py`
+  - `agente/status.py`
+  - `agente/status.sh`
+  - `agente/status.bat`
+  - `agente/README.md`
+  - `documentation/guias/AGENTE.md`
+  - `.gitignore`
+
 
