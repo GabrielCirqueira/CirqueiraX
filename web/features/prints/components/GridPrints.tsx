@@ -1,4 +1,4 @@
-import { Box, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { Camera } from 'lucide-react'
 import { memo } from 'react'
 import type { MediaItem } from '../types'
@@ -25,17 +25,18 @@ export const GridPrints = memo(function GridPrints({
 }: GridPrintsProps) {
   if (carregando && itens.length === 0) {
     return (
-      <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} gap={5}>
-        {Array.from({ length: 8 }).map((_, idx) => (
+      <Box className="google-photos-grid" w="full">
+        {Array.from({ length: 12 }).map((_, idx) => (
           <Box
             key={`sk-print-${idx + 1}`}
-            h="240px"
+            className="google-photos-item"
+            h={idx % 3 === 0 ? '220px' : idx % 2 === 0 ? '160px' : '280px'}
             bg="bg.muted"
-            borderRadius="xl"
+            borderRadius="md"
             animation="pulse 1.5s infinite"
           />
         ))}
-      </SimpleGrid>
+      </Box>
     )
   }
 
@@ -75,18 +76,19 @@ export const GridPrints = memo(function GridPrints({
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} gap={5}>
+    <Box className="google-photos-grid" w="full">
       {itens.map((item) => (
-        <CardPrint
-          key={item.uuid}
-          item={item}
-          selecionado={selecionados.includes(item.uuid)}
-          onToggleSelect={onToggleSelect}
-          onVisualizar={onVisualizar}
-          onCategorizar={onCategorizar}
-          onApagar={onApagar}
-        />
+        <Box key={item.uuid} className="google-photos-item">
+          <CardPrint
+            item={item}
+            selecionado={selecionados.includes(item.uuid)}
+            onToggleSelect={onToggleSelect}
+            onVisualizar={onVisualizar}
+            onCategorizar={onCategorizar}
+            onApagar={onApagar}
+          />
+        </Box>
       ))}
-    </SimpleGrid>
+    </Box>
   )
 })

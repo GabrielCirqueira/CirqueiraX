@@ -31,3 +31,47 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Galeria de Fotos Fluida (Google Fotos Style Masonry) */
+.google-photos-grid {
+  column-count: 2;
+  column-gap: 6px;
+}
+
+@media (min-width: 640px) {
+  .google-photos-grid {
+    column-count: 3;
+    column-gap: 8px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .google-photos-grid {
+    column-count: 4;
+    column-gap: 8px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .google-photos-grid {
+    column-count: 5;
+    column-gap: 10px;
+  }
+}
+
+.google-photos-item {
+  break-inside: avoid;
+  margin-bottom: 6px;
+}
+
+@media (min-width: 640px) {
+  .google-photos-item {
+    margin-bottom: 8px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .google-photos-item {
+    margin-bottom: 10px;
+  }
+}

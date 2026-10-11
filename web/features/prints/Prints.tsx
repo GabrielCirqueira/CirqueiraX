@@ -57,7 +57,7 @@ export default function Prints() {
   const filtros = useMemo<FiltrosPrints>(() => {
     const obj: FiltrosPrints = {
       pagina,
-      porPagina: 12,
+      porPagina: 20,
       origem: 'prints',
     }
     if (busca.trim()) {
@@ -134,7 +134,7 @@ export default function Prints() {
   const filtrosAtivos = Boolean(busca.trim() || statusFiltro || categoriaFiltro)
 
   return (
-    <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 4, md: 8 }}>
+    <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
       <VStack w="full" gap={6} alignItems="stretch">
         <Flex
           direction={{ base: 'column', sm: 'row' }}

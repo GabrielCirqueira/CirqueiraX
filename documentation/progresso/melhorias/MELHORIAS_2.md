@@ -466,6 +466,33 @@
   - `agente/README.md`
   - `documentation/guias/SYNCTHING.md`
 
+---
+
+## Melhoria 36 — Redesign da Grade de Prints Estilo Google Fotos: Visual Limpo, Ações no Hover e Expansão Rápida
+
+- **Data**: 11/10/2026
+- **Contexto**: O usuário observou que o layout anterior de prints com cards verticais contendo blocos inferiores de texto (nomes de arquivos, tamanho, datas e botões fixos) polua a tela desnecessariamente para fotos. Solicitou uma interface limpa inspirada no Google Fotos: foco 100% na foto borda a borda, opções principais reveladas suavemente ao passar o mouse (copiar, download, categorizar, excluir) e clique direto na imagem para expandi-la em tamanho real.
+- **O que foi feito**:
+  - **Foco Visual 100% na Imagem e Mosaico Fluido (*Masonry*)**:
+    - Removido o `Card.Body` inferior pesado em [CardPrint.tsx](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/CardPrint.tsx).
+    - As fotos agora renderizam em suas proporções originais naturais (`height: auto`), sem cortes ou barras pretas, integradas no layout de colunas fluidas `.google-photos-grid` em [index.css](file:///home/gabriel/dev/CirqueiraX/web/index.css) e [GridPrints.tsx](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/GridPrints.tsx).
+  - **Ações no Hover Limpas na Parte Inferior Esquerda**:
+    - Removida a barra azul centralizada e o badge central que poluíam e transbordavam em imagens curtas/panorâmicas.
+    - Implementados pequenos botões discretos (26x26px) com efeito dark glass (`blackAlpha.750`) posicionados de forma absoluta no canto **inferior esquerdo** (`bottom: 8px, left: 8px`):
+      1. **Copiar**: Copia o print direto para a área de transferência com feedback de ícone verde (`Check`) e toast.
+      2. **Download**: Baixa a imagem PNG no computador com animação de loading.
+      3. **Categorizar**: Abre o modal para vincular ou mudar a categoria do print.
+      4. **Excluir**: Botão vermelho translúcido para remover a captura com segurança.
+    - Checkbox circular Google Fotos no topo esquerdo (`top: 8px, left: 8px`) e horário discreto no topo direito (`top: 8px, right: 8px`).
+  - **Clique Direto para Expansão (Lightbox)**:
+    - Clicar em qualquer ponto da foto dispara instantaneamente o [ModalVisualizarPrint.tsx](file:///home/gabriel/dev/CirqueiraX/web/features/prints/components/ModalVisualizarPrint.tsx), expandindo a imagem em alta resolução.
+- **Arquivos**:
+  - `web/features/prints/components/CardPrint.tsx`
+  - `web/features/prints/components/GridPrints.tsx`
+  - `web/features/prints/Prints.tsx`
+  - `web/index.css`
+
+
 
 
 
