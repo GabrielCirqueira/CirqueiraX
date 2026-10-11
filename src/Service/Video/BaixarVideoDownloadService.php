@@ -69,9 +69,9 @@ final readonly class BaixarVideoDownloadService
 
     private function resolverDiretorioDestino(): string
     {
-        $baseStorage = $this->resolverCaminhoBaseStorage();
+        $base = '' !== $this->projectDir ? $this->projectDir : '.';
 
-        return rtrim($baseStorage, '/') . '/' . self::SUBDIR_DOWNLOADS;
+        return rtrim($base, '/') . '/var/downloads';
     }
 
     private function resolverCaminhoBaseStorage(): string
