@@ -46,6 +46,8 @@
 | M32 | Suporte e Detecção Automática de WSL, PollingObserver para DrvFs e Instalador Dedicado | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-32--suporte-e-detecção-automática-de-wsl-pollingobserver-para-drvfs-e-instalador-dedicado) |
 | M33 | Separação Estrita de Mídias: Módulo Exclusivo de Prints & Capturas (`/prints`) e Isolamento de Downloads | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-33--separação-estrita-de-mídias-módulo-exclusivo-de-prints--capturas-prints-e-isolamento-de-downloads) |
 | M34 | Distribuição Temporal de Vídeos: Atalhos Retroativos Estilo Franky e Distribuição em Lote | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-34--distribuição-temporal-de-vídeos-atalhos-retroativos-estilo-franky-e-distribuição-em-lote) |
+| M35 | Unificação de Pasta de Prints e Ajuste das 3 Categorias de Vídeos (Memes, Shingeki e One Piece) | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-35--unificação-de-pasta-de-prints-e-ajuste-das-3-categorias-de-vídeos-memes-shingeki-e-one-piece) |
+
 
 
 

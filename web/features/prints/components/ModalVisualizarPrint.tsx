@@ -64,9 +64,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
   const dataHora = item.criadoEm
     ? new Date(item.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     : '--:--'
-  const dataDia = item.criadoEm
-    ? new Date(item.criadoEm).toLocaleDateString('pt-BR')
-    : 'Hoje'
+  const dataDia = item.criadoEm ? new Date(item.criadoEm).toLocaleDateString('pt-BR') : 'Hoje'
 
   const streamUrl = obterUrlStreamPrint(item.uuid)
 

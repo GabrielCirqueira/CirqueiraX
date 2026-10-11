@@ -437,6 +437,35 @@
   - `web/features/downloads-video/components/ModalEditarMetadata.tsx`
   - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
 
+---
+
+## Melhoria 35 — Unificação de Pasta de Prints e Ajuste das 3 Categorias de Vídeos (Memes, Shingeki e One Piece)
+
+- **Data**: 11/10/2026
+- **Contexto**: O usuário esclareceu que não devem existir duas pastas físicas para prints (`prints/empresa` e `prints/pessoal`), mas sim uma **única pasta de prints** (`prints/`), sendo que a diferença de origem (`print_empresa` vs `print_pessoal`) serve apenas para identificar de onde o print foi enviado (computador do trabalho ou computador pessoal de casa) e exibir badges/filtros no painel web. Além disso, foram ajustadas as **3 pastas de vídeos** desejadas pelo usuário: `videos/memes`, `Shingeki no Kyojin` (`videos/shingeki`) e `One Piece` (`videos/onepiece`), corrigindo a omissão de One Piece e a duplicidade de pastas de prints.
+- **O que foi feito**:
+  - **Pasta de Prints Unificada (`prints/`)**:
+    - Criada a categoria única `Prints` com `pasta_local = 'prints'`.
+    - Atualizadas as regras de origem (`origem_regra`) para que tanto `print_empresa` quanto `print_pessoal` apontem para a categoria `Prints`.
+    - Preservada a origem no registro de `media_item`, mantendo a auditoria e os filtros visuais nos componentes `CardPrint.tsx`, `TabelaPrints.tsx` e `ModalVisualizarPrint.tsx`.
+    - Migrados os arquivos físicos existentes no storage e atualizados os registros do banco de `/prints/pessoal/` para `/prints/`.
+  - **As 3 Pastas de Vídeos Alinhadas**:
+    - `videos/memes` (`pasta_local = 'videos/memes'`).
+    - `Shingeki no Kyojin` (`pasta_local = 'videos/shingeki'`).
+    - `One Piece` (`pasta_local = 'videos/onepiece'`).
+  - **Migration Doctrine Oficial**:
+    - Desenvolvida a nova migração [Version20261011211214.php](file:///home/gabriel/dev/CirqueiraX/migrations/Version20261011211214.php) que executa a transição de forma idempotente, migrando referências de `categoria_id`, atualizando caminhos locais em `media_item` e limpando as categorias antigas redundantes, preservando a migração anterior [Version20261010215918.php](file:///home/gabriel/dev/CirqueiraX/migrations/Version20261010215918.php) 100% intacta.
+  - **Seed e Comandos de Console**:
+    - Atualizado [SeedOrigemRegrasCommand.php](file:///home/gabriel/dev/CirqueiraX/src/Command/SeedOrigemRegrasCommand.php) para semear as 4 categorias oficiais (`Prints`, `videos/memes`, `Shingeki no Kyojin`, `One Piece`) e associar as regras de origem.
+  - **Atualização Completa dos Guias**:
+    - Reformulado [documentation/guias/SYNCTHING.md](file:///home/gabriel/dev/CirqueiraX/documentation/guias/SYNCTHING.md) com diagrama de arquitetura, estrutura de diretórios (`prints/`, `videos/memes/`, `videos/shingeki/`, `videos/onepiece/`), identificação dos 3 dispositivos (`old` na VPS, `CELULAR` no Android e `OLD-PC` no computador pessoal) e instruções para sincronização unificada ou por pastas individuais.
+    - Atualizado [agente/README.md](file:///home/gabriel/dev/CirqueiraX/agente/README.md) documentando a pasta única de prints.
+- **Arquivos**:
+  - `migrations/Version20261011211214.php`
+  - `src/Command/SeedOrigemRegrasCommand.php`
+  - `agente/README.md`
+  - `documentation/guias/SYNCTHING.md`
+
 
 
 

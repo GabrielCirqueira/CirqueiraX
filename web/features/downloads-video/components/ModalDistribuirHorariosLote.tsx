@@ -27,10 +27,7 @@ import {
 } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import type { ItemDistribuicaoHorario, MediaItem } from '../types'
-import {
-  formatarDataMidia,
-  formatarHorarioMidia,
-} from '../utils/formatadores'
+import { formatarDataMidia, formatarHorarioMidia } from '../utils/formatadores'
 import {
   calcularDistribuicaoOrganica,
   calcularDistribuicaoRetroativa,
@@ -76,7 +73,9 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
   const [horaFimUniforme, setHoraFimUniforme] = useState('22:30')
   const [horaBaseRetroativa, setHoraBaseRetroativa] = useState(dataHoraMaisRecente.hora)
   const [passoRetroativoMinutos, setPassoRetroativoMinutos] = useState(120)
-  const [ajustesManuais, setAjustesManuais] = useState<Record<string, { data: string; hora: string }>>({})
+  const [ajustesManuais, setAjustesManuais] = useState<
+    Record<string, { data: string; hora: string }>
+  >({})
 
   useEffect(() => {
     if (aberto && itens.length > 0) {
@@ -398,7 +397,8 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
                   <Flex align="center" gap={2} p={2} bg="bg.muted/20" borderRadius="lg">
                     <Info size={14} color="var(--chakra-colors-cirqueira-brand-400)" />
                     <Text fontSize="xs" color="fg.subtle">
-                      Distribui entre os picos de maior engajamento (manhã, almoço, tarde, noite) com minutos variados.
+                      Distribui entre os picos de maior engajamento (manhã, almoço, tarde, noite)
+                      com minutos variados.
                     </Text>
                   </Flex>
                 )}
@@ -475,7 +475,13 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
                             #{index + 1}
                           </Badge>
                           <VStack align="start" gap={0} minW={0} flex={1}>
-                            <Text fontSize="xs" fontWeight="medium" color="fg" truncate maxW="280px">
+                            <Text
+                              fontSize="xs"
+                              fontWeight="medium"
+                              color="fg"
+                              truncate
+                              maxW="280px"
+                            >
                               {titulo}
                             </Text>
                             <Text fontSize="10px" color="fg.subtle">

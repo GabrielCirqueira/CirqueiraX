@@ -153,10 +153,10 @@ Lê o arquivo `.env` localizado no próprio diretório `agente/` usando `python-
    - O backend valida a existência e validade do token (conferindo se não foi revogado) e atribui ao agente a permissão `ROLE_AGENTE`.
 
 3. **Classificação e Distribuição Automática**:
-   - O `IngestarPrintService` consulta a tabela `origem_regra` para descobrir qual categoria está associada à origem do token.
-   - Para `print_empresa`, mapeia para a categoria `Print Empresa` (pasta `prints/empresa`).
-   - Para `print_pessoal`, mapeia para a categoria `Print Pessoal` (pasta `prints/pessoal`).
-   - A mídia é salva no disco local e o processamento em lote/background é disparado (incluindo upload para o álbum correspondente no Google Fotos, se vinculado).
+   - O `IngestarPrintService` e o worker assíncrono consultam a tabela `origem_regra` para mapear a origem do token.
+   - Ambas as origens (`print_empresa` e `print_pessoal`) mapeiam para a categoria única **Prints** (salva na mesma pasta física `prints/`).
+   - A origem da captura (Empresa ou Pessoal) é preservada no campo `origem` do item para auditoria e filtragem visual na interface web.
+   - O processamento em background é disparado (incluindo upload para o álbum correspondente no Google Fotos, se vinculado).
 
 ---
 

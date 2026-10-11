@@ -186,4 +186,3 @@ export function calcularDistribuicaoOrganica(total: number): string[] {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
   })
 }
-

@@ -43,7 +43,12 @@ import {
   useRetentarMediaItem,
   useRetentarTodos,
 } from './hooks/useDownloadsVideo'
-import type { AtualizarMetadataInput, FiltrosMediaItem, ItemDistribuicaoHorario, MediaItem } from './types'
+import type {
+  AtualizarMetadataInput,
+  FiltrosMediaItem,
+  ItemDistribuicaoHorario,
+  MediaItem,
+} from './types'
 
 export default function DownloadsVideo() {
   const [pagina, setPagina] = useState(1)

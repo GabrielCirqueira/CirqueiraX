@@ -1,10 +1,6 @@
 import { api } from '@/config/api'
 import type { RespostaApi, RespostaPaginada } from '@/shared/types/api'
-import type {
-  CategoriaOpcao,
-  FiltrosPrints,
-  MediaItem,
-} from './types'
+import type { CategoriaOpcao, FiltrosPrints, MediaItem } from './types'
 
 export async function listarPrints(
   filtros: FiltrosPrints = {}
@@ -75,7 +71,9 @@ export async function baixarArquivoPrint(uuid: string, nomeArquivo?: string): Pr
   const link = document.createElement('a')
   link.href = url
   const nomeFinal = nomeArquivo
-    ? (nomeArquivo.endsWith('.png') || nomeArquivo.endsWith('.jpg') ? nomeArquivo : `${nomeArquivo}.png`)
+    ? nomeArquivo.endsWith('.png') || nomeArquivo.endsWith('.jpg')
+      ? nomeArquivo
+      : `${nomeArquivo}.png`
     : `print_${uuid}.png`
   link.download = nomeFinal
   document.body.appendChild(link)

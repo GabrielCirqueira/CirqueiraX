@@ -1,8 +1,8 @@
 import { Box, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { Camera } from 'lucide-react'
 import { memo } from 'react'
-import { CardPrint } from './CardPrint'
 import type { MediaItem } from '../types'
+import { CardPrint } from './CardPrint'
 
 export interface GridPrintsProps {
   itens: MediaItem[]
@@ -67,7 +67,8 @@ export const GridPrints = memo(function GridPrints({
           Nenhum print sincronizado
         </Text>
         <Text fontSize="sm" color="fg.subtle" maxW="md">
-          Tire capturas de tela no seu computador (Win + Shift + S ou PrintScreen) e o Agente CirqueiraX sincronizará seus prints automaticamente aqui.
+          Tire capturas de tela no seu computador (Win + Shift + S ou PrintScreen) e o Agente
+          CirqueiraX sincronizará seus prints automaticamente aqui.
         </Text>
       </VStack>
     )

@@ -149,7 +149,14 @@ export const TabelaPrints = memo(function TabelaPrints({
             <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle" textAlign="left">
               Categoria
             </Box>
-            <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle" textAlign="right">
+            <Box
+              as="th"
+              p={3.5}
+              fontSize="xs"
+              fontWeight="bold"
+              color="fg.subtle"
+              textAlign="right"
+            >
               Ações
             </Box>
           </Box>
@@ -172,7 +179,10 @@ export const TabelaPrints = memo(function TabelaPrints({
                   : `${(tamanhoBytes / (1024 * 1024)).toFixed(1)} MB`
                 : 'PNG'
             const dataHora = item.criadoEm
-              ? new Date(item.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+              ? new Date(item.criadoEm).toLocaleTimeString('pt-BR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
               : '--:--'
             const dataDia = item.criadoEm
               ? new Date(item.criadoEm).toLocaleDateString('pt-BR')

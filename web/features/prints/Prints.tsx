@@ -226,7 +226,13 @@ export default function Prints() {
                 bg="bg.muted"
                 borderColor="border.subtle"
               />
-              <Box position="absolute" left={2.5} top="50%" transform="translateY(-50%)" color="fg.subtle">
+              <Box
+                position="absolute"
+                left={2.5}
+                top="50%"
+                transform="translateY(-50%)"
+                color="fg.subtle"
+              >
                 <Search size={14} />
               </Box>
             </Box>
@@ -436,7 +442,12 @@ export default function Prints() {
       >
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content borderRadius="xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+          <Dialog.Content
+            borderRadius="xl"
+            bg="bg.panel"
+            borderWidth="1px"
+            borderColor="border.subtle"
+          >
             <Dialog.Header p={4}>
               <Dialog.Title fontSize="md" fontWeight="bold">
                 Excluir {itemApagarAlvo ? 'Print' : `${selecionados.length} Prints`}?
@@ -444,7 +455,8 @@ export default function Prints() {
             </Dialog.Header>
             <Dialog.Body p={4}>
               <Text fontSize="sm" color="fg.subtle">
-                Esta ação removerá permanentemente os prints selecionados do servidor e do banco de dados.
+                Esta ação removerá permanentemente os prints selecionados do servidor e do banco de
+                dados.
               </Text>
             </Dialog.Body>
             <Dialog.Footer p={4}>

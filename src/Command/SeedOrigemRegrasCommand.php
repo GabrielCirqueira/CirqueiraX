@@ -31,15 +31,21 @@ final class SeedOrigemRegrasCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $io->title('Seed de OrigemRegra para Prints Automáticos');
+        $io->title('Seed de Categorias Padrão e OrigemRegra');
 
-        $categoriaEmpresa = $this->obterOuCriarCategoria('Print Empresa', 'prints/empresa');
-        $categoriaPessoal = $this->obterOuCriarCategoria('Print Pessoal', 'prints/pessoal');
+        // Categoria única para Prints (enviadas tanto do trabalho quanto de casa)
+        $categoriaPrints = $this->obterOuCriarCategoria('Prints', 'prints');
 
-        $this->obterOuCriarOrigemRegra(OrigemMedia::PRINT_EMPRESA, $categoriaEmpresa);
-        $this->obterOuCriarOrigemRegra(OrigemMedia::PRINT_PESSOAL, $categoriaPessoal);
+        // As 3 categorias de vídeos
+        $this->obterOuCriarCategoria('videos/memes', 'videos/memes');
+        $this->obterOuCriarCategoria('Shingeki no Kyojin', 'videos/shingeki');
+        $this->obterOuCriarCategoria('One Piece', 'videos/onepiece');
 
-        $io->success('Categorias e regras de origem para print_empresa e print_pessoal cadastradas com sucesso!');
+        // Ambas as origens de prints mapeiam para a pasta única "prints"
+        $this->obterOuCriarOrigemRegra(OrigemMedia::PRINT_EMPRESA, $categoriaPrints);
+        $this->obterOuCriarOrigemRegra(OrigemMedia::PRINT_PESSOAL, $categoriaPrints);
+
+        $io->success('Categorias (Prints, videos/memes, Shingeki no Kyojin, One Piece) e regras de origem para prints configuradas com sucesso!');
 
         return Command::SUCCESS;
     }

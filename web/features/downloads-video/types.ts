@@ -118,4 +118,3 @@ export interface ItemDistribuicaoHorario {
 export interface DistribuirHorariosLoteInput {
   itens: ItemDistribuicaoHorario[]
 }
-

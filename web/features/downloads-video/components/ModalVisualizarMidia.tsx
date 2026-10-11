@@ -144,7 +144,11 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
           >
             {erroStream ? (
               <VStack gap={3} p={6} textAlign="center" color="fg.subtle">
-                {ehImagem ? <ImageIcon size={48} strokeWidth={1.5} /> : <Video size={48} strokeWidth={1.5} />}
+                {ehImagem ? (
+                  <ImageIcon size={48} strokeWidth={1.5} />
+                ) : (
+                  <Video size={48} strokeWidth={1.5} />
+                )}
                 <Text fontSize="sm">
                   {ehImagem
                     ? 'Não foi possível carregar esta imagem diretamente no navegador.'

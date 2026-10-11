@@ -143,7 +143,7 @@ export function obterStatusConfig(status: StatusMediaItem): StatusConfig {
 }
 
 export function verificarSeEhImagem(item: MediaItem): boolean {
-  if (item.origem && item.origem.startsWith('print_')) return true
+  if (item.origem?.startsWith('print_')) return true
   if (item.metadata?.tipo === 'imagem' || item.metadata?.tipo_midia === 'imagem') return true
   const ext = String(item.metadata?.extensao ?? '').toLowerCase()
   if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'svg'].includes(ext)) return true
@@ -187,4 +187,3 @@ export function extrairExtensaoMedia(item: MediaItem): string {
   }
   return verificarSeEhImagem(item) ? 'png' : 'mp4'
 }
-

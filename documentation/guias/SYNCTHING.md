@@ -1,41 +1,75 @@
 # Guia de Integração e Sincronização: Syncthing & CirqueiraX
 
-Este guia documenta a arquitetura, pré-requisitos, fluxo de configuração e pareamento do **Syncthing** com a VPS e aparelhos móveis (Android via Syncthing-Fork) para o **CirqueiraX**.
+Este guia documenta a arquitetura, estrutura de diretórios, fluxo de configuração e sincronização do **Syncthing** entre a **VPS**, o **Celular (Android via Syncthing-Fork)** e o **Computador Pessoal** para o **CirqueiraX**.
 
 ---
 
-## 1. Visão Geral da Arquitetura
+## 1. Visão Geral da Arquitetura e Pastas
 
-O CirqueiraX processa, baixa e categoriza fotos e vídeos, distribuindo os arquivos no armazenamento local conforme a categoria selecionada:
+O CirqueiraX centraliza o processamento, ingestão e download de mídias, organizando os arquivos em disco em **1 pasta de prints** e **3 pastas de vídeos**:
 
 ```
-[ Download / Upload / Ingestão ]
-               │
-               ▼
-   [ Classificar / Distribuir ]
-               │
-               ▼
-Container: /var/www/html/var/storage/<pasta_local>/<arquivo>
-               │ (Bind Mount Docker)
-               ▼
-Host VPS:  /root/cirqueirax/sync_media/<pasta_local>/<arquivo>
-               │
-               ▼ (Syncthing fsWatcher / P2P TLS)
-Celular:   Internal storage/CirqueiraX/<pasta_local>/<arquivo>
+[ Ingestão / Captura de Prints / Download de Vídeos ]
+                         │
+                         ▼
+             [ Classificar / Distribuir ]
+                         │
+                         ▼
+        Container: /var/www/html/var/storage/
+                         │ (Docker Bind Mount)
+                         ▼
+        Host VPS:  /root/cirqueirax/sync_media/
+                         │
+        ┌────────────────┴────────────────┐
+        │ (Syncthing TLS / fsWatcher)     │
+        ▼                                 ▼
+Celular (Syncthing-Fork)          Computador Pessoal (OLD-PC)
 ```
 
-- **Host Path:** `/root/cirqueirax/sync_media`
-- **Container Path:** `/var/www/html/var/storage`
-- **Syncthing Folder ID:** `cirqueirax-media`
-- **Permissões do Host:** UID:GID `1000:1000` (container Symfony) e leitura/escrita para grupo (`0775` em diretórios, `0664` em arquivos).
+### 1.1. Estrutura Oficial de Diretórios
+
+```
+sync_media/ (ou /var/www/html/var/storage/)
+├── prints/                     <- Pasta ÚNICA para todos os prints (trabalho + casa)
+└── videos/                     <- Pasta base para os vídeos
+    ├── memes/                  <- 1ª Pasta de Vídeos: Memes
+    ├── shingeki/               <- 2ª Pasta de Vídeos: Shingeki no Kyojin
+    └── onepiece/               <- 3ª Pasta de Vídeos: One Piece
+```
+
+### 1.2. Regra das Prints: 1 Pasta Única, 2 Origens
+
+- **Pasta Física Única:** `prints/` (Categoria `Prints`).
+- **Origens Suportadas:**
+  - `print_empresa` (Capturas enviadas pelo agente do computador do trabalho).
+  - `print_pessoal` (Capturas enviadas pelo agente do computador pessoal de casa).
+- **Como funciona:** Ambas as origens caem na **mesma pasta** física `prints/`. Não existem pastas separadas de prints em disco. A distinção de onde o print veio é mantida através do metadado de origem no banco de dados (`origem: print_empresa` ou `origem: print_pessoal`), permitindo exibir badges e filtros na interface web.
+
+### 1.3. As 3 Pastas de Vídeos
+
+| Categoria no CirqueiraX | Subpasta Física | Descrição |
+| :--- | :--- | :--- |
+| **`videos/memes`** | `videos/memes/` | Memes em vídeo baixados ou enviados |
+| **`Shingeki no Kyojin`** | `videos/shingeki/` | Clipes e episódios de Shingeki no Kyojin |
+| **`One Piece`** | `videos/onepiece/` | Clipes e episódios de One Piece |
 
 ---
 
-## 2. Pré-requisitos e Configuração no CirqueiraX
+## 2. Dispositivos Identificados na Rede Syncthing
 
-Antes de configurar o compartilhamento no Syncthing, o sistema CirqueiraX deve estar preparado.
+No ecossistema Syncthing configurado na VPS:
 
-### 2.1. Definir `MEDIA_STORAGE_PATH` no `.env` de Produção
+| Dispositivo | Nome Syncthing | Device ID | Papel |
+| :--- | :--- | :--- | :--- |
+| **VPS** | `old` | `D52KJIR-53A7OZA-WDQOQNI-AJZFZKI-OBEOJUP-3H7IXLQ-FCHSX3L-US7TTA6` | Servidor central / Origem dos downloads e ingestão |
+| **Celular** | `CELULAR` | `ITIL4U6-KCKJNYL-TFOTFQA-LEOA2C3-DBMEC2V-V7SOTSF-AHZ4ZGV-3L6I7AA` | Smartphone Android (App Syncthing-Fork) |
+| **Computador Pessoal** | `OLD-PC` | `QEV4QHJ-I24KCG4-PHKYV63-V6BWFXZ-74H3DY3-JD2J6ID-A57HX37-V7XW6QP` | Computador pessoal de casa |
+
+---
+
+## 3. Pré-requisitos e Configuração no CirqueiraX
+
+### 3.1. Definir `MEDIA_STORAGE_PATH` no `.env` da VPS
 
 No arquivo `.env` da raiz do projeto na VPS:
 
@@ -45,112 +79,118 @@ MEDIA_STORAGE_PATH=/root/cirqueirax/sync_media
 
 > **Nota de Arquitetura:** O Docker Compose de produção (`devops/docker-compose.prod.yaml`) mapeia `${MEDIA_STORAGE_PATH}` do host diretamente para `/var/www/html/var/storage` do container. O backend do CirqueiraX resolve o diretório automaticamente com fallback resiliente para `/var/www/html/var/storage`.
 
-### 2.2. Criar a Pasta no Host com Permissões Adequadas
+### 3.2. Criar as Pastas no Host da VPS
 
 Execute no terminal da VPS como `root`:
 
 ```bash
-mkdir -p /root/cirqueirax/sync_media
+mkdir -p /root/cirqueirax/sync_media/prints
+mkdir -p /root/cirqueirax/sync_media/videos/memes
+mkdir -p /root/cirqueirax/sync_media/videos/shingeki
+mkdir -p /root/cirqueirax/sync_media/videos/onepiece
+
 chown -R 1000:1000 /root/cirqueirax/sync_media
 chmod -R 775 /root/cirqueirax/sync_media
 ```
 
-### 2.3. Aplicar Migrations de Categorias no Banco
+### 3.3. Aplicar Migrations no Banco de Dados
 
-As categorias padrão do sistema já possuem migração automática registrada no Doctrine (`Version20261010215918`):
-- `Print Empresa` (`prints/empresa`)
-- `Print Pessoal` (`prints/pessoal`)
-- `videos/memes` (`videos-memes`)
-- `Shingeki no Kyojin` (`videos/shingeki`)
-
-Para rodar em produção:
+As categorias (`Prints`, `videos/memes`, `Shingeki no Kyojin`, `One Piece`) e as regras de origem automáticas estão registradas na migration do Doctrine:
 
 ```bash
 make migrate
 ```
 
-Novas migrations podem ser criadas a qualquer momento usando:
+Caso queira executar via seed do console:
 ```bash
-make new-migration
+docker exec cirqueirax_symfony php bin/console app:seed:origem-regras
 ```
 
-### 2.4. Criação Automática de Subpastas (`mkdir -p`)
+### 3.4. Criação Automática de Subpastas (`mkdir -p`)
 
-O serviço `DistribuirLocalService` e o `ArmazenamentoLocalClient` criam subdiretórios automaticamente de forma recursiva (`0775` e `mkdir -p` nativo). Quando um vídeo recebe a categoria `Shingeki no Kyojin`, a subpasta `videos/shingeki` é criada instantaneamente se ainda não existir.
-
-### 2.5. Recriar os Containers para Aplicar o Volume
-
-Se você alterou o `MEDIA_STORAGE_PATH` no `.env`:
-
-```bash
-docker compose --env-file devops/ports.env -f devops/docker-compose.prod.yaml up -d --force-recreate symfony
-```
-
-### 2.6. Configurar API Key do Syncthing (Opcional para Dashboard)
-
-No `.env`:
-
-```bash
-SYNCTHING_API_URL=http://localhost:8384
-SYNCTHING_API_KEY=<sua-api-key>
-```
-
-A chave pode ser copiada na interface web do Syncthing em: **Ações → Configurações → Geral / Avançado → API Key**.
+O serviço `DistribuirLocalService` e o `ArmazenamentoLocalClient` criam subdiretórios automaticamente de forma recursiva (`0775` e `mkdir -p` nativo). Quando um vídeo recebe a categoria `One Piece`, a subpasta `videos/onepiece` é criada instantaneamente se ainda não existir.
 
 ---
 
-## 3. Passo a Passo: Configuração do Syncthing na VPS
+## 4. Passo a Passo: Configuração do Syncthing
 
-### Passo 1: Acessar a Interface do Syncthing via Túnel SSH
+Você pode configurar a sincronização de duas formas:
+- **Abordagem A (Recomendada):** Compartilhar a pasta raiz unificada (`sync_media`). Uma única pasta configurada no Syncthing que já sincroniza tudo organizado.
+- **Abordagem B:** Compartilhar as pastas individualmente (`prints`, `memes`, `shingeki`, `onepiece`), útil se você quiser que cada pasta vá para um local específico diferente no celular (ex: galeria do Android).
 
-Por padrão, a porta 8384 do Syncthing deve permanecer fechada para a internet pública. Na sua máquina local, abra um túnel seguro:
+---
+
+### Opção A: Pasta Raiz Unificada (Recomendado)
+
+#### Passo 1: Acessar a Interface do Syncthing da VPS via Túnel SSH
+
+Na sua máquina local:
 
 ```bash
-ssh -L 8384:localhost:8384 root@IP-DA-VPS
+ssh -L 8384:localhost:8384 root@72.60.14.61
 ```
 
-Em seguida, acesse no seu navegador: [http://localhost:8384](http://localhost:8384).
+Acesse no navegador: [http://localhost:8384](http://localhost:8384).
 
-### Passo 2: Criar a Pasta Compartilhada
+#### Passo 2: Criar a Pasta no Syncthing da VPS
 
 1. Clique em **"Adicionar Pasta"**.
 2. **Aba Geral:**
    - **Rótulo da Pasta:** `CirqueiraX - Mídias`
-   - **ID da Pasta:** `cirqueirax-media` *(não utilize IDs de outros sistemas como Franky)*
+   - **ID da Pasta:** `cirqueirax-media`
    - **Caminho da Pasta:** `/root/cirqueirax/sync_media`
 3. **Aba Compartilhamento:**
-   - Marque o dispositivo **CELULAR** (Device ID já pareado previamente no Syncthing-Fork).
-   - Se desejar, marque também **OLD-PC**.
+   - Marque **CELULAR** (`ITIL4U6...`).
+   - Marque **OLD-PC** (`QEV4QHJ...`).
 4. **Aba Avançado:**
-   - Ative **"Ignorar Permissões"** (*Ignore Permissions*): o Android não suporta permissões POSIX/Unix completas, e essa opção previne conflitos contínuos de sincronização.
+   - Ative **"Ignorar Permissões"** (*Ignore Permissions*) — essencial para Android.
    - Padrão de monitoramento: mantenha **"Observar alterações (fsWatcher)"** ativado com intervalo padrão (~10 segundos).
 5. Clique em **Salvar**.
 
----
+#### Passo 3: Aceitar no Celular (Syncthing-Fork)
 
-## 4. Passo a Passo: Aceitar o Compartilhamento no Celular (Android)
+1. Abra o app **Syncthing-Fork** no celular.
+2. Surgirá o alerta: *"old quer compartilhar a pasta 'CirqueiraX - Mídias' (cirqueirax-media)"*.
+3. Toque para aceitar.
+4. Escolha onde salvar na memória interna (ex.: `Armazenamento Principal / CirqueiraX`).
+5. Ative **"Ignorar permissões"** e salve.
+6. Pronto! As subpastas `prints/`, `videos/memes/`, `videos/shingeki/` e `videos/onepiece/` surgirão automaticamente no celular.
 
-1. Abra o aplicativo **Syncthing-Fork** no celular.
-2. Uma notificação surgirá: *"VPS quer compartilhar a pasta 'CirqueiraX - Mídias' com você"*.
-3. Toque na notificação para aceitar.
-4. Defina o diretório local no aparelho:
-   - Exemplo: `Armazenamento Principal / CirqueiraX` (ou dentro de `Movies/CirqueiraX`).
-5. Confirme e salve.
+#### Passo 4: Aceitar no Computador Pessoal (OLD-PC)
 
----
-
-## 5. Fluxo de Validação e Teste Ponta a Ponta
-
-1. Acesse o CirqueiraX no navegador (`/downloads`).
-2. Cole a URL de um vídeo e selecione a categoria **Shingeki no Kyojin** (ou faça upload manual na triagem).
-3. Aguarde o download e o processamento pelo worker.
-4. O arquivo será movido para `/root/cirqueirax/sync_media/videos/shingeki/<arquivo>.mp4`.
-5. Em até 10 segundos, o Syncthing detecta o novo arquivo via `fsWatcher`.
-6. No celular, o vídeo aparecerá na pasta `CirqueiraX/videos/shingeki/<arquivo>.mp4`.
+1. Abra o Syncthing no seu computador de casa.
+2. Aceite o compartilhamento de `cirqueirax-media`.
+3. Escolha o diretório local (ex.: `D:\CirqueiraX` ou `C:\Users\...\CirqueiraX`).
+4. Salve.
 
 ---
 
-## 6. Escalabilidade e Novas Categorias
+### Opção B: Pastas Individuais (Se quiser mapear separadamente no Android)
 
-Você só precisa realizar o pareamento da pasta raiz (`cirqueirax-media`) **uma única vez**.
-Qualquer nova categoria criada no CirqueiraX (seja álbum novo, anime, série ou projeto) criará uma subpasta dentro de `sync_media/` que será imediatamente sincronizada com todos os dispositivos pareados.
+Se preferir que cada pasta vá para um diretório específico da sua galeria no Android (por exemplo, `Pictures/Prints`, `Movies/Memes`, `Movies/Shingeki`, `Movies/One Piece`), crie as pastas no Syncthing da VPS individualmente:
+
+| Rótulo da Pasta | ID da Pasta (Folder ID) | Caminho na VPS |
+| :--- | :--- | :--- |
+| `CirqueiraX - Prints` | `cirqueirax-prints` | `/root/cirqueirax/sync_media/prints` |
+| `CirqueiraX - Memes` | `cirqueirax-videos-memes` | `/root/cirqueirax/sync_media/videos/memes` |
+| `CirqueiraX - Shingeki` | `cirqueirax-videos-shingeki` | `/root/cirqueirax/sync_media/videos/shingeki` |
+| `CirqueiraX - One Piece` | `cirqueirax-videos-onepiece` | `/root/cirqueirax/sync_media/videos/onepiece` |
+
+Em cada uma:
+- Compartilhe com `CELULAR` e `OLD-PC`.
+- Marque **"Ignorar Permissões"**.
+- No celular (Syncthing-Fork), aponte cada uma para a pasta de destino correspondente.
+
+---
+
+## 5. Fluxo de Validação Ponta a Ponta
+
+1. **Teste de Prints:**
+   - Faça uma captura no PC de casa ou do trabalho pelo agente.
+   - O print é salvo em `/root/cirqueirax/sync_media/prints/print_<data>_<hash>.png`.
+   - Em poucos segundos, o Syncthing sincroniza o print para o Celular e para o PC pessoal.
+
+2. **Teste de Vídeos (One Piece / Shingeki / Memes):**
+   - No CirqueiraX web (`/downloads`), cole uma URL de vídeo e selecione a categoria **One Piece** (ou **Shingeki no Kyojin** ou **videos/memes**).
+   - O worker baixa o arquivo e distribui para `/root/cirqueirax/sync_media/videos/onepiece/<arquivo>.mp4`.
+   - O Syncthing detecta via `fsWatcher` e o vídeo surge instantaneamente no seu celular na pasta de One Piece.
