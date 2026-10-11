@@ -12,6 +12,7 @@ interface HeaderProps {
 
 function getTituloRota(pathname: string): string {
   if (pathname.startsWith('/downloads')) return 'Downloads de Vídeo'
+  if (pathname.startsWith('/prints')) return 'Prints & Capturas'
   if (pathname.startsWith('/upload-manual')) return 'Upload Manual'
   if (pathname.startsWith('/google-fotos')) return 'Google Fotos'
   return 'Dashboard'

@@ -2,6 +2,7 @@ import { useTheme } from '@/contexts'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Badge, Box, Center, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
+  Camera,
   Code2,
   DownloadCloud,
   Images,
@@ -24,6 +25,7 @@ interface SidebarProps {
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
+  { href: '/prints', label: 'Prints & Capturas', icon: Camera },
   { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud },
   { href: '/google-fotos', label: 'Google Fotos', icon: Images },
 ]

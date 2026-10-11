@@ -54,6 +54,7 @@ export interface MediaItem {
 export interface FiltrosMediaItem {
   status?: string
   origem?: string
+  tipo?: string
   categoriaId?: string
   busca?: string
   ordenacao?: string

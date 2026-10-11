@@ -114,10 +114,30 @@ class MediaItemRepository extends ServiceEntityRepository
                 ->setParameter('status', $statusVal);
         }
 
+        if (!empty($filtros['tipo'])) {
+            if ('video' === $filtros['tipo']) {
+                $qb->andWhere("m.origem NOT IN ('print_pessoal', 'print_empresa')");
+            } elseif ('imagem' === $filtros['tipo'] || 'print' === $filtros['tipo']) {
+                $qb->andWhere("m.origem IN ('print_pessoal', 'print_empresa')");
+            }
+        }
+
         if (!empty($filtros['origem'])) {
-            $origemVal = $filtros['origem'] instanceof OrigemMedia ? $filtros['origem']->value : $filtros['origem'];
-            $qb->andWhere('m.origem = :origem')
-                ->setParameter('origem', $origemVal);
+            if (is_string($filtros['origem']) && str_contains($filtros['origem'], ',')) {
+                $origens = array_map('trim', explode(',', $filtros['origem']));
+                $qb->andWhere('m.origem IN (:origens)')
+                    ->setParameter('origens', $origens);
+            } elseif ('prints' === $filtros['origem']) {
+                $qb->andWhere('m.origem IN (:origens_prints)')
+                    ->setParameter('origens_prints', ['print_pessoal', 'print_empresa']);
+            } elseif ('downloads' === $filtros['origem']) {
+                $qb->andWhere('m.origem IN (:origens_downloads)')
+                    ->setParameter('origens_downloads', ['download', 'bot_telegram']);
+            } else {
+                $origemVal = $filtros['origem'] instanceof OrigemMedia ? $filtros['origem']->value : $filtros['origem'];
+                $qb->andWhere('m.origem = :origem')
+                    ->setParameter('origem', $origemVal);
+            }
         }
 
         if (array_key_exists('categoriaId', $filtros) && null !== $filtros['categoriaId'] && '' !== $filtros['categoriaId']) {

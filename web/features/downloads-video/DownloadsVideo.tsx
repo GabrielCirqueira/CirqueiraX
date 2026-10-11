@@ -12,10 +12,8 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import {
-  AlertTriangle,
   ChevronLeft,
   ChevronRight,
-  Filter,
   LayoutGrid,
   List,
   Loader2,
@@ -70,6 +68,7 @@ export default function DownloadsVideo() {
     const obj: FiltrosMediaItem = {
       pagina,
       porPagina: 12,
+      tipo: 'video',
     }
     if (busca.trim()) {
       obj.busca = busca.trim()
@@ -531,10 +530,9 @@ export default function DownloadsVideo() {
                   h={8}
                 >
                   <option value="">Todas as origens</option>
-                  <option value="manual">Manual / Web</option>
+                  <option value="download">Download de Vídeo</option>
                   <option value="bot_telegram">Bot Telegram</option>
-                  <option value="print_empresa">Print Empresa</option>
-                  <option value="print_pessoal">Print Pessoal</option>
+                  <option value="manual">Upload Manual (Vídeo)</option>
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>

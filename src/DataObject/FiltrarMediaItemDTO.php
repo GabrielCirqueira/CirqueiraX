@@ -11,6 +11,7 @@ final readonly class FiltrarMediaItemDTO
     public function __construct(
         public ?string $status = null,
         public ?string $origem = null,
+        public ?string $tipo = null,
         public ?string $categoriaId = null,
         public ?string $busca = null,
         public string $ordenacao = 'criadoEm',
@@ -76,6 +77,7 @@ final readonly class FiltrarMediaItemDTO
         return array_filter([
             'status' => $this->status,
             'origem' => $this->origem,
+            'tipo' => $this->tipo,
             'categoriaId' => $this->categoriaId,
             'busca' => $this->busca,
             'ordenacao' => $this->ordenacao,
