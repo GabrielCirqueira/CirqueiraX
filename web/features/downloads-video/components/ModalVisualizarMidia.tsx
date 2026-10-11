@@ -17,6 +17,7 @@ import {
   Film,
   FolderPlus,
   HardDrive,
+  Image as ImageIcon,
   Loader2,
   User,
   Video,
@@ -25,7 +26,13 @@ import {
 import { memo, useState } from 'react'
 import { baixarArquivoMidia, obterUrlStreamMediaItem } from '../api'
 import type { MediaItem } from '../types'
-import { formatarDuracao, formatarTamanhoBytes } from '../utils/formatadores'
+import {
+  extrairExtensaoMedia,
+  extrairTituloMedia,
+  formatarDuracao,
+  formatarTamanhoBytes,
+  verificarSeEhImagem,
+} from '../utils/formatadores'
 
 export interface ModalVisualizarMidiaProps {
   item: MediaItem | null
@@ -47,19 +54,22 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
 
   if (!item) return null
 
-  const titulo = item.metadata?.titulo || `Vídeo ${item.hash.slice(0, 10)}`
-  const uploader = item.metadata?.uploader || 'Desconhecido'
+  const ehImagem = verificarSeEhImagem(item)
+  const titulo = extrairTituloMedia(item)
+  const extensao = extrairExtensaoMedia(item)
+  const uploader =
+    item.metadata?.uploader ||
+    (ehImagem ? (item.metadata?.agente_nome as string) || 'Dispositivo Pessoal' : 'Desconhecido')
   const streamUrl = obterUrlStreamMediaItem(item.uuid)
   const tamanhoBytes = (item.metadata?.tamanho_bytes as number) || undefined
   const duracao = (item.metadata?.duracao as number) || undefined
-  const extensao = (item.metadata?.extensao as string) || 'mp4'
   const urlOriginal = item.metadata?.url_original
   const urlThumbnail = item.thumbnailUrl || (item.metadata?.thumbnail as string)
 
   const handleBaixar = async () => {
     try {
       setBaixando(true)
-      await baixarArquivoMidia(item.uuid, titulo)
+      await baixarArquivoMidia(item.uuid, titulo, extensao)
     } finally {
       setBaixando(false)
     }
@@ -98,7 +108,7 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                 alignItems="center"
                 justifyContent="center"
               >
-                <Film size={18} />
+                {ehImagem ? <ImageIcon size={18} /> : <Film size={18} />}
               </Box>
               <VStack align="start" gap={0.5}>
                 <Dialog.Title fontSize="md" fontWeight="bold" color="fg" lineClamp={1}>
@@ -124,24 +134,40 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
           <Box
             position="relative"
             bg="black"
-            aspectRatio="16/9"
+            aspectRatio={{ base: '4/3', md: '16/9' }}
             w="full"
             overflow="hidden"
             display="flex"
             alignItems="center"
             justifyContent="center"
+            p={ehImagem ? 2 : 0}
           >
             {erroStream ? (
               <VStack gap={3} p={6} textAlign="center" color="fg.subtle">
-                <Video size={48} strokeWidth={1.5} />
+                {ehImagem ? <ImageIcon size={48} strokeWidth={1.5} /> : <Video size={48} strokeWidth={1.5} />}
                 <Text fontSize="sm">
-                  Não foi possível reproduzir este vídeo diretamente no navegador.
+                  {ehImagem
+                    ? 'Não foi possível carregar esta imagem diretamente no navegador.'
+                    : 'Não foi possível reproduzir este vídeo diretamente no navegador.'}
                 </Text>
                 <Button size="sm" colorPalette="brand" onClick={handleBaixar} borderRadius="lg">
                   <Download size={14} />
-                  <Text as="span">Baixar Arquivo MP4</Text>
+                  <Text as="span">Baixar Arquivo ({extensao.toUpperCase()})</Text>
                 </Button>
               </VStack>
+            ) : ehImagem ? (
+              <img
+                key={streamUrl}
+                src={streamUrl}
+                alt={titulo}
+                onError={() => setErroStream(true)}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '65vh',
+                  objectFit: 'contain',
+                  borderRadius: '6px',
+                }}
+              />
             ) : (
               <video
                 key={streamUrl}
@@ -264,7 +290,11 @@ export const ModalVisualizarMidia = memo(function ModalVisualizarMidia({
                   ) : (
                     <>
                       <Download size={14} />
-                      <Text as="span">Baixar Vídeo MP4</Text>
+                      <Text as="span">
+                        {ehImagem
+                          ? `Baixar Imagem (${extensao.toUpperCase()})`
+                          : `Baixar Vídeo (${extensao.toUpperCase()})`}
+                      </Text>
                     </>
                   )}
                 </Button>

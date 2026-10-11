@@ -141,3 +141,50 @@ export function obterStatusConfig(status: StatusMediaItem): StatusConfig {
       return { label: status, colorPalette: 'gray', animado: false }
   }
 }
+
+export function verificarSeEhImagem(item: MediaItem): boolean {
+  if (item.origem && item.origem.startsWith('print_')) return true
+  if (item.metadata?.tipo === 'imagem' || item.metadata?.tipo_midia === 'imagem') return true
+  const ext = String(item.metadata?.extensao ?? '').toLowerCase()
+  if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'svg'].includes(ext)) return true
+  if (item.caminhoLocal && /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(item.caminhoLocal)) return true
+  if (
+    typeof item.metadata?.nome_original === 'string' &&
+    /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(item.metadata.nome_original)
+  ) {
+    return true
+  }
+  return false
+}
+
+export function extrairTituloMedia(item: MediaItem): string {
+  if (typeof item.metadata?.titulo === 'string' && item.metadata.titulo.trim()) {
+    return item.metadata.titulo
+  }
+  if (typeof item.metadata?.nome_original === 'string' && item.metadata.nome_original.trim()) {
+    return item.metadata.nome_original
+  }
+  if (item.caminhoLocal) {
+    const partes = item.caminhoLocal.split('/')
+    const ultimo = partes[partes.length - 1]
+    if (ultimo) return ultimo
+  }
+  const ehImagem = verificarSeEhImagem(item)
+  return ehImagem ? `Print ${item.hash.slice(0, 10)}` : `Vídeo ${item.hash.slice(0, 10)}`
+}
+
+export function extrairExtensaoMedia(item: MediaItem): string {
+  if (typeof item.metadata?.extensao === 'string' && item.metadata.extensao.trim()) {
+    return item.metadata.extensao.toLowerCase()
+  }
+  if (typeof item.metadata?.nome_original === 'string') {
+    const ext = item.metadata.nome_original.split('.').pop()
+    if (ext && ext !== item.metadata.nome_original) return ext.toLowerCase()
+  }
+  if (item.caminhoLocal) {
+    const ext = item.caminhoLocal.split('.').pop()
+    if (ext && ext !== item.caminhoLocal) return ext.toLowerCase()
+  }
+  return verificarSeEhImagem(item) ? 'png' : 'mp4'
+}
+

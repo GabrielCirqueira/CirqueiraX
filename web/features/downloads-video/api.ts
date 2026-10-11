@@ -102,7 +102,11 @@ export function obterUrlStreamMediaItem(uuid: string): string {
   return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl
 }
 
-export async function baixarArquivoMidia(uuid: string, nomeArquivo?: string): Promise<void> {
+export async function baixarArquivoMidia(
+  uuid: string,
+  nomeArquivo?: string,
+  extensaoPadrao?: string
+): Promise<void> {
   const response = await api.get(`/api/v1/media-itens/${uuid}/download`, {
     responseType: 'blob',
   })
@@ -112,11 +116,15 @@ export async function baixarArquivoMidia(uuid: string, nomeArquivo?: string): Pr
   const url = window.URL.createObjectURL(blob)
   const link = document.createElement('a')
   link.href = url
-  link.download = nomeArquivo
-    ? nomeArquivo.endsWith('.mp4')
-      ? nomeArquivo
-      : `${nomeArquivo}.mp4`
-    : `video_${uuid}.mp4`
+
+  const ext = (extensaoPadrao || 'mp4').toLowerCase().replace(/^\./, '')
+  if (nomeArquivo) {
+    const jaTemExtensao = /\.[a-z0-9]{2,5}$/i.test(nomeArquivo)
+    link.download = jaTemExtensao ? nomeArquivo : `${nomeArquivo}.${ext}`
+  } else {
+    link.download = `midia_${uuid}.${ext}`
+  }
+
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)

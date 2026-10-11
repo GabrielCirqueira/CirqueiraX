@@ -47,10 +47,18 @@ final readonly class IngestarPrintService
 
         $origemMedia = OrigemMedia::tryFrom($tokenAgente->origem()) ?? OrigemMedia::MANUAL;
 
+        $extensaoNormalizada = strtolower($extensao);
+        $titulo = $dto->nomeOriginal() ?: sprintf('Print %s', date('d/m/Y H:i'));
+
         /** @var array<string, mixed> $metadataExtra */
         $metadataExtra = array_filter([
+            MetadataKeys::TITULO => $titulo,
             MetadataKeys::NOME_ORIGINAL => $dto->nomeOriginal(),
+            MetadataKeys::EXTENSAO => $extensaoNormalizada,
             MetadataKeys::TIMESTAMP_CAPTURA => $dto->timestampCaptura(),
+            'tipo' => 'imagem',
+            'tipo_midia' => 'imagem',
+            'mimetype' => 'image/' . ($extensaoNormalizada === 'jpg' ? 'jpeg' : $extensaoNormalizada),
             'agente_nome' => $tokenAgente->nome(),
             'agente_uuid' => $tokenAgente->uuid()?->toString(),
         ]);

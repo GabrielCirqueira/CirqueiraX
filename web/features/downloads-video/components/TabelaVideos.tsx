@@ -20,16 +20,21 @@ import {
   Trash2,
   User,
   Video,
+  Eye,
+  Image as ImageIcon,
 } from 'lucide-react'
 import { memo, useState } from 'react'
-import { baixarArquivoMidia } from '../api'
+import { baixarArquivoMidia, obterUrlStreamMediaItem } from '../api'
 import type { MediaItem } from '../types'
 import {
+  extrairExtensaoMedia,
+  extrairTituloMedia,
   formatarDataMidia,
   formatarDuracao,
   formatarHorarioMidia,
   formatarTamanhoBytes,
   obterStatusConfig,
+  verificarSeEhImagem,
 } from '../utils/formatadores'
 
 export interface TabelaVideosProps {
@@ -61,11 +66,16 @@ export const TabelaVideos = memo(function TabelaVideos({
 }: TabelaVideosProps) {
   const [baixandoUuid, setBaixandoUuid] = useState<string | null>(null)
 
-  const handleDownload = async (uuid: string, titulo: string, e: React.MouseEvent) => {
+  const handleDownload = async (
+    uuid: string,
+    titulo: string,
+    extensao: string,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation()
     try {
       setBaixandoUuid(uuid)
-      await baixarArquivoMidia(uuid, titulo)
+      await baixarArquivoMidia(uuid, titulo, extensao)
     } finally {
       setBaixandoUuid(null)
     }

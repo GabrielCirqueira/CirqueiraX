@@ -9,9 +9,11 @@ import {
   DownloadCloud,
   Edit3,
   ExternalLink,
+  Eye,
   Folder,
   FolderPlus,
   HardDrive,
+  Image as ImageIcon,
   Loader2,
   Play,
   RotateCcw,
@@ -21,15 +23,18 @@ import {
   Video,
 } from 'lucide-react'
 import { memo, useState } from 'react'
-import { baixarArquivoMidia } from '../api'
+import { baixarArquivoMidia, obterUrlStreamMediaItem } from '../api'
 import type { MediaItem } from '../types'
 import {
+  extrairExtensaoMedia,
+  extrairTituloMedia,
   formatarDataMidia,
   formatarDuracao,
   formatarHorarioMidia,
   formatarTamanhoBytes,
   obterStatusConfig,
   tempoRelativoNativo,
+  verificarSeEhImagem,
 } from '../utils/formatadores'
 
 export interface CardVideoProps {
@@ -58,20 +63,22 @@ export const CardVideo = memo(function CardVideo({
   const [erroImagem, setErroImagem] = useState(false)
   const [baixando, setBaixando] = useState(false)
   const statusInfo = obterStatusConfig(item.status)
+  const ehImagem = verificarSeEhImagem(item)
   const duracaoNumero =
     typeof item.metadata?.duracao === 'number' ? item.metadata.duracao : undefined
   const duracaoFormatada = formatarDuracao(duracaoNumero)
-  const titulo =
-    typeof item.metadata?.titulo === 'string' && item.metadata.titulo
-      ? item.metadata.titulo
-      : `Vídeo ${item.hash.slice(0, 10)}`
+  const titulo = extrairTituloMedia(item)
   const uploader =
     typeof item.metadata?.uploader === 'string' && item.metadata.uploader
       ? item.metadata.uploader
-      : 'Uploader desconhecido'
+      : ehImagem
+        ? (item.metadata?.agente_nome as string) || 'Dispositivo Pessoal'
+        : 'Uploader desconhecido'
+  const extensao = extrairExtensaoMedia(item)
   const urlThumbnail =
     item.thumbnailUrl ||
-    (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined)
+    (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined) ||
+    (ehImagem ? obterUrlStreamMediaItem(item.uuid) : undefined)
   const temThumbnail = Boolean(urlThumbnail) && !erroImagem
   const urlOriginal =
     typeof item.metadata?.url_original === 'string' ? item.metadata.url_original : undefined
@@ -81,13 +88,12 @@ export const CardVideo = memo(function CardVideo({
   const tamanhoNumero =
     typeof item.metadata?.tamanho_bytes === 'number' ? item.metadata.tamanho_bytes : undefined
   const tamanhoFormatado = formatarTamanhoBytes(tamanhoNumero)
-  const extensao = typeof item.metadata?.extensao === 'string' ? item.metadata.extensao : 'mp4'
 
   const handleDownloadDirecto = async (e: React.MouseEvent) => {
     e.stopPropagation()
     try {
       setBaixando(true)
-      await baixarArquivoMidia(item.uuid, titulo)
+      await baixarArquivoMidia(item.uuid, titulo, extensao)
     } finally {
       setBaixando(false)
     }
@@ -118,10 +124,21 @@ export const CardVideo = memo(function CardVideo({
           />
         ) : (
           <VStack h="full" w="full" align="center" justify="center" gap={2} color="fg.subtle">
-            <Video size={36} strokeWidth={1.5} />
-            <Text fontSize="xs" fontWeight="medium">
-              Clique para assistir
-            </Text>
+            {ehImagem ? (
+              <>
+                <ImageIcon size={36} strokeWidth={1.5} />
+                <Text fontSize="xs" fontWeight="medium">
+                  Visualizar imagem
+                </Text>
+              </>
+            ) : (
+              <>
+                <Video size={36} strokeWidth={1.5} />
+                <Text fontSize="xs" fontWeight="medium">
+                  Clique para assistir
+                </Text>
+              </>
+            )}
           </VStack>
         )}
 
@@ -149,7 +166,7 @@ export const CardVideo = memo(function CardVideo({
             _hover={{ transform: 'scale(1.08)' }}
             transition="transform 0.15s ease"
           >
-            <Play size={20} fill="white" />
+            {ehImagem ? <Eye size={20} /> : <Play size={20} fill="white" />}
           </Box>
         </Box>
 
