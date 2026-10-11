@@ -24,6 +24,20 @@ echo "• Verificando dependências Python..."
 
 "$PYTHON_BIN" "$AGENTE_DIR/agente.py" install
 
+CURRENT_USER="$(whoami)"
+loginctl enable-linger "$CURRENT_USER" 2>/dev/null || true
+
+for user_dir in /mnt/c/Users/*/; do
+    startup_dir="${user_dir}AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
+    if [ -d "$startup_dir" ]; then
+        vbs_file="$startup_dir/cirqueirax-agente.vbs"
+        printf 'Set WshShell = CreateObject("WScript.Shell")\r\nWshShell.Run "wsl.exe -u %s --exec true", 0, False\r\n' "$CURRENT_USER" > "$vbs_file"
+        echo "✔ Inicialização silenciosa no boot do Windows configurada em:"
+        echo "  $vbs_file"
+        break
+    fi
+done
+
 echo ""
 echo "=========================================================="
 echo "  Instalação concluída no WSL!                            "
