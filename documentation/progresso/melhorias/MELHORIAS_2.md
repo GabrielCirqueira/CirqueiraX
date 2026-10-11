@@ -279,5 +279,40 @@
   - `documentation/guias/AGENTE.md`
   - `.gitignore`
 
+---
+
+## Melhoria 31 — Suíte de Comandos Utilitários do Terminal e Troca Dinâmica de Ambientes no Agente
+
+- **Data**: 11/10/2026
+- **Contexto**: O usuário necessitava de uma forma ágil e prática pelo próprio terminal para alternar a URL do servidor (testando localmente em desenvolvimento e migrando para VPS/produção conforme o ambiente), visualizar e editar variáveis de configuração sem abrir manualmente arquivos `.env`, testar conectividade, despachar imagens avulsas para validação imediata e resetar históricos para novos testes.
+- **O que foi feito**:
+  - Implementado o comando `python3 agente.py url [NOVA_URL]`:
+    - Sem argumentos: exibe a URL atual, tipo de ambiente identificado (Local, Rede Local ou Produção) e executa ping de conectividade.
+    - Com argumento: normaliza inteligentemente a URL (anexando automaticamente protocolo HTTP/HTTPS e endpoint `/api/v1/ingestao/print`), grava no arquivo `.env` e valida a conexão imediatamente.
+  - Implementado o comando `python3 agente.py env [local|prod|vps|custom] [ALVO]`:
+    - Alternador instantâneo com presets prontos (`local` aponta para localhost:8080 ou porta customizada; `prod` para domínio HTTPS; `vps` para IP de servidor).
+  - Implementado o comando `python3 agente.py config [show|set|get]`:
+    - Exibe painel detalhado de integridade de todas as variáveis configuradas com status de arquivos e diretórios no disco.
+    - Permite definir valores via `config set CHAVE VALOR` ou flags convenientes (`--url`, `--token`, `--watch-dir`, `--name`).
+  - Implementado o comando `python3 agente.py test [--url URL] [--token TOKEN]`:
+    - Permite testar endpoints e tokens antes mesmo de aplicá-los ou salvá-los no `.env`.
+  - Implementado o comando `python3 agente.py send <ARQUIVO> [-f|--force] [--url URL]`:
+    - Envio pontual de imagem pelo terminal para testar a rota da API, permissões de token e regras de ingestão sem precisar aguardar um print real do SO.
+  - Implementado o comando `python3 agente.py reset [--hashes] [--stats] [--all]`:
+    - Limpa o histórico de hashes enviados para permitir reenviar os mesmos prints durante testes locais e zera estatísticas.
+  - Criado o módulo dedicado [`agente/core/comandos.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/comandos.py) e adicionada persistência isolada com sanitização estrita no [`agente/core/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/config.py).
+  - Atualizados guias técnicos e documentação em [`agente/README.md`](file:///home/gabriel/dev/CirqueiraX/agente/README.md) e [`documentation/guias/AGENTE.md`](file:///home/gabriel/dev/CirqueiraX/documentation/guias/AGENTE.md).
+- **Arquivos**:
+  - `agente/agente.py`
+  - `agente/core/comandos.py`
+  - `agente/core/config.py`
+  - `agente/core/cliente.py`
+  - `agente/core/estado.py`
+  - `agente/core/__init__.py`
+  - `agente/README.md`
+  - `documentation/guias/AGENTE.md`
+  - `.gitignore`
+
+
 
 

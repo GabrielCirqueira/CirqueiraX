@@ -93,25 +93,7 @@ def marcar_enviado(caminho_arquivo: Path) -> None:
 # Gerenciamento de Métricas e Estatísticas Persistentes
 # ─────────────────────────────────────────────────────────────
 
-def _carregar_stats() -> dict:
-    arquivo_stats = Path(config.STATS_FILE)
-    if not arquivo_stats.exists():
-        return {
-            "total_enviados": 0,
-            "total_bytes": 0,
-            "total_falhas": 0,
-            "ultimo_sucesso": None,
-            "ultima_falha": None,
-            "diario": {},
-            "historico_recente": [],
-        }
-    try:
-        with open(arquivo_stats, "r", encoding="utf-8") as f:
-            dados = json.load(f)
-            if isinstance(dados, dict):
-                return dados
-    except Exception as e:
-        logging.warning(f"Erro ao ler arquivo de estatísticas [{config.STATS_FILE}]: {e}")
+def _estrutura_stats_vazia() -> dict:
     return {
         "total_enviados": 0,
         "total_bytes": 0,
@@ -121,6 +103,21 @@ def _carregar_stats() -> dict:
         "diario": {},
         "historico_recente": [],
     }
+
+
+def _carregar_stats() -> dict:
+    arquivo_stats = Path(config.STATS_FILE)
+    if not arquivo_stats.exists():
+        return _estrutura_stats_vazia()
+    try:
+        with open(arquivo_stats, "r", encoding="utf-8") as f:
+            dados = json.load(f)
+            if isinstance(dados, dict):
+                return dados
+    except Exception as e:
+        logging.warning(f"Erro ao ler arquivo de estatísticas [{config.STATS_FILE}]: {e}")
+    return _estrutura_stats_vazia()
+
 
 
 def _salvar_stats(stats: dict) -> None:
@@ -358,3 +355,26 @@ def obter_status_processo() -> dict:
         "uptime_segundos": 0,
         "instancia": dados.get("instancia", config.INSTANCE_NAME),
     }
+
+
+def limpar_historico_enviados() -> int:
+    """Limpa a lista de hashes de arquivos já enviados no arquivo de estado."""
+    with _lock:
+        estado = _carregar_estado()
+        qtd = len(estado.get("enviados", {}))
+        _salvar_estado({"enviados": {}})
+    return qtd
+
+
+def limpar_estatisticas() -> bool:
+    """Zera o arquivo de estatísticas locais."""
+    with _lock:
+        _salvar_stats(_estrutura_stats_vazia())
+    return True
+
+
+def limpar_tudo() -> tuple[int, bool]:
+    """Limpa tanto os hashes de envio quanto as estatísticas acumuladas."""
+    qtd_hashes = limpar_historico_enviados()
+    stats_zeradas = limpar_estatisticas()
+    return qtd_hashes, stats_zeradas

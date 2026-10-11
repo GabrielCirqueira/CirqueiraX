@@ -188,31 +188,94 @@ launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
 
 ---
 
-## 7. Monitoramento, Métricas e Status do Agente
+## 7. Comandos Utilitários do Terminal e Troca de Ambientes
 
-O agente fornece um comando de status visual no terminal (semelhante ao `systemctl status`), funcionando de maneira idêntica no **Linux**, **Windows** e **macOS**, sem depender exclusivamente das ferramentas do SO para saber sobre métricas da aplicação.
+O agente fornece uma suíte de comandos utilitários diretamente no terminal, permitindo gerenciar variáveis de ambiente, trocar entre ambiente local e produção sem abrir arquivos de texto, testar conectividade, despachar imagens avulsas para validação imediata e resetar históricos locais.
 
-### 7.1. Comandos de Visualização de Status
+### 7.1. Alteração de URL e Alternador de Ambientes (`url` e `env`)
+
+Para testar o agente localmente e alternar dinamicamente para VPS ou produção:
+
+```bash
+# Visualizar a URL atual, ambiente detectado e ping de teste
+python3 agente/agente.py url
+
+# Alterar a URL diretamente pelo terminal (grava automaticamente no .env)
+python3 agente/agente.py url http://localhost:8080
+python3 agente/agente.py url https://cirqueirax.com
+
+# Alternar rapidamente entre perfis de ambiente:
+python3 agente/agente.py env local             # http://localhost:8080/api/v1/ingestao/print
+python3 agente/agente.py env local 8000        # http://localhost:8000/api/v1/ingestao/print
+python3 agente/agente.py env prod https://meusite.com  # Produção HTTPS
+python3 agente/agente.py env vps 72.60.14.61   # http://72.60.14.61:8080/api/v1/ingestao/print
+```
+
+> [!TIP]
+> O agente normaliza URLs automaticamente: ao informar apenas `http://localhost:8080` ou `https://meusite.com`, o caminho `/api/v1/ingestao/print` é anexado automaticamente.
+
+### 7.2. Painel e Gerenciador de Configurações (`config`)
+
+```bash
+# Exibir o painel de variáveis carregadas com validação de arquivos
+python3 agente/agente.py config
+
+# Alterar variáveis individuais com persistência no .env
+python3 agente/agente.py config --token cx_ag_a837a4f7...
+python3 agente/agente.py config --watch-dir ~/Pictures/Screenshots
+python3 agente/agente.py config --name "Notebook Pessoal"
+
+# Definir ou consultar chaves arbitrárias
+python3 agente/agente.py config set LOG_LEVEL DEBUG
+python3 agente/agente.py config get SERVER_URL
+```
+
+### 7.3. Testes Manuais e Envio Avulso de Print (`test` e `send`)
+
+Excelente para validar a comunicação com a API, validação do token e regras de ingestão sem precisar aguardar um print real do SO:
+
+```bash
+# Testar saúde da API e autenticação do token
+python3 agente/agente.py test
+
+# Testar uma URL ou token temporário antes de salvar no .env
+python3 agente/agente.py test --url https://cirqueirax.com
+
+# Despachar manualmente uma imagem para validação imediata
+python3 agente/agente.py send /caminho/para/imagem.png
+
+# Forçar reenvio (ignora deduplicação local SHA-256)
+python3 agente/agente.py send /caminho/para/imagem.png --force
+```
+
+### 7.4. Limpeza de Histórico e Estado Local (`reset`)
+
+```bash
+# Limpar hashes de arquivos enviados (permite reenviar imagens locais existentes)
+python3 agente/agente.py reset --hashes
+
+# Zerar contadores diários e acumulados
+python3 agente/agente.py reset --stats
+
+# Limpar tanto hashes quanto estatísticas
+python3 agente/agente.py reset --all
+```
+
+### 7.5. Painel de Status e Métricas (`status`)
+
+Exibe o painel visual formatado com cores ANSI (estilo `systemctl status`):
 
 ```bash
 # Via CLI canônico do agente
 python3 agente/agente.py status
 
+# Modo Live Monitor (atualiza o terminal a cada 2 segundos):
+python3 agente/agente.py status --watch
+
 # Ou diretamente pelos atalhos em scripts/
 ./agente/scripts/status.sh          # No Linux / macOS
 agente\scripts\status.bat           # No Windows
-```
-
-### 7.2. Modo Live Monitor (`--watch` / `-w`)
-
-Para acompanhar os envios e o status em tempo real (atualizado a cada 2 segundos):
-
-```bash
-python3 agente/agente.py status --watch
-
-# Ou via atalhos:
-./agente/scripts/status.sh -w
-agente\scripts\status.bat -w
+./agente/scripts/status.sh -w       # Live monitor
 ```
 
 ### 7.3. Exemplo de Saída do Terminal

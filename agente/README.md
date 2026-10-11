@@ -247,74 +247,103 @@ launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
 
 ---
 
-## 7. Monitoramento, Métricas e Status do Agente
+## 7. Comandos Utilitários do Terminal e Troca de Ambientes
 
-O agente conta com um sistema de métricas da aplicação e um comando de status visual no terminal (semelhante ao `systemctl status`), funcionando de maneira idêntica no **Linux**, **Windows** e **macOS**.
+O agente disponibiliza uma suíte completa de comandos utilitários diretamente no terminal, permitindo gerenciar variáveis de ambiente, trocar entre ambiente local e produção sem abrir arquivos de texto, testar conectividade, despachar imagens avulsas para validação imediata e resetar históricos locais.
 
-### 7.1. Comandos de Visualização de Status
+### 7.1. Gerenciamento de URL e Alternador de Ambientes (`url` e `env`)
+
+Para testar localmente e depois alternar para produção ou VPS:
 
 ```bash
-# Via script do agente
+# Visualizar a URL atual, ambiente detectado e teste de ping
+python3 agente.py url
+
+# Alterar a URL diretamente pelo terminal (salva automaticamente no .env)
+python3 agente.py url http://localhost:8080
+# Ou especificando HTTPS / produção:
+python3 agente.py url https://cirqueirax.com
+
+# Alternar rapidamente entre ambientes pré-configurados:
+python3 agente.py env local             # Configura para http://localhost:8080/api/v1/ingestao/print
+python3 agente.py env local 8000        # Configura para porta customizada (ex: 8000)
+python3 agente.py env prod https://dominio.com  # Configura para ambiente de produção
+python3 agente.py env vps 72.60.14.61   # Configura para IP da VPS
+```
+
+> [!TIP]
+> A URL informada é normalizada automaticamente. Se você digitar apenas `http://localhost:8080` ou `https://meusite.com`, o agente anexa `/api/v1/ingestao/print` automaticamente.
+
+---
+
+### 7.2. Painel e Gerenciador de Configurações (`config`)
+
+```bash
+# Exibir todas as variáveis ativas com status de integridade
+python3 agente.py config
+
+# Alterar variáveis específicas no arquivo .env
+python3 agente.py config --token cx_ag_a837a4f7...
+python3 agente.py config --watch-dir ~/Imagens/Capturas
+python3 agente.py config --name "Notebook Pessoal"
+
+# Definir qualquer chave arbitrária
+python3 agente.py config set LOG_LEVEL DEBUG
+python3 agente.py config get SERVER_URL
+```
+
+---
+
+### 7.3. Teste Manual e Envio Avulso de Print (`test` e `send`)
+
+Excelente para validar se o backend, banco de dados e regras de ingestão estão funcionando sem precisar esperar capturas de tela do SO:
+
+```bash
+# Testar conectividade e saúde com a URL configurada
+python3 agente.py test
+
+# Testar uma URL ou token alternativo antes de salvar no .env
+python3 agente.py test --url https://cirqueirax.com
+
+# Enviar manualmente uma imagem para validação imediata na API
+python3 agente.py send /caminho/para/imagem.png
+
+# Forçar envio mesmo se a imagem já tiver sido enviada antes (ignora deduplicação SHA-256)
+python3 agente.py send /caminho/para/imagem.png --force
+```
+
+---
+
+### 7.4. Limpeza de Histórico e Estado Local (`reset`)
+
+Útil durante testes de desenvolvimento local para permitir reenviar os mesmos prints ou zerar contadores:
+
+```bash
+# Limpar apenas os hashes de arquivos enviados (permite reenviar prints existentes)
+python3 agente.py reset --hashes
+
+# Zerar apenas contadores diários e métricas acumuladas
+python3 agente.py reset --stats
+
+# Limpar ambos (hashes e estatísticas)
+python3 agente.py reset --all
+```
+
+---
+
+### 7.5. Monitoramento de Status e Métricas (`status`)
+
+Exibe o painel visual formatado com cores ANSI (estilo `systemctl status`):
+
+```bash
+# Exibir resumo do processo, métricas de hoje e atividades recentes
 python3 agente.py status
 
-# Ou diretamente pelo script status.py / status.sh / status.bat
-./status.sh          # No Linux / macOS
-status.bat           # No Windows
-python status.py     # Em qualquer sistema operacional
-```
-
-### 7.2. Modo Live Monitor (`--watch` / `-w`)
-
-Para acompanhar os envios e o status em tempo real (atualizado a cada 2 segundos):
-
-```bash
+# Modo Live Monitor (atualiza o terminal em tempo real a cada 2 segundos)
 python3 agente.py status --watch
-# Ou de forma abreviada:
-./status.sh -w
-status.bat -w
-```
-
-### 7.3. Exemplo de Saída do Terminal
-
-```text
-● CirqueiraX Agente — Ingestão de Prints
-──────────────────────────────────────────────────────────────
-  Status:            ● Ativo (em execução) (PID 28419, rodando há 2h 15m)
-  Perfil/Máquina:    PC Empresa
-  Pasta Vigiada:     /home/usuario/Pictures/Screenshots [OK]
-  Servidor:          https://cirqueirax.com/api/v1/ingestao/print
-  Conexão API:       ● Online (HTTP 200)
-  Token de Acesso:   cx_ag_a8...5fb8
-
-  Estatísticas de Hoje (11/10/2026):
-  ├─ Enviados hoje:       14 prints (32.4 MB)
-  ├─ Falhas hoje:         0
-  └─ Taxa de sucesso:     100.0%
-
-  Métricas Acumuladas (Histórico Geral):
-  ├─ Total de envios:     342 arquivos (891.2 MB)
-  └─ Total de falhas:     1
-
-  Último Envio Concluído:
-  └─ ✔ Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
-
-  Última Falha Registrada:
-  └─ ✖ Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
-     Motivo: Falha após 3 tentativas (Timeout de rede)
-
-  Atividades Recentes (Últimos Eventos):
-  • ✔ Sucesso: Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
-  • ✔ Sucesso: Screenshot_20261011_181512.png (1.8 MB) — 18:15:12 (há 17m)
-  • ✖ Falha:   Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
-──────────────────────────────────────────────────────────────
-```
-
-### 7.4. Teste Rápido de Conectividade
-
-Para testar se o servidor CirqueiraX está online e respondendo sem precisar enviar nenhum arquivo:
-
-```bash
-python3 agente.py test
+# Ou via atalhos em scripts/
+./scripts/status.sh -w        # Linux / macOS
+scripts\status.bat -w         # Windows
 ```
 
 ---

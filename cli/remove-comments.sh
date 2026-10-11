@@ -37,7 +37,7 @@ if $USE_DIFF; then
 else
   echo "Modo: pastas do projeto (src, web, migrations)"
   mapfile -t FILES < <(
-    find "$ROOT_DIR/src" "$ROOT_DIR/web" "$ROOT_DIR/migrations" \
+    find "$ROOT_DIR/src" "$ROOT_DIR/web" "$ROOT_DIR/migrations" "$ROOT_DIR/agente" \
       \( -name "*.php" -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \
       -not -path "*/vendor/*" \
       -not -path "*/node_modules/*" \

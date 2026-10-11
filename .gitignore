@@ -57,4 +57,9 @@ yarn-error.log
 /.deploy-progress
 __pycache__/
 *.pyc
+agente/.env
+agente/env/.env
+agente/.venv/
+.venv/
 ###< gerados automaticamente ###
+
