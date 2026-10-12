@@ -84,7 +84,7 @@ final readonly class UploadManualService
             $existente->adicionarMetadata(MetadataKeys::DATA_DETECCAO_DUPLICADO, (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM));
             $existente->mesclarMetadata($metadataExtraida);
 
-            if (null !== $dto->categoriaId() && '' !== trim($dto->categoriaId()) && null === $existente->categoriaId()) {
+            if (null !== $dto->categoriaId() && '' !== trim($dto->categoriaId())) {
                 $existente->setCategoriaId($dto->categoriaId());
             }
 

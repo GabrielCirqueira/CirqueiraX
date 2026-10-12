@@ -16,7 +16,7 @@ final readonly class UploadManualDTO
     public function __construct(
         #[Assert\NotNull(message: 'O arquivo para upload é obrigatório.')]
         #[Assert\File(
-            maxSize: '100M',
+            maxSize: '500M',
             mimeTypes: [
                 'image/png',
                 'image/jpeg',

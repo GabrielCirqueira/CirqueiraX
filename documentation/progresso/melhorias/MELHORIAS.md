@@ -54,6 +54,7 @@
 | M39 | Conformidade Estrita com o Design System: Eliminação de Hex/RGBA e Adoção Integral de `theme.ts` | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-39--conformidade-estrita-com-o-design-system-eliminação-de-hexrgba-e-adoção-integral-de-themets) |
 | M40 | Alinhamento Integral de Fuso Horário Local (`America/Sao_Paulo`) no Backend Docker e Frontend | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-40--alinhamento-integral-de-fuso-horário-local-americasao_paulo-no-backend-docker-e-frontend) |
 | M41 | Redesign Completo da Central de Upload Manual & Triagem com Layout Amplo, Grade/Tabela e Ingestão via Clipboard | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_3.md#melhoria-41--redesign-completo-da-central-de-upload-manual--triagem-com-layout-amplo-prévia-em-gradetabela-e-ingestão-via-clipboard) |
+| M42 | Atalhos Ágeis de Categorização em Lote (Fila e Triagem), Detecção de Capturas e Proteção Anti-Duplicação | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_3.md#melhoria-42--atalhos-ágeis-de-categorização-em-lote-fila-e-triagem-detecção-inteligente-de-capturas-e-garantia-estrita-anti-duplicação) |
 
 
 

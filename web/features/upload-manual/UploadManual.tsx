@@ -26,6 +26,7 @@ import {
   FolderCheck,
   RefreshCw,
   UploadCloud,
+  Zap,
 } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -52,6 +53,9 @@ const UploadManual = memo(function UploadManual() {
     adicionarArquivos,
     removerArquivo,
     atualizarCategoriaItem,
+    aplicarCategoriaParaTodos,
+    aplicarCategoriaParaSelecionados,
+    aplicarCategoriaParaSemCategoria,
     limparConcluidos,
     enviarTodosPendentes,
     reenviarItemIndividual,
@@ -195,6 +199,25 @@ const UploadManual = memo(function UploadManual() {
     )
   }, [itensMedia])
 
+  const handleCategorizarTodasSemCategoria = useCallback(
+    (categoriaId: string) => {
+      const uuidsSemCategoria = itensMedia
+        .filter((i) => !i.categoriaId)
+        .map((i) => i.uuid)
+      if (uuidsSemCategoria.length > 0) {
+        mutationCategorizarLote.mutate({ uuids: uuidsSemCategoria, categoriaId })
+      }
+    },
+    [itensMedia, mutationCategorizarLote]
+  )
+
+  const handleSelecionarTodasSemCategoria = useCallback(() => {
+    const uuidsSemCategoria = itensMedia
+      .filter((i) => !i.categoriaId)
+      .map((i) => i.uuid)
+    setSelecionados(uuidsSemCategoria)
+  }, [itensMedia])
+
   const handleConfirmarApagar = () => {
     if (itemApagarAlvo) {
       mutationApagarLote.mutate([itemApagarAlvo])
@@ -327,6 +350,9 @@ const UploadManual = memo(function UploadManual() {
             onAdicionarArquivos={adicionarArquivos}
             onRemoverArquivo={removerArquivo}
             onAtualizarCategoriaItem={atualizarCategoriaItem}
+            onAplicarCategoriaParaTodos={aplicarCategoriaParaTodos}
+            onAplicarCategoriaParaSelecionados={aplicarCategoriaParaSelecionados}
+            onAplicarCategoriaParaSemCategoria={aplicarCategoriaParaSemCategoria}
             onLimparConcluidos={limparConcluidos}
             onEnviarTodos={enviarTodosPendentes}
             onReenviarItem={reenviarItemIndividual}
@@ -354,6 +380,67 @@ const UploadManual = memo(function UploadManual() {
                 </Text>
               )}
             </HStack>
+
+            {/* Painel de Atalhos Rápidos para Mídias Sem Categoria da Triagem */}
+            {semCategoriaCount > 0 && (
+              <Box
+                p={3}
+                px={4}
+                borderRadius="xl"
+                bg="cirqueira.amber.500/10"
+                borderWidth="1px"
+                borderColor="cirqueira.amber.500/25"
+              >
+                <Flex
+                  direction={{ base: 'column', md: 'row' }}
+                  align={{ base: 'flex-start', md: 'center' }}
+                  justify="space-between"
+                  gap={2.5}
+                >
+                  <HStack gap={2} flexWrap="wrap">
+                    <Badge colorPalette="amber" variant="solid" size="sm" borderRadius="md" fontWeight="bold">
+                      <HStack gap={1}>
+                        <Zap size={12} />
+                        <Text as="span">{semCategoriaCount} sem categoria</Text>
+                      </HStack>
+                    </Badge>
+                    <Text fontSize="xs" fontWeight="semibold" color="fg">
+                      Definir todas as {semCategoriaCount} de uma vez:
+                    </Text>
+                  </HStack>
+
+                  <HStack gap={1.5} flexWrap="wrap">
+                    {categorias.map((cat) => (
+                      <Button
+                        key={cat.uuid}
+                        size="xs"
+                        variant="subtle"
+                        colorPalette="amber"
+                        disabled={mutationCategorizarLote.isPending}
+                        onClick={() => handleCategorizarTodasSemCategoria(cat.uuid)}
+                        borderRadius="md"
+                        fontSize="11px"
+                        h={6.5}
+                        fontWeight="semibold"
+                      >
+                        {cat.nome}
+                      </Button>
+                    ))}
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={handleSelecionarTodasSemCategoria}
+                      borderRadius="md"
+                      fontSize="11px"
+                      h={6.5}
+                      color="fg.subtle"
+                    >
+                      Selecionar todas ({semCategoriaCount})
+                    </Button>
+                  </HStack>
+                </Flex>
+              </Box>
+            )}
 
             <FilaTriagemUpload
               itens={itensMedia}

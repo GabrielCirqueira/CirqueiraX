@@ -65,6 +65,38 @@ export function useUploadManual() {
     setFila((prev) => prev.map((item) => (item.id === id ? { ...item, categoriaId } : item)))
   }, [])
 
+  // Atalho: Aplicar categoria a todos os itens da fila (ou apenas aos pendentes)
+  const aplicarCategoriaParaTodos = useCallback((categoriaId: string | null) => {
+    setFila((prev) =>
+      prev.map((item) =>
+        item.status === 'pendente' || item.status === 'erro'
+          ? { ...item, categoriaId }
+          : item
+      )
+    )
+  }, [])
+
+  // Atalho: Aplicar categoria para itens selecionados na fila
+  const aplicarCategoriaParaSelecionados = useCallback(
+    (ids: string[], categoriaId: string | null) => {
+      setFila((prev) =>
+        prev.map((item) => (ids.includes(item.id) ? { ...item, categoriaId } : item))
+      )
+    },
+    []
+  )
+
+  // Atalho: Aplicar categoria apenas aos itens que estão sem categoria
+  const aplicarCategoriaParaSemCategoria = useCallback((categoriaId: string) => {
+    setFila((prev) =>
+      prev.map((item) =>
+        !item.categoriaId && (item.status === 'pendente' || item.status === 'erro')
+          ? { ...item, categoriaId }
+          : item
+      )
+    )
+  }, [])
+
   const limparConcluidos = useCallback(() => {
     setFila((prev) => {
       const mantidos: ArquivoFilaUpload[] = []
@@ -81,7 +113,11 @@ export function useUploadManual() {
     })
   }, [])
 
-  const enviarItem = async (item: ArquivoFilaUpload): Promise<void> => {
+  // Envio individual interno
+  const enviarItemInterno = async (
+    item: ArquivoFilaUpload,
+    isLote = false
+  ): Promise<'sucesso' | 'duplicado' | 'erro'> => {
     setFila((prev) =>
       prev.map((f) =>
         f.id === item.id ? { ...f, status: 'enviando', progresso: 0, mensagemErro: null } : f
@@ -97,12 +133,14 @@ export function useUploadManual() {
         },
       })
 
+      const statusFinal = resultado.ehDuplicado ? 'duplicado' : 'sucesso'
+
       setFila((prev) =>
         prev.map((f) =>
           f.id === item.id
             ? {
                 ...f,
-                status: resultado.ehDuplicado ? 'duplicado' : 'sucesso',
+                status: statusFinal,
                 progresso: 100,
                 ehDuplicado: resultado.ehDuplicado,
                 mediaItem: resultado.mediaItem,
@@ -111,24 +149,30 @@ export function useUploadManual() {
         )
       )
 
-      if (resultado.ehDuplicado) {
-        addToast({
-          title: `"${item.nome}" já existia no banco e foi identificado como duplicado.`,
-          color: 'warning',
-        })
-        // Abre o modal de confirmação para perguntar se quer sincronizar com o Google Fotos mesmo assim
-        setItemDuplicadoPendente({
-          nome: item.nome,
-          tamanhoBytes: item.tamanhoBytes,
-          tipoMime: item.tipoMime,
-          previewUrl: item.previewUrl,
-          mediaItem: resultado.mediaItem,
-        })
-      } else {
-        addToast({ title: `"${item.nome}" enviado com sucesso!`, color: 'success' })
+      if (!isLote) {
+        if (resultado.ehDuplicado) {
+          addToast({
+            title: `"${item.nome}" já existia no sistema e foi mantido sem duplicação.`,
+            color: 'warning',
+          })
+        } else {
+          addToast({ title: `"${item.nome}" enviado com sucesso!`, color: 'success' })
+        }
       }
+
+      return statusFinal
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Falha ao enviar arquivo'
+      let msg = error instanceof Error ? error.message : 'Falha ao enviar arquivo'
+      if (
+        (typeof error === 'object' &&
+          error !== null &&
+          'response' in error &&
+          (error as { response?: { status?: number } }).response?.status === 413) ||
+        msg.includes('413')
+      ) {
+        msg = 'Arquivo excede o limite do servidor (413 Request Entity Too Large).'
+      }
+
       setFila((prev) =>
         prev.map((f) =>
           f.id === item.id
@@ -141,10 +185,14 @@ export function useUploadManual() {
             : f
         )
       )
-      addToast({ title: `Erro ao enviar "${item.nome}": ${msg}`, color: 'danger' })
+      if (!isLote) {
+        addToast({ title: `Erro ao enviar "${item.nome}": ${msg}`, color: 'danger' })
+      }
+      return 'erro'
     }
   }
 
+  // Envio em lote com feedback consolidado anti-duplicação
   const enviarTodosPendentes = useCallback(async () => {
     const pendentes = fila.filter((f) => f.status === 'pendente' || f.status === 'erro')
     if (pendentes.length === 0) {
@@ -153,10 +201,43 @@ export function useUploadManual() {
     }
 
     setEstaProcessando(true)
+    let novosCount = 0
+    let duplicadosCount = 0
+    let errosCount = 0
+
     for (const item of pendentes) {
-      await enviarItem(item)
+      const res = await enviarItemInterno(item, true)
+      if (res === 'sucesso') novosCount++
+      else if (res === 'duplicado') duplicadosCount++
+      else errosCount++
     }
+
     setEstaProcessando(false)
+
+    // Notificação consolidada com transparência sobre duplicatas
+    if (duplicadosCount > 0 && novosCount > 0) {
+      addToast({
+        title: `Upload concluído: ${novosCount} novo(s) arquivo(s) enviado(s). ${duplicadosCount} arquivo(s) já existiam no sistema e foram preservados sem duplicar!`,
+        color: 'success',
+      })
+    } else if (duplicadosCount > 0 && novosCount === 0) {
+      addToast({
+        title: `Todos os ${duplicadosCount} arquivos já existiam no sistema e foram identificados como duplicados (nenhum registro foi duplicado).`,
+        color: 'warning',
+      })
+    } else if (novosCount > 0) {
+      addToast({
+        title: `${novosCount} arquivo(s) enviado(s) com sucesso!`,
+        color: 'success',
+      })
+    }
+
+    if (errosCount > 0) {
+      addToast({
+        title: `${errosCount} arquivo(s) falharam durante o envio.`,
+        color: 'danger',
+      })
+    }
   }, [fila])
 
   const reenviarItemIndividual = useCallback(
@@ -165,7 +246,7 @@ export function useUploadManual() {
       if (!item) return
 
       setEstaProcessando(true)
-      await enviarItem(item)
+      await enviarItemInterno(item, false)
       setEstaProcessando(false)
     },
     [fila]
@@ -232,6 +313,9 @@ export function useUploadManual() {
     adicionarArquivos,
     removerArquivo,
     atualizarCategoriaItem,
+    aplicarCategoriaParaTodos,
+    aplicarCategoriaParaSelecionados,
+    aplicarCategoriaParaSemCategoria,
     limparConcluidos,
     enviarTodosPendentes,
     reenviarItemIndividual,

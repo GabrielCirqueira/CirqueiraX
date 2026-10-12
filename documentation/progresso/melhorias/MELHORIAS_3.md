@@ -46,3 +46,54 @@
   - `web/features/upload-manual/components/CardItemTriagem.tsx`
   - `web/features/upload-manual/components/TabelaTriagemUpload.tsx`
   - `web/features/upload-manual/components/ModalVisualizarMidiaManual.tsx`
+
+---
+
+### ✅ Melhoria 42 — Atalhos Ágeis de Categorização em Lote (Fila e Triagem), Detecção Inteligente de Capturas e Garantia Estrita Anti-Duplicação
+
+- **Status**: Concluído
+- **Data**: 11 de outubro de 2026
+- **Problema**:
+  - Ao fazer upload manual de dezenas de imagens (ex.: 50 capturas de tela), classificar item a item era um processo demorado e repetitivo.
+  - Existia o risco de duplicar mídias que o sistema já havia coletado previamente por outros canais (agente de prints em Python, Syncthing ou uploads anteriores), sobrecarregando o banco de dados, o armazenamento e a cota do Google Fotos.
+  - A fila de upload e a triagem não possuíam atalhos de teclado nem botões de 1 clique para classificar mídias sem categoria em massa.
+- **Solução**:
+  - **Garantia Estrita Anti-Duplicação no Backend (`UploadManualService.php`)**:
+    - Verificação rigorosa pré-ingestão através de SHA-256 (`hash`), MD5 e hash visual (`buscarDuplicado`).
+    - Ao detectar que a imagem já foi coletada anteriormente, o arquivo temporário em `/tmp` é sumariamente excluído para poupar disco.
+    - Nenhum novo registro é persistido no banco de dados e **nenhuma mensagem para o Google Fotos é despachada**.
+    - Se o usuário selecionou uma categoria no upload manual, o registro existente tem sua categoria atualizada (`$existente->setCategoriaId(...)`).
+    - Retorno com flag explícita `duplicado: true` e status `_warning: item_duplicado_existente`.
+  - **Atalhos de Categorização Rápida na Fila de Upload (`DropzoneUpload.tsx` & `useUploadManual.ts`)**:
+    - Botões tipo pílula de 1 clique para aplicar qualquer categoria a todos os itens da fila ou apenas aos selecionados.
+    - Detecção inteligente de capturas de tela: identifica arquivos com padrão de nome "Captura de tela", "screenshot" ou "print" e exibe botão contextual para definir todas com 1 clique (ex.: `Definir todas como Print Empresa`).
+    - Checkboxes individuais na fila com alternador "Selecionar todos / Desmarcar todos".
+    - Envio em lote com notificação consolidada transparente: informa a quantidade exata de mídias novas enviadas e quantas mídias já existiam e foram preservadas sem duplicar.
+  - **Atalhos Ágeis na Triagem de Mídias Recebidas (`UploadManual.tsx` & `FilaTriagemUpload.tsx`)**:
+    - Painel contextual no topo da triagem quando houver mídias sem categoria (`semCategoriaCount > 0`): botões de 1 clique para atribuir todas as mídias pendentes de uma só vez para qualquer categoria cadastrada.
+    - Atalho de teclado `Ctrl + A` (ou `Cmd + A`) para selecionar todas as mídias filtradas da triagem.
+    - Atalhos de teclado numéricos `1` a `9`: ao selecionar mídias, pressionar a tecla numérica atribui imediatamente a categoria correspondente sem abrir modais.
+    - Barra flutuante de ações em lote com botões rápidos das categorias e badges indicativas do atalho do teclado (`[1]`, `[2]`).
+  - **Resolução do Erro 413 (Request Entity Too Large) e Elevação dos Limites de Upload para 500MB**:
+    - O Nginx (`cirqueirax_nginx`) possuía a diretiva padrão de 1MB (`client_max_body_size 1M`), bloqueando imagens e vídeos com tamanho superior (ex.: prints em PNG de 1.3MB, 2.5MB, 4.2MB).
+    - Configurado `client_max_body_size 500M;` em `devops/nginx/dev.conf`, `devops/nginx/prod.conf` e `devops/php/nginx-internal.conf`, com timeouts e buffers ampliados (`fastcgi_read_timeout 300s`, `fastcgi_buffers 16 16k`).
+    - Elevados os limites do PHP-FPM (`devops/php/php.dev.ini` e `php.prod.ini`) para `upload_max_filesize = 500M`, `post_max_size = 500M`, `max_execution_time = 300` e volume mapeado no `docker-compose.yaml`.
+    - Atualizado o validador `UploadManualDTO.php` com `maxSize: '500M'`.
+    - Adicionado tratamento humanizado no frontend para mensagens de erro HTTP 413 e botão `Retentar Falhas ({errosCount})` na barra de controle da fila para reenviar falhas com 1 clique.
+  - **Conformidade de Design**:
+    - Utilização rigorosa dos tokens do sistema de design `cirqueira.*` de `web/config/theme/theme.ts`, com zero cores hexadecimais ou RGBA soltos.
+- **Arquivos**:
+  - `devops/nginx/dev.conf`
+  - `devops/nginx/prod.conf`
+  - `devops/php/nginx-internal.conf`
+  - `devops/php/php.dev.ini`
+  - `devops/php/php.prod.ini`
+  - `devops/docker-compose.yaml`
+  - `src/DataObject/UploadManualDTO.php`
+  - `src/Service/MediaItem/UploadManualService.php`
+  - `web/features/upload-manual/UploadManual.tsx`
+  - `web/features/upload-manual/hooks/useUploadManual.ts`
+  - `web/features/upload-manual/components/DropzoneUpload.tsx`
+  - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
+
+

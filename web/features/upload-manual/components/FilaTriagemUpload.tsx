@@ -25,7 +25,7 @@ import {
   Upload,
   X,
 } from 'lucide-react'
-import { memo, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { CardItemTriagem } from './CardItemTriagem'
 import { ModalVisualizarMidiaManual } from './ModalVisualizarMidiaManual'
 import { TabelaTriagemUpload } from './TabelaTriagemUpload'
@@ -97,6 +97,39 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
 
   const todosSelecionados = itensFiltrados.length > 0 && selecionados.length === itensFiltrados.length
   const algunsSelecionados = selecionados.length > 0 && !todosSelecionados
+
+  // Atalhos de teclado para a triagem:
+  // - Ctrl + A: Selecionar todas as mídias da triagem
+  // - Teclas 1 a 9: Se houver mídias selecionadas, atribui a categoria correspondente instantaneamente!
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        document.activeElement instanceof HTMLSelectElement
+      ) {
+        return
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+        e.preventDefault()
+        onToggleSelectAll()
+        return
+      }
+
+      if (selecionados.length > 0 && /^[1-9]$/.test(e.key)) {
+        const index = Number(e.key) - 1
+        const categoriaAlvo = categorias[index]
+        if (categoriaAlvo) {
+          e.preventDefault()
+          onCategorizarEmLote(categoriaAlvo.uuid)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selecionados, categorias, onCategorizarEmLote, onToggleSelectAll])
 
   const handleConfirmarCategorizarLote = () => {
     if (!categoriaLoteId) return
@@ -454,7 +487,8 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           maxW="xl"
         >
           <Flex
-            align="center"
+            direction={{ base: 'column', md: 'row' }}
+            align={{ base: 'stretch', md: 'center' }}
             justify="space-between"
             gap={3}
             p={3}
@@ -475,16 +509,55 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               </Text>
             </HStack>
 
-            <HStack gap={2}>
+            {/* Botões Rápidos Diretos das Categorias */}
+            <HStack gap={1.5} flexWrap="wrap" justify="center">
+              <Text as="span" fontSize="11px" color="fg.subtle" fontWeight="medium" display={{ base: 'none', lg: 'inline' }}>
+                Atribuir:
+              </Text>
+              {categorias.slice(0, 4).map((cat, idx) => (
+                <Button
+                  key={cat.uuid}
+                  size="xs"
+                  variant="subtle"
+                  colorPalette="brand"
+                  onClick={() => onCategorizarEmLote(cat.uuid)}
+                  borderRadius="lg"
+                  fontWeight="bold"
+                  h={7}
+                  px={2}
+                  title={`Atalho rápido: Pressione a tecla [${idx + 1}]`}
+                >
+                  <HStack gap={1}>
+                    <Badge
+                      size="xs"
+                      variant="solid"
+                      colorPalette="brand"
+                      px={1}
+                      py={0}
+                      borderRadius="sm"
+                      fontSize="9px"
+                      lineHeight="normal"
+                    >
+                      {idx + 1}
+                    </Badge>
+                    <Text as="span">{cat.nome}</Text>
+                  </HStack>
+                </Button>
+              ))}
+            </HStack>
+
+            <HStack gap={2} justify={{ base: 'flex-end', md: 'flex-start' }}>
               <Button
                 size="sm"
-                colorPalette="brand"
+                variant="outline"
                 onClick={() => setModalCategorizarAberto(true)}
                 fontWeight="semibold"
                 borderRadius="xl"
+                h={8}
+                fontSize="xs"
               >
-                <FolderPlus size={14} style={{ marginRight: '5px' }} />
-                <Text as="span">Categorizar em Lote</Text>
+                <FolderPlus size={13} style={{ marginRight: '5px' }} />
+                <Text as="span">Mais...</Text>
               </Button>
 
               <Button
@@ -494,8 +567,10 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 onClick={onApagarEmLote}
                 fontWeight="semibold"
                 borderRadius="xl"
+                h={8}
+                fontSize="xs"
               >
-                <Trash2 size={14} style={{ marginRight: '5px' }} />
+                <Trash2 size={13} style={{ marginRight: '5px' }} />
                 <Text as="span">Excluir</Text>
               </Button>
             </HStack>

@@ -35,6 +35,7 @@ services:
       - ..:/var/www/html
       - "${MEDIA_STORAGE_PATH:-./var/storage}:/var/www/html/var/storage"
       - ./supervisord.conf:/etc/supervisord.conf
+      - ./php/php.dev.ini:/usr/local/etc/php/conf.d/php.ini:ro
     depends_on:
       - database
 
