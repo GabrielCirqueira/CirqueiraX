@@ -42,7 +42,8 @@ final readonly class EnviarGoogleFotosService
                 'googlePhotosMediaId' => $mediaItem->googleFotosId(),
             ]);
 
-            if (!$mediaItem->isFinal()) {
+            $mediaItem->limparErro();
+            if (StatusMediaItem::CONCLUIDO !== $mediaItem->status()) {
                 $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
                 $this->mediaItemRepository->salvar($mediaItem);
             }
@@ -112,6 +113,7 @@ final readonly class EnviarGoogleFotosService
                     ]);
                 }
 
+                $mediaItem->limparErro();
                 $mediaItem->setMetadata($metadata);
                 $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
                 $this->mediaItemRepository->salvar($mediaItem);
@@ -193,6 +195,7 @@ final readonly class EnviarGoogleFotosService
         }
         $mediaItem->setMetadata($metadata);
 
+        $mediaItem->limparErro();
         $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
         $this->mediaItemRepository->salvar($mediaItem);
 

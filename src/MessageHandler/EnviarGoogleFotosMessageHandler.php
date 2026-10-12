@@ -24,9 +24,11 @@ final readonly class EnviarGoogleFotosMessageHandler
             $this->enviarGoogleFotosService->executar($message->mediaItemUuid());
         } catch (\Throwable $e) {
             $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
-            if (null !== $mediaItem && !$mediaItem->isFinal()) {
+            if (null !== $mediaItem) {
                 $mediaItem->setErroMotivo($e->getMessage());
-                $mediaItem->transicionarPara(StatusMediaItem::ERRO);
+                if (StatusMediaItem::ERRO !== $mediaItem->status()) {
+                    $mediaItem->transicionarPara(StatusMediaItem::ERRO);
+                }
                 $this->mediaItemRepository->salvar($mediaItem);
             }
             throw $e;

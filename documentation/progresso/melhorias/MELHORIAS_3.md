@@ -223,5 +223,35 @@
   - `web/features/upload-manual/components/DropzoneUpload.tsx`
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
 
+### ✅ Melhoria 46 — Resolução de Erros de Quota 429 no Google Fotos com Semáforo de Concorrência, Backoff Exponencial e Limpeza da Fila Operacional
 
-
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Na "Fila Operacional de Erros" do Dashboard, 5 mídias de Upload Manual (`c1529b7ef6...`, `dd24c472ad...`, `d21563d82a...`, `9abadc13bc...`, `0b2ec59d3d...`) falharam com o erro:
+    `Client error: POST https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate resulted in a 429 Too Many Requests response: Quota exceeded for quota 'concurrent write request' of service 'photoslibrary.googleapis.com'`
+  - **Diagnóstico da Causa Raiz**:
+    1. A API do Google Photos Library possui cota extremamente restritiva para escritas simultâneas: **limite de 1 requisição concorrente de escrita** (`concurrent write request quota = 1`).
+    2. Quando o usuário enviou múltiplos arquivos em lote, os workers do Symfony Messenger consumiram as mensagens simultaneamente e dispararam requisições concorrentes para `mediaItems:batchCreate`, excedendo imediatamente a cota do Google.
+    3. Quando ocorria o 429, a exceção não possuía mecanismo de lock local nem política de retry com sleep/backoff na camada de infraestrutura da API.
+    4. Ao falhar, o item ficava travado em `status: erro`, e mesmo quando retentado com sucesso, o campo `erro_motivo` não era limpo na conclusão.
+- **Solução**:
+  - **Semáforo Local de Escrita e Backoff com Jitter (`GoogleFotosAPI.php`)**:
+    - Implementado método `executarComSemaforoERetry` utilizando lock exclusivo de arquivo (`flock(LOCK_EX)`) no arquivo de semáforo local `/tmp/cirqueirax_google_photos_write.lock`. Isso serializa as escritas mesmo entre múltiplos workers e processos concorrentes.
+    - Adicionado delay de segurança de 300ms entre escritas consecutivas.
+    - Implementado mecanismo de repetição com backoff exponencial com jitter (até 4 tentativas com esperas de 2s, 4s, 6s + jitter aleatório) para capturar e contornar automaticamente respostas HTTP 429 (`concurrent write request` ou `RESOURCE_EXHAUSTED`).
+    - O semáforo protege `batchCreateMediaItems`, `criarAlbum`, `adicionarItensAoAlbum` e `removerItensDoAlbum`.
+  - **Limpeza de Erros ao Concluir (`EnviarGoogleFotosService.php`)**:
+    - Adicionada chamada `$mediaItem->limparErro()` em todos os fluxos de sucesso (reutilização de upload duplicado e conclusão de novo upload).
+    - Garantida a transição para `StatusMediaItem::CONCLUIDO` mesmo se a mídia estava previamente marcada como `ERRO`.
+  - **Tratamento de Exceção no Handler (`EnviarGoogleFotosMessageHandler.php`)**:
+    - Atualização apropriada de `erroMotivo` e transição de status para `ERRO` sem bloqueios por `isFinal()`.
+  - **Reprocessamento e Limpeza Operacional dos Erros**:
+    - Todas as 5 mídias em falha foram reprocessadas com sucesso via `app:media:retentar --todos` e integradas ao Google Fotos (`status: concluido`, IDs registrados).
+    - Mensagens mortas no transporte `failed` do Symfony Messenger purgadas.
+    - Registros com `erro_motivo` residual limpos. Fila de erros zerada (`0 itens`).
+- **Arquivos**:
+  - `src/Infra/GoogleFotos/GoogleFotosAPI.php`
+  - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
+  - `src/MessageHandler/EnviarGoogleFotosMessageHandler.php`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`

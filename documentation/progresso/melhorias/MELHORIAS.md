@@ -56,13 +56,6 @@
 | M41 | Redesign Completo da Central de Upload Manual & Triagem com Layout Amplo, Grade/Tabela e Ingestão via Clipboard | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_3.md#melhoria-41--redesign-completo-da-central-de-upload-manual--triagem-com-layout-amplo-prévia-em-gradetabela-e-ingestão-via-clipboard) |
 | M42 | Atalhos Ágeis de Categorização em Lote (Fila e Triagem), Detecção de Capturas e Proteção Anti-Duplicação | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_3.md#melhoria-42--atalhos-ágeis-de-categorização-em-lote-fila-e-triagem-detecção-inteligente-de-capturas-e-garantia-estrita-anti-duplicação) |
 | M43 | Central Unificada de Mídias (`/central-midias`) com Galeria Fluida Estilo Google Fotos para Todas as Mídias | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-43--central-unificada-de-mídias-central-midias-com-galeria-fluida-estilo-google-fotos-para-todas-as-mídias) |
-
-
-
-
-
-
-
-
-
-
+| M44 | Resolução da Visibilidade de Prints do Agente e Downloads de Vídeos na Central de Mídias com Contadores e Miniaturas FFmpeg | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-44--resolução-da-visibilidade-de-prints-do-agente-e-downloads-de-vídeos-na-central-de-mídias-com-contadores-nas-abas-limite-de-60-itens-e-miniaturas-ffmpeg) |
+| M45 | Correção de Layout Quebrado nos Botões de Abas da Central de Mídias e no Grid de Saúde do Ecossistema no Dashboard | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-45--correção-de-layout-quebrado-nos-botões-de-abas-da-central-de-mídias-e-no-grid-de-saúde-do-ecossistema-no-dashboard) |
+| M46 | Resolução de Erros de Quota 429 no Google Fotos com Semáforo de Concorrência, Backoff Exponencial e Limpeza da Fila Operacional | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-46--resolução-de-erros-de-quota-429-no-google-fotos-com-semáforo-de-concorrência-backoff-exponencial-e-limpeza-da-fila-operacional) |
