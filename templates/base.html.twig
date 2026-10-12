@@ -1,12 +1,54 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="referrer" content="no-referrer">
-    <title>cirqueiraX</title>
+
+    <!-- Primary Meta Tags -->
+    <title>CirqueiraX — Central de Mídias &amp; Automação de Downloads</title>
+    <meta name="title" content="CirqueiraX — Central de Mídias &amp; Automação de Downloads">
+    <meta name="description" content="CirqueiraX é uma central moderna e inteligente para gestão, triagem e automação de downloads de vídeos (TikTok, Twitter/X, Instagram, YouTube), sincronização via Syncthing e backup no Google Fotos.">
+    <meta name="keywords" content="CirqueiraX, central de mídias, automação de downloads, download tiktok sem marca, download twitter, syncthing, google fotos backup, biblioteca multimídia, streaming local">
+    <meta name="author" content="CirqueiraX">
+    <meta name="robots" content="index, follow">
+
+    <!-- Mobile & Theme -->
+    <meta name="theme-color" content="#00ba9c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CirqueiraX">
+
+    <!-- Favicons & Icons -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
-     {{ vite_entry_link_tags('app') }}
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="CirqueiraX">
+    <meta property="og:title" content="CirqueiraX — Central de Mídias &amp; Automação de Downloads">
+    <meta property="og:description" content="Central inteligente para gestão e automação de downloads de vídeos sociais, metadados enriquecidos, sincronização contínua e backup em nuvem.">
+    <meta property="og:image" content="{{ app.request.schemeAndHttpHost ~ asset('og-image.png') }}">
+    <meta property="og:image:secure_url" content="{{ app.request.schemeAndHttpHost ~ asset('og-image.png') }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="720">
+    <meta property="og:image:alt" content="CirqueiraX — Central de Mídias e Automação">
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CirqueiraX — Central de Mídias &amp; Automação de Downloads">
+    <meta name="twitter:description" content="Central inteligente para gestão e automação de downloads de vídeos sociais, metadados enriquecidos e backup em nuvem.">
+    <meta name="twitter:image" content="{{ app.request.schemeAndHttpHost ~ asset('og-image.png') }}">
+    <meta name="twitter:image:alt" content="CirqueiraX — Central de Mídias">
+
+    {{ vite_entry_link_tags('app') }}
 </head>
 <body>
     <div id="root"></div>

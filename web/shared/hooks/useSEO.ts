@@ -4,34 +4,34 @@ interface UseSEOProps {
   /** Título da página — aparece na aba do browser */
   title: string
   /** Descrição da página — 150–160 caracteres */
-  description: string
-  /** Palavras-chave separadas por vírgula — 5–10 termos */
-  keywords: string
-  /** true para páginas que não devem ser indexadas (rotas autenticadas) */
+  description?: string
+  /** Palavras-chave separadas por vírgula */
+  keywords?: string
+  /** true para páginas que não devem ser indexadas (rotas autenticadas restritas) */
   noindex?: boolean
+  /** Imagem para Open Graph e Twitter Card */
+  image?: string
   /** Dado estruturado Schema.org (JSON-LD) */
   jsonLd?: Record<string, unknown>
 }
 
 /**
- * Configura as metatags de SEO da página.
- *
- * DEVE ser a primeira chamada dentro de Component(), antes de qualquer return.
- *
- * @example
- * export function Component() {
- *   useSEO({
- *     title: 'Dashboard — cirqueiraX',
- *     description: 'Visão geral das métricas e indicadores principais do sistema.',
- *     keywords: 'dashboard, métricas, indicadores',
- *     noindex: true,
- *   })
- *   return <AppContainer>...</AppContainer>
- * }
+ * Configura dinamicamente as metatags de SEO da página.
  */
-export function useSEO({ title, description, keywords, noindex = false, jsonLd }: UseSEOProps) {
+export function useSEO({
+  title,
+  description = 'Central inteligente para gestão, triagem e automação de downloads de vídeos, sincronização contínua e backup em nuvem.',
+  keywords = 'CirqueiraX, central de mídias, automação de downloads, backup, syncthing, google fotos',
+  noindex = false,
+  image = '/og-image.png',
+  jsonLd,
+}: UseSEOProps) {
   useEffect(() => {
-    document.title = title
+    const formattedTitle = title.toLowerCase().includes('cirqueirax')
+      ? title
+      : `${title} — CirqueiraX`
+
+    document.title = formattedTitle
 
     setMeta('description', description)
     setMeta('keywords', keywords)
@@ -42,8 +42,17 @@ export function useSEO({ title, description, keywords, noindex = false, jsonLd }
       setMeta('robots', 'index, follow')
     }
 
-    setMetaProperty('og:title', title)
+    setMetaProperty('og:title', formattedTitle)
     setMetaProperty('og:description', description)
+    setMetaProperty('og:image', image)
+    setMetaProperty('og:type', 'website')
+    setMetaProperty('og:locale', 'pt_BR')
+    setMetaProperty('og:site_name', 'CirqueiraX')
+
+    setMeta('twitter:card', 'summary_large_image')
+    setMeta('twitter:title', formattedTitle)
+    setMeta('twitter:description', description)
+    setMeta('twitter:image', image)
 
     if (jsonLd) {
       const existing = document.getElementById('json-ld-schema')
@@ -62,7 +71,7 @@ export function useSEO({ title, description, keywords, noindex = false, jsonLd }
       const script = document.getElementById('json-ld-schema')
       if (script) script.remove()
     }
-  }, [title, description, keywords, noindex, jsonLd])
+  }, [title, description, keywords, noindex, image, jsonLd])
 }
 
 function setMeta(name: string, content: string) {

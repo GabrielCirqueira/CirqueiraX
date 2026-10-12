@@ -30,12 +30,19 @@ import {
 } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useSEO } from '@/shared/hooks'
 import { DropzoneUpload } from './components/DropzoneUpload'
 import { FilaTriagemUpload } from './components/FilaTriagemUpload'
 import { ModalConfirmarSincronizacaoDuplicado } from './components/ModalConfirmarSincronizacaoDuplicado'
 import { useUploadManual } from './hooks/useUploadManual'
 
 const UploadManual = memo(function UploadManual() {
+  useSEO({
+    title: 'Upload Manual & Triagem',
+    description: 'Envio manual de arquivos, detecção de duplicados e distribuição automática em lotes.',
+    keywords: 'upload manual, triagem de midias, cirqueirax',
+  })
+
   const queryClient = useQueryClient()
   const [filtroStatus, setFiltroStatus] = useState<string>('todos')
   const [busca, setBusca] = useState<string>('')

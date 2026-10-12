@@ -32,6 +32,7 @@ import { ModalDistribuirHorariosLote } from './components/ModalDistribuirHorario
 import { ModalEditarMetadata } from './components/ModalEditarMetadata'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import { TabelaVideos } from './components/TabelaVideos'
+import { useSEO } from '@/shared/hooks'
 import {
   useApagarLote,
   useAtualizarMetadata,
@@ -53,6 +54,12 @@ import type {
 } from './types'
 
 export default function DownloadsVideo() {
+  useSEO({
+    title: 'Downloads de Vídeos',
+    description: 'Gerencie e monitore os downloads de vídeos sociais, metadados enriquecidos, categorias e status de sincronização.',
+    keywords: 'downloads de videos, tiktok, twitter, instagram, youtube, cirqueirax',
+  })
+
   const [pagina, setPagina] = useState(1)
   const [busca, setBusca] = useState('')
   const [statusFiltro, setStatusFiltro] = useState<string>('')

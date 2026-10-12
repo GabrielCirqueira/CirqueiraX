@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Sparkles,
 } from 'lucide-react'
+import { useSEO } from '@/shared/hooks'
 import { memo, Suspense, lazy, useState } from 'react'
 import { AtividadesRecentes } from './components/AtividadesRecentes'
 import { BarraAcoesRapidas } from './components/BarraAcoesRapidas'
@@ -42,6 +43,12 @@ export function Component() {
 export const Dashboard = Component
 
 const DashboardView = memo(function DashboardView() {
+  useSEO({
+    title: 'Dashboard Geral',
+    description: 'Métricas em tempo real, volume de downloads, status de sincronização com Google Fotos e integridade do storage.',
+    keywords: 'dashboard, metricas, downloads, google fotos, syncthing, cirqueirax',
+  })
+
   const queryClient = useQueryClient()
   const [abaAtiva, setAbaAtiva] = useState<string>('visao-geral')
   const [atualizandoManual, setAtualizandoManual] = useState(false)

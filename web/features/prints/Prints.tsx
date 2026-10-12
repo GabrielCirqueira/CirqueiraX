@@ -30,6 +30,7 @@ import { GridPrints } from './components/GridPrints'
 import { ModalCategorizarPrint } from './components/ModalCategorizarPrint'
 import { ModalVisualizarPrint } from './components/ModalVisualizarPrint'
 import { TabelaPrints } from './components/TabelaPrints'
+import { useSEO } from '@/shared/hooks'
 import {
   useApagarLotePrints,
   useApagarPrint,
@@ -41,6 +42,12 @@ import {
 import type { FiltrosPrints, MediaItem } from './types'
 
 export default function Prints() {
+  useSEO({
+    title: 'Galeria de Prints',
+    description: 'Gestão e sincronização rápida de capturas de tela e prints de dispositivos sincronizados.',
+    keywords: 'prints, screenshots, capturas de tela, cirqueirax',
+  })
+
   const [pagina, setPagina] = useState(1)
   const [busca, setBusca] = useState('')
   const [statusFiltro, setStatusFiltro] = useState<string>('')

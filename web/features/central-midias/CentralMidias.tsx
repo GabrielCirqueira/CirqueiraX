@@ -32,6 +32,7 @@ import { GridCentralMidias } from './components/GridCentralMidias'
 import { ModalCategorizarMidia } from './components/ModalCategorizarMidia'
 import { ModalVisualizarMidiaCentral } from './components/ModalVisualizarMidiaCentral'
 import { TabelaCentralMidias } from './components/TabelaCentralMidias'
+import { useSEO } from '@/shared/hooks'
 import {
   useApagarLoteMidias,
   useApagarMidia,
@@ -44,6 +45,12 @@ import {
 import type { FiltrosCentralMidias, MediaItem } from './types'
 
 const CentralMidias = memo(function CentralMidias() {
+  useSEO({
+    title: 'Central de Mídias',
+    description: 'Biblioteca multimídia unificada, visualização em alta resolução, cópia para clipboard e organização por categorias.',
+    keywords: 'central de midias, fotos, videos, galeria, cirqueirax',
+  })
+
   const [pagina, setPagina] = useState(1)
   const [porPagina, setPorPagina] = useState(60)
   const [busca, setBusca] = useState('')

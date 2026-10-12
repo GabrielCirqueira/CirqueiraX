@@ -1,6 +1,7 @@
 import { AppContainer } from '@/layouts/AppContainer'
 import { Box, Button, Card, Flex, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { AlertTriangle, CheckCircle2, FolderSync, Images, RefreshCw } from 'lucide-react'
+import { useSEO } from '@/shared/hooks'
 import { useState } from 'react'
 import { AvisoMigracaoAlbuns } from './components/AvisoMigracaoAlbuns'
 import { GateConexaoGoogle } from './components/GateConexaoGoogle'
@@ -10,6 +11,12 @@ import { useAlbunsGoogleFotos } from './hooks/useGoogleFotos'
 import type { AlbumGoogleFotos } from './types'
 
 export default function GoogleFotos() {
+  useSEO({
+    title: 'Google Fotos Backup',
+    description: 'Painel de sincronização contínua com álbuns e backup na nuvem do Google Fotos.',
+    keywords: 'google fotos, backup em nuvem, albuns, cirqueirax',
+  })
+
   const [albumVinculando, setAlbumVinculando] = useState<AlbumGoogleFotos | null>(null)
   const { data: respostaAlbuns, isLoading, isFetching, refetch } = useAlbunsGoogleFotos()
 
