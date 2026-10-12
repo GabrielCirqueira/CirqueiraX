@@ -94,7 +94,6 @@ export const CardPrint = memo(function CardPrint({
         borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
       }}
     >
-      {/* Imagem em proporção natural sem cortes */}
       {!erroCarregamento ? (
         <img
           src={streamUrl}
@@ -123,7 +122,6 @@ export const CardPrint = memo(function CardPrint({
         </VStack>
       )}
 
-      {/* Checkbox circular no topo esquerdo (visível quando selecionado ou no hover) */}
       <Box
         position="absolute"
         top={2}
@@ -160,7 +158,6 @@ export const CardPrint = memo(function CardPrint({
         </Box>
       </Box>
 
-      {/* Horário discreto no topo direito (aparece no hover) */}
       {dataHora && (
         <Box
           position="absolute"
@@ -188,7 +185,6 @@ export const CardPrint = memo(function CardPrint({
         </Box>
       )}
 
-      {/* Sombra suave inferior no hover para destacar os botões */}
       <Box
         position="absolute"
         inset={0}
@@ -202,7 +198,6 @@ export const CardPrint = memo(function CardPrint({
         transition="opacity 0.15s ease"
       />
 
-      {/* Pequenos ícones de botões na parte inferior esquerda */}
       <HStack
         position="absolute"
         bottom={2}
@@ -214,7 +209,6 @@ export const CardPrint = memo(function CardPrint({
         gap={1}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 1. Copiar */}
         <IconButton
           size="xs"
           w="26px"
@@ -240,7 +234,6 @@ export const CardPrint = memo(function CardPrint({
           {copiadoRecente ? <Check size={13} /> : <Copy size={13} />}
         </IconButton>
 
-        {/* 2. Download */}
         <IconButton
           size="xs"
           w="26px"
@@ -270,7 +263,6 @@ export const CardPrint = memo(function CardPrint({
           )}
         </IconButton>
 
-        {/* 3. Categorizar */}
         {onCategorizar && (
           <IconButton
             size="xs"
@@ -300,7 +292,6 @@ export const CardPrint = memo(function CardPrint({
           </IconButton>
         )}
 
-        {/* 4. Excluir */}
         {onApagar && (
           <IconButton
             size="xs"

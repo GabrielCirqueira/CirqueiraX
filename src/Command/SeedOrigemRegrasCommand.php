@@ -33,15 +33,12 @@ final class SeedOrigemRegrasCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Seed de Categorias Padrão e OrigemRegra');
 
-        // Categoria única para Prints (enviadas tanto do trabalho quanto de casa)
         $categoriaPrints = $this->obterOuCriarCategoria('Prints', 'prints');
 
-        // As 3 categorias de vídeos
         $this->obterOuCriarCategoria('videos/memes', 'videos/memes');
         $this->obterOuCriarCategoria('Shingeki no Kyojin', 'videos/shingeki');
         $this->obterOuCriarCategoria('One Piece', 'videos/onepiece');
 
-        // Ambas as origens de prints mapeiam para a pasta única "prints"
         $this->obterOuCriarOrigemRegra(OrigemMedia::PRINT_EMPRESA, $categoriaPrints);
         $this->obterOuCriarOrigemRegra(OrigemMedia::PRINT_PESSOAL, $categoriaPrints);
 

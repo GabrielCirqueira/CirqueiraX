@@ -74,7 +74,6 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
           maxW="4xl"
           w="95vw"
         >
-          {/* Cabeçalho */}
           <Flex
             px={5}
             py={4}
@@ -118,7 +117,6 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
             </IconButton>
           </Flex>
 
-          {/* Área de Visualização da Mídia */}
           <Dialog.Body p={0} bg="bg.canvas">
             <Box
               w="full"
@@ -156,7 +154,6 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
             </Box>
           </Dialog.Body>
 
-          {/* Rodapé e Ações */}
           <Flex
             px={5}
             py={4}
@@ -168,7 +165,6 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
             borderColor="border.subtle"
             bg="bg.panel"
           >
-            {/* Metadados e Categoria */}
             <HStack gap={3} flexWrap="wrap" flex={1}>
               <HStack gap={1.5} fontSize="xs" color="fg.subtle">
                 <Calendar size={13} />
@@ -184,7 +180,6 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
                 </Badge>
               )}
 
-              {/* Seletor Rápido de Categoria */}
               <HStack gap={2} align="center">
                 <Text as="span" fontSize="xs" color="fg.subtle" fontWeight="medium">
                   Categoria:
@@ -211,7 +206,6 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
               </HStack>
             </HStack>
 
-            {/* Ações */}
             <HStack gap={2} justify={{ base: 'flex-end', sm: 'flex-start' }}>
               {ehDuplicado && onForcarGoogleFotos && (
                 <Button

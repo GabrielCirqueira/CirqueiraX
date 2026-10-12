@@ -118,7 +118,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
     (f) => f.status === 'sucesso' || f.status === 'duplicado'
   ).length
 
-  // Conta quantos na fila estão sem categoria
   const semCategoriaFilaCount = useMemo(
     () => pendentes.filter((f) => !f.categoriaId).length,
     [pendentes]
@@ -129,7 +128,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
     [fila]
   )
 
-  // Detecta se a maioria dos arquivos são capturas de tela pelo nome
   const capturasCount = useMemo(
     () =>
       pendentes.filter((f) =>
@@ -166,7 +164,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
 
   return (
     <VStack w="full" gap={5}>
-      {/* Caixa de Dropzone Principal */}
       <Card.Root
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -223,7 +220,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             </Text>
           </VStack>
 
-          {/* Formatos Suportados e Dica de Clipboard */}
           <HStack gap={2} flexWrap="wrap" justify="center" pt={1}>
             <HStack gap={1} px={2} py={0.5} borderRadius="md" bg="bg.muted" borderWidth="1px" borderColor="border.subtle">
               <FileImage size={12} />
@@ -247,7 +243,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             </Badge>
           </HStack>
 
-          {/* Seletor de Categoria Pré-definida */}
           <Box
             mt={2}
             p={2.5}
@@ -272,7 +267,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                   onChange={(e) => {
                     const novoId = e.target.value || null
                     onSetCategoriaPadraoId(novoId)
-                    // Se houver arquivos na fila sem categoria, oferece aplicar a todos
                     if (novoId && fila.length > 0 && onAplicarCategoriaParaSemCategoria) {
                       onAplicarCategoriaParaSemCategoria(novoId)
                     }
@@ -298,10 +292,8 @@ export const DropzoneUpload = memo(function DropzoneUpload({
         </Card.Body>
       </Card.Root>
 
-      {/* Fila de Arquivos em Envio */}
       {fila.length > 0 && (
         <VStack w="full" gap={3}>
-          {/* Barra de Status e Envio Principal */}
           <Flex
             w="full"
             direction={{ base: 'column', sm: 'row' }}
@@ -423,7 +415,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             </HStack>
           </Flex>
 
-          {/* ⚡ BARRA DE ATALHOS RÁPIDOS DE CATEGORIA PARA A FILA */}
           <Card.Root
             w="full"
             p={3.5}
@@ -449,7 +440,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 </HStack>
 
                 <HStack gap={1.5} flexWrap="wrap">
-                  {/* Seletor genérico com botão aplicar */}
                   <NativeSelect.Root size="xs" w="44">
                     <NativeSelect.Field
                       value={categoriaLoteFilaId}
@@ -489,7 +479,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 </HStack>
               </Flex>
 
-              {/* Botões rápidos tipo pílula para 1 clique direto em cada categoria cadastrada */}
               <HStack gap={1.5} flexWrap="wrap">
                 <Text as="span" fontSize="11px" color="fg.subtle" fontWeight="medium">
                   Clique para definir todos:
@@ -526,7 +515,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 </Button>
               </HStack>
 
-              {/* Atalho Especial Inteligente para Capturas de Tela */}
               {capturasCount > 0 && (
                 <HStack
                   p={2}
@@ -569,7 +557,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             </VStack>
           </Card.Root>
 
-          {/* Lista de Arquivos Individuais */}
           <Grid w="full" templateColumns="1fr" gap={2}>
             {fila.map((item) => {
               const isItemSelecionado = selecionadosFila.includes(item.id)
@@ -592,7 +579,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                     gap={2.5}
                   >
                     <HStack gap={2.5} flex={1} minW={0} w="full">
-                      {/* Checkbox de seleção na fila */}
                       <IconButton
                         size="xs"
                         variant="ghost"
@@ -606,7 +592,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                         {isItemSelecionado ? <CheckSquare size={16} /> : <Square size={16} />}
                       </IconButton>
 
-                      {/* Miniatura do Arquivo */}
                       <Box
                         w={10}
                         h={10}
@@ -646,7 +631,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           </Text>
                         </HStack>
 
-                        {/* Progresso de Envio */}
                         {item.status === 'enviando' && (
                           <Box w="full" mt={1}>
                             <Progress.Root value={item.progresso} size="xs" colorPalette="brand">
@@ -665,7 +649,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       </VStack>
                     </HStack>
 
-                    {/* Seletor de Categoria e Ações */}
                     <HStack gap={2} flexShrink={0} alignSelf={{ base: 'flex-end', sm: 'center' }}>
                       <NativeSelect.Root
                         size="xs"
@@ -739,7 +722,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                         </Badge>
                       )}
 
-                      {/* Botões de Ação na Fila */}
                       {item.status === 'duplicado' && onAbrirConfirmacaoDuplicado && item.mediaItem && (
                         <Button
                           size="xs"

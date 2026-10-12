@@ -84,7 +84,6 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
         templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
         gap={3}
       >
-        {/* 1. SYNCTHING */}
         <Box
           p={3.5}
           borderRadius="xl"
@@ -120,7 +119,6 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
           </Text>
         </Box>
 
-        {/* 2. MESSENGER WORKER */}
         <Box
           p={3.5}
           borderRadius="xl"
@@ -151,7 +149,6 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
           </Text>
         </Box>
 
-        {/* 3. GOOGLE FOTOS */}
         <Box
           p={3.5}
           borderRadius="xl"
@@ -182,7 +179,6 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
           </Text>
         </Box>
 
-        {/* 4. DIRETÓRIOS CLASSIFICADOS */}
         <Box
           p={3.5}
           borderRadius="xl"

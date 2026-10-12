@@ -87,10 +87,8 @@ final readonly class ExtratorMetadataService
             $novosMetadados[MetadataKeys::DATA_CRIACAO_ARQUIVO] = $dataCriacao;
         }
 
-        // Filtra valores nulos
         $novosMetadados = array_filter($novosMetadados, static fn($v) => null !== $v);
 
-        // Precedência aos metadados contextuais já informados (como títulos personalizados)
         return array_merge($novosMetadados, $metadataExistente);
     }
 }

@@ -79,7 +79,6 @@ export const CardsResumo = memo(function CardsResumo({
       templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
       gap={4}
     >
-      {/* 1. TOTAL INGERIDO */}
       <Card.Root
         position="relative"
         overflow="hidden"
@@ -97,7 +96,6 @@ export const CardsResumo = memo(function CardsResumo({
         }}
         onClick={() => onSelecionarAba?.('visao-geral')}
       >
-        {/* Glow ambient background */}
         <Box
           position="absolute"
           top="-40px"
@@ -156,7 +154,6 @@ export const CardsResumo = memo(function CardsResumo({
         </VStack>
       </Card.Root>
 
-      {/* 2. CONCLUÍDAS */}
       <Card.Root
         position="relative"
         overflow="hidden"
@@ -224,7 +221,6 @@ export const CardsResumo = memo(function CardsResumo({
               </Text>
             </HStack>
 
-            {/* Visual mini progress bar */}
             <Box mt={2.5} w="full">
               <Box
                 w="full"
@@ -252,7 +248,6 @@ export const CardsResumo = memo(function CardsResumo({
         </VStack>
       </Card.Root>
 
-      {/* 3. EM PROCESSAMENTO / FILA */}
       <Card.Root
         position="relative"
         overflow="hidden"
@@ -364,7 +359,6 @@ export const CardsResumo = memo(function CardsResumo({
         </VStack>
       </Card.Root>
 
-      {/* 4. FILA DE ERROS */}
       <Card.Root
         position="relative"
         overflow="hidden"

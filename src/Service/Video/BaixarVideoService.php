@@ -33,7 +33,6 @@ final readonly class BaixarVideoService
             throw YtDlpException::urlInvalidaOuNaoSuportada($url);
         }
 
-        // 1. Verificação prévia: se a URL já foi baixada anteriormente
         $itemExistente = $this->mediaItemRepository->buscarPorUrlOriginal($url);
         if (null !== $itemExistente) {
             $tentativas = ((int) ($itemExistente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
@@ -66,7 +65,6 @@ final readonly class BaixarVideoService
 
         $mediaItem = $this->ingestarMediaService->executar($dto);
 
-        // Se o arquivo baixado era duplicado de outro item com mesmo hash, remove o arquivo temporário
         if (null !== $mediaItem->caminhoLocal() && $mediaItem->caminhoLocal() !== $caminhoLocal && file_exists($caminhoLocal)) {
             $this->armazenamentoClient->remover($caminhoLocal);
         }

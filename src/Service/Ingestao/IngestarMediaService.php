@@ -27,14 +27,12 @@ final readonly class IngestarMediaService
         $caminhoArquivo = $dto->caminhoArquivo();
         $hash = $dto->hash() ?? $this->armazenamentoClient->calcularHash($caminhoArquivo);
 
-        // Extrai metadados completos do arquivo (SHA-256, MD5, tamanho exato, mime type, dimensões, fingerprint)
         $metadataEnriquecida = $this->extratorMetadataService->extrair($caminhoArquivo, $dto->metadata());
         $md5 = $metadataEnriquecida[MetadataKeys::HASH_MD5] ?? null;
         $tamanho = $metadataEnriquecida[MetadataKeys::TAMANHO_BYTES] ?? null;
         $urlOriginal = $metadataEnriquecida[MetadataKeys::URL_ORIGINAL] ?? null;
         $hashVisual = $metadataEnriquecida[MetadataKeys::HASH_VISUAL] ?? null;
 
-        // Busca duplicado por SHA-256, MD5, Hash Visual ou URL Original
         $existente = $this->mediaItemRepository->buscarDuplicado(
             $hash,
             is_string($md5) ? $md5 : null,
@@ -44,7 +42,6 @@ final readonly class IngestarMediaService
         );
 
         if (null !== $existente) {
-            // Registra tentativa duplicada e mescla metadados de integridade se ausentes
             $tentativas = ((int) ($existente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
             $existente->adicionarMetadata(MetadataKeys::TENTATIVAS_DUPLICADAS, $tentativas);
             $existente->adicionarMetadata(MetadataKeys::DATA_DETECCAO_DUPLICADO, (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM));
@@ -52,7 +49,6 @@ final readonly class IngestarMediaService
             $existente->mesclarMetadata($metadataEnriquecida);
             $this->mediaItemRepository->salvar($existente);
 
-            // Não redespacha mensagens para evitar reclassificação ou upload repetido no Google Fotos!
             return $existente;
         }
 

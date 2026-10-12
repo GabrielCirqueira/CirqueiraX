@@ -127,9 +127,6 @@ const CentralMidias = memo(function CentralMidias() {
     setPagina(1)
   }
 
-  // Atalhos de teclado:
-  // - Ctrl+A: selecionar todos
-  // - Teclas 1 a 9: atribuir categoria instantaneamente aos selecionados
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -223,7 +220,6 @@ const CentralMidias = memo(function CentralMidias() {
   return (
     <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
       <VStack w="full" gap={6} alignItems="stretch">
-        {/* Topo: Título, Métricas e Atualizar */}
         <Flex
           direction={{ base: 'column', sm: 'row' }}
           justify="space-between"
@@ -275,7 +271,6 @@ const CentralMidias = memo(function CentralMidias() {
           </HStack>
         </Flex>
 
-        {/* Toolbar de Filtros Unificada */}
         <VStack
           w="full"
           bg="bg.panel"
@@ -286,7 +281,6 @@ const CentralMidias = memo(function CentralMidias() {
           gap={3}
           align="stretch"
         >
-          {/* Linha 1: Abas de Origem com Contadores */}
           <Flex
             direction={{ base: 'column', lg: 'row' }}
             justify="space-between"
@@ -336,7 +330,6 @@ const CentralMidias = memo(function CentralMidias() {
               })}
             </HStack>
 
-            {/* Alternador de Modo de Visualização: Grade / Tabela */}
             <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle" alignSelf={{ base: 'flex-start', lg: 'center' }}>
               <IconButton
                 size="xs"
@@ -367,7 +360,6 @@ const CentralMidias = memo(function CentralMidias() {
             </HStack>
           </Flex>
 
-          {/* Linha 2: Filtros de Tipo, Categoria, Status e Busca */}
           <Flex
             direction={{ base: 'column', md: 'row' }}
             justify="space-between"
@@ -376,7 +368,6 @@ const CentralMidias = memo(function CentralMidias() {
             flexWrap="wrap"
           >
             <HStack gap={2} flexWrap="wrap" flex={1}>
-              {/* Filtro de Tipo (Fotos / Vídeos) */}
               <NativeSelect.Root size="sm" w={{ base: 'full', sm: '130px' }}>
                 <NativeSelect.Field
                   value={tipoFiltro}
@@ -397,7 +388,6 @@ const CentralMidias = memo(function CentralMidias() {
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
 
-              {/* Filtro de Categoria */}
               <NativeSelect.Root size="sm" w={{ base: 'full', sm: '180px' }}>
                 <NativeSelect.Field
                   value={categoriaFiltro}
@@ -422,7 +412,6 @@ const CentralMidias = memo(function CentralMidias() {
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
 
-              {/* Filtro de Status */}
               <NativeSelect.Root size="sm" w={{ base: 'full', sm: '140px' }}>
                 <NativeSelect.Field
                   value={statusFiltro}
@@ -445,7 +434,6 @@ const CentralMidias = memo(function CentralMidias() {
               </NativeSelect.Root>
             </HStack>
 
-            {/* Campo de Busca Textual */}
             <Box position="relative" w={{ base: 'full', md: '250px' }}>
               <Box
                 position="absolute"
@@ -492,7 +480,6 @@ const CentralMidias = memo(function CentralMidias() {
           </Flex>
         </VStack>
 
-        {/* Visualização de Mídias (Masonry Grid ou Tabela) */}
         {modoVisualizacao === 'grid' ? (
           <GridCentralMidias
             itens={itens}
@@ -530,7 +517,6 @@ const CentralMidias = memo(function CentralMidias() {
           />
         )}
 
-        {/* Paginação e Controles de Exibição */}
         <Flex
           justify="space-between"
           align="center"
@@ -604,7 +590,6 @@ const CentralMidias = memo(function CentralMidias() {
         </Flex>
       </VStack>
 
-      {/* Modal de Prévia Ampliada */}
       <ModalVisualizarMidiaCentral
         aberto={Boolean(itemVisualizar)}
         item={itemVisualizar}
@@ -622,7 +607,6 @@ const CentralMidias = memo(function CentralMidias() {
         }}
       />
 
-      {/* Modal de Escolha de Categoria */}
       <ModalCategorizarMidia
         aberto={modalCategorizarAberto}
         quantidade={itemCategorizarAlvo ? 1 : selecionados.length}
@@ -634,7 +618,6 @@ const CentralMidias = memo(function CentralMidias() {
         onConfirmar={handleConfirmarCategorizar}
       />
 
-      {/* Barra Flutuante de Ações em Lote */}
       {selecionados.length > 0 && (
         <Box
           position="fixed"
@@ -668,7 +651,6 @@ const CentralMidias = memo(function CentralMidias() {
               </Text>
             </HStack>
 
-            {/* Pílulas de 1 clique para as primeiras categorias com atalho do teclado */}
             <HStack gap={1.5} flexWrap="wrap" justify="center">
               <Text as="span" fontSize="11px" color="fg.subtle" fontWeight="medium" display={{ base: 'none', lg: 'inline' }}>
                 Atribuir:
@@ -743,7 +725,6 @@ const CentralMidias = memo(function CentralMidias() {
         </Box>
       )}
 
-      {/* Modal de Confirmação de Exclusão */}
       <Dialog.Root
         open={modalConfirmarApagar}
         onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}

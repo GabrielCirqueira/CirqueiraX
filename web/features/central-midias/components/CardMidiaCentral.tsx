@@ -52,7 +52,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
   const [copiadoRecente, setCopiadoRecente] = useState(false)
   const [falhaThumbRemota, setFalhaThumbRemota] = useState(false)
 
-  // Identificação inteligente de tipo
   const isVideo = useMemo(() => {
     const temDuracao = Boolean(item.metadata?.duracao)
     const temCaminhoVideo = Boolean(item.caminhoLocal?.match(REGEX_VIDEO_EXT))
@@ -173,7 +172,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
         borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
       }}
     >
-      {/* Mídia Principal em proporção natural sem cortes */}
       {!erroCarregamento ? (
         <Box position="relative" w="full" overflow="hidden">
           <img
@@ -181,7 +179,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             alt={titulo}
             loading="lazy"
             onError={() => {
-              // Se falhar a thumbnail externa, tenta a gerada pelo backend; se já falhou, marca erro
               if (isVideo && remoteThumbUrl && !falhaThumbRemota) {
                 setFalhaThumbRemota(true)
               } else {
@@ -198,7 +195,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             }}
           />
 
-          {/* Se for vídeo, overlay de reprodução sutil */}
           {isVideo && (
             <Box
               position="absolute"
@@ -249,7 +245,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
         </VStack>
       )}
 
-      {/* Checkbox de Seleção no Canto Superior Esquerdo */}
       <Box
         position="absolute"
         top={2}
@@ -282,7 +277,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
         </IconButton>
       </Box>
 
-      {/* Badges de Origem e Tipo no Canto Superior Direito */}
       <HStack
         position="absolute"
         top={2}
@@ -294,7 +288,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
         justify="flex-end"
         maxW="calc(100% - 40px)"
       >
-        {/* Badge da Categoria (se houver) - Com Ícone Folder */}
         {item.categoria?.nome && (
           <Badge
             size="xs"
@@ -316,7 +309,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           </Badge>
         )}
 
-        {/* Badge de Origem com ícone dedicado */}
         <Badge
           size="xs"
           variant="solid"
@@ -332,7 +324,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           {infoOrigem.label}
         </Badge>
 
-        {/* Duração se for vídeo */}
         {isVideo && duracaoFormatada && (
           <Badge
             size="xs"
@@ -352,7 +343,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
         )}
       </HStack>
 
-      {/* Barra de Ações Rápidas no Hover (Inferior) */}
       <Box
         position="absolute"
         bottom={0}
@@ -381,7 +371,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           </Text>
 
           <HStack gap={1} flexShrink={0} onClick={(e) => e.stopPropagation()}>
-            {/* Copiar para Área de Transferência (apenas imagens) */}
             {!isVideo && (
               <IconButton
                 size="xs"
@@ -401,7 +390,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
               </IconButton>
             )}
 
-            {/* Categorizar Rápido */}
             {onCategorizar && (
               <IconButton
                 size="xs"
@@ -420,7 +408,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
               </IconButton>
             )}
 
-            {/* Download Direto */}
             <IconButton
               size="xs"
               variant="ghost"
@@ -438,7 +425,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
               <Download size={12} />
             </IconButton>
 
-            {/* Excluir Mídia */}
             {onApagar && (
               <IconButton
                 size="xs"
@@ -459,7 +445,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           </HStack>
         </HStack>
 
-        {/* Linha discreta de data/horário */}
         {dataHora && (
           <Text fontSize="9px" color="cirqueira.grey.400" mt={0.5}>
             {dataHora}

@@ -85,7 +85,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
       display="flex"
       flexDirection="column"
     >
-      {/* Área da Miniatura / Preview 16:9 */}
       <Box
         position="relative"
         w="full"
@@ -119,7 +118,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           </VStack>
         )}
 
-        {/* Checkbox de Seleção no Canto Superior Esquerdo */}
         <Box
           position="absolute"
           top={2}
@@ -147,7 +145,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           </Button>
         </Box>
 
-        {/* Badges de Tipo e Duplicado no Canto Superior Direito */}
         <HStack position="absolute" top={2} right={2} zIndex={10} gap={1.5}>
           {ehDuplicado && (
             <Badge
@@ -177,7 +174,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           </Badge>
         </HStack>
 
-        {/* Botão Central de Visualizar no Hover */}
         <Flex
           position="absolute"
           inset={0}
@@ -203,7 +199,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           </Box>
         </Flex>
 
-        {/* Pílula de Tamanho no Canto Inferior Direito */}
         <Box
           position="absolute"
           bottom={2}
@@ -222,9 +217,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
         </Box>
       </Box>
 
-      {/* Corpo do Card */}
       <Card.Body p={3.5} display="flex" flexDirection="column" gap={3} flex={1}>
-        {/* Título e Hash */}
         <VStack align="start" gap={0.5} w="full">
           <Text
             fontWeight="bold"
@@ -248,7 +241,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           </HStack>
         </VStack>
 
-        {/* Categoria: Seletor Inline Rápido */}
         <VStack align="start" gap={1} w="full" pt={1} borderTopWidth="1px" borderColor="border.subtle">
           <HStack justify="space-between" w="full">
             <HStack gap={1} fontSize="11px" fontWeight="semibold" color="fg.subtle">
@@ -288,7 +280,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
         </VStack>
       </Card.Body>
 
-      {/* Rodapé do Card com Ações */}
       <Flex
         px={3.5}
         py={2}

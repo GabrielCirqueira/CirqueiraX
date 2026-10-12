@@ -203,7 +203,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                 onClick={() => onVisualizar(item)}
                 transition="background 0.15s ease"
               >
-                {/* Checkbox */}
                 <Box
                   as="td"
                   p={3}
@@ -226,7 +225,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                   </IconButton>
                 </Box>
 
-                {/* Miniatura e Título */}
                 <Box as="td" p={3}>
                   <HStack gap={3} maxW="380px">
                     <Box
@@ -270,7 +268,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                   </HStack>
                 </Box>
 
-                {/* Origem */}
                 <Box as="td" p={3}>
                   <Badge
                     size="xs"
@@ -282,7 +279,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                   </Badge>
                 </Box>
 
-                {/* Categoria */}
                 <Box as="td" p={3}>
                   {item.categoria?.nome ? (
                     <Badge size="xs" variant="solid" colorPalette="brand" borderRadius="md">
@@ -296,7 +292,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                   )}
                 </Box>
 
-                {/* Tamanho */}
                 <Box as="td" p={3}>
                   <HStack gap={1} fontSize="xs" color="fg.subtle">
                     <HardDrive size={12} />
@@ -304,7 +299,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                   </HStack>
                 </Box>
 
-                {/* Data */}
                 <Box as="td" p={3}>
                   <HStack gap={1} fontSize="xs" color="fg.subtle">
                     <Calendar size={12} />
@@ -312,7 +306,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                   </HStack>
                 </Box>
 
-                {/* Ações */}
                 <Box as="td" p={3} pr={4} textAlign="right" onClick={(e) => e.stopPropagation()}>
                   <HStack gap={1} justify="flex-end">
                     <IconButton

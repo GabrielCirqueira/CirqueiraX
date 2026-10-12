@@ -96,7 +96,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
             overflow="hidden"
             shadow="2xl"
           >
-            {/* Header */}
             <Dialog.Header
               p={5}
               borderBottomWidth="1px"
@@ -140,9 +139,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
               </Button>
             </Dialog.Header>
 
-            {/* Body */}
             <Dialog.Body p={5} spaceY={4}>
-              {/* Box de Informação */}
               <Box
                 p={3.5}
                 borderRadius="xl"
@@ -160,7 +157,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                 </Text>
               </Box>
 
-              {/* Detalhes do Arquivo */}
               <Box
                 p={4}
                 borderRadius="xl"
@@ -240,7 +236,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                 </HStack>
               </Box>
 
-              {/* Seleção de Categoria para Álbum */}
               <VStack align="flex-start" gap={1.5} w="full">
                 <HStack gap={1.5} color="fg">
                   <FolderPlus size={14} />
@@ -273,7 +268,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                 </Text>
               </VStack>
 
-              {/* Pergunta Destacada */}
               <Box
                 p={3.5}
                 borderRadius="xl"
@@ -287,7 +281,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
               </Box>
             </Dialog.Body>
 
-            {/* Footer */}
             <Dialog.Footer
               p={4}
               px={5}

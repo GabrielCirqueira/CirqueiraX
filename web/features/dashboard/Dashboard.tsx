@@ -61,7 +61,6 @@ const DashboardView = memo(function DashboardView() {
   return (
     <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 4, md: 8 }}>
       <VStack w="full" gap={6} alignItems="stretch">
-        {/* CABEÇALHO DO DASHBOARD */}
         <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <VStack gap={1} alignItems="flex-start">
             <HStack gap={2.5} align="center">
@@ -141,21 +140,18 @@ const DashboardView = memo(function DashboardView() {
           </HStack>
         </HStack>
 
-        {/* BARRA DE AÇÕES RÁPIDAS */}
         <BarraAcoesRapidas
           pastasSync={pastasSync}
           onAtualizarTudo={handleAtualizarTudo}
           atualizando={atualizandoManual}
         />
 
-        {/* CARDS DE RESUMO (KPIs) */}
         <CardsResumo
           resumo={resumo}
           carregando={carregandoResumo}
           onSelecionarAba={setAbaAtiva}
         />
 
-        {/* ABAS DO DASHBOARD */}
         <VStack w="full" gap={6} alignItems="stretch">
           <Tabs.Root value={abaAtiva} onValueChange={(e) => setAbaAtiva(e.value)} w="full">
             <Tabs.List
@@ -243,7 +239,6 @@ const DashboardView = memo(function DashboardView() {
             </Tabs.List>
           </Tabs.Root>
 
-          {/* ABA 1: VISÃO GERAL */}
           {abaAtiva === 'visao-geral' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <GraficosDashboard
@@ -252,7 +247,6 @@ const DashboardView = memo(function DashboardView() {
                 carregando={carregandoResumo || carregandoCategorias}
               />
 
-              {/* ATIVIDADES RECENTES E SAÚDE DO SISTEMA */}
               <Box
                 display="grid"
                 gridTemplateColumns={{ base: '1fr', lg: '1.2fr 0.8fr' }}
@@ -272,21 +266,18 @@ const DashboardView = memo(function DashboardView() {
             </VStack>
           )}
 
-          {/* ABA 2: CATEGORIAS */}
           {abaAtiva === 'categorias' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
             </VStack>
           )}
 
-          {/* ABA 3: SINCRONIZAÇÃO */}
           {abaAtiva === 'sincronizacao' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <PainelSync />
             </VStack>
           )}
 
-          {/* ABA 4: FILA DE ERROS */}
           {abaAtiva === 'erros' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <FilaErros />

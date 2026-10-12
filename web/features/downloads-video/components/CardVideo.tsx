@@ -123,7 +123,6 @@ export const CardVideo = memo(function CardVideo({
     }
   }
 
-  // Helper para ícone da plataforma
   const renderIconePlataforma = () => {
     if (!plataformaInfo) return null
     if (plataformaInfo.id === 'youtube') return <Youtube size={12} />
@@ -154,7 +153,6 @@ export const CardVideo = memo(function CardVideo({
         transform: 'translateY(-2px)',
       }}
     >
-      {/* 1. SEÇÃO DE MÍDIA / THUMBNAIL (16:9) */}
       <Box position="relative" aspectRatio="16/9" w="full" bg="cirqueira.grey.950" overflow="hidden">
         {temThumbnail ? (
           <img
@@ -183,7 +181,6 @@ export const CardVideo = memo(function CardVideo({
           </VStack>
         )}
 
-        {/* Gradientes de contraste para badges superiores e inferiores */}
         <Box
           position="absolute"
           top={0}
@@ -209,7 +206,6 @@ export const CardVideo = memo(function CardVideo({
           zIndex={1}
         />
 
-        {/* Overlay central com Play no Hover */}
         <Box
           position="absolute"
           inset={0}
@@ -241,7 +237,6 @@ export const CardVideo = memo(function CardVideo({
           </Box>
         </Box>
 
-        {/* Topo Esquerdo: Checkbox de seleção + Badge da Plataforma */}
         <HStack position="absolute" top={2.5} left={2.5} zIndex={10} gap={1.5}>
           <IconButton
             size="xs"
@@ -290,7 +285,6 @@ export const CardVideo = memo(function CardVideo({
           )}
         </HStack>
 
-        {/* Topo Direito: Status da Mídia + Badge de Duplicado */}
         <VStack position="absolute" top={2.5} right={2.5} zIndex={10} align="flex-end" gap={1}>
           <Badge
             size="sm"
@@ -337,7 +331,6 @@ export const CardVideo = memo(function CardVideo({
           )}
         </VStack>
 
-        {/* Base da Thumbnail: Link Original e Duração do Vídeo */}
         {urlOriginal && (
           <Link
             href={urlOriginal}
@@ -386,9 +379,7 @@ export const CardVideo = memo(function CardVideo({
         )}
       </Box>
 
-      {/* 2. CORPO DO CARD */}
       <Card.Body display="flex" flex={1} flexDirection="column" p={4} gap={3}>
-        {/* Título com 2 linhas */}
         <Text
           as="h3"
           fontWeight="bold"
@@ -405,7 +396,6 @@ export const CardVideo = memo(function CardVideo({
           {titulo}
         </Text>
 
-        {/* Linha 1: Uploader + Extensão / Tamanho */}
         <Flex align="center" justify="space-between" gap={2} fontSize="xs" color="fg.subtle">
           <HStack gap={1.5} truncate flex={1}>
             <User size={13} style={{ flexShrink: 0 }} />
@@ -436,7 +426,6 @@ export const CardVideo = memo(function CardVideo({
           )}
         </Flex>
 
-        {/* Linha 2: Categoria + Data Relativa */}
         <Flex align="center" justify="space-between" gap={2} fontSize="11px" color="fg.subtle">
           <Box flexShrink={0}>
             {item.categoria?.nome ? (
@@ -488,7 +477,6 @@ export const CardVideo = memo(function CardVideo({
           </HStack>
         </Flex>
 
-        {/* Linha 3: Barra de Data & Agendamento (Sutil e Interativa) */}
         <Box
           w="full"
           px={3}
@@ -526,7 +514,6 @@ export const CardVideo = memo(function CardVideo({
           </HStack>
         </Box>
 
-        {/* Motivo do Erro (se houver) */}
         {item.status === 'erro' && item.erroMotivo && (
           <Box
             borderRadius="lg"
@@ -542,7 +529,6 @@ export const CardVideo = memo(function CardVideo({
           </Box>
         )}
 
-        {/* 3. RODAPÉ DO CARD: Hash, Status Google Fotos e Ações */}
         <Flex
           align="center"
           justify="space-between"
@@ -578,7 +564,6 @@ export const CardVideo = memo(function CardVideo({
           </HStack>
 
           <HStack gap={1} flexShrink={0}>
-            {/* Forçar Google Fotos se for duplicado ou não sincronizado */}
             {(ehDuplicado || !enviadoGoogleFotos) && onForcarGoogleFotos && (
               <IconButton
                 size="xs"
@@ -601,7 +586,6 @@ export const CardVideo = memo(function CardVideo({
               </IconButton>
             )}
 
-            {/* Download direto */}
             <IconButton
               size="xs"
               variant="ghost"
@@ -620,7 +604,6 @@ export const CardVideo = memo(function CardVideo({
               )}
             </IconButton>
 
-            {/* Editar metadados */}
             {onEditarMetadata && (
               <IconButton
                 size="xs"
@@ -634,7 +617,6 @@ export const CardVideo = memo(function CardVideo({
               </IconButton>
             )}
 
-            {/* Categorizar */}
             {onCategorizar && (
               <IconButton
                 size="xs"
@@ -648,7 +630,6 @@ export const CardVideo = memo(function CardVideo({
               </IconButton>
             )}
 
-            {/* Rebaixar */}
             {onRebaixar && (
               <IconButton
                 size="xs"
@@ -662,7 +643,6 @@ export const CardVideo = memo(function CardVideo({
               </IconButton>
             )}
 
-            {/* Retentar se erro */}
             {item.status === 'erro' && onRetentar && (
               <IconButton
                 size="xs"
@@ -678,7 +658,6 @@ export const CardVideo = memo(function CardVideo({
               </IconButton>
             )}
 
-            {/* Apagar */}
             {onApagar && (
               <IconButton
                 size="xs"

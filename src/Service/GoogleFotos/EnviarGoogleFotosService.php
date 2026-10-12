@@ -36,7 +36,6 @@ final readonly class EnviarGoogleFotosService
             throw MediaItemException::midiaNaoEncontradaPorUuid();
         }
 
-        // 1. VERIFICAÇÃO DE DUPLICIDADE: Se este item já foi enviado ao Google Fotos, nunca envia novamente (a menos que explicitamente forçado pelo usuário)
         if (!$forcarUpload && $mediaItem->isEnviadoGoogleFotos()) {
             $this->logger?->info('Mídia já possui upload no Google Fotos concluído, ignorando upload repetido.', [
                 'uuid' => $mediaItemUuid,
@@ -61,7 +60,6 @@ final readonly class EnviarGoogleFotosService
             throw CategoriaException::categoriaNaoEncontrada();
         }
 
-        // 2. VERIFICAÇÃO DE DUPLICIDADE ENTRE ITENS: Verifica se outro registro com mesmo hash/MD5/hashVisual já foi enviado
         if (!$forcarUpload) {
             $md5 = is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null)
                 ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5]
@@ -95,7 +93,6 @@ final readonly class EnviarGoogleFotosService
                     'googleMediaId' => $googleMediaId,
                 ]);
 
-                // Se pertencer a outra categoria com álbum diferente, associa ao álbum sem enviar os bytes novamente
                 try {
                     $conta = $this->contaRepository->buscarContaAtiva();
                     if (null !== $conta) {
@@ -125,7 +122,6 @@ final readonly class EnviarGoogleFotosService
 
         $caminhoLocal = $mediaItem->caminhoLocal();
         if (TextoUtil::estaEmBranco($caminhoLocal) || !file_exists((string) $caminhoLocal)) {
-            // Tenta localizar arquivo se for duplicado com caminho em outro item
             $outroItem = $this->mediaItemRepository->buscarDuplicado(
                 $mediaItem->hash(),
                 is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null) ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5] : null,

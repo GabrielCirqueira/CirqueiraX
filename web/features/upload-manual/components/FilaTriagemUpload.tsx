@@ -75,17 +75,14 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
   const [filtroCategoria, setFiltroCategoria] = useState<string>('')
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
 
-  // Filtragem local complementar para tipo e categoria
   const itensFiltrados = useMemo(() => {
     return itens.filter((item) => {
-      // Filtro de tipo
       if (filtroTipo !== 'todos') {
         const tipoInfo = identificarTipoMidia(item)
         if (filtroTipo === 'video' && !tipoInfo.isVideo) return false
         if (filtroTipo === 'imagem' && tipoInfo.isVideo) return false
       }
 
-      // Filtro de categoria selecionada no dropdown
       if (filtroCategoria) {
         if (filtroCategoria === 'sem_categoria' && item.categoriaId) return false
         if (filtroCategoria !== 'sem_categoria' && item.categoriaId !== filtroCategoria) return false
@@ -98,9 +95,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
   const todosSelecionados = itensFiltrados.length > 0 && selecionados.length === itensFiltrados.length
   const algunsSelecionados = selecionados.length > 0 && !todosSelecionados
 
-  // Atalhos de teclado para a triagem:
-  // - Ctrl + A: Selecionar todas as mídias da triagem
-  // - Teclas 1 a 9: Se houver mídias selecionadas, atribui a categoria correspondente instantaneamente!
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (
@@ -147,7 +141,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
 
   return (
     <VStack w="full" gap={5}>
-      {/* Barra de Ferramentas / Filtros Unificada */}
       <Flex
         w="full"
         direction={{ base: 'column', md: 'row' }}
@@ -161,7 +154,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         borderColor="border.subtle"
         shadow="none"
       >
-        {/* Abas de Status com Estilo Pílula */}
         <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto">
           {abasFiltro.map((aba) => (
             <Button
@@ -180,9 +172,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           ))}
         </HStack>
 
-        {/* Filtros de Categoria, Tipo, Busca e Alternador de Modo */}
         <HStack gap={2} flexWrap="wrap" justify={{ base: 'stretch', md: 'flex-end' }}>
-          {/* Filtro por Categoria */}
           <NativeSelect.Root size="sm" w={{ base: 'full', sm: '180px' }}>
             <NativeSelect.Field
               value={filtroCategoria}
@@ -204,7 +194,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             <NativeSelect.Indicator />
           </NativeSelect.Root>
 
-          {/* Filtro por Tipo de Mídia */}
           <NativeSelect.Root size="sm" w={{ base: 'full', sm: '130px' }}>
             <NativeSelect.Field
               value={filtroTipo}
@@ -222,7 +211,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             <NativeSelect.Indicator />
           </NativeSelect.Root>
 
-          {/* Campo de Busca com Botão de Limpeza */}
           <Box position="relative" w={{ base: 'full', sm: '220px' }}>
             <Box
               position="absolute"
@@ -264,7 +252,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             )}
           </Box>
 
-          {/* Alternador de Visualização: Grade / Tabela */}
           <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle">
             <IconButton
               size="xs"
@@ -296,7 +283,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         </HStack>
       </Flex>
 
-      {/* Barra de Ações Rápidas de Seleção */}
       {itensFiltrados.length > 0 && (
         <Flex w="full" justify="space-between" align="center" px={1}>
           <HStack gap={3}>
@@ -341,7 +327,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         </Flex>
       )}
 
-      {/* Estado Carregando (Skeleton) */}
       {carregando && itensFiltrados.length === 0 ? (
         <Grid
           w="full"
@@ -465,7 +450,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         />
       )}
 
-      {/* Modal de Prévia Ampliada */}
       <ModalVisualizarMidiaManual
         aberto={Boolean(itemVisualizar)}
         item={itemVisualizar}
@@ -475,7 +459,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         onForcarGoogleFotos={onForcarGoogleFotos}
       />
 
-      {/* Barra Flutuante de Ações em Lote */}
       {selecionados.length > 0 && (
         <Box
           position="fixed"
@@ -509,7 +492,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               </Text>
             </HStack>
 
-            {/* Botões Rápidos Diretos das Categorias */}
             <HStack gap={1.5} flexWrap="wrap" justify="center">
               <Text as="span" fontSize="11px" color="fg.subtle" fontWeight="medium" display={{ base: 'none', lg: 'inline' }}>
                 Atribuir:
@@ -578,7 +560,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         </Box>
       )}
 
-      {/* Modal de Escolha de Categoria em Lote */}
       <Dialog.Root
         open={modalCategorizarAberto}
         onOpenChange={(e) => !e.open && setModalCategorizarAberto(false)}

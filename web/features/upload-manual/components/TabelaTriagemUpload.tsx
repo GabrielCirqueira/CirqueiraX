@@ -125,7 +125,6 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                 _hover={{ bg: isSelected ? 'cirqueira.brand.500/10' : 'bg.muted' }}
                 transition="background-color 0.15s"
               >
-                {/* Checkbox */}
                 <Table.Cell textAlign="center">
                   <Button
                     size="xs"
@@ -141,7 +140,6 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                   </Button>
                 </Table.Cell>
 
-                {/* Miniatura com clique para prévia */}
                 <Table.Cell>
                   <Box
                     w={11}
@@ -189,7 +187,6 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                   </Box>
                 </Table.Cell>
 
-                {/* Nome e Hash */}
                 <Table.Cell>
                   <VStack align="start" gap={0.5} maxW="320px">
                     <Text
@@ -221,7 +218,6 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                   </VStack>
                 </Table.Cell>
 
-                {/* Tipo de Mídia */}
                 <Table.Cell>
                   <Badge
                     size="xs"
@@ -237,12 +233,10 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                   </Badge>
                 </Table.Cell>
 
-                {/* Tamanho */}
                 <Table.Cell fontSize="xs" color="fg.subtle">
                   {formatarTamanhoBytes(item.tamanhoBytes ?? 0)}
                 </Table.Cell>
 
-                {/* Seletor Inline de Categoria */}
                 <Table.Cell>
                   <NativeSelect.Root size="xs" w="44">
                     <NativeSelect.Field
@@ -265,13 +259,11 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                   </NativeSelect.Root>
                 </Table.Cell>
 
-                {/* Data e Hora */}
                 <Table.Cell fontSize="11px" color="fg.subtle">
                   <Text as="div">{dataFormatada}</Text>
                   <Text as="div" fontSize="10px" color="fg.muted">{horarioFormatado}</Text>
                 </Table.Cell>
 
-                {/* Ações */}
                 <Table.Cell textAlign="right">
                   <HStack gap={1} justify="flex-end">
                     {ehDuplicado && onForcarGoogleFotos && (

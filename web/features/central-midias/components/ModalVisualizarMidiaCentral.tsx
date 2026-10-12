@@ -154,7 +154,6 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
           maxW="1100px"
           overflow="hidden"
         >
-          {/* Cabeçalho */}
           <Dialog.Header p={4} pb={3} borderBottomWidth="1px" borderColor="border.subtle">
             <Flex justify="space-between" align="center" w="full" gap={3}>
               <HStack gap={2.5} minW={0} flex={1}>
@@ -195,10 +194,8 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
             </Flex>
           </Dialog.Header>
 
-          {/* Corpo com Mídia + Painel Lateral */}
           <Dialog.Body p={0}>
             <Flex direction={{ base: 'column', lg: 'row' }} minH="480px" maxH="80vh">
-              {/* Visualizador de Mídia */}
               <Box
                 flex={1}
                 bg="cirqueira.grey.950"
@@ -236,7 +233,6 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                 )}
               </Box>
 
-              {/* Painel de Metadados e Ações */}
               <Box
                 w={{ base: 'full', lg: '340px' }}
                 p={5}
@@ -247,7 +243,6 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                 overflowY="auto"
               >
                 <VStack align="stretch" gap={4}>
-                  {/* Seletor de Categoria Inline */}
                   <VStack align="start" gap={1.5}>
                     <Text fontSize="xs" fontWeight="bold" color="fg.subtle">
                       Categoria Atribuída
@@ -278,7 +273,6 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                     </HStack>
                   </VStack>
 
-                  {/* Detalhes da Mídia */}
                   <VStack align="start" gap={2.5} pt={2} borderTopWidth="1px" borderColor="border.subtle">
                     <Text fontSize="xs" fontWeight="bold" color="fg.subtle">
                       Informações
@@ -327,7 +321,6 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                     </HStack>
                   </VStack>
 
-                  {/* Botões de Ação */}
                   <VStack align="stretch" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
                     {!isVideo && (
                       <Button

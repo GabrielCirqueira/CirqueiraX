@@ -225,7 +225,6 @@ export const GraficosDashboard = memo(function GraficosDashboard({
   return (
     <VStack gap={5} w="full" align="stretch">
       <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={5}>
-        {/* GRÁFICO 1: DISTRIBUIÇÃO POR ORIGEM (DONUT) */}
         <Card.Root
           borderWidth="1px"
           borderColor="border.subtle"
@@ -320,7 +319,6 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                   </PieChart>
                 </ResponsiveContainer>
 
-                {/* Centro do Donut com Total */}
                 <Box
                   position="absolute"
                   top="50%"
@@ -338,7 +336,6 @@ export const GraficosDashboard = memo(function GraficosDashboard({
                 </Box>
               </Box>
 
-              {/* Legenda Customizada com contagens e % */}
               <VStack gap={2.5} align="stretch" pr={2}>
                 {dadosOrigem.map((item) => {
                   const Icone = item.icon
@@ -393,7 +390,6 @@ export const GraficosDashboard = memo(function GraficosDashboard({
           )}
         </Card.Root>
 
-        {/* GRÁFICO 2: ARMAZENAMENTO POR CATEGORIA (BAR CHART FIXADO) */}
         <Card.Root
           borderWidth="1px"
           borderColor="border.subtle"
@@ -513,7 +509,6 @@ export const GraficosDashboard = memo(function GraficosDashboard({
         </Card.Root>
       </Grid>
 
-      {/* DETALHAMENTO DE USO DE DISCO POR CATEGORIA */}
       {temDadosCategorias && (
         <Card.Root
           borderWidth="1px"

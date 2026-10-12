@@ -65,7 +65,6 @@ export function useUploadManual() {
     setFila((prev) => prev.map((item) => (item.id === id ? { ...item, categoriaId } : item)))
   }, [])
 
-  // Atalho: Aplicar categoria a todos os itens da fila (ou apenas aos pendentes)
   const aplicarCategoriaParaTodos = useCallback((categoriaId: string | null) => {
     setFila((prev) =>
       prev.map((item) =>
@@ -76,7 +75,6 @@ export function useUploadManual() {
     )
   }, [])
 
-  // Atalho: Aplicar categoria para itens selecionados na fila
   const aplicarCategoriaParaSelecionados = useCallback(
     (ids: string[], categoriaId: string | null) => {
       setFila((prev) =>
@@ -86,7 +84,6 @@ export function useUploadManual() {
     []
   )
 
-  // Atalho: Aplicar categoria apenas aos itens que estão sem categoria
   const aplicarCategoriaParaSemCategoria = useCallback((categoriaId: string) => {
     setFila((prev) =>
       prev.map((item) =>
@@ -113,7 +110,6 @@ export function useUploadManual() {
     })
   }, [])
 
-  // Envio individual interno
   const enviarItemInterno = async (
     item: ArquivoFilaUpload,
     isLote = false
@@ -192,7 +188,6 @@ export function useUploadManual() {
     }
   }
 
-  // Envio em lote com feedback consolidado anti-duplicação
   const enviarTodosPendentes = useCallback(async () => {
     const pendentes = fila.filter((f) => f.status === 'pendente' || f.status === 'erro')
     if (pendentes.length === 0) {
@@ -214,7 +209,6 @@ export function useUploadManual() {
 
     setEstaProcessando(false)
 
-    // Notificação consolidada com transparência sobre duplicatas
     if (duplicadosCount > 0 && novosCount > 0) {
       addToast({
         title: `Upload concluído: ${novosCount} novo(s) arquivo(s) enviado(s). ${duplicadosCount} arquivo(s) já existiam no sistema e foram preservados sem duplicar!`,
@@ -271,7 +265,6 @@ export function useUploadManual() {
           categoriaId
         )
 
-        // Atualiza item na fila de upload
         setFila((prev) =>
           prev.map((f) =>
             f.mediaItem?.uuid === itemDuplicadoPendente.mediaItem.uuid ||

@@ -19,7 +19,6 @@ final class Version20261011211214 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // 1. Criar categoria única Prints (prints/) se não existir
         $this->addSql(<<<'SQL'
             INSERT INTO categoria (uuid, nome, pasta_local, criado_em, atualizado_em)
             SELECT UNHEX(REPLACE(UUID(), '-', '')), 'Prints', 'prints', NOW(), NOW()
@@ -27,7 +26,6 @@ final class Version20261011211214 extends AbstractMigration
             WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'Prints')
         SQL);
 
-        // 2. Criar categoria One Piece (videos/onepiece) se não existir
         $this->addSql(<<<'SQL'
             INSERT INTO categoria (uuid, nome, pasta_local, criado_em, atualizado_em)
             SELECT UNHEX(REPLACE(UUID(), '-', '')), 'One Piece', 'videos/onepiece', NOW(), NOW()
@@ -35,14 +33,12 @@ final class Version20261011211214 extends AbstractMigration
             WHERE NOT EXISTS (SELECT 1 FROM categoria WHERE nome = 'One Piece')
         SQL);
 
-        // 3. Normalizar pasta local de videos/memes para videos/memes
         $this->addSql(<<<'SQL'
             UPDATE categoria
             SET pasta_local = 'videos/memes'
             WHERE nome = 'videos/memes'
         SQL);
 
-        // 4. Migrar media_item antigos vinculados a Print Empresa ou Print Pessoal para a nova Prints
         $this->addSql(<<<'SQL'
             UPDATE media_item m
             JOIN (
@@ -71,7 +67,6 @@ final class Version20261011211214 extends AbstractMigration
             SET m.categoria_id = new_cat.new_uuid_str
         SQL);
 
-        // 5. Apontar regras de origem print_empresa e print_pessoal para a categoria Prints
         $this->addSql(<<<'SQL'
             UPDATE origem_regra o
             CROSS JOIN (
@@ -118,12 +113,10 @@ final class Version20261011211214 extends AbstractMigration
             AND NOT EXISTS (SELECT 1 FROM origem_regra WHERE origem = 'print_pessoal')
         SQL);
 
-        // 6. Remover categorias duplicadas antigas
         $this->addSql(<<<'SQL'
             DELETE FROM categoria WHERE nome IN ('Print Empresa', 'Print Pessoal')
         SQL);
 
-        // 7. Atualizar caminho_local dos itens existentes no banco
         $this->addSql(<<<'SQL'
             UPDATE media_item
             SET caminho_local = REPLACE(caminho_local, '/prints/pessoal/', '/prints/')

@@ -244,7 +244,6 @@ final class MediaItemController extends DefaultController
         $caminhoFisico = $arquivoMidia->caminhoFisico();
         $mimeType = $arquivoMidia->mimeType();
 
-        // Se já for imagem, retorna direto
         if (str_starts_with($mimeType, 'image/')) {
             $response = new BinaryFileResponse($caminhoFisico);
             $response->setAutoEtag();
@@ -257,7 +256,6 @@ final class MediaItemController extends DefaultController
             return $response;
         }
 
-        // Se for vídeo, gera ou serve cache de thumbnail via ffmpeg
         if (str_starts_with($mimeType, 'video/')) {
             $cacheDir = $this->getParameter('kernel.project_dir') . '/var/cache/thumbnails';
             if (!is_dir($cacheDir)) {

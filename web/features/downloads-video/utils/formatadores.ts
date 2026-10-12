@@ -19,14 +19,11 @@ export function formatarDataMidia(valorData?: string, fallbackIso?: string): str
     return `${dia}/${mes}/${ano}`
   }
 
-  // Se for apenas data YYYY-MM-DD pura sem hora
   if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
     const [ano, mes, dia] = str.split('-')
     return `${dia}/${mes}/${ano}`
   }
 
-  // Se tiver indicação de data/hora ISO ou fuso horário (ex: contém T, Z ou offset)
-  // Converte respeitando o fuso local do navegador do usuário
   if (str.includes('T') || str.includes('Z') || /[+-]\d{2}:\d{2}$/.test(str)) {
     try {
       const parsed = new Date(str)

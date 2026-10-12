@@ -31,7 +31,6 @@ export function extrairDataHoraInicial(item: MediaItem | null): DataHoraExtraida
     return { data: `${ano}-${mes}-${dia}`, hora: '12:00' }
   }
 
-  // Se for ISO completo com fuso horário (ex: 2026-10-12T02:08:00Z ou offset), converte para o horário civil local
   if (str.includes('T') || str.includes('Z') || /[+-]\d{2}:\d{2}$/.test(str)) {
     const parsed = new Date(str)
     if (!Number.isNaN(parsed.getTime())) {

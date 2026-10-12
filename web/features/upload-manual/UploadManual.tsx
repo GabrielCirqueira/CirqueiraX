@@ -89,7 +89,6 @@ const UploadManual = memo(function UploadManual() {
 
   const itensMedia = useMemo(() => respostaMedia?.data ?? [], [respostaMedia])
 
-  // Métricas dinâmicas da triagem
   const totalTriagem = itensMedia.length
   const semCategoriaCount = useMemo(
     () => itensMedia.filter((i) => !i.categoriaId).length,
@@ -104,7 +103,6 @@ const UploadManual = memo(function UploadManual() {
     [itensMedia]
   )
 
-  // Listener Global de Paste (Ctrl+V) para capturas de tela e arquivos
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       if (
@@ -230,7 +228,6 @@ const UploadManual = memo(function UploadManual() {
     <AppContainer maxWidth="full" paddingX="0" paddingY="0">
       <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
         <VStack w="full" gap={6} alignItems="stretch">
-          {/* Top Bar: Navegação, Status do Pipeline e Atualizar */}
           <Flex
             direction={{ base: 'column', sm: 'row' }}
             justify="space-between"
@@ -340,7 +337,6 @@ const UploadManual = memo(function UploadManual() {
             </HStack>
           </Flex>
 
-          {/* Área de Dropzone de Alta Estética */}
           <DropzoneUpload
             fila={fila}
             estaProcessando={estaProcessando}
@@ -359,7 +355,6 @@ const UploadManual = memo(function UploadManual() {
             onAbrirConfirmacaoDuplicado={abrirConfirmacaoDuplicado}
           />
 
-          {/* Seção de Triagem de Mídias Recebidas */}
           <VStack gap={4} pt={2} alignItems="stretch">
             <HStack justify="space-between" align="center" flexWrap="wrap">
               <HStack gap={2}>
@@ -381,7 +376,6 @@ const UploadManual = memo(function UploadManual() {
               )}
             </HStack>
 
-            {/* Painel de Atalhos Rápidos para Mídias Sem Categoria da Triagem */}
             {semCategoriaCount > 0 && (
               <Box
                 p={3}
@@ -483,7 +477,6 @@ const UploadManual = memo(function UploadManual() {
           </VStack>
         </VStack>
 
-        {/* Modal de Confirmação de Envio de Duplicado */}
         <ModalConfirmarSincronizacaoDuplicado
           aberto={Boolean(itemDuplicadoPendente)}
           item={itemDuplicadoPendente}
@@ -496,7 +489,6 @@ const UploadManual = memo(function UploadManual() {
           }}
         />
 
-        {/* Modal de Confirmação de Exclusão */}
         <Dialog.Root
           open={modalConfirmarApagar}
           onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}

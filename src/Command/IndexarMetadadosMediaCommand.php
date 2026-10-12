@@ -45,7 +45,6 @@ final class IndexarMetadadosMediaCommand extends Command
             $metadataAtual = $item->metadata();
             $modificado = false;
 
-            // 1. Extração de metadados se o arquivo físico existir
             if (null !== $caminhoLocal && '' !== $caminhoLocal && file_exists($caminhoLocal)) {
                 $comArquivoLocal++;
                 $novaMetadata = $this->extratorMetadataService->extrair($caminhoLocal, $metadataAtual);
@@ -57,7 +56,6 @@ final class IndexarMetadadosMediaCommand extends Command
                 }
             }
 
-            // 2. Registro do Google Photos ID nos metadados caso já tenha sido enviado
             if ($item->isEnviadoGoogleFotos()) {
                 $comGoogleFotos++;
                 if (!isset($metadataAtual[MetadataKeys::GOOGLE_PHOTOS_ID])) {
@@ -66,7 +64,6 @@ final class IndexarMetadadosMediaCommand extends Command
                 }
             }
 
-            // 3. Garante que hash_sha256 esteja preenchido nos metadados
             if (!isset($metadataAtual[MetadataKeys::HASH_SHA256])) {
                 $item->adicionarMetadata(MetadataKeys::HASH_SHA256, $item->hash());
                 $modificado = true;
