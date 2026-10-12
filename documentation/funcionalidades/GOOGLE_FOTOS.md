@@ -90,3 +90,23 @@ A tela de Google Fotos oferece gestão completa da integração:
    - Categoria do CirqueiraX vinculada (ex: `Prints`, `videos/memes`, etc.).
 3. **Criação de Novos Álbuns**: Permite criar um álbum novo diretamente pelo CirqueiraX, registrando-o instantaneamente no Google Fotos.
 4. **Vinculação Manual**: Permite associar qualquer categoria local a um álbum remoto existente.
+
+---
+
+## 5. Prevenção de Duplicatas e Deduplicação Inteligente
+
+Para evitar consumo desnecessário de cota da API do Google Fotos e acúmulo de arquivos repetidos na nuvem e no disco, o CirqueiraX conta com uma camada robusta de **deduplicação baseada em metadados**:
+
+1. **Extração e Persistência de Metadados (`ExtratorMetadataService`)**:
+   - Cada arquivo ingerido tem seus metadados extraídos automaticamente: `hash_sha256`, `hash_md5`, `tamanho_bytes`, `mime_type`, `dimensoes` (para imagens), `data_criacao_arquivo` e `fingerprint` (`<tamanho>:<md5>`).
+2. **Identificação Prévia de Duplicatas**:
+   - Quando um arquivo é enviado novamente (via Upload Manual, download de vídeo com a mesma URL/conteúdo ou prints do celular), o sistema cruza os hashes e fingerprints com o banco de dados.
+   - O item existente é identificado, e o arquivo temporário duplicado é descartado do disco para não ocupar espaço redundante.
+3. **Bloqueio de Upload Repetido no Google Fotos (`EnviarGoogleFotosService`)**:
+   - **Guarda de Idempotência**: Se o item já tiver um `googlePhotosMediaId` ou metadado `google_photos_id`, o serviço aborta imediatamente sem reenviar bytes.
+   - **Reaproveitamento de IDs entre Registros**: Se um arquivo tiver conteúdo idêntico a outro já enviado anteriormente ao Google Fotos, o `googlePhotosMediaId` é reutilizado. Caso a mídia pertença a outra categoria/álbum, ela é apenas associada ao novo álbum via API, **sem fazer upload repetido dos bytes**.
+4. **Comando de Indexação de Metadados**:
+   - Para reindexar ou preencher metadados de itens históricos já existentes no banco de dados:
+     ```bash
+     docker exec -it cirqueirax_symfony php bin/console app:media:indexar-metadados
+     ```

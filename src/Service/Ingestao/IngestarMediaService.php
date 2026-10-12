@@ -9,6 +9,8 @@ use App\Entity\MediaItem;
 use App\Interface\ArmazenamentoInterface;
 use App\Message\ClassificarMediaMessage;
 use App\Repository\MediaItemRepository;
+use App\Service\MediaItem\ExtratorMetadataService;
+use App\Support\MetadataKeys;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class IngestarMediaService
@@ -16,25 +18,44 @@ final readonly class IngestarMediaService
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
         private ArmazenamentoInterface $armazenamentoClient,
+        private ExtratorMetadataService $extratorMetadataService,
         private MessageBusInterface $messageBus,
     ) {}
 
     public function executar(IngestarMediaDTO $dto): MediaItem
     {
-        $hash = $dto->hash() ?? $this->armazenamentoClient->calcularHash($dto->caminhoArquivo());
+        $caminhoArquivo = $dto->caminhoArquivo();
+        $hash = $dto->hash() ?? $this->armazenamentoClient->calcularHash($caminhoArquivo);
 
-        $mediaItem = $this->mediaItemRepository->buscarPorHash($hash);
-        if (null !== $mediaItem) {
-            return $mediaItem;
+        // Extrai metadados completos do arquivo (SHA-256, MD5, tamanho exato, mime type, dimensões, fingerprint)
+        $metadataEnriquecida = $this->extratorMetadataService->extrair($caminhoArquivo, $dto->metadata());
+        $md5 = $metadataEnriquecida[MetadataKeys::HASH_MD5] ?? null;
+        $tamanho = $metadataEnriquecida[MetadataKeys::TAMANHO_BYTES] ?? null;
+        $urlOriginal = $metadataEnriquecida[MetadataKeys::URL_ORIGINAL] ?? null;
+
+        // Busca duplicado por SHA-256, MD5 ou URL Original
+        $existente = $this->mediaItemRepository->buscarDuplicado(
+            $hash,
+            is_string($md5) ? $md5 : null,
+            is_int($tamanho) ? $tamanho : null,
+            is_string($urlOriginal) ? $urlOriginal : null
+        );
+
+        if (null !== $existente) {
+            // Registra tentativa duplicada e mescla metadados de integridade se ausentes
+            $tentativas = ((int) ($existente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
+            $existente->adicionarMetadata(MetadataKeys::TENTATIVAS_DUPLICADAS, $tentativas);
+            $existente->adicionarMetadata(MetadataKeys::DATA_DETECCAO_DUPLICADO, (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM));
+
+            $existente->mesclarMetadata($metadataEnriquecida);
+            $this->mediaItemRepository->salvar($existente);
+
+            // Não redespacha mensagens para evitar reclassificação ou upload repetido no Google Fotos!
+            return $existente;
         }
 
         $mediaItem = MediaItem::fromIngestaoDTO($dto, $hash);
-
-        $metadata = $mediaItem->metadata();
-        if (!isset($metadata['tamanho_bytes']) && file_exists($dto->caminhoArquivo())) {
-            $metadata['tamanho_bytes'] = (int) @filesize($dto->caminhoArquivo());
-            $mediaItem->setMetadata($metadata);
-        }
+        $mediaItem->setMetadata($metadataEnriquecida);
 
         $this->mediaItemRepository->salvar($mediaItem);
 

@@ -65,12 +65,20 @@ final readonly class IngestarPrintService
 
         $metadata = array_merge($dto->metadata(), $metadataExtra);
 
+        $caminhoTemp = $arquivoMovido->getPathname();
+
         $ingestarMediaDTO = new IngestarMediaDTO(
-            caminhoArquivo: $arquivoMovido->getPathname(),
+            caminhoArquivo: $caminhoTemp,
             origem: $origemMedia,
             metadata: $metadata,
         );
 
-        return $this->ingestarMediaService->executar($ingestarMediaDTO);
+        $mediaItem = $this->ingestarMediaService->executar($ingestarMediaDTO);
+
+        if (null !== $mediaItem->caminhoLocal() && $mediaItem->caminhoLocal() !== $caminhoTemp && file_exists($caminhoTemp)) {
+            $this->armazenamentoLocalClient->remover($caminhoTemp);
+        }
+
+        return $mediaItem;
     }
 }

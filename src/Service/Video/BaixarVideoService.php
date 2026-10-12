@@ -9,8 +9,11 @@ use App\DataObject\IngestarMediaDTO;
 use App\Entity\MediaItem;
 use App\Enum\OrigemMedia;
 use App\Exception\Video\YtDlpException;
+use App\Interface\ArmazenamentoInterface;
+use App\Repository\MediaItemRepository;
 use App\Service\Ingestao\IngestarMediaService;
 use App\Service\MediaItem\ClassificarMediaItemService;
+use App\Support\MetadataKeys;
 use App\Support\TextoUtil;
 
 final readonly class BaixarVideoService
@@ -20,12 +23,36 @@ final readonly class BaixarVideoService
         private IngestarMediaService $ingestarMediaService,
         private BaixarVideoDownloadService $baixarVideoDownloadService,
         private ClassificarMediaItemService $classificarMediaItemService,
+        private MediaItemRepository $mediaItemRepository,
+        private ArmazenamentoInterface $armazenamentoClient,
     ) {}
 
     public function executar(string $url, ?OrigemMedia $origem = null, ?string $categoriaId = null): MediaItem
     {
         if (!$this->validadorUrl->ehUrlSuportada($url)) {
             throw YtDlpException::urlInvalidaOuNaoSuportada($url);
+        }
+
+        // 1. Verificação prévia: se a URL já foi baixada anteriormente
+        $itemExistente = $this->mediaItemRepository->buscarPorUrlOriginal($url);
+        if (null !== $itemExistente) {
+            $tentativas = ((int) ($itemExistente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
+            $itemExistente->adicionarMetadata(MetadataKeys::TENTATIVAS_DUPLICADAS, $tentativas);
+            $itemExistente->adicionarMetadata(MetadataKeys::DATA_DETECCAO_DUPLICADO, (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM));
+
+            if (null !== $categoriaId && TextoUtil::naoEstaEmBranco($categoriaId) && $itemExistente->categoriaId() !== $categoriaId) {
+                $uuid = $itemExistente->uuid()?->toString();
+                if (null !== $uuid && '' !== $uuid) {
+                    $itemExistente = $this->classificarMediaItemService->classificarManualmente(
+                        $uuid,
+                        new ClassificarManualDTO($categoriaId)
+                    );
+                }
+            }
+
+            $this->mediaItemRepository->salvar($itemExistente);
+
+            return $itemExistente;
         }
 
         $metadataExtraida = $this->baixarVideoDownloadService->extrairMetadata($url);
@@ -38,6 +65,11 @@ final readonly class BaixarVideoService
         );
 
         $mediaItem = $this->ingestarMediaService->executar($dto);
+
+        // Se o arquivo baixado era duplicado de outro item com mesmo hash, remove o arquivo temporário
+        if (null !== $mediaItem->caminhoLocal() && $mediaItem->caminhoLocal() !== $caminhoLocal && file_exists($caminhoLocal)) {
+            $this->armazenamentoClient->remover($caminhoLocal);
+        }
 
         if (null !== $categoriaId && TextoUtil::naoEstaEmBranco($categoriaId)) {
             $uuid = $mediaItem->uuid()?->toString();

@@ -343,6 +343,51 @@ class MediaItem
         return $this;
     }
 
+    public function adicionarMetadata(string $chave, mixed $valor): self
+    {
+        $this->metadata[$chave] = $valor;
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    /**
+     * @param array<string, mixed> $novosMetadados
+     */
+    public function mesclarMetadata(array $novosMetadados): self
+    {
+        $this->metadata = array_merge($this->metadata, $novosMetadados);
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function isEnviadoGoogleFotos(): bool
+    {
+        return null !== $this->googlePhotosMediaId && '' !== trim($this->googlePhotosMediaId);
+    }
+
+    public function isDuplicado(): bool
+    {
+        return (bool) ($this->metadata[MetadataKeys::DUPLICADO] ?? false);
+    }
+
+    public function marcarComoDuplicado(self $original): self
+    {
+        $this->metadata[MetadataKeys::DUPLICADO] = true;
+        $this->metadata[MetadataKeys::DUPLICADO_DE_UUID] = $original->uuid()?->toString();
+        $this->metadata[MetadataKeys::DATA_DETECCAO_DUPLICADO] = (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
+
+        if ($original->isEnviadoGoogleFotos() && !$this->isEnviadoGoogleFotos()) {
+            $this->googlePhotosMediaId = $original->googleFotosId();
+            $this->metadata[MetadataKeys::GOOGLE_PHOTOS_ID] = $original->googleFotosId();
+        }
+
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
+    }
+
     public function erroMotivo(): ?string
     {
         return $this->erroMotivo;

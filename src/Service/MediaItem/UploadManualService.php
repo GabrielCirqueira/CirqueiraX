@@ -29,6 +29,7 @@ final readonly class UploadManualService
         private IngestarMediaService $ingestarMediaService,
         private ClassificarMediaItemService $classificarMediaItemService,
         private ArmazenamentoInterface $armazenamentoClient,
+        private ExtratorMetadataService $extratorMetadataService,
     ) {}
 
     public function executar(UploadManualDTO $dto): ResultadoUploadDTO
@@ -58,9 +59,23 @@ final readonly class UploadManualService
             throw UploadManualException::falhaAoCalcularHashDoArquivo();
         }
 
-        $existente = $this->mediaItemRepository->buscarPorHash($hash);
+        $metadataExtraida = $this->extratorMetadataService->extrair($caminhoArquivo, $dto->metadata());
+        $md5 = $metadataExtraida[MetadataKeys::HASH_MD5] ?? null;
+
+        $existente = $this->mediaItemRepository->buscarDuplicado(
+            $hash,
+            is_string($md5) ? $md5 : null,
+            (int) @filesize($caminhoArquivo)
+        );
+
         if (null !== $existente) {
             $this->armazenamentoClient->remover($caminhoArquivo);
+
+            $tentativas = ((int) ($existente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
+            $existente->adicionarMetadata(MetadataKeys::TENTATIVAS_DUPLICADAS, $tentativas);
+            $existente->adicionarMetadata(MetadataKeys::DATA_DETECCAO_DUPLICADO, (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM));
+            $existente->mesclarMetadata($metadataExtraida);
+            $this->mediaItemRepository->salvar($existente);
 
             return new ResultadoUploadDTO(
                 mediaItem: $existente,

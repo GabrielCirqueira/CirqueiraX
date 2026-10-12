@@ -56,6 +56,91 @@ class MediaItemRepository extends ServiceEntityRepository
         return $this->find($uuid);
     }
 
+    public function buscarDuplicado(
+        string $hash,
+        ?string $md5 = null,
+        ?int $tamanhoBytes = null,
+        ?string $urlOriginal = null,
+    ): ?MediaItem {
+        $porHash = $this->buscarPorHash($hash);
+        if (null !== $porHash) {
+            return $porHash;
+        }
+
+        if (null !== $md5 && '' !== trim($md5)) {
+            $porMd5 = $this->buscarPorMd5($md5);
+            if (null !== $porMd5) {
+                return $porMd5;
+            }
+        }
+
+        if (null !== $urlOriginal && '' !== trim($urlOriginal)) {
+            $porUrl = $this->buscarPorUrlOriginal($urlOriginal);
+            if (null !== $porUrl) {
+                return $porUrl;
+            }
+        }
+
+        return null;
+    }
+
+    public function buscarPorMd5(string $md5): ?MediaItem
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.metadata LIKE :md5')
+            ->setParameter('md5', '%' . $md5 . '%')
+            ->setMaxResults(1);
+
+        /** @var MediaItem|null $item */
+        $item = $qb->getQuery()->getOneOrNullResult();
+
+        return $item;
+    }
+
+    public function buscarPorUrlOriginal(string $urlOriginal): ?MediaItem
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.metadata LIKE :url')
+            ->setParameter('url', '%' . $urlOriginal . '%')
+            ->setMaxResults(1);
+
+        /** @var MediaItem|null $item */
+        $item = $qb->getQuery()->getOneOrNullResult();
+
+        return $item;
+    }
+
+    public function buscarOutroItemComGoogleFotos(
+        string $hash,
+        ?Uuid $ignorarUuid = null,
+        ?string $md5 = null,
+    ): ?MediaItem {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.googlePhotosMediaId IS NOT NULL')
+            ->andWhere("m.googlePhotosMediaId != ''");
+
+        if (null !== $md5 && '' !== trim($md5)) {
+            $qb->andWhere('(m.hash = :hash OR m.metadata LIKE :md5)')
+                ->setParameter('hash', $hash)
+                ->setParameter('md5', '%' . $md5 . '%');
+        } else {
+            $qb->andWhere('m.hash = :hash')
+                ->setParameter('hash', $hash);
+        }
+
+        if (null !== $ignorarUuid) {
+            $qb->andWhere('m.uuid != :ignorarUuid')
+                ->setParameter('ignorarUuid', $ignorarUuid->toBinary());
+        }
+
+        $qb->setMaxResults(1);
+
+        /** @var MediaItem|null $item */
+        $item = $qb->getQuery()->getOneOrNullResult();
+
+        return $item;
+    }
+
     /**
      * @return list<MediaItem>
      */
