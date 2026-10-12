@@ -120,6 +120,12 @@ export function obterUrlStreamMediaItem(uuid: string): string {
   return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl
 }
 
+export function obterUrlThumbnailMediaItem(uuid: string): string {
+  const token = localStorage.getItem('token') || ''
+  const baseUrl = `/api/v1/media-itens/${uuid}/thumbnail`
+  return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl
+}
+
 export async function baixarArquivoMidia(
   uuid: string,
   nomeArquivo?: string,

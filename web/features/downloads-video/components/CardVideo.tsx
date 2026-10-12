@@ -38,7 +38,7 @@ import {
   Youtube,
 } from 'lucide-react'
 import { memo, useState } from 'react'
-import { baixarArquivoMidia, obterUrlStreamMediaItem } from '../api'
+import { baixarArquivoMidia, obterUrlStreamMediaItem, obterUrlThumbnailMediaItem } from '../api'
 import type { MediaItem } from '../types'
 import {
   extrairExtensaoMedia,
@@ -99,7 +99,7 @@ export const CardVideo = memo(function CardVideo({
   const urlThumbnail =
     item.thumbnailUrl ||
     (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined) ||
-    (ehImagem ? obterUrlStreamMediaItem(item.uuid) : undefined)
+    (ehImagem ? obterUrlStreamMediaItem(item.uuid) : obterUrlThumbnailMediaItem(item.uuid))
   const temThumbnail = Boolean(urlThumbnail) && !erroImagem
   const urlOriginal =
     typeof item.metadata?.url_original === 'string' ? item.metadata.url_original : undefined
@@ -159,6 +159,7 @@ export const CardVideo = memo(function CardVideo({
           <img
             src={urlThumbnail}
             alt={titulo}
+            referrerPolicy="no-referrer"
             onError={() => setErroImagem(true)}
             style={{
               width: '100%',

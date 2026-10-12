@@ -27,6 +27,7 @@ use App\Service\MediaItem\RebaixarMediaItemService;
 use App\Service\MediaItem\RetentarMediaItemService;
 use App\Service\MediaItem\UploadManualService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -248,52 +249,81 @@ final class MediaItemController extends DefaultController
     #[Route('/{uuid}/thumbnail', name: 'thumbnail', methods: ['GET'])]
     public function thumbnail(string $uuid): Response
     {
-        $arquivoMidia = $this->obterArquivoMidiaService->obterParaStream($uuid);
-        $caminhoFisico = $arquivoMidia->caminhoFisico();
-        $mimeType = $arquivoMidia->mimeType();
+        $cacheDir = $this->getParameter('kernel.project_dir') . '/var/cache/thumbnails';
+        $cacheArquivo = sprintf('%s/%s.jpg', $cacheDir, $uuid);
 
-        if (str_starts_with($mimeType, 'image/')) {
-            $response = new BinaryFileResponse($caminhoFisico);
+        if (file_exists($cacheArquivo) && filesize($cacheArquivo) > 0) {
+            $response = new BinaryFileResponse($cacheArquivo);
             $response->setAutoEtag();
-            $response->headers->set('Content-Type', $mimeType);
+            $response->headers->set('Content-Type', 'image/jpeg');
             $response->headers->set('Cache-Control', 'public, max-age=86400');
             $response->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_INLINE,
-                $arquivoMidia->nomeArquivo(),
+                $uuid . '.jpg',
             );
             return $response;
         }
 
-        if (str_starts_with($mimeType, 'video/')) {
-            $cacheDir = $this->getParameter('kernel.project_dir') . '/var/cache/thumbnails';
-            if (!is_dir($cacheDir)) {
-                @mkdir($cacheDir, 0777, true);
+        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+        if (null === $mediaItem) {
+            return new Response(null, Response::HTTP_NOT_FOUND);
+        }
+
+        if (null !== $mediaItem->thumbnailUrl() && '' !== $mediaItem->thumbnailUrl()) {
+            return new RedirectResponse($mediaItem->thumbnailUrl());
+        }
+
+        $metaThumb = $mediaItem->metadata()['thumbnail'] ?? null;
+        if (is_string($metaThumb) && '' !== $metaThumb) {
+            return new RedirectResponse($metaThumb);
+        }
+
+        try {
+            $arquivoMidia = $this->obterArquivoMidiaService->obterParaStream($uuid);
+            $caminhoFisico = $arquivoMidia->caminhoFisico();
+            $mimeType = $arquivoMidia->mimeType();
+
+            if (str_starts_with($mimeType, 'image/')) {
+                $response = new BinaryFileResponse($caminhoFisico);
+                $response->setAutoEtag();
+                $response->headers->set('Content-Type', $mimeType);
+                $response->headers->set('Cache-Control', 'public, max-age=86400');
+                $response->setContentDisposition(
+                    ResponseHeaderBag::DISPOSITION_INLINE,
+                    $arquivoMidia->nomeArquivo(),
+                );
+                return $response;
             }
 
-            $cacheArquivo = sprintf('%s/%s.jpg', $cacheDir, $uuid);
-            if (!file_exists($cacheArquivo) || filesize($cacheArquivo) === 0) {
+            if (str_starts_with($mimeType, 'video/')) {
+                if (!is_dir($cacheDir)) {
+                    @mkdir($cacheDir, 0777, true);
+                }
+
                 $cmd = sprintf('ffmpeg -y -ss 00:00:01 -i %s -vframes 1 -q:v 2 %s 2>/dev/null', escapeshellarg($caminhoFisico), escapeshellarg($cacheArquivo));
                 @exec($cmd, $output, $ret);
                 if (0 !== $ret || !file_exists($cacheArquivo) || filesize($cacheArquivo) === 0) {
                     $cmd = sprintf('ffmpeg -y -ss 00:00:00 -i %s -vframes 1 -q:v 2 %s 2>/dev/null', escapeshellarg($caminhoFisico), escapeshellarg($cacheArquivo));
                     @exec($cmd);
                 }
-            }
 
-            if (file_exists($cacheArquivo) && filesize($cacheArquivo) > 0) {
-                $response = new BinaryFileResponse($cacheArquivo);
-                $response->setAutoEtag();
-                $response->headers->set('Content-Type', 'image/jpeg');
-                $response->headers->set('Cache-Control', 'public, max-age=86400');
-                $response->setContentDisposition(
-                    ResponseHeaderBag::DISPOSITION_INLINE,
-                    $uuid . '.jpg',
-                );
-                return $response;
+                if (file_exists($cacheArquivo) && filesize($cacheArquivo) > 0) {
+                    $response = new BinaryFileResponse($cacheArquivo);
+                    $response->setAutoEtag();
+                    $response->headers->set('Content-Type', 'image/jpeg');
+                    $response->headers->set('Cache-Control', 'public, max-age=86400');
+                    $response->setContentDisposition(
+                        ResponseHeaderBag::DISPOSITION_INLINE,
+                        $uuid . '.jpg',
+                    );
+                    return $response;
+                }
             }
+        } catch (\Throwable) {
+            // Se o arquivo físico não estiver disponível no disco, prossegue com 404
         }
 
-        return $this->streamArquivo($uuid);
+        return new Response(null, Response::HTTP_NOT_FOUND);
     }
 
     #[Route('/{uuid}/download', name: 'download_arquivo', methods: ['GET'])]

@@ -179,6 +179,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           <img
             src={displayUrl}
             alt={titulo}
+            referrerPolicy="no-referrer"
             loading="lazy"
             onError={() => {
               if (isVideo && remoteThumbUrl && !falhaThumbRemota) {

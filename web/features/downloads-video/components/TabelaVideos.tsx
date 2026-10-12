@@ -23,7 +23,7 @@ import {
   Video,
 } from 'lucide-react'
 import { memo, useState } from 'react'
-import { baixarArquivoMidia } from '../api'
+import { baixarArquivoMidia, obterUrlThumbnailMediaItem } from '../api'
 import type { MediaItem } from '../types'
 import {
   formatarDataMidia,
@@ -209,7 +209,8 @@ export const TabelaVideos = memo(function TabelaVideos({
                   : 'Desconhecido'
               const urlThumbnail =
                 item.thumbnailUrl ||
-                (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined)
+                (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined) ||
+                obterUrlThumbnailMediaItem(item.uuid)
               const urlOriginal =
                 typeof item.metadata?.url_original === 'string'
                   ? item.metadata.url_original
@@ -271,6 +272,7 @@ export const TabelaVideos = memo(function TabelaVideos({
                           <img
                             src={urlThumbnail}
                             alt={titulo}
+                            referrerPolicy="no-referrer"
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             loading="lazy"
                           />
