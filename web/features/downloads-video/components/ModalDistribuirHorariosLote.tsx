@@ -395,7 +395,9 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
 
                 {modo === 'organico' && (
                   <Flex align="center" gap={2} p={2} bg="bg.muted/20" borderRadius="lg">
-                    <Info size={14} color="var(--chakra-colors-cirqueira-brand-400)" />
+                    <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                      <Info size={14} color="currentColor" />
+                    </Box>
                     <Text fontSize="xs" color="fg.subtle">
                       Distribui entre os picos de maior engajamento (manhã, almoço, tarde, noite)
                       com minutos variados.
@@ -558,7 +560,9 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
             bg="bg.muted/20"
           >
             <HStack gap={2} fontSize="xs" color="fg.subtle">
-              <Calendar size={13} color="var(--chakra-colors-cirqueira-brand-400)" />
+              <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                <Calendar size={13} color="currentColor" />
+              </Box>
               <Text as="span">
                 {listaHorariosCalculados[0]?.hora} até {listaHorariosCalculados[total - 1]?.hora}
               </Text>
@@ -572,7 +576,7 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
                 size="sm"
                 bg="cirqueira.brand.500"
                 _hover={{ bg: 'cirqueira.brand.600' }}
-                color="white"
+                color="cirqueira.grey.0"
                 disabled={pendente || total === 0}
                 onClick={handleConfirmar}
                 borderRadius="lg"

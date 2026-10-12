@@ -492,6 +492,89 @@
   - `web/features/prints/Prints.tsx`
   - `web/index.css`
 
+---
+
+### ✅ Melhoria 37 — Detecção de Duplicatas e Sincronização Sob Demanda com Google Fotos
+
+- **Status**: Concluído
+- **Data**: 11 de outubro de 2026
+- **Problema**:
+  - Quando um arquivo já processado era enviado novamente para o sistema (mesmo com alteração de data, horário ou renomeação), havia risco de envio repetido para o Google Fotos gerando duplicatas desnecessárias na nuvem e consumindo quota da API.
+  - O usuário solicitou que o sistema identificasse duplicatas com base no conteúdo/metadados e não realizasse upload automático repetido, sinalizando o status no frontend e oferecendo a opção de forçar a sincronização caso desejado.
+- **Solução**:
+  - Adicionadas propriedades de identificação de duplicatas e status na entidade `MediaItem` (`isDuplicado`, hash do conteúdo e rastreamento de upload).
+  - Atualizados os serviços de ingestão (`IngestarMediaService`, `IngestarPrintService`) e o serviço de envio (`EnviarGoogleFotosService`) para calcular o hash do conteúdo do arquivo e verificar mídias preexistentes no repositório.
+  - Implementado endpoint e caso de uso `POST /api/v1/media-itens/{uuid}/forcar-google-fotos` permitindo que o usuário force a sincronização mesmo quando o item estiver marcado como duplicado.
+  - Criado o hook `useForcarGoogleFotos` no frontend e integradas badges visuais de "Duplicado" (com cor âmbar) e botão de ação dedicado no `CardVideo.tsx` e `TabelaVideos.tsx`.
+- **Arquivos**:
+  - `src/Entity/MediaItem.php`
+  - `src/Serializer/MediaItemSerializer.php`
+  - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
+  - `src/Service/Ingestao/IngestarMediaService.php`
+  - `src/Service/Ingestao/IngestarPrintService.php`
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `web/features/downloads-video/types.ts`
+  - `web/features/downloads-video/api.ts`
+  - `web/features/downloads-video/hooks/useDownloadsVideo.ts`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/components/TabelaVideos.tsx`
+
+---
+
+### ✅ Melhoria 38 — Redesign da Central de Downloads com Layout Amplo e Cards de Vídeo Cinematográficos 16:9
+
+- **Status**: Concluído
+- **Data**: 11 de outubro de 2026
+- **Problema**:
+  - A interface da tela de downloads de vídeo apresentava cards pesados com botões verdes dominantes para edição de horários, barra de filtros limitada sem suporte a categorias e container restrito a `7xl`, em contraste com a nova experiência limpa e moderna introduzida na tela de Prints. O usuário solicitou uma reformulação completa da tela de downloads inspirada na clareza da tela de Prints, mantendo porém a especificidade de mídias de vídeo (sem transformá-los em cards de fotos simples).
+- **Solução**:
+  - **Container Expandido (`maxW="1680px"`) e Cabeçalho Moderno**:
+    - Título `Downloads de Vídeo` com peso `black`, badges de estatísticas (`total mídias`, `prontas`, `na fila`, `erros`) e pílula de monitoramento `Motor yt-dlp • Pipeline Ativo`.
+    - Botões de ação no topo para `Retentar Falhas` (visível apenas sob erros) e `Atualizar` com animação contínua de carregamento.
+  - **Toolbar de Filtros Unificada**:
+    - Busca com botão de limpeza rápida, dropdown de seleção por categoria (integrado à lista de categorias do banco de dados), seletor de origem e abas de status (`Todos`, `Concluídos`, `Baixando`, `Com Erro`), além do alternador de visualização Grid/Lista.
+  - **Pílulas de Plataformas Suportadas no Input de Link**:
+    - Adicionada barra sutil com badges oficiais de plataformas reconhecidas (**YouTube**, **TikTok**, **Instagram**, **X / Twitter**), fornecendo confirmação visual prévia ao colar links.
+  - **Cards de Vídeo Cinematográficos 16:9 ([`CardVideo.tsx`](web/features/downloads-video/components/CardVideo.tsx))**:
+    - Proporção 16:9 com zoom suave no hover e botão centralizado de play com efeito de vidro (*frosted glass*).
+    - Badge da plataforma no topo esquerdo com ícone e cores da marca de origem.
+    - Status e indicador de duplicado em glassmorphism no topo direito.
+    - Pílula de duração do vídeo no canto inferior direito da miniatura.
+    - Faixa sutil e elegante de data/horário em `bg.muted`, eliminando o bloco verde invasivo anterior e preservando o clique direto para agendamento temporal.
+    - Rodapé espaçado com hash, tag do Google Fotos e ações de download, edição de metadados, mudança de categoria, forçar envio para Google Fotos, re-download e exclusão.
+- **Arquivos**:
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/CampoNovoLink.tsx`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/components/GridVideos.tsx`
+  - `web/features/downloads-video/components/TabelaVideos.tsx`
+
+---
+
+### ✅ Melhoria 39 — Conformidade Estrita com o Design System: Eliminação de Hex/RGBA e Adoção Integral de `theme.ts`
+
+- **Status**: Concluído
+- **Data**: 11 de outubro de 2026
+- **Problema**:
+  - Foram detectados usos de valores de cor hexadecimais brutos, `rgba(...)` hardcoded (como sombras roxas `rgba(139, 92, 246, ...)`) e chamadas `var(--chakra-colors-...)` em componentes da feature de downloads e prints, violando a regra estrita do projeto de sempre utilizar exclusivamente as paletas e tokens semânticos de [`web/config/theme/theme.ts`](web/config/theme/theme.ts).
+- **Solução**:
+  - **Varredura e Eliminação Global de Hex e RGBA**:
+    - Removidos todos os valores `rgba(...)` de sombras de seleção e hover, substituindo por propriedades nativas do Chakra UI v3 (`outline="2px solid"`, `outlineColor="cirqueira.brand.500"` e `shadow="lg"` / `shadow="md"`).
+    - Substituídos `blackAlpha` e `whiteAlpha` por tokens oficiais da escala `cirqueira.grey`: `cirqueira.grey.950/80`, `cirqueira.grey.950/85`, `cirqueira.grey.950/50` e `cirqueira.grey.0`.
+    - Substituídos literais `amber.500` e `red.500` por tokens formais da paleta: `cirqueira.amber.500` e `cirqueira.red.500`.
+  - **Remoção de `var(--chakra-colors-...)`**:
+    - Substituídas referências a variáveis CSS brutas em ícones Lucide por wrappers com a propriedade `color` apontando diretamente para tokens semânticos (`cirqueira.green.500`, `cirqueira.brand.400`) e ícones consumindo `currentColor`.
+  - Saneamento equivalente aplicado nos componentes de prints (`CardPrint.tsx`, `ModalVisualizarPrint.tsx`), garantindo 100% de conformidade com o design system do CirqueiraX.
+- **Arquivos**:
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/CampoNovoLink.tsx`
+  - `web/features/downloads-video/components/TabelaVideos.tsx`
+  - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
+  - `web/features/prints/components/CardPrint.tsx`
+  - `web/features/prints/components/ModalVisualizarPrint.tsx`
+
+
 
 
 

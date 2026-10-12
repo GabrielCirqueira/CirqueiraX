@@ -16,6 +16,7 @@ export interface GridVideosProps {
   onRebaixar?: (uuid: string) => void
   onRetentar?: (uuid: string) => void
   onApagar?: (uuid: string) => void
+  onForcarGoogleFotos?: (item: MediaItem) => void
 }
 
 function SkeletonCard() {
@@ -23,7 +24,7 @@ function SkeletonCard() {
     <Box
       display="flex"
       flexDirection="column"
-      borderRadius="xl"
+      borderRadius="2xl"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -55,6 +56,7 @@ export const GridVideos = memo(function GridVideos({
   onRebaixar,
   onRetentar,
   onApagar,
+  onForcarGoogleFotos,
 }: GridVideosProps) {
   const todosSelecionados = itens.length > 0 && selecionados.length === itens.length
   const algunsSelecionados = selecionados.length > 0 && !todosSelecionados
@@ -161,7 +163,7 @@ export const GridVideos = memo(function GridVideos({
           base: '1fr',
           sm: 'repeat(2, 1fr)',
           md: 'repeat(3, 1fr)',
-          lg: 'repeat(4, 1fr)',
+          lg: 'repeat(5, 1fr)',
         }}
         gap={4}
       >
@@ -177,6 +179,7 @@ export const GridVideos = memo(function GridVideos({
             onRebaixar={onRebaixar}
             onRetentar={onRetentar}
             onApagar={onApagar}
+            onForcarGoogleFotos={onForcarGoogleFotos}
           />
         ))}
       </Grid>

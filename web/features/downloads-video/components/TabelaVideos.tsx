@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   CheckSquare,
   Clock,
+  CloudUpload,
   Download,
   DownloadCloud,
   Edit3,
@@ -44,6 +45,7 @@ export interface TabelaVideosProps {
   onRebaixar?: (uuid: string) => void
   onRetentar?: (uuid: string) => void
   onApagar?: (uuid: string) => void
+  onForcarGoogleFotos?: (item: MediaItem) => void
 }
 
 export const TabelaVideos = memo(function TabelaVideos({
@@ -58,6 +60,7 @@ export const TabelaVideos = memo(function TabelaVideos({
   onRebaixar,
   onRetentar,
   onApagar,
+  onForcarGoogleFotos,
 }: TabelaVideosProps) {
   const [baixandoUuid, setBaixandoUuid] = useState<string | null>(null)
 
@@ -279,27 +282,27 @@ export const TabelaVideos = memo(function TabelaVideos({
                         <Flex
                           position="absolute"
                           inset={0}
-                          bg="blackAlpha.600"
+                          bg="cirqueira.grey.950/60"
                           opacity={0}
                           _hover={{ opacity: 1 }}
                           align="center"
                           justify="center"
                           transition="opacity 0.15s"
                         >
-                          <Play size={16} fill="white" color="white" />
+                          <Play size={16} fill="currentColor" color="cirqueira.grey.0" />
                         </Flex>
                         {duracaoFormatada && (
                           <Box
                             position="absolute"
                             bottom={0.5}
                             right={0.5}
-                            bg="blackAlpha.800"
+                            bg="cirqueira.grey.950/80"
                             px={1}
                             py={0.2}
                             borderRadius="xs"
                             fontSize="9px"
                             fontWeight="bold"
-                            color="white"
+                            color="cirqueira.grey.0"
                           >
                             {duracaoFormatada}
                           </Box>
@@ -420,25 +423,38 @@ export const TabelaVideos = memo(function TabelaVideos({
                   </Box>
 
                   <Box as="td" p={3.5} verticalAlign="middle">
-                    <Badge
-                      size="sm"
-                      variant="subtle"
-                      colorPalette={statusInfo.colorPalette}
-                      borderRadius="md"
-                    >
-                      <HStack gap={1} alignItems="center">
-                        {statusInfo.animado ? (
-                          <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
-                        ) : item.status === 'erro' ? (
-                          <AlertCircle size={11} />
-                        ) : item.status === 'concluido' ? (
-                          <CheckCircle2 size={11} />
-                        ) : (
-                          <Clock size={11} />
-                        )}
-                        <Text as="span">{statusInfo.label}</Text>
-                      </HStack>
-                    </Badge>
+                    <HStack gap={1.5} align="center">
+                      <Badge
+                        size="sm"
+                        variant="subtle"
+                        colorPalette={statusInfo.colorPalette}
+                        borderRadius="md"
+                      >
+                        <HStack gap={1} alignItems="center">
+                          {statusInfo.animado ? (
+                            <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                          ) : item.status === 'erro' ? (
+                            <AlertCircle size={11} />
+                          ) : item.status === 'concluido' ? (
+                            <CheckCircle2 size={11} />
+                          ) : (
+                            <Clock size={11} />
+                          )}
+                          <Text as="span">{statusInfo.label}</Text>
+                        </HStack>
+                      </Badge>
+                      {item.isDuplicado && (
+                        <Badge
+                          size="xs"
+                          variant="solid"
+                          colorPalette="amber"
+                          borderRadius="md"
+                          title="Arquivo com mesmo conteúdo ou identificação já processado no sistema"
+                        >
+                          Duplicado
+                        </Badge>
+                      )}
+                    </HStack>
                   </Box>
 
                   <Box as="td" p={3.5} verticalAlign="middle" textAlign="right">
@@ -460,6 +476,35 @@ export const TabelaVideos = memo(function TabelaVideos({
                           <Download size={14} />
                         )}
                       </IconButton>
+
+                      {onForcarGoogleFotos && (
+                        <IconButton
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => onForcarGoogleFotos(item)}
+                          aria-label="Sincronizar Google Fotos"
+                          title={
+                            item.isDuplicado
+                              ? 'Forçar envio para o Google Fotos (mesmo marcado como duplicado)'
+                              : item.isEnviadoGoogleFotos
+                              ? 'Já sincronizado com Google Fotos (clique para reenviar se desejar)'
+                              : 'Enviar para o Google Fotos'
+                          }
+                          color={
+                            item.isDuplicado
+                              ? 'cirqueira.amber.500'
+                              : item.isEnviadoGoogleFotos
+                              ? 'cirqueira.green.500'
+                              : 'fg.subtle'
+                          }
+                          _hover={{
+                            color: item.isDuplicado ? 'cirqueira.amber.400' : 'cirqueira.brand.400',
+                          }}
+                          borderRadius="lg"
+                        >
+                          <CloudUpload size={14} />
+                        </IconButton>
+                      )}
 
                       {onEditarMetadata && (
                         <IconButton

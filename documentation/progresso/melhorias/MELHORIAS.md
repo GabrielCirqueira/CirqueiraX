@@ -48,6 +48,9 @@
 | M34 | Distribuição Temporal de Vídeos: Atalhos Retroativos Estilo Franky e Distribuição em Lote | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-34--distribuição-temporal-de-vídeos-atalhos-retroativos-estilo-franky-e-distribuição-em-lote) |
 | M35 | Unificação de Pasta de Prints e Ajuste das 3 Categorias de Vídeos (Memes, Shingeki e One Piece) | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-35--unificação-de-pasta-de-prints-e-ajuste-das-3-categorias-de-vídeos-memes-shingeki-e-one-piece) |
 | M36 | Redesign da Grade de Prints Estilo Google Fotos: Visual Limpo, Ações no Hover e Expansão Rápida | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-36--redesign-da-grade-de-prints-estilo-google-fotos-visual-limpo-ações-no-hover-e-expansão-rápida) |
+| M37 | Detecção de Duplicatas e Sincronização Sob Demanda com Google Fotos | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-37--detecção-de-duplicatas-e-sincronização-sob-demanda-com-google-fotos) |
+| M38 | Redesign da Central de Downloads com Layout Amplo e Cards de Vídeo Cinematográficos 16:9 | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-38--redesign-da-central-de-downloads-com-layout-amplo-e-cards-de-vídeo-cinematográficos-169) |
+| M39 | Conformidade Estrita com o Design System: Eliminação de Hex/RGBA e Adoção Integral de `theme.ts` | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-39--conformidade-estrita-com-o-design-system-eliminação-de-hexrgba-e-adoção-integral-de-themets) |
 
 
 

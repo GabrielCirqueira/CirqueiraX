@@ -12,6 +12,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
@@ -38,6 +39,7 @@ import {
   useCategorizarLote,
   useClassificarIndividual,
   useDistribuirHorariosLote,
+  useForcarGoogleFotos,
   useMediaItens,
   useRebaixarLote,
   useRetentarMediaItem,
@@ -55,6 +57,7 @@ export default function DownloadsVideo() {
   const [busca, setBusca] = useState('')
   const [statusFiltro, setStatusFiltro] = useState<string>('')
   const [origemFiltro, setOrigemFiltro] = useState<string>('')
+  const [categoriaFiltro, setCategoriaFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
   const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'lista'>('grid')
 
@@ -90,8 +93,11 @@ export default function DownloadsVideo() {
     if (origemFiltro) {
       obj.origem = origemFiltro
     }
+    if (categoriaFiltro) {
+      obj.categoriaId = categoriaFiltro
+    }
     return obj
-  }, [pagina, busca, statusFiltro, origemFiltro])
+  }, [pagina, busca, statusFiltro, origemFiltro, categoriaFiltro])
 
   const { data: respostaPaginada, isLoading, isFetching, refetch } = useMediaItens(filtros)
   const { data: categorias = [] } = useCategorias()
@@ -106,6 +112,14 @@ export default function DownloadsVideo() {
     useDistribuirHorariosLote()
   const { mutate: retentarItemMutate } = useRetentarMediaItem()
   const { mutate: retentarTodosMutate, isPending: pendenteRetentarTodos } = useRetentarTodos()
+  const { mutate: forcarGoogleFotosMutate } = useForcarGoogleFotos()
+
+  const handleForcarGoogleFotos = useCallback(
+    (item: MediaItem) => {
+      forcarGoogleFotosMutate({ uuid: item.uuid, categoriaId: item.categoriaId ?? undefined })
+    },
+    [forcarGoogleFotosMutate]
+  )
 
   const itens = respostaPaginada?.data ?? []
   const total = respostaPaginada?.total ?? 0
@@ -132,12 +146,13 @@ export default function DownloadsVideo() {
   )
   const errosCount = useMemo(() => itens.filter((i) => i.status === 'erro').length, [itens])
   const temItensComErro = errosCount > 0
-  const filtrosAtivos = Boolean(busca.trim() || statusFiltro || origemFiltro)
+  const filtrosAtivos = Boolean(busca.trim() || statusFiltro || origemFiltro || categoriaFiltro)
 
   const handleLimparFiltros = () => {
     setBusca('')
     setStatusFiltro('')
     setOrigemFiltro('')
+    setCategoriaFiltro('')
     setPagina(1)
   }
 
@@ -296,85 +311,73 @@ export default function DownloadsVideo() {
   }
 
   return (
-    <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 4, md: 8 }}>
-      <VStack w="full" gap={5} alignItems="stretch">
+    <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
+      <VStack w="full" gap={6} alignItems="stretch">
         <Flex
-          direction={{ base: 'column', md: 'row' }}
-          align={{ base: 'flex-start', md: 'center' }}
+          direction={{ base: 'column', sm: 'row' }}
           justify="space-between"
-          gap={3}
+          align={{ base: 'stretch', sm: 'center' }}
+          gap={4}
         >
-          <HStack gap={3} flexWrap="wrap" align="center">
-            <Box
-              p={2}
-              borderRadius="lg"
-              bg="cirqueira.brand.500/10"
-              color="cirqueira.brand.500"
-              display="inline-flex"
-            >
-              <Video size={22} />
-            </Box>
-            <Text
-              as="h1"
-              fontSize={{ base: 'xl', md: '2xl' }}
-              fontWeight="bold"
-              color="fg"
-              letterSpacing="tight"
-            >
-              Downloads de Vídeo
-            </Text>
-
-            <HStack gap={1.5} pl={1}>
-              <Badge
-                variant="subtle"
-                colorPalette="gray"
-                fontSize="xs"
-                borderRadius="md"
-                px={2}
-                py={0.5}
+          <VStack align="start" gap={1}>
+            <HStack gap={2.5} align="center" flexWrap="wrap">
+              <Box
+                p={2}
+                borderRadius="xl"
+                bg="cirqueira.brand.500/15"
+                color="cirqueira.brand.400"
+                display="inline-flex"
               >
-                {total} mídias
-              </Badge>
-              {concluidosCount > 0 && (
-                <Badge
-                  variant="subtle"
-                  colorPalette="green"
-                  fontSize="xs"
-                  borderRadius="md"
-                  px={2}
-                  py={0.5}
-                >
-                  {concluidosCount} prontas
+                <Video size={22} strokeWidth={2.2} />
+              </Box>
+              <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="black" color="fg">
+                Downloads de Vídeo
+              </Text>
+              <HStack gap={1.5} pl={1}>
+                <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+                  {total} {total === 1 ? 'mídia' : 'mídias'}
                 </Badge>
-              )}
-              {processandoCount > 0 && (
-                <Badge
-                  variant="subtle"
-                  colorPalette="blue"
-                  fontSize="xs"
-                  borderRadius="md"
-                  px={2}
-                  py={0.5}
-                >
-                  {processandoCount} na fila
-                </Badge>
-              )}
-              {errosCount > 0 && (
-                <Badge
-                  variant="subtle"
-                  colorPalette="red"
-                  fontSize="xs"
-                  borderRadius="md"
-                  px={2}
-                  py={0.5}
-                >
-                  {errosCount} erros
-                </Badge>
-              )}
+                {concluidosCount > 0 && (
+                  <Badge size="sm" variant="subtle" colorPalette="green" borderRadius="md">
+                    {concluidosCount} prontas
+                  </Badge>
+                )}
+                {processandoCount > 0 && (
+                  <Badge size="sm" variant="subtle" colorPalette="blue" borderRadius="md">
+                    {processandoCount} na fila
+                  </Badge>
+                )}
+                {errosCount > 0 && (
+                  <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md">
+                    {errosCount} erros
+                  </Badge>
+                )}
+              </HStack>
             </HStack>
-          </HStack>
+            <Text fontSize="xs" color="fg.subtle">
+              Downloads inteligentes com extração de metadados, corte e sincronização com Google Fotos
+            </Text>
+          </VStack>
 
-          <HStack gap={2}>
+          <HStack gap={2} flexWrap="wrap">
+            <HStack
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              px={3}
+              py={1.5}
+              borderRadius="lg"
+              fontSize="xs"
+              color="fg.subtle"
+              display={{ base: 'none', md: 'flex' }}
+            >
+              <Box w={2} h={2} borderRadius="full" bg="cirqueira.green.500" />
+              <Text as="span">Motor yt-dlp • Pipeline Ativo</Text>
+              <Box as="span" color="cirqueira.green.500" display="inline-flex">
+                <CheckCircle2 size={11} color="currentColor" />
+              </Box>
+            </HStack>
+
             {temItensComErro && (
               <Button
                 size="sm"
@@ -410,7 +413,9 @@ export default function DownloadsVideo() {
                   marginRight: '6px',
                 }}
               />
-              <Text as="span">Atualizar</Text>
+              <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                {isFetching ? 'Atualizando...' : 'Atualizar'}
+              </Text>
             </Button>
           </HStack>
         </Flex>
@@ -423,133 +428,86 @@ export default function DownloadsVideo() {
           justify="space-between"
           gap={3}
           bg="bg.panel"
-          p={2.5}
+          p={3}
           borderRadius="xl"
           borderWidth="1px"
           borderColor="border.subtle"
-          shadow="sm"
         >
-          <Box position="relative" flex={1} maxW={{ base: 'full', md: 'sm' }}>
-            <Box
-              position="absolute"
-              left={3}
-              top="50%"
-              transform="translateY(-50%)"
-              pointerEvents="none"
-              zIndex={2}
-              color="fg.subtle"
-            >
-              <Search size={14} />
-            </Box>
-            <Input
-              value={busca}
-              onChange={(e) => {
-                setBusca(e.target.value)
-                setPagina(1)
-              }}
-              placeholder="Buscar por título ou canal..."
-              bg="bg.muted"
-              borderColor="border.subtle"
-              fontSize="xs"
-              h={8}
-              pl={8}
-              pr={busca ? 7 : 3}
-              borderRadius="lg"
-            />
-            {busca && (
-              <Button
-                size="xs"
-                variant="ghost"
+          <HStack gap={2} flex={1} flexWrap="wrap">
+            <Box position="relative" flex={1} minW={{ base: 'full', sm: '220px' }} maxW={{ base: 'full', md: '360px' }}>
+              <Box
                 position="absolute"
-                right={1}
+                left={3}
                 top="50%"
                 transform="translateY(-50%)"
-                onClick={() => {
-                  setBusca('')
+                pointerEvents="none"
+                zIndex={2}
+                color="fg.subtle"
+              >
+                <Search size={14} />
+              </Box>
+              <Input
+                value={busca}
+                onChange={(e) => {
+                  setBusca(e.target.value)
                   setPagina(1)
                 }}
-                p={0.5}
+                placeholder="Buscar por título ou canal..."
+                bg="bg.muted"
+                borderColor="border.subtle"
+                fontSize="xs"
+                h={9}
+                pl={8}
+                pr={busca ? 7 : 3}
                 borderRadius="lg"
-                aria-label="Limpar busca"
-              >
-                <X size={13} />
-              </Button>
-            )}
-          </Box>
+              />
+              {busca && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  position="absolute"
+                  right={1}
+                  top="50%"
+                  transform="translateY(-50%)"
+                  onClick={() => {
+                    setBusca('')
+                    setPagina(1)
+                  }}
+                  p={0.5}
+                  borderRadius="lg"
+                  aria-label="Limpar busca"
+                >
+                  <X size={13} />
+                </Button>
+              )}
+            </Box>
 
-          <HStack gap={1.5} flexWrap="wrap" justify={{ base: 'stretch', md: 'flex-end' }}>
-            <HStack gap={1} display={{ base: 'none', lg: 'flex' }}>
-              <Button
-                size="xs"
-                variant={statusFiltro === '' ? 'solid' : 'ghost'}
-                colorPalette={statusFiltro === '' ? 'brand' : 'gray'}
-                onClick={() => handleFiltrarRapidoStatus('')}
-                borderRadius="md"
-                fontSize="xs"
-                h={7}
-              >
-                Todos
-              </Button>
-              <Button
-                size="xs"
-                variant={statusFiltro === 'concluido' ? 'solid' : 'ghost'}
-                colorPalette={statusFiltro === 'concluido' ? 'brand' : 'gray'}
-                onClick={() => handleFiltrarRapidoStatus('concluido')}
-                borderRadius="md"
-                fontSize="xs"
-                h={7}
-              >
-                Concluídos
-              </Button>
-              <Button
-                size="xs"
-                variant={statusFiltro === 'baixando' ? 'solid' : 'ghost'}
-                colorPalette={statusFiltro === 'baixando' ? 'brand' : 'gray'}
-                onClick={() => handleFiltrarRapidoStatus('baixando')}
-                borderRadius="md"
-                fontSize="xs"
-                h={7}
-              >
-                Baixando
-              </Button>
-              <Button
-                size="xs"
-                variant={statusFiltro === 'erro' ? 'solid' : 'ghost'}
-                colorPalette={statusFiltro === 'erro' ? 'red' : 'gray'}
-                onClick={() => handleFiltrarRapidoStatus('erro')}
-                borderRadius="md"
-                fontSize="xs"
-                h={7}
-              >
-                Com Erro
-              </Button>
-            </HStack>
-
-            <Box w={{ base: 'full', sm: '36' }} display={{ base: 'block', lg: 'none' }}>
+            <Box w={{ base: 'full', sm: '44' }}>
               <NativeSelect.Root size="sm" w="full">
                 <NativeSelect.Field
-                  value={statusFiltro}
+                  value={categoriaFiltro}
                   onChange={(e) => {
-                    setStatusFiltro(e.target.value)
+                    setCategoriaFiltro(e.target.value)
                     setPagina(1)
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
                   borderRadius="lg"
                   fontSize="xs"
-                  h={8}
+                  h={9}
                 >
-                  <option value="">Todos status</option>
-                  <option value="concluido">Concluídos</option>
-                  <option value="baixando">Baixando</option>
-                  <option value="em_fila">Em Fila</option>
-                  <option value="erro">Com Erro</option>
+                  <option value="">Todas as categorias</option>
+                  {categorias.map((cat) => (
+                    <option key={cat.uuid} value={cat.uuid}>
+                      {cat.nome}
+                    </option>
+                  ))}
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
             </Box>
 
-            <Box w={{ base: 'full', sm: '36' }}>
+            <Box w={{ base: 'full', sm: '40' }}>
               <NativeSelect.Root size="sm" w="full">
                 <NativeSelect.Field
                   value={origemFiltro}
@@ -561,12 +519,87 @@ export default function DownloadsVideo() {
                   borderColor="border.subtle"
                   borderRadius="lg"
                   fontSize="xs"
-                  h={8}
+                  h={9}
                 >
                   <option value="">Todas as origens</option>
                   <option value="download">Download de Vídeo</option>
                   <option value="bot_telegram">Bot Telegram</option>
                   <option value="manual">Upload Manual (Vídeo)</option>
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+            </Box>
+
+            <HStack gap={1} display={{ base: 'none', xl: 'flex' }}>
+              <Button
+                size="xs"
+                variant={statusFiltro === '' ? 'solid' : 'ghost'}
+                colorPalette={statusFiltro === '' ? 'brand' : 'gray'}
+                onClick={() => handleFiltrarRapidoStatus('')}
+                borderRadius="md"
+                fontSize="xs"
+                h={8}
+                px={3}
+              >
+                Todos
+              </Button>
+              <Button
+                size="xs"
+                variant={statusFiltro === 'concluido' ? 'solid' : 'ghost'}
+                colorPalette={statusFiltro === 'concluido' ? 'brand' : 'gray'}
+                onClick={() => handleFiltrarRapidoStatus('concluido')}
+                borderRadius="md"
+                fontSize="xs"
+                h={8}
+                px={3}
+              >
+                Concluídos
+              </Button>
+              <Button
+                size="xs"
+                variant={statusFiltro === 'baixando' ? 'solid' : 'ghost'}
+                colorPalette={statusFiltro === 'baixando' ? 'brand' : 'gray'}
+                onClick={() => handleFiltrarRapidoStatus('baixando')}
+                borderRadius="md"
+                fontSize="xs"
+                h={8}
+                px={3}
+              >
+                Baixando
+              </Button>
+              <Button
+                size="xs"
+                variant={statusFiltro === 'erro' ? 'solid' : 'ghost'}
+                colorPalette={statusFiltro === 'erro' ? 'red' : 'gray'}
+                onClick={() => handleFiltrarRapidoStatus('erro')}
+                borderRadius="md"
+                fontSize="xs"
+                h={8}
+                px={3}
+              >
+                Com Erro
+              </Button>
+            </HStack>
+
+            <Box w={{ base: 'full', sm: '36' }} display={{ base: 'block', xl: 'none' }}>
+              <NativeSelect.Root size="sm" w="full">
+                <NativeSelect.Field
+                  value={statusFiltro}
+                  onChange={(e) => {
+                    setStatusFiltro(e.target.value)
+                    setPagina(1)
+                  }}
+                  bg="bg.muted"
+                  borderColor="border.subtle"
+                  borderRadius="lg"
+                  fontSize="xs"
+                  h={9}
+                >
+                  <option value="">Todos os status</option>
+                  <option value="concluido">Concluídos</option>
+                  <option value="baixando">Baixando</option>
+                  <option value="em_fila">Em Fila</option>
+                  <option value="erro">Com Erro</option>
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
@@ -581,43 +614,37 @@ export default function DownloadsVideo() {
                 borderRadius="lg"
                 color="fg.subtle"
                 _hover={{ color: 'fg' }}
-                h={8}
+                h={9}
               >
+                <X size={13} style={{ marginRight: '4px' }} />
                 Limpar
               </Button>
             )}
+          </HStack>
 
-            <HStack
-              gap={1}
-              p={0.5}
-              bg="bg.muted"
+          <HStack gap={1}>
+            <IconButton
+              size="sm"
+              variant={modoVisualizacao === 'grid' ? 'subtle' : 'ghost'}
+              colorPalette={modoVisualizacao === 'grid' ? 'brand' : 'gray'}
+              onClick={() => setModoVisualizacao('grid')}
+              aria-label="Grade"
+              title="Visualização em Grade"
               borderRadius="lg"
-              borderWidth="1px"
-              borderColor="border.subtle"
             >
-              <IconButton
-                size="xs"
-                variant={modoVisualizacao === 'grid' ? 'subtle' : 'ghost'}
-                colorPalette={modoVisualizacao === 'grid' ? 'brand' : 'gray'}
-                onClick={() => setModoVisualizacao('grid')}
-                aria-label="Grade"
-                title="Visualização em Grade"
-                borderRadius="md"
-              >
-                <LayoutGrid size={14} />
-              </IconButton>
-              <IconButton
-                size="xs"
-                variant={modoVisualizacao === 'lista' ? 'subtle' : 'ghost'}
-                colorPalette={modoVisualizacao === 'lista' ? 'brand' : 'gray'}
-                onClick={() => setModoVisualizacao('lista')}
-                aria-label="Lista"
-                title="Visualização em Lista"
-                borderRadius="md"
-              >
-                <List size={14} />
-              </IconButton>
-            </HStack>
+              <LayoutGrid size={16} />
+            </IconButton>
+            <IconButton
+              size="sm"
+              variant={modoVisualizacao === 'lista' ? 'subtle' : 'ghost'}
+              colorPalette={modoVisualizacao === 'lista' ? 'brand' : 'gray'}
+              onClick={() => setModoVisualizacao('lista')}
+              aria-label="Lista"
+              title="Visualização em Lista"
+              borderRadius="lg"
+            >
+              <List size={16} />
+            </IconButton>
           </HStack>
         </Flex>
 
@@ -634,6 +661,7 @@ export default function DownloadsVideo() {
             onRebaixar={handleAbrirRebaixarIndividual}
             onRetentar={(uuid) => retentarItemMutate(uuid)}
             onApagar={handleAbrirApagarIndividual}
+            onForcarGoogleFotos={handleForcarGoogleFotos}
           />
         ) : (
           <TabelaVideos
@@ -648,6 +676,7 @@ export default function DownloadsVideo() {
             onRebaixar={handleAbrirRebaixarIndividual}
             onRetentar={(uuid) => retentarItemMutate(uuid)}
             onApagar={handleAbrirApagarIndividual}
+            onForcarGoogleFotos={handleForcarGoogleFotos}
           />
         )}
 

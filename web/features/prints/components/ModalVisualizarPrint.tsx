@@ -168,7 +168,6 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                 maxHeight: '70vh',
                 objectFit: 'contain',
                 borderRadius: '8px',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
               }}
             />
           </Box>

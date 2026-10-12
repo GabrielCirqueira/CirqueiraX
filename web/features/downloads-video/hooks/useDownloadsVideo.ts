@@ -13,6 +13,7 @@ import {
   rebaixarLote,
   retentarMediaItem,
   retentarTodos,
+  forcarSincronizacaoGoogleFotos,
 } from '../api'
 import type {
   ApagarLoteInput,
@@ -198,3 +199,25 @@ export function useRetentarTodos() {
     },
   })
 }
+
+export function useForcarGoogleFotos() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ uuid, categoriaId }: { uuid: string; categoriaId?: string }) =>
+      forcarSincronizacaoGoogleFotos(uuid, categoriaId),
+    onSuccess: (item) => {
+      addToast({
+        title: item.isDuplicado
+          ? 'Sincronização iniciada com o Google Fotos mesmo sendo duplicado!'
+          : 'Sincronização com Google Fotos iniciada!',
+        color: 'success',
+      })
+      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    },
+    onError: () => {
+      addToast({ title: 'Falha ao forçar envio para o Google Fotos.', color: 'danger' })
+    },
+  })
+}
+

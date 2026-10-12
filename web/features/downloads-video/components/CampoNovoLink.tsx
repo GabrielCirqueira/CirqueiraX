@@ -9,7 +9,20 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Clipboard, Cloud, Download, Folder, Globe, Loader2, Sparkles, X, Zap } from 'lucide-react'
+import {
+  Clipboard,
+  Cloud,
+  Download,
+  Folder,
+  Globe,
+  Instagram,
+  Loader2,
+  Sparkles,
+  Video,
+  X,
+  Youtube,
+  Zap,
+} from 'lucide-react'
 import { type FormEvent, memo, useCallback, useEffect, useRef, useState } from 'react'
 import { useCategorias, useCriarDownload } from '../hooks/useDownloadsVideo'
 import { identificarPlataforma } from '../utils/plataformaVideo'
@@ -159,7 +172,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
             p={2}
             borderRadius="lg"
             bg={isPending ? 'cirqueira.brand.500' : 'cirqueira.brand.500/10'}
-            color={isPending ? 'white' : 'cirqueira.brand.500'}
+            color={isPending ? 'cirqueira.grey.0' : 'cirqueira.brand.500'}
             display="inline-flex"
             alignItems="center"
             justifyContent="center"
@@ -233,6 +246,40 @@ export const CampoNovoLink = memo(function CampoNovoLink({
             </Button>
           )}
         </Flex>
+
+        {!expandido && (
+          <HStack gap={2} pt={0.5} px={1} flexWrap="wrap" align="center">
+            <Text fontSize="11px" color="fg.subtle" fontWeight="medium">
+              Plataformas suportadas:
+            </Text>
+            <HStack gap={1.5} flexWrap="wrap">
+              <Badge size="xs" variant="subtle" colorPalette="red" borderRadius="md" px={2} py={0.5}>
+                <HStack gap={1} alignItems="center">
+                  <Youtube size={11} />
+                  <Text as="span" fontSize="10px">YouTube</Text>
+                </HStack>
+              </Badge>
+              <Badge size="xs" variant="subtle" colorPalette="cyan" borderRadius="md" px={2} py={0.5}>
+                <HStack gap={1} alignItems="center">
+                  <Video size={11} />
+                  <Text as="span" fontSize="10px">TikTok</Text>
+                </HStack>
+              </Badge>
+              <Badge size="xs" variant="subtle" colorPalette="pink" borderRadius="md" px={2} py={0.5}>
+                <HStack gap={1} alignItems="center">
+                  <Instagram size={11} />
+                  <Text as="span" fontSize="10px">Instagram</Text>
+                </HStack>
+              </Badge>
+              <Badge size="xs" variant="subtle" colorPalette="blue" borderRadius="md" px={2} py={0.5}>
+                <HStack gap={1} alignItems="center">
+                  <Globe size={11} />
+                  <Text as="span" fontSize="10px">X / Twitter</Text>
+                </HStack>
+              </Badge>
+            </HStack>
+          </HStack>
+        )}
 
         {expandido && (
           <Flex

@@ -87,9 +87,11 @@ export const CardPrint = memo(function CardPrint({
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onVisualizar(item)}
       transition="border-color 0.15s ease, box-shadow 0.15s ease"
-      shadow={selecionado ? '0 0 0 2px rgba(139, 92, 246, 0.4), md' : 'none'}
+      shadow={selecionado ? 'md' : 'none'}
+      outline={selecionado ? '2px solid' : 'none'}
+      outlineColor="cirqueira.brand.500"
       _hover={{
-        borderColor: selecionado ? 'cirqueira.brand.500' : 'whiteAlpha.400',
+        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
       }}
     >
       {/* Imagem em proporção natural sem cortes */}
@@ -191,7 +193,10 @@ export const CardPrint = memo(function CardPrint({
         position="absolute"
         inset={0}
         zIndex={5}
-        bg="linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 35%, transparent 60%, rgba(0,0,0,0.7) 100%)"
+        bgGradient="to-b"
+        gradientFrom="cirqueira.grey.950/40"
+        gradientVia="transparent"
+        gradientTo="cirqueira.grey.950/80"
         opacity={isHovered ? 1 : 0}
         pointerEvents="none"
         transition="opacity 0.15s ease"

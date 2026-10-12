@@ -1,19 +1,33 @@
-import { Badge, Box, Card, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Card,
+  Flex,
+  HStack,
+  IconButton,
+  Link,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import {
   AlertCircle,
+  AlertTriangle,
   Calendar,
+  Check,
   CheckCircle2,
-  CheckSquare,
   Clock,
+  Cloud,
+  CloudUpload,
   Download,
   DownloadCloud,
   Edit3,
   ExternalLink,
-  Eye,
   Folder,
   FolderPlus,
+  Globe,
   HardDrive,
   Image as ImageIcon,
+  Instagram,
   Loader2,
   Play,
   RotateCcw,
@@ -21,6 +35,7 @@ import {
   Trash2,
   User,
   Video,
+  Youtube,
 } from 'lucide-react'
 import { memo, useState } from 'react'
 import { baixarArquivoMidia, obterUrlStreamMediaItem } from '../api'
@@ -36,6 +51,7 @@ import {
   tempoRelativoNativo,
   verificarSeEhImagem,
 } from '../utils/formatadores'
+import { identificarPlataforma } from '../utils/plataformaVideo'
 
 export interface CardVideoProps {
   item: MediaItem
@@ -47,6 +63,7 @@ export interface CardVideoProps {
   onRebaixar?: (uuid: string) => void
   onRetentar?: (uuid: string) => void
   onApagar?: (uuid: string) => void
+  onForcarGoogleFotos?: (item: MediaItem) => void
 }
 
 export const CardVideo = memo(function CardVideo({
@@ -59,9 +76,12 @@ export const CardVideo = memo(function CardVideo({
   onRebaixar,
   onRetentar,
   onApagar,
+  onForcarGoogleFotos,
 }: CardVideoProps) {
   const [erroImagem, setErroImagem] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const [baixando, setBaixando] = useState(false)
+
   const statusInfo = obterStatusConfig(item.status)
   const ehImagem = verificarSeEhImagem(item)
   const duracaoNumero =
@@ -73,7 +93,7 @@ export const CardVideo = memo(function CardVideo({
       ? item.metadata.uploader
       : ehImagem
         ? (item.metadata?.agente_nome as string) || 'Dispositivo Pessoal'
-        : 'Uploader desconhecido'
+        : 'Canal não informado'
   const extensao = extrairExtensaoMedia(item)
   const urlThumbnail =
     item.thumbnailUrl ||
@@ -89,6 +109,10 @@ export const CardVideo = memo(function CardVideo({
     typeof item.metadata?.tamanho_bytes === 'number' ? item.metadata.tamanho_bytes : undefined
   const tamanhoFormatado = formatarTamanhoBytes(tamanhoNumero)
 
+  const plataformaInfo = urlOriginal ? identificarPlataforma(urlOriginal) : null
+  const ehDuplicado = Boolean(item.isDuplicado || item.metadata?.duplicado)
+  const enviadoGoogleFotos = Boolean(item.isEnviadoGoogleFotos || item.googlePhotosMediaId)
+
   const handleDownloadDirecto = async (e: React.MouseEvent) => {
     e.stopPropagation()
     try {
@@ -99,78 +123,126 @@ export const CardVideo = memo(function CardVideo({
     }
   }
 
+  // Helper para ícone da plataforma
+  const renderIconePlataforma = () => {
+    if (!plataformaInfo) return null
+    if (plataformaInfo.id === 'youtube') return <Youtube size={12} />
+    if (plataformaInfo.id === 'instagram') return <Instagram size={12} />
+    if (plataformaInfo.id === 'twitter') return <Globe size={12} />
+    return <Video size={12} />
+  }
+
   return (
     <Card.Root
       position="relative"
       display="flex"
       flexDirection="column"
-      borderRadius="xl"
+      borderRadius="2xl"
       borderWidth={selecionado ? '2px' : '1px'}
       borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       bg="bg.panel"
       overflow="hidden"
-      shadow="sm"
-      transition="all 0.2s"
-      _hover={{ borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted', shadow: 'md' }}
+      shadow={selecionado ? 'lg' : 'sm'}
+      outline={selecionado ? '2px solid' : 'none'}
+      outlineColor="cirqueira.brand.500"
+      transition="all 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      _hover={{
+        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+        shadow: 'xl',
+        transform: 'translateY(-2px)',
+      }}
     >
-      <Box position="relative" aspectRatio="16/9" w="full" bg="bg.muted" overflow="hidden">
+      {/* 1. SEÇÃO DE MÍDIA / THUMBNAIL (16:9) */}
+      <Box position="relative" aspectRatio="16/9" w="full" bg="cirqueira.grey.950" overflow="hidden">
         {temThumbnail ? (
           <img
             src={urlThumbnail}
             alt={titulo}
             onError={() => setErroImagem(true)}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              transition: 'transform 0.4s ease',
+              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+            }}
             loading="lazy"
           />
         ) : (
           <VStack h="full" w="full" align="center" justify="center" gap={2} color="fg.subtle">
             {ehImagem ? (
-              <>
-                <ImageIcon size={36} strokeWidth={1.5} />
-                <Text fontSize="xs" fontWeight="medium">
-                  Visualizar imagem
-                </Text>
-              </>
+              <ImageIcon size={38} strokeWidth={1.5} />
             ) : (
-              <>
-                <Video size={36} strokeWidth={1.5} />
-                <Text fontSize="xs" fontWeight="medium">
-                  Clique para assistir
-                </Text>
-              </>
+              <Video size={38} strokeWidth={1.5} />
             )}
+            <Text fontSize="xs" fontWeight="medium">
+              {ehImagem ? 'Imagem' : 'Vídeo'}
+            </Text>
           </VStack>
         )}
 
+        {/* Gradientes de contraste para badges superiores e inferiores */}
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          h="40%"
+          bgGradient="to-b"
+          gradientFrom="cirqueira.grey.950/80"
+          gradientTo="transparent"
+          pointerEvents="none"
+          zIndex={1}
+        />
+        <Box
+          position="absolute"
+          bottom={0}
+          left={0}
+          right={0}
+          h="50%"
+          bgGradient="to-t"
+          gradientFrom="cirqueira.grey.950/85"
+          gradientTo="transparent"
+          pointerEvents="none"
+          zIndex={1}
+        />
+
+        {/* Overlay central com Play no Hover */}
         <Box
           position="absolute"
           inset={0}
           display="flex"
           alignItems="center"
           justifyContent="center"
-          bg="blackAlpha.600"
-          opacity={0}
-          _hover={{ opacity: 1 }}
+          bg="cirqueira.grey.950/50"
+          backdropFilter="blur(2px)"
+          opacity={isHovered ? 1 : 0}
           cursor="pointer"
           onClick={() => onVisualizar?.(item)}
           transition="opacity 0.2s ease"
           zIndex={5}
         >
           <Box
-            p={3}
+            p={3.5}
             borderRadius="full"
             bg="cirqueira.brand.500"
-            color="white"
-            shadow="2xl"
-            transform="scale(0.95)"
-            _hover={{ transform: 'scale(1.08)' }}
-            transition="transform 0.15s ease"
+            color="cirqueira.grey.0"
+            shadow="lg"
+            transform={isHovered ? 'scale(1.05)' : 'scale(0.9)'}
+            _hover={{ transform: 'scale(1.15)', bg: 'cirqueira.brand.400' }}
+            transition="all 0.15s ease"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
           >
-            {ehImagem ? <Eye size={20} /> : <Play size={20} fill="white" />}
+            <Play size={20} fill="currentColor" style={{ marginLeft: '2px' }} />
           </Box>
         </Box>
 
-        <Box position="absolute" top={2} left={2} zIndex={10}>
+        {/* Topo Esquerdo: Checkbox de seleção + Badge da Plataforma */}
+        <HStack position="absolute" top={2.5} left={2.5} zIndex={10} gap={1.5}>
           <IconButton
             size="xs"
             variant="ghost"
@@ -178,30 +250,58 @@ export const CardVideo = memo(function CardVideo({
               e.stopPropagation()
               onToggleSelect(item.uuid)
             }}
-            bg="blackAlpha.600"
-            _hover={{ bg: 'blackAlpha.800' }}
-            color="white"
-            backdropFilter="blur(8px)"
+            bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
+            _hover={{ bg: selecionado ? 'cirqueira.brand.600' : 'cirqueira.grey.950' }}
+            color="cirqueira.grey.0"
+            backdropFilter="blur(10px)"
             borderRadius="lg"
+            h={7}
+            w={7}
+            borderWidth="1px"
+            borderColor={selecionado ? 'cirqueira.brand.400' : 'border.subtle'}
             aria-label={`Selecionar ${titulo}`}
           >
             {selecionado ? (
-              <Box as="span" color="cirqueira.brand.400" display="inline-flex">
-                <CheckSquare size={15} color="currentColor" />
-              </Box>
+              <Check size={14} strokeWidth={3} />
             ) : (
-              <Square size={15} />
+              <Square size={14} opacity={0.7} />
             )}
           </IconButton>
-        </Box>
 
-        <Box position="absolute" top={2} right={2} zIndex={10}>
+          {plataformaInfo && (
+            <Badge
+              size="sm"
+              variant="subtle"
+              colorPalette={plataformaInfo.colorPalette}
+              backdropFilter="blur(10px)"
+              bg="cirqueira.grey.950/80"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              borderRadius="lg"
+              px={2}
+              py={0.5}
+              fontWeight="semibold"
+            >
+              <HStack gap={1} alignItems="center">
+                {renderIconePlataforma()}
+                <Text as="span">{plataformaInfo.nome}</Text>
+              </HStack>
+            </Badge>
+          )}
+        </HStack>
+
+        {/* Topo Direito: Status da Mídia + Badge de Duplicado */}
+        <VStack position="absolute" top={2.5} right={2.5} zIndex={10} align="flex-end" gap={1}>
           <Badge
             size="sm"
             variant="subtle"
             colorPalette={statusInfo.colorPalette}
-            backdropFilter="blur(8px)"
-            borderRadius="md"
+            backdropFilter="blur(10px)"
+            borderRadius="lg"
+            px={2.5}
+            py={0.5}
+            borderWidth="1px"
+            borderColor="border.subtle"
           >
             <HStack gap={1} alignItems="center">
               {statusInfo.animado ? (
@@ -216,27 +316,28 @@ export const CardVideo = memo(function CardVideo({
               <Text as="span">{statusInfo.label}</Text>
             </HStack>
           </Badge>
-        </Box>
 
-        {duracaoFormatada && (
-          <Box
-            position="absolute"
-            bottom={2}
-            right={2}
-            zIndex={10}
-            borderRadius="md"
-            bg="blackAlpha.800"
-            px={2}
-            py={0.5}
-            fontSize="xs"
-            fontWeight="bold"
-            color="white"
-            backdropFilter="blur(4px)"
-          >
-            {duracaoFormatada}
-          </Box>
-        )}
+          {ehDuplicado && (
+            <Badge
+              size="xs"
+              variant="subtle"
+              colorPalette="amber"
+              backdropFilter="blur(10px)"
+              borderRadius="md"
+              px={1.5}
+              py={0.5}
+              borderWidth="1px"
+              borderColor="cirqueira.amber.500/40"
+            >
+              <HStack gap={1} alignItems="center">
+                <AlertTriangle size={10} />
+                <Text as="span">Duplicado</Text>
+              </HStack>
+            </Badge>
+          )}
+        </VStack>
 
+        {/* Base da Thumbnail: Link Original e Duração do Vídeo */}
         {urlOriginal && (
           <Link
             href={urlOriginal}
@@ -244,43 +345,71 @@ export const CardVideo = memo(function CardVideo({
             rel="noopener noreferrer"
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
             position="absolute"
-            bottom={2}
-            left={2}
+            bottom={2.5}
+            left={2.5}
             zIndex={10}
             p={1.5}
             borderRadius="md"
-            bg="blackAlpha.700"
-            color="whiteAlpha.900"
+            bg="cirqueira.grey.950/70"
+            color="cirqueira.grey.0"
+            backdropFilter="blur(8px)"
             display="inline-flex"
             alignItems="center"
             justifyContent="center"
-            title="Abrir link original"
-            _hover={{ bg: 'blackAlpha.900' }}
+            title="Abrir no site de origem"
+            _hover={{ bg: 'cirqueira.grey.950', color: 'cirqueira.brand.300' }}
           >
             <ExternalLink size={13} />
           </Link>
         )}
+
+        {duracaoFormatada && (
+          <Box
+            position="absolute"
+            bottom={2.5}
+            right={2.5}
+            zIndex={10}
+            borderRadius="md"
+            bg="cirqueira.grey.950/85"
+            px={2}
+            py={0.5}
+            fontSize="xs"
+            fontWeight="bold"
+            fontFamily="mono"
+            color="cirqueira.grey.0"
+            backdropFilter="blur(8px)"
+            borderWidth="1px"
+            borderColor="border.subtle"
+          >
+            {duracaoFormatada}
+          </Box>
+        )}
       </Box>
 
-      <Card.Body display="flex" flex={1} flexDirection="column" p={4} gap={2.5}>
+      {/* 2. CORPO DO CARD */}
+      <Card.Body display="flex" flex={1} flexDirection="column" p={4} gap={3}>
+        {/* Título com 2 linhas */}
         <Text
           as="h3"
-          fontWeight="semibold"
+          fontWeight="bold"
           fontSize="sm"
           color="fg"
           lineClamp={2}
           title={titulo}
           cursor="pointer"
+          transition="color 0.15s ease"
           _hover={{ color: 'cirqueira.brand.400' }}
           onClick={() => onVisualizar?.(item)}
+          lineHeight="snug"
         >
           {titulo}
         </Text>
 
+        {/* Linha 1: Uploader + Extensão / Tamanho */}
         <Flex align="center" justify="space-between" gap={2} fontSize="xs" color="fg.subtle">
           <HStack gap={1.5} truncate flex={1}>
             <User size={13} style={{ flexShrink: 0 }} />
-            <Text as="span" truncate>
+            <Text as="span" truncate title={uploader}>
               {uploader}
             </Text>
           </HStack>
@@ -293,11 +422,12 @@ export const CardVideo = memo(function CardVideo({
                 textTransform="uppercase"
                 colorPalette="gray"
                 borderRadius="md"
+                px={1.5}
               >
                 {extensao}
               </Badge>
               {tamanhoFormatado && (
-                <HStack gap={1} fontSize="xs" color="fg.subtle">
+                <HStack gap={1} fontSize="11px" color="fg.subtle">
                   <HardDrive size={11} />
                   <Text as="span">{tamanhoFormatado}</Text>
                 </HStack>
@@ -306,77 +436,97 @@ export const CardVideo = memo(function CardVideo({
           )}
         </Flex>
 
+        {/* Linha 2: Categoria + Data Relativa */}
         <Flex align="center" justify="space-between" gap={2} fontSize="11px" color="fg.subtle">
-          <HStack gap={1} color="fg.muted">
-            <Clock size={11} />
-            <Text as="span">Baixado: {tempoRelativoNativo(item.criadoEm)}</Text>
-          </HStack>
-
           <Box flexShrink={0}>
             {item.categoria?.nome ? (
-              <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+              <Badge
+                size="xs"
+                variant="subtle"
+                colorPalette="brand"
+                borderRadius="md"
+                cursor={onCategorizar ? 'pointer' : 'default'}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onCategorizar?.(item)
+                }}
+                _hover={onCategorizar ? { opacity: 0.8 } : undefined}
+                title="Clique para alterar a categoria"
+              >
                 <HStack gap={1} alignItems="center">
-                  <Folder size={10} />
-                  <Text as="span" maxW="20" truncate>
-                    {item.categoria.nome}
+                  <Folder size={11} />
+                  <Text as="span" maxW="28" truncate>
+                    {item.categoria?.nome}
                   </Text>
                 </HStack>
               </Badge>
             ) : (
-              <Text as="span" fontStyle="italic" color="fg.subtle" fontSize="10px">
-                Sem categoria
-              </Text>
+              <Badge
+                size="xs"
+                variant="outline"
+                colorPalette="amber"
+                borderRadius="md"
+                cursor={onCategorizar ? 'pointer' : 'default'}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onCategorizar?.(item)
+                }}
+                _hover={onCategorizar ? { bg: 'cirqueira.amber.500/10' } : undefined}
+                title="Clique para definir uma categoria"
+              >
+                <HStack gap={1} alignItems="center">
+                  <FolderPlus size={11} />
+                  <Text as="span">Sem categoria</Text>
+                </HStack>
+              </Badge>
             )}
           </Box>
+
+          <HStack gap={1} color="fg.muted" fontSize="10px">
+            <Clock size={11} />
+            <Text as="span">Baixado {tempoRelativoNativo(item.criadoEm)}</Text>
+          </HStack>
         </Flex>
 
+        {/* Linha 3: Barra de Data & Agendamento (Sutil e Interativa) */}
         <Box
-          as="button"
           w="full"
-          px={2.5}
+          px={3}
           py={1.5}
-          borderRadius="lg"
+          borderRadius="xl"
           borderWidth="1px"
-          borderColor="cirqueira.brand.500/30"
-          bg="cirqueira.brand.500/5"
-          _hover={{
-            borderColor: 'cirqueira.brand.500/60',
-            bg: 'cirqueira.brand.500/12',
-            transform: 'translateY(-1px)',
-          }}
+          borderColor="border.subtle"
+          bg="bg.muted"
           transition="all 0.15s ease"
+          _hover={{
+            borderColor: 'cirqueira.brand.500/40',
+            bg: 'bg.subtle',
+          }}
+          cursor="pointer"
           onClick={(e) => {
             e.stopPropagation()
             onEditarMetadata?.(item, 'data')
           }}
-          cursor="pointer"
-          textAlign="left"
-          title="Clique para editar a data e horário desta mídia"
+          title="Clique para editar a data e horário"
         >
           <HStack justify="space-between" align="center" w="full">
             <HStack gap={2}>
               <Box color="cirqueira.brand.400" display="inline-flex">
                 <Calendar size={13} />
               </Box>
-              <Text fontSize="xs" fontWeight="semibold" color="cirqueira.brand.200">
+              <Text fontSize="xs" fontWeight="medium" color="fg">
                 {dataMidia}, {horarioMidia}
               </Text>
             </HStack>
-            <Badge
-              size="xs"
-              variant="subtle"
-              colorPalette="brand"
-              px={1.5}
-              py={0.5}
-              fontSize="10px"
-              fontWeight="bold"
-              borderRadius="md"
-            >
-              EDITAR
-            </Badge>
+
+            <HStack gap={1} color="fg.subtle" fontSize="10px" fontWeight="semibold">
+              <Edit3 size={11} />
+              <Text as="span">Editar</Text>
+            </HStack>
           </HStack>
         </Box>
 
+        {/* Motivo do Erro (se houver) */}
         {item.status === 'erro' && item.erroMotivo && (
           <Box
             borderRadius="lg"
@@ -392,20 +542,66 @@ export const CardVideo = memo(function CardVideo({
           </Box>
         )}
 
+        {/* 3. RODAPÉ DO CARD: Hash, Status Google Fotos e Ações */}
         <Flex
           align="center"
           justify="space-between"
           gap={2}
-          pt={2}
+          pt={2.5}
           mt="auto"
           borderTopWidth="1px"
           borderColor="border.subtle"
         >
-          <Text as="span" fontSize="10px" color="fg.subtle" truncate>
-            #{item.hash.slice(0, 6)}
-          </Text>
+          <HStack gap={2} minW={0}>
+            <Text as="span" fontSize="10px" fontFamily="mono" color="fg.subtle">
+              #{item.hash.slice(0, 6)}
+            </Text>
+
+            {enviadoGoogleFotos && (
+              <Badge
+                size="xs"
+                variant="subtle"
+                colorPalette="green"
+                px={1.5}
+                py={0.2}
+                borderRadius="md"
+                title="Sincronizado no Google Fotos"
+              >
+                <HStack gap={1} alignItems="center">
+                  <Cloud size={10} />
+                  <Text as="span" fontSize="9px">
+                    Fotos
+                  </Text>
+                </HStack>
+              </Badge>
+            )}
+          </HStack>
 
           <HStack gap={1} flexShrink={0}>
+            {/* Forçar Google Fotos se for duplicado ou não sincronizado */}
+            {(ehDuplicado || !enviadoGoogleFotos) && onForcarGoogleFotos && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onForcarGoogleFotos?.(item)
+                }}
+                aria-label="Sincronizar com Google Fotos"
+                title={
+                  ehDuplicado
+                    ? 'Mídia duplicada: Forçar envio para o Google Fotos'
+                    : 'Enviar para o Google Fotos'
+                }
+                color={ehDuplicado ? 'cirqueira.amber.500' : 'fg.subtle'}
+                _hover={{ bg: 'bg.muted', color: 'fg' }}
+                borderRadius="lg"
+              >
+                <CloudUpload size={14} />
+              </IconButton>
+            )}
+
+            {/* Download direto */}
             <IconButton
               size="xs"
               variant="ghost"
@@ -424,52 +620,56 @@ export const CardVideo = memo(function CardVideo({
               )}
             </IconButton>
 
+            {/* Editar metadados */}
             {onEditarMetadata && (
               <IconButton
                 size="xs"
                 variant="ghost"
-                onClick={() => onEditarMetadata(item)}
+                onClick={() => onEditarMetadata?.(item)}
                 aria-label="Editar metadados"
-                title="Editar metadados"
+                title="Editar título, data e metadados"
                 borderRadius="lg"
               >
                 <Edit3 size={14} />
               </IconButton>
             )}
 
+            {/* Categorizar */}
             {onCategorizar && (
               <IconButton
                 size="xs"
                 variant="ghost"
-                onClick={() => onCategorizar(item)}
+                onClick={() => onCategorizar?.(item)}
                 aria-label="Categorizar vídeo"
-                title="Categorizar"
+                title="Atribuir categoria"
                 borderRadius="lg"
               >
                 <FolderPlus size={14} />
               </IconButton>
             )}
 
+            {/* Rebaixar */}
             {onRebaixar && (
               <IconButton
                 size="xs"
                 variant="ghost"
-                onClick={() => onRebaixar(item.uuid)}
-                aria-label="Rebaixar vídeo"
-                title="Baixar novamente"
+                onClick={() => onRebaixar?.(item.uuid)}
+                aria-label="Baixar novamente"
+                title="Rebaixar vídeo"
                 borderRadius="lg"
               >
                 <DownloadCloud size={14} />
               </IconButton>
             )}
 
+            {/* Retentar se erro */}
             {item.status === 'erro' && onRetentar && (
               <IconButton
                 size="xs"
                 variant="ghost"
-                onClick={() => onRetentar(item.uuid)}
+                onClick={() => onRetentar?.(item.uuid)}
                 aria-label="Retentar processamento"
-                title="Retentar"
+                title="Retentar download"
                 borderRadius="lg"
               >
                 <Box as="span" color="cirqueira.amber.500" display="inline-flex">
@@ -478,13 +678,14 @@ export const CardVideo = memo(function CardVideo({
               </IconButton>
             )}
 
+            {/* Apagar */}
             {onApagar && (
               <IconButton
                 size="xs"
                 variant="ghost"
-                onClick={() => onApagar(item.uuid)}
+                onClick={() => onApagar?.(item.uuid)}
                 aria-label="Apagar vídeo"
-                title="Apagar"
+                title="Excluir vídeo"
                 borderRadius="lg"
               >
                 <Box as="span" color="cirqueira.red.500" display="inline-flex">
