@@ -269,15 +269,6 @@ final class MediaItemController extends DefaultController
             return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
-        if (null !== $mediaItem->thumbnailUrl() && '' !== $mediaItem->thumbnailUrl()) {
-            return new RedirectResponse($mediaItem->thumbnailUrl());
-        }
-
-        $metaThumb = $mediaItem->metadata()['thumbnail'] ?? null;
-        if (is_string($metaThumb) && '' !== $metaThumb) {
-            return new RedirectResponse($metaThumb);
-        }
-
         try {
             $arquivoMidia = $this->obterArquivoMidiaService->obterParaStream($uuid);
             $caminhoFisico = $arquivoMidia->caminhoFisico();
@@ -320,7 +311,16 @@ final class MediaItemController extends DefaultController
                 }
             }
         } catch (\Throwable) {
-            // Se o arquivo físico não estiver disponível no disco, prossegue com 404
+            // Se o arquivo físico não estiver disponível, tenta URL remota
+        }
+
+        if (null !== $mediaItem->thumbnailUrl() && '' !== $mediaItem->thumbnailUrl()) {
+            return new RedirectResponse($mediaItem->thumbnailUrl());
+        }
+
+        $metaThumb = $mediaItem->metadata()['thumbnail'] ?? null;
+        if (is_string($metaThumb) && '' !== $metaThumb) {
+            return new RedirectResponse($metaThumb);
         }
 
         return new Response(null, Response::HTTP_NOT_FOUND);

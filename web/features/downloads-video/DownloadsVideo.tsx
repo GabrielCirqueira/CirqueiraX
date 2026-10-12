@@ -59,6 +59,7 @@ export default function DownloadsVideo() {
   const [origemFiltro, setOrigemFiltro] = useState<string>('')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
+  const [porPagina, setPorPagina] = useState<number>(50)
   const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'lista'>('grid')
 
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
@@ -81,7 +82,7 @@ export default function DownloadsVideo() {
   const filtros = useMemo<FiltrosMediaItem>(() => {
     const obj: FiltrosMediaItem = {
       pagina,
-      porPagina: 12,
+      porPagina,
       tipo: 'video',
     }
     if (busca.trim()) {
@@ -97,7 +98,7 @@ export default function DownloadsVideo() {
       obj.categoriaId = categoriaFiltro
     }
     return obj
-  }, [pagina, busca, statusFiltro, origemFiltro, categoriaFiltro])
+  }, [pagina, porPagina, busca, statusFiltro, origemFiltro, categoriaFiltro])
 
   const { data: respostaPaginada, isLoading, isFetching, refetch } = useMediaItens(filtros)
   const { data: categorias = [] } = useCategorias()
@@ -123,8 +124,8 @@ export default function DownloadsVideo() {
 
   const itens = respostaPaginada?.data ?? []
   const total = respostaPaginada?.total ?? 0
-  const porPagina = respostaPaginada?.porPagina ?? 12
-  const totalPaginas = Math.ceil(total / porPagina) || 1
+  const limitePorPagina = respostaPaginada?.porPagina ?? porPagina
+  const totalPaginas = Math.ceil(total / limitePorPagina) || 1
 
   const itensSelecionados = useMemo(
     () => itens.filter((i) => selecionados.includes(i.uuid)),
@@ -708,10 +709,37 @@ export default function DownloadsVideo() {
             pt={3}
             borderTopWidth="1px"
             borderColor="border.subtle"
+            flexWrap="wrap"
           >
-            <Text fontSize="xs" color="fg.subtle">
-              Mostrando {itens.length} de {total} registros (Página {pagina} de {totalPaginas})
-            </Text>
+            <HStack gap={4} align="center" flexWrap="wrap">
+              <Text fontSize="xs" color="fg.subtle">
+                Mostrando {itens.length} de {total} registros (Página {pagina} de {totalPaginas})
+              </Text>
+
+              <HStack gap={1} align="center">
+                <Text fontSize="xs" color="fg.subtle">
+                  Por página:
+                </Text>
+                {[25, 50, 100].map((qtd) => (
+                  <Button
+                    key={qtd}
+                    size="xs"
+                    variant={porPagina === qtd ? 'solid' : 'ghost'}
+                    colorPalette={porPagina === qtd ? 'brand' : undefined}
+                    onClick={() => {
+                      setPorPagina(qtd)
+                      setPagina(1)
+                    }}
+                    borderRadius="md"
+                    h={6}
+                    px={2}
+                    fontSize="xs"
+                  >
+                    {qtd}
+                  </Button>
+                ))}
+              </HStack>
+            </HStack>
 
             <HStack gap={2}>
               <Button

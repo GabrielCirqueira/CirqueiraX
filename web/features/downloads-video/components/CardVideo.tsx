@@ -79,6 +79,7 @@ export const CardVideo = memo(function CardVideo({
   onForcarGoogleFotos,
 }: CardVideoProps) {
   const [erroImagem, setErroImagem] = useState(false)
+  const [usarFallbackApi, setUsarFallbackApi] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [baixando, setBaixando] = useState(false)
 
@@ -96,11 +97,21 @@ export const CardVideo = memo(function CardVideo({
         ? (item.metadata?.agente_nome as string) || 'Dispositivo Pessoal'
         : 'Canal não informado'
   const extensao = extrairExtensaoMedia(item)
+  const urlApiThumbnail = item.uuid ? obterUrlThumbnailMediaItem(item.uuid) : undefined
   const urlThumbnail =
+    (usarFallbackApi ? urlApiThumbnail : null) ||
     item.thumbnailUrl ||
     (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined) ||
-    (ehImagem ? obterUrlStreamMediaItem(item.uuid) : obterUrlThumbnailMediaItem(item.uuid))
+    (ehImagem ? obterUrlStreamMediaItem(item.uuid) : urlApiThumbnail)
   const temThumbnail = Boolean(urlThumbnail) && !erroImagem
+
+  const handleErroImagem = () => {
+    if (!usarFallbackApi && urlApiThumbnail && urlThumbnail !== urlApiThumbnail) {
+      setUsarFallbackApi(true)
+    } else {
+      setErroImagem(true)
+    }
+  }
   const urlOriginal =
     typeof item.metadata?.url_original === 'string' ? item.metadata.url_original : undefined
   const dataString = typeof item.metadata?.data === 'string' ? item.metadata.data : undefined
@@ -160,7 +171,7 @@ export const CardVideo = memo(function CardVideo({
             src={urlThumbnail}
             alt={titulo}
             referrerPolicy="no-referrer"
-            onError={() => setErroImagem(true)}
+            onError={handleErroImagem}
             style={{
               width: '100%',
               height: '100%',
