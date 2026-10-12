@@ -57,6 +57,7 @@
 | :--- | :--- |
 | [ops/DOCKER.md](ops/DOCKER.md) | Compose, imagens, portas (`ports.env`) e storage externo |
 | [ops/DEPLOY.md](ops/DEPLOY.md) | Produção, Nginx reverse proxy, SSL e deploy automático |
+| [ops/DEPLOY_PRODUCAO.md](ops/DEPLOY_PRODUCAO.md) | Arquitetura real de produção na VPS, Syncthing, migração segura e atualizações contínuas |
 | [ops/MAKEFILE.md](ops/MAKEFILE.md) | Comandos `make …` disponíveis |
 | [ops/CLI.md](ops/CLI.md) | Scripts de console e automação |
 | [ops/FORMATTING.md](ops/FORMATTING.md) | Biome e PHP-CS-Fixer |
