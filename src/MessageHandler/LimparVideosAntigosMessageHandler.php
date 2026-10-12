@@ -25,9 +25,9 @@ final readonly class LimparVideosAntigosMessageHandler
 
         $resultado = $this->limparVideosAntigosService->executar($message->dias(), false);
 
-        $this->logger?->info('Rotina de expurgo de vídeos antigos finalizada', [
+        $this->logger?->info('Rotina de limpeza de vídeos do sistema finalizada', [
             'totalAnalisados' => $resultado['totalAnalisados'],
-            'totalExpurgados' => $resultado['totalExpurgados'],
+            'totalRemovidos' => $resultado['totalRemovidos'],
             'espacoLiberado' => $resultado['espacoLiberadoFormatado'],
             'erros' => count($resultado['erros']),
         ]);

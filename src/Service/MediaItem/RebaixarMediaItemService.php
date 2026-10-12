@@ -141,8 +141,8 @@ final readonly class RebaixarMediaItemService
         $this->preservarDataModificacaoArquivo($caminhoDestinoFinal, $metadata, $mediaItem);
 
         // Atualiza a entidade mantendo todos os metadados existentes
+        unset($metadata[MetadataKeys::ARQUIVO_REMOVIDO_EM], $metadata[MetadataKeys::ARQUIVO_EXPURGADO_EM]);
         $metadata[MetadataKeys::TAMANHO_BYTES] = (int) @filesize($caminhoDestinoFinal);
-        unset($metadata[MetadataKeys::ARQUIVO_EXPURGADO_EM]);
         $metadata['rebaixado_em'] = (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
 
         $mediaItem->setMetadata($metadata);

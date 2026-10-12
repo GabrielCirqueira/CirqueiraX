@@ -432,9 +432,14 @@ class MediaItem
         return 0;
     }
 
+    public function isArquivoRemovido(): bool
+    {
+        return StatusMediaItem::ARQUIVO_REMOVIDO === $this->status || StatusMediaItem::ARQUIVO_EXPURGADO === $this->status;
+    }
+
     public function isArquivoExpurgado(): bool
     {
-        return StatusMediaItem::ARQUIVO_EXPURGADO === $this->status;
+        return $this->isArquivoRemovido();
     }
 
     public function isPrint(): bool

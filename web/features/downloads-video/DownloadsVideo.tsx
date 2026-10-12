@@ -581,15 +581,15 @@ export default function DownloadsVideo() {
               </Button>
               <Button
                 size="xs"
-                variant={statusFiltro === 'arquivo_expurgado' ? 'solid' : 'ghost'}
-                colorPalette={statusFiltro === 'arquivo_expurgado' ? 'orange' : 'gray'}
-                onClick={() => handleFiltrarRapidoStatus('arquivo_expurgado')}
+                variant={statusFiltro === 'arquivo_removido' || statusFiltro === 'arquivo_expurgado' ? 'solid' : 'ghost'}
+                colorPalette={statusFiltro === 'arquivo_removido' || statusFiltro === 'arquivo_expurgado' ? 'orange' : 'gray'}
+                onClick={() => handleFiltrarRapidoStatus('arquivo_removido')}
                 borderRadius="md"
                 fontSize="xs"
                 h={8}
                 px={3}
               >
-                Espaço Liberado
+                Arquivo Removido
               </Button>
             </HStack>
 
@@ -609,7 +609,7 @@ export default function DownloadsVideo() {
                 >
                   <option value="">Todos os status</option>
                   <option value="concluido">Concluídos</option>
-                  <option value="arquivo_expurgado">Espaço Liberado</option>
+                  <option value="arquivo_removido">Arquivo Removido</option>
                   <option value="baixando">Baixando</option>
                   <option value="em_fila">Em Fila</option>
                   <option value="erro">Com Erro</option>

@@ -434,7 +434,7 @@ const CentralMidias = memo(function CentralMidias() {
                   <option value="todos">Todos Status</option>
                   <option value="classificado">Classificados</option>
                   <option value="sem_categoria">Sem Categoria</option>
-                  <option value="arquivo_expurgado">Espaço Liberado</option>
+                  <option value="arquivo_removido">Arquivo Removido</option>
                   <option value="erro">Com Erro</option>
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />

@@ -328,7 +328,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           {infoOrigem.label}
         </Badge>
 
-        {item.status === 'arquivo_expurgado' && (
+        {(item.status === 'arquivo_removido' || item.status === 'arquivo_expurgado') && (
           <Badge
             size="xs"
             variant="solid"
@@ -339,10 +339,10 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             py={0.5}
             fontSize="9px"
             fontWeight="bold"
-            title="Arquivo físico expurgado para liberar espaço no disco da VPS. Metadados e miniatura preservados."
+            title="Arquivo de vídeo removido do sistema para economizar espaço. Metadados e miniatura preservados."
           >
             <HardDrive size={10} style={{ marginRight: '3px', display: 'inline' }} />
-            Espaço Liberado
+            Arquivo Removido
           </Badge>
         )}
 

@@ -83,6 +83,7 @@ export const CardVideo = memo(function CardVideo({
   const [baixando, setBaixando] = useState(false)
 
   const statusInfo = obterStatusConfig(item.status)
+  const ehArquivoRemovido = item.status === 'arquivo_removido' || item.status === 'arquivo_expurgado'
   const ehImagem = verificarSeEhImagem(item)
   const duracaoNumero =
     typeof item.metadata?.duracao === 'number' ? item.metadata.duracao : undefined
@@ -304,7 +305,7 @@ export const CardVideo = memo(function CardVideo({
                 <AlertCircle size={11} />
               ) : item.status === 'concluido' ? (
                 <CheckCircle2 size={11} />
-              ) : item.status === 'arquivo_expurgado' ? (
+              ) : ehArquivoRemovido ? (
                 <HardDrive size={11} />
               ) : (
                 <Clock size={11} />
@@ -592,15 +593,15 @@ export const CardVideo = memo(function CardVideo({
               size="xs"
               variant="ghost"
               onClick={handleDownloadDirecto}
-              disabled={baixando || item.status === 'arquivo_expurgado'}
-              aria-label={item.status === 'arquivo_expurgado' ? 'Espaço liberado' : 'Baixar arquivo MP4'}
+              disabled={baixando || ehArquivoRemovido}
+              aria-label={ehArquivoRemovido ? 'Arquivo removido do sistema' : 'Baixar arquivo MP4'}
               title={
-                item.status === 'arquivo_expurgado'
-                  ? 'Arquivo físico expurgado para liberar espaço na VPS. Clique no botão ao lado para Rebaixar.'
+                ehArquivoRemovido
+                  ? 'Arquivo de vídeo removido do sistema para liberar espaço. Clique no botão ao lado para Rebaixar.'
                   : 'Baixar arquivo MP4'
               }
-              color={item.status === 'arquivo_expurgado' ? 'fg.subtle' : 'cirqueira.brand.500'}
-              _hover={item.status === 'arquivo_expurgado' ? undefined : { bg: 'cirqueira.brand.500/10' }}
+              color={ehArquivoRemovido ? 'fg.subtle' : 'cirqueira.brand.500'}
+              _hover={ehArquivoRemovido ? undefined : { bg: 'cirqueira.brand.500/10' }}
               borderRadius="lg"
             >
               {baixando ? (
@@ -639,14 +640,14 @@ export const CardVideo = memo(function CardVideo({
             {onRebaixar && (
               <IconButton
                 size="xs"
-                variant={item.status === 'arquivo_expurgado' ? 'subtle' : 'ghost'}
-                colorPalette={item.status === 'arquivo_expurgado' ? 'orange' : undefined}
-                color={item.status === 'arquivo_expurgado' ? 'cirqueira.amber.400' : undefined}
+                variant={ehArquivoRemovido ? 'subtle' : 'ghost'}
+                colorPalette={ehArquivoRemovido ? 'orange' : undefined}
+                color={ehArquivoRemovido ? 'cirqueira.amber.400' : undefined}
                 onClick={() => onRebaixar?.(item.uuid)}
                 aria-label="Baixar novamente"
                 title={
-                  item.status === 'arquivo_expurgado'
-                    ? 'Rebaixar vídeo (Espaço Liberado: baixar novamente preservando datas e metadados)'
+                  ehArquivoRemovido
+                    ? 'Rebaixar vídeo (Arquivo Removido: baixar novamente preservando datas e metadados)'
                     : 'Rebaixar vídeo'
                 }
                 borderRadius="lg"

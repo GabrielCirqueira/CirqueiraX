@@ -163,8 +163,9 @@ export function obterStatusConfig(status: StatusMediaItem): StatusConfig {
       return { label: 'Concluído', colorPalette: 'green', animado: false }
     case 'erro':
       return { label: 'Erro', colorPalette: 'red', animado: false }
+    case 'arquivo_removido':
     case 'arquivo_expurgado':
-      return { label: 'Espaço Liberado', colorPalette: 'orange', animado: false }
+      return { label: 'Arquivo Removido', colorPalette: 'orange', animado: false }
     default:
       return { label: status, colorPalette: 'gray', animado: false }
   }

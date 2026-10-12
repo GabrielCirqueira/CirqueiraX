@@ -39,6 +39,7 @@ final class MetadataKeys
     public const string DATA_DETECCAO_DUPLICADO = 'data_deteccao_duplicado';
     public const string TENTATIVAS_DUPLICADAS = 'tentativas_duplicadas';
 
+    public const string ARQUIVO_REMOVIDO_EM = 'arquivo_removido_em';
     public const string ARQUIVO_EXPURGADO_EM = 'arquivo_expurgado_em';
     public const string CAMINHO_LOCAL_ANTERIOR = 'caminho_local_anterior';
 }

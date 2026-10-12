@@ -9,6 +9,7 @@ export type StatusMediaItem =
   | 'enviando_google_fotos'
   | 'concluido'
   | 'erro'
+  | 'arquivo_removido'
   | 'arquivo_expurgado'
 
 export type OrigemMedia = 'print_empresa' | 'print_pessoal' | 'bot_telegram' | 'download' | 'manual'

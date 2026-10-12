@@ -429,20 +429,27 @@ class MediaItemRepository extends ServiceEntityRepository
     }
 
     /**
+     * Busca vídeos no sistema (downloads/temporários) aptos para liberação de espaço,
+     * garantindo estritamente que arquivos da pasta de sincronização com o celular (Syncthing /var/storage) NUNCA sejam selecionados.
+     *
      * @return list<MediaItem>
      */
-    public function buscarVideosParaExpurgo(\DateTimeImmutable $dataLimite): array
+    public function buscarVideosParaLimpezaDoSistema(\DateTimeImmutable $dataLimite): array
     {
         $qb = $this->createQueryBuilder('m')
             ->where('m.criadoEm <= :dataLimite')
-            ->andWhere('m.status IN (:statusValidos)')
+            ->andWhere('m.status NOT IN (:statusJaRemovidos)')
             ->andWhere("(m.origem IN ('download', 'bot_telegram') OR m.caminhoLocal LIKE '%.mp4' OR m.caminhoLocal LIKE '%.mkv' OR m.caminhoLocal LIKE '%.webm' OR m.caminhoLocal LIKE '%.mov' OR m.metadata LIKE '%video/%')")
             ->andWhere("m.origem NOT IN ('print_pessoal', 'print_empresa')")
             ->andWhere('m.caminhoLocal IS NOT NULL')
+            // Proteção estrita: NUNCA apagar da pasta sincronizada com o celular (Syncthing /var/storage)
+            ->andWhere("m.caminhoLocal NOT LIKE '%/var/storage/%'")
+            ->andWhere("m.caminhoLocal NOT LIKE '%var/storage/%'")
+            ->andWhere("m.caminhoLocal NOT LIKE '%sync_media/%'")
             ->setParameter('dataLimite', $dataLimite)
-            ->setParameter('statusValidos', [
-                StatusMediaItem::CONCLUIDO->value,
-                StatusMediaItem::DISTRIBUIDO_LOCAL->value,
+            ->setParameter('statusJaRemovidos', [
+                StatusMediaItem::ARQUIVO_REMOVIDO->value,
+                StatusMediaItem::ARQUIVO_EXPURGADO->value,
             ])
             ->orderBy('m.criadoEm', 'ASC');
 
@@ -450,5 +457,13 @@ class MediaItemRepository extends ServiceEntityRepository
         $itens = $qb->getQuery()->getResult();
 
         return $itens;
+    }
+
+    /**
+     * @return list<MediaItem>
+     */
+    public function buscarVideosParaExpurgo(\DateTimeImmutable $dataLimite): array
+    {
+        return $this->buscarVideosParaLimpezaDoSistema($dataLimite);
     }
 }
