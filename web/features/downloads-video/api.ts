@@ -141,3 +141,14 @@ export async function baixarArquivoMidia(
   document.body.removeChild(link)
   window.URL.revokeObjectURL(url)
 }
+
+export async function forcarSincronizacaoGoogleFotos(
+  uuid: string,
+  categoriaId?: string
+): Promise<MediaItem> {
+  const { data } = await api.post<RespostaApi<MediaItem>>(
+    `/api/v1/media-itens/${uuid}/forcar-google-fotos`,
+    categoriaId ? { categoriaId } : {}
+  )
+  return data.data
+}

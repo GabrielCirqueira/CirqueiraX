@@ -34,6 +34,7 @@ final class MetadataKeys
     public const string GOOGLE_PHOTOS_ID = 'google_photos_id';
     public const string GOOGLE_PHOTOS_ALBUM_ID = 'google_photos_album_id';
     public const string GOOGLE_PHOTOS_UPLOADED_AT = 'google_photos_uploaded_at';
+    public const string GOOGLE_PHOTOS_FORCADO = 'google_photos_forcado';
 
     // Rastreamento de duplicidade
     public const string DUPLICADO = 'duplicado';

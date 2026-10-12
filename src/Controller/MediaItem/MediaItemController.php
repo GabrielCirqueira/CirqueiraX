@@ -13,7 +13,10 @@ use App\DataObject\DistribuirHorariosLoteDTO;
 use App\DataObject\FiltrarMediaItemDTO;
 use App\DataObject\RebaixarLoteDTO;
 use App\DataObject\UploadManualDTO;
+use App\Repository\CategoriaRepository;
+use App\Repository\MediaItemRepository;
 use App\Serializer\MediaItemSerializer;
+use App\Service\GoogleFotos\EnviarGoogleFotosService;
 use App\Service\MediaItem\ApagarMediaItemService;
 use App\Service\MediaItem\AtualizarMetadataMediaItemService;
 use App\Service\MediaItem\ClassificarMediaItemService;
@@ -44,6 +47,9 @@ final class MediaItemController extends DefaultController
         private readonly UploadManualService $uploadManualService,
         private readonly ObterArquivoMidiaService $obterArquivoMidiaService,
         private readonly MediaItemSerializer $mediaItemSerializer,
+        private readonly EnviarGoogleFotosService $enviarGoogleFotosService,
+        private readonly CategoriaRepository $categoriaRepository,
+        private readonly MediaItemRepository $mediaItemRepository,
     ) {}
 
     #[Route('', name: 'listar', methods: ['GET'])]
@@ -160,6 +166,38 @@ final class MediaItemController extends DefaultController
         $mediaItem = $this->retentarMediaItemService->retentar($uuid);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+    }
+
+    #[Route('/{uuid}/forcar-google-fotos', name: 'forcar_google_fotos', methods: ['POST'])]
+    public function forcarGoogleFotos(string $uuid, Request $request): Response
+    {
+        $corpo = json_decode((string) $request->getContent(), true);
+        $categoriaId = is_array($corpo) && isset($corpo['categoriaId']) ? (string) $corpo['categoriaId'] : null;
+
+        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
+        if (null !== $categoriaId && '' !== trim($categoriaId)) {
+            $categoria = $this->categoriaRepository->buscarPorUuid($categoriaId);
+            if (null !== $categoria) {
+                $mediaItem->setCategoriaId($categoriaId);
+                $this->mediaItemRepository->salvar($mediaItem);
+            }
+        }
+
+        if (null === $mediaItem->categoriaId() || '' === trim($mediaItem->categoriaId())) {
+            return $this->unprocessable('categoria_obrigatoria', [
+                'categoriaId' => 'Selecione uma categoria para vincular ao álbum do Google Fotos.',
+            ]);
+        }
+
+        try {
+            $itemAtualizado = $this->enviarGoogleFotosService->executar($uuid, forcarUpload: true);
+        } catch (\Throwable $e) {
+            return $this->error($e->getMessage(), Response::HTTP_BAD_REQUEST, [
+                'motivo' => $e->getMessage(),
+            ]);
+        }
+
+        return $this->success($this->mediaItemSerializer->normalizar($itemAtualizado));
     }
 
     #[Route('/{uuid}/stream', name: 'stream', methods: ['GET'])]

@@ -41,6 +41,9 @@ export interface MediaItem {
   statusDescricao: string
   caminhoLocal: string | null
   googlePhotosMediaId: string | null
+  isEnviadoGoogleFotos?: boolean
+  isDuplicado?: boolean
+  tamanhoBytes?: number | null
   categoriaId: string | null
   categoria: CategoriaVinculada | null
   thumbnailUrl: string | null

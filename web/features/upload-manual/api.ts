@@ -30,10 +30,22 @@ export async function enviarArquivoUpload({
     }
   )
 
-  const ehDuplicado = data.data._warning === 'item_duplicado_existente'
+  const ehDuplicado =
+    data.data._warning === 'item_duplicado_existente' || Boolean(data.data.isDuplicado)
 
   return {
     mediaItem: data.data,
     ehDuplicado,
   }
+}
+
+export async function forcarSincronizacaoGoogleFotos(
+  uuid: string,
+  categoriaId?: string
+): Promise<MediaItem> {
+  const { data } = await api.post<RespostaApi<MediaItem>>(
+    `/api/v1/media-itens/${uuid}/forcar-google-fotos`,
+    categoriaId ? { categoriaId } : {}
+  )
+  return data.data
 }

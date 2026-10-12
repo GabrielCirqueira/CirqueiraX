@@ -72,12 +72,22 @@ final readonly class UploadManualService
         );
 
         if (null !== $existente) {
-            $this->armazenamentoClient->remover($caminhoArquivo);
+            $caminhoExistente = $existente->caminhoLocal();
+            if (null === $caminhoExistente || !file_exists($caminhoExistente)) {
+                $existente->setCaminhoLocal($caminhoArquivo);
+            } else {
+                $this->armazenamentoClient->remover($caminhoArquivo);
+            }
 
             $tentativas = ((int) ($existente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
             $existente->adicionarMetadata(MetadataKeys::TENTATIVAS_DUPLICADAS, $tentativas);
             $existente->adicionarMetadata(MetadataKeys::DATA_DETECCAO_DUPLICADO, (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM));
             $existente->mesclarMetadata($metadataExtraida);
+
+            if (null !== $dto->categoriaId() && '' !== trim($dto->categoriaId()) && null === $existente->categoriaId()) {
+                $existente->setCategoriaId($dto->categoriaId());
+            }
+
             $this->mediaItemRepository->salvar($existente);
 
             return new ResultadoUploadDTO(

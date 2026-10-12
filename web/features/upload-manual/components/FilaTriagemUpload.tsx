@@ -14,7 +14,9 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import {
+  AlertTriangle,
   CheckSquare,
+  CloudUpload,
   FileImage,
   FileVideo,
   FolderPlus,
@@ -41,6 +43,7 @@ export interface FilaTriagemUploadProps {
   onCategorizarEmLote: (categoriaId: string) => void
   onApagarEmLote: () => void
   onRetentar: (uuid: string) => void
+  onForcarGoogleFotos?: (item: MediaItem) => void
   filtroStatus: string
   onMudarFiltroStatus: (status: string) => void
   busca: string
@@ -58,6 +61,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
   onCategorizarEmLote,
   onApagarEmLote,
   onRetentar,
+  onForcarGoogleFotos,
   filtroStatus,
   onMudarFiltroStatus,
   busca,
@@ -298,7 +302,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       {nomeExibicao}
                     </Text>
 
-                    <HStack gap={2} w="full">
+                    <HStack gap={2} w="full" wrap="wrap">
                       {item.categoria ? (
                         <Badge
                           variant="subtle"
@@ -321,6 +325,21 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                           borderRadius="md"
                         >
                           Sem Categoria
+                        </Badge>
+                      )}
+
+                      {Boolean(item.isDuplicado || item.metadata?.duplicado) && (
+                        <Badge
+                          variant="subtle"
+                          colorPalette="amber"
+                          px={2}
+                          py={0.5}
+                          borderRadius="md"
+                        >
+                          <HStack gap={1} alignItems="center">
+                            <AlertTriangle size={11} />
+                            <Text as="span">Duplicado</Text>
+                          </HStack>
                         </Badge>
                       )}
 
@@ -376,7 +395,25 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                     {item.statusDescricao ?? item.status}
                   </Text>
 
-                  <HStack gap={1}>
+                  <HStack gap={1.5}>
+                    {Boolean(item.isDuplicado || item.metadata?.duplicado) && onForcarGoogleFotos && (
+                      <Button
+                        size="xs"
+                        variant="subtle"
+                        colorPalette="amber"
+                        onClick={() => onForcarGoogleFotos(item)}
+                        fontSize="11px"
+                        fontWeight="semibold"
+                        p={1.5}
+                        px={2}
+                        borderRadius="md"
+                        title="Sincronizar com Google Fotos mesmo sendo duplicado"
+                      >
+                        <CloudUpload size={13} style={{ marginRight: '4px' }} />
+                        <Text as="span">Forçar Google Fotos</Text>
+                      </Button>
+                    )}
+
                     {item.status === 'erro' && (
                       <Button
                         size="xs"

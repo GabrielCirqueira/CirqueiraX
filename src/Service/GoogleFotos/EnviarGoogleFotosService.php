@@ -29,15 +29,15 @@ final readonly class EnviarGoogleFotosService
         private ?LoggerInterface $logger = null,
     ) {}
 
-    public function executar(string $mediaItemUuid): MediaItem
+    public function executar(string $mediaItemUuid, bool $forcarUpload = false): MediaItem
     {
         $mediaItem = $this->mediaItemRepository->buscarPorUuid($mediaItemUuid);
         if (null === $mediaItem) {
             throw MediaItemException::midiaNaoEncontradaPorUuid();
         }
 
-        // 1. VERIFICAÇÃO DE DUPLICIDADE: Se este item já foi enviado ao Google Fotos, nunca envia novamente
-        if ($mediaItem->isEnviadoGoogleFotos()) {
+        // 1. VERIFICAÇÃO DE DUPLICIDADE: Se este item já foi enviado ao Google Fotos, nunca envia novamente (a menos que explicitamente forçado pelo usuário)
+        if (!$forcarUpload && $mediaItem->isEnviadoGoogleFotos()) {
             $this->logger?->info('Mídia já possui upload no Google Fotos concluído, ignorando upload repetido.', [
                 'uuid' => $mediaItemUuid,
                 'googlePhotosMediaId' => $mediaItem->googleFotosId(),
@@ -62,68 +62,81 @@ final readonly class EnviarGoogleFotosService
         }
 
         // 2. VERIFICAÇÃO DE DUPLICIDADE ENTRE ITENS: Verifica se outro registro com mesmo hash/MD5/hashVisual já foi enviado
-        $md5 = is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null)
-            ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5]
-            : null;
-        $hashVisual = is_string($mediaItem->metadata()[MetadataKeys::HASH_VISUAL] ?? null)
-            ? (string) $mediaItem->metadata()[MetadataKeys::HASH_VISUAL]
-            : null;
+        if (!$forcarUpload) {
+            $md5 = is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null)
+                ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5]
+                : null;
+            $hashVisual = is_string($mediaItem->metadata()[MetadataKeys::HASH_VISUAL] ?? null)
+                ? (string) $mediaItem->metadata()[MetadataKeys::HASH_VISUAL]
+                : null;
 
-        $outroItemComGoogle = $this->mediaItemRepository->buscarOutroItemComGoogleFotos(
-            $mediaItem->hash(),
-            $mediaItem->uuid(),
-            $md5,
-            $hashVisual
-        );
+            $outroItemComGoogle = $this->mediaItemRepository->buscarOutroItemComGoogleFotos(
+                $mediaItem->hash(),
+                $mediaItem->uuid(),
+                $md5,
+                $hashVisual
+            );
 
-        if (null !== $outroItemComGoogle && $outroItemComGoogle->isEnviadoGoogleFotos()) {
-            $googleMediaId = (string) $outroItemComGoogle->googleFotosId();
-            $mediaItem->setGoogleFotosId($googleMediaId);
+            if (null !== $outroItemComGoogle && $outroItemComGoogle->isEnviadoGoogleFotos()) {
+                $googleMediaId = (string) $outroItemComGoogle->googleFotosId();
+                $mediaItem->setGoogleFotosId($googleMediaId);
 
-            $metadata = $mediaItem->metadata();
-            $metadata[MetadataKeys::GOOGLE_PHOTOS_ID] = $googleMediaId;
-            $metadata[MetadataKeys::DUPLICADO] = true;
-            $metadata[MetadataKeys::DUPLICADO_DE_UUID] = $outroItemComGoogle->uuid()?->toString();
-            $metadata[MetadataKeys::DATA_DETECCAO_DUPLICADO] = (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
-            $metadata[MetadataKeys::GOOGLE_PHOTOS_UPLOADED_AT] = $outroItemComGoogle->metadata()[MetadataKeys::GOOGLE_PHOTOS_UPLOADED_AT]
-                ?? (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
+                $metadata = $mediaItem->metadata();
+                $metadata[MetadataKeys::GOOGLE_PHOTOS_ID] = $googleMediaId;
+                $metadata[MetadataKeys::DUPLICADO] = true;
+                $metadata[MetadataKeys::DUPLICADO_DE_UUID] = $outroItemComGoogle->uuid()?->toString();
+                $metadata[MetadataKeys::DATA_DETECCAO_DUPLICADO] = (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
+                $metadata[MetadataKeys::GOOGLE_PHOTOS_UPLOADED_AT] = $outroItemComGoogle->metadata()[MetadataKeys::GOOGLE_PHOTOS_UPLOADED_AT]
+                    ?? (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
 
-            $this->logger?->info('Arquivo duplicado detectado com upload prévio no Google Fotos. Reutilizando mediaId existente.', [
-                'uuid' => $mediaItemUuid,
-                'originalUuid' => $outroItemComGoogle->uuid()?->toString(),
-                'googleMediaId' => $googleMediaId,
-            ]);
-
-            // Se pertencer a outra categoria com álbum diferente, associa ao álbum sem enviar os bytes novamente
-            try {
-                $conta = $this->contaRepository->buscarContaAtiva();
-                if (null !== $conta) {
-                    $token = $this->oAuthService->obterAccessTokenValido($conta);
-                    $albumId = $this->albumService->obterOuCriarAlbumId($categoria);
-                    $albumOriginal = $outroItemComGoogle->metadata()[MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID] ?? null;
-
-                    if ($albumId !== $albumOriginal && !TextoUtil::estaEmBranco($albumId)) {
-                        $this->googleFotosApi->adicionarItensAoAlbum($token, $albumId, [$googleMediaId]);
-                        $metadata[MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID] = $albumId;
-                    }
-                }
-            } catch (\Throwable $e) {
-                $this->logger?->warning('Não foi possível associar item duplicado ao álbum da nova categoria', [
+                $this->logger?->info('Arquivo duplicado detectado com upload prévio no Google Fotos. Reutilizando mediaId existente.', [
                     'uuid' => $mediaItemUuid,
-                    'error' => $e->getMessage(),
+                    'originalUuid' => $outroItemComGoogle->uuid()?->toString(),
+                    'googleMediaId' => $googleMediaId,
                 ]);
+
+                // Se pertencer a outra categoria com álbum diferente, associa ao álbum sem enviar os bytes novamente
+                try {
+                    $conta = $this->contaRepository->buscarContaAtiva();
+                    if (null !== $conta) {
+                        $token = $this->oAuthService->obterAccessTokenValido($conta);
+                        $albumId = $this->albumService->obterOuCriarAlbumId($categoria);
+                        $albumOriginal = $outroItemComGoogle->metadata()[MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID] ?? null;
+
+                        if ($albumId !== $albumOriginal && !TextoUtil::estaEmBranco($albumId)) {
+                            $this->googleFotosApi->adicionarItensAoAlbum($token, $albumId, [$googleMediaId]);
+                            $metadata[MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID] = $albumId;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    $this->logger?->warning('Não foi possível associar item duplicado ao álbum da nova categoria', [
+                        'uuid' => $mediaItemUuid,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+
+                $mediaItem->setMetadata($metadata);
+                $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
+                $this->mediaItemRepository->salvar($mediaItem);
+
+                return $mediaItem;
             }
-
-            $mediaItem->setMetadata($metadata);
-            $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
-            $this->mediaItemRepository->salvar($mediaItem);
-
-            return $mediaItem;
         }
 
         $caminhoLocal = $mediaItem->caminhoLocal();
         if (TextoUtil::estaEmBranco($caminhoLocal) || !file_exists((string) $caminhoLocal)) {
-            throw MediaItemException::arquivoDeOrigemNaoEncontrado();
+            // Tenta localizar arquivo se for duplicado com caminho em outro item
+            $outroItem = $this->mediaItemRepository->buscarDuplicado(
+                $mediaItem->hash(),
+                is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null) ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5] : null,
+                $mediaItem->tamanhoBytes()
+            );
+            if (null !== $outroItem && !TextoUtil::estaEmBranco($outroItem->caminhoLocal()) && file_exists((string) $outroItem->caminhoLocal())) {
+                $caminhoLocal = $outroItem->caminhoLocal();
+                $mediaItem->setCaminhoLocal((string) $caminhoLocal);
+            } else {
+                throw MediaItemException::arquivoDeOrigemNaoEncontrado();
+            }
         }
 
         $conta = $this->contaRepository->buscarContaAtiva();
@@ -179,6 +192,9 @@ final readonly class EnviarGoogleFotosService
         $metadata[MetadataKeys::GOOGLE_PHOTOS_ID] = $googleMediaId;
         $metadata[MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID] = $albumId;
         $metadata[MetadataKeys::GOOGLE_PHOTOS_UPLOADED_AT] = (new \DateTimeImmutable())->format(\DateTimeInterface::ATOM);
+        if ($forcarUpload) {
+            $metadata[MetadataKeys::GOOGLE_PHOTOS_FORCADO] = true;
+        }
         $mediaItem->setMetadata($metadata);
 
         $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);

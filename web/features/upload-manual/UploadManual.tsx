@@ -15,6 +15,7 @@ import { memo, useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DropzoneUpload } from './components/DropzoneUpload'
 import { FilaTriagemUpload } from './components/FilaTriagemUpload'
+import { ModalConfirmarSincronizacaoDuplicado } from './components/ModalConfirmarSincronizacaoDuplicado'
 import { useUploadManual } from './hooks/useUploadManual'
 
 const UploadManual = memo(function UploadManual() {
@@ -27,6 +28,8 @@ const UploadManual = memo(function UploadManual() {
     fila,
     estaProcessando,
     categoriaPadraoId,
+    itemDuplicadoPendente,
+    sincronizandoDuplicado,
     setCategoriaPadraoId,
     adicionarArquivos,
     removerArquivo,
@@ -34,6 +37,9 @@ const UploadManual = memo(function UploadManual() {
     limparConcluidos,
     enviarTodosPendentes,
     reenviarItemIndividual,
+    abrirConfirmacaoDuplicado,
+    fecharConfirmacaoDuplicado,
+    confirmarSincronizacaoDuplicado,
   } = useUploadManual()
 
   const { data: categorias = [] } = useQuery({
@@ -183,6 +189,7 @@ const UploadManual = memo(function UploadManual() {
           onLimparConcluidos={limparConcluidos}
           onEnviarTodos={enviarTodosPendentes}
           onReenviarItem={reenviarItemIndividual}
+          onAbrirConfirmacaoDuplicado={abrirConfirmacaoDuplicado}
         />
 
         <VStack
@@ -216,12 +223,35 @@ const UploadManual = memo(function UploadManual() {
             }
             onApagarEmLote={() => mutationApagarLote.mutate(selecionados)}
             onRetentar={(uuid) => mutationRetentar.mutate(uuid)}
+            onForcarGoogleFotos={(item) =>
+              abrirConfirmacaoDuplicado({
+                nome:
+                  item.metadata?.titulo ||
+                  (item.caminhoLocal ? item.caminhoLocal.split('/').pop() || '' : '') ||
+                  item.hash,
+                tamanhoBytes: item.tamanhoBytes ?? undefined,
+                previewUrl: item.thumbnailUrl,
+                mediaItem: item,
+              })
+            }
             filtroStatus={filtroStatus}
             onMudarFiltroStatus={setFiltroStatus}
             busca={busca}
             onMudarBusca={setBusca}
           />
         </VStack>
+
+        <ModalConfirmarSincronizacaoDuplicado
+          aberto={Boolean(itemDuplicadoPendente)}
+          item={itemDuplicadoPendente}
+          categorias={categorias}
+          carregando={sincronizandoDuplicado}
+          onFechar={fecharConfirmacaoDuplicado}
+          onConfirmar={async (categoriaId) => {
+            await confirmarSincronizacaoDuplicado(categoriaId)
+            queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+          }}
+        />
       </Container>
     </AppContainer>
   )

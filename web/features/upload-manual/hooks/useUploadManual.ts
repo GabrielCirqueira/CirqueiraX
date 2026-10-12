@@ -1,12 +1,16 @@
 import { addToast } from '@/shared/components/ui/toaster'
 import { useCallback, useState } from 'react'
-import { enviarArquivoUpload } from '../api'
+import { enviarArquivoUpload, forcarSincronizacaoGoogleFotos } from '../api'
+import type { ItemDuplicadoConfirmacao } from '../components/ModalConfirmarSincronizacaoDuplicado'
 import type { ArquivoFilaUpload } from '../types'
 
 export function useUploadManual() {
   const [fila, setFila] = useState<ArquivoFilaUpload[]>([])
   const [categoriaPadraoId, setCategoriaPadraoId] = useState<string | null>(null)
   const [estaProcessando, setEstaProcessando] = useState(false)
+  const [itemDuplicadoPendente, setItemDuplicadoPendente] =
+    useState<ItemDuplicadoConfirmacao | null>(null)
+  const [sincronizandoDuplicado, setSincronizandoDuplicado] = useState(false)
 
   const gerarPreviewUrl = (file: File): string | null => {
     if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
@@ -112,6 +116,14 @@ export function useUploadManual() {
           title: `"${item.nome}" já existia no banco e foi identificado como duplicado.`,
           color: 'warning',
         })
+        // Abre o modal de confirmação para perguntar se quer sincronizar com o Google Fotos mesmo assim
+        setItemDuplicadoPendente({
+          nome: item.nome,
+          tamanhoBytes: item.tamanhoBytes,
+          tipoMime: item.tipoMime,
+          previewUrl: item.previewUrl,
+          mediaItem: resultado.mediaItem,
+        })
       } else {
         addToast({ title: `"${item.nome}" enviado com sucesso!`, color: 'success' })
       }
@@ -159,10 +171,63 @@ export function useUploadManual() {
     [fila]
   )
 
+  const abrirConfirmacaoDuplicado = useCallback((confirmacao: ItemDuplicadoConfirmacao) => {
+    setItemDuplicadoPendente(confirmacao)
+  }, [])
+
+  const fecharConfirmacaoDuplicado = useCallback(() => {
+    setItemDuplicadoPendente(null)
+  }, [])
+
+  const confirmarSincronizacaoDuplicado = useCallback(
+    async (categoriaId?: string) => {
+      if (!itemDuplicadoPendente?.mediaItem?.uuid) return
+
+      setSincronizandoDuplicado(true)
+      try {
+        const itemAtualizado = await forcarSincronizacaoGoogleFotos(
+          itemDuplicadoPendente.mediaItem.uuid,
+          categoriaId
+        )
+
+        // Atualiza item na fila de upload
+        setFila((prev) =>
+          prev.map((f) =>
+            f.mediaItem?.uuid === itemDuplicadoPendente.mediaItem.uuid ||
+            f.nome === itemDuplicadoPendente.nome
+              ? {
+                  ...f,
+                  status: 'sucesso',
+                  mediaItem: itemAtualizado,
+                }
+              : f
+          )
+        )
+
+        addToast({
+          title: `"${itemDuplicadoPendente.nome}" sincronizado com o Google Fotos com sucesso!`,
+          color: 'success',
+        })
+        setItemDuplicadoPendente(null)
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Falha ao sincronizar com Google Fotos'
+        addToast({
+          title: `Erro ao sincronizar com Google Fotos: ${msg}`,
+          color: 'danger',
+        })
+      } finally {
+        setSincronizandoDuplicado(false)
+      }
+    },
+    [itemDuplicadoPendente]
+  )
+
   return {
     fila,
     estaProcessando,
     categoriaPadraoId,
+    itemDuplicadoPendente,
+    sincronizandoDuplicado,
     setCategoriaPadraoId,
     adicionarArquivos,
     removerArquivo,
@@ -170,5 +235,8 @@ export function useUploadManual() {
     limparConcluidos,
     enviarTodosPendentes,
     reenviarItemIndividual,
+    abrirConfirmacaoDuplicado,
+    fecharConfirmacaoDuplicado,
+    confirmarSincronizacaoDuplicado,
   }
 }

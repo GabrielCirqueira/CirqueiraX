@@ -105,7 +105,11 @@ Para evitar consumo desnecessário de cota da API do Google Fotos e acúmulo de 
 3. **Bloqueio de Upload Repetido no Google Fotos (`EnviarGoogleFotosService`)**:
    - **Guarda de Idempotência**: Se o item já tiver um `googlePhotosMediaId` ou metadado `google_photos_id`, o serviço aborta imediatamente sem reenviar bytes.
    - **Reaproveitamento de IDs entre Registros**: Se um arquivo tiver conteúdo idêntico a outro já enviado anteriormente ao Google Fotos, o `googlePhotosMediaId` é reutilizado. Caso a mídia pertença a outra categoria/álbum, ela é apenas associada ao novo álbum via API, **sem fazer upload repetido dos bytes**.
-4. **Comando de Indexação de Metadados**:
+4. **Confirmação e Sincronização Forçada a Pedido do Usuário**:
+   - Quando uma mídia é enviada e identificada como duplicada no frontend, um modal interativo notifica o usuário e pergunta se deseja sincronizar com o Google Fotos mesmo assim.
+   - Se confirmado, o endpoint `POST /api/v1/media-itens/{uuid}/forcar-google-fotos` efetua o upload e inclusão no álbum remoto ignorando o bloqueio de duplicidade e registra `google_photos_forcado: true` nos metadados.
+   - O usuário também pode acionar essa sincronização a qualquer momento através do botão **Forçar Google Fotos** nos cards de triagem e na fila de upload.
+5. **Comando de Indexação de Metadados**:
    - Para reindexar ou preencher metadados de itens históricos já existentes no banco de dados:
      ```bash
      docker exec -it cirqueirax_symfony php bin/console app:media:indexar-metadados

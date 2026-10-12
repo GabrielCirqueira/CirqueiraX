@@ -14,6 +14,7 @@ import {
 import {
   AlertTriangle,
   CheckCircle2,
+  CloudUpload,
   FileImage,
   FileVideo,
   FolderPlus,
@@ -24,6 +25,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { type ChangeEvent, type DragEvent, memo, useRef, useState } from 'react'
+import type { ItemDuplicadoConfirmacao } from './ModalConfirmarSincronizacaoDuplicado'
 import type { ArquivoFilaUpload } from '../types'
 import { formatarTamanhoBytes } from '../utils/arquivosUpload'
 
@@ -39,6 +41,7 @@ export interface DropzoneUploadProps {
   onLimparConcluidos: () => void
   onEnviarTodos: () => void
   onReenviarItem: (id: string) => void
+  onAbrirConfirmacaoDuplicado?: (confirmacao: ItemDuplicadoConfirmacao) => void
 }
 
 export const DropzoneUpload = memo(function DropzoneUpload({
@@ -53,6 +56,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
   onLimparConcluidos,
   onEnviarTodos,
   onReenviarItem,
+  onAbrirConfirmacaoDuplicado,
 }: DropzoneUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -375,18 +379,46 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                     )}
 
                     {item.status === 'duplicado' && (
-                      <Badge
-                        variant="subtle"
-                        colorPalette="amber"
-                        px={2}
-                        py={0.5}
-                        borderRadius="md"
-                      >
-                        <HStack gap={1.5} alignItems="center">
-                          <AlertTriangle size={14} />
-                          <Text as="span">Duplicado (já existia)</Text>
-                        </HStack>
-                      </Badge>
+                      <HStack gap={2}>
+                        <Badge
+                          variant="subtle"
+                          colorPalette="amber"
+                          px={2}
+                          py={0.5}
+                          borderRadius="md"
+                        >
+                          <HStack gap={1.5} alignItems="center">
+                            <AlertTriangle size={14} />
+                            <Text as="span">Duplicado (já existia)</Text>
+                          </HStack>
+                        </Badge>
+
+                        {item.mediaItem && onAbrirConfirmacaoDuplicado && (
+                          <Button
+                            size="xs"
+                            variant="subtle"
+                            colorPalette="amber"
+                            disabled={estaProcessando}
+                            onClick={() =>
+                              onAbrirConfirmacaoDuplicado({
+                                nome: item.nome,
+                                tamanhoBytes: item.tamanhoBytes,
+                                tipoMime: item.tipoMime,
+                                previewUrl: item.previewUrl,
+                                mediaItem: item.mediaItem!,
+                              })
+                            }
+                            borderRadius="md"
+                            fontSize="11px"
+                            fontWeight="semibold"
+                            px={2.5}
+                            py={1}
+                          >
+                            <CloudUpload size={13} style={{ marginRight: '4px' }} />
+                            <Text as="span">Sincronizar Google Fotos</Text>
+                          </Button>
+                        )}
+                      </HStack>
                     )}
 
                     {item.status === 'erro' && (
