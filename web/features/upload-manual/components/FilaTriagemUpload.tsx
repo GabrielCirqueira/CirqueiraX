@@ -8,29 +8,28 @@ import {
   Flex,
   Grid,
   HStack,
+  IconButton,
   Input,
   NativeSelect,
   Text,
   VStack,
 } from '@chakra-ui/react'
 import {
-  AlertTriangle,
   CheckSquare,
-  CloudUpload,
-  FileImage,
-  FileVideo,
   FolderPlus,
-  RefreshCw,
+  LayoutGrid,
+  List,
+  Search,
   Square,
   Trash2,
   Upload,
+  X,
 } from 'lucide-react'
-import { memo, useState } from 'react'
-import {
-  extrairHashCurto,
-  extrairNomeExibicao,
-  identificarTipoMidia,
-} from '../utils/arquivosUpload'
+import { memo, useMemo, useState } from 'react'
+import { CardItemTriagem } from './CardItemTriagem'
+import { ModalVisualizarMidiaManual } from './ModalVisualizarMidiaManual'
+import { TabelaTriagemUpload } from './TabelaTriagemUpload'
+import { identificarTipoMidia } from '../utils/arquivosUpload'
 
 export interface FilaTriagemUploadProps {
   itens: MediaItem[]
@@ -42,6 +41,7 @@ export interface FilaTriagemUploadProps {
   onClassificarIndividual: (uuid: string, categoriaId: string) => void
   onCategorizarEmLote: (categoriaId: string) => void
   onApagarEmLote: () => void
+  onApagarIndividual?: (uuid: string) => void
   onRetentar: (uuid: string) => void
   onForcarGoogleFotos?: (item: MediaItem) => void
   filtroStatus: string
@@ -60,6 +60,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
   onClassificarIndividual,
   onCategorizarEmLote,
   onApagarEmLote,
+  onApagarIndividual,
   onRetentar,
   onForcarGoogleFotos,
   filtroStatus,
@@ -69,8 +70,32 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
 }: FilaTriagemUploadProps) {
   const [modalCategorizarAberto, setModalCategorizarAberto] = useState(false)
   const [categoriaLoteId, setCategoriaLoteId] = useState('')
+  const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'tabela'>('grid')
+  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'imagem' | 'video'>('todos')
+  const [filtroCategoria, setFiltroCategoria] = useState<string>('')
+  const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
 
-  const todosSelecionados = itens.length > 0 && selecionados.length === itens.length
+  // Filtragem local complementar para tipo e categoria
+  const itensFiltrados = useMemo(() => {
+    return itens.filter((item) => {
+      // Filtro de tipo
+      if (filtroTipo !== 'todos') {
+        const tipoInfo = identificarTipoMidia(item)
+        if (filtroTipo === 'video' && !tipoInfo.isVideo) return false
+        if (filtroTipo === 'imagem' && tipoInfo.isVideo) return false
+      }
+
+      // Filtro de categoria selecionada no dropdown
+      if (filtroCategoria) {
+        if (filtroCategoria === 'sem_categoria' && item.categoriaId) return false
+        if (filtroCategoria !== 'sem_categoria' && item.categoriaId !== filtroCategoria) return false
+      }
+
+      return true
+    })
+  }, [itens, filtroTipo, filtroCategoria])
+
+  const todosSelecionados = itensFiltrados.length > 0 && selecionados.length === itensFiltrados.length
   const algunsSelecionados = selecionados.length > 0 && !todosSelecionados
 
   const handleConfirmarCategorizarLote = () => {
@@ -88,21 +113,23 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
   ]
 
   return (
-    <VStack w="full" gap={6}>
+    <VStack w="full" gap={5}>
+      {/* Barra de Ferramentas / Filtros Unificada */}
       <Flex
         w="full"
-        direction={{ base: 'column', sm: 'row' }}
-        align={{ base: 'stretch', sm: 'center' }}
+        direction={{ base: 'column', md: 'row' }}
+        align={{ base: 'stretch', md: 'center' }}
         justify="space-between"
-        gap={4}
+        gap={3}
         bg="bg.panel"
-        p={4}
+        p={3.5}
         borderRadius="2xl"
         borderWidth="1px"
         borderColor="border.subtle"
-        shadow="sm"
+        shadow="none"
       >
-        <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl">
+        {/* Abas de Status com Estilo Pílula */}
+        <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto">
           {abasFiltro.map((aba) => (
             <Button
               key={aba.value}
@@ -112,327 +139,310 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               onClick={() => onMudarFiltroStatus(aba.value)}
               fontWeight="semibold"
               borderRadius="lg"
+              px={3}
+              h={7}
             >
               {aba.label}
             </Button>
           ))}
         </HStack>
 
-        <Box position="relative" maxW={{ base: 'full', sm: 'xs' }} w="full">
-          <Input
-            value={busca}
-            onChange={(e) => onMudarBusca(e.target.value)}
-            placeholder="Filtrar por nome ou hash..."
-            bg="bg.muted"
-            borderColor="border.subtle"
-            fontSize="xs"
-            h={8}
-            borderRadius="xl"
-          />
-        </Box>
+        {/* Filtros de Categoria, Tipo, Busca e Alternador de Modo */}
+        <HStack gap={2} flexWrap="wrap" justify={{ base: 'stretch', md: 'flex-end' }}>
+          {/* Filtro por Categoria */}
+          <NativeSelect.Root size="sm" w={{ base: 'full', sm: '180px' }}>
+            <NativeSelect.Field
+              value={filtroCategoria}
+              onChange={(e) => setFiltroCategoria(e.target.value)}
+              bg="bg.muted"
+              borderColor="border.subtle"
+              borderRadius="xl"
+              fontSize="xs"
+              h={8}
+            >
+              <option value="">Todas as Categorias</option>
+              <option value="sem_categoria">Apenas Sem Categoria</option>
+              {categorias.map((cat) => (
+                <option key={cat.uuid} value={cat.uuid}>
+                  {cat.nome}
+                </option>
+              ))}
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
+
+          {/* Filtro por Tipo de Mídia */}
+          <NativeSelect.Root size="sm" w={{ base: 'full', sm: '130px' }}>
+            <NativeSelect.Field
+              value={filtroTipo}
+              onChange={(e) => setFiltroTipo(e.target.value as 'todos' | 'imagem' | 'video')}
+              bg="bg.muted"
+              borderColor="border.subtle"
+              borderRadius="xl"
+              fontSize="xs"
+              h={8}
+            >
+              <option value="todos">Todos Tipos</option>
+              <option value="imagem">Fotos</option>
+              <option value="video">Vídeos</option>
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
+
+          {/* Campo de Busca com Botão de Limpeza */}
+          <Box position="relative" w={{ base: 'full', sm: '220px' }}>
+            <Box
+              position="absolute"
+              left={2.5}
+              top="50%"
+              transform="translateY(-50%)"
+              pointerEvents="none"
+              zIndex={2}
+              color="fg.subtle"
+            >
+              <Search size={13} />
+            </Box>
+            <Input
+              value={busca}
+              onChange={(e) => onMudarBusca(e.target.value)}
+              placeholder="Buscar nome ou hash..."
+              bg="bg.muted"
+              borderColor="border.subtle"
+              fontSize="xs"
+              h={8}
+              pl={8}
+              pr={busca ? 7 : 3}
+              borderRadius="xl"
+            />
+            {busca && (
+              <Box
+                position="absolute"
+                right={2}
+                top="50%"
+                transform="translateY(-50%)"
+                zIndex={2}
+                cursor="pointer"
+                onClick={() => onMudarBusca('')}
+                color="fg.subtle"
+                _hover={{ color: 'fg' }}
+              >
+                <X size={13} />
+              </Box>
+            )}
+          </Box>
+
+          {/* Alternador de Visualização: Grade / Tabela */}
+          <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle">
+            <IconButton
+              size="xs"
+              variant={modoVisualizacao === 'grid' ? 'solid' : 'ghost'}
+              colorPalette={modoVisualizacao === 'grid' ? 'brand' : undefined}
+              onClick={() => setModoVisualizacao('grid')}
+              aria-label="Visualização em Grade"
+              title="Visualização em Grade"
+              borderRadius="lg"
+              h={6}
+              w={6}
+            >
+              <LayoutGrid size={14} />
+            </IconButton>
+            <IconButton
+              size="xs"
+              variant={modoVisualizacao === 'tabela' ? 'solid' : 'ghost'}
+              colorPalette={modoVisualizacao === 'tabela' ? 'brand' : undefined}
+              onClick={() => setModoVisualizacao('tabela')}
+              aria-label="Visualização em Tabela"
+              title="Visualização em Tabela"
+              borderRadius="lg"
+              h={6}
+              w={6}
+            >
+              <List size={14} />
+            </IconButton>
+          </HStack>
+        </HStack>
       </Flex>
 
-      {itens.length > 0 && (
+      {/* Barra de Ações Rápidas de Seleção */}
+      {itensFiltrados.length > 0 && (
         <Flex w="full" justify="space-between" align="center" px={1}>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onToggleSelectAll}
-            fontSize="xs"
-            fontWeight="semibold"
-            color="fg.subtle"
-            _hover={{ color: 'fg' }}
-          >
-            <HStack gap={2}>
-              {todosSelecionados ? (
-                <Box as="span" color="cirqueira.purple.500" display="inline-flex">
-                  <CheckSquare size={16} color="currentColor" />
-                </Box>
-              ) : (
-                <Square size={16} />
-              )}
-              <Text as="span">
-                {todosSelecionados
-                  ? 'Desmarcar todos'
-                  : algunsSelecionados
-                    ? `Selecionados (${selecionados.length}/${itens.length})`
-                    : 'Selecionar todos'}
-              </Text>
-            </HStack>
-          </Button>
+          <HStack gap={3}>
+            <Button
+              size="xs"
+              variant="ghost"
+              onClick={onToggleSelectAll}
+              fontSize="xs"
+              fontWeight="semibold"
+              color="fg.subtle"
+              _hover={{ color: 'fg' }}
+              borderRadius="lg"
+            >
+              <HStack gap={1.5}>
+                {todosSelecionados ? (
+                  <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                    <CheckSquare size={15} />
+                  </Box>
+                ) : (
+                  <Square size={15} />
+                )}
+                <Text as="span">
+                  {todosSelecionados
+                    ? 'Desmarcar todos'
+                    : algunsSelecionados
+                      ? `Selecionados (${selecionados.length}/${itensFiltrados.length})`
+                      : 'Selecionar todos'}
+                </Text>
+              </HStack>
+            </Button>
+
+            {selecionados.length > 0 && (
+              <Badge colorPalette="brand" size="sm" borderRadius="md">
+                {selecionados.length} selecionado{selecionados.length > 1 ? 's' : ''}
+              </Badge>
+            )}
+          </HStack>
 
           <Text fontSize="xs" color="fg.subtle">
-            Exibindo {itens.length} registro(s)
+            Exibindo {itensFiltrados.length} {itensFiltrados.length === 1 ? 'mídia' : 'mídias'}
           </Text>
         </Flex>
       )}
 
-      {carregando && itens.length === 0 ? (
+      {/* Estado Carregando (Skeleton) */}
+      {carregando && itensFiltrados.length === 0 ? (
         <Grid
           w="full"
-          templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          templateColumns={{
+            base: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+            lg: 'repeat(4, 1fr)',
+          }}
           gap={4}
         >
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 8 }).map((_, i) => (
             <Card.Root
               key={`sk-${i + 1}`}
-              borderRadius="2xl"
+              borderRadius="xl"
               borderWidth="1px"
               borderColor="border.subtle"
               bg="bg.panel"
-              h={56}
-              p={4}
+              h={64}
+              p={3}
             >
               <VStack h="full" justify="space-between" align="stretch">
-                <Box h={4} bg="bg.muted" borderRadius="md" w="70%" />
-                <Box h={32} bg="bg.muted" borderRadius="xl" />
-                <Box h={4} bg="bg.muted" borderRadius="md" w="40%" />
+                <Box h={36} bg="bg.muted" borderRadius="lg" />
+                <Box h={4} bg="bg.muted" borderRadius="md" w="80%" />
+                <Box h={7} bg="bg.muted" borderRadius="md" />
               </VStack>
             </Card.Root>
           ))}
         </Grid>
-      ) : itens.length === 0 ? (
+      ) : itensFiltrados.length === 0 ? (
+        /* Estado Vazio Elegante */
         <VStack
           w="full"
           py={16}
-          px={4}
+          px={6}
           borderRadius="2xl"
           borderWidth="1px"
           borderStyle="dashed"
           borderColor="border.subtle"
           bg="bg.panel"
-          gap={2}
+          gap={3}
           textAlign="center"
         >
-          <Box p={4} borderRadius="full" bg="bg.muted" color="fg.subtle" mb={2}>
-            <Upload size={40} strokeWidth={1.5} />
+          <Box
+            p={4}
+            borderRadius="2xl"
+            bg="cirqueira.brand.500/10"
+            color="cirqueira.brand.400"
+            display="inline-flex"
+          >
+            <Upload size={36} strokeWidth={2} />
           </Box>
-          <Text as="h3" fontWeight="bold" fontSize="md" color="fg">
-            Nenhuma mídia encontrada na triagem
-          </Text>
-          <Text fontSize="xs" color="fg.subtle" maxW="sm">
-            {busca
-              ? 'Tente remover os filtros de busca para visualizar os registros.'
-              : 'Faça upload de arquivos acima para iniciar o processo de triagem e categorização.'}
-          </Text>
+          <VStack gap={1} maxW="md">
+            <Text as="h3" fontWeight="bold" fontSize="base" color="fg">
+              Nenhuma mídia encontrada na triagem
+            </Text>
+            <Text fontSize="xs" color="fg.subtle">
+              {busca || filtroCategoria || filtroTipo !== 'todos'
+                ? 'Nenhum resultado corresponde aos filtros selecionados. Tente limpar os filtros para ver todas as mídias.'
+                : 'Arraste fotos e vídeos na caixa de upload acima ou cole com Ctrl+V para iniciar a triagem e categorização.'}
+            </Text>
+          </VStack>
+
+          {(busca || filtroCategoria || filtroTipo !== 'todos') && (
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() => {
+                onMudarBusca('')
+                setFiltroCategoria('')
+                setFiltroTipo('todos')
+              }}
+              borderRadius="lg"
+              mt={1}
+            >
+              Limpar Todos os Filtros
+            </Button>
+          )}
         </VStack>
-      ) : (
+      ) : modoVisualizacao === 'grid' ? (
+        /* Visualização em Grade de Cards 16:9 */
         <Grid
           w="full"
-          templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
+          templateColumns={{
+            base: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(3, 1fr)',
+            lg: 'repeat(4, 1fr)',
+            xl: 'repeat(4, 1fr)',
+          }}
           gap={4}
         >
-          {itens.map((item) => {
-            const tipoInfo = identificarTipoMidia(item)
-            const nomeExibicao = extrairNomeExibicao(item)
-            const hashCurto = extrairHashCurto(item.hash)
-            const isSelected = selecionados.includes(item.uuid)
-
-            return (
-              <Card.Root
-                key={item.uuid}
-                borderRadius="xl"
-                borderWidth={isSelected ? '2px' : '1px'}
-                borderColor={isSelected ? 'cirqueira.brand.500' : 'border.subtle'}
-                bg="bg.panel"
-                overflow="hidden"
-                shadow="sm"
-                transition="all 0.2s"
-                _hover={{ borderColor: isSelected ? 'cirqueira.brand.500' : 'border.muted' }}
-              >
-                <Box position="relative" w="full" h={40} bg="bg.muted" overflow="hidden">
-                  {item.metadata?.thumbnail ? (
-                    <img
-                      src={String(item.metadata.thumbnail)}
-                      alt={item.hash}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <VStack h="full" w="full" align="center" justify="center" color="fg.subtle">
-                      {tipoInfo.isVideo ? <FileVideo size={40} /> : <FileImage size={40} />}
-                    </VStack>
-                  )}
-
-                  <Box position="absolute" top={2.5} left={2.5} zIndex={10}>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => onToggleSelect(item.uuid)}
-                      bg="blackAlpha.600"
-                      color="white"
-                      _hover={{ bg: 'blackAlpha.800' }}
-                      backdropFilter="blur(8px)"
-                      borderRadius="lg"
-                      p={1}
-                      aria-label="Selecionar"
-                    >
-                      {isSelected ? (
-                        <Box as="span" color="cirqueira.brand.400" display="inline-flex">
-                          <CheckSquare size={16} color="currentColor" />
-                        </Box>
-                      ) : (
-                        <Square size={16} />
-                      )}
-                    </Button>
-                  </Box>
-
-                  <Box position="absolute" top={2.5} right={2.5} zIndex={10}>
-                    <Badge
-                      size="sm"
-                      variant="subtle"
-                      colorPalette={tipoInfo.colorPalette}
-                      backdropFilter="blur(8px)"
-                      borderRadius="md"
-                    >
-                      {tipoInfo.label}
-                    </Badge>
-                  </Box>
-                </Box>
-
-                <Card.Body
-                  p={4}
-                  display="flex"
-                  flexDirection="column"
-                  justifyContent="space-between"
-                  gap={3}
-                >
-                  <VStack gap={1.5} alignItems="flex-start" w="full">
-                    <Text as="h4" fontWeight="bold" fontSize="xs" color="fg" truncate w="full">
-                      {nomeExibicao}
-                    </Text>
-
-                    <HStack gap={2} w="full" wrap="wrap">
-                      {item.categoria ? (
-                        <Badge
-                          variant="subtle"
-                          colorPalette="brand"
-                          px={2}
-                          py={0.5}
-                          borderRadius="md"
-                        >
-                          <HStack gap={1} alignItems="center">
-                            <FolderPlus size={12} />
-                            <Text as="span">{item.categoria.nome}</Text>
-                          </HStack>
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="subtle"
-                          colorPalette="amber"
-                          px={2}
-                          py={0.5}
-                          borderRadius="md"
-                        >
-                          Sem Categoria
-                        </Badge>
-                      )}
-
-                      {Boolean(item.isDuplicado || item.metadata?.duplicado) && (
-                        <Badge
-                          variant="subtle"
-                          colorPalette="amber"
-                          px={2}
-                          py={0.5}
-                          borderRadius="md"
-                        >
-                          <HStack gap={1} alignItems="center">
-                            <AlertTriangle size={11} />
-                            <Text as="span">Duplicado</Text>
-                          </HStack>
-                        </Badge>
-                      )}
-
-                      <Text as="span" fontSize="10px" fontFamily="mono" color="fg.subtle">
-                        {hashCurto}...
-                      </Text>
-                    </HStack>
-                  </VStack>
-
-                  <VStack
-                    gap={1}
-                    pt={2}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
-                    alignItems="flex-start"
-                    w="full"
-                  >
-                    <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
-                      Atribuir Categoria:
-                    </Text>
-                    <NativeSelect.Root size="sm" w="full">
-                      <NativeSelect.Field
-                        value={item.categoriaId ?? ''}
-                        onChange={(e) => onClassificarIndividual(item.uuid, e.target.value)}
-                        bg="bg.muted"
-                        borderColor="border.subtle"
-                        borderRadius="lg"
-                        fontSize="xs"
-                        h={8}
-                      >
-                        <option value="">Selecione uma categoria...</option>
-                        {categorias.map((cat) => (
-                          <option key={cat.uuid} value={cat.uuid}>
-                            {cat.nome}
-                          </option>
-                        ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                  </VStack>
-                </Card.Body>
-
-                <HStack
-                  px={4}
-                  py={2.5}
-                  bg="bg.muted"
-                  borderTopWidth="1px"
-                  borderColor="border.subtle"
-                  justify="space-between"
-                  w="full"
-                >
-                  <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
-                    {item.statusDescricao ?? item.status}
-                  </Text>
-
-                  <HStack gap={1.5}>
-                    {Boolean(item.isDuplicado || item.metadata?.duplicado) && onForcarGoogleFotos && (
-                      <Button
-                        size="xs"
-                        variant="subtle"
-                        colorPalette="amber"
-                        onClick={() => onForcarGoogleFotos(item)}
-                        fontSize="11px"
-                        fontWeight="semibold"
-                        p={1.5}
-                        px={2}
-                        borderRadius="md"
-                        title="Sincronizar com Google Fotos mesmo sendo duplicado"
-                      >
-                        <CloudUpload size={13} style={{ marginRight: '4px' }} />
-                        <Text as="span">Forçar Google Fotos</Text>
-                      </Button>
-                    )}
-
-                    {item.status === 'erro' && (
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        onClick={() => onRetentar(item.uuid)}
-                        aria-label="Retentar processamento"
-                        p={1.5}
-                      >
-                        <RefreshCw size={14} />
-                      </Button>
-                    )}
-                  </HStack>
-                </HStack>
-              </Card.Root>
-            )
-          })}
+          {itensFiltrados.map((item) => (
+            <CardItemTriagem
+              key={item.uuid}
+              item={item}
+              categorias={categorias}
+              selecionado={selecionados.includes(item.uuid)}
+              onToggleSelect={onToggleSelect}
+              onClassificar={onClassificarIndividual}
+              onVisualizar={(it) => setItemVisualizar(it)}
+              onForcarGoogleFotos={onForcarGoogleFotos}
+              onRetentar={onRetentar}
+              onApagar={onApagarIndividual}
+            />
+          ))}
         </Grid>
+      ) : (
+        /* Visualização em Tabela Compacta */
+        <TabelaTriagemUpload
+          itens={itensFiltrados}
+          categorias={categorias}
+          selecionados={selecionados}
+          onToggleSelect={onToggleSelect}
+          onToggleSelectAll={onToggleSelectAll}
+          onClassificar={onClassificarIndividual}
+          onVisualizar={(it) => setItemVisualizar(it)}
+          onForcarGoogleFotos={onForcarGoogleFotos}
+          onRetentar={onRetentar}
+          onApagar={onApagarIndividual}
+        />
       )}
 
+      {/* Modal de Prévia Ampliada */}
+      <ModalVisualizarMidiaManual
+        aberto={Boolean(itemVisualizar)}
+        item={itemVisualizar}
+        categorias={categorias}
+        onFechar={() => setItemVisualizar(null)}
+        onClassificar={onClassificarIndividual}
+        onForcarGoogleFotos={onForcarGoogleFotos}
+      />
+
+      {/* Barra Flutuante de Ações em Lote */}
       {selecionados.length > 0 && (
         <Box
           position="fixed"
@@ -451,17 +461,17 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             px={5}
             borderRadius="2xl"
             borderWidth="1px"
-            borderColor="border.subtle"
+            borderColor="cirqueira.brand.500/40"
             bg="bg.panel"
-            backdropFilter="blur(16px)"
+            backdropFilter="blur(20px)"
             shadow="2xl"
           >
             <HStack gap={2}>
-              <Badge colorPalette="brand" px={2} py={0.5} borderRadius="md" fontWeight="bold">
+              <Badge colorPalette="brand" px={2.5} py={1} borderRadius="lg" fontWeight="bold">
                 {selecionados.length}
               </Badge>
               <Text as="span" fontSize="xs" fontWeight="semibold" color="fg">
-                selecionado(s)
+                mídia(s) selecionada(s)
               </Text>
             </HStack>
 
@@ -473,8 +483,8 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 fontWeight="semibold"
                 borderRadius="xl"
               >
-                <FolderPlus size={14} style={{ marginRight: '4px' }} />
-                <Text as="span">Categorizar</Text>
+                <FolderPlus size={14} style={{ marginRight: '5px' }} />
+                <Text as="span">Categorizar em Lote</Text>
               </Button>
 
               <Button
@@ -482,91 +492,80 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 variant="subtle"
                 colorPalette="red"
                 onClick={onApagarEmLote}
+                fontWeight="semibold"
                 borderRadius="xl"
               >
-                <Trash2 size={14} style={{ marginRight: '4px' }} />
-                <Text as="span">Apagar</Text>
+                <Trash2 size={14} style={{ marginRight: '5px' }} />
+                <Text as="span">Excluir</Text>
               </Button>
             </HStack>
           </Flex>
         </Box>
       )}
 
+      {/* Modal de Escolha de Categoria em Lote */}
       <Dialog.Root
         open={modalCategorizarAberto}
-        onOpenChange={(e) => setModalCategorizarAberto(e.open)}
+        onOpenChange={(e) => !e.open && setModalCategorizarAberto(false)}
+        size="sm"
       >
-        <Dialog.Backdrop />
+        <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
         <Dialog.Positioner>
-          <Dialog.Content
-            bg="bg.panel"
-            borderWidth="1px"
-            borderColor="border.subtle"
-            color="fg"
-            borderRadius="2xl"
-            p={4}
-            maxW="md"
-          >
-            <Dialog.Header>
-              <Dialog.Title fontSize="md" fontWeight="bold">
-                Categorizar {selecionados.length} item(ns) em lote
+          <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+            <Dialog.Header pb={2}>
+              <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
+                Categorizar Mídias em Lote
               </Dialog.Title>
             </Dialog.Header>
+
             <Dialog.Body py={4}>
-              <VStack gap={4} alignItems="stretch">
+              <VStack gap={3} align="stretch">
                 <Text fontSize="xs" color="fg.subtle">
-                  Escolha a categoria que será atribuída a todas as mídias selecionadas:
+                  Selecione a categoria para aplicar a todas as {selecionados.length} mídias selecionadas:
                 </Text>
 
-                <select
-                  value={categoriaLoteId}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setCategoriaLoteId(e.target.value)
-                  }
-                  style={{
-                    width: '100%',
-                    height: '2.5rem',
-                    padding: '0 0.75rem',
-                    borderRadius: '0.75rem',
-                    fontSize: '0.75rem',
-                    fontWeight: 500,
-                    backgroundColor: 'var(--chakra-colors-bg-muted)',
-                    borderColor: 'var(--chakra-colors-border-subtle)',
-                    color: 'inherit',
-                    borderWidth: '1px',
-                    outline: 'none',
-                  }}
-                >
-                  <option value="">Selecione a categoria...</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.uuid} value={cat.uuid}>
-                      {cat.nome}
-                    </option>
-                  ))}
-                </select>
-
-                <HStack justify="flex-end" gap={2} pt={2}>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setModalCategorizarAberto(false)}
+                <NativeSelect.Root size="sm" w="full">
+                  <NativeSelect.Field
+                    value={categoriaLoteId}
+                    onChange={(e) => setCategoriaLoteId(e.target.value)}
+                    bg="bg.muted"
+                    borderColor="border.subtle"
+                    borderRadius="lg"
+                    fontSize="xs"
+                    h={9}
                   >
-                    Cancelar
-                  </Button>
-                  <Button
-                    size="sm"
-                    colorPalette="brand"
-                    disabled={!categoriaLoteId}
-                    onClick={handleConfirmarCategorizarLote}
-                    fontWeight="bold"
-                    borderRadius="xl"
-                  >
-                    Aplicar Categoria
-                  </Button>
-                </HStack>
+                    <option value="">Selecione uma categoria...</option>
+                    {categorias.map((cat) => (
+                      <option key={cat.uuid} value={cat.uuid}>
+                        {cat.nome}
+                      </option>
+                    ))}
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
               </VStack>
             </Dialog.Body>
-            <Dialog.CloseTrigger />
+
+            <Dialog.Footer pt={2}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setModalCategorizarAberto(false)}
+                borderRadius="lg"
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                colorPalette="brand"
+                disabled={!categoriaLoteId}
+                onClick={handleConfirmarCategorizarLote}
+                borderRadius="lg"
+                fontWeight="semibold"
+              >
+                Aplicar Categoria
+              </Button>
+            </Dialog.Footer>
           </Dialog.Content>
         </Dialog.Positioner>
       </Dialog.Root>

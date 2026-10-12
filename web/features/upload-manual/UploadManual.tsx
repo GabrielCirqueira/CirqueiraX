@@ -8,10 +8,26 @@ import {
 } from '@/features/downloads-video/api'
 import { AppContainer } from '@/layouts'
 import { addToast } from '@/shared/components/ui/toaster'
-import { Badge, Box, Button, Container, HStack, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Dialog,
+  Flex,
+  HStack,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, FolderCheck, RefreshCw } from 'lucide-react'
-import { memo, useCallback, useMemo, useState } from 'react'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  FolderCheck,
+  RefreshCw,
+  UploadCloud,
+} from 'lucide-react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { DropzoneUpload } from './components/DropzoneUpload'
 import { FilaTriagemUpload } from './components/FilaTriagemUpload'
@@ -23,6 +39,8 @@ const UploadManual = memo(function UploadManual() {
   const [filtroStatus, setFiltroStatus] = useState<string>('todos')
   const [busca, setBusca] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
+  const [modalConfirmarApagar, setModalConfirmarApagar] = useState(false)
+  const [itemApagarAlvo, setItemApagarAlvo] = useState<string | null>(null)
 
   const {
     fila,
@@ -47,7 +65,12 @@ const UploadManual = memo(function UploadManual() {
     queryFn: listarCategorias,
   })
 
-  const { data: respostaMedia, isLoading: carregandoMedia } = useQuery({
+  const {
+    data: respostaMedia,
+    isLoading: carregandoMedia,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ['media-itens', 'upload-manual', filtroStatus, busca],
     queryFn: () =>
       listarMediaItens({
@@ -61,6 +84,51 @@ const UploadManual = memo(function UploadManual() {
   })
 
   const itensMedia = useMemo(() => respostaMedia?.data ?? [], [respostaMedia])
+
+  // Métricas dinâmicas da triagem
+  const totalTriagem = itensMedia.length
+  const semCategoriaCount = useMemo(
+    () => itensMedia.filter((i) => !i.categoriaId).length,
+    [itensMedia]
+  )
+  const classificadosCount = useMemo(
+    () => itensMedia.filter((i) => Boolean(i.categoriaId)).length,
+    [itensMedia]
+  )
+  const errosCount = useMemo(
+    () => itensMedia.filter((i) => i.status === 'erro').length,
+    [itensMedia]
+  )
+
+  // Listener Global de Paste (Ctrl+V) para capturas de tela e arquivos
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+
+      if (e.clipboardData && e.clipboardData.files && e.clipboardData.files.length > 0) {
+        const files = Array.from(e.clipboardData.files)
+        const mediaFiles = files.filter(
+          (f) => f.type.startsWith('image/') || f.type.startsWith('video/')
+        )
+        if (mediaFiles.length > 0) {
+          e.preventDefault()
+          adicionarArquivos(mediaFiles)
+          addToast({
+            title: `${mediaFiles.length} mídia(s) colada(s) via clipboard!`,
+            color: 'success',
+          })
+        }
+      }
+    }
+
+    window.addEventListener('paste', handlePaste)
+    return () => window.removeEventListener('paste', handlePaste)
+  }, [adicionarArquivos])
 
   const mutationClassificar = useMutation({
     mutationFn: ({ uuid, categoriaId }: { uuid: string; categoriaId: string }) =>
@@ -95,6 +163,8 @@ const UploadManual = memo(function UploadManual() {
         color: 'success',
       })
       setSelecionados([])
+      setItemApagarAlvo(null)
+      setModalConfirmarApagar(false)
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {
@@ -125,122 +195,208 @@ const UploadManual = memo(function UploadManual() {
     )
   }, [itensMedia])
 
-  return (
-    <AppContainer>
-      <Container maxW="6xl" py={8} spaceY={8}>
-        <VStack gap={4} alignItems="stretch">
-          <HStack justify="space-between">
-            <Link
-              to="/downloads"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: 'var(--chakra-colors-fg-subtle)',
-                textDecoration: 'none',
-              }}
-            >
-              <ArrowLeft size={16} />
-              <span>Voltar para Downloads</span>
-            </Link>
+  const handleConfirmarApagar = () => {
+    if (itemApagarAlvo) {
+      mutationApagarLote.mutate([itemApagarAlvo])
+    } else if (selecionados.length > 0) {
+      mutationApagarLote.mutate(selecionados)
+    }
+  }
 
-            <HStack gap={2}>
-              <Button
-                size="xs"
-                variant="ghost"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['media-itens'] })}
-                aria-label="Atualizar lista"
-                p={1.5}
-                color="fg.subtle"
-                _hover={{ color: 'fg' }}
+  return (
+    <AppContainer maxWidth="full" paddingX="0" paddingY="0">
+      <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
+        <VStack w="full" gap={6} alignItems="stretch">
+          {/* Top Bar: Navegação, Status do Pipeline e Atualizar */}
+          <Flex
+            direction={{ base: 'column', sm: 'row' }}
+            justify="space-between"
+            align={{ base: 'stretch', sm: 'center' }}
+            gap={4}
+          >
+            <VStack align="start" gap={1.5}>
+              <Link
+                to="/downloads"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: 'inherit',
+                  opacity: 0.75,
+                  textDecoration: 'none',
+                }}
               >
-                <RefreshCw size={16} />
+                <ArrowLeft size={14} />
+                <span>Voltar para Downloads</span>
+              </Link>
+
+              <HStack gap={2.5} align="center" flexWrap="wrap">
+                <Box
+                  p={2}
+                  borderRadius="xl"
+                  bg="cirqueira.brand.500/15"
+                  color="cirqueira.brand.400"
+                  display="inline-flex"
+                >
+                  <UploadCloud size={22} strokeWidth={2.2} />
+                </Box>
+
+                <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="black" color="fg">
+                  Upload Manual & Triagem
+                </Text>
+
+                <HStack gap={1.5} pl={1} flexWrap="wrap">
+                  <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+                    {totalTriagem} {totalTriagem === 1 ? 'mídia' : 'mídias'}
+                  </Badge>
+
+                  {semCategoriaCount > 0 && (
+                    <Badge size="sm" variant="subtle" colorPalette="amber" borderRadius="md">
+                      {semCategoriaCount} sem categoria
+                    </Badge>
+                  )}
+
+                  {classificadosCount > 0 && (
+                    <Badge size="sm" variant="subtle" colorPalette="green" borderRadius="md">
+                      {classificadosCount} classificadas
+                    </Badge>
+                  )}
+
+                  {errosCount > 0 && (
+                    <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md">
+                      {errosCount} erros
+                    </Badge>
+                  )}
+                </HStack>
+              </HStack>
+
+              <Text fontSize="xs" color="fg.subtle">
+                Envie fotos ou vídeos locais com classificação instantânea. Cole diretamente com Ctrl+V em qualquer lugar.
+              </Text>
+            </VStack>
+
+            <HStack gap={2} flexWrap="wrap" alignSelf={{ base: 'flex-start', sm: 'center' }}>
+              <HStack
+                bg="bg.panel"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                px={3}
+                py={1.5}
+                borderRadius="lg"
+                fontSize="xs"
+                color="fg.subtle"
+                display={{ base: 'none', md: 'flex' }}
+              >
+                <Box w={2} h={2} borderRadius="full" bg="cirqueira.green.500" />
+                <Text as="span">Pipeline de Upload • Multi-arquivo Ativo</Text>
+                <Box as="span" color="cirqueira.green.500" display="inline-flex">
+                  <CheckCircle2 size={11} color="currentColor" />
+                </Box>
+              </HStack>
+
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isFetching}
+                onClick={() => refetch()}
+                borderRadius="lg"
+              >
+                <RefreshCw
+                  size={14}
+                  style={{
+                    animation: isFetching ? 'spin 1s linear infinite' : 'none',
+                    marginRight: '6px',
+                  }}
+                />
+                <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                  {isFetching ? 'Atualizando...' : 'Atualizar'}
+                </Text>
               </Button>
             </HStack>
-          </HStack>
+          </Flex>
 
-          <VStack gap={1} alignItems="flex-start">
-            <HStack gap={2.5}>
-              <Text as="h1" fontSize={{ base: '2xl', sm: '3xl' }} fontWeight="black" color="fg">
-                Upload Manual & Triagem
-              </Text>
-              <Badge variant="subtle" colorPalette="purple" px={2} py={0.5} borderRadius="md">
-                Feature 4
-              </Badge>
+          {/* Área de Dropzone de Alta Estética */}
+          <DropzoneUpload
+            fila={fila}
+            estaProcessando={estaProcessando}
+            categorias={categorias}
+            categoriaPadraoId={categoriaPadraoId}
+            onSetCategoriaPadraoId={setCategoriaPadraoId}
+            onAdicionarArquivos={adicionarArquivos}
+            onRemoverArquivo={removerArquivo}
+            onAtualizarCategoriaItem={atualizarCategoriaItem}
+            onLimparConcluidos={limparConcluidos}
+            onEnviarTodos={enviarTodosPendentes}
+            onReenviarItem={reenviarItemIndividual}
+            onAbrirConfirmacaoDuplicado={abrirConfirmacaoDuplicado}
+          />
+
+          {/* Seção de Triagem de Mídias Recebidas */}
+          <VStack gap={4} pt={2} alignItems="stretch">
+            <HStack justify="space-between" align="center" flexWrap="wrap">
+              <HStack gap={2}>
+                <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                  <FolderCheck size={20} color="currentColor" />
+                </Box>
+                <Text as="h2" fontSize="md" fontWeight="bold" color="fg">
+                  Triagem de Mídias Recebidas
+                </Text>
+                <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+                  {totalTriagem} total
+                </Badge>
+              </HStack>
+
+              {semCategoriaCount > 0 && (
+                <Text fontSize="xs" color="cirqueira.amber.500" fontWeight="medium">
+                  {semCategoriaCount} mídia(s) aguardando atribuição de categoria
+                </Text>
+              )}
             </HStack>
-            <Text fontSize="sm" color="fg.subtle">
-              Envie fotos ou vídeos locais diretamente para o sistema e realize a classificação e
-              triagem rápida por categorias.
-            </Text>
+
+            <FilaTriagemUpload
+              itens={itensMedia}
+              carregando={carregandoMedia}
+              categorias={categorias}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              onClassificarIndividual={(uuid, categoriaId) =>
+                mutationClassificar.mutate({ uuid, categoriaId })
+              }
+              onCategorizarEmLote={(categoriaId) =>
+                mutationCategorizarLote.mutate({ uuids: selecionados, categoriaId })
+              }
+              onApagarEmLote={() => {
+                setItemApagarAlvo(null)
+                setModalConfirmarApagar(true)
+              }}
+              onApagarIndividual={(uuid) => {
+                setItemApagarAlvo(uuid)
+                setModalConfirmarApagar(true)
+              }}
+              onRetentar={(uuid) => mutationRetentar.mutate(uuid)}
+              onForcarGoogleFotos={(item) =>
+                abrirConfirmacaoDuplicado({
+                  nome:
+                    item.metadata?.titulo ||
+                    (item.caminhoLocal ? item.caminhoLocal.split('/').pop() || '' : '') ||
+                    item.hash,
+                  tamanhoBytes: item.tamanhoBytes ?? undefined,
+                  previewUrl: item.thumbnailUrl,
+                  mediaItem: item,
+                })
+              }
+              filtroStatus={filtroStatus}
+              onMudarFiltroStatus={setFiltroStatus}
+              busca={busca}
+              onMudarBusca={setBusca}
+            />
           </VStack>
         </VStack>
 
-        <DropzoneUpload
-          fila={fila}
-          estaProcessando={estaProcessando}
-          categorias={categorias}
-          categoriaPadraoId={categoriaPadraoId}
-          onSetCategoriaPadraoId={setCategoriaPadraoId}
-          onAdicionarArquivos={adicionarArquivos}
-          onRemoverArquivo={removerArquivo}
-          onAtualizarCategoriaItem={atualizarCategoriaItem}
-          onLimparConcluidos={limparConcluidos}
-          onEnviarTodos={enviarTodosPendentes}
-          onReenviarItem={reenviarItemIndividual}
-          onAbrirConfirmacaoDuplicado={abrirConfirmacaoDuplicado}
-        />
-
-        <VStack
-          gap={4}
-          pt={4}
-          borderTop="1px solid"
-          borderColor="border.subtle"
-          alignItems="flex-start"
-        >
-          <HStack gap={2}>
-            <Box as="span" color="cirqueira.purple.500" display="inline-flex">
-              <FolderCheck size={20} color="currentColor" />
-            </Box>
-            <Text as="h2" fontSize="lg" fontWeight="bold" color="fg">
-              Triagem de Mídias Recebidas
-            </Text>
-          </HStack>
-
-          <FilaTriagemUpload
-            itens={itensMedia}
-            carregando={carregandoMedia}
-            categorias={categorias}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onToggleSelectAll={handleToggleSelectAll}
-            onClassificarIndividual={(uuid, categoriaId) =>
-              mutationClassificar.mutate({ uuid, categoriaId })
-            }
-            onCategorizarEmLote={(categoriaId) =>
-              mutationCategorizarLote.mutate({ uuids: selecionados, categoriaId })
-            }
-            onApagarEmLote={() => mutationApagarLote.mutate(selecionados)}
-            onRetentar={(uuid) => mutationRetentar.mutate(uuid)}
-            onForcarGoogleFotos={(item) =>
-              abrirConfirmacaoDuplicado({
-                nome:
-                  item.metadata?.titulo ||
-                  (item.caminhoLocal ? item.caminhoLocal.split('/').pop() || '' : '') ||
-                  item.hash,
-                tamanhoBytes: item.tamanhoBytes ?? undefined,
-                previewUrl: item.thumbnailUrl,
-                mediaItem: item,
-              })
-            }
-            filtroStatus={filtroStatus}
-            onMudarFiltroStatus={setFiltroStatus}
-            busca={busca}
-            onMudarBusca={setBusca}
-          />
-        </VStack>
-
+        {/* Modal de Confirmação de Envio de Duplicado */}
         <ModalConfirmarSincronizacaoDuplicado
           aberto={Boolean(itemDuplicadoPendente)}
           item={itemDuplicadoPendente}
@@ -252,7 +408,57 @@ const UploadManual = memo(function UploadManual() {
             queryClient.invalidateQueries({ queryKey: ['media-itens'] })
           }}
         />
-      </Container>
+
+        {/* Modal de Confirmação de Exclusão */}
+        <Dialog.Root
+          open={modalConfirmarApagar}
+          onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}
+          size="sm"
+        >
+          <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+          <Dialog.Positioner>
+            <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+              <Dialog.Header pb={2}>
+                <HStack gap={2} color="cirqueira.red.500">
+                  <AlertTriangle size={18} />
+                  <Dialog.Title fontSize="md" fontWeight="bold">
+                    Confirmar Exclusão
+                  </Dialog.Title>
+                </HStack>
+              </Dialog.Header>
+
+              <Dialog.Body py={3}>
+                <Text fontSize="xs" color="fg.subtle">
+                  {itemApagarAlvo
+                    ? 'Tem certeza de que deseja apagar esta mídia? Os arquivos e metadados serão excluídos permanentemente.'
+                    : `Tem certeza de que deseja apagar as ${selecionados.length} mídias selecionadas? Esta ação é irreversível.`}
+                </Text>
+              </Dialog.Body>
+
+              <Dialog.Footer pt={2}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setModalConfirmarApagar(false)}
+                  borderRadius="lg"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  colorPalette="red"
+                  onClick={handleConfirmarApagar}
+                  disabled={mutationApagarLote.isPending}
+                  borderRadius="lg"
+                  fontWeight="bold"
+                >
+                  {mutationApagarLote.isPending ? 'Apagando...' : 'Sim, Excluir'}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Dialog.Root>
+      </Box>
     </AppContainer>
   )
 })

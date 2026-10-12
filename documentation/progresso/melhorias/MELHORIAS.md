@@ -9,6 +9,7 @@
 > Os detalhes de cada melhoria estão nos arquivos desta pasta:
 > - **M1–M20** → [MELHORIAS_1.md](MELHORIAS_1.md)
 > - **M21–M40** → [MELHORIAS_2.md](MELHORIAS_2.md)
+> - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -52,6 +53,8 @@
 | M38 | Redesign da Central de Downloads com Layout Amplo e Cards de Vídeo Cinematográficos 16:9 | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-38--redesign-da-central-de-downloads-com-layout-amplo-e-cards-de-vídeo-cinematográficos-169) |
 | M39 | Conformidade Estrita com o Design System: Eliminação de Hex/RGBA e Adoção Integral de `theme.ts` | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-39--conformidade-estrita-com-o-design-system-eliminação-de-hexrgba-e-adoção-integral-de-themets) |
 | M40 | Alinhamento Integral de Fuso Horário Local (`America/Sao_Paulo`) no Backend Docker e Frontend | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-40--alinhamento-integral-de-fuso-horário-local-americasao_paulo-no-backend-docker-e-frontend) |
+| M41 | Redesign Completo da Central de Upload Manual & Triagem com Layout Amplo, Grade/Tabela e Ingestão via Clipboard | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_3.md#melhoria-41--redesign-completo-da-central-de-upload-manual--triagem-com-layout-amplo-prévia-em-gradetabela-e-ingestão-via-clipboard) |
+
 
 
 
