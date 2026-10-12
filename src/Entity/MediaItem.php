@@ -431,4 +431,42 @@ class MediaItem
 
         return 0;
     }
+
+    public function isArquivoExpurgado(): bool
+    {
+        return StatusMediaItem::ARQUIVO_EXPURGADO === $this->status;
+    }
+
+    public function isPrint(): bool
+    {
+        return in_array($this->origem, [OrigemMedia::PRINT_PESSOAL, OrigemMedia::PRINT_EMPRESA], true);
+    }
+
+    public function isVideo(): bool
+    {
+        if ($this->isPrint()) {
+            return false;
+        }
+
+        if (in_array($this->origem, [OrigemMedia::DOWNLOAD, OrigemMedia::BOT_TELEGRAM], true)) {
+            return true;
+        }
+
+        $caminho = strtolower((string) ($this->caminhoLocal ?? ''));
+        if ('' !== $caminho && preg_match('/\.(mp4|mkv|webm|mov|avi|flv)$/i', $caminho)) {
+            return true;
+        }
+
+        $mime = (string) ($this->metadata['mime_type'] ?? '');
+        if (str_starts_with($mime, 'video/')) {
+            return true;
+        }
+
+        $ext = (string) ($this->metadata['extensao'] ?? '');
+        if ('' !== $ext && preg_match('/^(mp4|mkv|webm|mov|avi|flv)$/i', $ext)) {
+            return true;
+        }
+
+        return false;
+    }
 }

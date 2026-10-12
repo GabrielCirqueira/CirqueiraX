@@ -38,4 +38,7 @@ final class MetadataKeys
     public const string DUPLICADO_DE_UUID = 'duplicado_de_uuid';
     public const string DATA_DETECCAO_DUPLICADO = 'data_deteccao_duplicado';
     public const string TENTATIVAS_DUPLICADAS = 'tentativas_duplicadas';
+
+    public const string ARQUIVO_EXPURGADO_EM = 'arquivo_expurgado_em';
+    public const string CAMINHO_LOCAL_ANTERIOR = 'caminho_local_anterior';
 }

@@ -427,4 +427,28 @@ class MediaItemRepository extends ServiceEntityRepository
 
         return $dados;
     }
+
+    /**
+     * @return list<MediaItem>
+     */
+    public function buscarVideosParaExpurgo(\DateTimeImmutable $dataLimite): array
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.criadoEm <= :dataLimite')
+            ->andWhere('m.status IN (:statusValidos)')
+            ->andWhere("(m.origem IN ('download', 'bot_telegram') OR m.caminhoLocal LIKE '%.mp4' OR m.caminhoLocal LIKE '%.mkv' OR m.caminhoLocal LIKE '%.webm' OR m.caminhoLocal LIKE '%.mov' OR m.metadata LIKE '%video/%')")
+            ->andWhere("m.origem NOT IN ('print_pessoal', 'print_empresa')")
+            ->andWhere('m.caminhoLocal IS NOT NULL')
+            ->setParameter('dataLimite', $dataLimite)
+            ->setParameter('statusValidos', [
+                StatusMediaItem::CONCLUIDO->value,
+                StatusMediaItem::DISTRIBUIDO_LOCAL->value,
+            ])
+            ->orderBy('m.criadoEm', 'ASC');
+
+        /** @var list<MediaItem> $itens */
+        $itens = $qb->getQuery()->getResult();
+
+        return $itens;
+    }
 }

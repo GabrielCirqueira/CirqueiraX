@@ -2,3 +2,6 @@
 
 # Executa um comando de teste a cada hora.
 0 * * * * root php /var/www/html/bin/console app:cron:heartbeat --no-interaction >> /var/log/cron/command.log 2>&1
+
+# Expurgo de vídeos antigos (> 7 dias) para liberar espaço no disco da VPS (somente vídeos)
+0 3 * * 0 root php /var/www/html/bin/console app:media:limpar-videos-antigos --dias=7 --no-interaction >> /var/log/cron/limpar_videos.log 2>&1

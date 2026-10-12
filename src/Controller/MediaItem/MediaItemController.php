@@ -188,6 +188,14 @@ final class MediaItemController extends DefaultController
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
+    #[Route('/{uuid}/rebaixar', name: 'rebaixar_individual', methods: ['POST'])]
+    public function rebaixarIndividual(string $uuid): Response
+    {
+        $mediaItem = $this->rebaixarMediaItemService->rebaixarIndividual($uuid);
+
+        return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
+    }
+
     #[Route('/{uuid}/forcar-google-fotos', name: 'forcar_google_fotos', methods: ['POST'])]
     public function forcarGoogleFotos(string $uuid, Request $request): Response
     {
