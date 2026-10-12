@@ -1,5 +1,8 @@
 import type { MediaItem } from '../types'
 
+import { formatarDataIsoLocal } from '@/shared/utils/formatarData'
+export { formatarDataIsoLocal }
+
 export interface DataHoraExtraida {
   data: string
   hora: string
@@ -15,39 +18,51 @@ export function extrairDataHoraInicial(item: MediaItem | null): DataHoraExtraida
 
   const valorData = item.metadata?.data || item.criadoEm
   if (!valorData) {
-    const hoje = new Date().toISOString().split('T')[0] ?? ''
+    const hoje = formatarDataIsoLocal(new Date())
     return { data: hoje, hora: '12:00' }
   }
 
-  if (/^\d{8}$/.test(valorData)) {
-    const ano = valorData.substring(0, 4)
-    const mes = valorData.substring(4, 6)
-    const dia = valorData.substring(6, 8)
+  const str = String(valorData).trim()
+
+  if (/^\d{8}$/.test(str)) {
+    const ano = str.substring(0, 4)
+    const mes = str.substring(4, 6)
+    const dia = str.substring(6, 8)
     return { data: `${ano}-${mes}-${dia}`, hora: '12:00' }
   }
 
-  if (valorData.includes('T')) {
-    const [d = '', h = '12:00'] = valorData.split('T')
+  // Se for ISO completo com fuso horário (ex: 2026-10-12T02:08:00Z ou offset), converte para o horário civil local
+  if (str.includes('T') || str.includes('Z') || /[+-]\d{2}:\d{2}$/.test(str)) {
+    const parsed = new Date(str)
+    if (!Number.isNaN(parsed.getTime())) {
+      const data = formatarDataIsoLocal(parsed)
+      const hh = String(parsed.getHours()).padStart(2, '0')
+      const mm = String(parsed.getMinutes()).padStart(2, '0')
+      return { data, hora: `${hh}:${mm}` }
+    }
+  }
+
+  if (str.includes(' ')) {
+    const [d = '', h = '12:00'] = str.split(' ')
     return { data: d, hora: h.substring(0, 5) || '12:00' }
   }
 
-  if (valorData.includes(' ')) {
-    const [d = '', h = '12:00'] = valorData.split(' ')
-    return { data: d, hora: h.substring(0, 5) || '12:00' }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return { data: str, hora: '12:00' }
   }
 
-  return { data: valorData, hora: '12:00' }
+  return { data: str, hora: '12:00' }
 }
 
 export function calcularDataComOffset(diasOffset: number): string {
   const dataAlvo = new Date()
   dataAlvo.setDate(dataAlvo.getDate() + diasOffset)
-  return dataAlvo.toISOString().split('T')[0] ?? ''
+  return formatarDataIsoLocal(dataAlvo)
 }
 
 export function obterDataHoraAtual(): DataHoraExtraida {
   const agora = new Date()
-  const data = agora.toISOString().split('T')[0] ?? ''
+  const data = formatarDataIsoLocal(agora)
   const hh = String(agora.getHours()).padStart(2, '0')
   const mm = String(agora.getMinutes()).padStart(2, '0')
   return { data, hora: `${hh}:${mm}` }
@@ -88,15 +103,24 @@ export function deslocarDataHora(
   deltaMinutos = 0
 ): { data: string; hora: string } {
   try {
-    const base = `${dataIso.trim()}T${hora.trim().substring(0, 5)}:00`
-    const dataObj = new Date(base)
-    if (!Number.isNaN(dataObj.getTime())) {
-      dataObj.setHours(dataObj.getHours() + deltaHoras)
-      dataObj.setMinutes(dataObj.getMinutes() + deltaMinutos)
-      const novaData = dataObj.toISOString().split('T')[0] ?? dataIso
-      const hh = String(dataObj.getHours()).padStart(2, '0')
-      const mm = String(dataObj.getMinutes()).padStart(2, '0')
-      return { data: novaData, hora: `${hh}:${mm}` }
+    const partesData = dataIso.trim().split('-').map(Number)
+    const ano = partesData[0]
+    const mes = partesData[1]
+    const dia = partesData[2]
+    const partesHora = hora.trim().split(':').map(Number)
+    const h = partesHora[0] ?? 0
+    const m = partesHora[1] ?? 0
+
+    if (ano && mes && dia) {
+      const dataObj = new Date(ano, mes - 1, dia, h, m, 0)
+      if (!Number.isNaN(dataObj.getTime())) {
+        dataObj.setHours(dataObj.getHours() + deltaHoras)
+        dataObj.setMinutes(dataObj.getMinutes() + deltaMinutos)
+        const novaData = formatarDataIsoLocal(dataObj)
+        const hh = String(dataObj.getHours()).padStart(2, '0')
+        const mm = String(dataObj.getMinutes()).padStart(2, '0')
+        return { data: novaData, hora: `${hh}:${mm}` }
+      }
     }
   } catch {}
   return { data: dataIso, hora }

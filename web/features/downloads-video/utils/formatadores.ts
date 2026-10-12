@@ -10,14 +10,33 @@ export function formatarDataMidia(valorData?: string, fallbackIso?: string): str
   const candidato = valorData || fallbackIso
   if (!candidato) return 'Data não inf.'
 
-  if (/^\d{8}$/.test(candidato)) {
-    const ano = candidato.substring(0, 4)
-    const mes = candidato.substring(4, 6)
-    const dia = candidato.substring(6, 8)
+  const str = String(candidato).trim()
+
+  if (/^\d{8}$/.test(str)) {
+    const ano = str.substring(0, 4)
+    const mes = str.substring(4, 6)
+    const dia = str.substring(6, 8)
     return `${dia}/${mes}/${ano}`
   }
 
-  const dataApenas = candidato.split(/[T ]/)[0] ?? ''
+  // Se for apenas data YYYY-MM-DD pura sem hora
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [ano, mes, dia] = str.split('-')
+    return `${dia}/${mes}/${ano}`
+  }
+
+  // Se tiver indicação de data/hora ISO ou fuso horário (ex: contém T, Z ou offset)
+  // Converte respeitando o fuso local do navegador do usuário
+  if (str.includes('T') || str.includes('Z') || /[+-]\d{2}:\d{2}$/.test(str)) {
+    try {
+      const parsed = new Date(str)
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString('pt-BR')
+      }
+    } catch {}
+  }
+
+  const dataApenas = str.split(/[T ]/)[0] ?? ''
   if (dataApenas.includes('-')) {
     const partes = dataApenas.split('-')
     if (partes.length === 3 && partes[0] && partes[1] && partes[2]) {
@@ -27,7 +46,7 @@ export function formatarDataMidia(valorData?: string, fallbackIso?: string): str
   }
 
   try {
-    const parsed = new Date(candidato)
+    const parsed = new Date(str)
     if (!Number.isNaN(parsed.getTime())) {
       return parsed.toLocaleDateString('pt-BR')
     }
@@ -49,7 +68,17 @@ export function formatarHorarioMidia(item: MediaItem): string {
 
   const valorData = item.metadata?.data
   if (valorData && typeof valorData === 'string') {
-    const partesEspaco = valorData.split(/[T ]/)
+    const strData = valorData.trim()
+    if (strData.includes('T') && (strData.includes('Z') || /[+-]\d{2}:\d{2}$/.test(strData))) {
+      try {
+        const parsed = new Date(strData)
+        if (!Number.isNaN(parsed.getTime())) {
+          return parsed.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        }
+      } catch {}
+    }
+
+    const partesEspaco = strData.split(/[T ]/)
     const horaRaw = partesEspaco[1]
     if (horaRaw) {
       const partesHora = horaRaw.split(':')

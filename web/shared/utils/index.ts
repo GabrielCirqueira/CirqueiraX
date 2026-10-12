@@ -6,5 +6,5 @@ export {
   slideLateral,
   slideDown,
 } from './animacoes'
-export { formatarData, formatarDataHora, tempoRelativo } from './formatarData'
+export { formatarData, formatarDataHora, formatarDataIsoLocal, tempoRelativo } from './formatarData'
 export { formatarMoeda, formatarPercentual, formatarNumero } from './formatarMoeda'

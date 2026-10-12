@@ -1,5 +1,25 @@
+export function formatarDataIsoLocal(data: Date = new Date()): string {
+  const ano = data.getFullYear()
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
+}
+
 export function formatarData(data: string | Date): string {
   try {
+    if (typeof data === 'string') {
+      const limpo = data.trim()
+      if (/^\d{4}-\d{2}-\d{2}$/.test(limpo)) {
+        const [ano, mes, dia] = limpo.split('-')
+        return `${dia}/${mes}/${ano}`
+      }
+      if (/^\d{8}$/.test(limpo)) {
+        const ano = limpo.substring(0, 4)
+        const mes = limpo.substring(4, 6)
+        const dia = limpo.substring(6, 8)
+        return `${dia}/${mes}/${ano}`
+      }
+    }
     const d = typeof data === 'string' ? new Date(data) : data
     if (Number.isNaN(d.getTime())) return String(data)
     return d.toLocaleDateString('pt-BR')

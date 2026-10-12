@@ -51,6 +51,8 @@
 | M37 | Detecção de Duplicatas e Sincronização Sob Demanda com Google Fotos | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-37--detecção-de-duplicatas-e-sincronização-sob-demanda-com-google-fotos) |
 | M38 | Redesign da Central de Downloads com Layout Amplo e Cards de Vídeo Cinematográficos 16:9 | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-38--redesign-da-central-de-downloads-com-layout-amplo-e-cards-de-vídeo-cinematográficos-169) |
 | M39 | Conformidade Estrita com o Design System: Eliminação de Hex/RGBA e Adoção Integral de `theme.ts` | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-39--conformidade-estrita-com-o-design-system-eliminação-de-hexrgba-e-adoção-integral-de-themets) |
+| M40 | Alinhamento Integral de Fuso Horário Local (`America/Sao_Paulo`) no Backend Docker e Frontend | ✅ Concluído | 11/10/2026 | [ver](MELHORIAS_2.md#melhoria-40--alinhamento-integral-de-fuso-horário-local-americasao_paulo-no-backend-docker-e-frontend) |
+
 
 
 

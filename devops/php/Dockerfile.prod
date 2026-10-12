@@ -39,7 +39,9 @@ FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
     bash libzip-dev icu-dev oniguruma-dev \
-    nginx supervisor curl openssl netcat-openbsd \
+    nginx supervisor curl openssl netcat-openbsd tzdata \
+    && cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime \
+    && echo "America/Sao_Paulo" > /etc/timezone \
     && docker-php-ext-install pdo_mysql zip intl opcache \
     && mkdir -p /run/nginx /var/log/supervisor
 

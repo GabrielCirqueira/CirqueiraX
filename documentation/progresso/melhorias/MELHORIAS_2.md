@@ -574,6 +574,38 @@
   - `web/features/prints/components/CardPrint.tsx`
   - `web/features/prints/components/ModalVisualizarPrint.tsx`
 
+---
+
+### ✅ Melhoria 40 — Alinhamento Integral de Fuso Horário Local (`America/Sao_Paulo`) no Backend Docker e Frontend
+
+- **Status**: Concluído
+- **Data**: 11 de outubro de 2026
+- **Problema**:
+  - O sistema apresentava que hoje era "dia 12" em vez de "dia 11" no período noturno (a partir das 21:00 no fuso de Brasília, UTC-3), afetando botões como "Hoje", "⚡ Agora", a data base do modal de distribuição em lote e o parsing de timestamps de criação de mídias (`criadoEm`).
+  - Diagnosticadas duas causas fundamentais:
+    1. A imagem Alpine PHP (`devops/php/Dockerfile` e `devops/php/Dockerfile.prod`) não possuía o pacote `tzdata` instalado nem `/etc/localtime` vinculado, fazendo com que chamadas de sistema no container operassem em UTC.
+    2. O frontend utilizava `new Date().toISOString().split('T')[0]` e splits textuais diretos de strings ISO (`valorData.split('T')[0]`), que capturavam o dia civil em UTC (onde 23:08 BRT do dia 11 corresponde a 02:08 UTC do dia 12). Além disso, `formatarData` e `formatarDataMidia` não convertiam timestamps com timezone de volta para o horário local do navegador.
+- **Solução**:
+  - **Dockerfiles PHP (`devops/php/Dockerfile` e `devops/php/Dockerfile.prod`)**:
+    - Adicionado o pacote `tzdata` via `apk add` e configurados `cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime` e `echo "America/Sao_Paulo" > /etc/timezone`, assegurando que o sistema operacional e processos do container PHP operem nativamente no fuso brasileiro (`America/Sao_Paulo`, UTC-3).
+  - **Utilitário de Formatação de Data Local (`web/shared/utils/formatarData.ts`)**:
+    - Criada a função exportada `formatarDataIsoLocal(data: Date = new Date()): string` que extrai ano, mês e dia a partir dos métodos locais do navegador (`getFullYear()`, `getMonth() + 1`, `getDate()`), impedindo avanços precoces para o dia seguinte causados por conversão UTC de `toISOString()`.
+    - Protegida a função `formatarData` para que strings com formato de data pura (`YYYY-MM-DD` ou `YYYYMMDD`) sejam formatadas sem sofrer conversão regressiva de fuso em `new Date(string)`.
+  - **Utilitários e Modais de Edição (`web/features/downloads-video/utils/metadataEdicao.ts` e `ModalDistribuirHorariosLote.tsx`)**:
+    - Substituídas todas as ocorrências de `toISOString().split('T')[0]` por `formatarDataIsoLocal(...)`.
+    - Atualizada a função `extrairDataHoraInicial` para que strings com timestamp ISO completo (com `T`, `Z` ou offset de fuso) sejam convertidas para a hora e dia locais do cliente em vez de realizar um `split('T')` ingênuo.
+    - Atualizada `deslocarDataHora` para instanciar objetos Date com argumentos numéricos locais (`new Date(ano, mes - 1, dia, h, m)`), garantindo estabilidade ao somar/subtrair horários sem pular dias inadvertidamente.
+  - **Formatadores de Exibição (`web/features/downloads-video/utils/formatadores.ts`)**:
+    - Atualizadas `formatarDataMidia` e `formatarHorarioMidia` para que timestamps completos com timezone sejam parseados para o fuso local do navegador do usuário (`America/Sao_Paulo`), apresentando a data e horário corretos tanto no Grid quanto na Tabela e modais.
+- **Arquivos**:
+  - `devops/php/Dockerfile`
+  - `devops/php/Dockerfile.prod`
+  - `web/shared/utils/formatarData.ts`
+  - `web/shared/utils/index.ts`
+  - `web/features/downloads-video/utils/metadataEdicao.ts`
+  - `web/features/downloads-video/utils/formatadores.ts`
+  - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
+
 
 
 

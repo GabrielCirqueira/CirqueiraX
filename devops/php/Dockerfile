@@ -3,7 +3,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Dependências do sistema
 RUN apk add --no-cache \
-    git bash libzip-dev icu-dev oniguruma-dev python3 yt-dlp ffmpeg supervisor \
+    git bash libzip-dev icu-dev oniguruma-dev python3 yt-dlp ffmpeg supervisor tzdata \
+    && cp /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime \
+    && echo "America/Sao_Paulo" > /etc/timezone \
     && docker-php-ext-install pdo_mysql zip intl opcache
 
 # --- Desenvolvimento ---

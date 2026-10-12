@@ -35,6 +35,7 @@ import {
   combinarDataHora,
   deslocarDataHora,
   extrairDataHoraInicial,
+  formatarDataIsoLocal,
 } from '../utils/metadataEdicao'
 
 export interface ModalDistribuirHorariosLoteProps {
@@ -57,13 +58,14 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
   const total = itens.length
 
   const dataHoraMaisRecente = useMemo(() => {
-    const hoje = new Date().toISOString().split('T')[0] ?? ''
-    if (itens.length === 0) return { data: hoje, hora: '22:46' }
+    const hoje = formatarDataIsoLocal(new Date())
+    const agoraHora = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
+    if (itens.length === 0) return { data: hoje, hora: agoraHora }
     const primeiro = itens[0] ?? null
     const ext = extrairDataHoraInicial(primeiro)
     return {
       data: ext.data || hoje,
-      hora: ext.hora || '22:46',
+      hora: ext.hora || agoraHora,
     }
   }, [itens])
 
@@ -79,11 +81,12 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
 
   useEffect(() => {
     if (aberto && itens.length > 0) {
-      const hoje = new Date().toISOString().split('T')[0] ?? ''
+      const hoje = formatarDataIsoLocal(new Date())
+      const agoraHora = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
       const primeiro = itens[0] ?? null
       const ext = extrairDataHoraInicial(primeiro)
       setDataBase(ext.data || hoje)
-      setHoraBaseRetroativa(ext.hora || '22:46')
+      setHoraBaseRetroativa(ext.hora || agoraHora)
       setAjustesManuais({})
     }
   }, [aberto, itens])
