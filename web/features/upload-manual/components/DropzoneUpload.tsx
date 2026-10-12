@@ -545,7 +545,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           colorPalette="brand"
                           onClick={() => handleAplicarCategoriaRapida(catPrint.uuid)}
                           borderRadius="md"
-                          h={5.5}
+                          h="24px"
                           fontSize="10px"
                         >
                           Definir todas como {catPrint.nome}
@@ -662,7 +662,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           borderColor="border.subtle"
                           borderRadius="md"
                           fontSize="11px"
-                          h={6.5}
+                          h="28px"
                         >
                           <option value="">Sem Categoria</option>
                           {categorias.map((cat) => (

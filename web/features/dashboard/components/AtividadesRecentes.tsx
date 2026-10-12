@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Bot,
   Building2,
-  CheckCircle2,
   Clock,
   DownloadCloud,
   FileQuestion,
@@ -97,6 +96,8 @@ export const AtividadesRecentes = memo(function AtividadesRecentes({
       borderRadius="2xl"
       shadow="md"
       p={5}
+      minW={0}
+      overflow="hidden"
     >
       <HStack justify="space-between" align="center" mb={4}>
         <HStack gap={2.5}>
@@ -197,7 +198,7 @@ export const AtividadesRecentes = memo(function AtividadesRecentes({
                       fontSize="xs"
                       fontWeight="bold"
                       color="fg"
-                      isTruncated
+                      truncate
                       maxW={{ base: '180px', sm: '280px', md: '360px' }}
                     >
                       {nomeExibicao}

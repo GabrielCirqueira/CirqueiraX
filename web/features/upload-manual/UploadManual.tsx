@@ -414,7 +414,7 @@ const UploadManual = memo(function UploadManual() {
                         onClick={() => handleCategorizarTodasSemCategoria(cat.uuid)}
                         borderRadius="md"
                         fontSize="11px"
-                        h={6.5}
+                        h="26px"
                         fontWeight="semibold"
                       >
                         {cat.nome}
@@ -426,7 +426,7 @@ const UploadManual = memo(function UploadManual() {
                       onClick={handleSelecionarTodasSemCategoria}
                       borderRadius="md"
                       fontSize="11px"
-                      h={6.5}
+                      h="26px"
                       color="fg.subtle"
                     >
                       Selecionar todas ({semCategoriaCount})

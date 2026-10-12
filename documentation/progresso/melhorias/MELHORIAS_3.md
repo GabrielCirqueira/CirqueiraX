@@ -192,5 +192,36 @@
   - `web/features/central-midias/components/ModalVisualizarMidiaCentral.tsx`
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
 
+### ✅ Melhoria 45 — Correção de Layout Quebrado nos Botões de Abas da Central de Mídias e no Grid de Saúde do Ecossistema no Dashboard
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - **Imagens 1 e 3 (Central de Mídias)**: O botão da aba ativa `Todas as Mídias [70]` estava completamente esmagado verticalmente em uma faixa verde de espessura mínima, com o texto vazando para cima e para baixo e o badge numérico `70` projetando-se para fora de forma desproporcional.
+    - *Causa Raiz*: No componente `CentralMidias.tsx`, o botão da aba utilizava `h={7.5}`. No Chakra UI v3 / Styled System, `7.5` não é um token do sistema de espaçamento e foi avaliado literalmente como `height: 7.5px`. Isso fez o botão colapsar para uma altura de apenas 7.5px.
+  - **Imagem 2 (Dashboard — Saúde do Ecossistema & Serviços)**: No card de integrações do Dashboard, os blocos 3 e 4 (`Google Fotos` e `Armazenamento`) vazavam para fora da borda direita do container, flutuando no vazio preto.
+    - *Causa Raiz*: No componente `StatusIntegracoes.tsx`, a propriedade `templateColumns` estava configurada como `repeat(4, 1fr)` em telas desktop (`lg`). Como o card está posicionado na coluna direita do layout do Dashboard (`0.8fr`, ocupando ~40% da largura útil da tela), forçar 4 colunas horizontais espremia cada bloco em ~90px, fazendo o conteúdo ultrapassar os limites do container do card.
+- **Solução**:
+  - **Correção da Altura e Estilização das Abas (`CentralMidias.tsx`)**:
+    - Substituído `h={7.5}` por `size="sm"`, `h="36px"`, `minH="36px"`, `px={3.5}` e `flexShrink={0}`.
+    - O badge numérico da aba ativa foi refinado com `bg="cirqueira.grey.950/30"` e `color="cirqueira.grey.0"` para contraste nítido sobre o fundo verde esmeralda.
+    - As abas inativas receberam badges sutis com `bg="bg.panel"`, `color="fg.subtle"` e borda delicada.
+    - Os botões de alternância de modo de visualização (grade / tabela) foram alinhados com `h="36px"` e `w="36px"`.
+  - **Reestruturação do Grid de Integrações (`StatusIntegracoes.tsx` e `Dashboard.tsx`)**:
+    - Ajustado o grid para 2 colunas harmônicas em formato 2x2 (`templateColumns={{ base: '1fr', sm: 'repeat(2, 1fr)' }}`): Linha 1 = Syncthing e Fila de Processamento; Linha 2 = Google Fotos e Armazenamento.
+    - Aplicado `minW={0}`, `w="full"` e `overflow="hidden"` no `Card.Root`.
+    - Adicionado `truncate` nos títulos, `lineClamp={1}` nos subtítulos e `flexShrink={0}` nos badges e ícones de cada bloco de serviço.
+    - No container pai `Dashboard.tsx`, atualizado `gridTemplateColumns` para utilizar `minmax(0, 1.2fr) minmax(0, 0.8fr)`, eliminando qualquer possibilidade de blowout em colunas de grid fracionadas.
+  - **Varredura Preventiva de Alturas Fracionárias (`UploadManual.tsx`, `DropzoneUpload.tsx`)**:
+    - Corrigidas ocorrências de `h={6.5}` e `h={5.5}` para dimensões explícitas `h="26px"`, `h="28px"` e `h="24px"`.
+- **Arquivos**:
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/dashboard/components/StatusIntegracoes.tsx`
+  - `web/features/dashboard/components/AtividadesRecentes.tsx`
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/upload-manual/UploadManual.tsx`
+  - `web/features/upload-manual/components/DropzoneUpload.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+
 
 

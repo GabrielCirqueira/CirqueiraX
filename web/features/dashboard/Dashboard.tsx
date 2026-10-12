@@ -249,9 +249,10 @@ const DashboardView = memo(function DashboardView() {
 
               <Box
                 display="grid"
-                gridTemplateColumns={{ base: '1fr', lg: '1.2fr 0.8fr' }}
+                gridTemplateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1.2fr) minmax(0, 0.8fr)' }}
                 gap={5}
                 w="full"
+                minW={0}
               >
                 <AtividadesRecentes
                   midias={resumo?.ultimasMidias}

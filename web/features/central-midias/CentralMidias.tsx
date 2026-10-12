@@ -287,7 +287,7 @@ const CentralMidias = memo(function CentralMidias() {
             align={{ base: 'stretch', lg: 'center' }}
             gap={3}
           >
-            <HStack gap={1.5} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto">
+            <HStack gap={1.5} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto" maxW="full">
               {origensAbas.map((aba) => {
                 const Icone = aba.icon
                 const ativo = origemFiltro === aba.value
@@ -295,7 +295,7 @@ const CentralMidias = memo(function CentralMidias() {
                 return (
                   <Button
                     key={aba.value}
-                    size="xs"
+                    size="sm"
                     variant={ativo ? 'solid' : 'ghost'}
                     colorPalette={ativo ? 'brand' : undefined}
                     onClick={() => {
@@ -304,22 +304,28 @@ const CentralMidias = memo(function CentralMidias() {
                     }}
                     fontWeight="semibold"
                     borderRadius="lg"
-                    px={3}
-                    h={7.5}
+                    px={3.5}
+                    h="36px"
+                    minH="36px"
+                    flexShrink={0}
                   >
-                    <HStack gap={1.5} align="center">
-                      <Icone size={13} />
-                      <Text as="span">{aba.label}</Text>
+                    <HStack gap={2} align="center">
+                      <Icone size={14} />
+                      <Text as="span" fontSize="xs">{aba.label}</Text>
                       {typeof aba.count === 'number' && (
                         <Badge
                           size="xs"
-                          variant={ativo ? 'solid' : 'subtle'}
-                          colorPalette={ativo ? 'brand' : 'gray'}
+                          variant="solid"
+                          bg={ativo ? 'cirqueira.grey.950/30' : 'bg.panel'}
+                          color={ativo ? 'cirqueira.grey.0' : 'fg.subtle'}
+                          borderWidth={ativo ? '0px' : '1px'}
+                          borderColor="border.subtle"
                           borderRadius="full"
-                          px={1.5}
-                          py={0}
+                          px={2}
+                          py={0.5}
                           fontSize="10px"
                           fontWeight="bold"
+                          lineHeight="1"
                         >
                           {aba.count}
                         </Badge>
@@ -330,32 +336,32 @@ const CentralMidias = memo(function CentralMidias() {
               })}
             </HStack>
 
-            <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle" alignSelf={{ base: 'flex-start', lg: 'center' }}>
+            <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle" alignSelf={{ base: 'flex-start', lg: 'center' }} flexShrink={0}>
               <IconButton
-                size="xs"
+                size="sm"
                 variant={modoVisualizacao === 'grid' ? 'solid' : 'ghost'}
                 colorPalette={modoVisualizacao === 'grid' ? 'brand' : undefined}
                 onClick={() => setModoVisualizacao('grid')}
                 aria-label="Grade Estilo Google Fotos"
                 title="Grade Estilo Google Fotos"
                 borderRadius="lg"
-                h={6}
-                w={6}
+                h="36px"
+                w="36px"
               >
-                <LayoutGrid size={14} />
+                <LayoutGrid size={16} />
               </IconButton>
               <IconButton
-                size="xs"
+                size="sm"
                 variant={modoVisualizacao === 'tabela' ? 'solid' : 'ghost'}
                 colorPalette={modoVisualizacao === 'tabela' ? 'brand' : undefined}
                 onClick={() => setModoVisualizacao('tabela')}
                 aria-label="Tabela Compacta"
                 title="Tabela Compacta"
                 borderRadius="lg"
-                h={6}
-                w={6}
+                h="36px"
+                w="36px"
               >
-                <List size={14} />
+                <List size={16} />
               </IconButton>
             </HStack>
           </Flex>
