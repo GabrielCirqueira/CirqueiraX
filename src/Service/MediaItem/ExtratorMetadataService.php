@@ -55,6 +55,15 @@ final readonly class ExtratorMetadataService
             $dataCriacao = (new \DateTimeImmutable("@{$mtime}"))->format(\DateTimeInterface::ATOM);
         }
 
+        $hashVisual = null;
+        if (str_starts_with($mimeType, 'image/') || str_starts_with($mimeType, 'video/')) {
+            $cmd = sprintf('ffmpeg -v error -i %s -f md5 - 2>/dev/null', escapeshellarg($caminhoArquivo));
+            $saida = trim((string) @shell_exec($cmd));
+            if (str_starts_with($saida, 'MD5=')) {
+                $hashVisual = substr($saida, 4);
+            }
+        }
+
         $novosMetadados = [
             MetadataKeys::TAMANHO_BYTES => $tamanhoBytes,
             MetadataKeys::HASH_SHA256 => $sha256,
@@ -62,6 +71,7 @@ final readonly class ExtratorMetadataService
             MetadataKeys::MIME_TYPE => $mimeType,
             MetadataKeys::EXTENSAO => $extensao,
             MetadataKeys::FINGERPRINT => $fingerprint,
+            MetadataKeys::HASH_VISUAL => $hashVisual,
         ];
 
         if (null !== $largura) {

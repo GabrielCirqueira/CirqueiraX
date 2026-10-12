@@ -27,6 +27,7 @@ final class MetadataKeys
     public const string ALTURA = 'altura';
     public const string DIMENSOES = 'dimensoes';
     public const string FINGERPRINT = 'fingerprint';
+    public const string HASH_VISUAL = 'hash_visual';
     public const string DATA_CRIACAO_ARQUIVO = 'data_criacao_arquivo';
 
     // Metadados de sincronização Google Fotos

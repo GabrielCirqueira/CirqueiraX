@@ -32,13 +32,15 @@ final readonly class IngestarMediaService
         $md5 = $metadataEnriquecida[MetadataKeys::HASH_MD5] ?? null;
         $tamanho = $metadataEnriquecida[MetadataKeys::TAMANHO_BYTES] ?? null;
         $urlOriginal = $metadataEnriquecida[MetadataKeys::URL_ORIGINAL] ?? null;
+        $hashVisual = $metadataEnriquecida[MetadataKeys::HASH_VISUAL] ?? null;
 
-        // Busca duplicado por SHA-256, MD5 ou URL Original
+        // Busca duplicado por SHA-256, MD5, Hash Visual ou URL Original
         $existente = $this->mediaItemRepository->buscarDuplicado(
             $hash,
             is_string($md5) ? $md5 : null,
             is_int($tamanho) ? $tamanho : null,
-            is_string($urlOriginal) ? $urlOriginal : null
+            is_string($urlOriginal) ? $urlOriginal : null,
+            is_string($hashVisual) ? $hashVisual : null
         );
 
         if (null !== $existente) {

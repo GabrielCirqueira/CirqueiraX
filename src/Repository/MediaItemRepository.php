@@ -61,6 +61,7 @@ class MediaItemRepository extends ServiceEntityRepository
         ?string $md5 = null,
         ?int $tamanhoBytes = null,
         ?string $urlOriginal = null,
+        ?string $hashVisual = null,
     ): ?MediaItem {
         $porHash = $this->buscarPorHash($hash);
         if (null !== $porHash) {
@@ -71,6 +72,13 @@ class MediaItemRepository extends ServiceEntityRepository
             $porMd5 = $this->buscarPorMd5($md5);
             if (null !== $porMd5) {
                 return $porMd5;
+            }
+        }
+
+        if (null !== $hashVisual && '' !== trim($hashVisual)) {
+            $porVisual = $this->buscarPorHashVisual($hashVisual);
+            if (null !== $porVisual) {
+                return $porVisual;
             }
         }
 
@@ -97,6 +105,19 @@ class MediaItemRepository extends ServiceEntityRepository
         return $item;
     }
 
+    public function buscarPorHashVisual(string $hashVisual): ?MediaItem
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.metadata LIKE :hashVisual')
+            ->setParameter('hashVisual', '%' . $hashVisual . '%')
+            ->setMaxResults(1);
+
+        /** @var MediaItem|null $item */
+        $item = $qb->getQuery()->getOneOrNullResult();
+
+        return $item;
+    }
+
     public function buscarPorUrlOriginal(string $urlOriginal): ?MediaItem
     {
         $qb = $this->createQueryBuilder('m')
@@ -114,19 +135,26 @@ class MediaItemRepository extends ServiceEntityRepository
         string $hash,
         ?Uuid $ignorarUuid = null,
         ?string $md5 = null,
+        ?string $hashVisual = null,
     ): ?MediaItem {
         $qb = $this->createQueryBuilder('m')
             ->where('m.googlePhotosMediaId IS NOT NULL')
             ->andWhere("m.googlePhotosMediaId != ''");
 
+        $orCondicoes = ['m.hash = :hash'];
+        $qb->setParameter('hash', $hash);
+
         if (null !== $md5 && '' !== trim($md5)) {
-            $qb->andWhere('(m.hash = :hash OR m.metadata LIKE :md5)')
-                ->setParameter('hash', $hash)
-                ->setParameter('md5', '%' . $md5 . '%');
-        } else {
-            $qb->andWhere('m.hash = :hash')
-                ->setParameter('hash', $hash);
+            $orCondicoes[] = 'm.metadata LIKE :md5';
+            $qb->setParameter('md5', '%' . $md5 . '%');
         }
+
+        if (null !== $hashVisual && '' !== trim($hashVisual)) {
+            $orCondicoes[] = 'm.metadata LIKE :hashVisual';
+            $qb->setParameter('hashVisual', '%' . $hashVisual . '%');
+        }
+
+        $qb->andWhere('(' . implode(' OR ', $orCondicoes) . ')');
 
         if (null !== $ignorarUuid) {
             $qb->andWhere('m.uuid != :ignorarUuid')

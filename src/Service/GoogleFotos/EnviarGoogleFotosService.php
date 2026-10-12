@@ -61,15 +61,19 @@ final readonly class EnviarGoogleFotosService
             throw CategoriaException::categoriaNaoEncontrada();
         }
 
-        // 2. VERIFICAÇÃO DE DUPLICIDADE ENTRE ITENS: Verifica se outro registro com mesmo hash/MD5 já foi enviado
+        // 2. VERIFICAÇÃO DE DUPLICIDADE ENTRE ITENS: Verifica se outro registro com mesmo hash/MD5/hashVisual já foi enviado
         $md5 = is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null)
             ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5]
+            : null;
+        $hashVisual = is_string($mediaItem->metadata()[MetadataKeys::HASH_VISUAL] ?? null)
+            ? (string) $mediaItem->metadata()[MetadataKeys::HASH_VISUAL]
             : null;
 
         $outroItemComGoogle = $this->mediaItemRepository->buscarOutroItemComGoogleFotos(
             $mediaItem->hash(),
             $mediaItem->uuid(),
-            $md5
+            $md5,
+            $hashVisual
         );
 
         if (null !== $outroItemComGoogle && $outroItemComGoogle->isEnviadoGoogleFotos()) {

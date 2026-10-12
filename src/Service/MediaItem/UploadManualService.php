@@ -61,11 +61,14 @@ final readonly class UploadManualService
 
         $metadataExtraida = $this->extratorMetadataService->extrair($caminhoArquivo, $dto->metadata());
         $md5 = $metadataExtraida[MetadataKeys::HASH_MD5] ?? null;
+        $hashVisual = $metadataExtraida[MetadataKeys::HASH_VISUAL] ?? null;
 
         $existente = $this->mediaItemRepository->buscarDuplicado(
             $hash,
             is_string($md5) ? $md5 : null,
-            (int) @filesize($caminhoArquivo)
+            (int) @filesize($caminhoArquivo),
+            null,
+            is_string($hashVisual) ? $hashVisual : null
         );
 
         if (null !== $existente) {
