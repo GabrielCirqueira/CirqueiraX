@@ -648,37 +648,43 @@ export default function DownloadsVideo() {
           </HStack>
         </Flex>
 
-        {modoVisualizacao === 'grid' ? (
-          <GridVideos
-            itens={itens}
-            carregando={isLoading}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onToggleSelectAll={handleToggleSelectAll}
-            onVisualizar={(item) => setItemVisualizar(item)}
-            onEditarMetadata={handleAbrirEditarMetadata}
-            onCategorizar={handleAbrirCategorizarIndividual}
-            onRebaixar={handleAbrirRebaixarIndividual}
-            onRetentar={(uuid) => retentarItemMutate(uuid)}
-            onApagar={handleAbrirApagarIndividual}
-            onForcarGoogleFotos={handleForcarGoogleFotos}
-          />
-        ) : (
-          <TabelaVideos
-            itens={itens}
-            carregando={isLoading}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onToggleSelectAll={handleToggleSelectAll}
-            onVisualizar={(item) => setItemVisualizar(item)}
-            onEditarMetadata={handleAbrirEditarMetadata}
-            onCategorizar={handleAbrirCategorizarIndividual}
-            onRebaixar={handleAbrirRebaixarIndividual}
-            onRetentar={(uuid) => retentarItemMutate(uuid)}
-            onApagar={handleAbrirApagarIndividual}
-            onForcarGoogleFotos={handleForcarGoogleFotos}
-          />
-        )}
+        <Box
+          key={`${modoVisualizacao}-${statusFiltro}-${origemFiltro}-${categoriaFiltro}-${pagina}`}
+          className="tab-pane-fade"
+          w="full"
+        >
+          {modoVisualizacao === 'grid' ? (
+            <GridVideos
+              itens={itens}
+              carregando={isLoading}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              onVisualizar={(item) => setItemVisualizar(item)}
+              onEditarMetadata={handleAbrirEditarMetadata}
+              onCategorizar={handleAbrirCategorizarIndividual}
+              onRebaixar={handleAbrirRebaixarIndividual}
+              onRetentar={(uuid) => retentarItemMutate(uuid)}
+              onApagar={handleAbrirApagarIndividual}
+              onForcarGoogleFotos={handleForcarGoogleFotos}
+            />
+          ) : (
+            <TabelaVideos
+              itens={itens}
+              carregando={isLoading}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              onVisualizar={(item) => setItemVisualizar(item)}
+              onEditarMetadata={handleAbrirEditarMetadata}
+              onCategorizar={handleAbrirCategorizarIndividual}
+              onRebaixar={handleAbrirRebaixarIndividual}
+              onRetentar={(uuid) => retentarItemMutate(uuid)}
+              onApagar={handleAbrirApagarIndividual}
+              onForcarGoogleFotos={handleForcarGoogleFotos}
+            />
+          )}
+        </Box>
 
         {total > 0 && (
           <Flex

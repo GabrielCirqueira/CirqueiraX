@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, HStack, Text } from '@chakra-ui/react'
+import { Box, Button, Card, HStack, Text } from '@chakra-ui/react'
 import {
   DownloadCloud,
   FolderPlus,
@@ -54,6 +54,7 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
   return (
     <>
       <Card.Root
+        className="smooth-card"
         borderWidth="1px"
         borderColor="border.subtle"
         bg="bg.panel"
@@ -90,6 +91,7 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
 
           <HStack gap={2} flexWrap="wrap">
             <Button
+              className="btn-tactile"
               size="sm"
               variant="outline"
               borderRadius="xl"
@@ -105,6 +107,7 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
             </Button>
 
             <Button
+              className="btn-tactile"
               size="sm"
               variant="outline"
               borderRadius="xl"
@@ -120,6 +123,7 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
             </Button>
 
             <Button
+              className="btn-tactile"
               size="sm"
               variant="outline"
               borderRadius="xl"
@@ -135,6 +139,7 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
             </Button>
 
             <Button
+              className="btn-tactile"
               size="sm"
               variant="outline"
               borderRadius="xl"
@@ -149,6 +154,7 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
             </Button>
 
             <Button
+              className="btn-tactile"
               size="sm"
               variant="subtle"
               colorPalette="teal"

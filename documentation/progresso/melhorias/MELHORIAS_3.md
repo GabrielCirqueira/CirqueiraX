@@ -303,3 +303,37 @@
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
   - `documentation/progresso/melhorias/MELHORIAS.md`
 
+### ✅ Melhoria 48 — Transições Suaves e Microinterações Fluidas de Alta Performance (GPU Aceleradas) sem Perda de Fluidez
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - A interface realizava trocas de rotas e alternância de abas de forma abrupta e seca, sem transições visuais agradáveis. Ao mesmo tempo, era imperativo que qualquer animação adicionada não consumisse CPU nem causasse engasgos (*jank* / *frame drop*) ou travamentos na navegação.
+- **Solução**:
+  - **Transição de Entrada de Páginas Acelerada por Hardware (`MainLayout.tsx` e `index.css`)**:
+    - Criada a classe `.page-transition-enter` baseada exclusivamente em `transform: translateY(4px)` e `opacity` com duração de **200ms** e curva `cubic-bezier(0.16, 1, 0.3, 1)`.
+    - No container do `<Outlet />`, a transição é ativada suavemente a cada alteração de rota (`location.pathname`), conferindo sensação premium e fluida de aplicativo nativo sem provocar *layout shift* ou recálculo de layout.
+    - Utilizado `will-change: transform, opacity` para promoção direta à camada de composição da GPU.
+  - **Transição Suave na Alternância de Abas e Modos de Visualização (`Dashboard.tsx`, `CentralMidias.tsx`, `Prints.tsx`, `DownloadsVideo.tsx`)**:
+    - Criada a classe `.tab-pane-fade` com duração de **160ms** para transições instantâneas entre abas do Dashboard (`visao-geral`, `categorias`, `sincronizacao`, `erros`) e alternância entre os modos **Grade** e **Tabela** na Central de Mídias, Galeria de Prints e Central de Downloads.
+  - **Microinterações e Elevação Suave de Cards e Botões (`index.css`, `CardMidiaCentral.tsx`, `CardPrint.tsx`, `BarraAcoesRapidas.tsx`)**:
+    - Criadas classes utilitárias de alta performance:
+      - `.smooth-media-item`: Elevação suave em $Z$ com sombra gradual e micro-zoom de imagem no hover (`scale(1.02)`) acelerado pela GPU.
+      - `.smooth-card`: Suavização de borda, elevação e transição tátil em cards interativos.
+      - `.btn-tactile`: Feedback tátil leve no clique (`active: scale(0.98)`).
+  - **Respeito a Preferências de Acessibilidade (`prefers-reduced-motion`)**:
+    - Incluída regra `@media (prefers-reduced-motion: reduce)` desativando automaticamente todas as animações caso o usuário tenha preferência por redução de movimento configurada no sistema operacional.
+- **Arquivos**:
+  - `web/index.css`
+  - `web/layouts/MainLayout.tsx`
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/dashboard/components/BarraAcoesRapidas.tsx`
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`
+  - `web/features/prints/Prints.tsx`
+  - `web/features/prints/components/CardPrint.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+
+

@@ -246,90 +246,92 @@ const DashboardView = memo(function DashboardView() {
             </Tabs.List>
           </Tabs.Root>
 
-          {abaAtiva === 'visao-geral' && (
-            <VStack gap={6} w="full" alignItems="stretch">
-              <Suspense
-                fallback={
-                  <Box
-                    p={6}
-                    borderRadius="2xl"
-                    borderWidth="1px"
-                    borderColor="border.subtle"
-                    bg="bg.panel"
-                    minH="260px"
-                  >
-                    <Skeleton h="220px" borderRadius="xl" />
-                  </Box>
-                }
-              >
-                <GraficosDashboard
-                  resumo={resumo}
-                  categorias={categorias}
-                  carregando={carregandoResumo || carregandoCategorias}
-                />
-              </Suspense>
+          <Box key={abaAtiva} className="tab-pane-fade" w="full">
+            {abaAtiva === 'visao-geral' && (
+              <VStack gap={6} w="full" alignItems="stretch">
+                <Suspense
+                  fallback={
+                    <Box
+                      p={6}
+                      borderRadius="2xl"
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                      bg="bg.panel"
+                      minH="260px"
+                    >
+                      <Skeleton h="220px" borderRadius="xl" />
+                    </Box>
+                  }
+                >
+                  <GraficosDashboard
+                    resumo={resumo}
+                    categorias={categorias}
+                    carregando={carregandoResumo || carregandoCategorias}
+                  />
+                </Suspense>
 
-              <Box
-                display="grid"
-                gridTemplateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1.2fr) minmax(0, 0.8fr)' }}
-                gap={5}
-                w="full"
-                minW={0}
-              >
-                <AtividadesRecentes
-                  midias={resumo?.ultimasMidias}
-                  carregando={carregandoResumo}
-                />
-                <StatusIntegracoes
-                  statusSync={statusSync}
-                  resumo={resumo}
-                  totalCategorias={categorias.length}
-                />
-              </Box>
-            </VStack>
-          )}
+                <Box
+                  display="grid"
+                  gridTemplateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1.2fr) minmax(0, 0.8fr)' }}
+                  gap={5}
+                  w="full"
+                  minW={0}
+                >
+                  <AtividadesRecentes
+                    midias={resumo?.ultimasMidias}
+                    carregando={carregandoResumo}
+                  />
+                  <StatusIntegracoes
+                    statusSync={statusSync}
+                    resumo={resumo}
+                    totalCategorias={categorias.length}
+                  />
+                </Box>
+              </VStack>
+            )}
 
-          {abaAtiva === 'categorias' && (
-            <VStack gap={6} w="full" alignItems="stretch">
-              <Suspense
-                fallback={
-                  <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
-                    <Skeleton h="200px" borderRadius="xl" />
-                  </Box>
-                }
-              >
-                <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
-              </Suspense>
-            </VStack>
-          )}
+            {abaAtiva === 'categorias' && (
+              <VStack gap={6} w="full" alignItems="stretch">
+                <Suspense
+                  fallback={
+                    <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+                      <Skeleton h="200px" borderRadius="xl" />
+                    </Box>
+                  }
+                >
+                  <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
+                </Suspense>
+              </VStack>
+            )}
 
-          {abaAtiva === 'sincronizacao' && (
-            <VStack gap={6} w="full" alignItems="stretch">
-              <Suspense
-                fallback={
-                  <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
-                    <Skeleton h="200px" borderRadius="xl" />
-                  </Box>
-                }
-              >
-                <PainelSync />
-              </Suspense>
-            </VStack>
-          )}
+            {abaAtiva === 'sincronizacao' && (
+              <VStack gap={6} w="full" alignItems="stretch">
+                <Suspense
+                  fallback={
+                    <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+                      <Skeleton h="200px" borderRadius="xl" />
+                    </Box>
+                  }
+                >
+                  <PainelSync />
+                </Suspense>
+              </VStack>
+            )}
 
-          {abaAtiva === 'erros' && (
-            <VStack gap={6} w="full" alignItems="stretch">
-              <Suspense
-                fallback={
-                  <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
-                    <Skeleton h="200px" borderRadius="xl" />
-                  </Box>
-                }
-              >
-                <FilaErros />
-              </Suspense>
-            </VStack>
-          )}
+            {abaAtiva === 'erros' && (
+              <VStack gap={6} w="full" alignItems="stretch">
+                <Suspense
+                  fallback={
+                    <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+                      <Skeleton h="200px" borderRadius="xl" />
+                    </Box>
+                  }
+                >
+                  <FilaErros />
+                </Suspense>
+              </VStack>
+            )}
+          </Box>
         </VStack>
       </VStack>
     </Box>

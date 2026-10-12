@@ -486,42 +486,44 @@ const CentralMidias = memo(function CentralMidias() {
           </Flex>
         </VStack>
 
-        {modoVisualizacao === 'grid' ? (
-          <GridCentralMidias
-            itens={itens}
-            carregando={isLoading}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onVisualizar={(it) => setItemVisualizar(it)}
-            onCategorizar={(it) => {
-              setItemCategorizarAlvo(it)
-              setModalCategorizarAberto(true)
-            }}
-            onApagar={(uuid) => {
-              setItemApagarAlvo(uuid)
-              setModalConfirmarApagar(true)
-            }}
-            onLimparFiltros={handleLimparFiltros}
-            temFiltrosAtivos={filtrosAtivos}
-          />
-        ) : (
-          <TabelaCentralMidias
-            itens={itens}
-            carregando={isLoading}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onToggleSelectAll={handleToggleSelectAll}
-            onVisualizar={(it) => setItemVisualizar(it)}
-            onCategorizar={(it) => {
-              setItemCategorizarAlvo(it)
-              setModalCategorizarAberto(true)
-            }}
-            onApagar={(uuid) => {
-              setItemApagarAlvo(uuid)
-              setModalConfirmarApagar(true)
-            }}
-          />
-        )}
+        <Box key={`${modoVisualizacao}-${origemFiltro}-${pagina}`} className="tab-pane-fade" w="full">
+          {modoVisualizacao === 'grid' ? (
+            <GridCentralMidias
+              itens={itens}
+              carregando={isLoading}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onVisualizar={(it) => setItemVisualizar(it)}
+              onCategorizar={(it) => {
+                setItemCategorizarAlvo(it)
+                setModalCategorizarAberto(true)
+              }}
+              onApagar={(uuid) => {
+                setItemApagarAlvo(uuid)
+                setModalConfirmarApagar(true)
+              }}
+              onLimparFiltros={handleLimparFiltros}
+              temFiltrosAtivos={filtrosAtivos}
+            />
+          ) : (
+            <TabelaCentralMidias
+              itens={itens}
+              carregando={isLoading}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              onVisualizar={(it) => setItemVisualizar(it)}
+              onCategorizar={(it) => {
+                setItemCategorizarAlvo(it)
+                setModalCategorizarAberto(true)
+              }}
+              onApagar={(uuid) => {
+                setItemApagarAlvo(uuid)
+                setModalConfirmarApagar(true)
+              }}
+            />
+          )}
+        </Box>
 
         <Flex
           justify="space-between"

@@ -75,6 +75,7 @@ export const CardPrint = memo(function CardPrint({
 
   return (
     <Box
+      className="smooth-media-item"
       position="relative"
       w="full"
       borderRadius="md"
@@ -86,12 +87,12 @@ export const CardPrint = memo(function CardPrint({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => onVisualizar(item)}
-      transition="border-color 0.15s ease, box-shadow 0.15s ease"
       shadow={selecionado ? 'md' : 'none'}
       outline={selecionado ? '2px solid' : 'none'}
       outlineColor="cirqueira.brand.500"
       _hover={{
         borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+        shadow: '0 8px 24px -4px rgba(0, 0, 0, 0.5)',
       }}
     >
       {!erroCarregamento ? (
@@ -104,6 +105,9 @@ export const CardPrint = memo(function CardPrint({
             height: 'auto',
             display: 'block',
             borderRadius: '4px',
+            transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            transform: isHovered ? 'scale(1.02)' : 'scale(1)',
+            willChange: 'transform',
           }}
           loading="lazy"
         />

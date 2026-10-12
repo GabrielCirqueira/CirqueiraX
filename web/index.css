@@ -75,3 +75,94 @@
     margin-bottom: 10px;
   }
 }
+
+/* ==========================================================================
+   Transições e Animações Suaves de Alta Performance (GPU Aceleradas)
+   - Utilizam exclusivamente transform e opacity (zero repaint / reflow)
+   - Tempos rápidos (150ms-220ms) para sensação ágil sem engasgos
+   ========================================================================== */
+
+/* Transição de entrada suave para páginas */
+@keyframes pageTransitionEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-enter {
+  animation: pageTransitionEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Transição de alternância de abas */
+@keyframes tabPaneFade {
+  0% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-pane-fade {
+  animation: tabPaneFade 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Microinterações suaves para cards e botões */
+.smooth-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  will-change: transform;
+}
+
+.smooth-card:hover {
+  transform: translateY(-2px);
+}
+
+.smooth-media-item {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+.smooth-media-item:hover {
+  transform: translateY(-2px);
+}
+
+.smooth-thumb-zoom {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.smooth-thumb-zoom:hover {
+  transform: scale(1.025);
+}
+
+/* Botões e itens interativos com feedback tátil leve */
+.btn-tactile {
+  transition: transform 0.12s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.btn-tactile:active {
+  transform: scale(0.98);
+}
+
+/* Acessibilidade: respeita preferências de redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter,
+  .tab-pane-fade,
+  .smooth-card,
+  .smooth-media-item,
+  .smooth-thumb-zoom,
+  .btn-tactile {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

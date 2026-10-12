@@ -345,40 +345,42 @@ export default function Prints() {
           </Flex>
         )}
 
-        {modoVisualizacao === 'grid' ? (
-          <GridPrints
-            itens={itens}
-            carregando={isLoading}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onVisualizar={(it) => setItemVisualizar(it)}
-            onCategorizar={(it) => {
-              setItemCategorizarAlvo(it)
-              setModalCategorizarAberto(true)
-            }}
-            onApagar={(uuid) => {
-              setItemApagarAlvo(uuid)
-              setModalConfirmarApagar(true)
-            }}
-          />
-        ) : (
-          <TabelaPrints
-            itens={itens}
-            carregando={isLoading}
-            selecionados={selecionados}
-            onToggleSelect={handleToggleSelect}
-            onToggleSelectAll={handleToggleSelectAll}
-            onVisualizar={(it) => setItemVisualizar(it)}
-            onCategorizar={(it) => {
-              setItemCategorizarAlvo(it)
-              setModalCategorizarAberto(true)
-            }}
-            onApagar={(uuid) => {
-              setItemApagarAlvo(uuid)
-              setModalConfirmarApagar(true)
-            }}
-          />
-        )}
+        <Box key={`${modoVisualizacao}-${categoriaFiltro}-${pagina}`} className="tab-pane-fade" w="full">
+          {modoVisualizacao === 'grid' ? (
+            <GridPrints
+              itens={itens}
+              carregando={isLoading}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onVisualizar={(it) => setItemVisualizar(it)}
+              onCategorizar={(it) => {
+                setItemCategorizarAlvo(it)
+                setModalCategorizarAberto(true)
+              }}
+              onApagar={(uuid) => {
+                setItemApagarAlvo(uuid)
+                setModalConfirmarApagar(true)
+              }}
+            />
+          ) : (
+            <TabelaPrints
+              itens={itens}
+              carregando={isLoading}
+              selecionados={selecionados}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              onVisualizar={(it) => setItemVisualizar(it)}
+              onCategorizar={(it) => {
+                setItemCategorizarAlvo(it)
+                setModalCategorizarAberto(true)
+              }}
+              onApagar={(uuid) => {
+                setItemApagarAlvo(uuid)
+                setModalConfirmarApagar(true)
+              }}
+            />
+          )}
+        </Box>
 
         {totalPaginas > 1 && (
           <Flex justify="space-between" align="center" pt={4}>
