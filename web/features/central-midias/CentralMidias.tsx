@@ -8,6 +8,7 @@ import {
   IconButton,
   Input,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -635,110 +636,113 @@ const CentralMidias = memo(function CentralMidias() {
       />
 
       {selecionados.length > 0 && (
-        <Box
-          position="fixed"
-          bottom={6}
-          left="50%"
-          transform="translateX(-50%)"
-          zIndex={50}
-          w="92%"
-          maxW="xl"
-        >
-          <Flex
-            direction={{ base: 'column', md: 'row' }}
-            align={{ base: 'stretch', md: 'center' }}
-            justify="space-between"
-            gap={3}
-            p={3}
-            px={5}
-            borderRadius="2xl"
-            borderWidth="1px"
-            borderColor="cirqueira.brand.500/40"
-            bg="bg.panel"
-            backdropFilter="blur(20px)"
-            shadow="2xl"
+        <Portal>
+          <Box
+            position="fixed"
+            bottom={{ base: 4, md: 6 }}
+            left="50%"
+            transform="translateX(-50%)"
+            zIndex={1100}
+            w="92%"
+            maxW="xl"
+            pointerEvents="auto"
           >
-            <HStack gap={2}>
-              <Badge colorPalette="brand" px={2.5} py={1} borderRadius="lg" fontWeight="bold">
-                {selecionados.length}
-              </Badge>
-              <Text as="span" fontSize="xs" fontWeight="semibold" color="fg">
-                mídia(s) selecionada(s)
-              </Text>
-            </HStack>
+            <Flex
+              direction={{ base: 'column', md: 'row' }}
+              align={{ base: 'stretch', md: 'center' }}
+              justify="space-between"
+              gap={3}
+              p={3}
+              px={5}
+              borderRadius="2xl"
+              borderWidth="1px"
+              borderColor="cirqueira.brand.500/40"
+              bg="rgba(20, 25, 23, 0.94)"
+              backdropFilter="blur(20px)"
+              shadow="0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 186, 156, 0.2)"
+            >
+              <HStack gap={2}>
+                <Badge colorPalette="brand" px={2.5} py={1} borderRadius="lg" fontWeight="bold">
+                  {selecionados.length}
+                </Badge>
+                <Text as="span" fontSize="xs" fontWeight="semibold" color="fg">
+                  mídia(s) selecionada(s)
+                </Text>
+              </HStack>
 
-            <HStack gap={1.5} flexWrap="wrap" justify="center">
-              <Text as="span" fontSize="11px" color="fg.subtle" fontWeight="medium" display={{ base: 'none', lg: 'inline' }}>
-                Atribuir:
-              </Text>
-              {categorias.slice(0, 3).map((cat, idx) => (
+              <HStack gap={1.5} flexWrap="wrap" justify="center">
+                <Text as="span" fontSize="11px" color="fg.subtle" fontWeight="medium" display={{ base: 'none', lg: 'inline' }}>
+                  Atribuir:
+                </Text>
+                {categorias.slice(0, 3).map((cat, idx) => (
+                  <Button
+                    key={cat.uuid}
+                    size="xs"
+                    variant="subtle"
+                    colorPalette="brand"
+                    onClick={() => {
+                      categorizarLoteMutate({ uuids: selecionados, categoriaId: cat.uuid })
+                      setSelecionados([])
+                    }}
+                    borderRadius="lg"
+                    fontWeight="bold"
+                    h={7}
+                    px={2}
+                    title={`Atalho do teclado: Pressione a tecla [${idx + 1}]`}
+                  >
+                    <HStack gap={1}>
+                      <Badge
+                        size="xs"
+                        variant="solid"
+                        colorPalette="brand"
+                        px={1}
+                        py={0}
+                        borderRadius="sm"
+                        fontSize="9px"
+                        lineHeight="normal"
+                      >
+                        {idx + 1}
+                      </Badge>
+                      <Text as="span">{cat.nome}</Text>
+                    </HStack>
+                  </Button>
+                ))}
+              </HStack>
+
+              <HStack gap={2} justify={{ base: 'flex-end', md: 'flex-start' }}>
                 <Button
-                  key={cat.uuid}
-                  size="xs"
-                  variant="subtle"
-                  colorPalette="brand"
-                  onClick={() => {
-                    categorizarLoteMutate({ uuids: selecionados, categoriaId: cat.uuid })
-                    setSelecionados([])
-                  }}
-                  borderRadius="lg"
-                  fontWeight="bold"
-                  h={7}
-                  px={2}
-                  title={`Atalho do teclado: Pressione a tecla [${idx + 1}]`}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setModalCategorizarAberto(true)}
+                  fontWeight="semibold"
+                  borderRadius="xl"
+                  h={8}
+                  fontSize="xs"
                 >
-                  <HStack gap={1}>
-                    <Badge
-                      size="xs"
-                      variant="solid"
-                      colorPalette="brand"
-                      px={1}
-                      py={0}
-                      borderRadius="sm"
-                      fontSize="9px"
-                      lineHeight="normal"
-                    >
-                      {idx + 1}
-                    </Badge>
-                    <Text as="span">{cat.nome}</Text>
-                  </HStack>
+                  <FolderPlus size={13} style={{ marginRight: '5px' }} />
+                  <Text as="span">Mais...</Text>
                 </Button>
-              ))}
-            </HStack>
 
-            <HStack gap={2} justify={{ base: 'flex-end', md: 'flex-start' }}>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setModalCategorizarAberto(true)}
-                fontWeight="semibold"
-                borderRadius="xl"
-                h={8}
-                fontSize="xs"
-              >
-                <FolderPlus size={13} style={{ marginRight: '5px' }} />
-                <Text as="span">Mais...</Text>
-              </Button>
-
-              <Button
-                size="sm"
-                variant="subtle"
-                colorPalette="red"
-                onClick={() => {
-                  setItemApagarAlvo(null)
-                  setModalConfirmarApagar(true)
-                }}
-                fontWeight="semibold"
-                borderRadius="xl"
-                h={8}
-                fontSize="xs"
-              >
-                <Trash2 size={13} style={{ marginRight: '5px' }} />
-                <Text as="span">Excluir</Text>
-              </Button>
-            </HStack>
-          </Flex>
-        </Box>
+                <Button
+                  size="sm"
+                  variant="subtle"
+                  colorPalette="red"
+                  onClick={() => {
+                    setItemApagarAlvo(null)
+                    setModalConfirmarApagar(true)
+                  }}
+                  fontWeight="semibold"
+                  borderRadius="xl"
+                  h={8}
+                  fontSize="xs"
+                >
+                  <Trash2 size={13} style={{ marginRight: '5px' }} />
+                  <Text as="span">Excluir</Text>
+                </Button>
+              </HStack>
+            </Flex>
+          </Box>
+        </Portal>
       )}
 
       <Dialog.Root

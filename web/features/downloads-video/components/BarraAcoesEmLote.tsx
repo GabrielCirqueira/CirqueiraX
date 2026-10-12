@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, HStack, Portal, Text } from '@chakra-ui/react'
 import { CalendarClock, DownloadCloud, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
 import { memo } from 'react'
 
@@ -27,30 +27,32 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
   }
 
   return (
-    <Box
-      position="fixed"
-      bottom={6}
-      left="50%"
-      transform="translateX(-50%)"
-      zIndex={50}
-      w="92%"
-      maxW="2xl"
-    >
-      <Flex
-        direction={{ base: 'column', sm: 'row' }}
-        align="center"
-        justify="space-between"
-        gap={3}
-        p={3}
-        px={{ sm: 5 }}
-        py={{ sm: 3 }}
-        borderRadius="xl"
-        borderWidth="1px"
-        borderColor="border.subtle"
-        bg="bg.panel"
-        backdropFilter="blur(16px)"
-        shadow="2xl"
+    <Portal>
+      <Box
+        position="fixed"
+        bottom={{ base: 4, md: 6 }}
+        left="50%"
+        transform="translateX(-50%)"
+        zIndex={1100}
+        w="92%"
+        maxW="2xl"
+        pointerEvents="auto"
       >
+        <Flex
+          direction={{ base: 'column', sm: 'row' }}
+          align="center"
+          justify="space-between"
+          gap={3}
+          p={3}
+          px={{ base: 3, sm: 5 }}
+          py={{ base: 2.5, sm: 3 }}
+          borderRadius="xl"
+          borderWidth="1px"
+          borderColor="cirqueira.brand.500/40"
+          bg="rgba(20, 25, 23, 0.94)"
+          backdropFilter="blur(20px)"
+          shadow="0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 186, 156, 0.2)"
+        >
         <HStack gap={2.5}>
           <Badge colorPalette="brand" px={2} py={0.5} borderRadius="md" fontWeight="bold">
             {totalSelecionados}
@@ -147,5 +149,6 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
         </HStack>
       </Flex>
     </Box>
+  </Portal>
   )
 })
