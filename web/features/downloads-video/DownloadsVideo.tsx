@@ -15,12 +15,14 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  FolderCheck,
   LayoutGrid,
   List,
   Loader2,
   RefreshCw,
   RotateCcw,
   Search,
+  Tag,
   Video,
   X,
 } from 'lucide-react'
@@ -186,6 +188,46 @@ export default function DownloadsVideo() {
   const handleLimparSelecao = useCallback(() => {
     setSelecionados([])
   }, [])
+
+  const nomeCategoriaFiltro = useMemo(() => {
+    if (categoriaFiltro === 'sem_categoria') return 'Sem Categoria'
+    if (categoriaFiltro === 'com_categoria') return 'Categorizados'
+    if (categoriaFiltro) {
+      const cat = categorias.find((c) => c.uuid === categoriaFiltro)
+      return cat?.nome || 'Categoria Selecionada'
+    }
+    return ''
+  }, [categoriaFiltro, categorias])
+
+  const handleSelectSomenteSemCategoria = useCallback(() => {
+    const uuidsSemCategoria = itens
+      .filter((it) => !it.categoriaId && !it.categoria)
+      .map((it) => it.uuid)
+    if (uuidsSemCategoria.length === 0) return
+
+    setSelecionados((prev) => {
+      const todosJaMarcados = uuidsSemCategoria.every((id) => prev.includes(id))
+      if (todosJaMarcados) {
+        return prev.filter((id) => !uuidsSemCategoria.includes(id))
+      }
+      return Array.from(new Set([...prev, ...uuidsSemCategoria]))
+    })
+  }, [itens])
+
+  const handleSelectSomenteCategorizados = useCallback(() => {
+    const uuidsCategorizados = itens
+      .filter((it) => Boolean(it.categoriaId || it.categoria))
+      .map((it) => it.uuid)
+    if (uuidsCategorizados.length === 0) return
+
+    setSelecionados((prev) => {
+      const todosJaMarcados = uuidsCategorizados.every((id) => prev.includes(id))
+      if (todosJaMarcados) {
+        return prev.filter((id) => !uuidsCategorizados.includes(id))
+      }
+      return Array.from(new Set([...prev, ...uuidsCategorizados]))
+    })
+  }, [itens])
 
   const handleAbrirEditarMetadata = (
     item: MediaItem,
@@ -490,7 +532,7 @@ export default function DownloadsVideo() {
               )}
             </Box>
 
-            <Box w={{ base: 'full', sm: '44' }}>
+            <Box w={{ base: 'full', sm: '48' }}>
               <NativeSelect.Root size="sm" w="full">
                 <NativeSelect.Field
                   value={categoriaFiltro}
@@ -505,11 +547,17 @@ export default function DownloadsVideo() {
                   h={9}
                 >
                   <option value="">Todas as categorias</option>
-                  {categorias.map((cat) => (
-                    <option key={cat.uuid} value={cat.uuid}>
-                      {cat.nome}
-                    </option>
-                  ))}
+                  <option value="sem_categoria">⚠️ Sem categoria</option>
+                  <option value="com_categoria">✓ Categorizados</option>
+                  {categorias.length > 0 && (
+                    <optgroup label="Categorias cadastradas">
+                      {categorias.map((cat) => (
+                        <option key={cat.uuid} value={cat.uuid}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
@@ -669,6 +717,97 @@ export default function DownloadsVideo() {
           </HStack>
         </Flex>
 
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={2}
+          px={1}
+          flexWrap="wrap"
+        >
+          <HStack gap={1.5} flexWrap="wrap" align="center">
+            <Text
+              fontSize="11px"
+              fontWeight="bold"
+              color="fg.subtle"
+              textTransform="uppercase"
+              letterSpacing="wider"
+            >
+              Categoria:
+            </Text>
+            <Button
+              size="xs"
+              variant={categoriaFiltro === '' ? 'solid' : 'ghost'}
+              colorPalette={categoriaFiltro === '' ? 'brand' : 'gray'}
+              onClick={() => {
+                setCategoriaFiltro('')
+                setPagina(1)
+              }}
+              borderRadius="md"
+              fontSize="xs"
+              h={7}
+              px={2.5}
+            >
+              Todas
+            </Button>
+            <Button
+              size="xs"
+              variant={categoriaFiltro === 'sem_categoria' ? 'solid' : 'ghost'}
+              colorPalette={categoriaFiltro === 'sem_categoria' ? 'amber' : 'gray'}
+              onClick={() => {
+                setCategoriaFiltro((prev) => (prev === 'sem_categoria' ? '' : 'sem_categoria'))
+                setPagina(1)
+              }}
+              borderRadius="md"
+              fontSize="xs"
+              h={7}
+              px={2.5}
+            >
+              <HStack gap={1}>
+                <Tag size={12} />
+                <Text as="span">Sem Categoria</Text>
+              </HStack>
+            </Button>
+            <Button
+              size="xs"
+              variant={categoriaFiltro === 'com_categoria' ? 'solid' : 'ghost'}
+              colorPalette={categoriaFiltro === 'com_categoria' ? 'purple' : 'gray'}
+              onClick={() => {
+                setCategoriaFiltro((prev) => (prev === 'com_categoria' ? '' : 'com_categoria'))
+                setPagina(1)
+              }}
+              borderRadius="md"
+              fontSize="xs"
+              h={7}
+              px={2.5}
+            >
+              <HStack gap={1}>
+                <FolderCheck size={12} />
+                <Text as="span">Categorizados</Text>
+              </HStack>
+            </Button>
+
+            {categorias.slice(0, 5).map((cat) => (
+              <Button
+                key={cat.uuid}
+                size="xs"
+                variant={categoriaFiltro === cat.uuid ? 'solid' : 'ghost'}
+                colorPalette={categoriaFiltro === cat.uuid ? 'brand' : 'gray'}
+                onClick={() => {
+                  setCategoriaFiltro((prev) => (prev === cat.uuid ? '' : cat.uuid))
+                  setPagina(1)
+                }}
+                borderRadius="md"
+                fontSize="xs"
+                h={7}
+                px={2.5}
+                display={{ base: 'none', lg: 'inline-flex' }}
+              >
+                {cat.nome}
+              </Button>
+            ))}
+          </HStack>
+        </Flex>
+
         <Box
           key={`${modoVisualizacao}-${statusFiltro}-${origemFiltro}-${categoriaFiltro}-${pagina}`}
           className="tab-pane-fade"
@@ -679,8 +818,13 @@ export default function DownloadsVideo() {
               itens={itens}
               carregando={isLoading}
               selecionados={selecionados}
+              categoriaFiltro={categoriaFiltro}
+              nomeCategoriaFiltro={nomeCategoriaFiltro}
               onToggleSelect={handleToggleSelect}
               onToggleSelectAll={handleToggleSelectAll}
+              onSelectSomenteSemCategoria={handleSelectSomenteSemCategoria}
+              onSelectSomenteCategorizados={handleSelectSomenteCategorizados}
+              onLimparSelecao={handleLimparSelecao}
               onVisualizar={(item) => setItemVisualizar(item)}
               onEditarMetadata={handleAbrirEditarMetadata}
               onCategorizar={handleAbrirCategorizarIndividual}
@@ -694,8 +838,13 @@ export default function DownloadsVideo() {
               itens={itens}
               carregando={isLoading}
               selecionados={selecionados}
+              categoriaFiltro={categoriaFiltro}
+              nomeCategoriaFiltro={nomeCategoriaFiltro}
               onToggleSelect={handleToggleSelect}
               onToggleSelectAll={handleToggleSelectAll}
+              onSelectSomenteSemCategoria={handleSelectSomenteSemCategoria}
+              onSelectSomenteCategorizados={handleSelectSomenteCategorizados}
+              onLimparSelecao={handleLimparSelecao}
               onVisualizar={(item) => setItemVisualizar(item)}
               onEditarMetadata={handleAbrirEditarMetadata}
               onCategorizar={handleAbrirCategorizarIndividual}

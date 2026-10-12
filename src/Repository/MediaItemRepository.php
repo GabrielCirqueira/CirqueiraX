@@ -259,6 +259,8 @@ class MediaItemRepository extends ServiceEntityRepository
         if (array_key_exists('categoriaId', $filtros) && null !== $filtros['categoriaId'] && '' !== $filtros['categoriaId']) {
             if ('null' === $filtros['categoriaId'] || 'sem_categoria' === $filtros['categoriaId']) {
                 $qb->andWhere('m.categoriaId IS NULL');
+            } elseif ('com_categoria' === $filtros['categoriaId'] || 'categorizados' === $filtros['categoriaId']) {
+                $qb->andWhere('m.categoriaId IS NOT NULL');
             } else {
                 $qb->andWhere('m.categoriaId = :categoriaId')
                     ->setParameter('categoriaId', $filtros['categoriaId']);

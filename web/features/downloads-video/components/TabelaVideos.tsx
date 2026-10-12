@@ -1,4 +1,4 @@
-import { Badge, Box, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
   Calendar,
@@ -12,17 +12,20 @@ import {
   ExternalLink,
   Film,
   Folder,
+  FolderCheck,
   FolderPlus,
   HardDrive,
   Loader2,
   Play,
   RotateCcw,
   Square,
+  Tag,
   Trash2,
   User,
   Video,
+  X,
 } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { baixarArquivoMidia, obterUrlThumbnailMediaItem } from '../api'
 import type { MediaItem } from '../types'
 import {
@@ -37,8 +40,13 @@ export interface TabelaVideosProps {
   itens: MediaItem[]
   carregando?: boolean
   selecionados: string[]
+  categoriaFiltro?: string
+  nomeCategoriaFiltro?: string
   onToggleSelect: (uuid: string) => void
   onToggleSelectAll?: () => void
+  onSelectSomenteSemCategoria?: () => void
+  onSelectSomenteCategorizados?: () => void
+  onLimparSelecao?: () => void
   onVisualizar?: (item: MediaItem) => void
   onEditarMetadata?: (item: MediaItem, abaInicial?: 'geral' | 'data' | 'duracao' | 'capa') => void
   onCategorizar?: (item: MediaItem) => void
@@ -52,8 +60,13 @@ export const TabelaVideos = memo(function TabelaVideos({
   itens,
   carregando = false,
   selecionados,
+  categoriaFiltro = '',
+  nomeCategoriaFiltro = '',
   onToggleSelect,
   onToggleSelectAll,
+  onSelectSomenteSemCategoria,
+  onSelectSomenteCategorizados,
+  onLimparSelecao,
   onVisualizar,
   onEditarMetadata,
   onCategorizar,
@@ -73,6 +86,42 @@ export const TabelaVideos = memo(function TabelaVideos({
       setBaixandoUuid(null)
     }
   }
+
+  const todosSelecionados = itens.length > 0 && selecionados.length === itens.length
+  const algunsSelecionados = selecionados.length > 0 && !todosSelecionados
+
+  const semCategoriaNaPagina = useMemo(
+    () => itens.filter((it) => !it.categoriaId && !it.categoria),
+    [itens]
+  )
+  const categorizadosNaPagina = useMemo(
+    () => itens.filter((it) => Boolean(it.categoriaId || it.categoria)),
+    [itens]
+  )
+
+  const todosSemCategoriaMarcados =
+    semCategoriaNaPagina.length > 0 &&
+    semCategoriaNaPagina.every((it) => selecionados.includes(it.uuid))
+
+  const todosCategorizadosMarcados =
+    categorizadosNaPagina.length > 0 &&
+    categorizadosNaPagina.every((it) => selecionados.includes(it.uuid))
+
+  const labelBotaoPrincipal = useMemo(() => {
+    if (todosSelecionados) return 'Desmarcar todos'
+    if (algunsSelecionados) return `Selecionados (${selecionados.length}/${itens.length})`
+    if (categoriaFiltro === 'sem_categoria') return `Selecionar todos sem categoria (${itens.length})`
+    if (categoriaFiltro === 'com_categoria') return `Selecionar todos categorizados (${itens.length})`
+    if (nomeCategoriaFiltro) return `Selecionar todos de "${nomeCategoriaFiltro}" (${itens.length})`
+    return `Selecionar todos os vídeos (${itens.length})`
+  }, [
+    todosSelecionados,
+    algunsSelecionados,
+    selecionados.length,
+    itens.length,
+    categoriaFiltro,
+    nomeCategoriaFiltro,
+  ])
 
   if (carregando && itens.length === 0) {
     return (
@@ -128,15 +177,124 @@ export const TabelaVideos = memo(function TabelaVideos({
   }
 
   return (
-    <Box
-      w="full"
-      borderRadius="xl"
-      borderWidth="1px"
-      borderColor="border.subtle"
-      bg="bg.panel"
-      overflow="hidden"
-      shadow="sm"
-    >
+    <VStack w="full" gap={4} alignItems="stretch">
+      {itens.length > 0 && onToggleSelectAll && (
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          align={{ base: 'stretch', md: 'center' }}
+          justify="space-between"
+          gap={2.5}
+          p={2}
+          px={3}
+          borderRadius="xl"
+          bg="bg.panel"
+          borderWidth="1px"
+          borderColor="border.subtle"
+        >
+          <HStack gap={2} flexWrap="wrap" align="center">
+            <Button
+              size="sm"
+              variant={todosSelecionados ? 'subtle' : 'ghost'}
+              colorPalette={todosSelecionados ? 'brand' : 'gray'}
+              onClick={onToggleSelectAll}
+              fontSize="xs"
+              fontWeight="semibold"
+              borderRadius="lg"
+              h={8}
+              px={2.5}
+            >
+              <HStack gap={2}>
+                {todosSelecionados ? (
+                  <Box as="span" color="cirqueira.brand.500" display="inline-flex">
+                    <CheckSquare size={15} color="currentColor" />
+                  </Box>
+                ) : (
+                  <Square size={15} />
+                )}
+                <Text as="span">{labelBotaoPrincipal}</Text>
+              </HStack>
+            </Button>
+
+            {semCategoriaNaPagina.length > 0 && onSelectSomenteSemCategoria && (
+              <Button
+                size="xs"
+                variant={todosSemCategoriaMarcados ? 'solid' : 'subtle'}
+                colorPalette={todosSemCategoriaMarcados ? 'amber' : 'gray'}
+                onClick={onSelectSomenteSemCategoria}
+                borderRadius="lg"
+                fontSize="xs"
+                h={7}
+                px={2.5}
+                title="Selecionar ou desmarcar todos os vídeos sem categoria desta página"
+              >
+                <HStack gap={1.5}>
+                  <Tag size={12} />
+                  <Text as="span">Sem categoria ({semCategoriaNaPagina.length})</Text>
+                </HStack>
+              </Button>
+            )}
+
+            {categorizadosNaPagina.length > 0 && onSelectSomenteCategorizados && (
+              <Button
+                size="xs"
+                variant={todosCategorizadosMarcados ? 'solid' : 'subtle'}
+                colorPalette={todosCategorizadosMarcados ? 'purple' : 'gray'}
+                onClick={onSelectSomenteCategorizados}
+                borderRadius="lg"
+                fontSize="xs"
+                h={7}
+                px={2.5}
+                title="Selecionar ou desmarcar todos os vídeos categorizados desta página"
+              >
+                <HStack gap={1.5}>
+                  <FolderCheck size={12} />
+                  <Text as="span">Categorizados ({categorizadosNaPagina.length})</Text>
+                </HStack>
+              </Button>
+            )}
+
+            {selecionados.length > 0 && onLimparSelecao && (
+              <Button
+                size="xs"
+                variant="ghost"
+                onClick={onLimparSelecao}
+                borderRadius="lg"
+                fontSize="xs"
+                h={7}
+                px={2}
+                color="fg.subtle"
+                _hover={{ color: 'fg' }}
+              >
+                <HStack gap={1}>
+                  <X size={12} />
+                  <Text as="span">Limpar ({selecionados.length})</Text>
+                </HStack>
+              </Button>
+            )}
+          </HStack>
+
+          <HStack gap={2} fontSize="xs" color="fg.subtle" justify={{ base: 'flex-start', md: 'flex-end' }}>
+            <Text as="span">
+              {itens.length} {itens.length === 1 ? 'vídeo nesta página' : 'vídeos nesta página'}
+            </Text>
+            {semCategoriaNaPagina.length > 0 && (
+              <Badge size="xs" variant="subtle" colorPalette="amber" borderRadius="md">
+                {semCategoriaNaPagina.length} sem categoria
+              </Badge>
+            )}
+          </HStack>
+        </Flex>
+      )}
+
+      <Box
+        w="full"
+        borderRadius="xl"
+        borderWidth="1px"
+        borderColor="border.subtle"
+        bg="bg.panel"
+        overflow="hidden"
+        shadow="sm"
+      >
       <Box overflowX="auto" w="full">
         <Box as="table" w="full" style={{ borderCollapse: 'collapse', textAlign: 'left' }}>
           <Box as="thead" bg="bg.muted/50" borderBottomWidth="1px" borderColor="border.subtle">
@@ -585,5 +743,6 @@ export const TabelaVideos = memo(function TabelaVideos({
         </Box>
       </Box>
     </Box>
+    </VStack>
   )
 })
