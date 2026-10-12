@@ -12,6 +12,7 @@ import { memo, Suspense, lazy, useState } from 'react'
 import { AtividadesRecentes } from './components/AtividadesRecentes'
 import { BarraAcoesRapidas } from './components/BarraAcoesRapidas'
 import { CardsResumo } from './components/CardsResumo'
+import { CardsVideosMetricas } from './components/CardsVideosMetricas'
 import { StatusIntegracoes } from './components/StatusIntegracoes'
 import {
   DASHBOARD_QUERY_KEYS,
@@ -157,6 +158,11 @@ const DashboardView = memo(function DashboardView() {
           resumo={resumo}
           carregando={carregandoResumo}
           onSelecionarAba={setAbaAtiva}
+        />
+
+        <CardsVideosMetricas
+          metricas={resumo?.metricasVideos}
+          carregando={carregandoResumo}
         />
 
         <VStack w="full" gap={6} alignItems="stretch">

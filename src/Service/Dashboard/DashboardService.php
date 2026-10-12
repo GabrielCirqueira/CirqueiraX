@@ -30,7 +30,17 @@ final readonly class DashboardService
      *     porOrigem: array<string, int>,
      *     origemEspaco: array<string, array{totalItens: int, tamanhoBytes: int, tamanhoFormatado: string}>,
      *     porOrigemEspaco: array<string, array{totalItens: int, tamanhoBytes: int, tamanhoFormatado: string}>,
-     *     ultimasMidias: list<array<string, mixed>>
+     *     ultimasMidias: list<array<string, mixed>>,
+     *     metricasVideos: array{
+     *         totalBaixados: int,
+     *         totalRemovidos: int,
+     *         permanecemSistema: int,
+     *         removidosHoje: int,
+     *         tamanhoPermanecemBytes: int,
+     *         tamanhoPermanecemFormatado: string,
+     *         espacoLiberadoBytes: int,
+     *         espacoLiberadoFormatado: string
+     *     }
      * }
      */
     public function obterResumo(): array
@@ -39,6 +49,7 @@ final readonly class DashboardService
         $totaisOrigem = $this->mediaItemRepository->contarAgrupadoPorOrigem();
         $espacoOrigem = $this->mediaItemRepository->obterEspacoAgrupadoPorOrigem();
         $tamanhoTotalBytes = $this->mediaItemRepository->obterTamanhoTotalBytes();
+        $metricasVideosRaw = $this->mediaItemRepository->obterMetricasVideos();
 
         $origemEspaco = [];
         foreach ($espacoOrigem as $origemVal => $dados) {
@@ -54,6 +65,17 @@ final readonly class DashboardService
 
         $ultimosItens = $this->mediaItemRepository->findBy([], ['criadoEm' => 'DESC'], 6);
 
+        $metricasVideos = [
+            'totalBaixados' => $metricasVideosRaw['totalBaixados'],
+            'totalRemovidos' => $metricasVideosRaw['totalRemovidos'],
+            'permanecemSistema' => $metricasVideosRaw['permanecemSistema'],
+            'removidosHoje' => $metricasVideosRaw['removidosHoje'],
+            'tamanhoPermanecemBytes' => $metricasVideosRaw['tamanhoPermanecemBytes'],
+            'tamanhoPermanecemFormatado' => self::formatarBytes($metricasVideosRaw['tamanhoPermanecemBytes']),
+            'espacoLiberadoBytes' => $metricasVideosRaw['espacoLiberadoBytes'],
+            'espacoLiberadoFormatado' => self::formatarBytes($metricasVideosRaw['espacoLiberadoBytes']),
+        ];
+
         return [
             'totalGeral' => $totalGeral,
             'totalErros' => $totalErros,
@@ -66,6 +88,7 @@ final readonly class DashboardService
             'origemEspaco' => $origemEspaco,
             'porOrigemEspaco' => $origemEspaco,
             'ultimasMidias' => $this->mediaItemSerializer->normalizarLista($ultimosItens),
+            'metricasVideos' => $metricasVideos,
         ];
     }
 

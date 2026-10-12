@@ -37,6 +37,17 @@ export interface MidiaRecenteDashboard {
   atualizadoEm?: string
 }
 
+export interface MetricasVideosDashboard {
+  totalBaixados: number
+  permanecemSistema: number
+  removidosHoje: number
+  totalRemovidos: number
+  tamanhoPermanecemBytes: number
+  tamanhoPermanecemFormatado: string
+  espacoLiberadoBytes: number
+  espacoLiberadoFormatado: string
+}
+
 export interface ResumoDashboard {
   status?: Record<StatusMediaItem, number>
   porStatus?: Record<StatusMediaItem, number>
@@ -49,6 +60,7 @@ export interface ResumoDashboard {
   origemEspaco?: Record<OrigemMedia, DetalheOrigemEspaco>
   porOrigemEspaco?: Record<OrigemMedia, DetalheOrigemEspaco>
   ultimasMidias?: MidiaRecenteDashboard[]
+  metricasVideos?: MetricasVideosDashboard
 }
 
 export interface CategoriaMetrica {

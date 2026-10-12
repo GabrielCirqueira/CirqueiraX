@@ -466,4 +466,67 @@ class MediaItemRepository extends ServiceEntityRepository
     {
         return $this->buscarVideosParaLimpezaDoSistema($dataLimite);
     }
+
+    /**
+     * Retorna métricas analíticas sobre os vídeos baixados no sistema:
+     * - Total de vídeos baixados no histórico (incluindo os removidos pela rotina/cron)
+     * - Vídeos que permanecem com arquivo físico no sistema
+     * - Vídeos removidos hoje pela rotina
+     * - Total de vídeos com arquivo removido
+     * - Espaço ocupado e espaço liberado em disco
+     *
+     * @return array{
+     *     totalBaixados: int,
+     *     totalRemovidos: int,
+     *     permanecemSistema: int,
+     *     removidosHoje: int,
+     *     tamanhoPermanecemBytes: int,
+     *     espacoLiberadoBytes: int
+     * }
+     */
+    public function obterMetricasVideos(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $agoraSp = new \DateTimeImmutable('now', new \DateTimeZone('America/Sao_Paulo'));
+        $hojePrefix = $agoraSp->format('Y-m-d') . '%';
+        $inicioHojeUtc = (new \DateTimeImmutable('today', new \DateTimeZone('America/Sao_Paulo')))
+            ->setTimezone(new \DateTimeZone('UTC'))
+            ->format('Y-m-d H:i:s');
+
+        $sql = "
+            SELECT
+                COUNT(*) as total_baixados,
+                COALESCE(SUM(CASE WHEN status IN ('arquivo_removido', 'arquivo_expurgado') THEN 1 ELSE 0 END), 0) as total_removidos,
+                COALESCE(SUM(CASE WHEN status NOT IN ('arquivo_removido', 'arquivo_expurgado') AND caminho_local IS NOT NULL THEN 1 ELSE 0 END), 0) as permanecem_sistema,
+                COALESCE(SUM(CASE WHEN status IN ('arquivo_removido', 'arquivo_expurgado') AND (
+                    JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.arquivo_removido_em')) LIKE :hojePrefix
+                    OR JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.arquivo_expurgado_em')) LIKE :hojePrefix
+                    OR atualizado_em >= :inicioHojeUtc
+                ) THEN 1 ELSE 0 END), 0) as removidos_hoje,
+                COALESCE(SUM(CASE WHEN status NOT IN ('arquivo_removido', 'arquivo_expurgado') AND caminho_local IS NOT NULL THEN
+                    COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED), CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED), 0)
+                ELSE 0 END), 0) as tamanho_permanecem_bytes,
+                COALESCE(SUM(CASE WHEN status IN ('arquivo_removido', 'arquivo_expurgado') THEN
+                    COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED), CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED), 0)
+                ELSE 0 END), 0) as espaco_liberado_bytes
+            FROM media_item
+            WHERE (origem IN ('download', 'bot_telegram') OR caminho_local LIKE '%.mp4' OR caminho_local LIKE '%.mkv' OR caminho_local LIKE '%.webm' OR metadata LIKE '%video/%')
+              AND origem NOT IN ('print_pessoal', 'print_empresa')
+        ";
+
+        /** @var array<string, mixed> $linha */
+        $linha = $conn->executeQuery($sql, [
+            'hojePrefix' => $hojePrefix,
+            'inicioHojeUtc' => $inicioHojeUtc,
+        ])->fetchAssociative() ?: [];
+
+        return [
+            'totalBaixados' => (int) ($linha['total_baixados'] ?? 0),
+            'totalRemovidos' => (int) ($linha['total_removidos'] ?? 0),
+            'permanecemSistema' => (int) ($linha['permanecem_sistema'] ?? 0),
+            'removidosHoje' => (int) ($linha['removidos_hoje'] ?? 0),
+            'tamanhoPermanecemBytes' => (int) ($linha['tamanho_permanecem_bytes'] ?? 0),
+            'espacoLiberadoBytes' => (int) ($linha['espaco_liberado_bytes'] ?? 0),
+        ];
+    }
 }

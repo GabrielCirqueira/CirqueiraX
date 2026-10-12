@@ -406,5 +406,46 @@
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
   - `documentation/progresso/melhorias/MELHORIAS.md`
 
+### ✅ Melhoria 50 — Painel de Métricas de Vídeos no Dashboard: Total Baixados no Sistema, Permanecem na VPS, Apagados Hoje e Espaço Liberado
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O usuário necessitava visualizar diretamente no Dashboard principal as métricas completas do ciclo de vídeos baixados no sistema:
+    1. Quantidade total de vídeos que foram baixados no sistema (incluindo o histórico completo com os arquivos que foram apagados pela rotina semanal/cron).
+    2. Quantidade de vídeos apagados hoje pela cron / rotina automática de liberação de espaço.
+    3. Quantidade de vídeos que ainda permanecem fisicamente no sistema (com arquivo ativo na VPS) e seu tamanho em disco.
+- **Solução**:
+  - **Consulta Otimizada em DBAL Nativo (`MediaItemRepository::obterMetricasVideos`)**:
+    - Implementada agregação SQL nativa de altíssima performance calculando em uma única query:
+      - `total_baixados`: total histórico de vídeos baixados no sistema.
+      - `permanecem_sistema`: vídeos com arquivo físico ativo no sistema (`status NOT IN ('arquivo_removido', 'arquivo_expurgado') AND caminho_local IS NOT NULL`).
+      - `removidos_hoje`: vídeos cujo arquivo físico foi removido na data corrente (fuso horário `America/Sao_Paulo`) pela rotina.
+      - `total_removidos`: total acumulado de itens cujo arquivo foi removido da VPS.
+      - `tamanho_permanecem_bytes`: espaço físico atual ocupado pelos vídeos ativos.
+      - `espaco_liberado_bytes`: espaço em disco recuperado na VPS pela limpeza.
+  - **Integração no Serviço de Dashboard (`DashboardService::obterResumo`)**:
+    - Integrado o bloco `metricasVideos` com números exatos e formatação legível de bytes (`tamanhoPermanecemFormatado`, `espacoLiberadoFormatado`).
+  - **Componente Premium de Métricas no Frontend (`CardsVideosMetricas.tsx`)**:
+    - Painel dedicado posicionado estrategicamente no Dashboard contendo:
+      - Cabeçalho com selo de proteção da pasta sincronizada com o celular (Syncthing) e atalho rápido para a central de downloads.
+      - **Card 1 — Total Baixados**: Histórico completo de vídeos ingeridos pelo sistema.
+      - **Card 2 — Permanecem no Sistema**: Quantidade de vídeos com arquivo físico na VPS, porcentagem e espaço em disco.
+      - **Card 3 — Apagados Hoje**: Contagem de arquivos de vídeo liberados pela cron/rotina nas últimas 24h.
+      - **Card 4 — Espaço Liberado**: Total acumulado de espaço recuperado na VPS com indicação da possibilidade de "Rebaixar".
+      - **Barra de Proporção Visual**: Indicador visual dinâmico com gradientes comparando a proporção de vídeos ativos no disco vs. espaço liberado.
+  - **Refinamento no Card de Total Ingerido (`CardsResumo.tsx`)**:
+    - Adicionado resumo de apoio no primeiro card exibindo `X vídeos (Y ativos no sistema)` para visão imediata.
+- **Arquivos**:
+  - `src/Repository/MediaItemRepository.php`
+  - `src/Service/Dashboard/DashboardService.php`
+  - `web/features/dashboard/types.ts`
+  - `web/features/dashboard/components/CardsVideosMetricas.tsx`
+  - `web/features/dashboard/components/CardsResumo.tsx`
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/dashboard/index.ts`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+
 
 

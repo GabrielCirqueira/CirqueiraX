@@ -1,4 +1,4 @@
-import { Box, Card, Grid, HStack, Progress, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Card, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
   AlertTriangle,
@@ -9,7 +9,6 @@ import {
   Layers,
   Loader2,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
 import { memo } from 'react'
 import type { ResumoDashboard } from '../types'
@@ -54,7 +53,7 @@ export const CardsResumo = memo(function CardsResumo({
   }
 
   const totalGeral = resumo?.totalGeral ?? 0
-  const statusMap = resumo?.porStatus ?? resumo?.status ?? {}
+  const statusMap: Record<string, number> = (resumo?.porStatus ?? resumo?.status ?? {}) as Record<string, number>
 
   const concluidos =
     (statusMap.concluido ?? 0) + (statusMap.distribuido_local ?? 0)
@@ -150,6 +149,12 @@ export const CardsResumo = memo(function CardsResumo({
                 {resumo?.tamanhoTotalFormatado ?? '0 B'} em disco
               </Text>
             </HStack>
+
+            {resumo?.metricasVideos && (
+              <Text fontSize="11px" color="fg.subtle" mt={1.5}>
+                {resumo.metricasVideos.totalBaixados} vídeos ({resumo.metricasVideos.permanecemSistema} ativos no sistema)
+              </Text>
+            )}
           </Box>
         </VStack>
       </Card.Root>

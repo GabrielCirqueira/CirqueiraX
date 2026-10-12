@@ -1,5 +1,6 @@
 export * from './api'
 export * from './components/CardsResumo'
+export * from './components/CardsVideosMetricas'
 export * from './components/FilaErros'
 export * from './components/GraficosDashboard'
 export * from './components/ModalCriarCategoria'
