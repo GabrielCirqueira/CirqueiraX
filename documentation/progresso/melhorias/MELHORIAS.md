@@ -61,5 +61,6 @@
 | M46 | Resolução de Erros de Quota 429 no Google Fotos com Semáforo de Concorrência, Backoff Exponencial e Limpeza da Fila Operacional | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-46--resolução-de-erros-de-quota-429-no-google-fotos-com-semáforo-de-concorrência-backoff-exponencial-e-limpeza-da-fila-operacional) |
 | M47 | Otimização Extrema de Performance: Eliminação de Gargalos Backend (DBAL Nativo), Resolução de N+1, Code-Splitting de Bundles e Ajuste de Polling | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-47--otimização-extrema-de-performance-eliminação-de-gargalos-backend-dbal-nativo-resolução-de-n1-code-splitting-de-bundles-e-ajuste-de-polling) |
 | M48 | Transições Suaves e Microinterações Fluidas de Alta Performance (GPU Aceleradas) sem Perda de Fluidez | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-48--transições-suaves-e-microinterações-fluidas-de-alta-performance-gpu-aceleradas-sem-perda-de-fluidez) |
+| M49 | Agendamento de Expurgo de Vídeos Antigos (> 7 Dias), Novo Status `arquivo_expurgado` e Redownload com Preservação de Datas e Metadados | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-49--agendamento-de-expurgo-de-vídeos-antigos--7-dias-novo-status-arquivo_expurgado-e-redownload-com-preservação-de-datas-e-metadados) |
 
 

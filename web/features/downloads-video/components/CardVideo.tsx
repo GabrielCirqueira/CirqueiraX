@@ -304,6 +304,8 @@ export const CardVideo = memo(function CardVideo({
                 <AlertCircle size={11} />
               ) : item.status === 'concluido' ? (
                 <CheckCircle2 size={11} />
+              ) : item.status === 'arquivo_expurgado' ? (
+                <HardDrive size={11} />
               ) : (
                 <Clock size={11} />
               )}
@@ -590,11 +592,15 @@ export const CardVideo = memo(function CardVideo({
               size="xs"
               variant="ghost"
               onClick={handleDownloadDirecto}
-              disabled={baixando}
-              aria-label="Baixar arquivo MP4"
-              title="Baixar arquivo MP4"
-              color="cirqueira.brand.500"
-              _hover={{ bg: 'cirqueira.brand.500/10' }}
+              disabled={baixando || item.status === 'arquivo_expurgado'}
+              aria-label={item.status === 'arquivo_expurgado' ? 'Espaço liberado' : 'Baixar arquivo MP4'}
+              title={
+                item.status === 'arquivo_expurgado'
+                  ? 'Arquivo físico expurgado para liberar espaço na VPS. Clique no botão ao lado para Rebaixar.'
+                  : 'Baixar arquivo MP4'
+              }
+              color={item.status === 'arquivo_expurgado' ? 'fg.subtle' : 'cirqueira.brand.500'}
+              _hover={item.status === 'arquivo_expurgado' ? undefined : { bg: 'cirqueira.brand.500/10' }}
               borderRadius="lg"
             >
               {baixando ? (
@@ -633,10 +639,16 @@ export const CardVideo = memo(function CardVideo({
             {onRebaixar && (
               <IconButton
                 size="xs"
-                variant="ghost"
+                variant={item.status === 'arquivo_expurgado' ? 'subtle' : 'ghost'}
+                colorPalette={item.status === 'arquivo_expurgado' ? 'orange' : undefined}
+                color={item.status === 'arquivo_expurgado' ? 'cirqueira.amber.400' : undefined}
                 onClick={() => onRebaixar?.(item.uuid)}
                 aria-label="Baixar novamente"
-                title="Rebaixar vídeo"
+                title={
+                  item.status === 'arquivo_expurgado'
+                    ? 'Rebaixar vídeo (Espaço Liberado: baixar novamente preservando datas e metadados)'
+                    : 'Rebaixar vídeo'
+                }
                 borderRadius="lg"
               >
                 <DownloadCloud size={14} />

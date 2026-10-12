@@ -22,8 +22,8 @@ class Schedule implements ScheduleProviderInterface
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true)
             ->add(
-                // Executa diariamente às 03:00 para expurgar vídeos antigos com mais de 7 dias
-                RecurringMessage::cron('0 3 * * *', new LimparVideosAntigosMessage(7))
+                // Executa a cada 1 dia para expurgar vídeos antigos com mais de 7 dias
+                RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7))
             );
     }
 }

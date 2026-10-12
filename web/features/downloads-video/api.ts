@@ -51,6 +51,13 @@ export async function rebaixarLote(input: RebaixarLoteInput): Promise<MediaItem[
   return data.data
 }
 
+export async function rebaixarIndividual(uuid: string): Promise<MediaItem> {
+  const { data } = await api.post<RespostaApi<MediaItem>>(
+    `/api/v1/media-itens/${uuid}/rebaixar`
+  )
+  return data.data
+}
+
 export async function apagarLote(input: ApagarLoteInput): Promise<ApagarLoteResposta> {
   const { data } = await api.post<RespostaApi<ApagarLoteResposta>>(
     '/api/v1/media-itens/lote/apagar',

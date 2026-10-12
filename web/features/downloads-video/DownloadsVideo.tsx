@@ -579,6 +579,18 @@ export default function DownloadsVideo() {
               >
                 Com Erro
               </Button>
+              <Button
+                size="xs"
+                variant={statusFiltro === 'arquivo_expurgado' ? 'solid' : 'ghost'}
+                colorPalette={statusFiltro === 'arquivo_expurgado' ? 'orange' : 'gray'}
+                onClick={() => handleFiltrarRapidoStatus('arquivo_expurgado')}
+                borderRadius="md"
+                fontSize="xs"
+                h={8}
+                px={3}
+              >
+                Espaço Liberado
+              </Button>
             </HStack>
 
             <Box w={{ base: 'full', sm: '36' }} display={{ base: 'block', xl: 'none' }}>
@@ -597,6 +609,7 @@ export default function DownloadsVideo() {
                 >
                   <option value="">Todos os status</option>
                   <option value="concluido">Concluídos</option>
+                  <option value="arquivo_expurgado">Espaço Liberado</option>
                   <option value="baixando">Baixando</option>
                   <option value="em_fila">Em Fila</option>
                   <option value="erro">Com Erro</option>
@@ -940,7 +953,7 @@ export default function DownloadsVideo() {
               <Dialog.Body p={0} py={2}>
                 <VStack gap={4} alignItems="stretch">
                   <Text fontSize="xs" color="fg.subtle">
-                    O download será reenfileirado a partir da URL original gravada nos metadados.
+                    O download do arquivo de vídeo será reenfileirado a partir da URL original gravada nos metadados. Todas as datas alteradas, categorias e metadados existentes serão rigorosamente preservados, sem reenviar para o Google Fotos se já sincronizado.
                   </Text>
 
                   <HStack

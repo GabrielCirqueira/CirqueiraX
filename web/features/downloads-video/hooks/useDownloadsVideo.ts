@@ -10,6 +10,7 @@ import {
   distribuirHorariosLote,
   listarCategorias,
   listarMediaItens,
+  rebaixarIndividual,
   rebaixarLote,
   retentarMediaItem,
   retentarTodos,
@@ -114,6 +115,21 @@ export function useRebaixarLote() {
     },
     onError: () => {
       addToast({ title: 'Falha ao rebaixar itens selecionados.', color: 'danger' })
+    },
+  })
+}
+
+export function useRebaixarIndividual() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (uuid: string) => rebaixarIndividual(uuid),
+    onSuccess: () => {
+      addToast({ title: 'Download do vídeo reenfileirado!', color: 'success' })
+      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    },
+    onError: () => {
+      addToast({ title: 'Falha ao rebaixar o vídeo.', color: 'danger' })
     },
   })
 }

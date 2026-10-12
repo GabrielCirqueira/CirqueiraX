@@ -336,4 +336,69 @@
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
   - `documentation/progresso/melhorias/MELHORIAS.md`
 
+### ✅ Melhoria 49 — Agendamento de Expurgo de Vídeos Antigos (> 7 Dias), Novo Status `arquivo_expurgado` e Redownload com Preservação de Datas e Metadados
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Os arquivos de vídeos baixados de redes sociais e canais ocupam muito espaço em disco na VPS, causando risco iminente de lotação e saturação do storage.
+  - Imagens e prints não devem ser afetados pelo expurgo (somente vídeos).
+  - Era necessário um novo status para diferenciar itens cujo registro e metadados continuam catalogados no sistema, mas cujo arquivo físico local foi expurgado para liberar espaço em disco.
+  - O sistema necessitava de uma opção para "Rebaixar" o vídeo caso o usuário necessite do arquivo novamente, com a garantia estrita de:
+    - **Não reenviar para o Google Fotos** se o upload já foi realizado anteriormente.
+    - **Não alterar datas**: manter rigorosamente as datas personalizadas nos metadados e aplicar `touch` no sistema de arquivos local com o mesmo timestamp para que o Syncthing / Syncthing-Fork não provoque re-sincronizações ou conflitos com o celular e PC.
+- **Solução**:
+  - **Novo Status no Backend e Frontend (`StatusMediaItem.php`, `types.ts`, `formatadores.ts`)**:
+    - Adicionado o status `StatusMediaItem::ARQUIVO_EXPURGADO = 'arquivo_expurgado'` com descrição `'Arquivo Expurga (Espaço Liberado)'`.
+    - Marcado como status final (`isFinal() = true`) na entidade `MediaItem`.
+    - Atualizada a matriz de transições permitindo: `CONCLUIDO`/`DISTRIBUIDO_LOCAL` -> `ARQUIVO_EXPURGADO` e `ARQUIVO_EXPURGADO` -> `BAIXANDO`/`CONCLUIDO`.
+    - Adicionados os metadados `MetadataKeys::ARQUIVO_EXPURGADO_EM` e `MetadataKeys::CAMINHO_LOCAL_ANTERIOR`.
+  - **Serviço e Comando CLI de Expurgo (`LimparVideosAntigosService.php`, `LimparVideosAntigosCommand.php`)**:
+    - Filtra estritamente apenas vídeos (`$item->isVideo() && !$item->isPrint()`) mais antigos que o limite configurado (padrão de 7 dias) com status concluído ou distribuído.
+    - Antes de remover o arquivo físico, garante a persistência da miniatura em `var/cache/thumbnails/{uuid}.jpg` usando FFmpeg, mantendo as capas e visualizações na web 100% íntegras mesmo sem o vídeo físico.
+    - Remove o arquivo físico via `ArmazenamentoInterface`, salva o caminho anterior e a data do expurgo nos metadados, seta `caminhoLocal = null` e transiciona o status para `ARQUIVO_EXPURGADO`.
+    - Comando CLI `php bin/console app:media:limpar-videos-antigos --dias=7 --dry-run` para testes e execução manual.
+  - **Agendamento no Symfony Scheduler e Cron da VPS (`Schedule.php`, `LimparVideosAntigosMessage.php`, `devops/crontab`)**:
+    - Adicionado agendamento diário nativo via `RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7))` no `src/Schedule.php` do Symfony (consumido pelo worker de scheduler do Supervisord).
+    - Adicionado job semanal no `devops/crontab` rodando aos domingos às 03:00 como contingência.
+  - **Serviço Completo de Rebaixamento / Redownload (`RebaixarMediaItemService.php`, `RebaixarMediaItemMessage.php`)**:
+    - Método `rebaixarIndividual(string $uuid)` e `rebaixarEmLote(RebaixarLoteDTO $dto)`.
+    - Redownload feito diretamente pela URL original via `BaixarVideoDownloadService` (yt-dlp) sem cair na checagem de duplicado precoce.
+    - O arquivo baixado é movido de volta para a pasta física da categoria (`var/storage/videos/{categoria}`).
+    - **Preservação de Datas**: Obtém a data customizada dos metadados (`data` ou `data_criacao_arquivo`) e executa `touch()` no arquivo físico para manter exatamente o mesmo timestamp de modificação no disco para sincronização com Syncthing-Fork no Android.
+    - **Proteção contra Reenvio no Google Fotos**: Verifica `isEnviadoGoogleFotos()` / `googlePhotosMediaId`; se a mídia já foi sincronizada anteriormente, não despacha upload nem tenta recriar o item no Google Fotos.
+    - Remove a flag de expurgo e transiciona para `StatusMediaItem::CONCLUIDO`.
+    - Exposta rota `POST /api/v1/media-itens/{uuid}/rebaixar` em `MediaItemController.php`.
+  - **Interface Web e Filtros (`DownloadsVideo.tsx`, `CardVideo.tsx`, `CentralMidias.tsx`, `CardMidiaCentral.tsx`)**:
+    - Adicionado Badge de status "Espaço Liberado" com palette laranja e ícone `HardDrive`.
+    - Adicionados botões de filtro rápido e opções em selects para filtrar itens com status `arquivo_expurgado`.
+    - Botão "Rebaixar Vídeo" destacado nos cards quando o arquivo estiver expurgado, desabilitando o download direto de arquivo não existente no disco e guiando o usuário com tooltips claros.
+    - Modal de confirmação explicando a preservação de dados e que mídias já no Google Fotos não serão duplicadas.
+- **Arquivos**:
+  - `src/Enum/StatusMediaItem.php`
+  - `src/Support/MetadataKeys.php`
+  - `src/Entity/MediaItem.php`
+  - `src/Repository/MediaItemRepository.php`
+  - `src/Service/MediaItem/LimparVideosAntigosService.php`
+  - `src/Command/LimparVideosAntigosCommand.php`
+  - `src/Message/LimparVideosAntigosMessage.php`
+  - `src/MessageHandler/LimparVideosAntigosMessageHandler.php`
+  - `src/Message/RebaixarMediaItemMessage.php`
+  - `src/MessageHandler/RebaixarMediaItemMessageHandler.php`
+  - `src/Service/MediaItem/RebaixarMediaItemService.php`
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `src/Schedule.php`
+  - `devops/crontab`
+  - `web/features/downloads-video/types.ts`
+  - `web/features/downloads-video/utils/formatadores.ts`
+  - `web/features/downloads-video/api.ts`
+  - `web/features/downloads-video/hooks/useDownloadsVideo.ts`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+
+
 

@@ -10,6 +10,7 @@ import {
   Film,
   Folder,
   FolderPlus,
+  HardDrive,
   Layers,
   Monitor,
   Play,
@@ -326,6 +327,24 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           <infoOrigem.icon size={10} style={{ marginRight: '3px', display: 'inline' }} />
           {infoOrigem.label}
         </Badge>
+
+        {item.status === 'arquivo_expurgado' && (
+          <Badge
+            size="xs"
+            variant="solid"
+            colorPalette="orange"
+            backdropFilter="blur(6px)"
+            borderRadius="md"
+            px={1.5}
+            py={0.5}
+            fontSize="9px"
+            fontWeight="bold"
+            title="Arquivo físico expurgado para liberar espaço no disco da VPS. Metadados e miniatura preservados."
+          >
+            <HardDrive size={10} style={{ marginRight: '3px', display: 'inline' }} />
+            Espaço Liberado
+          </Badge>
+        )}
 
         {isVideo && duracaoFormatada && (
           <Badge
