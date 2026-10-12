@@ -317,7 +317,7 @@ DATABASE_URL="mysql://${DEPLOY_DB_USER}:${DB_PASSWORD}@database:3306/${DEPLOY_DB
 JWT_SECRET_KEY=%kernel.project_dir%/config/jwt/private.pem
 JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
 JWT_PASSPHRASE=${JWT_PASSPHRASE}
-JWT_TTL=3600
+JWT_TTL=3600000
 
 # ── CORS ─────────────────────────────────────────────────────────────────────
 CORS_ALLOW_ORIGIN=https://${DEPLOY_DOMAIN}

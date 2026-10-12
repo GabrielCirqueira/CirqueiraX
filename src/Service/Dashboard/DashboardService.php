@@ -8,12 +8,14 @@ use App\Enum\OrigemMedia;
 use App\Enum\StatusMediaItem;
 use App\Repository\CategoriaRepository;
 use App\Repository\MediaItemRepository;
+use App\Serializer\MediaItemSerializer;
 
 final readonly class DashboardService
 {
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
         private CategoriaRepository $categoriaRepository,
+        private MediaItemSerializer $mediaItemSerializer,
     ) {}
 
     /**
@@ -23,8 +25,12 @@ final readonly class DashboardService
      *     tamanhoTotalBytes: int,
      *     tamanhoTotalFormatado: string,
      *     status: array<string, int>,
+     *     porStatus: array<string, int>,
      *     origem: array<string, int>,
-     *     origemEspaco: array<string, array{totalItens: int, tamanhoBytes: int, tamanhoFormatado: string}>
+     *     porOrigem: array<string, int>,
+     *     origemEspaco: array<string, array{totalItens: int, tamanhoBytes: int, tamanhoFormatado: string}>,
+     *     porOrigemEspaco: array<string, array{totalItens: int, tamanhoBytes: int, tamanhoFormatado: string}>,
+     *     ultimasMidias: list<array<string, mixed>>
      * }
      */
     public function obterResumo(): array
@@ -67,14 +73,20 @@ final readonly class DashboardService
         $totalGeral = array_sum($totaisStatus);
         $totalErros = $totaisStatus[StatusMediaItem::ERRO->value] ?? 0;
 
+        $ultimosItens = $this->mediaItemRepository->findBy([], ['criadoEm' => 'DESC'], 6);
+
         return [
             'totalGeral' => $totalGeral,
             'totalErros' => $totalErros,
             'tamanhoTotalBytes' => $tamanhoTotalBytes,
             'tamanhoTotalFormatado' => self::formatarBytes($tamanhoTotalBytes),
             'status' => $totaisStatus,
+            'porStatus' => $totaisStatus,
             'origem' => $totaisOrigem,
+            'porOrigem' => $totaisOrigem,
             'origemEspaco' => $origemEspaco,
+            'porOrigemEspaco' => $origemEspaco,
+            'ultimasMidias' => $this->mediaItemSerializer->normalizarLista($ultimosItens),
         ];
     }
 

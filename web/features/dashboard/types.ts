@@ -18,14 +18,35 @@ export interface DetalheOrigemEspaco {
   tamanhoFormatado: string
 }
 
+export interface MidiaRecenteDashboard {
+  uuid: string
+  hash: string
+  origem: OrigemMedia
+  origemDescricao?: string
+  status: StatusMediaItem
+  statusDescricao?: string
+  caminhoLocal: string | null
+  googlePhotosMediaId?: string | null
+  categoriaId: string | null
+  categoria?: { uuid: string; nome?: string; pastaLocal?: string } | null
+  thumbnailUrl?: string | null
+  metadata?: Record<string, unknown>
+  criadoEm: string
+  atualizadoEm?: string
+}
+
 export interface ResumoDashboard {
-  porStatus: Record<StatusMediaItem, number>
-  porOrigem: Record<OrigemMedia, number>
+  status?: Record<StatusMediaItem, number>
+  porStatus?: Record<StatusMediaItem, number>
+  origem?: Record<OrigemMedia, number>
+  porOrigem?: Record<OrigemMedia, number>
   totalGeral: number
   totalErros: number
   tamanhoTotalBytes: number
   tamanhoTotalFormatado: string
-  porOrigemEspaco: Record<OrigemMedia, DetalheOrigemEspaco>
+  origemEspaco?: Record<OrigemMedia, DetalheOrigemEspaco>
+  porOrigemEspaco?: Record<OrigemMedia, DetalheOrigemEspaco>
+  ultimasMidias?: MidiaRecenteDashboard[]
 }
 
 export interface CategoriaMetrica {

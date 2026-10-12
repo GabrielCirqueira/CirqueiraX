@@ -1,11 +1,21 @@
 import { Badge, Box, Button, HStack, Tabs, Text, VStack } from '@chakra-ui/react'
 import { useQueryClient } from '@tanstack/react-query'
-import { AlertTriangle, CheckCircle2, FolderTree, LayoutDashboard, RefreshCw } from 'lucide-react'
+import {
+  AlertTriangle,
+  CheckCircle2,
+  FolderTree,
+  LayoutDashboard,
+  RefreshCw,
+  Sparkles,
+} from 'lucide-react'
 import { memo, useState } from 'react'
+import { AtividadesRecentes } from './components/AtividadesRecentes'
+import { BarraAcoesRapidas } from './components/BarraAcoesRapidas'
 import { CardsResumo } from './components/CardsResumo'
 import { FilaErros } from './components/FilaErros'
 import { GraficosDashboard } from './components/GraficosDashboard'
 import { PainelSync } from './components/PainelSync'
+import { StatusIntegracoes } from './components/StatusIntegracoes'
 import { TabelaCategorias } from './components/TabelaCategorias'
 import {
   DASHBOARD_QUERY_KEYS,
@@ -13,6 +23,7 @@ import {
   useFilaErros,
   usePastasSync,
   useResumoDashboard,
+  useStatusSync,
 } from './hooks/useDashboard'
 
 export function Component() {
@@ -30,6 +41,7 @@ const DashboardView = memo(function DashboardView() {
   const { data: categorias = [], isLoading: carregandoCategorias } = useCategoriasMetricas()
   const { data: respostaErros } = useFilaErros(1, 10)
   const { data: pastasSync = [] } = usePastasSync()
+  const { data: statusSync } = useStatusSync()
 
   const totalErros = resumo?.totalErros ?? respostaErros?.total ?? 0
 
@@ -40,6 +52,7 @@ const DashboardView = memo(function DashboardView() {
       queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.categorias }),
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'erros'] }),
       queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.syncPastas }),
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.syncStatus }),
     ]).finally(() => {
       setTimeout(() => setAtualizandoManual(false), 600)
     })
@@ -48,19 +61,29 @@ const DashboardView = memo(function DashboardView() {
   return (
     <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 4, md: 8 }}>
       <VStack w="full" gap={6} alignItems="stretch">
+        {/* CABEÇALHO DO DASHBOARD */}
         <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <VStack gap={1} alignItems="flex-start">
-            <Text
-              as="h1"
-              fontSize={{ base: '2xl', sm: '3xl' }}
-              fontWeight="black"
-              color="fg"
-              letterSpacing="tight"
-            >
-              Dashboard
-            </Text>
+            <HStack gap={2.5} align="center">
+              <Text
+                as="h1"
+                fontSize={{ base: '2xl', sm: '3xl' }}
+                fontWeight="black"
+                color="fg"
+                letterSpacing="tight"
+              >
+                Dashboard
+              </Text>
+              <Box
+                w={2.5}
+                h={2.5}
+                borderRadius="full"
+                bg="cirqueira.brand.400"
+                boxShadow="0 0 10px rgba(0, 186, 156, 0.8)"
+              />
+            </HStack>
             <Text fontSize="xs" color="fg.subtle">
-              Métricas operacionais e visão integrada de mídias em tempo real
+              Métricas operacionais, ingestão contínua e status integrado em tempo real
             </Text>
           </VStack>
 
@@ -68,29 +91,31 @@ const DashboardView = memo(function DashboardView() {
             {totalErros > 0 ? (
               <Badge
                 variant="subtle"
-                size="sm"
+                size="md"
                 colorPalette="red"
                 fontWeight="semibold"
                 cursor="pointer"
                 onClick={() => setAbaAtiva('erros')}
-                borderRadius="md"
-                px={2.5}
-                py={1}
+                borderRadius="xl"
+                px={3}
+                py={1.5}
+                transition="all 0.2s"
+                _hover={{ transform: 'scale(1.02)' }}
               >
-                <AlertTriangle size={13} style={{ marginRight: '4px' }} />
+                <AlertTriangle size={14} style={{ marginRight: '6px' }} />
                 {totalErros} {totalErros === 1 ? 'erro pendente' : 'erros pendentes'}
               </Badge>
             ) : (
               <Badge
                 variant="subtle"
-                size="sm"
-                colorPalette="green"
+                size="md"
+                colorPalette="teal"
                 fontWeight="semibold"
-                borderRadius="md"
-                px={2.5}
-                py={1}
+                borderRadius="xl"
+                px={3}
+                py={1.5}
               >
-                <CheckCircle2 size={13} style={{ marginRight: '4px' }} />
+                <CheckCircle2 size={14} style={{ marginRight: '6px' }} />
                 Pipeline 100% Operacional
               </Badge>
             )}
@@ -101,7 +126,8 @@ const DashboardView = memo(function DashboardView() {
               disabled={atualizandoManual}
               onClick={handleAtualizarTudo}
               fontWeight="medium"
-              borderRadius="lg"
+              borderRadius="xl"
+              _hover={{ borderColor: 'cirqueira.brand.500/50' }}
             >
               <RefreshCw
                 size={14}
@@ -115,29 +141,44 @@ const DashboardView = memo(function DashboardView() {
           </HStack>
         </HStack>
 
-        <CardsResumo resumo={resumo} carregando={carregandoResumo} />
+        {/* BARRA DE AÇÕES RÁPIDAS */}
+        <BarraAcoesRapidas
+          pastasSync={pastasSync}
+          onAtualizarTudo={handleAtualizarTudo}
+          atualizando={atualizandoManual}
+        />
 
+        {/* CARDS DE RESUMO (KPIs) */}
+        <CardsResumo
+          resumo={resumo}
+          carregando={carregandoResumo}
+          onSelecionarAba={setAbaAtiva}
+        />
+
+        {/* ABAS DO DASHBOARD */}
         <VStack w="full" gap={6} alignItems="stretch">
           <Tabs.Root value={abaAtiva} onValueChange={(e) => setAbaAtiva(e.value)} w="full">
             <Tabs.List
               bg="bg.panel"
               borderWidth="1px"
               borderColor="border.subtle"
-              p={1}
-              borderRadius="xl"
+              p={1.5}
+              borderRadius="2xl"
               flexWrap="wrap"
-              gap={1}
+              gap={1.5}
+              shadow="sm"
             >
               <Tabs.Trigger
                 value="visao-geral"
                 px={4}
-                py={2}
+                py={2.5}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="lg"
+                borderRadius="xl"
+                transition="all 0.2s"
               >
                 <HStack gap={2} align="center">
-                  <LayoutDashboard size={15} />
+                  <LayoutDashboard size={16} />
                   <Text as="span">Gráficos & Métricas</Text>
                 </HStack>
               </Tabs.Trigger>
@@ -145,13 +186,14 @@ const DashboardView = memo(function DashboardView() {
               <Tabs.Trigger
                 value="categorias"
                 px={4}
-                py={2}
+                py={2.5}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="lg"
+                borderRadius="xl"
+                transition="all 0.2s"
               >
                 <HStack gap={2} align="center">
-                  <FolderTree size={15} />
+                  <FolderTree size={16} />
                   <Text as="span">Categorias ({categorias.length})</Text>
                 </HStack>
               </Tabs.Trigger>
@@ -159,13 +201,14 @@ const DashboardView = memo(function DashboardView() {
               <Tabs.Trigger
                 value="sincronizacao"
                 px={4}
-                py={2}
+                py={2.5}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="lg"
+                borderRadius="xl"
+                transition="all 0.2s"
               >
                 <HStack gap={2} align="center">
-                  <RefreshCw size={15} />
+                  <RefreshCw size={16} />
                   <Text as="span">Sincronização ({pastasSync.length})</Text>
                 </HStack>
               </Tabs.Trigger>
@@ -173,13 +216,14 @@ const DashboardView = memo(function DashboardView() {
               <Tabs.Trigger
                 value="erros"
                 px={4}
-                py={2}
+                py={2.5}
                 fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="semibold"
-                borderRadius="lg"
+                borderRadius="xl"
+                transition="all 0.2s"
               >
                 <HStack gap={2} align="center">
-                  <AlertTriangle size={15} />
+                  <AlertTriangle size={16} />
                   <Text as="span">Fila de Erros</Text>
                   {totalErros > 0 && (
                     <Badge
@@ -199,6 +243,7 @@ const DashboardView = memo(function DashboardView() {
             </Tabs.List>
           </Tabs.Root>
 
+          {/* ABA 1: VISÃO GERAL */}
           {abaAtiva === 'visao-geral' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <GraficosDashboard
@@ -206,21 +251,42 @@ const DashboardView = memo(function DashboardView() {
                 categorias={categorias}
                 carregando={carregandoResumo || carregandoCategorias}
               />
+
+              {/* ATIVIDADES RECENTES E SAÚDE DO SISTEMA */}
+              <Box
+                display="grid"
+                gridTemplateColumns={{ base: '1fr', lg: '1.2fr 0.8fr' }}
+                gap={5}
+                w="full"
+              >
+                <AtividadesRecentes
+                  midias={resumo?.ultimasMidias}
+                  carregando={carregandoResumo}
+                />
+                <StatusIntegracoes
+                  statusSync={statusSync}
+                  resumo={resumo}
+                  totalCategorias={categorias.length}
+                />
+              </Box>
             </VStack>
           )}
 
+          {/* ABA 2: CATEGORIAS */}
           {abaAtiva === 'categorias' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
             </VStack>
           )}
 
+          {/* ABA 3: SINCRONIZAÇÃO */}
           {abaAtiva === 'sincronizacao' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <PainelSync />
             </VStack>
           )}
 
+          {/* ABA 4: FILA DE ERROS */}
           {abaAtiva === 'erros' && (
             <VStack gap={6} w="full" alignItems="stretch">
               <FilaErros />
