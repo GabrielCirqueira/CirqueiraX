@@ -267,6 +267,16 @@ class MediaItem
         return $this->historicoStatus;
     }
 
+    /**
+     * @param array<int, array{de?: string, para: string, em: string}> $historicoStatus
+     */
+    public function setHistoricoStatus(array $historicoStatus): self
+    {
+        $this->historicoStatus = $historicoStatus;
+
+        return $this;
+    }
+
     public function setStatus(StatusMediaItem|string $status): self
     {
         return $this->transicionarPara($status);
@@ -406,9 +416,23 @@ class MediaItem
         return $this->criadoEm;
     }
 
+    public function setCriadoEm(\DateTimeImmutable $criadoEm): self
+    {
+        $this->criadoEm = $criadoEm;
+
+        return $this;
+    }
+
     public function atualizadoEm(): \DateTimeImmutable
     {
         return $this->atualizadoEm;
+    }
+
+    public function setAtualizadoEm(\DateTimeImmutable $atualizadoEm): self
+    {
+        $this->atualizadoEm = $atualizadoEm;
+
+        return $this;
     }
 
     public function tamanhoBytes(): int

@@ -489,9 +489,6 @@ class MediaItemRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
         $agoraSp = new \DateTimeImmutable('now', new \DateTimeZone('America/Sao_Paulo'));
         $hojePrefix = $agoraSp->format('Y-m-d') . '%';
-        $inicioHojeUtc = (new \DateTimeImmutable('today', new \DateTimeZone('America/Sao_Paulo')))
-            ->setTimezone(new \DateTimeZone('UTC'))
-            ->format('Y-m-d H:i:s');
 
         $sql = "
             SELECT
@@ -501,7 +498,6 @@ class MediaItemRepository extends ServiceEntityRepository
                 COALESCE(SUM(CASE WHEN status IN ('arquivo_removido', 'arquivo_expurgado') AND (
                     JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.arquivo_removido_em')) LIKE :hojePrefix
                     OR JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.arquivo_expurgado_em')) LIKE :hojePrefix
-                    OR atualizado_em >= :inicioHojeUtc
                 ) THEN 1 ELSE 0 END), 0) as removidos_hoje,
                 COALESCE(SUM(CASE WHEN status NOT IN ('arquivo_removido', 'arquivo_expurgado') AND caminho_local IS NOT NULL THEN
                     COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED), CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED), 0)
@@ -517,7 +513,6 @@ class MediaItemRepository extends ServiceEntityRepository
         /** @var array<string, mixed> $linha */
         $linha = $conn->executeQuery($sql, [
             'hojePrefix' => $hojePrefix,
-            'inicioHojeUtc' => $inicioHojeUtc,
         ])->fetchAssociative() ?: [];
 
         return [

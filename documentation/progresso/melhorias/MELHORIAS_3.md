@@ -447,5 +447,40 @@
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
   - `documentation/progresso/melhorias/MELHORIAS.md`
 
+### ✅ Melhoria 51 — Migração e Importação do Histórico de Vídeos Baixados do Franky (573 vídeos) com Status `arquivo_removido`, Desduplicação e Preservação de Metadados
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O usuário possuía um backup SQL recente de produção do seu outro sistema (Franky) em `~/dev/Franky/Data/db-backups/franky-20261012-181923.sql` contendo 582 registros na tabela `video_downloads`.
+  - Era necessário importar todo o histórico de vídeos baixados para o CirqueiraX para que constem no Dashboard e na Central de Downloads, sem baixar os arquivos de mídia novamente.
+  - Como os arquivos físicos não estão no disco da VPS, os itens precisavam ser registrados com o novo status `StatusMediaItem::ARQUIVO_REMOVIDO` (`'arquivo_removido'`), com `caminhoLocal = null` e metadados preservados (incluindo `url_original`, `tamanho_bytes`, plataforma, título, datas originais), permitindo inclusive que o usuário clique em "Rebaixar" a qualquer momento se desejar recuperar algum vídeo físico.
+- **Solução**:
+  - **Serviço de Importação Idempotente (`ImportarVideosFrankyService.php`)**:
+    - Parser streaming de SQL que extrai tuplas de `INSERT INTO video_downloads`.
+    - Ignora downloads com falha no Franky (`status = 'erro'`).
+    - Desduplica URLs dentro do dump mantendo a linha mais recente.
+    - Checa se o vídeo já existe no CirqueiraX por URL ou Hash SHA-256 (`franky:video_downloads:{url}`), evitando qualquer duplicação.
+    - Constrói a entidade `MediaItem` com status `StatusMediaItem::ARQUIVO_REMOVIDO`, `caminhoLocal = null`, histórico de status (`baixando -> concluido -> arquivo_removido`) e datas históricas originais (`criadoEm` e `atualizadoEm`).
+    - Gravação em lote com `flush` a cada 50 itens para máxima performance.
+  - **Comando CLI Symfony (`ImportarVideosFrankyCommand.php`)**:
+    - Criado o comando `php bin/console app:media:importar-videos-franky --dry-run` e execução em produção.
+    - **Resultado da execução**:
+      - 582 linhas no dump analisadas.
+      - 8 falhas do Franky ignoradas.
+      - 1 vídeo já existente no CirqueiraX desduplicado.
+      - **573 vídeos novos importados com sucesso** com status `arquivo_removido` e 3,25 GB de histórico registrados.
+  - **Reflexo Imediato no Dashboard e Central de Downloads**:
+    - Total de vídeos baixados no Dashboard subiu de 8 para **581 vídeos** (8 ativos no disco + 573 com status `arquivo_removido`).
+    - Espaço liberado acumulado na VPS passou a exibir **3,49 GB liberados**.
+    - Os 573 vídeos aparecem na tela de Downloads de Vídeo prontos para filtragem e com o botão "Rebaixar" ativo caso o usuário queira baixar qualquer arquivo físico sob demanda.
+- **Arquivos**:
+  - `src/Entity/MediaItem.php`
+  - `src/Repository/MediaItemRepository.php`
+  - `src/Service/Importacao/ImportarVideosFrankyService.php`
+  - `src/Command/ImportarVideosFrankyCommand.php`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+
 
 
