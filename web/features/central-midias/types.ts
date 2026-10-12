@@ -20,3 +20,11 @@ export interface FiltrosCentralMidias {
   ordenacao?: string
   direcao?: 'ASC' | 'DESC' | string
 }
+
+export interface ContagensMidias {
+  total: number
+  manual: number
+  downloads: number
+  prints: number
+  origens?: Record<string, number>
+}

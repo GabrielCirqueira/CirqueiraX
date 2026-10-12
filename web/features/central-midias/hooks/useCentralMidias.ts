@@ -7,17 +7,27 @@ import {
   categorizarMidia,
   listarCategorias,
   listarMidiasCentral,
+  obterContagensMidias,
 } from '../api'
 import type { FiltrosCentralMidias } from '../types'
 
 export const CHAVE_CENTRAL_MIDIAS = ['central-midias']
 export const CHAVE_CATEGORIAS = ['categorias']
+export const CHAVE_CONTAGENS = ['central-midias', 'contagens']
 
 export function useCentralMidias(filtros: FiltrosCentralMidias = {}) {
   return useQuery({
     queryKey: [...CHAVE_CENTRAL_MIDIAS, filtros],
     queryFn: () => listarMidiasCentral(filtros),
     staleTime: 1000 * 30,
+  })
+}
+
+export function useContagensMidias() {
+  return useQuery({
+    queryKey: CHAVE_CONTAGENS,
+    queryFn: obterContagensMidias,
+    staleTime: 1000 * 15,
   })
 }
 
@@ -87,6 +97,7 @@ export function useApagarMidia() {
       })
       queryClient.invalidateQueries({ queryKey: CHAVE_CENTRAL_MIDIAS })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+      queryClient.invalidateQueries({ queryKey: CHAVE_CONTAGENS })
     },
     onError: () => {
       addToast({
@@ -109,6 +120,7 @@ export function useApagarLoteMidias() {
       })
       queryClient.invalidateQueries({ queryKey: CHAVE_CENTRAL_MIDIAS })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+      queryClient.invalidateQueries({ queryKey: CHAVE_CONTAGENS })
     },
     onError: () => {
       addToast({

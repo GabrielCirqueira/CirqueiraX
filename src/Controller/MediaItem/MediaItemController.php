@@ -13,6 +13,7 @@ use App\DataObject\DistribuirHorariosLoteDTO;
 use App\DataObject\FiltrarMediaItemDTO;
 use App\DataObject\RebaixarLoteDTO;
 use App\DataObject\UploadManualDTO;
+use App\Enum\OrigemMedia;
 use App\Repository\CategoriaRepository;
 use App\Repository\MediaItemRepository;
 use App\Serializer\MediaItemSerializer;
@@ -136,6 +137,25 @@ final class MediaItemController extends DefaultController
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
+    #[Route('/contagens', name: 'contagens', methods: ['GET'])]
+    public function contagens(): Response
+    {
+        $origens = $this->mediaItemRepository->contarAgrupadoPorOrigem();
+        $totalGeral = array_sum($origens);
+
+        $manual = $origens[OrigemMedia::MANUAL->value] ?? 0;
+        $downloads = ($origens[OrigemMedia::DOWNLOAD->value] ?? 0) + ($origens[OrigemMedia::BOT_TELEGRAM->value] ?? 0);
+        $prints = ($origens[OrigemMedia::PRINT_PESSOAL->value] ?? 0) + ($origens[OrigemMedia::PRINT_EMPRESA->value] ?? 0);
+
+        return $this->success([
+            'total' => $totalGeral,
+            'manual' => $manual,
+            'downloads' => $downloads,
+            'prints' => $prints,
+            'origens' => $origens,
+        ]);
+    }
+
     #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
     public function detalhar(string $uuid): Response
     {
@@ -215,6 +235,59 @@ final class MediaItemController extends DefaultController
         );
 
         return $response;
+    }
+
+    #[Route('/{uuid}/thumbnail', name: 'thumbnail', methods: ['GET'])]
+    public function thumbnail(string $uuid): Response
+    {
+        $arquivoMidia = $this->obterArquivoMidiaService->obterParaStream($uuid);
+        $caminhoFisico = $arquivoMidia->caminhoFisico();
+        $mimeType = $arquivoMidia->mimeType();
+
+        // Se já for imagem, retorna direto
+        if (str_starts_with($mimeType, 'image/')) {
+            $response = new BinaryFileResponse($caminhoFisico);
+            $response->setAutoEtag();
+            $response->headers->set('Content-Type', $mimeType);
+            $response->headers->set('Cache-Control', 'public, max-age=86400');
+            $response->setContentDisposition(
+                ResponseHeaderBag::DISPOSITION_INLINE,
+                $arquivoMidia->nomeArquivo(),
+            );
+            return $response;
+        }
+
+        // Se for vídeo, gera ou serve cache de thumbnail via ffmpeg
+        if (str_starts_with($mimeType, 'video/')) {
+            $cacheDir = $this->getParameter('kernel.project_dir') . '/var/cache/thumbnails';
+            if (!is_dir($cacheDir)) {
+                @mkdir($cacheDir, 0777, true);
+            }
+
+            $cacheArquivo = sprintf('%s/%s.jpg', $cacheDir, $uuid);
+            if (!file_exists($cacheArquivo) || filesize($cacheArquivo) === 0) {
+                $cmd = sprintf('ffmpeg -y -ss 00:00:01 -i %s -vframes 1 -q:v 2 %s 2>/dev/null', escapeshellarg($caminhoFisico), escapeshellarg($cacheArquivo));
+                @exec($cmd, $output, $ret);
+                if (0 !== $ret || !file_exists($cacheArquivo) || filesize($cacheArquivo) === 0) {
+                    $cmd = sprintf('ffmpeg -y -ss 00:00:00 -i %s -vframes 1 -q:v 2 %s 2>/dev/null', escapeshellarg($caminhoFisico), escapeshellarg($cacheArquivo));
+                    @exec($cmd);
+                }
+            }
+
+            if (file_exists($cacheArquivo) && filesize($cacheArquivo) > 0) {
+                $response = new BinaryFileResponse($cacheArquivo);
+                $response->setAutoEtag();
+                $response->headers->set('Content-Type', 'image/jpeg');
+                $response->headers->set('Cache-Control', 'public, max-age=86400');
+                $response->setContentDisposition(
+                    ResponseHeaderBag::DISPOSITION_INLINE,
+                    $uuid . '.jpg',
+                );
+                return $response;
+            }
+        }
+
+        return $this->streamArquivo($uuid);
     }
 
     #[Route('/{uuid}/download', name: 'download_arquivo', methods: ['GET'])]

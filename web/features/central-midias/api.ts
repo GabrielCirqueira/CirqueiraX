@@ -1,6 +1,11 @@
 import { api } from '@/config/api'
 import type { RespostaApi, RespostaPaginada } from '@/shared/types/api'
-import type { CategoriaOpcao, FiltrosCentralMidias, MediaItem } from './types'
+import type { CategoriaOpcao, ContagensMidias, FiltrosCentralMidias, MediaItem } from './types'
+
+export async function obterContagensMidias(): Promise<ContagensMidias> {
+  const { data } = await api.get<RespostaApi<ContagensMidias>>('/api/v1/media-itens/contagens')
+  return data.data
+}
 
 export async function listarMidiasCentral(
   filtros: FiltrosCentralMidias = {}

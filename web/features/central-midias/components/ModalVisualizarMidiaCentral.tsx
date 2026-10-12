@@ -87,12 +87,13 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
       case 'manual':
         return { label: 'Upload Manual', colorPalette: 'blue' }
       case 'download':
-      case 'bot_telegram' as string:
         return { label: 'Download Vídeo', colorPalette: 'purple' }
+      case 'bot_telegram' as string:
+        return { label: 'Telegram', colorPalette: 'purple' }
       case 'print_empresa':
-        return { label: 'Print Empresa', colorPalette: 'green' }
+        return { label: 'Agente Empresa', colorPalette: 'cyan' }
       case 'print_pessoal':
-        return { label: 'Print Pessoal', colorPalette: 'teal' }
+        return { label: 'Agente PC', colorPalette: 'teal' }
       default:
         return { label: item.origemDescricao || 'Mídia', colorPalette: 'gray' }
     }

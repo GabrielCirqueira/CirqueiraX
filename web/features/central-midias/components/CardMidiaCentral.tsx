@@ -1,16 +1,21 @@
 import { addToast } from '@/shared/components/ui/toaster'
 import { Badge, Box, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
+  Camera,
   Check,
   CheckSquare,
   Copy,
   Download,
   FileImage,
   Film,
+  Folder,
   FolderPlus,
+  Layers,
+  Monitor,
   Play,
   Square,
   Trash2,
+  UploadCloud,
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import {
@@ -45,6 +50,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
   const [baixando, setBaixando] = useState(false)
   const [copiando, setCopiando] = useState(false)
   const [copiadoRecente, setCopiadoRecente] = useState(false)
+  const [falhaThumbRemota, setFalhaThumbRemota] = useState(false)
 
   // Identificação inteligente de tipo
   const isVideo = useMemo(() => {
@@ -73,16 +79,17 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
   const infoOrigem = useMemo(() => {
     switch (item.origem) {
       case 'manual':
-        return { label: 'Upload Manual', colorPalette: 'blue' }
+        return { label: 'Upload Manual', icon: UploadCloud, colorPalette: 'blue' }
       case 'download':
+        return { label: 'Download Vídeo', icon: Film, colorPalette: 'purple' }
       case 'bot_telegram' as string:
-        return { label: 'Download Vídeo', colorPalette: 'purple' }
+        return { label: 'Telegram', icon: Film, colorPalette: 'purple' }
       case 'print_empresa':
-        return { label: 'Print Empresa', colorPalette: 'green' }
+        return { label: 'Agente Empresa', icon: Monitor, colorPalette: 'cyan' }
       case 'print_pessoal':
-        return { label: 'Print Pessoal', colorPalette: 'teal' }
+        return { label: 'Agente PC', icon: Camera, colorPalette: 'teal' }
       default:
-        return { label: item.origemDescricao || 'Mídia', colorPalette: 'gray' }
+        return { label: item.origemDescricao || 'Mídia', icon: Layers, colorPalette: 'gray' }
     }
   }, [item])
 
@@ -107,8 +114,18 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
   }, [item.criadoEm])
 
   const streamUrl = obterUrlStreamMidia(item.uuid)
-  const thumbnailUrl = item.thumbnailUrl ? item.thumbnailUrl : obterUrlThumbnailMidia(item.uuid)
-  const displayUrl = isVideo ? thumbnailUrl : streamUrl
+  const apiThumbUrl = obterUrlThumbnailMidia(item.uuid)
+  const remoteThumbUrl = item.thumbnailUrl || (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : null)
+
+  const displayUrl = useMemo(() => {
+    if (isVideo) {
+      if (remoteThumbUrl && !falhaThumbRemota) {
+        return remoteThumbUrl
+      }
+      return apiThumbUrl
+    }
+    return streamUrl
+  }, [isVideo, remoteThumbUrl, falhaThumbRemota, apiThumbUrl, streamUrl])
 
   const handleCopiar = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -164,8 +181,12 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             alt={titulo}
             loading="lazy"
             onError={() => {
-              // Se falhar a thumbnail ou stream direto, marca erro para exibir fallback
-              setErroCarregamento(true)
+              // Se falhar a thumbnail externa, tenta a gerada pelo backend; se já falhou, marca erro
+              if (isVideo && remoteThumbUrl && !falhaThumbRemota) {
+                setFalhaThumbRemota(true)
+              } else {
+                setErroCarregamento(true)
+              }
             }}
             style={{
               width: '100%',
@@ -267,41 +288,47 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
         top={2}
         right={2}
         zIndex={3}
-        gap={1}
+        gap={1.5}
         pointerEvents="none"
+        flexWrap="wrap"
+        justify="flex-end"
+        maxW="calc(100% - 40px)"
       >
-        {/* Badge da Categoria (se houver) */}
+        {/* Badge da Categoria (se houver) - Com Ícone Folder */}
         {item.categoria?.nome && (
           <Badge
             size="xs"
-            variant="solid"
-            colorPalette="brand"
-            bg="cirqueira.brand.500/90"
-            color="cirqueira.grey.0"
+            variant="surface"
+            colorPalette="gray"
+            bg="cirqueira.grey.950/85"
+            color="cirqueira.brand.300"
+            borderWidth="1px"
+            borderColor="cirqueira.brand.500/40"
             backdropFilter="blur(6px)"
-            borderRadius="sm"
+            borderRadius="md"
             px={1.5}
             py={0.5}
             fontSize="10px"
-            fontWeight="bold"
+            fontWeight="semibold"
           >
+            <Folder size={10} style={{ marginRight: '3px', display: 'inline' }} />
             {item.categoria.nome}
           </Badge>
         )}
 
-        {/* Badge de Origem */}
+        {/* Badge de Origem com ícone dedicado */}
         <Badge
           size="xs"
           variant="solid"
           colorPalette={infoOrigem.colorPalette}
           backdropFilter="blur(6px)"
-          borderRadius="sm"
+          borderRadius="md"
           px={1.5}
           py={0.5}
           fontSize="9px"
-          fontWeight="semibold"
-          opacity={isHovered ? 1 : 0.85}
+          fontWeight="bold"
         >
+          <infoOrigem.icon size={10} style={{ marginRight: '3px', display: 'inline' }} />
           {infoOrigem.label}
         </Badge>
 
@@ -314,7 +341,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             bg="cirqueira.grey.950/90"
             color="cirqueira.grey.0"
             backdropFilter="blur(6px)"
-            borderRadius="sm"
+            borderRadius="md"
             px={1.5}
             py={0.5}
             fontSize="9px"

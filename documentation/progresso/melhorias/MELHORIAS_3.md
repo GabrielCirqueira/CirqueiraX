@@ -146,5 +146,51 @@
   - `web/layouts/Header.tsx`
   - `src/Repository/MediaItemRepository.php`
 
+---
+
+### ✅ Melhoria 44 — Resolução da Visibilidade de Prints do Agente e Downloads de Vídeos na Central de Mídias com Contadores nas Abas, Limite de 60 Itens e Miniaturas FFmpeg
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Na Central de Mídias (`/central-midias`), o usuário relatou que a página não estava trazendo as capturas coletadas pelo agente Python (`print_pessoal`) nem os vídeos baixados das redes sociais (`downloads`), exibindo apenas itens com selo de upload manual.
+  - **Diagnóstico da Causa Raiz**:
+    1. *Inanição por Paginação*: O usuário realizou 28 uploads manuais recentes. Como a ordenação padrão é `criadoEm DESC` e o limite era de apenas 30 itens por página, a página 1 foi 100% preenchida pelos uploads recentes. Os 8 vídeos baixados e as 31 capturas do agente ficaram alocados nas páginas 2 e 3, invisíveis sem rolar até o rodapé da grade masonry.
+    2. *Ambiguidade Visual nos Cards*: Como os uploads manuais foram categorizados como "Prints", os cards exibiam lado a lado `[Prints]` (categoria) e `[Upload Manual]` (origem), fazendo parecer que todo o acervo consistia em uploads manuais rotulados como print.
+    3. *Ausência de Contadores nas Abas*: As abas não informavam quantos itens pertenciam a cada origem.
+    4. *Miniaturas Remotas Expiradas*: Vídeos baixados do TikTok e Twitter dependiam de URLs externas de CDN que expiram (ex.: HTTP 403 Forbidden do TikTok), caindo em erro de carregamento sem miniatura local.
+- **Solução**:
+  - **Endpoint de Contagens por Origem no Backend (`MediaItemController.php`)**:
+    - Implementada rota `GET /api/v1/media-itens/contagens` que agrega o total geral e as contagens separadas de `manual`, `downloads` (download + bot_telegram) e `prints` (print_pessoal + print_empresa).
+  - **Endpoint de Miniaturas com Geração FFmpeg (`MediaItemController.php`)**:
+    - Implementada rota `GET /api/v1/media-itens/{uuid}/thumbnail`.
+    - Para imagens, entrega o arquivo diretamente com headers de cache HTTP e etag.
+    - Para vídeos locais (MP4/MKV/WEBM), gera dinamicamente miniatura JPEG em 20ms via FFmpeg e salva em `var/cache/thumbnails/{uuid}.jpg`.
+  - **Contadores em Tempo Real nas Abas de Origem (`CentralMidias.tsx`)**:
+    - As abas agora possuem badges visuais com as quantidades exatas: `Todas as Mídias ({total})`, `Upload Manual ({manual})`, `Downloads Redes ({downloads})` e `Prints & Capturas ({prints})`.
+    - Ao bater o olho, o usuário confirma de imediato a disponibilidade de todas as mídias coletadas.
+  - **Elevação do Limite Padrão e Seletor por Página (`CentralMidias.tsx`)**:
+    - Limite padrão aumentado para **60 mídias por página**, garantindo que todo o acervo caiba na primeira tela.
+    - Adicionado seletor de quantidade (`30 | 60 | 100`) e barra informativa clara no rodapé: `Exibindo X de Y mídias`.
+  - **Desambiguação Visual e Ícones Dedicados (`CardMidiaCentral.tsx`, `TabelaCentralMidias.tsx`, `ModalVisualizarMidiaCentral.tsx`)**:
+    - Categorias agora possuem ícone de pasta (`Folder`), deixando claro que é uma pasta organizacional (ex.: `📁 Prints`).
+    - Origens possuem ícones e cores distintas:
+      - `print_pessoal`: `📸 Agente PC` (teal)
+      - `print_empresa`: `🖥️ Agente Empresa` (cyan)
+      - `download`: `🎬 Download Vídeo` (purple)
+      - `bot_telegram`: `💬 Telegram` (purple)
+      - `manual`: `☁️ Upload Manual` (blue)
+    - Fallback inteligente: se a miniatura externa de um vídeo falhar (ex.: CDN expirado), o componente chaveia automaticamente para o endpoint `/api/v1/media-itens/{uuid}/thumbnail` gerado pelo FFmpeg.
+- **Arquivos**:
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/central-midias/types.ts`
+  - `web/features/central-midias/api.ts`
+  - `web/features/central-midias/hooks/useCentralMidias.ts`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`
+  - `web/features/central-midias/components/TabelaCentralMidias.tsx`
+  - `web/features/central-midias/components/ModalVisualizarMidiaCentral.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+
 
 

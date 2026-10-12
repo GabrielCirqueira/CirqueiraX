@@ -39,11 +39,13 @@ import {
   useCategorizarLoteMidias,
   useCategorizarMidia,
   useCentralMidias,
+  useContagensMidias,
 } from './hooks/useCentralMidias'
 import type { FiltrosCentralMidias, MediaItem } from './types'
 
 const CentralMidias = memo(function CentralMidias() {
   const [pagina, setPagina] = useState(1)
+  const [porPagina, setPorPagina] = useState(60)
   const [busca, setBusca] = useState('')
   const [origemFiltro, setOrigemFiltro] = useState<string>('todas')
   const [tipoFiltro, setTipoFiltro] = useState<string>('todos')
@@ -61,7 +63,7 @@ const CentralMidias = memo(function CentralMidias() {
   const filtros = useMemo<FiltrosCentralMidias>(() => {
     const obj: FiltrosCentralMidias = {
       pagina,
-      porPagina: 30,
+      porPagina,
       ordenacao: 'criadoEm',
       direcao: 'DESC',
     }
@@ -83,9 +85,10 @@ const CentralMidias = memo(function CentralMidias() {
     }
 
     return obj
-  }, [pagina, busca, origemFiltro, tipoFiltro, categoriaFiltro, statusFiltro])
+  }, [pagina, porPagina, busca, origemFiltro, tipoFiltro, categoriaFiltro, statusFiltro])
 
   const { data: respostaPaginada, isLoading, isFetching, refetch } = useCentralMidias(filtros)
+  const { data: contagens } = useContagensMidias()
   const { data: categorias = [] } = useCategorias()
 
   const { mutate: categorizarMidiaMutate } = useCategorizarMidia()
@@ -95,8 +98,8 @@ const CentralMidias = memo(function CentralMidias() {
 
   const itens = respostaPaginada?.data ?? []
   const total = respostaPaginada?.total ?? 0
-  const porPagina = respostaPaginada?.porPagina ?? 30
-  const totalPaginas = Math.ceil(total / porPagina) || 1
+  const limitePorPagina = respostaPaginada?.porPagina ?? porPagina
+  const totalPaginas = Math.ceil(total / limitePorPagina) || 1
 
   const handleToggleSelect = useCallback((uuid: string) => {
     setSelecionados((prev) =>
@@ -187,12 +190,35 @@ const CentralMidias = memo(function CentralMidias() {
       statusFiltro !== 'todos'
   )
 
-  const origensAbas = [
-    { value: 'todas', label: 'Todas as Mídias', icon: Layers },
-    { value: 'manual', label: 'Upload Manual', icon: UploadCloud },
-    { value: 'downloads', label: 'Downloads Redes', icon: DownloadCloud },
-    { value: 'prints', label: 'Prints & Capturas', icon: Camera },
-  ]
+  const origensAbas = useMemo(
+    () => [
+      {
+        value: 'todas',
+        label: 'Todas as Mídias',
+        icon: Layers,
+        count: contagens?.total ?? total,
+      },
+      {
+        value: 'manual',
+        label: 'Upload Manual',
+        icon: UploadCloud,
+        count: contagens?.manual,
+      },
+      {
+        value: 'downloads',
+        label: 'Downloads Redes',
+        icon: DownloadCloud,
+        count: contagens?.downloads,
+      },
+      {
+        value: 'prints',
+        label: 'Prints & Capturas',
+        icon: Camera,
+        count: contagens?.prints,
+      },
+    ],
+    [contagens, total]
+  )
 
   return (
     <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
@@ -223,7 +249,7 @@ const CentralMidias = memo(function CentralMidias() {
               </Badge>
             </HStack>
             <Text fontSize="xs" color="fg.subtle">
-              Galeria unificada com todas as fotos, vídeos de redes sociais, uploads manuais e prints.
+              Galeria unificada com todas as fotos, vídeos de redes sociais, uploads manuais e prints do agente.
             </Text>
           </VStack>
 
@@ -260,14 +286,14 @@ const CentralMidias = memo(function CentralMidias() {
           gap={3}
           align="stretch"
         >
-          {/* Linha 1: Abas de Origem */}
+          {/* Linha 1: Abas de Origem com Contadores */}
           <Flex
             direction={{ base: 'column', lg: 'row' }}
             justify="space-between"
             align={{ base: 'stretch', lg: 'center' }}
             gap={3}
           >
-            <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto">
+            <HStack gap={1.5} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto">
               {origensAbas.map((aba) => {
                 const Icone = aba.icon
                 const ativo = origemFiltro === aba.value
@@ -285,10 +311,26 @@ const CentralMidias = memo(function CentralMidias() {
                     fontWeight="semibold"
                     borderRadius="lg"
                     px={3}
-                    h={7}
+                    h={7.5}
                   >
-                    <Icone size={13} style={{ marginRight: '5px' }} />
-                    <Text as="span">{aba.label}</Text>
+                    <HStack gap={1.5} align="center">
+                      <Icone size={13} />
+                      <Text as="span">{aba.label}</Text>
+                      {typeof aba.count === 'number' && (
+                        <Badge
+                          size="xs"
+                          variant={ativo ? 'solid' : 'subtle'}
+                          colorPalette={ativo ? 'brand' : 'gray'}
+                          borderRadius="full"
+                          px={1.5}
+                          py={0}
+                          fontSize="10px"
+                          fontWeight="bold"
+                        >
+                          {aba.count}
+                        </Badge>
+                      )}
+                    </HStack>
                   </Button>
                 )
               })}
@@ -488,13 +530,49 @@ const CentralMidias = memo(function CentralMidias() {
           />
         )}
 
-        {/* Paginação */}
-        {totalPaginas > 1 && (
-          <Flex justify="space-between" align="center" pt={4} flexWrap="wrap" gap={3}>
+        {/* Paginação e Controles de Exibição */}
+        <Flex
+          justify="space-between"
+          align="center"
+          pt={4}
+          pb={4}
+          borderTopWidth="1px"
+          borderColor="border.subtle"
+          flexWrap="wrap"
+          gap={3}
+        >
+          <HStack gap={3} flexWrap="wrap">
             <Text fontSize="xs" color="fg.subtle">
-              Exibindo {itens.length} de {total} mídias
+              Exibindo <Text as="span" fontWeight="bold" color="fg">{itens.length}</Text> de{' '}
+              <Text as="span" fontWeight="bold" color="fg">{total}</Text> mídias
             </Text>
 
+            <HStack gap={1} align="center">
+              <Text fontSize="xs" color="fg.subtle">
+                Por página:
+              </Text>
+              {[30, 60, 100].map((qtd) => (
+                <Button
+                  key={qtd}
+                  size="xs"
+                  variant={porPagina === qtd ? 'solid' : 'ghost'}
+                  colorPalette={porPagina === qtd ? 'brand' : undefined}
+                  onClick={() => {
+                    setPorPagina(qtd)
+                    setPagina(1)
+                  }}
+                  borderRadius="md"
+                  h={6}
+                  px={2}
+                  fontSize="xs"
+                >
+                  {qtd}
+                </Button>
+              ))}
+            </HStack>
+          </HStack>
+
+          {totalPaginas > 1 && (
             <HStack gap={2}>
               <Button
                 size="sm"
@@ -522,8 +600,8 @@ const CentralMidias = memo(function CentralMidias() {
                 <ChevronRight size={14} style={{ marginLeft: '4px' }} />
               </Button>
             </HStack>
-          </Flex>
-        )}
+          )}
+        </Flex>
       </VStack>
 
       {/* Modal de Prévia Ampliada */}
