@@ -22,6 +22,14 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
           />
           <Route
+            path="central-midias"
+            lazy={() => lazyWithRetry(() => import('@/features/central-midias/CentralMidias'))}
+          />
+          <Route
+            path="todas-midias"
+            lazy={() => lazyWithRetry(() => import('@/features/central-midias/CentralMidias'))}
+          />
+          <Route
             path="downloads"
             lazy={() => lazyWithRetry(() => import('@/features/downloads-video/DownloadsVideo'))}
           />

@@ -10,7 +10,7 @@ export type StatusMediaItem =
   | 'concluido'
   | 'erro'
 
-export type OrigemMedia = 'print_empresa' | 'print_pessoal' | 'bot_telegram' | 'manual'
+export type OrigemMedia = 'print_empresa' | 'print_pessoal' | 'bot_telegram' | 'download' | 'manual'
 
 export type PlataformaVideo = 'youtube' | 'tiktok' | 'twitter' | 'instagram' | 'outros'
 

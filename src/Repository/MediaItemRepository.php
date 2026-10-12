@@ -229,13 +229,13 @@ class MediaItemRepository extends ServiceEntityRepository
 
         if (!empty($filtros['tipo'])) {
             if ('video' === $filtros['tipo']) {
-                $qb->andWhere("m.origem NOT IN ('print_pessoal', 'print_empresa')");
-            } elseif ('imagem' === $filtros['tipo'] || 'print' === $filtros['tipo']) {
-                $qb->andWhere("m.origem IN ('print_pessoal', 'print_empresa')");
+                $qb->andWhere("(m.origem IN ('download', 'bot_telegram') OR m.caminhoLocal LIKE '%.mp4' OR m.caminhoLocal LIKE '%.mkv' OR m.caminhoLocal LIKE '%.webm' OR m.caminhoLocal LIKE '%.mov' OR m.metadata LIKE '%video/%')");
+            } elseif ('imagem' === $filtros['tipo'] || 'print' === $filtros['tipo'] || 'foto' === $filtros['tipo']) {
+                $qb->andWhere("(m.origem IN ('print_pessoal', 'print_empresa') OR m.caminhoLocal LIKE '%.png' OR m.caminhoLocal LIKE '%.jpg' OR m.caminhoLocal LIKE '%.jpeg' OR m.caminhoLocal LIKE '%.webp' OR m.metadata LIKE '%image/%')");
             }
         }
 
-        if (!empty($filtros['origem'])) {
+        if (!empty($filtros['origem']) && 'todas' !== $filtros['origem'] && 'all' !== $filtros['origem']) {
             if (is_string($filtros['origem']) && str_contains($filtros['origem'], ',')) {
                 $origens = array_map('trim', explode(',', $filtros['origem']));
                 $qb->andWhere('m.origem IN (:origens)')
@@ -246,6 +246,9 @@ class MediaItemRepository extends ServiceEntityRepository
             } elseif ('downloads' === $filtros['origem']) {
                 $qb->andWhere('m.origem IN (:origens_downloads)')
                     ->setParameter('origens_downloads', ['download', 'bot_telegram']);
+            } elseif ('manual' === $filtros['origem'] || 'upload_manual' === $filtros['origem']) {
+                $qb->andWhere('m.origem = :origem_manual')
+                    ->setParameter('origem_manual', 'manual');
             } else {
                 $origemVal = $filtros['origem'] instanceof OrigemMedia ? $filtros['origem']->value : $filtros['origem'];
                 $qb->andWhere('m.origem = :origem')

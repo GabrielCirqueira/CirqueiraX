@@ -6,6 +6,7 @@ import {
   Code2,
   DownloadCloud,
   Images,
+  Layers,
   LayoutDashboard,
   LogOut,
   Moon,
@@ -24,6 +25,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/central-midias', label: 'Central de Mídias', icon: Layers },
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
   { href: '/prints', label: 'Prints & Capturas', icon: Camera },
   { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud },

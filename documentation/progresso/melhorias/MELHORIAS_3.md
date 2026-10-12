@@ -96,4 +96,55 @@
   - `web/features/upload-manual/components/DropzoneUpload.tsx`
   - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
 
+---
+
+### ✅ Melhoria 43 — Central Unificada de Mídias (`/central-midias`) com Galeria Fluida Estilo Google Fotos para Todas as Mídias
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - As mídias do sistema estavam fragmentadas entre telas distintas (Downloads de Vídeo, Prints & Capturas e Upload Manual), sem uma central única onde o usuário pudesse ver, pesquisar e categorizar tudo junto (fotos, uploads manuais, vídeos baixados das redes e capturas de tela) com o visual fluido da grade de capturas estilo Google Fotos.
+- **Solução**:
+  - **Criação da Central de Mídias (`/central-midias` e `/todas-midias`)**:
+    - Nova página unificada desenvolvida em `web/features/central-midias/CentralMidias.tsx`.
+    - Integrada ao menu lateral global (`Sidebar.tsx`) e cabeçalho dinâmico (`Header.tsx`).
+    - Layout imersivo `maxW="1680px"` com cabeçalho contendo métricas em tempo real (`total de mídias`) e botão de atualização contínua.
+  - **Grade Fluida Masonry Estilo Google Fotos (`GridCentralMidias.tsx` & `CardMidiaCentral.tsx`)**:
+    - Layout em colunas dinâmicas sem cortes forçados, preservando a proporção natural das fotos e dos vídeos.
+    - Card inteligente com suporte simultâneo a imagens e vídeos: exibe preview de streaming para fotos e thumbnail com play overlay para vídeos (com duração formatada e ícone de vídeo).
+    - Badges contextuais de origem no canto superior: `Upload Manual` (azul/brand), `Download Vídeo` (roxo), `Print Empresa` (verde), `Print Pessoal` (teal).
+    - Ações no hover: checkbox de seleção múltipla, botão de copiar imagem para clipboard (1 clique), download direto, atribuição rápida de categoria e exclusão.
+    - Modal de visualização expandida (`ModalVisualizarMidiaCentral.tsx`): player HTML5 nativo para vídeos, zoom em tela cheia para fotos, metadados detalhados (resolução, tamanho, datas, hash) e seletor de categoria inline.
+  - **Toolbar de Filtros Poderosos e Alternador de Modo**:
+    - Filtro de Origem em abas: `Todas as Mídias`, `Upload Manual`, `Downloads Redes`, `Prints & Capturas`.
+    - Filtro de Tipo: `Todos Tipos`, `Apenas Fotos`, `Apenas Vídeos`.
+    - Filtro de Categoria: dropdown integrado a todas as categorias do banco + `Sem Categoria`.
+    - Filtro de Status: `Todos`, `Classificados`, `Sem Categoria`, `Com Erro`.
+    - Campo de busca textual com limpeza instantânea por `X`.
+    - Alternador de visualização: Grade Masonry (Google Fotos) / Tabela Compacta (`TabelaCentralMidias.tsx`).
+  - **Atalhos de Teclado e Ações em Lote**:
+    - `Ctrl + A`: seleciona todas as mídias da página atual.
+    - Teclas numéricas `1` a `9`: aplicam a categoria correspondente aos itens selecionados instantaneamente sem cliques adicionais.
+    - Barra flutuante inferior com contador de seleção, botões de 1 clique para categorias frequentes com dicas de teclas de atalho e botão de exclusão em massa.
+  - **Ajuste no Backend (`MediaItemRepository.php`)**:
+    - Refinada a lógica de filtros `tipo` (`imagem` vs `video`) e `origem` (`manual`, `prints`, `downloads`, `todas`) para englobar perfeitamente todas as extensões e origens.
+  - **Conformidade de Design**:
+    - 100% tokens de `web/config/theme/theme.ts`.
+- **Arquivos**:
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/central-midias/index.ts`
+  - `web/features/central-midias/types.ts`
+  - `web/features/central-midias/api.ts`
+  - `web/features/central-midias/hooks/useCentralMidias.ts`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`
+  - `web/features/central-midias/components/GridCentralMidias.tsx`
+  - `web/features/central-midias/components/TabelaCentralMidias.tsx`
+  - `web/features/central-midias/components/ModalVisualizarMidiaCentral.tsx`
+  - `web/features/central-midias/components/ModalCategorizarMidia.tsx`
+  - `web/App.tsx`
+  - `web/layouts/Sidebar.tsx`
+  - `web/layouts/Header.tsx`
+  - `src/Repository/MediaItemRepository.php`
+
+
 
