@@ -19,7 +19,7 @@ export function useCentralMidias(filtros: FiltrosCentralMidias = {}) {
   return useQuery({
     queryKey: [...CHAVE_CENTRAL_MIDIAS, filtros],
     queryFn: () => listarMidiasCentral(filtros),
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 60,
   })
 }
 
@@ -27,7 +27,7 @@ export function useContagensMidias() {
   return useQuery({
     queryKey: CHAVE_CONTAGENS,
     queryFn: obterContagensMidias,
-    staleTime: 1000 * 15,
+    staleTime: 1000 * 60,
   })
 }
 

@@ -352,4 +352,79 @@ class MediaItemRepository extends ServiceEntityRepository
 
         return $totais;
     }
+
+    public function obterTamanhoTotalBytes(): int
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = "SELECT COALESCE(SUM(COALESCE(
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED),
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED),
+            0
+        )), 0) as total_bytes FROM media_item";
+
+        $total = $conn->executeQuery($sql)->fetchOne();
+
+        return (int) $total;
+    }
+
+    /**
+     * @return array<string, array{totalItens: int, tamanhoBytes: int}>
+     */
+    public function obterEspacoAgrupadoPorOrigem(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = "SELECT origem, COUNT(*) as total_itens, COALESCE(SUM(COALESCE(
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED),
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED),
+            0
+        )), 0) as total_bytes FROM media_item GROUP BY origem";
+
+        $linhas = $conn->executeQuery($sql)->fetchAllAssociative();
+
+        $dados = [];
+        foreach (OrigemMedia::cases() as $case) {
+            $dados[$case->value] = [
+                'totalItens' => 0,
+                'tamanhoBytes' => 0,
+            ];
+        }
+
+        foreach ($linhas as $linha) {
+            $origem = (string) ($linha['origem'] ?? '');
+            if (isset($dados[$origem])) {
+                $dados[$origem] = [
+                    'totalItens' => (int) ($linha['total_itens'] ?? 0),
+                    'tamanhoBytes' => (int) ($linha['total_bytes'] ?? 0),
+                ];
+            }
+        }
+
+        return $dados;
+    }
+
+    /**
+     * @return array<string|null, array{totalItens: int, tamanhoBytes: int}>
+     */
+    public function obterMetricasAgrupadasPorCategoria(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = "SELECT categoria_id, COUNT(*) as total_itens, COALESCE(SUM(COALESCE(
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED),
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED),
+            0
+        )), 0) as total_bytes FROM media_item GROUP BY categoria_id";
+
+        $linhas = $conn->executeQuery($sql)->fetchAllAssociative();
+
+        $dados = [];
+        foreach ($linhas as $linha) {
+            $catId = !empty($linha['categoria_id']) ? (string) $linha['categoria_id'] : null;
+            $dados[$catId] = [
+                'totalItens' => (int) ($linha['total_itens'] ?? 0),
+                'tamanhoBytes' => (int) ($linha['total_bytes'] ?? 0),
+            ];
+        }
+
+        return $dados;
+    }
 }

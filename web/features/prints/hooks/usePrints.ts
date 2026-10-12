@@ -28,7 +28,14 @@ export function usePrints(filtros: FiltrosPrints = {}) {
   return useQuery({
     queryKey: PRINTS_QUERY_KEYS.lista(filtros),
     queryFn: () => listarPrints(filtros),
-    refetchInterval: 5000,
+    staleTime: 1000 * 30,
+    refetchInterval: (query) => {
+      const temItensProcessando = query.state.data?.data?.some((item) =>
+        ['recebido', 'classificado', 'distribuido_local', 'enviando_google_fotos'].includes(item.status)
+      )
+      return temItensProcessando ? 5000 : false
+    },
+    refetchIntervalInBackground: false,
   })
 }
 

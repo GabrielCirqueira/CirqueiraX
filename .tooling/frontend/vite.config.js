@@ -24,6 +24,24 @@ export default defineConfig((config) => ({
       input: {
         app: './web/main.tsx',
       },
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'vendor-charts'
+            }
+            if (id.includes('@chakra-ui') || id.includes('@emotion')) {
+              return 'vendor-ui'
+            }
+            if (id.includes('@tanstack/react-query') || id.includes('axios')) {
+              return 'vendor-query'
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons'
+            }
+          }
+        },
+      },
     },
     sourcemap: config.mode === 'development',
   },

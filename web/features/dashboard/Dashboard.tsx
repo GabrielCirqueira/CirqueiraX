@@ -1,4 +1,4 @@
-import { Badge, Box, Button, HStack, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, HStack, Skeleton, Tabs, Text, VStack } from '@chakra-ui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   AlertTriangle,
@@ -8,23 +8,31 @@ import {
   RefreshCw,
   Sparkles,
 } from 'lucide-react'
-import { memo, useState } from 'react'
+import { memo, Suspense, lazy, useState } from 'react'
 import { AtividadesRecentes } from './components/AtividadesRecentes'
 import { BarraAcoesRapidas } from './components/BarraAcoesRapidas'
 import { CardsResumo } from './components/CardsResumo'
-import { FilaErros } from './components/FilaErros'
-import { GraficosDashboard } from './components/GraficosDashboard'
-import { PainelSync } from './components/PainelSync'
 import { StatusIntegracoes } from './components/StatusIntegracoes'
-import { TabelaCategorias } from './components/TabelaCategorias'
 import {
   DASHBOARD_QUERY_KEYS,
   useCategoriasMetricas,
-  useFilaErros,
   usePastasSync,
   useResumoDashboard,
   useStatusSync,
 } from './hooks/useDashboard'
+
+const GraficosDashboard = lazy(() =>
+  import('./components/GraficosDashboard').then((m) => ({ default: m.GraficosDashboard }))
+)
+const TabelaCategorias = lazy(() =>
+  import('./components/TabelaCategorias').then((m) => ({ default: m.TabelaCategorias }))
+)
+const PainelSync = lazy(() =>
+  import('./components/PainelSync').then((m) => ({ default: m.PainelSync }))
+)
+const FilaErros = lazy(() =>
+  import('./components/FilaErros').then((m) => ({ default: m.FilaErros }))
+)
 
 export function Component() {
   return <DashboardView />
@@ -39,11 +47,10 @@ const DashboardView = memo(function DashboardView() {
 
   const { data: resumo, isLoading: carregandoResumo } = useResumoDashboard()
   const { data: categorias = [], isLoading: carregandoCategorias } = useCategoriasMetricas()
-  const { data: respostaErros } = useFilaErros(1, 10)
   const { data: pastasSync = [] } = usePastasSync()
   const { data: statusSync } = useStatusSync()
 
-  const totalErros = resumo?.totalErros ?? respostaErros?.total ?? 0
+  const totalErros = resumo?.totalErros ?? 0
 
   function handleAtualizarTudo() {
     setAtualizandoManual(true)
@@ -241,11 +248,26 @@ const DashboardView = memo(function DashboardView() {
 
           {abaAtiva === 'visao-geral' && (
             <VStack gap={6} w="full" alignItems="stretch">
-              <GraficosDashboard
-                resumo={resumo}
-                categorias={categorias}
-                carregando={carregandoResumo || carregandoCategorias}
-              />
+              <Suspense
+                fallback={
+                  <Box
+                    p={6}
+                    borderRadius="2xl"
+                    borderWidth="1px"
+                    borderColor="border.subtle"
+                    bg="bg.panel"
+                    minH="260px"
+                  >
+                    <Skeleton h="220px" borderRadius="xl" />
+                  </Box>
+                }
+              >
+                <GraficosDashboard
+                  resumo={resumo}
+                  categorias={categorias}
+                  carregando={carregandoResumo || carregandoCategorias}
+                />
+              </Suspense>
 
               <Box
                 display="grid"
@@ -269,19 +291,43 @@ const DashboardView = memo(function DashboardView() {
 
           {abaAtiva === 'categorias' && (
             <VStack gap={6} w="full" alignItems="stretch">
-              <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
+              <Suspense
+                fallback={
+                  <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+                    <Skeleton h="200px" borderRadius="xl" />
+                  </Box>
+                }
+              >
+                <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
+              </Suspense>
             </VStack>
           )}
 
           {abaAtiva === 'sincronizacao' && (
             <VStack gap={6} w="full" alignItems="stretch">
-              <PainelSync />
+              <Suspense
+                fallback={
+                  <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+                    <Skeleton h="200px" borderRadius="xl" />
+                  </Box>
+                }
+              >
+                <PainelSync />
+              </Suspense>
             </VStack>
           )}
 
           {abaAtiva === 'erros' && (
             <VStack gap={6} w="full" alignItems="stretch">
-              <FilaErros />
+              <Suspense
+                fallback={
+                  <Box p={6} borderRadius="2xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
+                    <Skeleton h="200px" borderRadius="xl" />
+                  </Box>
+                }
+              >
+                <FilaErros />
+              </Suspense>
             </VStack>
           )}
         </VStack>

@@ -7,11 +7,14 @@ namespace App\Serializer;
 use App\Entity\MediaItem;
 use App\Service\Categoria\CategoriaService;
 
-final readonly class MediaItemSerializer
+final class MediaItemSerializer
 {
+    /** @var array<string, array<string, mixed>> */
+    private array $cacheCategorias = [];
+
     public function __construct(
-        private CategoriaService $categoriaService,
-        private CategoriaSerializer $categoriaSerializer,
+        private readonly CategoriaService $categoriaService,
+        private readonly CategoriaSerializer $categoriaSerializer,
     ) {}
 
     /**
@@ -20,14 +23,20 @@ final readonly class MediaItemSerializer
     public function normalizar(MediaItem $item): array
     {
         $categoriaData = null;
-        if (null !== $item->categoriaId()) {
-            try {
-                $categoria = $this->categoriaService->buscarPorUuid($item->categoriaId());
-                $categoriaData = $this->categoriaSerializer->normalizar($categoria);
-            } catch (\DomainException) {
-                $categoriaData = [
-                    'uuid' => $item->categoriaId(),
-                ];
+        $catId = $item->categoriaId();
+        if (null !== $catId && '' !== trim($catId)) {
+            if (array_key_exists($catId, $this->cacheCategorias)) {
+                $categoriaData = $this->cacheCategorias[$catId];
+            } else {
+                try {
+                    $categoria = $this->categoriaService->buscarPorUuid($catId);
+                    $categoriaData = $this->categoriaSerializer->normalizar($categoria);
+                } catch (\Throwable) {
+                    $categoriaData = [
+                        'uuid' => $catId,
+                    ];
+                }
+                $this->cacheCategorias[$catId] = $categoriaData;
             }
         }
 

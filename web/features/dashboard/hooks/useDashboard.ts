@@ -25,7 +25,9 @@ export function useResumoDashboard() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.resumo,
     queryFn: obterResumoDashboard,
-    refetchInterval: 10_000,
+    staleTime: 1000 * 45,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -33,7 +35,9 @@ export function useCategoriasMetricas() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.categorias,
     queryFn: obterCategoriasMetricas,
-    refetchInterval: 15_000,
+    staleTime: 1000 * 60 * 2,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -41,7 +45,9 @@ export function useFilaErros(pagina = 1, limite = 20) {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.erros(pagina, limite),
     queryFn: () => obterFilaErros(pagina, limite),
-    refetchInterval: 10_000,
+    staleTime: 1000 * 30,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -49,7 +55,9 @@ export function usePastasSync() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.syncPastas,
     queryFn: obterPastasSync,
-    refetchInterval: 10_000,
+    staleTime: 1000 * 45,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   })
 }
 
@@ -57,7 +65,9 @@ export function useStatusSync() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.syncStatus,
     queryFn: obterStatusSync,
-    refetchInterval: 10_000,
+    staleTime: 1000 * 30,
+    refetchInterval: 20_000,
+    refetchIntervalInBackground: false,
   })
 }
 

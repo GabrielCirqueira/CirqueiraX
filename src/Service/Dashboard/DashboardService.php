@@ -37,37 +37,16 @@ final readonly class DashboardService
     {
         $totaisStatus = $this->mediaItemRepository->contarAgrupadoPorStatus();
         $totaisOrigem = $this->mediaItemRepository->contarAgrupadoPorOrigem();
+        $espacoOrigem = $this->mediaItemRepository->obterEspacoAgrupadoPorOrigem();
+        $tamanhoTotalBytes = $this->mediaItemRepository->obterTamanhoTotalBytes();
 
-        $itens = $this->mediaItemRepository->findAll();
-        $tamanhoTotalBytes = 0;
         $origemEspaco = [];
-
-        foreach (OrigemMedia::cases() as $case) {
-            $origemEspaco[$case->value] = [
-                'totalItens' => 0,
-                'tamanhoBytes' => 0,
-                'tamanhoFormatado' => '0 B',
+        foreach ($espacoOrigem as $origemVal => $dados) {
+            $origemEspaco[$origemVal] = [
+                'totalItens' => $dados['totalItens'],
+                'tamanhoBytes' => $dados['tamanhoBytes'],
+                'tamanhoFormatado' => self::formatarBytes($dados['tamanhoBytes']),
             ];
-        }
-
-        foreach ($itens as $item) {
-            $bytes = $item->tamanhoBytes();
-            $tamanhoTotalBytes += $bytes;
-
-            $origemVal = $item->origem()->value;
-            if (!isset($origemEspaco[$origemVal])) {
-                $origemEspaco[$origemVal] = [
-                    'totalItens' => 0,
-                    'tamanhoBytes' => 0,
-                    'tamanhoFormatado' => '0 B',
-                ];
-            }
-            $origemEspaco[$origemVal]['totalItens']++;
-            $origemEspaco[$origemVal]['tamanhoBytes'] += $bytes;
-        }
-
-        foreach ($origemEspaco as $origemVal => $dados) {
-            $origemEspaco[$origemVal]['tamanhoFormatado'] = self::formatarBytes($dados['tamanhoBytes']);
         }
 
         $totalGeral = array_sum($totaisStatus);
@@ -103,53 +82,34 @@ final readonly class DashboardService
     public function resumoPorCategoria(): array
     {
         $categorias = $this->categoriaRepository->listarTodas();
-        $itens = $this->mediaItemRepository->findAll();
+        $metricasPorCat = $this->mediaItemRepository->obterMetricasAgrupadasPorCategoria();
 
-        $mapaCategorias = [];
+        $resultado = [];
         foreach ($categorias as $cat) {
             $uuidStr = $cat->uuid()?->toString();
-            if (null !== $uuidStr) {
-                $mapaCategorias[$uuidStr] = [
-                    'categoriaId' => $uuidStr,
-                    'nome' => $cat->nome(),
-                    'pastaLocal' => $cat->pastaLocal(),
-                    'totalItens' => 0,
-                    'tamanhoBytes' => 0,
-                    'tamanhoFormatado' => '0 B',
-                ];
-            }
+            $metricas = (null !== $uuidStr && isset($metricasPorCat[$uuidStr]))
+                ? $metricasPorCat[$uuidStr]
+                : ['totalItens' => 0, 'tamanhoBytes' => 0];
+
+            $resultado[] = [
+                'categoriaId' => $uuidStr,
+                'nome' => $cat->nome(),
+                'pastaLocal' => $cat->pastaLocal(),
+                'totalItens' => $metricas['totalItens'],
+                'tamanhoBytes' => $metricas['tamanhoBytes'],
+                'tamanhoFormatado' => self::formatarBytes($metricas['tamanhoBytes']),
+            ];
         }
 
-        $semCategoriaData = [
+        $semCatMetricas = $metricasPorCat[null] ?? ['totalItens' => 0, 'tamanhoBytes' => 0];
+        $resultado[] = [
             'categoriaId' => null,
             'nome' => 'Sem Categoria',
             'pastaLocal' => null,
-            'totalItens' => 0,
-            'tamanhoBytes' => 0,
-            'tamanhoFormatado' => '0 B',
+            'totalItens' => $semCatMetricas['totalItens'],
+            'tamanhoBytes' => $semCatMetricas['tamanhoBytes'],
+            'tamanhoFormatado' => self::formatarBytes($semCatMetricas['tamanhoBytes']),
         ];
-
-        foreach ($itens as $item) {
-            $bytes = $item->tamanhoBytes();
-            $catId = $item->categoriaId();
-
-            if (null !== $catId && isset($mapaCategorias[$catId])) {
-                $mapaCategorias[$catId]['totalItens']++;
-                $mapaCategorias[$catId]['tamanhoBytes'] += $bytes;
-            } else {
-                $semCategoriaData['totalItens']++;
-                $semCategoriaData['tamanhoBytes'] += $bytes;
-            }
-        }
-
-        $resultado = [];
-        foreach ($mapaCategorias as $catData) {
-            $catData['tamanhoFormatado'] = self::formatarBytes($catData['tamanhoBytes']);
-            $resultado[] = $catData;
-        }
-
-        $semCategoriaData['tamanhoFormatado'] = self::formatarBytes($semCategoriaData['tamanhoBytes']);
-        $resultado[] = $semCategoriaData;
 
         return $resultado;
     }
