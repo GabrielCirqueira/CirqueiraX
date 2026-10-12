@@ -447,6 +447,80 @@
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
   - `documentation/progresso/melhorias/MELHORIAS.md`
 
+### ✅ Melhoria 51 — Importação de Histórico de Vídeos da Franky, Enriquecimento em Lote de Thumbnails e Paginação Estendida (50 Itens)
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O usuário mantinha um catálogo histórico substancial de vídeos baixados no sistema anterior (Franky), preservado no backup SQL `franky-20261012-181923.sql` (tabela `video_downloads`).
+  - Esses vídeos não constavam no banco de dados do CirqueiraX, impossibilitando visualizar o histórico consolidado de downloads, acessar links originais ou solicitar novo download diretamente pela interface.
+  - Ao importar os registros, diversas URLs não continham arquivos físicos locais nem miniaturas prévias válidas, resultando em falhas visuais nos cards.
+  - A paginação padrão na Central de Downloads limitava a visualização a apenas 12 vídeos por página, tornando a navegação do acervo lenta e fragmentada.
+- **Solução**:
+  - **Importação Automatizada do Banco de Dados da Franky**:
+    - Extração e parsing dos registros históricos da tabela `video_downloads` do backup da Franky.
+    - Ingestão para a tabela `media_item` com tipo `video_download`, categorização automática e status `arquivo_removido` (permitindo que o item exista no acervo histórico sem ocupar espaço em disco da VPS e habilitando o botão "Rebaixar").
+    - Preservação estrita dos metadados originais: títulos, duração, tamanho estimado, datas de criação originais e URLs de origem das plataformas sociais.
+  - **Recuperação e Enriquecimento em Lote de Miniaturas (Thumbnails)**:
+    - Implementação de rotina de enriquecimento que consulta metadados oEmbed das redes sociais e extração via `yt-dlp` com fallback resiliente para TikTok, Twitter/X, Instagram e YouTube.
+    - Armazenamento das miniaturas no diretório de thumbnails e atualização do campo `caminho_thumbnail` de cada mídia correspondente.
+  - **Paginação Aumentada para 50 Vídeos por Página**:
+    - Atualização do padrão de paginação da Central de Downloads de 12 para 50 itens simultâneos no backend (`MediaItemController::listar`) e frontend (`useDownloadsVideo.ts` e `DownloadsVideo.tsx`), proporcionando navegação rápida em catálogo denso.
+- **Arquivos**:
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `web/features/downloads-video/hooks/useDownloadsVideo.ts`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+
+### ✅ Melhoria 52 — Infraestrutura Completa de SEO, Metadados Open Graph/Twitter Cards e Identidade Visual Flat Design (OG Banner 16:9 e Suíte Multiplataforma de Favicons)
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O sistema carecia de configuração profissional de SEO, metadados semânticos e tags Open Graph / Twitter Cards para indexação de motores de busca e prévias elegantes em compartilhamentos (WhatsApp, Telegram, Twitter/X, Discord, Slack).
+  - O usuário solicitou expressamente a substituição de qualquer estilo com brilho/3D por uma identidade visual rigorosamente **Flat Design**: minimalista, vetorial 2D, moderna, com formas geométricas sólidas e alto contraste.
+- **Solução**:
+  - **Estruturação Completa de Metadados e SEO em `base.html.twig`**:
+    - Meta tags primárias: `title`, `description`, `keywords`, `author`, `robots: index, follow`, `theme-color: #00ba9c`.
+    - Open Graph completo: `og:type: website`, `og:site_name`, `og:title`, `og:description`, `og:image`, `og:image:width: 1280`, `og:image:height: 720`, `og:locale: pt_BR`.
+    - Twitter Cards habilitado como `summary_large_image`.
+    - PWA Manifest integrado via `site.webmanifest`.
+  - **Hook Dinâmico `useSEO` no Frontend React**:
+    - Criado utilitário reativo `useSEO.ts` integrado em todas as rotas (`Dashboard`, `CentralMidias`, `DownloadsVideo`, `UploadManual`, `Prints`, `GoogleFotos`, `Login`) para alteração contextual de título de aba e meta description durante a navegação SPA.
+  - **Banner Open Graph 16:9 em Estética Flat Design**:
+    - Criação de imagem 16:9 (`1280x720`) em `public/og-image.png` e `public/og-image.jpg` com fundo matte carvão (`#161a18`), logotipo geométrico do **X** em duas cores sólidas (verde-esmeralda `#00ba9c` e branco `#ffffff`), e tipografia minimalista (*"CirqueiraX — CENTRAL DE MÍDIAS"*).
+  - **Suíte de Favicons Multiplataforma em Flat Design**:
+    - Favicon vetorial SVG nativo `public/favicon.svg` com squircle e chevrons planos de alto contraste.
+    - Geração de pacote completo rasterizado em alta densidade (`-density 384`):
+      - `public/favicon.ico` (multi-tamanho 16x16 e 32x32).
+      - `public/favicon-16x16.png` e `public/favicon-32x32.png`.
+      - `public/apple-touch-icon.png` (180x180 para iOS).
+      - `public/android-chrome-192x192.png` e `public/android-chrome-512x512.png` registrados no manifest.
+- **Arquivos**:
+  - `templates/base.html.twig`
+  - `public/site.webmanifest`
+  - `public/favicon.svg`
+  - `public/favicon.ico`
+  - `public/favicon-16x16.png`
+  - `public/favicon-32x32.png`
+  - `public/apple-touch-icon.png`
+  - `public/android-chrome-192x192.png`
+  - `public/android-chrome-512x512.png`
+  - `public/og-image.png`
+  - `public/og-image.jpg`
+  - `web/shared/hooks/useSEO.ts`
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/upload-manual/UploadManual.tsx`
+  - `web/features/prints/Prints.tsx`
+  - `web/features/google-fotos/GoogleFotos.tsx`
+  - `web/features/auth/Login.tsx`
+  - `documentation/progresso/melhorias/MELHORIAS_3.md`
+  - `documentation/progresso/melhorias/MELHORIAS.md`
+
+
 
 
 

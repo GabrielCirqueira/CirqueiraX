@@ -63,5 +63,8 @@
 | M48 | Transições Suaves e Microinterações Fluidas de Alta Performance (GPU Aceleradas) sem Perda de Fluidez | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-48--transições-suaves-e-microinterações-fluidas-de-alta-performance-gpu-aceleradas-sem-perda-de-fluidez) |
 | M49 | Agendamento de Limpeza de Vídeos Antigos do Sistema (> 7 Dias), Novo Status `arquivo_removido`, Proteção Estrita da Pasta do Syncthing/Celular e Rebaixar com Preservação de Datas | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-49--agendamento-de-limpeza-de-vídeos-antigos-do-sistema--7-dias-novo-status-arquivo_removido-arquivo-removido-proteção-estrita-da-pasta-do-syncthingcelular-e-rebaixar-com-preservação-de-datas-e-metadados) |
 | M50 | Painel de Métricas de Vídeos no Dashboard: Total Baixados no Sistema, Permanecem na VPS, Apagados Hoje e Espaço Liberado | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-50--painel-de-métricas-de-vídeos-no-dashboard-total-baixados-no-sistema-permanecem-na-vps-apagados-hoje-e-espaço-liberado) |
+| M51 | Importação de Histórico de Vídeos da Franky, Enriquecimento em Lote de Thumbnails e Paginação Estendida (50 Itens) | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-51--importação-de-histórico-de-vídeos-da-franky-enriquecimento-em-lote-de-thumbnails-e-paginação-estendida-50-itens) |
+| M52 | Infraestrutura Completa de SEO, Metadados Open Graph/Twitter Cards e Identidade Visual Flat Design (OG Banner 16:9 e Suíte Multiplataforma de Favicons) | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-52--infraestrutura-completa-de-seo-metadados-open-graphtwitter-cards-e-identidade-visual-flat-design-og-banner-169-e-suíte-multiplataforma-de-favicons) |
+
 
 
