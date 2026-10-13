@@ -70,7 +70,9 @@ final class EnviarGoogleFotosCommand extends Command
             $qb->andWhere('m.categoriaId IS NOT NULL')
                 ->andWhere('m.googlePhotosMediaId IS NULL')
                 ->andWhere('m.status != :statusErro')
-                ->setParameter('statusErro', StatusMediaItem::ERRO);
+                ->andWhere('m.metadata NOT LIKE :frankyKey')
+                ->setParameter('statusErro', StatusMediaItem::ERRO)
+                ->setParameter('frankyKey', '%"franky_id"%');
 
             /** @var list<MediaItem> $itens */
             $itens = $qb->getQuery()->getResult();

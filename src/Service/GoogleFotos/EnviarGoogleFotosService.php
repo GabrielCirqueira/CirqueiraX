@@ -53,6 +53,16 @@ final readonly class EnviarGoogleFotosService
             return $mediaItem;
         }
 
+        $metadata = $mediaItem->metadata();
+        if (!$forcarUpload && (!empty($metadata['franky_id']) || !empty($metadata['importado_franky']))) {
+            $this->logger?->info('Mídia originária da Franky identificada. Vídeo já existe no Google Fotos e não deve ser reenviado pelo CirqueiraX.', [
+                'uuid' => $mediaItemUuid,
+                'frankyId' => $metadata['franky_id'] ?? null,
+            ]);
+
+            return $mediaItem;
+        }
+
         $categoriaId = $mediaItem->categoriaId();
         if (TextoUtil::estaEmBranco($categoriaId)) {
             throw MediaItemException::categoriaDesejadaNaoDefinida();

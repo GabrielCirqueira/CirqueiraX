@@ -156,7 +156,8 @@ final readonly class RebaixarMediaItemService
 
         $this->mediaItemRepository->salvar($mediaItem);
 
-        if (!$mediaItem->isEnviadoGoogleFotos() && null !== $mediaItem->categoriaId()) {
+        $isFranky = !empty($metadata['franky_id']) || !empty($metadata['importado_franky']);
+        if (!$isFranky && !$mediaItem->isEnviadoGoogleFotos() && null !== $mediaItem->categoriaId()) {
             $categoria = $this->categoriaRepository->buscarPorUuid((string) $mediaItem->categoriaId());
             if (null !== $categoria && !TextoUtil::estaEmBranco($categoria->googleFotosAlbumId())) {
                 $this->messageBus->dispatch(new EnviarGoogleFotosMessage($uuid));

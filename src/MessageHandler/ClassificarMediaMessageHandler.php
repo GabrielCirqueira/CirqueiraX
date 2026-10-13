@@ -38,7 +38,11 @@ final readonly class ClassificarMediaMessageHandler
 
                 $mediaUuidStr = $message->mediaItemUuid();
                 $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
-                $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+
+                $metadata = $mediaItem->metadata();
+                if (empty($metadata['franky_id']) && empty($metadata['importado_franky'])) {
+                    $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+                }
 
                 return;
             }
