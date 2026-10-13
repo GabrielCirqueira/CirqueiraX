@@ -82,8 +82,11 @@ log "── [1/4] Atualizando código ──"
 
 BEFORE_HASH=$(git rev-parse HEAD)
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-read -rp "  Branch para pull [$CURRENT_BRANCH]: " INPUT_BRANCH
-DEPLOY_BRANCH="${INPUT_BRANCH:-$CURRENT_BRANCH}"
+INPUT_BRANCH=""
+if [[ -t 0 ]]; then
+  read -rp "  Branch para pull [$CURRENT_BRANCH]: " INPUT_BRANCH || true
+fi
+DEPLOY_BRANCH="${1:-${INPUT_BRANCH:-$CURRENT_BRANCH}}"
 info "git pull origin $DEPLOY_BRANCH..."
 git pull origin "$DEPLOY_BRANCH"
 AFTER_HASH=$(git rev-parse HEAD)
