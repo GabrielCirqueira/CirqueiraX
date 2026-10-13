@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { Globe, Instagram, Video, Youtube } from 'lucide-react'
+import { Globe, Instagram, Sparkles, Video, Youtube } from 'lucide-react'
 
 export interface PlataformaDetectada {
   id: string
@@ -115,3 +115,26 @@ export function isUrlVideoConhecida(url: string): boolean {
   const plataforma = identificarPlataforma(url)
   return Boolean(plataforma?.conhecido)
 }
+
+/**
+ * Retorna com segurança o componente Lucide correspondente à plataforma ou URL.
+ * Imune a desserializações com objetos vazios ou corrompidos.
+ */
+export function obterIconePlataforma(idOuUrl?: string): LucideIcon {
+  if (!idOuUrl || typeof idOuUrl !== 'string') {
+    return Sparkles
+  }
+
+  const porUrl = identificarPlataforma(idOuUrl)
+  if (porUrl?.icone && (typeof porUrl.icone === 'function' || typeof porUrl.icone === 'object')) {
+    return porUrl.icone
+  }
+
+  const porId = PLATAFORMAS_REGISTRADAS.find((p) => p.id === idOuUrl)
+  if (porId?.icone && (typeof porId.icone === 'function' || typeof porId.icone === 'object')) {
+    return porId.icone
+  }
+
+  return Sparkles
+}
+

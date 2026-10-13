@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { memo } from 'react'
 import { useFilaDownloadsStore } from '../stores/useFilaDownloadsStore'
+import { obterIconePlataforma } from '../utils/plataformaVideo'
 
 export interface PainelFilaDownloadsProps {
   onRefetch?: () => void
@@ -247,7 +248,10 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
           align="stretch"
         >
           {itens.map((item, index) => {
-            const IconePlat = item.plataforma?.icone || Sparkles
+            const IconePlat =
+              typeof item.plataforma?.icone === 'function'
+                ? item.plataforma.icone
+                : obterIconePlataforma(item.plataforma?.id || item.url)
             return (
               <Flex
                 key={item.id}

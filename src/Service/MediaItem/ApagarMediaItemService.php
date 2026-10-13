@@ -67,9 +67,7 @@ final readonly class ApagarMediaItemService
             try {
                 $this->armazenamentoClient->remover((string) $caminhoLocal);
             } catch (\Throwable $e) {
-                $this->logger->error(sprintf('Falha ao remover arquivo físico da mídia "%s": %s', $uuid, $e->getMessage()));
-
-                return ['sucesso' => false, 'erro' => self::ERRO_REMOVER_ARQUIVO];
+                $this->logger->warning(sprintf('Falha ao remover arquivo físico da mídia "%s" (%s): %s. Prosseguindo com remoção do banco.', $uuid, (string) $caminhoLocal, $e->getMessage()));
             }
         }
 

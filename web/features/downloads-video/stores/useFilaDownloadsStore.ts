@@ -281,12 +281,23 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
       },
     }),
     {
-      name: 'cirqueirax-fila-downloads-v1',
+      name: 'cirqueirax-fila-downloads-v2',
       partialize: (state) => ({
         // Reseta qualquer item que estivesse travado como 'baixando' para 'pendente'
-        itens: state.itens.map((it) =>
-          it.status === 'baixando' ? { ...it, status: 'pendente' as const } : it
-        ),
+        // e garante que nenhum objeto de componente React seja persistido no JSON
+        itens: state.itens.map((it) => ({
+          ...it,
+          status: it.status === 'baixando' ? ('pendente' as const) : it.status,
+          plataforma: it.plataforma
+            ? {
+                id: it.plataforma.id,
+                nome: it.plataforma.nome,
+                colorPalette: it.plataforma.colorPalette,
+                conhecido: it.plataforma.conhecido,
+                icone: undefined as any,
+              }
+            : it.plataforma,
+        })),
         pausado: state.pausado,
         painelAberto: state.painelAberto,
       }),
