@@ -18,6 +18,8 @@ import {
   ArrowDownUp,
   Calendar,
   CalendarClock,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Dices,
   Info,
@@ -35,7 +37,6 @@ import {
   calcularDistribuicaoUniforme,
   combinarDataHora,
   deslocarDataHora,
-  extrairDataHoraInicial,
   formatarDataIsoLocal,
 } from '../utils/metadataEdicao'
 
@@ -56,25 +57,19 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
   onSalvar,
   pendente = false,
 }: ModalDistribuirHorariosLoteProps) {
-  const total = itens.length
+  // Ordenar cronologicamente por criação/download (primeiro baixado no dia = primeiro da lista)
+  const [listaItens, setListaItens] = useState<MediaItem[]>([])
+  const [ordemInvertida, setOrdemInvertida] = useState(false)
+  const total = listaItens.length
 
-  const dataHoraMaisRecente = useMemo(() => {
-    const hoje = formatarDataIsoLocal(new Date())
-    const agoraHora = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
-    if (itens.length === 0) return { data: hoje, hora: agoraHora }
-    const primeiro = itens[0] ?? null
-    const ext = extrairDataHoraInicial(primeiro)
-    return {
-      data: ext.data || hoje,
-      hora: ext.hora || agoraHora,
-    }
-  }, [itens])
+  const hoje = formatarDataIsoLocal(new Date())
+  const agoraHora = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
 
   const [modo, setModo] = useState<ModoDistribuicao>('retroativo')
-  const [dataBase, setDataBase] = useState(dataHoraMaisRecente.data)
+  const [dataBase, setDataBase] = useState(hoje)
   const [horaInicioUniforme, setHoraInicioUniforme] = useState('08:30')
   const [horaFimUniforme, setHoraFimUniforme] = useState('22:30')
-  const [horaBaseRetroativa, setHoraBaseRetroativa] = useState(dataHoraMaisRecente.hora)
+  const [horaBaseRetroativa, setHoraBaseRetroativa] = useState(agoraHora)
   const [passoRetroativoMinutos, setPassoRetroativoMinutos] = useState(120)
   const [ajustesManuais, setAjustesManuais] = useState<
     Record<string, { data: string; hora: string }>
@@ -82,12 +77,34 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
 
   useEffect(() => {
     if (aberto && itens.length > 0) {
-      const hoje = formatarDataIsoLocal(new Date())
-      const agoraHora = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`
-      const primeiro = itens[0] ?? null
-      const ext = extrairDataHoraInicial(primeiro)
-      setDataBase(ext.data || hoje)
-      setHoraBaseRetroativa(ext.hora || agoraHora)
+      // Ordena por criadoEm crescente: o mais antigo (primeiro baixado) fica em index 0
+      const ordenados = [...itens].sort((a, b) => {
+        const timeA = new Date(a.criadoEm || 0).getTime()
+        const timeB = new Date(b.criadoEm || 0).getTime()
+        if (timeA !== timeB) return timeA - timeB
+        return 0
+      })
+
+      setListaItens(ordenados)
+      setOrdemInvertida(false)
+
+      const primeiro = ordenados[0] ?? null
+      const dataCriacaoPrimeiro = primeiro?.criadoEm
+        ? formatarDataIsoLocal(new Date(primeiro.criadoEm))
+        : hoje
+
+      setDataBase(dataCriacaoPrimeiro || hoje)
+
+      // Horário base para distribuição retroativa (fim do dia / download mais recente)
+      const ultimo = ordenados[ordenados.length - 1] ?? null
+      const horaDownloadUltimo = ultimo?.criadoEm
+        ? new Date(ultimo.criadoEm).toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          })
+        : agoraHora
+
+      setHoraBaseRetroativa(horaDownloadUltimo || agoraHora)
       setAjustesManuais({})
     }
   }, [aberto, itens])
@@ -104,7 +121,7 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
       horas = calcularDistribuicaoOrganica(total)
     }
 
-    return itens.map((item, index) => {
+    return listaItens.map((item, index) => {
       const horaPadrao = horas[index] ?? '12:00'
       const manual = ajustesManuais[item.uuid]
       return {
@@ -116,7 +133,7 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
     })
   }, [
     total,
-    itens,
+    listaItens,
     modo,
     dataBase,
     horaInicioUniforme,
@@ -125,6 +142,28 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
     passoRetroativoMinutos,
     ajustesManuais,
   ])
+
+  const handleInverterOrdem = () => {
+    setListaItens((prev) => [...prev].reverse())
+    setOrdemInvertida((prev) => !prev)
+    setAjustesManuais({})
+  }
+
+  const handleMoverItem = (indexOrigem: number, direcao: 'cima' | 'baixo') => {
+    const indexDestino = direcao === 'cima' ? indexOrigem - 1 : indexOrigem + 1
+    if (indexDestino < 0 || indexDestino >= listaItens.length) return
+
+    setListaItens((prev) => {
+      const clone = [...prev]
+      const itemOrigem = clone[indexOrigem]
+      const itemDestino = clone[indexDestino]
+      if (itemOrigem && itemDestino) {
+        clone[indexOrigem] = itemDestino
+        clone[indexDestino] = itemOrigem
+      }
+      return clone
+    })
+  }
 
   const handleAlterarLinha = (uuid: string, campo: 'data' | 'hora', valor: string) => {
     setAjustesManuais((prev) => {
@@ -426,6 +465,8 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
                   bg="bg.muted/30"
                   borderBottomWidth="1px"
                   borderColor="border.subtle"
+                  flexWrap="wrap"
+                  gap={2}
                 >
                   <HStack gap={2}>
                     <Text fontSize="xs" fontWeight="bold" color="fg">
@@ -438,17 +479,32 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
                     )}
                   </HStack>
 
-                  {Object.keys(ajustesManuais).length > 0 && (
+                  <HStack gap={2}>
                     <Button
                       size="2xs"
-                      variant="ghost"
-                      onClick={handleResetarAjustes}
-                      color="fg.subtle"
+                      variant="outline"
+                      colorPalette="brand"
+                      onClick={handleInverterOrdem}
+                      title="Inverter a sequência em que os vídeos recebem os horários"
                     >
-                      <RotateCcw size={12} style={{ marginRight: '4px' }} />
-                      <Text as="span">Restaurar cálculo</Text>
+                      <ArrowDownUp size={12} style={{ marginRight: '4px' }} />
+                      <Text as="span">
+                        {ordemInvertida ? 'Ordem: Mais Recente 1º' : 'Ordem: 1º Baixado 1º'}
+                      </Text>
                     </Button>
-                  )}
+
+                    {Object.keys(ajustesManuais).length > 0 && (
+                      <Button
+                        size="2xs"
+                        variant="ghost"
+                        onClick={handleResetarAjustes}
+                        color="fg.subtle"
+                      >
+                        <RotateCcw size={12} style={{ marginRight: '4px' }} />
+                        <Text as="span">Restaurar cálculo</Text>
+                      </Button>
+                    )}
+                  </HStack>
                 </Flex>
 
                 <VStack gap={0} align="stretch" maxH="38vh" overflowY="auto">
@@ -471,23 +527,60 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
                         _last={{ borderBottomWidth: 0 }}
                         _hover={{ bg: 'bg.muted/30' }}
                       >
-                        <HStack gap={2.5} flex={1} minW={0}>
-                          <Badge
-                            size="xs"
-                            variant="subtle"
-                            colorPalette="gray"
-                            minW={5}
-                            textAlign="center"
-                          >
-                            #{index + 1}
-                          </Badge>
+                        <HStack gap={2} flex={1} minW={0}>
+                          <HStack gap={0.5} align="center">
+                            <Badge
+                              size="xs"
+                              variant="subtle"
+                              colorPalette="gray"
+                              minW={5}
+                              textAlign="center"
+                            >
+                              #{index + 1}
+                            </Badge>
+                            <VStack gap={0}>
+                              <IconButton
+                                size="2xs"
+                                variant="ghost"
+                                disabled={index === 0}
+                                onClick={() => handleMoverItem(index, 'cima')}
+                                title="Mover para horário anterior (subir)"
+                                aria-label="Subir"
+                                borderRadius="xs"
+                                h="14px"
+                                minW="16px"
+                                p={0}
+                                opacity={index === 0 ? 0.25 : 0.75}
+                                _hover={{ opacity: 1, bg: 'bg.muted' }}
+                              >
+                                <ChevronUp size={12} />
+                              </IconButton>
+                              <IconButton
+                                size="2xs"
+                                variant="ghost"
+                                disabled={index === total - 1}
+                                onClick={() => handleMoverItem(index, 'baixo')}
+                                title="Mover para horário posterior (descer)"
+                                aria-label="Descer"
+                                borderRadius="xs"
+                                h="14px"
+                                minW="16px"
+                                p={0}
+                                opacity={index === total - 1 ? 0.25 : 0.75}
+                                _hover={{ opacity: 1, bg: 'bg.muted' }}
+                              >
+                                <ChevronDown size={12} />
+                              </IconButton>
+                            </VStack>
+                          </HStack>
+
                           <VStack align="start" gap={0} minW={0} flex={1}>
                             <Text
                               fontSize="xs"
                               fontWeight="medium"
                               color="fg"
                               truncate
-                              maxW="280px"
+                              maxW="260px"
                             >
                               {titulo}
                             </Text>
