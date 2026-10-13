@@ -10,6 +10,7 @@
 > - **M1–M20** → [MELHORIAS_1.md](MELHORIAS_1.md)
 > - **M21–M40** → [MELHORIAS_2.md](MELHORIAS_2.md)
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
+> - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -65,6 +66,18 @@
 | M50 | Painel de Métricas de Vídeos no Dashboard: Total Baixados no Sistema, Permanecem na VPS, Apagados Hoje e Espaço Liberado | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-50--painel-de-métricas-de-vídeos-no-dashboard-total-baixados-no-sistema-permanecem-na-vps-apagados-hoje-e-espaço-liberado) |
 | M51 | Importação de Histórico de Vídeos da Franky, Enriquecimento em Lote de Thumbnails e Paginação Estendida (50 Itens) | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-51--importação-de-histórico-de-vídeos-da-franky-enriquecimento-em-lote-de-thumbnails-e-paginação-estendida-50-itens) |
 | M52 | Infraestrutura Completa de SEO, Metadados Open Graph/Twitter Cards e Identidade Visual Flat Design (OG Banner 16:9 e Suíte Multiplataforma de Favicons) | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-52--infraestrutura-completa-de-seo-metadados-open-graphtwitter-cards-e-identidade-visual-flat-design-og-banner-169-e-suíte-multiplataforma-de-favicons) |
+| M53 | Infraestrutura Docker de Produção: Cache Persistente de Miniaturas, Ferramentas de Mídia e Guia de Deploy VPS (`DEPLOY_PRODUCAO.md`) | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-53--infraestrutura-docker-de-produção-cache-persistente-de-miniaturas-ferramentas-de-mídia-e-guia-de-deploy-vps-deploy_producaomd) |
+| M54 | Renderização de Barras de Ações em Lote via `<Portal>` Global contra Quebra de Layout | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-54--renderização-de-barras-de-ações-em-lote-via-portal-global-contra-quebra-de-layout) |
+| M55 | Filtros e Seleção Rápida por Categoria (Todas, Sem Categoria, Com Categoria) na Central de Downloads | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-55--filtros-e-seleção-rápida-por-categoria-todas-sem-categoria-com-categoria-na-central-de-downloads) |
+| M56 | Ajuste Fino de Layout e Prevenção de Quebra de Linha na Barra Flutuante de Ações em Lote | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-56--ajuste-fino-de-layout-e-prevenção-de-quebra-de-linha-na-barra-flutuante-de-ações-em-lote) |
+| M57 | Redesign do Modal de Categorização em Lote de Downloads com Cards Visuais e Seleção Direta | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-57--redesign-do-modal-de-categorização-em-lote-de-downloads-com-cards-visuais-e-seleção-direta) |
+| M58 | Guia Arquitetural e Operacional Completo do Ecossistema CirqueiraX (`GUIA_SINCRONIZACAO_ECOSSISTEMA.md`) | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-58--guia-arquitetural-e-operacional-completo-do-ecossistema-cirqueirax-guia_sincronizacao_ecossistemamd) |
+| M59 | Fila Sequencial de Downloads com Suporte a Múltiplos Links Simultâneos e Painel Flutuante de Progresso | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-59--fila-sequencial-de-downloads-com-suporte-a-múltiplos-links-simultâneos-e-painel-flutuante-de-progresso) |
+| M60 | Centralização Global de Todos os Modais do Sistema via `<Portal>` Desacoplados de Animações de Página | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_3.md#melhoria-60--centralização-global-de-todos-os-modais-do-sistema-via-portal-desacoplados-de-animações-de-página) |
+| M61 | Deploy Automatizado Não-Bloqueante em `scripts/update.sh` com Detecção de TTY para Execuções Remotas | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-61--deploy-automatizado-não-bloqueante-em-scriptsupdatesh-com-detecção-de-tty-para-execuções-remotas) |
+| M62 | Persistência do Volume de Downloads no Docker, Auto-Recuperação de Mídias Ausentes e Comando `app:media:rebaixar` | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-62--persistência-do-volume-de-downloads-no-docker-auto-recuperação-de-mídias-ausentes-e-comando-appmediarebaixar) |
+| M63 | Comando CLI `app:google-fotos:enviar` para Sincronização Direta, Operação em Lote e Diagnóstico com Google Photos | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-63--comando-cli-appgoogle-fotosenviar-para-sincronização-direta-operação-em-lote-e-diagnóstico-com-google-photos) |
+
 
 
 

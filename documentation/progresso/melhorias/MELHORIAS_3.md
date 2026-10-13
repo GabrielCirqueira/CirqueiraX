@@ -520,6 +520,185 @@
   - `documentation/progresso/melhorias/MELHORIAS_3.md`
   - `documentation/progresso/melhorias/MELHORIAS.md`
 
+---
+
+### ✅ Melhoria 53 — Infraestrutura Docker de Produção: Cache Persistente de Miniaturas, Ferramentas de Mídia e Guia de Deploy VPS (`DEPLOY_PRODUCAO.md`)
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Em ambiente de produção na VPS, as miniaturas (thumbnails) geradas dinamicamente para vídeos e imagens não possuíam volume persistente dedicado no `docker-compose.prod.yaml`, sendo descartadas e recalculadas a cada rebuild ou reinício dos containers.
+  - O container PHP de produção carecia das ferramentas CLI multimídia (`python3`, `yt-dlp`, `ffmpeg`) necessárias para processar extrações de vídeos sociais e renderizar miniaturas otimizadas.
+  - Faltava documentação consolidada orientando o processo de deploy, permissões de diretórios e boas práticas de manutenção na VPS.
+- **Solução**:
+  - **Volume de Cache de Miniaturas**:
+    - Declarado e montado o volume `thumbnails_cache:/var/www/html/var/thumbnails` no serviço `backend-cirqueirax` em `devops/docker-compose.prod.yaml`.
+  - **Ferramentas de Mídia no Dockerfile de Produção**:
+    - Atualizado `devops/php/Dockerfile.prod` para instalar `python3`, `ffmpeg` e a versão estável do `yt-dlp`, garantindo paridade total entre desenvolvimento e produção.
+  - **Guia Operacional Completo de Deploy (`DEPLOY_PRODUCAO.md`)**:
+    - Criado guia técnico detalhado cobrindo pré-requisitos, clonagem do repositório, configuração de `.env.prod`, subida via Docker Compose, rotinas de backup e solução de problemas na VPS.
+- **Arquivos**:
+  - `devops/docker-compose.prod.yaml`
+  - `devops/php/Dockerfile.prod`
+  - `documentation/README.md`
+  - `documentation/ops/DEPLOY_PRODUCAO.md`
+
+---
+
+### ✅ Melhoria 54 — Renderização de Barras de Ações em Lote via `<Portal>` Global contra Quebra de Layout
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - As barras flutuantes de ações em lote em `CentralMidias`, `BarraAcoesEmLote` e `FilaTriagemUpload` eram renderizadas dentro do fluxo normal da árvore DOM dos componentes pais.
+  - Quando os containers pais possuíam regras de overflow, transformações CSS ou margens relativas, as barras sofriam cortes visuais, problemas de z-index ou ficavam desalinhadas em relação à janela do navegador.
+- **Solução**:
+  - Envolvidas todas as instâncias das barras flutuantes de ações em lote com o componente `<Portal>` do `@chakra-ui/react`.
+  - Garante que a barra seja montada diretamente no nó raiz (`document.body`), desacoplada das restrições de empilhamento (`stacking context`) dos containers pais, flutuando perfeitamente centralizada e fixa na parte inferior da tela.
+- **Arquivos**:
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/downloads-video/components/BarraAcoesEmLote.tsx`
+  - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
+
+---
+
+### ✅ Melhoria 55 — Filtros e Seleção Rápida por Categoria (Todas, Sem Categoria, Com Categoria) na Central de Downloads
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Na Central de Downloads, após baixar múltiplos vídeos em massa, o usuário precisava navegar manualmente entre dezenas de itens para identificar quais vídeos ainda estavam sem categoria definida para triagem.
+  - Não havia mecanismos de seleção rápida para marcar apenas os itens não classificados ou apenas os já organizados.
+- **Solução**:
+  - **Filtros Rápidos de Visualização**:
+    - Adicionado seletor de visualização rápida em `DownloadsVideo.tsx` permitindo filtrar a listagem por: "Todas", "Sem Categoria" e "Com Categoria".
+  - **Seleção em Lote Inteligente**:
+    - Implementados botões de seleção rápida no cabeçalho da grade (`GridVideos.tsx`) e da tabela (`TabelaVideos.tsx`), permitindo selecionar com 1 clique todos os vídeos que necessitam de categorização.
+  - **Otimização no Repositório**:
+    - Ajustes em `src/Repository/MediaItemRepository.php` para suporte a filtros otimizados por presença/ausência de categoria associada.
+- **Arquivos**:
+  - `src/Repository/MediaItemRepository.php`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/GridVideos.tsx`
+  - `web/features/downloads-video/components/TabelaVideos.tsx`
+
+---
+
+### ✅ Melhoria 56 — Ajuste Fino de Layout e Prevenção de Quebra de Linha na Barra Flutuante de Ações em Lote
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Em telas de resolução média ou quando múltiplos itens estavam selecionados, os elementos internos da `BarraAcoesEmLote` (contador de itens, botão de categorizar, sincronizar e desmarcar) sofriam quebra de linha indesejada (`flex-wrap`), tornando a barra verticalmente desproporcional e cobrindo parte do conteúdo da página.
+- **Solução**:
+  - Reestruturado o layout flexbox da `BarraAcoesEmLote` com `flexWrap: "nowrap"`, espaçamentos otimizados e truncamento responsivo de rótulos.
+  - Alinhamento horizontal elegante entre o badge de seleção, ações principais e botão de fechar/cancelar seleção.
+- **Arquivos**:
+  - `web/features/downloads-video/components/BarraAcoesEmLote.tsx`
+
+---
+
+### ✅ Melhoria 57 — Redesign do Modal de Categorização em Lote de Downloads com Cards Visuais e Seleção Direta
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O modal de categorização em lote de vídeos utilizava um seletor tradicional em lista/dropdown, exigindo cliques adicionais e sem qualquer apelo visual ou identificação intuitiva das categorias configuradas (Memes, Shingeki, One Piece etc.).
+- **Solução**:
+  - Redesenhado completamente o modal de categorização em `DownloadsVideo.tsx` para uma grade visual de cards interativos.
+  - Cada categoria é apresentada em um card estilizado com ícone representativo, contagem de mídias pertencentes, efeito hover de elevação e borda ativa destacada na cor da marca ao ser selecionada.
+  - Adicionado botão de confirmação com indicação precisa da quantidade de vídeos que receberão a categoria escolhida.
+- **Arquivos**:
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+
+---
+
+### ✅ Melhoria 58 — Guia Arquitetural e Operacional Completo do Ecossistema CirqueiraX (`GUIA_SINCRONIZACAO_ECOSSISTEMA.md`)
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O fluxo de dados entre celular (capturas de tela/vídeos), Syncthing, VPS Linux, backend Symfony, Agente Python local e Google Fotos envolvia múltiplos serviços integrados sem uma referência arquitetural centralizada que explicasse permissões, rotas, portas e comportamentos de fallback.
+- **Solução**:
+  - Criado o documento técnico `documentation/guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md` com mais de 370 linhas detalhando:
+    - Diagramas conceituais da topologia de pastas e tráfego de rede.
+    - Como o Syncthing sincroniza as pastas do celular sem conflitos de concorrência.
+    - O papel do Agente Python de monitoramento e o envio via API Symfony.
+    - O pipeline assíncrono do Google Fotos (OAuth, Messenger/RabbitMQ, semáforo de taxa de transferência).
+    - Comandos de diagnóstico e procedimentos de recuperação de falhas.
+  - Registrado o guia no índice principal `documentation/README.md`.
+- **Arquivos**:
+  - `documentation/README.md`
+  - `documentation/guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md`
+
+---
+
+### ✅ Melhoria 59 — Fila Sequencial de Downloads com Suporte a Múltiplos Links Simultâneos e Painel Flutuante de Progresso
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - O campo de download permitia colar apenas uma única URL por vez. O usuário, ao acumular vários links de redes sociais (TikTok, Instagram, Twitter/X, YouTube), tinha que aguardar cada download individual terminar para só então colar o próximo link.
+- **Solução**:
+  - **Parser Inteligente de Múltiplos Links (`extrairUrls.ts`)**:
+    - Utilitário regex capaz de extrair todas as URLs válidas de blocos de texto colados no input, mesmo que misturadas com textos ou separadas por quebras de linha.
+  - **Fila Sequencial Global com Zustand (`useFilaDownloadsStore.ts`)**:
+    - Store dedicado gerenciando o estado da fila: itens pendentes, baixando, concluídos e falhas, processando as requisições sequencialmente para não sobrecarregar o `yt-dlp` e a conexão da VPS.
+  - **Painel Flutuante de Progresso (`PainelFilaDownloads.tsx`)**:
+    - Widget recolhível no canto da tela exibindo a contagem da fila, progresso percentual, status individual de cada URL e botão para limpar finalizados.
+  - **Interface de Ingestão Expandida (`CampoNovoLink.tsx`)**:
+    - Permite alternar ou expandir o input para textarea com detecção automática do número de links válidos detectados.
+- **Arquivos**:
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/CampoNovoLink.tsx`
+  - `web/features/downloads-video/components/PainelFilaDownloads.tsx`
+  - `web/features/downloads-video/index.ts`
+  - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
+  - `web/features/downloads-video/utils/extrairUrls.ts`
+
+---
+
+### ✅ Melhoria 60 — Centralização Global de Todos os Modais do Sistema via `<Portal>` Desacoplados de Animações de Página
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Diversos modais e caixas de diálogo abriam visivelmente descentralizados ("tortos") na tela, alinhados em relação ao container da página e não ao centro da viewport do monitor.
+  - A causa raiz era o container de transição de rota `.page-transition-enter`, que aplica propriedades CSS de animação (`will-change: transform`, `transform: translateY(0)`), criando um novo contexto de formatação e empilhamento restritivo para elementos com `position: fixed`.
+- **Solução**:
+  - Envolvidos todos os 19 modais e drawers do sistema na tag `<Portal>` do Chakra UI:
+    - Downloads: `ModalEditarMetadata`, `ModalDistribuirHorariosLote`, `ModalVisualizarMidia`, modal de categorização.
+    - Central de Mídias: `ModalVisualizarMidiaCentral`, `ModalCategorizarMidia`.
+    - Prints: `ModalVisualizarPrint`, `ModalCategorizarPrint`.
+    - Upload Manual: `ModalVisualizarMidiaManual`, `ModalConfirmarSincronizacaoDuplicado`.
+    - Dashboard: `ModalCriarCategoria`, `ModalEditarCategoria`.
+    - Google Fotos: `ModalVincularAlbum`.
+    - Autenticação e Utilitários: `ModalAuth`, `DialogOuDrawer`.
+  - Com o Portal, os backdrops e os diálogos são montados no nó raiz do documento, garantindo centralização geométrica perfeita e independente de transições de página ou containers aninhados.
+- **Arquivos**:
+  - `web/features/auth/ModalAuth.tsx`
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/central-midias/components/ModalCategorizarMidia.tsx`
+  - `web/features/central-midias/components/ModalVisualizarMidiaCentral.tsx`
+  - `web/features/dashboard/components/ModalCriarCategoria.tsx`
+  - `web/features/dashboard/components/ModalEditarCategoria.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
+  - `web/features/downloads-video/components/ModalEditarMetadata.tsx`
+  - `web/features/downloads-video/components/ModalVisualizarMidia.tsx`
+  - `web/features/google-fotos/components/ModalVincularAlbum.tsx`
+  - `web/features/prints/Prints.tsx`
+  - `web/features/prints/components/ModalCategorizarPrint.tsx`
+  - `web/features/prints/components/ModalVisualizarPrint.tsx`
+  - `web/features/upload-manual/UploadManual.tsx`
+  - `web/features/upload-manual/components/FilaTriagemUpload.tsx`
+  - `web/features/upload-manual/components/ModalConfirmarSincronizacaoDuplicado.tsx`
+  - `web/features/upload-manual/components/ModalVisualizarMidiaManual.tsx`
+  - `web/shared/components/responsive/DialogOuDrawer.tsx`
+
+---
+
+
 
 
 
