@@ -123,3 +123,29 @@
   - `web/features/google-fotos/types.ts`
 
 ---
+
+### ✅ Melhoria 66 — Bloqueio de Reenvio de Mídias Históricas da Franky para o Google Fotos e Comando de Limpeza
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - No banco de dados, centenas de mídias históricas importadas do bot Franky possuíam metadados com `franky_id`, mas `google_photos_media_id` como `NULL`.
+  - Ao rodar sincronizações em lote ou auto-recuperação (`app:google-fotos:enviar --pendentes` e `RebaixarMediaItemService`), o sistema interpretava esses vídeos da Franky como itens novos que ainda não tinham sido enviados ao Google Fotos.
+  - Isso disparava o download via `yt-dlp` e re-upload para os álbuns do Google Fotos, gerando duplicatas desnecessárias de vídeos que o bot Franky já havia enviado anteriormente para a nuvem.
+- **Solução**:
+  - **Filtro Estrito em Serviços e Mensageria**:
+    - Em `src/Service/GoogleFotos/EnviarGoogleFotosService.php`, adicionada trava de segurança: se a mídia possuir `franky_id` ou `importado_franky` nos metadados, o upload é abortado e registrado em log, impedindo qualquer duplicação.
+    - Em `src/Service/MediaItem/RebaixarMediaItemService.php`, mídias originárias da Franky não despacham mais `EnviarGoogleFotosMessage` após o download.
+    - Em `src/MessageHandler/ClassificarMediaMessageHandler.php`, bloqueado o despacho assíncrono de envio para o Google Fotos de itens com `franky_id`.
+    - Em `src/Command/EnviarGoogleFotosCommand.php`, a consulta de `--pendentes` exclui explicitamente registros contendo `"franky_id"` nos metadados (`NOT LIKE '%"franky_id"%'`).
+  - **Comando de Limpeza e Reversão (`app:google-fotos:limpar-duplicados-franky`)**:
+    - Criado comando Symfony `src/Command/LimparDuplicadosFrankyCommand.php` que localiza itens da Franky que receberam upload recente, limpa os campos de Google Fotos no banco de dados, remove eventuais arquivos físicos baixados e restaura o status da entidade para `arquivo_removido`.
+    - Executada a higienização de 37 mídias afetadas em produção, restabelecendo 100% da integridade da base e do armazenamento.
+- **Arquivos**:
+  - `src/Command/EnviarGoogleFotosCommand.php`
+  - `src/Command/LimparDuplicadosFrankyCommand.php`
+  - `src/MessageHandler/ClassificarMediaMessageHandler.php`
+  - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
+  - `src/Service/MediaItem/RebaixarMediaItemService.php`
+
+---
