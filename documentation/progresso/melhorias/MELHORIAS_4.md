@@ -149,3 +149,24 @@
   - `src/Service/MediaItem/RebaixarMediaItemService.php`
 
 ---
+
+### ✅ Melhoria 67 — Inversão de Ordem e Reordenação Manual no Modal de Distribuição de Horários em Lote de Downloads
+
+- **Status**: Concluído
+- **Data**: 13 de outubro de 2026
+- **Problema**:
+  - No modal de distribuição de horários em lote (`ModalDistribuirHorariosLote`), os horários calculados (Uniforme, Retroativo ou Orgânico) eram atribuídos rigidamente na sequência em que os vídeos foram selecionados/baixados.
+  - O usuário não tinha como inverter a ordem de atribuição (por exemplo, fazer o vídeo mais recente receber o horário mais cedo ou vice-versa), nem como trocar individualmente a posição de vídeos na grade de horários sem ter que digitar a data e hora manualmente linha por linha.
+- **Solução**:
+  - **Inversão de Ordem em Lote**:
+    - Adicionado botão no cabeçalho da pré-visualização: `Ordem: 1º Baixado 1º` / `Ordem: Mais Recente 1º`.
+    - Ao alternar a ordem, o cálculo redistribui automaticamente os slots de horários com base na sequência invertida dos itens selecionados, preservando eventuais regras do modo escolhido.
+  - **Reordenação Fina por Item (Subir / Descer)**:
+    - Adicionados botões de seta micro-interativos (`ChevronUp` e `ChevronDown`) ao lado do identificador `#{index + 1}` de cada vídeo na lista.
+    - Permite subir ou descer qualquer vídeo na sequência com 1 clique, trocando automaticamente os horários com o item vizinho.
+  - **Restaurar e Ajustes**:
+    - O botão de restaurar cálculo limpa tanto ajustes manuais pontuais quanto reordenações, voltando com segurança ao estado padrão calculado.
+- **Arquivos**:
+  - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
+
+---
