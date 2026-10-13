@@ -36,6 +36,7 @@ import { GridVideos } from './components/GridVideos'
 import { ModalDistribuirHorariosLote } from './components/ModalDistribuirHorariosLote'
 import { ModalEditarMetadata } from './components/ModalEditarMetadata'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
+import { PainelFilaDownloads } from './components/PainelFilaDownloads'
 import { TabelaVideos } from './components/TabelaVideos'
 import { useSEO } from '@/shared/hooks'
 import {
@@ -474,6 +475,8 @@ export default function DownloadsVideo() {
         </Flex>
 
         <CampoNovoLink onDownloadIniciado={() => refetch()} />
+
+        <PainelFilaDownloads onRefetch={() => refetch()} />
 
         <Flex
           direction={{ base: 'column', md: 'row' }}
