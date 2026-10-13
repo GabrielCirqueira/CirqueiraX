@@ -13,6 +13,7 @@ use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
 use App\Repository\MediaItemRepository;
+use App\Service\MediaItem\AplicarMetadataArquivoService;
 use App\Service\MediaItem\RebaixarMediaItemService;
 use App\Support\MetadataKeys;
 use App\Support\TextoUtil;
@@ -28,6 +29,7 @@ final readonly class EnviarGoogleFotosService
         private GoogleFotosAlbumService $albumService,
         private GoogleFotosAPI $googleFotosApi,
         private ?RebaixarMediaItemService $rebaixarMediaItemService = null,
+        private ?AplicarMetadataArquivoService $aplicarMetadataArquivoService = null,
         private ?LoggerInterface $logger = null,
     ) {}
 
@@ -178,6 +180,8 @@ final readonly class EnviarGoogleFotosService
 
         $token = $this->oAuthService->obterAccessTokenValido($conta);
         $albumId = $this->albumService->obterOuCriarAlbumId($categoria);
+
+        $this->aplicarMetadataArquivoService?->aplicarEmMediaItem($mediaItem);
 
         $caminhoLocalStr = (string) $caminhoLocal;
         $mimeType = mime_content_type($caminhoLocalStr) ?: 'application/octet-stream';

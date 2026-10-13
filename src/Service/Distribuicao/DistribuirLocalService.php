@@ -11,6 +11,7 @@ use App\Exception\MediaItem\MediaItemException;
 use App\Interface\ArmazenamentoInterface;
 use App\Repository\CategoriaRepository;
 use App\Repository\MediaItemRepository;
+use App\Service\MediaItem\AplicarMetadataArquivoService;
 use App\Support\TextoUtil;
 
 final readonly class DistribuirLocalService
@@ -19,6 +20,7 @@ final readonly class DistribuirLocalService
         private MediaItemRepository $mediaItemRepository,
         private CategoriaRepository $categoriaRepository,
         private ArmazenamentoInterface $armazenamentoClient,
+        private AplicarMetadataArquivoService $aplicarMetadataArquivoService,
         private string $mediaStoragePath = './var/storage',
         private string $projectDir = '',
     ) {}
@@ -58,6 +60,8 @@ final readonly class DistribuirLocalService
         }
 
         $mediaItem->setCaminhoLocal($caminhoDestinoFinal);
+        $this->aplicarMetadataArquivoService->aplicarEmMediaItem($mediaItem);
+
         $mediaItem->transicionarPara(StatusMediaItem::DISTRIBUIDO_LOCAL);
         $this->mediaItemRepository->salvar($mediaItem);
 
