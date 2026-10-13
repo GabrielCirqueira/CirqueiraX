@@ -18,6 +18,7 @@
 | Arquivo | Descrição |
 | :--- | :--- |
 | [funcionalidades/CIRQUEIRAX.md](funcionalidades/CIRQUEIRAX.md) | Visão geral do hub, princípios de design e arquitetura macro |
+| [guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md](guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md) | **Manual definitivo do ecossistema**: sincronização, Google Fotos, Celular (Syncthing-Fork) e Agente PC |
 | [funcionalidades/PRINTS.md](funcionalidades/PRINTS.md) | Captura de screenshots, deduplicação SHA-256 e galeria minimalista (Google Fotos) |
 | [funcionalidades/AGENTE.md](funcionalidades/AGENTE.md) | Agente cliente Python (`agente.py`), daemons (WSL/Linux/Windows) e comandos do terminal |
 | [funcionalidades/DOWNLOADS_VIDEOS.md](funcionalidades/DOWNLOADS_VIDEOS.md) | Download yt-dlp, extração de metadados, player, triagem e escalonamento de horários em lote |
