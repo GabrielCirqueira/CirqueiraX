@@ -81,6 +81,7 @@
 | M65 | Fluxo Web Interativo de Autorização e Reconexão OAuth do Google Fotos com Alerta de Token Expirado e Modal Direto | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-65--fluxo-web-interativo-de-autorização-e-reconexão-oauth-do-google-fotos-com-alerta-de-token-expirado-e-modal-direto) |
 | M66 | Bloqueio de Reenvio de Mídias Históricas da Franky para o Google Fotos e Comando de Limpeza | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-66--bloqueio-de-reenvio-de-mídias-históricas-da-franky-para-o-google-fotos-e-comando-de-limpeza) |
 | M67 | Inversão de Ordem e Reordenação Manual no Modal de Distribuição de Horários em Lote de Downloads | ✅ Concluído | 13/10/2026 | [ver](MELHORIAS_4.md#melhoria-67--inversão-de-ordem-e-reordenação-manual-no-modal-de-distribuição-de-horários-em-lote-de-downloads) |
+| M68 | Injeção Automática de Metadados de Criação via FFmpeg (`creation_time`) e Timestamps no Arquivo Físico para Google Fotos | ✅ Concluído | 13/10/2026 | [ver](MELHORIAS_4.md#melhoria-68--injeção-automática-de-metadados-de-criação-via-ffmpeg-creation_time-e-timestamps-no-arquivo-físico-para-google-fotos) |
 
 
 

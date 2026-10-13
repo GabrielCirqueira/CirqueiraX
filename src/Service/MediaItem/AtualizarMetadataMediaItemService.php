@@ -15,6 +15,7 @@ final readonly class AtualizarMetadataMediaItemService
 {
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
+        private AplicarMetadataArquivoService $aplicarMetadataArquivoService,
     ) {}
 
     public function atualizarMetadata(string|Uuid $uuid, AtualizarMetadataMediaItemDTO $dto): MediaItem
@@ -38,6 +39,7 @@ final readonly class AtualizarMetadataMediaItemService
         }
 
         $this->mediaItemRepository->salvar($mediaItem);
+        $this->aplicarMetadataArquivoService->aplicarEmMediaItem($mediaItem);
 
         return $mediaItem;
     }
@@ -71,6 +73,7 @@ final readonly class AtualizarMetadataMediaItemService
 
             $mediaItem->setMetadata($metadados);
             $this->mediaItemRepository->salvar($mediaItem);
+            $this->aplicarMetadataArquivoService->aplicarEmMediaItem($mediaItem);
             $atualizados[] = $mediaItem;
         }
 

@@ -170,3 +170,34 @@
   - `web/features/downloads-video/components/ModalDistribuirHorariosLote.tsx`
 
 ---
+
+### ✅ Melhoria 68 — Injeção Automática de Metadados de Criação via FFmpeg (`creation_time`) e Timestamps no Arquivo Físico para Google Fotos
+
+- **Status**: Concluído
+- **Data**: 13 de outubro de 2026
+- **Problema**:
+  - Ao editar a data e hora de vídeos (individualmente no modal de metadados ou em lote no modal de distribuição de horários), o sistema salvava as informações exclusivamente no banco de dados (`metadata.data` e `metadata.horario`).
+  - Os arquivos físicos no sistema de arquivos permaneciam com timestamps desatualizados e os containers de vídeo (`.mp4`, `.mov`) não continham a tag de cabeçalho `creation_time` gravada.
+  - Como a API do Google Photos (`photoslibrary.googleapis.com`) não aceita parâmetro de data no payload REST de criação e extrai a data unicamente dos átomos internos do container binário do vídeo, a ausência de `creation_time` fazia o Google Fotos aplicar o fallback para o momento exato do upload.
+  - Com isso, envios em lote chegavam ao Google Fotos agrupados sequencialmente no segundo em que o worker executou, desrespeitando as datas retroativas ou personalizadas configuradas pelo usuário.
+- **Solução**:
+  - **Serviço Centralizado `AplicarMetadataArquivoService`**:
+    - Criado serviço em `src/Service/MediaItem/AplicarMetadataArquivoService.php` para interpretar datas e horários em múltiplos formatos (`YYYYMMDD`, `YYYY-MM-DD HH:MM:SS`, ISO 8601) convertendo com precisão para o fuso horário oficial (`America/Sao_Paulo`) e gerando a representação UTC com sufixo `Z`.
+    - Para arquivos de vídeo (`.mp4`, `.mov`, `.m4v`, `.mkv`, `.webm`), executa o FFmpeg com `-c copy` (sem reencodamento, operação quase instantânea em ~0.4s) injetando `-metadata creation_time=...`, `-metadata:s:v creation_time=...` e `-metadata:s:a creation_time=...`, além de título e autor.
+    - Sincroniza atime e mtime do sistema de arquivos via `touch()`, garantindo que exploradores de arquivos, Syncthing e players nativos exibam a data e hora exatas da mídia.
+  - **Injeção Automática na Edição e Distribuição de Horários**:
+    - Integrado a `AtualizarMetadataMediaItemService`: ao salvar edições pontuais ou ao aplicar cálculo de distribuição em lote (`distribuirHorarios`), os arquivos físicos são atualizados imediatamente.
+  - **Injeção na Distribuição Local**:
+    - Integrado a `DistribuirLocalService`: ao mover/copiar arquivos para as pastas das categorias, os metadados e timestamps são reaplicados no arquivo de destino.
+  - **Salvaguarda Pré-Upload no Google Fotos**:
+    - Integrado a `EnviarGoogleFotosService`: antes da leitura de bytes para o endpoint `/v1/uploads`, o serviço revalida e garante que o arquivo binário possua a tag `creation_time` injetada.
+  - **Reenvio dos Vídeos Afetados**:
+    - Executado reprocessamento dos 17 vídeos históricos que haviam sido agrupados indevidamente no upload anterior, carimbando seus arquivos físicos e reenviando para o Google Fotos com os timestamps originais.
+- **Arquivos**:
+  - `src/Service/MediaItem/AplicarMetadataArquivoService.php`
+  - `src/Service/MediaItem/AtualizarMetadataMediaItemService.php`
+  - `src/Service/Distribuicao/DistribuirLocalService.php`
+  - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
+
+---
+
