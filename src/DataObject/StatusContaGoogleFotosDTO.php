@@ -10,6 +10,8 @@ final readonly class StatusContaGoogleFotosDTO
         public bool $conectado,
         public ?string $email = null,
         public ?string $conectadoEm = null,
+        public bool $tokenExpirado = false,
+        public ?string $expiraEm = null,
     ) {}
 
     /**
@@ -21,6 +23,8 @@ final readonly class StatusContaGoogleFotosDTO
             'conectado' => $this->conectado,
             'email' => $this->email,
             'conectadoEm' => $this->conectadoEm,
+            'tokenExpirado' => $this->tokenExpirado,
+            'expiraEm' => $this->expiraEm,
         ];
     }
 }

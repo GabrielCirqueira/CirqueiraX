@@ -35,3 +35,22 @@ export async function listarTodasCategorias(): Promise<CategoriaComAlbumDetalhe[
   const { data } = await api.get<RespostaApi<CategoriaComAlbumDetalhe[]>>('/api/v1/categorias')
   return data.data
 }
+
+export async function obterUrlOAuthGoogleFotos(): Promise<string> {
+  const { data } = await api.get<RespostaApi<{ url: string }>>('/api/v1/google-fotos/oauth/url')
+  return data.data.url
+}
+
+export async function concluirOAuthGoogleFotos(
+  codigoOuUrl: string
+): Promise<{ email: string; conectado: boolean }> {
+  const { data } = await api.post<RespostaApi<{ email: string; conectado: boolean }>>(
+    '/api/v1/google-fotos/oauth/concluir',
+    { codigoOuUrl }
+  )
+  return data.data
+}
+
+export async function desconectarGoogleFotos(): Promise<void> {
+  await api.post<RespostaApi<{ desconectado: boolean }>>('/api/v1/google-fotos/desconectar')
+}

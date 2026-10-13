@@ -2,6 +2,8 @@ export interface StatusGoogleFotos {
   conectado: boolean
   email: string | null
   conectadoEm: string | null
+  tokenExpirado?: boolean
+  expiraEm?: string | null
 }
 
 export interface CategoriaVinculo {

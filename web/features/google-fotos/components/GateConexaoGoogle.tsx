@@ -14,9 +14,22 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Check, CheckCircle2, CloudOff, Copy, RefreshCw, ShieldCheck, Terminal } from 'lucide-react'
+import {
+  AlertTriangle,
+  Check,
+  CheckCircle2,
+  CloudOff,
+  Copy,
+  KeyRound,
+  LogOut,
+  RefreshCw,
+  ShieldAlert,
+  ShieldCheck,
+  Terminal,
+} from 'lucide-react'
 import { type ReactNode, memo, useState } from 'react'
-import { useStatusGoogleFotos } from '../hooks/useGoogleFotos'
+import { useDesconectarGoogleFotos, useStatusGoogleFotos } from '../hooks/useGoogleFotos'
+import { ModalConectarGoogleFotos } from './ModalConectarGoogleFotos'
 
 export interface GateConexaoGoogleProps {
   children: ReactNode
@@ -26,6 +39,8 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
   children,
 }: GateConexaoGoogleProps) {
   const { data: status, isLoading, isError, refetch, isRefetching } = useStatusGoogleFotos()
+  const desconectarMutation = useDesconectarGoogleFotos()
+  const [modalConectarAberto, setModalConectarAberto] = useState(false)
   const [copiado, setCopiado] = useState(false)
 
   const comandoCLI = 'make google-fotos-autorizar'
@@ -35,6 +50,12 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
       setCopiado(true)
       setTimeout(() => setCopiado(false), 2000)
     })
+  }
+
+  function handleDesconectar() {
+    if (window.confirm('Tem certeza que deseja desconectar o Google Fotos do CirqueiraX?')) {
+      desconectarMutation.mutate()
+    }
   }
 
   if (isLoading) {
@@ -75,7 +96,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 <Heading size="lg">Conexão com o Google Fotos Necessária</Heading>
                 <Text fontSize="sm" color="fg.muted">
                   Para visualizar, gerenciar e vincular álbuns, você precisa autorizar a conta
-                  Google no servidor do CirqueiraX.
+                  Google no CirqueiraX.
                 </Text>
               </VStack>
             </VStack>
@@ -83,6 +104,19 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
 
           <Card.Body>
             <VStack gap={6} align="stretch">
+              <HStack justify="center">
+                <Button
+                  colorPalette="teal"
+                  size="lg"
+                  borderRadius="xl"
+                  onClick={() => setModalConectarAberto(true)}
+                  shadow="md"
+                >
+                  <Icon as={KeyRound} />
+                  Conectar Conta Google Fotos
+                </Button>
+              </HStack>
+
               <Box
                 p={4}
                 borderRadius="xl"
@@ -99,13 +133,9 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                       textTransform="uppercase"
                       letterSpacing="wider"
                     >
-                      Passo a Passo de Autorização
+                      Ou Autorize via Terminal / Servidor
                     </Text>
                   </HStack>
-
-                  <Text fontSize="sm" color="fg.muted">
-                    1. Execute o comando abaixo no terminal da sua máquina ou servidor:
-                  </Text>
 
                   <HStack
                     justify="space-between"
@@ -131,22 +161,13 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                       />
                     </IconButton>
                   </HStack>
-
-                  <Text fontSize="sm" color="fg.muted">
-                    2. Abra a URL exibida no navegador, faça login na sua conta Google e conceda as
-                    permissões de Fotos.
-                  </Text>
-                  <Text fontSize="sm" color="fg.muted">
-                    3. Ao ser redirecionado para a página local, copie a URL inteira da barra de
-                    endereços e cole no terminal para concluir.
-                  </Text>
                 </VStack>
               </Box>
 
               <HStack justify="center">
                 <Button
-                  colorPalette="teal"
-                  size="md"
+                  variant="ghost"
+                  size="sm"
                   borderRadius="lg"
                   onClick={() => refetch()}
                   loading={isRefetching}
@@ -158,60 +179,127 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
             </VStack>
           </Card.Body>
         </Card.Root>
+
+        <ModalConectarGoogleFotos
+          aberto={modalConectarAberto}
+          onFechar={() => setModalConectarAberto(false)}
+          isReconexao={false}
+        />
       </Flex>
     )
   }
+
+  const tokenExpirado = Boolean(status.tokenExpirado)
 
   return (
     <VStack w="full" gap={6} align="stretch">
       <Box
         p={4}
         borderRadius="xl"
-        bg="bg.subtle"
+        bg={tokenExpirado ? 'cirqueira.amber.500/5' : 'bg.subtle'}
         border="1px solid"
-        borderColor="cirqueira.teal.500/20"
+        borderColor={tokenExpirado ? 'cirqueira.amber.500/30' : 'cirqueira.teal.500/20'}
         shadow="xs"
       >
-        <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
-          <HStack gap={3}>
-            <Box p={2.5} borderRadius="lg" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
-              <Icon as={ShieldCheck} boxSize={5} />
-            </Box>
-            <VStack align="flex-start" gap={0.5}>
-              <HStack gap={2}>
-                <Text fontWeight="semibold" fontSize="sm">
-                  Google Fotos Conectado
-                </Text>
-                <Badge colorPalette="green" variant="subtle" size="sm">
-                  <Icon as={CheckCircle2} />
-                  Ativo
-                </Badge>
-              </HStack>
-              <HStack gap={2} fontSize="xs" color="fg.muted">
-                {status.email && <Text fontWeight="medium">{status.email}</Text>}
-                {status.conectadoEm && (
-                  <>
-                    <Text>•</Text>
-                    <Text>Autorizado em {formatarDataHora(status.conectadoEm)}</Text>
-                  </>
-                )}
-              </HStack>
-            </VStack>
+        <VStack align="stretch" gap={3}>
+          <HStack justify="space-between" align="center" flexWrap="wrap" gap={4}>
+            <HStack gap={3}>
+              <Box
+                p={2.5}
+                borderRadius="lg"
+                bg={tokenExpirado ? 'cirqueira.amber.500/10' : 'cirqueira.teal.500/10'}
+                color={tokenExpirado ? 'cirqueira.amber.500' : 'cirqueira.teal.500'}
+              >
+                <Icon as={tokenExpirado ? ShieldAlert : ShieldCheck} boxSize={5} />
+              </Box>
+              <VStack align="flex-start" gap={0.5}>
+                <HStack gap={2}>
+                  <Text fontWeight="semibold" fontSize="sm">
+                    Google Fotos Conectado
+                  </Text>
+                  {tokenExpirado ? (
+                    <Badge colorPalette="amber" variant="subtle" size="sm">
+                      <Icon as={AlertTriangle} />
+                      Token Expirado
+                    </Badge>
+                  ) : (
+                    <Badge colorPalette="green" variant="subtle" size="sm">
+                      <Icon as={CheckCircle2} />
+                      Ativo
+                    </Badge>
+                  )}
+                </HStack>
+                <HStack gap={2} fontSize="xs" color="fg.muted">
+                  {status.email && <Text fontWeight="medium">{status.email}</Text>}
+                  {status.conectadoEm && (
+                    <>
+                      <Text>•</Text>
+                      <Text>Autorizado em {formatarDataHora(status.conectadoEm)}</Text>
+                    </>
+                  )}
+                </HStack>
+              </VStack>
+            </HStack>
+
+            <HStack gap={2}>
+              <Button
+                size="sm"
+                colorPalette={tokenExpirado ? 'amber' : 'teal'}
+                variant={tokenExpirado ? 'solid' : 'outline'}
+                borderRadius="lg"
+                onClick={() => setModalConectarAberto(true)}
+              >
+                <Icon as={tokenExpirado ? AlertTriangle : KeyRound} />
+                {tokenExpirado ? 'Reconectar Conta' : 'Reconectar'}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="ghost"
+                colorPalette="red"
+                borderRadius="lg"
+                loading={desconectarMutation.isPending}
+                onClick={handleDesconectar}
+              >
+                <Icon as={LogOut} />
+                Desconectar
+              </Button>
+
+              <IconButton
+                aria-label="Atualizar status"
+                size="sm"
+                variant="outline"
+                onClick={() => refetch()}
+                loading={isRefetching}
+              >
+                <Icon as={RefreshCw} />
+              </IconButton>
+            </HStack>
           </HStack>
 
-          <HStack gap={2}>
-            <IconButton
-              aria-label="Atualizar status"
-              size="sm"
-              variant="outline"
-              onClick={() => refetch()}
-              loading={isRefetching}
+          {tokenExpirado && (
+            <HStack
+              gap={2.5}
+              p={3}
+              borderRadius="lg"
+              bg="cirqueira.amber.500/10"
+              border="1px solid"
+              borderColor="cirqueira.amber.500/20"
             >
-              <Icon as={RefreshCw} />
-            </IconButton>
-          </HStack>
-        </HStack>
+              <Icon as={AlertTriangle} color="cirqueira.amber.500" boxSize={4} flexShrink={0} />
+              <Text fontSize="xs" color="fg.muted">
+                O token OAuth da sua conta Google expirou ou foi revogado. O envio de mídias para os álbuns está pausado. Clique em <Text as="span" fontWeight="bold" color="fg">Reconectar Conta</Text> para renovar a autorização em poucos segundos.
+              </Text>
+            </HStack>
+          )}
+        </VStack>
       </Box>
+
+      <ModalConectarGoogleFotos
+        aberto={modalConectarAberto}
+        onFechar={() => setModalConectarAberto(false)}
+        isReconexao={tokenExpirado || Boolean(status.conectado)}
+      />
 
       {children}
     </VStack>

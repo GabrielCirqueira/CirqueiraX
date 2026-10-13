@@ -44,6 +44,11 @@ services:
             $clientId: '%env(GOOGLE_CLIENT_ID)%'
             $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
 
+    App\Service\GoogleFotos\AutorizarContaGoogleFotosService:
+        arguments:
+            $clientId: '%env(GOOGLE_CLIENT_ID)%'
+            $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
+
     App\Interface\ArmazenamentoInterface: '@App\Infra\Storage\ArmazenamentoLocalClient'
 
     App\Service\MediaItem\ClassificarMediaItemService:
