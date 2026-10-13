@@ -77,6 +77,8 @@
 | M61 | Deploy Automatizado Não-Bloqueante em `scripts/update.sh` com Detecção de TTY para Execuções Remotas | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-61--deploy-automatizado-não-bloqueante-em-scriptsupdatesh-com-detecção-de-tty-para-execuções-remotas) |
 | M62 | Persistência do Volume de Downloads no Docker, Auto-Recuperação de Mídias Ausentes e Comando `app:media:rebaixar` | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-62--persistência-do-volume-de-downloads-no-docker-auto-recuperação-de-mídias-ausentes-e-comando-appmediarebaixar) |
 | M63 | Comando CLI `app:google-fotos:enviar` para Sincronização Direta, Operação em Lote e Diagnóstico com Google Photos | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-63--comando-cli-appgoogle-fotosenviar-para-sincronização-direta-operação-em-lote-e-diagnóstico-com-google-photos) |
+| M64 | Resiliência na Exclusão de Mídias, Correção de Permissões de Storage e Resolução do Erro React #130 na Fila de Downloads | ✅ Concluído | 12/10/2026 | [ver](MELHORIAS_4.md#melhoria-64--resiliência-na-exclusão-de-mídias-correção-de-permissões-de-storage-e-resolução-do-erro-react-130-na-fila-de-downloads) |
+
 
 
 

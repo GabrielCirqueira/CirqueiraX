@@ -62,3 +62,31 @@
   - `src/Command/EnviarGoogleFotosCommand.php`
 
 ---
+
+### ✅ Melhoria 64 — Resiliência na Exclusão de Mídias, Correção de Permissões de Storage e Resolução do Erro React #130 na Fila de Downloads
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - Ao tentar apagar itens que falharam ou foram rebaixados pela CLI, a operação retornava `0 arquivos apagados com sucesso!` porque a pasta física no container estava com dono `root:root`, impedindo que o processo `www-data` do PHP fizesse `unlink()`. A falha no disco bloqueava a exclusão do registro no banco de dados.
+  - Na tela de downloads, ocorria crash total com `Unexpected Application Error! Minified React error #130; args[]=object` devido à serialização JSON do store Zustand (`cirqueirax-fila-downloads-v1`), que transformava componentes de ícones Lucide em objetos vazios `{}` no `localStorage`. Ao recarregar a página, a tentativa de renderizar `<{}>` como componente JSX derrubava o React.
+  - `RebaixarMediaItemService` não recebia `%kernel.project_dir%` configurado em `config/services.yaml`, provocando caminhos de gravação inconsistentes.
+- **Solução**:
+  - **Resiliência na Exclusão de Mídias**:
+    - Ajustado `src/Service/MediaItem/ApagarMediaItemService.php` para registrar warning caso o arquivo físico falhe em ser removido no disco (ex: permissões ou arquivo ausente), mas nunca abortar a remoção do registro no banco de dados solicitada pelo usuário.
+    - Corrigidas permissões dos diretórios `/var/storage` e `/var/www/html/var/storage` para `www-data:www-data` na VPS.
+  - **Resolução do Erro React #130 no Frontend**:
+    - Criada a função utilitária `obterIconePlataforma(idOuUrl)` em `web/features/downloads-video/utils/plataformaVideo.ts`, garantindo retorno estrito de componentes Lucide válidos imune a objetos corrompidos de JSON.
+    - Em `useFilaDownloadsStore.ts`, sanitizado o `partialize` para omitir referências a componentes React na serialização de `localStorage` e elevada a versão para `cirqueirax-fila-downloads-v2`.
+    - Em `PainelFilaDownloads.tsx`, garantida a validação de tipo de função antes da renderização de ícones de plataforma.
+  - **Injeção de Parâmetros em Services**:
+    - Declarado explicitamente `RebaixarMediaItemService` em `config/services.yaml` com `$mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'` e `$projectDir: '%kernel.project_dir%'`.
+- **Arquivos**:
+  - `config/services.yaml`
+  - `src/Service/MediaItem/ApagarMediaItemService.php`
+  - `web/features/downloads-video/components/PainelFilaDownloads.tsx`
+  - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
+  - `web/features/downloads-video/utils/plataformaVideo.ts`
+
+---
+
