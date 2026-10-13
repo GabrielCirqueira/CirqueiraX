@@ -15,7 +15,10 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Cloud,
+  Folder,
   FolderCheck,
+  FolderPlus,
   LayoutGrid,
   List,
   Loader2,
@@ -956,62 +959,223 @@ export default function DownloadsVideo() {
         <Dialog.Root
           open={modalCategorizarAberto}
           onOpenChange={(e) => setModalCategorizarAberto(e.open)}
+          placement="center"
+          size="md"
         >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
+          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+          <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
               borderWidth="1px"
-              borderColor="border.subtle"
+              borderColor="cirqueira.brand.500/30"
               color="fg"
-              borderRadius="xl"
-              p={5}
-              maxW="md"
+              borderRadius="2xl"
+              shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 186, 156, 0.2)"
+              maxW="lg"
+              overflow="hidden"
             >
-              <Dialog.Header p={0} mb={3}>
-                <Dialog.Title fontSize="md" fontWeight="bold">
-                  {categoriaAlvoUuid
-                    ? 'Categorizar Vídeo'
-                    : `Categorizar ${selecionados.length} Itens`}
-                </Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body p={0} py={2}>
-                <VStack gap={4} alignItems="stretch">
-                  <Text fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                    Selecione a Categoria de Destino
-                  </Text>
-                  <NativeSelect.Root size="md" w="full">
-                    <NativeSelect.Field
-                      value={categoriaSelecionadaId}
-                      onChange={(e) => setCategoriaSelecionadaId(e.target.value)}
-                      bg="bg.muted"
-                      borderColor="border.subtle"
-                      borderRadius="lg"
-                      fontSize="xs"
-                      h={10}
-                    >
-                      <option value="">Selecione uma categoria...</option>
-                      {categorias.map((cat) => (
-                        <option key={cat.uuid} value={cat.uuid}>
-                          {cat.nome} {cat.googlePhotosAlbumId ? '☁️ (Google Fotos)' : '📁 (Local)'}
-                        </option>
-                      ))}
-                    </NativeSelect.Field>
-                    <NativeSelect.Indicator />
-                  </NativeSelect.Root>
-
-                  <HStack
-                    justify="flex-end"
-                    gap={2}
-                    pt={3}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
+              <Flex
+                align="center"
+                justify="space-between"
+                p={4}
+                px={5}
+                borderBottomWidth="1px"
+                borderColor="border.subtle"
+                bg="bg.muted/30"
+              >
+                <HStack gap={3}>
+                  <Box
+                    p={2.5}
+                    borderRadius="xl"
+                    bg="cirqueira.purple.500/15"
+                    color="cirqueira.purple.400"
+                    borderWidth="1px"
+                    borderColor="cirqueira.purple.500/30"
+                    display="inline-flex"
                   >
+                    <FolderPlus size={20} />
+                  </Box>
+                  <VStack align="start" gap={0.5}>
+                    <Dialog.Title fontSize="md" fontWeight="bold">
+                      {categoriaAlvoUuid
+                        ? 'Categorizar Vídeo'
+                        : `Categorizar ${selecionados.length} Vídeos`}
+                    </Dialog.Title>
+                    <HStack gap={1.5}>
+                      <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+                        {categoriaAlvoUuid ? '1 selecionado' : `${selecionados.length} selecionados`}
+                      </Badge>
+                      <Text fontSize="11px" color="fg.subtle">
+                        Selecione a categoria de destino
+                      </Text>
+                    </HStack>
+                  </VStack>
+                </HStack>
+
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setModalCategorizarAberto(false)}
+                  aria-label="Fechar"
+                  borderRadius="lg"
+                  color="fg.subtle"
+                  _hover={{ color: 'fg', bg: 'whiteAlpha.100' }}
+                >
+                  <X size={16} />
+                </IconButton>
+              </Flex>
+
+              <Dialog.Body p={5}>
+                <VStack gap={3} alignItems="stretch">
+                  <Text
+                    fontSize="xs"
+                    fontWeight="semibold"
+                    color="fg.subtle"
+                    textTransform="uppercase"
+                    letterSpacing="wider"
+                  >
+                    Categorias Disponíveis
+                  </Text>
+
+                  {categorias.length === 0 ? (
+                    <Box
+                      p={6}
+                      textAlign="center"
+                      borderRadius="xl"
+                      bg="bg.muted/30"
+                      borderWidth="1px"
+                      borderColor="border.subtle"
+                    >
+                      <Text fontSize="sm" color="fg.subtle">
+                        Nenhuma categoria cadastrada ainda.
+                      </Text>
+                    </Box>
+                  ) : (
+                    <VStack gap={2} maxH="280px" overflowY="auto" pr={1} alignItems="stretch">
+                      {categorias.map((cat) => {
+                        const selecionada = categoriaSelecionadaId === cat.uuid
+                        return (
+                          <Box
+                            key={cat.uuid}
+                            as="button"
+                            onClick={() => setCategoriaSelecionadaId(cat.uuid)}
+                            onDoubleClick={() => {
+                              setCategoriaSelecionadaId(cat.uuid)
+                              handleConfirmarCategorizar()
+                            }}
+                            p={3}
+                            px={3.5}
+                            borderRadius="xl"
+                            borderWidth="1.5px"
+                            borderColor={selecionada ? 'cirqueira.brand.500' : 'border.subtle'}
+                            bg={selecionada ? 'cirqueira.brand.500/10' : 'bg.muted/40'}
+                            _hover={{
+                              borderColor: selecionada
+                                ? 'cirqueira.brand.500'
+                                : 'border.emphasized',
+                              bg: selecionada ? 'cirqueira.brand.500/15' : 'bg.muted/80',
+                            }}
+                            transition="all 0.15s ease"
+                            textAlign="left"
+                            w="full"
+                            outline="none"
+                          >
+                            <Flex align="center" justify="space-between" gap={3}>
+                              <HStack gap={3}>
+                                <Box
+                                  p={2}
+                                  borderRadius="lg"
+                                  bg={selecionada ? 'cirqueira.brand.500/20' : 'bg.panel'}
+                                  color={selecionada ? 'cirqueira.brand.400' : 'fg.subtle'}
+                                  borderWidth="1px"
+                                  borderColor={
+                                    selecionada ? 'cirqueira.brand.500/30' : 'border.subtle'
+                                  }
+                                >
+                                  {cat.googlePhotosAlbumId ? (
+                                    <Cloud size={16} />
+                                  ) : (
+                                    <Folder size={16} />
+                                  )}
+                                </Box>
+                                <VStack align="start" gap={0.5}>
+                                  <Text
+                                    fontSize="sm"
+                                    fontWeight="bold"
+                                    color={selecionada ? 'fg' : 'fg.muted'}
+                                  >
+                                    {cat.nome}
+                                  </Text>
+                                  <HStack gap={1.5}>
+                                    {cat.googlePhotosAlbumId ? (
+                                      <Badge
+                                        size="xs"
+                                        variant="subtle"
+                                        colorPalette="cyan"
+                                        borderRadius="md"
+                                        fontSize="10px"
+                                      >
+                                        Google Fotos + Local
+                                      </Badge>
+                                    ) : (
+                                      <Badge
+                                        size="xs"
+                                        variant="subtle"
+                                        colorPalette="gray"
+                                        borderRadius="md"
+                                        fontSize="10px"
+                                      >
+                                        Armazenamento Local
+                                      </Badge>
+                                    )}
+                                  </HStack>
+                                </VStack>
+                              </HStack>
+
+                              {selecionada ? (
+                                <Box color="cirqueira.brand.400" display="inline-flex">
+                                  <CheckCircle2 size={20} />
+                                </Box>
+                              ) : (
+                                <Box
+                                  w={5}
+                                  h={5}
+                                  borderRadius="full"
+                                  borderWidth="1.5px"
+                                  borderColor="border.subtle"
+                                />
+                              )}
+                            </Flex>
+                          </Box>
+                        )
+                      })}
+                    </VStack>
+                  )}
+                </VStack>
+              </Dialog.Body>
+
+              <Dialog.Footer
+                p={4}
+                px={5}
+                borderTopWidth="1px"
+                borderColor="border.subtle"
+                bg="bg.muted/20"
+              >
+                <HStack justify="space-between" w="full">
+                  <Text
+                    fontSize="11px"
+                    color="fg.subtle"
+                    display={{ base: 'none', sm: 'inline' }}
+                  >
+                    Dica: clique duplo para aplicar direto
+                  </Text>
+                  <HStack gap={2}>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setModalCategorizarAberto(false)}
                       borderRadius="lg"
+                      fontSize="xs"
                     >
                       Cancelar
                     </Button>
@@ -1024,8 +1188,10 @@ export default function DownloadsVideo() {
                         pendenteClassificarIndividual
                       }
                       onClick={handleConfirmarCategorizar}
-                      fontWeight="semibold"
+                      fontWeight="bold"
                       borderRadius="lg"
+                      fontSize="xs"
+                      px={4}
                     >
                       {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
                         <Loader2
@@ -1033,12 +1199,13 @@ export default function DownloadsVideo() {
                           style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
                         />
                       )}
-                      <Text as="span">Confirmar Categoria</Text>
+                      <Text as="span">
+                        Confirmar ({categoriaAlvoUuid ? '1 vídeo' : `${selecionados.length} vídeos`})
+                      </Text>
                     </Button>
                   </HStack>
-                </VStack>
-              </Dialog.Body>
-              <Dialog.CloseTrigger />
+                </HStack>
+              </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
         </Dialog.Root>
@@ -1046,17 +1213,20 @@ export default function DownloadsVideo() {
         <Dialog.Root
           open={modalConfirmarApagar}
           onOpenChange={(e) => setModalConfirmarApagar(e.open)}
+          placement="center"
+          size="md"
         >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
+          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+          <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
               borderWidth="1px"
-              borderColor="border.subtle"
+              borderColor="red.500/30"
               color="fg"
-              borderRadius="xl"
+              borderRadius="2xl"
               p={5}
               maxW="md"
+              shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(239, 68, 68, 0.15)"
             >
               <Dialog.Header p={0} mb={3}>
                 <Dialog.Title fontSize="md" fontWeight="bold">
@@ -1117,17 +1287,20 @@ export default function DownloadsVideo() {
         <Dialog.Root
           open={modalConfirmarRebaixar}
           onOpenChange={(e) => setModalConfirmarRebaixar(e.open)}
+          placement="center"
+          size="md"
         >
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
+          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+          <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
               borderWidth="1px"
-              borderColor="border.subtle"
+              borderColor="blue.500/30"
               color="fg"
-              borderRadius="xl"
+              borderRadius="2xl"
               p={5}
               maxW="md"
+              shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(59, 130, 246, 0.15)"
             >
               <Dialog.Header p={0} mb={3}>
                 <Dialog.Title fontSize="md" fontWeight="bold">
