@@ -11,14 +11,21 @@ final readonly class AtualizarMetadataMediaItemDTO
     /**
      * @param array<string, mixed> $metadata
      */
+    public ?int $duracao;
+
+    /**
+     * @param array<string, mixed> $metadata
+     */
     public function __construct(
         public ?string $titulo = null,
         public ?string $uploader = null,
         public ?string $data = null,
-        public ?int $duracao = null,
+        int|float|null $duracao = null,
         public ?string $thumbnail = null,
         public array $metadata = [],
-    ) {}
+    ) {
+        $this->duracao = null !== $duracao ? (int) round((float) $duracao) : null;
+    }
 
     /**
      * @return array<string, mixed>

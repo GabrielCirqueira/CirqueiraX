@@ -68,7 +68,7 @@ export function obterDataHoraAtual(): DataHoraExtraida {
 }
 
 export function extrairMinutosSegundos(duracaoTotal?: number): MinutosSegundos {
-  const total = Number(duracaoTotal) || 0
+  const total = Math.round(Number(duracaoTotal) || 0)
   const minutos = Math.floor(total / 60)
   const segundos = total % 60
   return {
@@ -81,8 +81,8 @@ export function calcularDuracaoTotalSegundos(
   minutos: string | number,
   segundos: string | number
 ): number | undefined {
-  const m = Number(minutos) || 0
-  const s = Number(segundos) || 0
+  const m = Math.max(0, Math.floor(Number(minutos) || 0))
+  const s = Math.max(0, Math.round(Number(segundos) || 0))
   const total = m * 60 + s
   return total > 0 ? total : undefined
 }
