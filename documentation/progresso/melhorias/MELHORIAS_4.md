@@ -182,8 +182,9 @@
   - Com isso, envios em lote chegavam ao Google Fotos agrupados sequencialmente no segundo em que o worker executou, desrespeitando as datas retroativas ou personalizadas configuradas pelo usuário.
 - **Solução**:
   - **Serviço Centralizado `AplicarMetadataArquivoService`**:
-    - Criado serviço em `src/Service/MediaItem/AplicarMetadataArquivoService.php` para interpretar datas e horários em múltiplos formatos (`YYYYMMDD`, `YYYY-MM-DD HH:MM:SS`, ISO 8601) convertendo com precisão para o fuso horário oficial (`America/Sao_Paulo`) e gerando a representação UTC com sufixo `Z`.
+    - Criado serviço em `src/Service/MediaItem/AplicarMetadataArquivoService.php` para interpretar datas e horários em múltiplos formatos (`YYYYMMDD`, `YYYY-MM-DD HH:MM:SS`, ISO 8601) convertendo com precisão para o fuso horário oficial (`America/Sao_Paulo`).
     - Para arquivos de vídeo (`.mp4`, `.mov`, `.m4v`, `.mkv`, `.webm`), executa o FFmpeg com `-c copy` (sem reencodamento, operação quase instantânea em ~0.4s) injetando `-metadata creation_time=...`, `-metadata:s:v creation_time=...` e `-metadata:s:a creation_time=...`, além de título e autor.
+    - **Ajuste Fino de Fuso Nominal**: Como a API do Google Photos não possui metadados de fuso nem tags GPS em vídeos web e interpreta o valor de `creation_time` diretamente como hora local de exibição, a injeção foi refinada para gravar a hora nominal configurada pelo usuário (ex: 19:00:00Z), impedindo que o Google Photos adicione 3 horas a mais (ex: 22h) na galeria.
     - Sincroniza atime e mtime do sistema de arquivos via `touch()`, garantindo que exploradores de arquivos, Syncthing e players nativos exibam a data e hora exatas da mídia.
   - **Injeção Automática na Edição e Distribuição de Horários**:
     - Integrado a `AtualizarMetadataMediaItemService`: ao salvar edições pontuais ou ao aplicar cálculo de distribuição em lote (`distribuirHorarios`), os arquivos físicos são atualizados imediatamente.
@@ -192,7 +193,7 @@
   - **Salvaguarda Pré-Upload no Google Fotos**:
     - Integrado a `EnviarGoogleFotosService`: antes da leitura de bytes para o endpoint `/v1/uploads`, o serviço revalida e garante que o arquivo binário possua a tag `creation_time` injetada.
   - **Reenvio dos Vídeos Afetados**:
-    - Executado reprocessamento dos 17 vídeos históricos que haviam sido agrupados indevidamente no upload anterior, carimbando seus arquivos físicos e reenviando para o Google Fotos com os timestamps originais.
+    - Executado reprocessamento dos 17 vídeos históricos que haviam sido agrupados indevidamente no upload anterior, carimbando seus arquivos físicos e reenviando para o Google Fotos com os timestamps originais e horários nominais exatos.
 - **Arquivos**:
   - `src/Service/MediaItem/AplicarMetadataArquivoService.php`
   - `src/Service/MediaItem/AtualizarMetadataMediaItemService.php`

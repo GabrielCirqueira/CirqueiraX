@@ -121,8 +121,11 @@ final readonly class AplicarMetadataArquivoService
         ?string $titulo = null,
         ?string $uploader = null,
     ): void {
-        $dateTimeUtc = $dateTime->setTimezone(new \DateTimeZone('UTC'));
-        $creationTimeUtc = $dateTimeUtc->format('Y-m-d\TH:i:s\Z');
+        // O Google Photos interpreta o creation_time de MP4 sem GPS diretamente como
+        // o horário local de exibição da galeria. Por isso, gravamos a data e hora nominal
+        // exata configurada pelo usuário (ex: 19:00), evitando que o Google Photos adicione
+        // ou desloque 3 horas a mais na visualização do usuário.
+        $creationTimeNominal = $dateTime->format('Y-m-d\TH:i:s\Z');
 
         $extensao = strtolower((string) pathinfo($caminhoArquivo, PATHINFO_EXTENSION));
         $tempArquivo = sprintf('%s.meta_%s.%s', $caminhoArquivo, bin2hex(random_bytes(4)), $extensao);
@@ -133,9 +136,9 @@ final readonly class AplicarMetadataArquivoService
             '-v', 'error',
             '-i', $caminhoArquivo,
             '-c', 'copy',
-            '-metadata', 'creation_time=' . $creationTimeUtc,
-            '-metadata:s:v', 'creation_time=' . $creationTimeUtc,
-            '-metadata:s:a', 'creation_time=' . $creationTimeUtc,
+            '-metadata', 'creation_time=' . $creationTimeNominal,
+            '-metadata:s:v', 'creation_time=' . $creationTimeNominal,
+            '-metadata:s:a', 'creation_time=' . $creationTimeNominal,
         ];
 
         if (null !== $titulo && '' !== trim($titulo)) {
@@ -160,7 +163,7 @@ final readonly class AplicarMetadataArquivoService
                 @chmod($caminhoArquivo, $perms);
                 $this->logger?->info('Metadados de creation_time gravados no vídeo com sucesso via FFmpeg', [
                     'caminho' => $caminhoArquivo,
-                    'creation_time' => $creationTimeUtc,
+                    'creation_time' => $creationTimeNominal,
                 ]);
 
                 return;
