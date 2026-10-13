@@ -133,23 +133,34 @@ export function gerarHorarioAleatorio(inicioHora = 8, fimHora = 22): string {
 
 export function calcularDistribuicaoUniforme(
   total: number,
-  horaInicio = '08:30',
+  horaInicio = '08:00',
   horaFim = '22:00'
 ): string[] {
   if (total <= 0) return []
-  if (total === 1) return [horaInicio]
 
-  const [hIni = 8, mIni = 30] = horaInicio.split(':').map(Number)
+  const [hIni = 8, mIni = 0] = horaInicio.split(':').map(Number)
   const [hFim = 22, mFim = 0] = horaFim.split(':').map(Number)
 
   const minIni = hIni * 60 + mIni
   const minFim = hFim * 60 + mFim
   const espacoTotal = Math.max(0, minFim - minIni)
-  const passo = espacoTotal / (total - 1)
 
+  if (total === 1) {
+    const minMeio = Math.round((minIni + minFim) / 2)
+    const h = Math.floor(minMeio / 60) % 24
+    const m = minMeio % 60
+    return [`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`]
+  }
+
+  // Divisão centrada em slots para posts realistas (ex: 2 vídeos viram 11:30 e 18:30)
+  const slotDuracao = espacoTotal / total
   const horarios: string[] = []
+
   for (let i = 0; i < total; i++) {
-    const minAtual = Math.round(minIni + i * passo)
+    const minBruto = minIni + (i + 0.5) * slotDuracao
+    let minAtual = Math.round(minBruto / 5) * 5
+    minAtual = Math.max(minIni, Math.min(minFim, minAtual))
+
     const h = Math.floor(minAtual / 60) % 24
     const m = minAtual % 60
     horarios.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
@@ -158,12 +169,12 @@ export function calcularDistribuicaoUniforme(
 }
 
 export function calcularDistribuicaoRetroativa(
-  horaBase = '22:46',
+  horaBase = '22:00',
   passoMinutos = 120,
   total = 8
 ): string[] {
   if (total <= 0) return []
-  const [h = 22, m = 46] = horaBase.split(':').map(Number)
+  const [h = 22, m = 0] = horaBase.split(':').map(Number)
   const minBase = h * 60 + m
 
   const horarios: string[] = []
@@ -209,3 +220,82 @@ export function calcularDistribuicaoOrganica(total: number): string[] {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
   })
 }
+
+export function gerarIntervaloDias(inicioIso: string, fimIso: string): string[] {
+  if (!inicioIso && !fimIso) return [formatarDataIsoLocal(new Date())]
+  if (!inicioIso) return [fimIso]
+  if (!fimIso) return [inicioIso]
+
+  if (inicioIso > fimIso) return [inicioIso]
+
+  const partesIni = inicioIso.split('-').map(Number)
+  const partesFim = fimIso.split('-').map(Number)
+  const aAno = partesIni[0]
+  const aMes = partesIni[1]
+  const aDia = partesIni[2]
+  const bAno = partesFim[0]
+  const bMes = partesFim[1]
+  const bDia = partesFim[2]
+
+  if (!aAno || !aMes || !aDia || !bAno || !bMes || !bDia) {
+    return [inicioIso]
+  }
+
+  const dias: string[] = []
+  const cur = new Date(aAno, aMes - 1, aDia, 12, 0, 0)
+  const end = new Date(bAno, bMes - 1, bDia, 12, 0, 0)
+
+  let iter = 0
+  while (cur.getTime() <= end.getTime() && iter < 120) {
+    dias.push(formatarDataIsoLocal(cur))
+    cur.setDate(cur.getDate() + 1)
+    iter++
+  }
+
+  return dias.length > 0 ? dias : [inicioIso]
+}
+
+export interface DistribuicaoItemCalculado {
+  item: MediaItem
+  data: string
+  hora: string
+}
+
+export function calcularDistribuicaoMultiplosDias(
+  itens: MediaItem[],
+  dias: string[],
+  obterHorasDoDia: (qtdNoDia: number) => string[]
+): DistribuicaoItemCalculado[] {
+  const total = itens.length
+  const qtdDias = Math.max(1, dias.length)
+  if (total === 0) return []
+
+  const basePorDia = Math.floor(total / qtdDias)
+  const resto = total % qtdDias
+
+  const resultado: DistribuicaoItemCalculado[] = []
+  let cursor = 0
+
+  for (let d = 0; d < qtdDias; d++) {
+    const dataDia = dias[d] ?? dias[0] ?? ''
+    const qtdEsteDia = basePorDia + (d < resto ? 1 : 0)
+
+    if (qtdEsteDia <= 0) continue
+
+    const itensDesteDia = itens.slice(cursor, cursor + qtdEsteDia)
+    const horasDesteDia = obterHorasDoDia(qtdEsteDia)
+
+    itensDesteDia.forEach((item, idx) => {
+      resultado.push({
+        item,
+        data: dataDia,
+        hora: horasDesteDia[idx] ?? '12:00',
+      })
+    })
+
+    cursor += qtdEsteDia
+  }
+
+  return resultado
+}
+
