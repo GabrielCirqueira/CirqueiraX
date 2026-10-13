@@ -15,10 +15,10 @@ fi
 
 # ── 1. Permissões de var/ ────────────────────────────────────────────────────
 if [[ -d /var/www/html/var ]]; then
-  mkdir -p /var/www/html/var/cache /var/www/html/var/log
+  mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/downloads /var/www/html/var/storage
   if [[ $(id -u) -eq 0 ]]; then
     chown -R www-data:www-data /var/www/html/var
-    log "Ensured cache/log directories exist with proper ownership."
+    log "Ensured cache, log, downloads and storage directories exist with proper ownership."
   else
     log "Running unprivileged; skipped chown of var/."
   fi

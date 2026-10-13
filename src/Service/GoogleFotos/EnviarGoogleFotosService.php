@@ -13,6 +13,7 @@ use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
 use App\Repository\MediaItemRepository;
+use App\Service\MediaItem\RebaixarMediaItemService;
 use App\Support\MetadataKeys;
 use App\Support\TextoUtil;
 use Psr\Log\LoggerInterface;
@@ -26,6 +27,7 @@ final readonly class EnviarGoogleFotosService
         private GoogleFotosOAuthService $oAuthService,
         private GoogleFotosAlbumService $albumService,
         private GoogleFotosAPI $googleFotosApi,
+        private ?RebaixarMediaItemService $rebaixarMediaItemService = null,
         private ?LoggerInterface $logger = null,
     ) {}
 
@@ -133,7 +135,29 @@ final readonly class EnviarGoogleFotosService
                 $caminhoLocal = $outroItem->caminhoLocal();
                 $mediaItem->setCaminhoLocal((string) $caminhoLocal);
             } else {
-                throw MediaItemException::arquivoDeOrigemNaoEncontrado();
+                $metadata = $mediaItem->metadata();
+                $urlOriginal = $metadata[MetadataKeys::URL_ORIGINAL]
+                    ?? ($metadata['webpage_url'] ?? ($metadata['url'] ?? null));
+
+                if (is_string($urlOriginal) && TextoUtil::naoEstaEmBranco($urlOriginal) && null !== $this->rebaixarMediaItemService) {
+                    $this->logger?->info('Arquivo físico não encontrado localmente. Tentando auto-rebaixar vídeo para envio ao Google Fotos...', [
+                        'uuid' => $mediaItemUuid,
+                        'url' => $urlOriginal,
+                    ]);
+                    try {
+                        $mediaItem = $this->rebaixarMediaItemService->processarRebaixamento($mediaItemUuid);
+                        $caminhoLocal = $mediaItem->caminhoLocal();
+                    } catch (\Throwable $e) {
+                        $this->logger?->warning('Falha ao auto-rebaixar vídeo ausente para o Google Fotos', [
+                            'uuid' => $mediaItemUuid,
+                            'erro' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                if (TextoUtil::estaEmBranco($caminhoLocal) || !file_exists((string) $caminhoLocal)) {
+                    throw MediaItemException::arquivoDeOrigemNaoEncontrado();
+                }
             }
         }
 

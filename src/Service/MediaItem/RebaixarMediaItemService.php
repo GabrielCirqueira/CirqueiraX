@@ -9,6 +9,7 @@ use App\Entity\MediaItem;
 use App\Enum\StatusMediaItem;
 use App\Exception\MediaItem\MediaItemException;
 use App\Interface\ArmazenamentoInterface;
+use App\Message\EnviarGoogleFotosMessage;
 use App\Message\RebaixarMediaItemMessage;
 use App\Repository\CategoriaRepository;
 use App\Repository\MediaItemRepository;
@@ -154,6 +155,13 @@ final readonly class RebaixarMediaItemService
         }
 
         $this->mediaItemRepository->salvar($mediaItem);
+
+        if (!$mediaItem->isEnviadoGoogleFotos() && null !== $mediaItem->categoriaId()) {
+            $categoria = $this->categoriaRepository->buscarPorUuid((string) $mediaItem->categoriaId());
+            if (null !== $categoria && !TextoUtil::estaEmBranco($categoria->googleFotosAlbumId())) {
+                $this->messageBus->dispatch(new EnviarGoogleFotosMessage($uuid));
+            }
+        }
 
         $this->logger?->info('Vídeo rebaixado com sucesso e restaurado no storage.', [
             'uuid' => $uuid,

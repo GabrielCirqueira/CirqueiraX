@@ -17,6 +17,7 @@ services:
       - "127.0.0.1:${DEPLOY_PORT:-8080}:80"
     volumes:
       - "${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}:/var/www/html/var/storage"
+      - downloads_prod:/var/www/html/var/downloads
       - thumbnails_prod:/var/www/html/var/cache/thumbnails
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
@@ -47,6 +48,7 @@ services:
 
 volumes:
   db_data_prod:
+  downloads_prod:
   thumbnails_prod:
 
 networks:
