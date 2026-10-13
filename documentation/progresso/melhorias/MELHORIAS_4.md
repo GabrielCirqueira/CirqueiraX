@@ -90,3 +90,36 @@
 
 ---
 
+### ✅ Melhoria 65 — Fluxo Web Interativo de Autorização e Reconexão OAuth do Google Fotos com Alerta de Token Expirado e Modal Direto
+
+- **Status**: Concluído
+- **Data**: 12 de outubro de 2026
+- **Problema**:
+  - A interface de sincronização com o Google Fotos exibia o status como "Ativo" mesmo quando o token de acesso/refresh do OAuth expirava ou era revogado no Google, sem nenhum botão ou mecanismo na interface web para reconectar a conta.
+  - Para autorizar ou renovar o token, o usuário era obrigado a abrir um terminal SSH na máquina host e rodar comandos CLI interativos (`make google-fotos-autorizar`), gerando atrito e quebra de fluxo em uma aplicação web moderna.
+  - O endpoint de status não realizava verificação ativa de expiração nem tentava auto-renovar tokens válidos, mascarando falhas de conexão nos envios para o Google Photos.
+- **Solução**:
+  - **Detecção de Expiração e Auto-Renovação no Backend**:
+    - Criado o serviço `App\Service\GoogleFotos\AutorizarContaGoogleFotosService.php` para orquestrar a geração da URL de consentimento OAuth, troca de códigos por tokens, extração de e-mail e persistência criptografada.
+    - Atualizado `ObterStatusContaGoogleFotosService.php` e `StatusContaGoogleFotosDTO.php` com o campo `tokenExpirado`. Se o access token estiver expirado, tenta renová-lo transparentemente via `GoogleFotosOAuthService`; caso o refresh token também tenha expirado/sido revogado, sinaliza `tokenExpirado = true` para a interface.
+    - Adicionados novos endpoints REST em `GoogleFotosController.php`:
+      - `GET /api/v1/google-fotos/oauth/url`: gera a URL oficial de consentimento do Google.
+      - `POST /api/v1/google-fotos/oauth/concluir`: recebe o código retornado ou URL de redirecionamento, valida os tokens e conclui a autenticação.
+      - `POST /api/v1/google-fotos/desconectar`: remove com segurança a associação da conta.
+  - **Interface Web Interativa de Autorização e Reconexão**:
+    - Criado o componente `ModalConectarGoogleFotos.tsx` integrado via `<Portal>` global, permitindo ao usuário abrir a página de autorização oficial do Google com 1 clique e colar o retorno diretamente no navegador.
+    - Atualizado `GateConexaoGoogle.tsx` com banner dinâmico: destaca visualmente em âmbar quando o token está expirado, inclui botões com destaque ("Reconectar Conta", "Desconectar", "Conectar Conta Google Fotos") e orienta claramente sobre a situação da conta.
+    - Criados hooks React Query (`useUrlOAuthGoogleFotos`, `useConectarGoogleFotos`, `useDesconectarGoogleFotos`) com invalidação automática de cache e toasts informativos.
+- **Arquivos**:
+  - `config/services.yaml`
+  - `src/Controller/GoogleFotos/GoogleFotosController.php`
+  - `src/DataObject/StatusContaGoogleFotosDTO.php`
+  - `src/Service/GoogleFotos/AutorizarContaGoogleFotosService.php`
+  - `src/Service/GoogleFotos/ObterStatusContaGoogleFotosService.php`
+  - `web/features/google-fotos/api.ts`
+  - `web/features/google-fotos/components/GateConexaoGoogle.tsx`
+  - `web/features/google-fotos/components/ModalConectarGoogleFotos.tsx`
+  - `web/features/google-fotos/hooks/useGoogleFotos.ts`
+  - `web/features/google-fotos/types.ts`
+
+---
