@@ -15,6 +15,7 @@ import {
   Dialog,
   Flex,
   HStack,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -500,9 +501,11 @@ const UploadManual = memo(function UploadManual() {
           open={modalConfirmarApagar}
           onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}
           size="sm"
+          placement="center"
         >
-          <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
-          <Dialog.Positioner>
+          <Portal>
+            <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+            <Dialog.Positioner>
             <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
               <Dialog.Header pb={2}>
                 <HStack gap={2} color="cirqueira.red.500">
@@ -543,7 +546,8 @@ const UploadManual = memo(function UploadManual() {
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
-        </Dialog.Root>
+        </Portal>
+      </Dialog.Root>
       </Box>
     </AppContainer>
   )

@@ -3,6 +3,7 @@ import {
   Dialog,
   HStack,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -35,9 +36,10 @@ export const ModalCategorizarMidia = memo(function ModalCategorizarMidia({
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="sm">
-      <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="sm" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           borderRadius="2xl"
           bg="bg.panel"
@@ -100,6 +102,7 @@ export const ModalCategorizarMidia = memo(function ModalCategorizarMidia({
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
+    </Portal>
+  </Dialog.Root>
   )
 })

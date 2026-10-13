@@ -9,6 +9,7 @@ import {
   HStack,
   IconButton,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -61,9 +62,10 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
   const ehDuplicado = Boolean(item.isDuplicado || item.metadata?.duplicado)
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl">
-      <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(8px)" />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           borderRadius="2xl"
           bg="bg.panel"
@@ -240,6 +242,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
           </Flex>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
-  )
+    </Portal>
+  </Dialog.Root>
+)
 })

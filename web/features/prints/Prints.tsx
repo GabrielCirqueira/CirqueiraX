@@ -8,6 +8,7 @@ import {
   IconButton,
   Input,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -448,9 +449,11 @@ export default function Prints() {
         open={modalConfirmarApagar}
         onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}
         size="sm"
+        placement="center"
       >
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Portal>
+          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+          <Dialog.Positioner>
           <Dialog.Content
             borderRadius="xl"
             bg="bg.panel"
@@ -485,7 +488,8 @@ export default function Prints() {
             </Dialog.Footer>
           </Dialog.Content>
         </Dialog.Positioner>
-      </Dialog.Root>
+      </Portal>
+    </Dialog.Root>
     </Box>
   )
 }

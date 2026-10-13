@@ -6,6 +6,7 @@ import {
   HStack,
   IconButton,
   Input,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -188,9 +189,10 @@ export function ModalEditarCategoria({
   if (!categoria) return null
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()}>
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           bg="bg.panel"
           borderWidth="1px"
@@ -241,6 +243,7 @@ export function ModalEditarCategoria({
           />
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
+    </Portal>
+  </Dialog.Root>
   )
 }

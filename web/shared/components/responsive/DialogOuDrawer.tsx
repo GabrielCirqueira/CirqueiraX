@@ -1,4 +1,4 @@
-import { Dialog } from '@chakra-ui/react'
+import { Dialog, Portal } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 
 export interface DialogState {
@@ -25,9 +25,10 @@ export function DialogOuDrawer({
   footer,
 }: DialogOuDrawerProps) {
   return (
-    <Dialog.Root open={state.isOpen} onOpenChange={(e) => state.setOpen(e.open)}>
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+    <Dialog.Root open={state.isOpen} onOpenChange={(e) => state.setOpen(e.open)} placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           bg="bg.panel"
           border="1px solid"
@@ -51,6 +52,7 @@ export function DialogOuDrawer({
           <Dialog.CloseTrigger />
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
-  )
+    </Portal>
+  </Dialog.Root>
+)
 }

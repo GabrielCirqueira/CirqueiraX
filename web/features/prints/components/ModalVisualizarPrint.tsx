@@ -7,6 +7,7 @@ import {
   Flex,
   HStack,
   IconButton,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -89,9 +90,10 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl">
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           borderRadius="xl"
           bg="bg.panel"
@@ -263,6 +265,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
           </Dialog.Body>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
-  )
+    </Portal>
+  </Dialog.Root>
+)
 })

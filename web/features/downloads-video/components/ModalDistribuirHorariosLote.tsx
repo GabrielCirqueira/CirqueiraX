@@ -10,6 +10,7 @@ import {
   IconButton,
   Input,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -167,9 +168,10 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl">
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           bg="bg.panel"
           borderWidth="1px"
@@ -597,6 +599,7 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
           </Flex>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
+    </Portal>
+  </Dialog.Root>
   )
 })

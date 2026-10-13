@@ -8,6 +8,7 @@ import {
   HStack,
   IconButton,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -143,9 +144,10 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl">
-      <Dialog.Backdrop bg="cirqueira.grey.950/85" backdropFilter="blur(6px)" />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="cirqueira.grey.950/85" backdropFilter="blur(6px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           borderRadius="2xl"
           bg="bg.panel"
@@ -365,6 +367,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
           </Dialog.Body>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
-  )
+    </Portal>
+  </Dialog.Root>
+)
 })

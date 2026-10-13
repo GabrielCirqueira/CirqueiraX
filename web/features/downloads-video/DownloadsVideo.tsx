@@ -8,6 +8,7 @@ import {
   IconButton,
   Input,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -965,8 +966,9 @@ export default function DownloadsVideo() {
           placement="center"
           size="md"
         >
-          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
-          <Dialog.Positioner p={4}>
+          <Portal>
+            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+            <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
               borderWidth="1px"
@@ -1211,7 +1213,8 @@ export default function DownloadsVideo() {
               </Dialog.Footer>
             </Dialog.Content>
           </Dialog.Positioner>
-        </Dialog.Root>
+        </Portal>
+      </Dialog.Root>
 
         <Dialog.Root
           open={modalConfirmarApagar}
@@ -1219,8 +1222,9 @@ export default function DownloadsVideo() {
           placement="center"
           size="md"
         >
-          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
-          <Dialog.Positioner p={4}>
+          <Portal>
+            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+            <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
               borderWidth="1px"
@@ -1285,7 +1289,8 @@ export default function DownloadsVideo() {
               <Dialog.CloseTrigger />
             </Dialog.Content>
           </Dialog.Positioner>
-        </Dialog.Root>
+        </Portal>
+      </Dialog.Root>
 
         <Dialog.Root
           open={modalConfirmarRebaixar}
@@ -1293,8 +1298,9 @@ export default function DownloadsVideo() {
           placement="center"
           size="md"
         >
-          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
-          <Dialog.Positioner p={4}>
+          <Portal>
+            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+            <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
               borderWidth="1px"
@@ -1353,7 +1359,8 @@ export default function DownloadsVideo() {
               <Dialog.CloseTrigger />
             </Dialog.Content>
           </Dialog.Positioner>
-        </Dialog.Root>
+        </Portal>
+      </Dialog.Root>
 
         <ModalVisualizarMidia
           item={itemVisualizar}

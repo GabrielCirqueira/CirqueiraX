@@ -2,7 +2,7 @@ import { api } from '@/config/api'
 import { addToast } from '@/shared/components/ui/toaster'
 import type { RespostaApi } from '@/shared/types/api'
 import { useAuthStore } from '@/stores'
-import { Button, Center, Dialog, Field, HStack, Input, Text, VStack } from '@chakra-ui/react'
+import { Button, Center, Dialog, Field, HStack, Input, Portal, Text, VStack } from '@chakra-ui/react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { Code2, Eye, EyeOff, Lock } from 'lucide-react'
@@ -88,9 +88,11 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
       onOpenChange={(e) => {
         if (!e.open) onClose()
       }}
+      placement="center"
     >
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           bg="cirqueira.grey.950"
           border="1px solid"
@@ -225,6 +227,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
           <Dialog.CloseTrigger />
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
-  )
+    </Portal>
+  </Dialog.Root>
+)
 })

@@ -6,6 +6,7 @@ import {
   Dialog,
   HStack,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -82,9 +83,10 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
     }
 
     return (
-      <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && !carregando && onFechar()}>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
+      <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && !carregando && onFechar()} placement="center">
+        <Portal>
+          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+          <Dialog.Positioner>
           <Dialog.Content
             bg="bg.panel"
             borderWidth="1px"
@@ -329,7 +331,8 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
             </Dialog.Footer>
           </Dialog.Content>
         </Dialog.Positioner>
-      </Dialog.Root>
-    )
+      </Portal>
+    </Dialog.Root>
+  )
   }
 )

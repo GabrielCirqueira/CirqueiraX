@@ -749,49 +749,52 @@ const CentralMidias = memo(function CentralMidias() {
         open={modalConfirmarApagar}
         onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}
         size="sm"
+        placement="center"
       >
-        <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
-        <Dialog.Positioner>
-          <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
-            <Dialog.Header pb={2}>
-              <HStack gap={2} color="cirqueira.red.500">
-                <AlertTriangle size={18} />
-                <Dialog.Title fontSize="md" fontWeight="bold">
-                  Confirmar Exclusão
-                </Dialog.Title>
-              </HStack>
-            </Dialog.Header>
+        <Portal>
+          <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+          <Dialog.Positioner>
+            <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+              <Dialog.Header pb={2}>
+                <HStack gap={2} color="cirqueira.red.500">
+                  <AlertTriangle size={18} />
+                  <Dialog.Title fontSize="md" fontWeight="bold">
+                    Confirmar Exclusão
+                  </Dialog.Title>
+                </HStack>
+              </Dialog.Header>
 
-            <Dialog.Body py={3}>
-              <Text fontSize="xs" color="fg.subtle">
-                {itemApagarAlvo
-                  ? 'Tem certeza de que deseja apagar esta mídia? O arquivo e seus registros serão excluídos permanentemente.'
-                  : `Tem certeza de que deseja apagar as ${selecionados.length} mídias selecionadas? Esta ação é irreversível.`}
-              </Text>
-            </Dialog.Body>
+              <Dialog.Body py={3}>
+                <Text fontSize="xs" color="fg.subtle">
+                  {itemApagarAlvo
+                    ? 'Tem certeza de que deseja apagar esta mídia? O arquivo e seus registros serão excluídos permanentemente.'
+                    : `Tem certeza de que deseja apagar as ${selecionados.length} mídias selecionadas? Esta ação é irreversível.`}
+                </Text>
+              </Dialog.Body>
 
-            <Dialog.Footer pt={2}>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setModalConfirmarApagar(false)}
-                borderRadius="lg"
-              >
-                Cancelar
-              </Button>
-              <Button
-                size="sm"
-                colorPalette="red"
-                onClick={handleConfirmarApagar}
-                disabled={pendenteApagarLote}
-                borderRadius="lg"
-                fontWeight="bold"
-              >
-                {pendenteApagarLote ? 'Apagando...' : 'Sim, Excluir'}
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
+              <Dialog.Footer pt={2}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setModalConfirmarApagar(false)}
+                  borderRadius="lg"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  colorPalette="red"
+                  onClick={handleConfirmarApagar}
+                  disabled={pendenteApagarLote}
+                  borderRadius="lg"
+                  fontWeight="bold"
+                >
+                  {pendenteApagarLote ? 'Apagando...' : 'Sim, Excluir'}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
       </Dialog.Root>
     </Box>
   )

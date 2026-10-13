@@ -6,6 +6,7 @@ import {
   HStack,
   IconButton,
   NativeSelect,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -40,9 +41,10 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="md">
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="md" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           borderRadius="xl"
           bg="bg.panel"
@@ -127,6 +129,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
           </Dialog.Footer>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
+    </Portal>
+  </Dialog.Root>
   )
 })

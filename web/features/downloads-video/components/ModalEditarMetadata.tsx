@@ -9,6 +9,7 @@ import {
   HStack,
   IconButton,
   Input,
+  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
@@ -141,9 +142,10 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="lg">
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
+    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="lg" placement="center">
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Positioner>
         <Dialog.Content
           bg="bg.panel"
           borderWidth="1px"
@@ -835,6 +837,7 @@ export const ModalEditarMetadata = memo(function ModalEditarMetadata({
           </Flex>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
+    </Portal>
+  </Dialog.Root>
   )
 })

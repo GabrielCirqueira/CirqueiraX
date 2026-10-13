@@ -568,66 +568,69 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         open={modalCategorizarAberto}
         onOpenChange={(e) => !e.open && setModalCategorizarAberto(false)}
         size="sm"
+        placement="center"
       >
-        <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
-        <Dialog.Positioner>
-          <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
-            <Dialog.Header pb={2}>
-              <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
-                Categorizar Mídias em Lote
-              </Dialog.Title>
-            </Dialog.Header>
+        <Portal>
+          <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+          <Dialog.Positioner>
+            <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+              <Dialog.Header pb={2}>
+                <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
+                  Categorizar Mídias em Lote
+                </Dialog.Title>
+              </Dialog.Header>
 
-            <Dialog.Body py={4}>
-              <VStack gap={3} align="stretch">
-                <Text fontSize="xs" color="fg.subtle">
-                  Selecione a categoria para aplicar a todas as {selecionados.length} mídias selecionadas:
-                </Text>
+              <Dialog.Body py={4}>
+                <VStack gap={3} align="stretch">
+                  <Text fontSize="xs" color="fg.subtle">
+                    Selecione a categoria para aplicar a todas as {selecionados.length} mídias selecionadas:
+                  </Text>
 
-                <NativeSelect.Root size="sm" w="full">
-                  <NativeSelect.Field
-                    value={categoriaLoteId}
-                    onChange={(e) => setCategoriaLoteId(e.target.value)}
-                    bg="bg.muted"
-                    borderColor="border.subtle"
-                    borderRadius="lg"
-                    fontSize="xs"
-                    h={9}
-                  >
-                    <option value="">Selecione uma categoria...</option>
-                    {categorias.map((cat) => (
-                      <option key={cat.uuid} value={cat.uuid}>
-                        {cat.nome}
-                      </option>
-                    ))}
-                  </NativeSelect.Field>
-                  <NativeSelect.Indicator />
-                </NativeSelect.Root>
-              </VStack>
-            </Dialog.Body>
+                  <NativeSelect.Root size="sm" w="full">
+                    <NativeSelect.Field
+                      value={categoriaLoteId}
+                      onChange={(e) => setCategoriaLoteId(e.target.value)}
+                      bg="bg.muted"
+                      borderColor="border.subtle"
+                      borderRadius="lg"
+                      fontSize="xs"
+                      h={9}
+                    >
+                      <option value="">Selecione uma categoria...</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.uuid} value={cat.uuid}>
+                          {cat.nome}
+                        </option>
+                      ))}
+                    </NativeSelect.Field>
+                    <NativeSelect.Indicator />
+                  </NativeSelect.Root>
+                </VStack>
+              </Dialog.Body>
 
-            <Dialog.Footer pt={2}>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setModalCategorizarAberto(false)}
-                borderRadius="lg"
-              >
-                Cancelar
-              </Button>
-              <Button
-                size="sm"
-                colorPalette="brand"
-                disabled={!categoriaLoteId}
-                onClick={handleConfirmarCategorizarLote}
-                borderRadius="lg"
-                fontWeight="semibold"
-              >
-                Aplicar Categoria
-              </Button>
-            </Dialog.Footer>
-          </Dialog.Content>
-        </Dialog.Positioner>
+              <Dialog.Footer pt={2}>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setModalCategorizarAberto(false)}
+                  borderRadius="lg"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  colorPalette="brand"
+                  disabled={!categoriaLoteId}
+                  onClick={handleConfirmarCategorizarLote}
+                  borderRadius="lg"
+                  fontWeight="semibold"
+                >
+                  Aplicar Categoria
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
       </Dialog.Root>
     </VStack>
   )
