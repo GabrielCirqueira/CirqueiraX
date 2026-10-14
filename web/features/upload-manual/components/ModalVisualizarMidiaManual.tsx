@@ -62,9 +62,12 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
   const ehDuplicado = Boolean(item.isDuplicado || item.metadata?.duplicado)
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+    <Dialog.Root
+      lazyMount
+      unmountOnExit
+      open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
       <Portal>
-        <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(8px)" />
+        <Dialog.Backdrop bg="cirqueira.grey.950/80" />
         <Dialog.Positioner>
         <Dialog.Content
           borderRadius="2xl"

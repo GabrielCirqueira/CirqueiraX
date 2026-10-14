@@ -42,8 +42,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
       zIndex={30}
       borderBottom="1px solid"
       borderColor="cirqueira.grey.900"
-      bg="cirqueira.grey.950/80"
-      backdropFilter="blur(12px)"
+      bg="cirqueira.grey.950"
       w="full"
     >
       <HStack px={{ base: 4, md: 6 }} h={14} justify="space-between" w="full">

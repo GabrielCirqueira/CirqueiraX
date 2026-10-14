@@ -74,13 +74,12 @@ export const CardItemTriagem = memo(function CardItemTriagem({
       borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       outline={selecionado ? '2px solid' : 'none'}
       outlineColor="cirqueira.brand.500"
+      className="cv-auto"
       bg="bg.panel"
       overflow="hidden"
       shadow={selecionado ? 'md' : 'none'}
-      transition="all 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
       _hover={{
         borderColor: selecionado ? 'cirqueira.brand.500' : 'cirqueira.brand.500/50',
-        shadow: 'sm',
       }}
       display="flex"
       flexDirection="column"
@@ -134,7 +133,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
             bg="cirqueira.grey.950/80"
             color={selecionado ? 'cirqueira.brand.400' : 'fg'}
             _hover={{ bg: 'cirqueira.grey.950' }}
-            backdropFilter="blur(8px)"
             borderRadius="md"
             p={1}
             minW="auto"
@@ -151,7 +149,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               size="xs"
               variant="subtle"
               colorPalette="amber"
-              backdropFilter="blur(8px)"
               borderRadius="md"
               px={1.5}
             >
@@ -166,7 +163,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
             size="xs"
             variant="subtle"
             colorPalette={tipoInfo.isVideo ? 'purple' : 'brand'}
-            backdropFilter="blur(8px)"
             borderRadius="md"
             px={2}
           >
@@ -190,7 +186,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
             borderRadius="full"
             bg="cirqueira.grey.950/80"
             color="cirqueira.brand.400"
-            backdropFilter="blur(12px)"
             shadow="lg"
             borderWidth="1px"
             borderColor="cirqueira.brand.500/30"
@@ -211,7 +206,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           borderRadius="md"
           fontSize="10px"
           fontWeight="semibold"
-          backdropFilter="blur(4px)"
         >
           {formatarTamanhoBytes(item.tamanhoBytes ?? 0)}
         </Box>

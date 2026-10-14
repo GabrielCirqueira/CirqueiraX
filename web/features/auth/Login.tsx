@@ -226,7 +226,6 @@ export function Component() {
                 bg="cirqueira.grey.900/40"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.800/60"
-                backdropFilter="blur(10px)"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.brand.500/40', transform: 'translateY(-2px)' }}
               >
@@ -253,7 +252,6 @@ export function Component() {
                 bg="cirqueira.grey.900/40"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.800/60"
-                backdropFilter="blur(10px)"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.brand.500/40', transform: 'translateY(-2px)' }}
               >
@@ -280,7 +278,6 @@ export function Component() {
                 bg="cirqueira.grey.900/40"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.800/60"
-                backdropFilter="blur(10px)"
                 transition="all 0.2s"
                 _hover={{ borderColor: 'cirqueira.brand.500/40', transform: 'translateY(-2px)' }}
               >
@@ -320,7 +317,6 @@ export function Component() {
               borderWidth="1px"
               borderRadius="xl"
               shadow="2xl"
-              backdropFilter="blur(24px)"
               overflow="hidden"
             >
               <Card.Header

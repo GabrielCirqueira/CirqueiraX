@@ -154,7 +154,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
 
   return (
     <Box
-      className="smooth-media-item"
+      className="cv-auto"
       position="relative"
       w="full"
       borderRadius="md"
@@ -171,7 +171,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
       outlineColor="cirqueira.brand.500"
       _hover={{
         borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
-        shadow: '0 8px 24px -4px rgba(0, 0, 0, 0.5)',
       }}
     >
       {!erroCarregamento ? (
@@ -194,10 +193,8 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
               display: 'block',
               objectFit: 'contain',
               backgroundColor: 'var(--chakra-colors-cirqueira-grey-950, #191b1a)',
-              transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease',
-              transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-              willChange: 'transform',
             }}
+            decoding="async"
           />
 
           {isVideo && (
@@ -216,7 +213,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
                 borderRadius="full"
                 bg="cirqueira.grey.950/80"
                 color="cirqueira.grey.0"
-                backdropFilter="blur(8px)"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.700"
                 shadow="lg"
@@ -268,7 +264,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           colorPalette={selecionado ? 'brand' : 'gray'}
           bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
           color="cirqueira.grey.0"
-          backdropFilter="blur(6px)"
           borderWidth="1px"
           borderColor={selecionado ? 'cirqueira.brand.400' : 'cirqueira.grey.700'}
           aria-label="Selecionar mídia"
@@ -302,7 +297,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             color="cirqueira.brand.300"
             borderWidth="1px"
             borderColor="cirqueira.brand.500/40"
-            backdropFilter="blur(6px)"
             borderRadius="md"
             px={1.5}
             py={0.5}
@@ -318,7 +312,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           size="xs"
           variant="solid"
           colorPalette={infoOrigem.colorPalette}
-          backdropFilter="blur(6px)"
           borderRadius="md"
           px={1.5}
           py={0.5}
@@ -334,7 +327,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             size="xs"
             variant="solid"
             colorPalette="orange"
-            backdropFilter="blur(6px)"
             borderRadius="md"
             px={1.5}
             py={0.5}
@@ -354,7 +346,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             colorPalette="purple"
             bg="cirqueira.grey.950/90"
             color="cirqueira.grey.0"
-            backdropFilter="blur(6px)"
             borderRadius="md"
             px={1.5}
             py={0.5}
