@@ -98,6 +98,8 @@ export default function DownloadsVideo() {
       pagina,
       porPagina,
       tipo: 'video',
+      ordenacao: 'dataExibicao',
+      direcao: 'DESC',
     }
     if (busca.trim()) {
       obj.busca = busca.trim()

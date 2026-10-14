@@ -18,6 +18,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity(repositoryClass: MediaItemRepository::class)]
 #[ORM\Table(name: 'media_item')]
 #[ORM\UniqueConstraint(name: 'UNIQ_MEDIA_ITEM_HASH', fields: ['hash'])]
+#[ORM\Index(name: 'IDX_MEDIA_ITEM_DATA_EXIBICAO', fields: ['dataExibicao'])]
 class MediaItem
 {
     #[ORM\Id]
@@ -64,6 +65,9 @@ class MediaItem
     private \DateTimeImmutable $criadoEm;
 
     #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $dataExibicao;
+
+    #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $atualizadoEm;
 
     public function __construct(
@@ -83,6 +87,7 @@ class MediaItem
         $this->erroMotivo = null;
         $agora = new \DateTimeImmutable();
         $this->criadoEm = $agora;
+        $this->dataExibicao = $agora;
         $this->atualizadoEm = $agora;
         $this->historicoStatus = [
             [
@@ -348,6 +353,7 @@ class MediaItem
     public function setMetadata(array $metadata): self
     {
         $this->metadata = $metadata;
+        $this->sincronizarDataExibicao();
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;
@@ -356,6 +362,7 @@ class MediaItem
     public function adicionarMetadata(string $chave, mixed $valor): self
     {
         $this->metadata[$chave] = $valor;
+        $this->sincronizarDataExibicao();
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;
@@ -367,6 +374,7 @@ class MediaItem
     public function mesclarMetadata(array $novosMetadados): self
     {
         $this->metadata = array_merge($this->metadata, $novosMetadados);
+        $this->sincronizarDataExibicao();
         $this->atualizadoEm = new \DateTimeImmutable();
 
         return $this;
@@ -419,8 +427,61 @@ class MediaItem
     public function setCriadoEm(\DateTimeImmutable $criadoEm): self
     {
         $this->criadoEm = $criadoEm;
+        $this->sincronizarDataExibicao();
 
         return $this;
+    }
+
+    public function dataExibicao(): \DateTimeImmutable
+    {
+        return $this->dataExibicao;
+    }
+
+    /**
+     * @param array<string, mixed> $metadata
+     */
+    public static function resolverDataExibicao(array $metadata, \DateTimeImmutable $fallback): \DateTimeImmutable
+    {
+        $data = $metadata[MetadataKeys::DATA] ?? null;
+        if (!is_string($data) || '' === trim($data)) {
+            return $fallback;
+        }
+
+        $horario = isset($metadata['horario']) && is_string($metadata['horario']) ? $metadata['horario'] : null;
+        $fuso = new \DateTimeZone('America/Sao_Paulo');
+        $dataLimpa = trim($data);
+
+        if (preg_match('/^(\d{4})(\d{2})(\d{2})$/', $dataLimpa, $partes)) {
+            $dataLimpa = sprintf('%s-%s-%s', $partes[1], $partes[2], $partes[3]);
+        }
+
+        if (!str_contains($dataLimpa, ':') && null !== $horario && '' !== trim($horario)) {
+            $horarioLimpo = trim($horario);
+            if (preg_match('/^\d{1,2}:\d{2}$/', $horarioLimpo)) {
+                $horarioLimpo .= ':00';
+            }
+            $dataLimpa .= ' ' . $horarioLimpo;
+        } elseif (!str_contains($dataLimpa, ':')) {
+            $dataLimpa .= ' 12:00:00';
+        }
+
+        try {
+            $temFusoExplicito = str_contains($dataLimpa, 'Z') || 1 === preg_match('/[+-]\d{2}:?\d{2}$/', $dataLimpa);
+            if ($temFusoExplicito) {
+                $local = (new \DateTimeImmutable($dataLimpa))->setTimezone($fuso);
+
+                return new \DateTimeImmutable($local->format('Y-m-d H:i:s'), $fuso);
+            }
+
+            return new \DateTimeImmutable($dataLimpa, $fuso);
+        } catch (\Throwable) {
+            return $fallback;
+        }
+    }
+
+    private function sincronizarDataExibicao(): void
+    {
+        $this->dataExibicao = self::resolverDataExibicao($this->metadata, $this->criadoEm);
     }
 
     public function atualizadoEm(): \DateTimeImmutable
