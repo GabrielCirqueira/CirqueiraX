@@ -25,9 +25,12 @@ export function DialogOuDrawer({
   footer,
 }: DialogOuDrawerProps) {
   return (
-    <Dialog.Root open={state.isOpen} onOpenChange={(e) => state.setOpen(e.open)} placement="center">
+    <Dialog.Root
+      lazyMount
+      unmountOnExit
+      open={state.isOpen} onOpenChange={(e) => state.setOpen(e.open)} placement="center">
       <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
         <Dialog.Content
           bg="bg.panel"

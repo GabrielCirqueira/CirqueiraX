@@ -259,7 +259,7 @@ const DashboardView = memo(function DashboardView() {
             </Tabs.List>
           </Tabs.Root>
 
-          <Box key={abaAtiva} className="tab-pane-fade" w="full">
+          <Box w="full">
             {abaAtiva === 'visao-geral' && (
               <VStack gap={6} w="full" alignItems="stretch">
                 <Suspense

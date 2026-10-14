@@ -815,11 +815,7 @@ export default function DownloadsVideo() {
           </HStack>
         </Flex>
 
-        <Box
-          key={`${modoVisualizacao}-${statusFiltro}-${origemFiltro}-${categoriaFiltro}-${pagina}`}
-          className="tab-pane-fade"
-          w="full"
-        >
+        <Box w="full">
           {modoVisualizacao === 'grid' ? (
             <GridVideos
               itens={itens}
@@ -961,13 +957,15 @@ export default function DownloadsVideo() {
         />
 
         <Dialog.Root
+          lazyMount
+          unmountOnExit
           open={modalCategorizarAberto}
           onOpenChange={(e) => setModalCategorizarAberto(e.open)}
           placement="center"
           size="md"
         >
           <Portal>
-            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
             <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
@@ -1217,13 +1215,15 @@ export default function DownloadsVideo() {
       </Dialog.Root>
 
         <Dialog.Root
+          lazyMount
+          unmountOnExit
           open={modalConfirmarApagar}
           onOpenChange={(e) => setModalConfirmarApagar(e.open)}
           placement="center"
           size="md"
         >
           <Portal>
-            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
             <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"
@@ -1293,13 +1293,15 @@ export default function DownloadsVideo() {
       </Dialog.Root>
 
         <Dialog.Root
+          lazyMount
+          unmountOnExit
           open={modalConfirmarRebaixar}
           onOpenChange={(e) => setModalConfirmarRebaixar(e.open)}
           placement="center"
           size="md"
         >
           <Portal>
-            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
             <Dialog.Positioner p={4}>
             <Dialog.Content
               bg="bg.panel"

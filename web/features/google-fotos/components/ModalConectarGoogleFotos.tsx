@@ -62,9 +62,12 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} placement="center">
+    <Dialog.Root
+      lazyMount
+      unmountOnExit
+      open={aberto} onOpenChange={(e) => !e.open && onFechar()} placement="center">
       <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
           <Dialog.Content
             bg="bg.panel"

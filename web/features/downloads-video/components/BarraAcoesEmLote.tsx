@@ -49,7 +49,6 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
           borderWidth="1px"
           borderColor="cirqueira.brand.500/40"
           bg="rgba(18, 22, 20, 0.96)"
-          backdropFilter="blur(20px)"
           shadow="0 20px 45px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 186, 156, 0.2)"
         >
           <HStack gap={2} flexShrink={0} align="center">

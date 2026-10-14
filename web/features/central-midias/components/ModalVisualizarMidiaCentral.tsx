@@ -144,9 +144,12 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
   }
 
   return (
-    <Dialog.Root open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+    <Dialog.Root
+      lazyMount
+      unmountOnExit
+      open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
       <Portal>
-        <Dialog.Backdrop bg="cirqueira.grey.950/85" backdropFilter="blur(6px)" />
+        <Dialog.Backdrop bg="cirqueira.grey.950/85" />
         <Dialog.Positioner>
         <Dialog.Content
           borderRadius="2xl"

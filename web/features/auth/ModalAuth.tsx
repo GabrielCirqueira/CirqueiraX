@@ -84,6 +84,8 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
 
   return (
     <Dialog.Root
+      lazyMount
+      unmountOnExit
       open={isOpen}
       onOpenChange={(e) => {
         if (!e.open) onClose()
@@ -91,7 +93,7 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
       placement="center"
     >
       <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
         <Dialog.Content
           bg="cirqueira.grey.950"

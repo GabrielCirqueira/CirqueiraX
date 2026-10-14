@@ -75,7 +75,7 @@ export const CardPrint = memo(function CardPrint({
 
   return (
     <Box
-      className="smooth-media-item"
+      className="cv-auto"
       position="relative"
       w="full"
       borderRadius="md"
@@ -92,7 +92,6 @@ export const CardPrint = memo(function CardPrint({
       outlineColor="cirqueira.brand.500"
       _hover={{
         borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
-        shadow: '0 8px 24px -4px rgba(0, 0, 0, 0.5)',
       }}
     >
       {!erroCarregamento ? (
@@ -105,10 +104,8 @@ export const CardPrint = memo(function CardPrint({
             height: 'auto',
             display: 'block',
             borderRadius: '4px',
-            transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-            transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-            willChange: 'transform',
           }}
+          decoding="async"
           loading="lazy"
         />
       ) : (
@@ -145,7 +142,6 @@ export const CardPrint = memo(function CardPrint({
           bg={selecionado ? 'cirqueira.brand.500' : 'blackAlpha.700'}
           color="white"
           border="1.5px solid white"
-          backdropFilter="blur(6px)"
           cursor="pointer"
           shadow="md"
           display="flex"
@@ -178,7 +174,6 @@ export const CardPrint = memo(function CardPrint({
             colorPalette="gray"
             bg="blackAlpha.750"
             color="whiteAlpha.900"
-            backdropFilter="blur(8px)"
             borderRadius="md"
             px={1.5}
             py={0.5}
@@ -222,7 +217,6 @@ export const CardPrint = memo(function CardPrint({
           onClick={handleCopiar}
           disabled={copiando}
           bg="blackAlpha.750"
-          backdropFilter="blur(8px)"
           borderWidth="1px"
           borderColor="whiteAlpha.200"
           color={copiadoRecente ? 'cirqueira.green.400' : 'white'}
@@ -247,7 +241,6 @@ export const CardPrint = memo(function CardPrint({
           onClick={handleBaixar}
           disabled={baixando}
           bg="blackAlpha.750"
-          backdropFilter="blur(8px)"
           borderWidth="1px"
           borderColor="whiteAlpha.200"
           color="white"
@@ -279,7 +272,6 @@ export const CardPrint = memo(function CardPrint({
               onCategorizar(item)
             }}
             bg="blackAlpha.750"
-            backdropFilter="blur(8px)"
             borderWidth="1px"
             borderColor="whiteAlpha.200"
             color="white"
@@ -308,7 +300,6 @@ export const CardPrint = memo(function CardPrint({
               onApagar(item.uuid)
             }}
             bg="blackAlpha.750"
-            backdropFilter="blur(8px)"
             borderWidth="1px"
             borderColor="whiteAlpha.200"
             color="red.300"

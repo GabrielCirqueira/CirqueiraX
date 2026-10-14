@@ -483,7 +483,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               borderWidth="1px"
               borderColor="cirqueira.brand.500/40"
               bg="rgba(20, 25, 23, 0.94)"
-              backdropFilter="blur(20px)"
               shadow="0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 186, 156, 0.2)"
             >
               <HStack gap={2}>
@@ -565,13 +564,15 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
       )}
 
       <Dialog.Root
+        lazyMount
+        unmountOnExit
         open={modalCategorizarAberto}
         onOpenChange={(e) => !e.open && setModalCategorizarAberto(false)}
         size="sm"
         placement="center"
       >
         <Portal>
-          <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+          <Dialog.Backdrop bg="cirqueira.grey.950/80" />
           <Dialog.Positioner>
             <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
               <Dialog.Header pb={2}>

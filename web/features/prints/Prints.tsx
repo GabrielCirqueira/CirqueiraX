@@ -353,7 +353,7 @@ export default function Prints() {
           </Flex>
         )}
 
-        <Box key={`${modoVisualizacao}-${categoriaFiltro}-${pagina}`} className="tab-pane-fade" w="full">
+        <Box w="full">
           {modoVisualizacao === 'grid' ? (
             <GridPrints
               itens={itens}
@@ -446,13 +446,15 @@ export default function Prints() {
       />
 
       <Dialog.Root
+        lazyMount
+        unmountOnExit
         open={modalConfirmarApagar}
         onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}
         size="sm"
         placement="center"
       >
         <Portal>
-          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" backdropFilter="blur(8px)" />
+          <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
           <Dialog.Positioner>
           <Dialog.Content
             borderRadius="xl"

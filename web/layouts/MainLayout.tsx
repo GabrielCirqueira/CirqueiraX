@@ -1,7 +1,7 @@
 import { ModalAuth } from '@/features/auth/ModalAuth'
 import { Box, Flex } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
 
@@ -14,7 +14,6 @@ export interface MainLayoutContext {
 }
 
 export function MainLayout() {
-  const location = useLocation()
   const [modalAberto, setModalAberto] = useState(false)
   const [mobileMenuAberto, setMobileMenuAberto] = useState(false)
 
@@ -42,7 +41,6 @@ export function MainLayout() {
             position="absolute"
             inset={0}
             bg="cirqueira.grey.950/80"
-            backdropFilter="blur(4px)"
             onClick={() => setMobileMenuAberto(false)}
           />
           <Box
@@ -63,13 +61,7 @@ export function MainLayout() {
       <Flex direction="column" flex={1} minW={0} minH="100vh">
         <Header onToggleMobileSidebar={() => setMobileMenuAberto(true)} onAbrirModal={abrirModal} />
         <Box as="main" flex={1} display="flex" flexDirection="column" overflowY="auto">
-          <Box
-            key={location.pathname}
-            flex={1}
-            display="flex"
-            flexDirection="column"
-            className="page-transition-enter"
-          >
+          <Box flex={1} display="flex" flexDirection="column">
             <Outlet context={ctx} />
           </Box>
         </Box>

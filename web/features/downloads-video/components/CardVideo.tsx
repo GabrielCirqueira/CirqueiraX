@@ -152,17 +152,15 @@ export const CardVideo = memo(function CardVideo({
       borderWidth={selecionado ? '2px' : '1px'}
       borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       bg="bg.panel"
+      className="cv-auto"
       overflow="hidden"
       shadow={selecionado ? 'lg' : 'sm'}
       outline={selecionado ? '2px solid' : 'none'}
       outlineColor="cirqueira.brand.500"
-      transition="all 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       _hover={{
         borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
-        shadow: 'xl',
-        transform: 'translateY(-2px)',
       }}
     >
       <Box position="relative" aspectRatio="16/9" w="full" bg="cirqueira.grey.950" overflow="hidden">
@@ -176,9 +174,8 @@ export const CardVideo = memo(function CardVideo({
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              transition: 'transform 0.4s ease',
-              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
             }}
+            decoding="async"
             loading="lazy"
           />
         ) : (
@@ -226,7 +223,6 @@ export const CardVideo = memo(function CardVideo({
           alignItems="center"
           justifyContent="center"
           bg="cirqueira.grey.950/50"
-          backdropFilter="blur(2px)"
           opacity={isHovered ? 1 : 0}
           cursor="pointer"
           onClick={() => onVisualizar?.(item)}
@@ -261,7 +257,6 @@ export const CardVideo = memo(function CardVideo({
             bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
             _hover={{ bg: selecionado ? 'cirqueira.brand.600' : 'cirqueira.grey.950' }}
             color="cirqueira.grey.0"
-            backdropFilter="blur(10px)"
             borderRadius="lg"
             h={7}
             w={7}
@@ -281,7 +276,6 @@ export const CardVideo = memo(function CardVideo({
               size="sm"
               variant="subtle"
               colorPalette={plataformaInfo.colorPalette}
-              backdropFilter="blur(10px)"
               bg="cirqueira.grey.950/80"
               borderWidth="1px"
               borderColor="border.subtle"
@@ -303,7 +297,6 @@ export const CardVideo = memo(function CardVideo({
             size="sm"
             variant="subtle"
             colorPalette={statusInfo.colorPalette}
-            backdropFilter="blur(10px)"
             borderRadius="lg"
             px={2.5}
             py={0.5}
@@ -331,7 +324,6 @@ export const CardVideo = memo(function CardVideo({
               size="xs"
               variant="subtle"
               colorPalette="amber"
-              backdropFilter="blur(10px)"
               borderRadius="md"
               px={1.5}
               py={0.5}
@@ -360,7 +352,6 @@ export const CardVideo = memo(function CardVideo({
             borderRadius="md"
             bg="cirqueira.grey.950/70"
             color="cirqueira.grey.0"
-            backdropFilter="blur(8px)"
             display="inline-flex"
             alignItems="center"
             justifyContent="center"
@@ -385,7 +376,6 @@ export const CardVideo = memo(function CardVideo({
             fontWeight="bold"
             fontFamily="mono"
             color="cirqueira.grey.0"
-            backdropFilter="blur(8px)"
             borderWidth="1px"
             borderColor="border.subtle"
           >

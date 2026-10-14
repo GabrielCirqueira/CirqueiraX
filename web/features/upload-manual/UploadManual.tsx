@@ -498,13 +498,15 @@ const UploadManual = memo(function UploadManual() {
         />
 
         <Dialog.Root
+          lazyMount
+          unmountOnExit
           open={modalConfirmarApagar}
           onOpenChange={(e) => !e.open && setModalConfirmarApagar(false)}
           size="sm"
           placement="center"
         >
           <Portal>
-            <Dialog.Backdrop bg="cirqueira.grey.950/80" backdropFilter="blur(4px)" />
+            <Dialog.Backdrop bg="cirqueira.grey.950/80" />
             <Dialog.Positioner>
             <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
               <Dialog.Header pb={2}>

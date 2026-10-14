@@ -90,7 +90,6 @@ function CustomTooltipPie({
       borderWidth="1px"
       borderColor="border.subtle"
       bg="rgba(25, 27, 26, 0.95)"
-      backdropFilter="blur(12px)"
       p={3}
       shadow="2xl"
       fontSize="xs"
@@ -135,7 +134,6 @@ function CustomTooltipBar({
       borderWidth="1px"
       borderColor="border.subtle"
       bg="rgba(25, 27, 26, 0.95)"
-      backdropFilter="blur(12px)"
       p={3.5}
       shadow="2xl"
       fontSize="xs"
