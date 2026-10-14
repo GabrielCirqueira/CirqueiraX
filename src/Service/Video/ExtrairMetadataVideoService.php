@@ -18,12 +18,14 @@ final readonly class ExtrairMetadataVideoService
     public function extrair(string $url): array
     {
         $dados = $this->ytDlpClient->extrairMetadata($url);
+        $agora = new \DateTimeImmutable('now', new \DateTimeZone('America/Sao_Paulo'));
 
         return [
             'titulo' => $dados['title'] ?? null,
             'uploader' => $dados['uploader'] ?? ($dados['uploader_id'] ?? null),
             'duracao' => $dados['duration'] ?? null,
-            'data' => $dados['upload_date'] ?? null,
+            'data' => $agora->format('Y-m-d H:i:s'),
+            'horario' => $agora->format('H:i'),
             'extensao' => $dados['ext'] ?? null,
             'url_original' => $url,
         ];

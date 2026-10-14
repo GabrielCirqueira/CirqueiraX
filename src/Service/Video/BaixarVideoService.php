@@ -12,6 +12,7 @@ use App\Exception\Video\YtDlpException;
 use App\Interface\ArmazenamentoInterface;
 use App\Repository\MediaItemRepository;
 use App\Service\Ingestao\IngestarMediaService;
+use App\Service\MediaItem\AplicarMetadataArquivoService;
 use App\Service\MediaItem\ClassificarMediaItemService;
 use App\Support\MetadataKeys;
 use App\Support\TextoUtil;
@@ -25,6 +26,7 @@ final readonly class BaixarVideoService
         private ClassificarMediaItemService $classificarMediaItemService,
         private MediaItemRepository $mediaItemRepository,
         private ArmazenamentoInterface $armazenamentoClient,
+        private AplicarMetadataArquivoService $aplicarMetadataArquivoService,
     ) {}
 
     public function executar(string $url, ?OrigemMedia $origem = null, ?string $categoriaId = null): MediaItem
@@ -64,6 +66,7 @@ final readonly class BaixarVideoService
         );
 
         $mediaItem = $this->ingestarMediaService->executar($dto);
+        $this->aplicarMetadataArquivoService->aplicarEmMediaItem($mediaItem);
 
         if (null !== $mediaItem->caminhoLocal() && $mediaItem->caminhoLocal() !== $caminhoLocal && file_exists($caminhoLocal)) {
             $this->armazenamentoClient->remover($caminhoLocal);
