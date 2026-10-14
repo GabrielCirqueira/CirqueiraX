@@ -281,6 +281,7 @@ class MediaItemRepository extends ServiceEntityRepository
             'atualizadoEm' => 'm.atualizadoEm',
             'status' => 'm.status',
             'origem' => 'm.origem',
+            'dataExibicao' => 'm.dataExibicao',
             default => 'm.criadoEm',
         };
 
@@ -289,6 +290,7 @@ class MediaItemRepository extends ServiceEntityRepository
         $offset = max(0, ($pagina - 1) * $porPagina);
 
         $qb->orderBy($campoOrdenacao, $direcao)
+            ->addOrderBy('m.uuid', 'DESC')
             ->setFirstResult($offset)
             ->setMaxResults($porPagina);
 
