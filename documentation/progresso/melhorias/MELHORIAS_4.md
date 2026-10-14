@@ -202,3 +202,52 @@
 
 ---
 
+### ✅ Melhoria 69 — Remoção de Blur e Animações de Página que Travavam Carregamento, Navegação e Popups
+
+- **Status**: Concluído
+- **Data**: 13 de outubro de 2026
+- **Problema**:
+  - A interface travava ao carregar, ao trocar de página e ao abrir popups.
+  - Cada card de mídia aplicava vários `backdrop-filter: blur`, o header e as barras flutuantes também, e o backdrop dos diálogos desfocava a tela inteira por cima dessa grade.
+  - A troca de rota animava a página inteira com `will-change: transform, opacity`, e a troca de aba, filtro ou página remontava a grade só para repetir a animação.
+- **Solução**:
+  - Removido o blur de diálogos, cards, header, login e barras de ação. O fundo dos popups ficou só com a camada escura.
+  - Desligadas as animações de entrada de página, de aba e de elevação dos cards (`page-transition-enter`, `tab-pane-fade`, `smooth-card`, `smooth-media-item`, `smooth-thumb-zoom`).
+  - A navegação deixou de remontar o `<Outlet />` a cada rota, e as grades de downloads, prints, central de mídias e dashboard deixaram de remontar ao mudar filtro ou página.
+  - Diálogos passaram a usar `lazyMount` e `unmountOnExit`, e os cards da grade usam `content-visibility: auto` para não pintar o que está fora da tela.
+- **Arquivos**:
+  - `web/index.css`
+  - `web/layouts/MainLayout.tsx`
+  - `web/layouts/Header.tsx`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/CardVideo.tsx`
+  - `web/features/central-midias/CentralMidias.tsx`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`
+  - `web/features/prints/Prints.tsx`
+  - `web/features/prints/components/CardPrint.tsx`
+  - `web/features/upload-manual/components/CardItemTriagem.tsx`
+  - `web/shared/components/responsive/DialogOuDrawer.tsx`
+
+---
+
+### ✅ Melhoria 70 — Ordenação da Central de Downloads pela Data de Exibição do Vídeo (Download ou Edição)
+
+- **Status**: Concluído
+- **Data**: 13 de outubro de 2026
+- **Problema**:
+  - A Central de Downloads listava os vídeos pela data em que o registro entrou no sistema (`criadoEm`), sempre do mais novo para o mais antigo.
+  - A data mostrada no card é outra: a data editada (`metadata.data` + `metadata.horario`) ou, se ninguém editou, a data do download.
+  - Ao alterar a data de um vídeo, individualmente ou na distribuição de horários em lote, a posição dele na grade não mudava.
+- **Solução**:
+  - Criado o campo `dataExibicao` em `MediaItem`, preenchido com a data e hora de exibição do vídeo. Sem data editada, o valor fica igual ao do download.
+  - Toda gravação de metadados recalcula esse campo, inclusive a distribuição de horários em lote.
+  - A listagem da Central de Downloads pede `ordenacao=dataExibicao` em ordem decrescente, então o vídeo editado passa a ocupar o lugar correspondente em relação aos demais.
+  - Migration `Version20261014030100` cria a coluna, preenche os vídeos já existentes e indexa a ordenação.
+- **Arquivos**:
+  - `src/Entity/MediaItem.php`
+  - `src/Repository/MediaItemRepository.php`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `migrations/Version20261014030100.php`
+
+---
+
