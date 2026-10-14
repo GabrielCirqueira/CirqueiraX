@@ -84,6 +84,7 @@
 | M68 | Injeção Automática de Metadados de Criação via FFmpeg (`creation_time`) e Timestamps no Arquivo Físico para Google Fotos | ✅ Concluído | 13/10/2026 | [ver](MELHORIAS_4.md#melhoria-68--injeção-automática-de-metadados-de-criação-via-ffmpeg-creation_time-e-timestamps-no-arquivo-físico-para-google-fotos) |
 | M69 | Remoção de Blur e Animações de Página que Travavam Carregamento, Navegação e Popups | ✅ Concluído | 13/10/2026 | [ver](MELHORIAS_4.md#melhoria-69--remoção-de-blur-e-animações-de-página-que-travavam-carregamento-navegação-e-popups) |
 | M70 | Ordenação da Central de Downloads pela Data de Exibição do Vídeo (Download ou Edição) | ✅ Concluído | 13/10/2026 | [ver](MELHORIAS_4.md#melhoria-70--ordenação-da-central-de-downloads-pela-data-de-exibição-do-vídeo-download-ou-edição) |
+| M71 | Data de Criação do Download no Momento do Download, e não na Data de Publicação da Plataforma | ✅ Concluído | 14/10/2026 | [ver](MELHORIAS_4.md#melhoria-71--data-de-criação-do-download-no-momento-do-download-e-não-na-data-de-publicação-da-plataforma) |
 
 
 

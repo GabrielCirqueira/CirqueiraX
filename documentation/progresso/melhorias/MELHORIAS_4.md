@@ -251,3 +251,25 @@
 
 ---
 
+### ✅ Melhoria 71 — Data de Criação do Download no Momento do Download, e não na Data de Publicação da Plataforma
+
+- **Status**: Concluído
+- **Data**: 14 de outubro de 2026
+- **Problema**:
+  - Ao baixar um vídeo, o sistema gravava em `metadata.data` o `upload_date` do yt-dlp, que é a data em que o vídeo foi publicado no TikTok, YouTube ou outra plataforma.
+  - Um vídeo baixado em 14/10 aparecia como 05/10, 08/10 ou 12/10. O horário do card ainda vinha do momento do download, então a data e a hora não batiam.
+  - Quem queria a data real do download precisava abrir o modal e editar um por um.
+- **Solução**:
+  - O download passa a gravar `data` e `horario` com o instante atual em `America/Sao_Paulo`, e carimba esse instante no arquivo.
+  - O yt-dlp baixa com `--no-mtime`, para não herdar a data de publicação no arquivo.
+  - Uma edição manual continua sobrescrevendo essa data, e a ordem da lista acompanha a data nova.
+  - Vídeos já baixados que ainda estavam só com a data `YYYYMMDD` da plataforma, e que não foram editados nem vieram da Franky, voltam para a data em que foram baixados.
+- **Arquivos**:
+  - `src/Service/Video/BaixarVideoDownloadService.php`
+  - `src/Service/Video/BaixarVideoService.php`
+  - `src/Service/Video/ExtrairMetadataVideoService.php`
+  - `src/Infra/YtDlp/YtDlpClient.php`
+  - `migrations/Version20261014223000.php`
+
+---
+

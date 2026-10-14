@@ -43,6 +43,7 @@ final class YtDlpClient implements ExtratorVideoInterface
         $process = new Process([
             'yt-dlp',
             '--no-playlist',
+            '--no-mtime',
             '--format',
             self::FORMATO_VIDEO_PREFERIDO,
             '--output',

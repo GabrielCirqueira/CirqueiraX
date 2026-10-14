@@ -28,12 +28,14 @@ final readonly class BaixarVideoDownloadService
     {
         $dados = $this->ytDlpClient->extrairMetadata($url);
         $thumbnail = $this->extrairThumbnail($dados);
+        $agora = new \DateTimeImmutable('now', new \DateTimeZone('America/Sao_Paulo'));
 
         return [
             MetadataKeys::TITULO => $dados['title'] ?? null,
             MetadataKeys::UPLOADER => $dados['uploader'] ?? ($dados['uploader_id'] ?? null),
             MetadataKeys::DURACAO => $dados['duration'] ?? null,
-            MetadataKeys::DATA => $dados['upload_date'] ?? null,
+            MetadataKeys::DATA => $agora->format('Y-m-d H:i:s'),
+            'horario' => $agora->format('H:i'),
             MetadataKeys::EXTENSAO => $dados['ext'] ?? null,
             MetadataKeys::THUMBNAIL => $thumbnail,
             MetadataKeys::URL_ORIGINAL => $url,
