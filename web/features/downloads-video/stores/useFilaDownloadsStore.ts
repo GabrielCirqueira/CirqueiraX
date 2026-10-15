@@ -246,8 +246,8 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
           if (callbackConclusaoGlobal) {
             callbackConclusaoGlobal()
           }
-        } catch (error: any) {
           const mensagemErro =
+            error?.response?.data?.error ||
             error?.response?.data?.message ||
             error?.response?.data?.detalhes ||
             error?.message ||

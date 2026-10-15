@@ -16,6 +16,9 @@ devops/var/
 /public/bundles/
 /var/
 var/
+!var/cookies/
+!var/cookies/.gitignore
+!var/cookies/README.md
 /vendor/
 ###< symfony/framework-bundle ###
 

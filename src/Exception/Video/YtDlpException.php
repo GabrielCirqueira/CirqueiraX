@@ -6,9 +6,14 @@ namespace App\Exception\Video;
 
 class YtDlpException extends \DomainException
 {
-    public static function falhaAoExtrairMetadataDoVideo(): self
+    public static function falhaAoExtrairMetadataDoVideo(?string $detalhe = null): self
     {
-        return new self('Falha ao extrair os metadados do vídeo utilizando o yt-dlp.', 400);
+        $mensagem = 'Falha ao extrair os metadados do vídeo utilizando o yt-dlp.';
+        if (null !== $detalhe && '' !== trim($detalhe)) {
+            $mensagem .= ' ' . trim($detalhe);
+        }
+
+        return new self($mensagem, 400);
     }
 
     public static function falhaAoProcessarJsonDeMetadata(): self
@@ -16,9 +21,14 @@ class YtDlpException extends \DomainException
         return new self('Não foi possível realizar o parse do JSON de metadados retornado pelo yt-dlp.', 500);
     }
 
-    public static function falhaAoEfetuarDownloadDoVideo(): self
+    public static function falhaAoEfetuarDownloadDoVideo(?string $detalhe = null): self
     {
-        return new self('Ocorreu uma falha durante o download do vídeo pelo yt-dlp.', 500);
+        $mensagem = 'Ocorreu uma falha durante o download do vídeo pelo yt-dlp.';
+        if (null !== $detalhe && '' !== trim($detalhe)) {
+            $mensagem .= ' ' . trim($detalhe);
+        }
+
+        return new self($mensagem, 500);
     }
 
     public static function arquivoDeVideoBaixadoNaoEncontrado(): self

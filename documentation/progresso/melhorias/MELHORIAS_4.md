@@ -271,5 +271,35 @@
   - `src/Infra/YtDlp/YtDlpClient.php`
   - `migrations/Version20261014223000.php`
 
----
+### ✅ Melhoria 72 — Suporte Nativo a Cookies para yt-dlp, Diagnóstico de Bloqueio Anti-Bot e Exibição de Mensagens Claras de Erro
+
+- **Status**: Concluído
+- **Data**: 15 de outubro de 2026
+- **Problema**:
+  - Ao tentar baixar certos vídeos do YouTube (como trailers restritos e vídeos musicais com proteção estrita, ex: trailer oficial do GTA VI `rz1B4B2yBZY`), o download falhava e a interface exibia apenas uma mensagem genérica opaca: `Request failed with status code 400`.
+  - O YouTube responde a requisições de IPs de data center (VPS) com `LOGIN_REQUIRED` e a mensagem de anti-bot `Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication`.
+  - O backend (`YtDlpClient`) descartava a saída de erro (`stderr`) do `Process`, disparando uma exceção com mensagem estática sem detalhes.
+  - O frontend (`useFilaDownloadsStore`) procurava mensagens em `error?.response?.data?.message`, enquanto o listener de erro do Symfony devolvia a chave `error`, provocando fallback para a mensagem padrão do Axios (`Request failed with status code 400`).
+  - O sistema não possuía suporte nativo nem pasta mapeada para injetar arquivos de cookies (`--cookies`) no `yt-dlp`.
+- **Solução**:
+  - **Suporte Nativo a Cookies no `YtDlpClient`**:
+    - O cliente agora verifica se existe um arquivo de cookies configurado via parâmetro `YTDLP_COOKIES_PATH` ou posicionado nos caminhos padrão (`var/cookies/youtube.txt`, `var/cookies/cookies.txt`, `var/storage/cookies/youtube.txt`).
+    - Se encontrado, injeta automaticamente o argumento `--cookies <caminho>` tanto na extração de metadados (`--dump-json`) quanto no download de arquivos.
+  - **Tratamento Inteligente de Erros no Backend**:
+    - `YtDlpClient` agora analisa a saída de erro (`stderr`). Se o YouTube responder com exigência anti-bot (`Sign in to confirm you're not a bot`), a mensagem é traduzida e enriquecida com a orientação exata para o usuário.
+    - `YtDlpException` aceita detalhe dinâmico do erro para manter código HTTP e contexto claros.
+  - **Exibição Transparente no Frontend**:
+    - `useFilaDownloadsStore` passa a extrair `error?.response?.data?.error` prioritariamente, garantindo que a explicação exata chegue ao card de download e ao toast.
+  - **Estrutura de Armazenamento e Volume Docker**:
+    - Criado o diretório `var/cookies/` com `.gitignore` (protegendo credenciais) e `README.md` com instruções de exportação rápida via extensão de navegador.
+    - Mapeado o volume `../var/cookies:/var/www/html/var/cookies` no `devops/docker-compose.prod.yaml`.
+- **Arquivos**:
+  - `src/Infra/YtDlp/YtDlpClient.php`
+  - `src/Exception/Video/YtDlpException.php`
+  - `config/services.yaml`
+  - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
+  - `devops/docker-compose.prod.yaml`
+  - `var/cookies/.gitignore`
+  - `var/cookies/README.md`
+
 
