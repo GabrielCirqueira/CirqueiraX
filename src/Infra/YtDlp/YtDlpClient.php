@@ -29,6 +29,13 @@ final class YtDlpClient implements ExtratorVideoInterface
         if (null !== $arquivoCookies) {
             $comando[] = '--cookies';
             $comando[] = $arquivoCookies;
+            $comando[] = '--remote-components';
+            $comando[] = 'ejs:github';
+            $comando[] = '--extractor-args';
+            $comando[] = 'youtube:player_client=web';
+        } else {
+            $comando[] = '--extractor-args';
+            $comando[] = 'youtube:player_client=android';
         }
         $comando[] = $url;
 
@@ -70,6 +77,13 @@ final class YtDlpClient implements ExtratorVideoInterface
         if (null !== $arquivoCookies) {
             $comando[] = '--cookies';
             $comando[] = $arquivoCookies;
+            $comando[] = '--remote-components';
+            $comando[] = 'ejs:github';
+            $comando[] = '--extractor-args';
+            $comando[] = 'youtube:player_client=web';
+        } else {
+            $comando[] = '--extractor-args';
+            $comando[] = 'youtube:player_client=android';
         }
         $comando[] = $url;
 
@@ -118,6 +132,10 @@ final class YtDlpClient implements ExtratorVideoInterface
 
     private function extrairMensagemErroRelevante(string $stderr): ?string
     {
+        if (stripos($stderr, 'The provided YouTube account cookies are no longer valid') !== false) {
+            return 'Os cookies do YouTube configurados no servidor expiraram ou foram invalidados pelo Google. Por favor, exporte um novo cookies.txt pelo navegador e atualize em var/cookies/youtube.txt.';
+        }
+
         $linhas = explode("\n", $stderr);
         $erros = [];
 
