@@ -14,17 +14,31 @@ final class YtDlpClient implements ExtratorVideoInterface
     private const float TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS = 300.0;
     private const string FORMATO_VIDEO_PREFERIDO = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
 
+    public function __construct(
+        private ?string $cookiesPath = null,
+        private string $projectDir = '',
+    ) {}
+
     /**
      * @return array<string, mixed>
      */
     public function extrairMetadata(string $url): array
     {
-        $process = new Process(['yt-dlp', '--dump-json', '--no-playlist', $url]);
+        $comando = ['yt-dlp', '--dump-json', '--no-playlist'];
+        $arquivoCookies = $this->resolverArquivoCookies();
+        if (null !== $arquivoCookies) {
+            $comando[] = '--cookies';
+            $comando[] = $arquivoCookies;
+        }
+        $comando[] = $url;
+
+        $process = new Process($comando);
         $process->setTimeout(self::TIMEOUT_EXTRACAO_METADATA_SEGUNDOS);
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw YtDlpException::falhaAoExtrairMetadataDoVideo();
+            $motivo = $this->extrairMensagemErroRelevante($process->getErrorOutput());
+            throw YtDlpException::falhaAoExtrairMetadataDoVideo($motivo);
         }
 
         /** @var mixed $dados */
@@ -40,7 +54,7 @@ final class YtDlpClient implements ExtratorVideoInterface
     public function baixarVideo(string $url, string $diretorioDestino): string
     {
         $templateSaida = $diretorioDestino . '/%(id)s.%(ext)s';
-        $process = new Process([
+        $comando = [
             'yt-dlp',
             '--no-playlist',
             '--no-mtime',
@@ -50,13 +64,22 @@ final class YtDlpClient implements ExtratorVideoInterface
             $templateSaida,
             '--print',
             'after_move:filepath',
-            $url,
-        ]);
+        ];
+
+        $arquivoCookies = $this->resolverArquivoCookies();
+        if (null !== $arquivoCookies) {
+            $comando[] = '--cookies';
+            $comando[] = $arquivoCookies;
+        }
+        $comando[] = $url;
+
+        $process = new Process($comando);
         $process->setTimeout(self::TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS);
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw YtDlpException::falhaAoEfetuarDownloadDoVideo();
+            $motivo = $this->extrairMensagemErroRelevante($process->getErrorOutput());
+            throw YtDlpException::falhaAoEfetuarDownloadDoVideo($motivo);
         }
 
         $linhas = array_filter(explode("\n", trim($process->getOutput())));
@@ -67,5 +90,52 @@ final class YtDlpClient implements ExtratorVideoInterface
         }
 
         return $caminhoArquivo;
+    }
+
+    private function resolverArquivoCookies(): ?string
+    {
+        if (null !== $this->cookiesPath && '' !== trim($this->cookiesPath) && file_exists($this->cookiesPath) && is_readable($this->cookiesPath) && filesize($this->cookiesPath) > 0) {
+            return $this->cookiesPath;
+        }
+
+        $candidatos = [
+            $this->projectDir . '/var/cookies/youtube.txt',
+            $this->projectDir . '/var/cookies/cookies.txt',
+            '/var/www/html/var/cookies/youtube.txt',
+            '/var/www/html/var/cookies/cookies.txt',
+            '/var/www/html/var/storage/cookies/youtube.txt',
+            '/var/www/html/var/storage/cookies/cookies.txt',
+        ];
+
+        foreach ($candidatos as $candidato) {
+            if (file_exists($candidato) && is_readable($candidato) && filesize($candidato) > 0) {
+                return $candidato;
+            }
+        }
+
+        return null;
+    }
+
+    private function extrairMensagemErroRelevante(string $stderr): ?string
+    {
+        $linhas = explode("\n", $stderr);
+        $erros = [];
+
+        foreach ($linhas as $linha) {
+            $linhaTrim = trim($linha);
+            if (str_starts_with($linhaTrim, 'ERROR:')) {
+                $msg = preg_replace('/^ERROR:\s*(\[[^\]]+\]\s*)?/', '', $linhaTrim) ?? $linhaTrim;
+                if (stripos($msg, "Sign in to confirm you're not a bot") !== false || stripos($msg, "confirm you’re not a bot") !== false) {
+                    return 'O YouTube exigiu login/autenticação anti-bot para este vídeo (Sign in to confirm you’re not a bot). Forneça o arquivo cookies.txt em var/cookies/youtube.txt.';
+                }
+                $erros[] = $msg;
+            }
+        }
+
+        if (!empty($erros)) {
+            return implode(' | ', $erros);
+        }
+
+        return null;
     }
 }

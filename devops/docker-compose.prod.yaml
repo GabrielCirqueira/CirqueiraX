@@ -19,6 +19,7 @@ services:
       - "${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}:/var/www/html/var/storage"
       - downloads_prod:/var/www/html/var/downloads
       - thumbnails_prod:/var/www/html/var/cache/thumbnails
+      - ../var/cookies:/var/www/html/var/cookies
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
       interval: 30s

@@ -9,6 +9,7 @@ parameters:
     env(GOOGLE_CLIENT_SECRET): ''
     env(SYNCTHING_API_URL): 'http://localhost:8384'
     env(SYNCTHING_API_KEY): ''
+    env(YTDLP_COOKIES_PATH): ''
 
 services:
     # default configuration for services in *this* file
@@ -59,6 +60,11 @@ services:
     App\Service\Video\BaixarVideoDownloadService:
         arguments:
             $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'
+            $projectDir: '%kernel.project_dir%'
+
+    App\Infra\YtDlp\YtDlpClient:
+        arguments:
+            $cookiesPath: '%env(YTDLP_COOKIES_PATH)%'
             $projectDir: '%kernel.project_dir%'
 
     App\Service\MediaItem\RebaixarMediaItemService:
