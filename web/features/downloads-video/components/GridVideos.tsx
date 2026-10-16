@@ -2,12 +2,14 @@ import { Badge, Box, Button, Flex, Grid, HStack, Text, VStack } from '@chakra-ui
 import { CheckSquare, Film, FolderCheck, Square, Tag, X } from 'lucide-react'
 import { memo, useMemo } from 'react'
 import type { MediaItem } from '../types'
-import { CardVideo } from './CardVideo'
+import { CardVideo, type VarianteCardVideo } from './CardVideo'
 
 export interface GridVideosProps {
   itens: MediaItem[]
   carregando?: boolean
   selecionados: string[]
+  variante?: VarianteCardVideo
+  colunas?: number
   categoriaFiltro?: string
   nomeCategoriaFiltro?: string
   onToggleSelect: (uuid: string) => void
@@ -53,6 +55,8 @@ export const GridVideos = memo(function GridVideos({
   itens,
   carregando = false,
   selecionados,
+  variante = 'grid',
+  colunas = 5,
   categoriaFiltro = '',
   nomeCategoriaFiltro = '',
   onToggleSelect,
@@ -70,6 +74,26 @@ export const GridVideos = memo(function GridVideos({
 }: GridVideosProps) {
   const todosSelecionados = itens.length > 0 && selecionados.length === itens.length
   const algunsSelecionados = selecionados.length > 0 && !todosSelecionados
+
+  const templateColunas = useMemo(() => {
+    if (variante === 'compacto') {
+      const colsCompacto = Math.min(3, Math.max(1, colunas))
+      return {
+        base: '1fr',
+        md: colsCompacto >= 2 ? 'repeat(2, 1fr)' : '1fr',
+        xl: `repeat(${colsCompacto}, 1fr)`,
+      }
+    }
+
+    const colsSeguras = Math.min(6, Math.max(2, colunas))
+    return {
+      base: '1fr',
+      sm: 'repeat(2, 1fr)',
+      md: `repeat(${Math.min(3, colsSeguras)}, 1fr)`,
+      lg: `repeat(${Math.min(4, colsSeguras)}, 1fr)`,
+      xl: `repeat(${colsSeguras}, 1fr)`,
+    }
+  }, [variante, colunas])
 
   const semCategoriaNaPagina = useMemo(
     () => itens.filter((it) => !it.categoriaId && !it.categoria),
@@ -106,16 +130,7 @@ export const GridVideos = memo(function GridVideos({
 
   if (carregando && itens.length === 0) {
     return (
-      <Grid
-        w="full"
-        templateColumns={{
-          base: '1fr',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
-          lg: 'repeat(4, 1fr)',
-        }}
-        gap={4}
-      >
+      <Grid w="full" templateColumns={templateColunas} gap={colunas >= 6 ? 3 : 4}>
         {Array.from({ length: 8 }).map((_, index) => (
           <SkeletonCard key={`skeleton-${index + 1}`} />
         ))}
@@ -274,19 +289,16 @@ export const GridVideos = memo(function GridVideos({
 
       <Grid
         w="full"
-        templateColumns={{
-          base: '1fr',
-          sm: 'repeat(2, 1fr)',
-          md: 'repeat(3, 1fr)',
-          lg: 'repeat(5, 1fr)',
-        }}
-        gap={4}
+        templateColumns={templateColunas}
+        gap={variante === 'compacto' ? 3 : colunas >= 6 ? 3 : 4}
       >
         {itens.map((item) => (
           <CardVideo
             key={item.uuid}
             item={item}
             selecionado={selecionados.includes(item.uuid)}
+            variante={variante}
+            colunas={colunas}
             onToggleSelect={onToggleSelect}
             onVisualizar={onVisualizar}
             onEditarMetadata={onEditarMetadata}
