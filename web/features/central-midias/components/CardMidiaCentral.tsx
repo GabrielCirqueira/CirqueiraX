@@ -26,6 +26,8 @@ import {
   obterUrlThumbnailMidia,
 } from '../api'
 import type { MediaItem } from '../types'
+import { formatarHorarioMidia } from '@/features/downloads-video/utils/formatadores'
+import type { MediaItem as MediaItemDownload } from '@/features/downloads-video/types'
 
 export interface CardMidiaCentralProps {
   item: MediaItem
@@ -102,16 +104,8 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
   }, [item.metadata?.duracao])
 
   const dataHora = useMemo(() => {
-    if (!item.criadoEm) return ''
-    try {
-      return new Date(item.criadoEm).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    } catch {
-      return ''
-    }
-  }, [item.criadoEm])
+    return formatarHorarioMidia(item as unknown as MediaItemDownload)
+  }, [item])
 
   const streamUrl = obterUrlStreamMidia(item.uuid)
   const apiThumbUrl = obterUrlThumbnailMidia(item.uuid)

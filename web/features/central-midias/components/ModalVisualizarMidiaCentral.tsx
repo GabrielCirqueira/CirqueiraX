@@ -34,6 +34,8 @@ import {
 } from '../api'
 import type { CategoriaOpcao, MediaItem } from '../types'
 import { formatarTamanhoBytes } from '@/features/upload-manual/utils/arquivosUpload'
+import { formatarDataMidia, formatarHorarioMidia } from '@/features/downloads-video/utils/formatadores'
+import type { MediaItem as MediaItemDownload } from '@/features/downloads-video/types'
 
 export interface ModalVisualizarMidiaCentralProps {
   item: MediaItem | null
@@ -105,20 +107,9 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
   const streamUrl = obterUrlStreamMidia(item.uuid)
   const thumbUrl = item.thumbnailUrl || obterUrlThumbnailMidia(item.uuid)
 
-  const dataFormatada = item.criadoEm
-    ? new Date(item.criadoEm).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
-    : '—'
-
-  const horarioFormatado = item.criadoEm
-    ? new Date(item.criadoEm).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : ''
+  const dataStr = typeof item.metadata?.data === 'string' ? item.metadata.data : undefined
+  const dataFormatada = formatarDataMidia(dataStr, item.criadoEm)
+  const horarioFormatado = formatarHorarioMidia(item as unknown as MediaItemDownload)
 
   const handleCopiar = async () => {
     if (isVideo) return

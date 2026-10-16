@@ -53,16 +53,6 @@ export function formatarDataMidia(valorData?: string, fallbackIso?: string): str
 }
 
 export function formatarHorarioMidia(item: MediaItem): string {
-  if (item.metadata?.horario && typeof item.metadata.horario === 'string') {
-    const limpo = item.metadata.horario.trim()
-    const partes = limpo.split(':')
-    const h = partes[0]
-    const m = partes[1]
-    if (h !== undefined && m !== undefined) {
-      return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`
-    }
-  }
-
   const valorData = item.metadata?.data
   if (valorData && typeof valorData === 'string') {
     const strData = valorData.trim()
@@ -84,6 +74,16 @@ export function formatarHorarioMidia(item: MediaItem): string {
       if (hh !== undefined && mm !== undefined) {
         return `${hh.padStart(2, '0')}:${mm.padStart(2, '0')}`
       }
+    }
+  }
+
+  if (item.metadata?.horario && typeof item.metadata.horario === 'string') {
+    const limpo = item.metadata.horario.trim()
+    const partes = limpo.split(':')
+    const h = partes[0]
+    const m = partes[1]
+    if (h !== undefined && m !== undefined) {
+      return `${h.padStart(2, '0')}:${m.padStart(2, '0')}`
     }
   }
 
