@@ -56,8 +56,8 @@ final readonly class BaixarVideoService
             return $itemExistente;
         }
 
-        $metadataExtraida = $this->baixarVideoDownloadService->extrairMetadata($url);
         $caminhoLocal = $this->baixarVideoDownloadService->baixarParaStorage($url);
+        $metadataExtraida = $this->baixarVideoDownloadService->extrairMetadata($url);
 
         $dto = new IngestarMediaDTO(
             caminhoArquivo: $caminhoLocal,

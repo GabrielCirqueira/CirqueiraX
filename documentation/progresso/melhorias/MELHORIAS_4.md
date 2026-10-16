@@ -302,4 +302,35 @@
   - `var/cookies/.gitignore`
   - `var/cookies/README.md`
 
+---
 
+### ✅ Melhoria 73 — Resiliência da Fila de Downloads, Download + Extração de Metadados em Passo Único e Isolamento de Flags por Plataforma (TikTok / YouTube / X)
+
+- **Status**: Concluído
+- **Data**: 15 de outubro de 2026
+- **Problema**:
+  - Ao enfileirar múltiplos vídeos de redes variadas (TikTok, YouTube, X/Twitter), a fila baixava 1 ou 2 vídeos e depois travava indefinidamente com o status `Baixando agora: ...` (carregando infinitamente), exigindo pausar e retomar manualmente.
+  - **Causa 1 — Falta do bloco `catch` na Store da Fila (`useFilaDownloadsStore.ts`)**: Uma edição anterior havia omitido acidentalmente a linha `} catch (error: any) {` dentro de `processarFila`. Quando qualquer item retornava erro HTTP (400 ou 504), a exceção saía sem passar pelo `catch`, mantendo o item eternamente com `status: 'baixando'`. Como `processarFila` aborta quando `temItemBaixando` é verdadeiro, toda a fila ficava congelada.
+  - **Causa 2 — Dupla Chamada ao `yt-dlp` e Vazamento de Flags do YouTube para o TikTok**: `BaixarVideoService` invocava o `yt-dlp` duas vezes seguidas para cada vídeo (`extrairMetadata` com `--dump-json` e depois `baixarVideo`). Além disso, `YtDlpClient` injetava os cookies do YouTube e `--extractor-args youtube:player_client=web` em todas as URLs, inclusive TikTok e X. Em downloads sequenciais do TikTok, o dobro de requisições causava bloqueio `HTTP Error 403: Forbidden`.
+  - **Causa 3 — Timeout de 90s no Nginx**: O Nginx (host e container) cortava conexões em `90s` (`504 Gateway Time-out`), enquanto o timeout do `YtDlpClient` era de `300s`.
+- **Solução**:
+  - **Correção e Auto-Recuperação na Store (`useFilaDownloadsStore.ts` e `api.ts`)**:
+    - Restaurado o bloco `} catch (error: any) {` garantindo que falhas transitem imediatamente para `status: 'erro'` e disparem o próximo item no `finally`.
+    - Adicionada auto-recuperação: se `processarFila` ou `retomar` forem acionados quando `processandoAtivo` é `false` e houver algum item órfão preso em `'baixando'`, ele é automaticamente resetado para `'pendente'`.
+    - Definido timeout explícito de 180s na chamada Axios `criarPedidoDownload`.
+  - **Download + Metadados em Passo Único (`YtDlpClient` e `BaixarVideoService`)**:
+    - `BaixarVideoService` passa a executar `baixarParaStorage($url)` antes de `extrairMetadata($url)`.
+    - `YtDlpClient::baixarVideo()` utiliza `--write-info-json`, lê e armazena os metadados em cache em memória (`$this->metadataCache[$url]`) e remove o arquivo `.info.json` temporário.
+    - Quando `extrairMetadata($url)` é chamado em seguida, retorna os metadados do cache em 0ms sem abrir um segundo processo `yt-dlp`, reduzindo o tempo por vídeo pela metade e evitando rate-limit.
+  - **Isolamento de Flags por Plataforma (`YtDlpClient::adicionarFlagsPlataforma`)**:
+    - **YouTube**: recebe `--cookies youtube.txt`, `--remote-components ejs:github` e `youtube:player_client=web`.
+    - **TikTok**: não recebe cookies do YouTube; utiliza `--user-agent` de navegador desktop, `--referer https://www.tiktok.com/`, `--retries 5`, `--extractor-retries 5` e suporte opcional a `var/cookies/tiktok.txt`.
+    - **X / Twitter e demais**: recebem `--retries 3` e `--extractor-retries 3` sem argumentos exclusivos do YouTube.
+  - **Alinhamento de Timeouts no Nginx**:
+    - Aumentados `fastcgi_read_timeout` em `devops/php/nginx-internal.conf` e `proxy_read_timeout` / `proxy_send_timeout` no Nginx do host de `90s` para `300s`.
+- **Arquivos**:
+  - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
+  - `web/features/downloads-video/api.ts`
+  - `src/Service/Video/BaixarVideoService.php`
+  - `src/Infra/YtDlp/YtDlpClient.php`
+  - `devops/php/nginx-internal.conf`

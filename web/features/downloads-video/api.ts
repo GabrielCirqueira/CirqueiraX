@@ -31,7 +31,11 @@ export async function detalharMediaItem(uuid: string): Promise<MediaItem> {
 export async function criarPedidoDownload(
   input: PedidoDownloadInput
 ): Promise<PedidoDownloadResposta> {
-  const { data } = await api.post<RespostaApi<PedidoDownloadResposta>>('/api/v1/downloads', input)
+  const { data } = await api.post<RespostaApi<PedidoDownloadResposta>>(
+    '/api/v1/downloads',
+    input,
+    { timeout: 180_000 }
+  )
   return data.data
 }
 

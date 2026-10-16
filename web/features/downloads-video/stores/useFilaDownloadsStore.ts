@@ -141,7 +141,14 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
         if (onItemConcluido) {
           callbackConclusaoGlobal = onItemConcluido
         }
-        set({ pausado: false })
+        set((state) => ({
+          pausado: false,
+          itens: state.processandoAtivo
+            ? state.itens
+            : state.itens.map((it) =>
+                it.status === 'baixando' ? { ...it, status: 'pendente' } : it
+              ),
+        }))
         addToast({ title: 'Fila de downloads retomada!', color: 'primary' })
         setTimeout(() => {
           get().processarFila(callbackConclusaoGlobal ?? undefined)
@@ -187,14 +194,18 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
           return
         }
 
-        // Verifica se há algum item já em download
-        const temItemBaixando = state.itens.some((it) => it.status === 'baixando')
-        if (temItemBaixando) {
-          return
+        // Se processandoAtivo é false mas algum item ficou órfão como 'baixando', recupera como 'pendente'
+        const temItemBaixandoOrfao = state.itens.some((it) => it.status === 'baixando')
+        if (temItemBaixandoOrfao) {
+          set((s) => ({
+            itens: s.itens.map((it) =>
+              it.status === 'baixando' ? { ...it, status: 'pendente' } : it
+            ),
+          }))
         }
 
         // Pega o próximo item pendente
-        const proximo = state.itens.find((it) => it.status === 'pendente')
+        const proximo = get().itens.find((it) => it.status === 'pendente')
         if (!proximo) {
           set({ processandoAtivo: false })
           return
@@ -246,6 +257,7 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
           if (callbackConclusaoGlobal) {
             callbackConclusaoGlobal()
           }
+        } catch (error: any) {
           const mensagemErro =
             error?.response?.data?.error ||
             error?.response?.data?.message ||
