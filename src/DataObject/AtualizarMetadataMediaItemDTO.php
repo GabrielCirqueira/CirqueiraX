@@ -41,6 +41,9 @@ final readonly class AtualizarMetadataMediaItemDTO
         }
         if (null !== $this->data) {
             $dados[MetadataKeys::DATA] = $this->data;
+            if (1 === preg_match('/[T ](\d{1,2}:\d{2})/', $this->data, $partesHora)) {
+                $dados['horario'] = $partesHora[1];
+            }
         }
         if (null !== $this->duracao) {
             $dados[MetadataKeys::DURACAO] = $this->duracao;

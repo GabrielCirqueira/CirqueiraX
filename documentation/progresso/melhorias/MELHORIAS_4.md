@@ -335,3 +335,27 @@
   - `src/Service/Video/BaixarVideoService.php`
   - `src/Infra/YtDlp/YtDlpClient.php`
   - `devops/php/nginx-internal.conf`
+
+---
+
+### ✅ Melhoria 74 — Sincronização de `metadata.horario` na Edição Individual de Metadados e Prioridade de Exibição de Hora nos Cards
+
+- **Status**: Concluído
+- **Data**: 15 de outubro de 2026
+- **Problema**:
+  - Ao editar o horário de um vídeo individualmente (`PATCH /api/v1/media-itens/{uuid}`), o payload enviava `"data": "2026-10-15 10:45:00"`.
+  - Diferente do endpoint em lote (`distribuirHorarios`), `AtualizarMetadataMediaItemDTO::paraArray()` atualizava apenas `metadata['data']`, mantendo `metadata['horario']` com o horário original do momento do download (ex: `"20:20"`).
+  - No frontend, `formatarHorarioMidia` (`web/features/downloads-video/utils/formatadores.ts`) verificava `item.metadata.horario` **antes** de `item.metadata.data`, fazendo o card continuar exibindo o horário antigo mesmo após recarregar a página.
+  - Além disso, `CardMidiaCentral.tsx` e `ModalVisualizarMidiaCentral.tsx` liam `item.criadoEm` diretamente em vez dos metadados editados.
+- **Solução**:
+  - **Sincronização no Backend (`AtualizarMetadataMediaItemDTO.php`)**:
+    - Quando `data` contém componente de hora (`HH:MM`), `paraArray()` extrai e atualiza automaticamente `metadata['horario']`.
+    - Sincronizados no banco de dados todos os registros existentes cujo `metadata.data` já possuía hora diferente de `metadata.horario`.
+  - **Prioridade Correta no Frontend (`formatadores.ts`, `CardMidiaCentral.tsx`, `ModalVisualizarMidiaCentral.tsx`)**:
+    - `formatarHorarioMidia` passa a priorizar a hora contida em `item.metadata.data` e usa `item.metadata.horario` apenas como fallback quando `data` contiver somente a data (`YYYY-MM-DD`).
+    - `CardMidiaCentral` e `ModalVisualizarMidiaCentral` passaram a usar `formatarDataMidia` e `formatarHorarioMidia`.
+- **Arquivos**:
+  - `src/DataObject/AtualizarMetadataMediaItemDTO.php`
+  - `web/features/downloads-video/utils/formatadores.ts`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`
+  - `web/features/central-midias/components/ModalVisualizarMidiaCentral.tsx`
