@@ -32,7 +32,7 @@ import {
   Video,
   X,
 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
 import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
@@ -41,7 +41,8 @@ import { ModalEditarMetadata } from './components/ModalEditarMetadata'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import { PainelFilaDownloads } from './components/PainelFilaDownloads'
 import { TabelaVideos } from './components/TabelaVideos'
-import { useSEO } from '@/shared/hooks'
+import { useLocalStorageState, useSEO } from '@/shared/hooks'
+import { CHAVES_STORAGE } from '@/shared/utils'
 import {
   useApagarLote,
   useAtualizarMetadata,
@@ -64,9 +65,15 @@ import type {
 
 type ModoVisualizacaoDownloads = 'grid' | 'compacto' | 'galeria' | 'lista'
 
-const STORAGE_KEY_MODO = 'cirqueirax:downloads:modo-visualizacao'
-const STORAGE_KEY_COLUNAS_GRID = 'cirqueirax:downloads:colunas-grid'
-const STORAGE_KEY_COLUNAS_COMPACTO = 'cirqueirax:downloads:colunas-compacto'
+const MODOS_PERMITIDOS: readonly ModoVisualizacaoDownloads[] = [
+  'grid',
+  'compacto',
+  'galeria',
+  'lista',
+]
+const COLUNAS_GRID_PERMITIDAS = [2, 3, 4, 5, 6] as const
+const COLUNAS_COMPACTO_PERMITIDAS = [1, 2, 3] as const
+const POR_PAGINA_PERMITIDOS = [25, 50, 100] as const
 
 export default function DownloadsVideo() {
   useSEO({
@@ -81,51 +88,30 @@ export default function DownloadsVideo() {
   const [origemFiltro, setOrigemFiltro] = useState<string>('')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
-  const [porPagina, setPorPagina] = useState<number>(50)
 
-  const [modoVisualizacao, setModoVisualizacao] = useState<ModoVisualizacaoDownloads>(() => {
-    try {
-      const salvo = localStorage.getItem(STORAGE_KEY_MODO)
-      if (salvo === 'grid' || salvo === 'compacto' || salvo === 'galeria' || salvo === 'lista') {
-        return salvo
-      }
-    } catch {}
-    return 'grid'
-  })
+  const [porPagina, setPorPagina] = useLocalStorageState<number>(
+    CHAVES_STORAGE.DOWNLOADS_POR_PAGINA,
+    50,
+    { valoresPermitidos: POR_PAGINA_PERMITIDOS }
+  )
 
-  const [colunasGrid, setColunasGrid] = useState<number>(() => {
-    try {
-      const salvo = Number(localStorage.getItem(STORAGE_KEY_COLUNAS_GRID))
-      if ([2, 3, 4, 5, 6].includes(salvo)) return salvo
-    } catch {}
-    return 5
-  })
+  const [modoVisualizacao, setModoVisualizacao] = useLocalStorageState<ModoVisualizacaoDownloads>(
+    CHAVES_STORAGE.DOWNLOADS_MODO_VISUALIZACAO,
+    'grid',
+    { valoresPermitidos: MODOS_PERMITIDOS }
+  )
 
-  const [colunasCompacto, setColunasCompacto] = useState<number>(() => {
-    try {
-      const salvo = Number(localStorage.getItem(STORAGE_KEY_COLUNAS_COMPACTO))
-      if ([1, 2, 3].includes(salvo)) return salvo
-    } catch {}
-    return 2
-  })
+  const [colunasGrid, setColunasGrid] = useLocalStorageState<number>(
+    CHAVES_STORAGE.DOWNLOADS_COLUNAS_GRID,
+    5,
+    { valoresPermitidos: COLUNAS_GRID_PERMITIDAS }
+  )
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_MODO, modoVisualizacao)
-    } catch {}
-  }, [modoVisualizacao])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_COLUNAS_GRID, String(colunasGrid))
-    } catch {}
-  }, [colunasGrid])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY_COLUNAS_COMPACTO, String(colunasCompacto))
-    } catch {}
-  }, [colunasCompacto])
+  const [colunasCompacto, setColunasCompacto] = useLocalStorageState<number>(
+    CHAVES_STORAGE.DOWNLOADS_COLUNAS_COMPACTO,
+    2,
+    { valoresPermitidos: COLUNAS_COMPACTO_PERMITIDAS }
+  )
 
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
   const [itemEditarMetadata, setItemEditarMetadata] = useState<MediaItem | null>(null)

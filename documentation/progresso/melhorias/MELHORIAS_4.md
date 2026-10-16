@@ -377,9 +377,15 @@
   - **Atalhos Seguros de Quantidade por Linha**:
     - Em **Grade** e **Galeria**, barra de atalhos rápidos `Por linha: 2 | 3 | 4 | 5 | 6` com cálculo responsivo seguro (`base: 1`, `sm: 2`, `md: min(3, N)`, `lg: min(4, N)`, `xl: N`) e ajuste automático de padding/tipografia em `6` colunas (`densidadeAlta`).
     - No modo **Compacto**, barra de atalhos `Por linha: 1 | 2 | 3`.
-  - **Persistência em `localStorage`**:
-    - Tanto o formato escolhido quanto a quantidade de colunas ficam salvos automaticamente no navegador (`cirqueirax:downloads:modo-visualizacao`, `cirqueirax:downloads:colunas-grid`, `cirqueirax:downloads:colunas-compacto`).
+  - **Arquitetura Reutilizável de Persistência em `localStorage` (`localStorageService` + `useLocalStorageState`)**:
+    - Criado `web/shared/utils/localStorageService.ts` com namespace padronizado (`cirqueirax:`), catálogo centralizado de chaves (`CHAVES_STORAGE`), serialização JSON segura com retrocompatibilidade e validação de valores permitidos (`valoresPermitidos` / `validar`).
+    - Criado hook `web/shared/hooks/useLocalStorageState.ts` com sincronização reativa entre abas (`storage` event) e API idêntica ao `useState`.
+    - Persistidos em `DownloadsVideo.tsx`: formato de visualização (`modoVisualizacao`), colunas por linha (`colunasGrid` e `colunasCompacto`) e quantidade de itens por página (`porPagina`: `25 | 50 | 100`).
 - **Arquivos**:
+  - `web/shared/utils/localStorageService.ts`
+  - `web/shared/hooks/useLocalStorageState.ts`
+  - `web/shared/utils/index.ts`
+  - `web/shared/hooks/index.ts`
   - `web/features/downloads-video/DownloadsVideo.tsx`
   - `web/features/downloads-video/components/GridVideos.tsx`
   - `web/features/downloads-video/components/CardVideo.tsx`
