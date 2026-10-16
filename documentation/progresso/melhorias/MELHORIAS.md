@@ -89,8 +89,4 @@
 | M73 | Resiliência da Fila de Downloads, Download + Extração de Metadados em Passo Único e Isolamento de Flags por Plataforma (TikTok / YouTube / X) | ✅ Concluído | 15/10/2026 | [ver](MELHORIAS_4.md#melhoria-73--resiliência-da-fila-de-downloads-download--extração-de-metadados-em-passo-único-e-isolamento-de-flags-por-plataforma-tiktok--youtube--x) |
 | M74 | Sincronização de `metadata.horario` na Edição Individual de Metadados e Prioridade de Exibição de Hora nos Cards | ✅ Concluído | 15/10/2026 | [ver](MELHORIAS_4.md#melhoria-74--sincronização-de-metadatahorario-na-edição-individual-de-metadados-e-prioridade-de-exibição-de-hora-nos-cards) |
 | M75 | Personalização de Modos de Visualização (Grade, Compacto, Galeria e Lista) e Atalhos de Densidade por Linha na Central de Downloads | ✅ Concluído | 16/10/2026 | [ver](MELHORIAS_4.md#melhoria-75--personalização-de-modos-de-visualização-grade-compacto-galeria-e-lista-e-atalhos-de-densidade-por-linha-na-central-de-downloads) |
-
-
-
-
-
+| M76 | Rebaixamento Individual Síncrono com Feedback de Progresso e Mensagens de Erro Claras para Vídeos com Arquivo Removido | ✅ Concluído | 16/10/2026 | [ver](MELHORIAS_4.md#melhoria-76--rebaixamento-individual-síncrono-com-feedback-de-progresso-e-mensagens-de-erro-claras-para-vídeos-com-arquivo-removido) |
