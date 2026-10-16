@@ -86,6 +86,7 @@
 | M70 | Ordenação da Central de Downloads pela Data de Exibição do Vídeo (Download ou Edição) | ✅ Concluído | 13/10/2026 | [ver](MELHORIAS_4.md#melhoria-70--ordenação-da-central-de-downloads-pela-data-de-exibição-do-vídeo-download-ou-edição) |
 | M71 | Data de Criação do Download no Momento do Download, e não na Data de Publicação da Plataforma | ✅ Concluído | 14/10/2026 | [ver](MELHORIAS_4.md#melhoria-71--data-de-criação-do-download-no-momento-do-download-e-não-na-data-de-publicação-da-plataforma) |
 | M72 | Suporte Nativo a Cookies para yt-dlp, Diagnóstico de Bloqueio Anti-Bot e Exibição de Mensagens Claras de Erro | ✅ Concluído | 15/10/2026 | [ver](MELHORIAS_4.md#melhoria-72--suporte-nativo-a-cookies-para-yt-dlp-diagnóstico-de-bloqueio-anti-bot-e-exibição-de-mensagens-claras-de-erro) |
+| M73 | Resiliência da Fila de Downloads, Download + Extração de Metadados em Passo Único e Isolamento de Flags por Plataforma (TikTok / YouTube / X) | ✅ Concluído | 15/10/2026 | [ver](MELHORIAS_4.md#melhoria-73--resiliência-da-fila-de-downloads-download--extração-de-metadados-em-passo-único-e-isolamento-de-flags-por-plataforma-tiktok--youtube--x) |
 
 
 
