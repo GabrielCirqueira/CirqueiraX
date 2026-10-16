@@ -25,4 +25,14 @@ class MediaItemException extends \DomainException
     {
         return new self(sprintf('Transição de status inválida de "%s" para "%s".', $de, $para), 422);
     }
+
+    public static function urlOriginalAusenteParaRebaixar(): self
+    {
+        return new self('Esta mídia não possui URL de origem gravada nos metadados para permitir o download novamente.', 422);
+    }
+
+    public static function falhaAoRebaixarMidia(string $motivo): self
+    {
+        return new self(sprintf('Não foi possível baixar o vídeo novamente: %s', $motivo), 422);
+    }
 }
