@@ -271,6 +271,8 @@
   - `src/Infra/YtDlp/YtDlpClient.php`
   - `migrations/Version20261014223000.php`
 
+---
+
 ### ✅ Melhoria 72 — Suporte Nativo a Cookies para yt-dlp, Diagnóstico de Bloqueio Anti-Bot e Exibição de Mensagens Claras de Erro
 
 - **Status**: Concluído
@@ -389,3 +391,33 @@
   - `web/features/downloads-video/DownloadsVideo.tsx`
   - `web/features/downloads-video/components/GridVideos.tsx`
   - `web/features/downloads-video/components/CardVideo.tsx`
+
+---
+
+### ✅ Melhoria 76 — Rebaixamento Individual Síncrono com Feedback de Progresso e Mensagens de Erro Claras para Vídeos com Arquivo Removido
+
+- **Status**: Concluído
+- **Data**: 16 de outubro de 2026
+- **Problema**:
+  - Ao clicar em "Rebaixar" num vídeo com status `arquivo_removido`, o backend só despachava `RebaixarMediaItemMessage` para o worker e respondia na hora. A tela mostrava "1 download(s) reenfileirado(s)!" e nada mais: o modal ficava aberto até a resposta, o card não mudava de status e, se o worker falhasse, o usuário não era avisado.
+  - Mídias sem URL de origem nos metadados entravam em `baixando` e só falhavam depois, dentro do worker.
+  - Os toasts de erro eram fixos ("Falha ao rebaixar o vídeo.") e não mostravam o motivo devolvido pela API.
+  - Quando o `caminho_local_anterior` apontava para uma pasta que não existia mais nem estava dentro do storage, o arquivo podia ser gravado num diretório inválido.
+- **Solução**:
+  - **Backend (`RebaixarMediaItemService`)**:
+    - `rebaixarIndividual()` valida a URL original antes de começar. Sem URL, marca a mídia como `erro` com o motivo e lança `MediaItemException::urlOriginalAusenteParaRebaixar()` (HTTP 422).
+    - Com um vídeo só, o download roda na própria requisição (`set_time_limit(300)`). Com vários, cada um continua sendo enviado para a fila do Messenger.
+    - Se o download síncrono falhar, a mídia vai para `erro` com o motivo gravado e a API devolve `MediaItemException::falhaAoRebaixarMidia()` com a mensagem real.
+    - `rebaixarEmLote()` relança o último erro quando nenhum item foi processado, em vez de devolver uma lista vazia com HTTP 200.
+    - A pasta de `caminho_local_anterior` só é reutilizada se estiver dentro do storage ou existir e permitir escrita; senão o arquivo vai para a pasta da categoria ou para `videos/`.
+  - **Frontend**:
+    - Ao confirmar, o modal fecha na hora e aparece um toast de carregamento ("Baixando o vídeo novamente..."), que some quando a requisição termina.
+    - A listagem é atualizada logo depois do clique, então o card passa a mostrar o status animado `baixando`. O polling de `useMediaItens` acompanha até o status final.
+    - Os toasts de erro mostram a mensagem devolvida pela API (`error` ou `message`) via `extrairMensagemErroApi()` e ficam 8s na tela. A listagem também é atualizada no erro, para o card exibir o `erroMotivo`.
+    - O timeout do Axios nas rotas de rebaixar subiu para 300s, igual ao `max_execution_time` do PHP e aos timeouts do Nginx (M73).
+- **Arquivos**:
+  - `src/Exception/MediaItem/MediaItemException.php`
+  - `src/Service/MediaItem/RebaixarMediaItemService.php`
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/api.ts`
+  - `web/features/downloads-video/hooks/useDownloadsVideo.ts`
