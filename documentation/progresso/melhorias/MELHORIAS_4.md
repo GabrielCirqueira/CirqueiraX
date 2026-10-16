@@ -359,3 +359,27 @@
   - `web/features/downloads-video/utils/formatadores.ts`
   - `web/features/central-midias/components/CardMidiaCentral.tsx`
   - `web/features/central-midias/components/ModalVisualizarMidiaCentral.tsx`
+
+---
+
+### ✅ Melhoria 75 — Personalização de Modos de Visualização (Grade, Compacto, Galeria e Lista) e Atalhos de Densidade por Linha na Central de Downloads
+
+- **Status**: Concluído
+- **Data**: 16 de outubro de 2026
+- **Problema**:
+  - A tela de Downloads (`DownloadsVideo.tsx`) possuía apenas dois modos de visualização (`Grade` fixa de 5 colunas no desktop e `Lista` em tabela), sem opção de ajustar quantos cards aparecem por linha ou alternar para formatos visuais intermediários.
+- **Solução**:
+  - **4 Formatos de Visualização**:
+    - **Grade (`grid`)**: cards verticais completos com miniatura 16:9, metadados, badge de categoria, atalho de edição de data/hora e barra de ações.
+    - **Compacto (`compacto`)**: cards horizontais enxutos com miniatura lateral à esquerda e informações/ações agrupadas à direita, ideal para leitura rápida sem a densidade de uma tabela.
+    - **Galeria (`galeria`)**: mosaico focado nas capas (`aspectRatio="16/10"`) com gradiente escuro e título, categoria, data/hora e ações sobrepostas diretamente no card.
+    - **Lista (`lista`)**: tabela detalhada com colunas completas (`TabelaVideos.tsx`).
+  - **Atalhos Seguros de Quantidade por Linha**:
+    - Em **Grade** e **Galeria**, barra de atalhos rápidos `Por linha: 2 | 3 | 4 | 5 | 6` com cálculo responsivo seguro (`base: 1`, `sm: 2`, `md: min(3, N)`, `lg: min(4, N)`, `xl: N`) e ajuste automático de padding/tipografia em `6` colunas (`densidadeAlta`).
+    - No modo **Compacto**, barra de atalhos `Por linha: 1 | 2 | 3`.
+  - **Persistência em `localStorage`**:
+    - Tanto o formato escolhido quanto a quantidade de colunas ficam salvos automaticamente no navegador (`cirqueirax:downloads:modo-visualizacao`, `cirqueirax:downloads:colunas-grid`, `cirqueirax:downloads:colunas-compacto`).
+- **Arquivos**:
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/GridVideos.tsx`
+  - `web/features/downloads-video/components/CardVideo.tsx`

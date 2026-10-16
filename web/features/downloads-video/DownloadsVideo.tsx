@@ -20,17 +20,19 @@ import {
   Folder,
   FolderCheck,
   FolderPlus,
+  Grid2X2,
   LayoutGrid,
   List,
   Loader2,
   RefreshCw,
   RotateCcw,
+  Rows3,
   Search,
   Tag,
   Video,
   X,
 } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { BarraAcoesEmLote } from './components/BarraAcoesEmLote'
 import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
@@ -60,6 +62,12 @@ import type {
   MediaItem,
 } from './types'
 
+type ModoVisualizacaoDownloads = 'grid' | 'compacto' | 'galeria' | 'lista'
+
+const STORAGE_KEY_MODO = 'cirqueirax:downloads:modo-visualizacao'
+const STORAGE_KEY_COLUNAS_GRID = 'cirqueirax:downloads:colunas-grid'
+const STORAGE_KEY_COLUNAS_COMPACTO = 'cirqueirax:downloads:colunas-compacto'
+
 export default function DownloadsVideo() {
   useSEO({
     title: 'Downloads de Vídeos',
@@ -74,7 +82,50 @@ export default function DownloadsVideo() {
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
   const [porPagina, setPorPagina] = useState<number>(50)
-  const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'lista'>('grid')
+
+  const [modoVisualizacao, setModoVisualizacao] = useState<ModoVisualizacaoDownloads>(() => {
+    try {
+      const salvo = localStorage.getItem(STORAGE_KEY_MODO)
+      if (salvo === 'grid' || salvo === 'compacto' || salvo === 'galeria' || salvo === 'lista') {
+        return salvo
+      }
+    } catch {}
+    return 'grid'
+  })
+
+  const [colunasGrid, setColunasGrid] = useState<number>(() => {
+    try {
+      const salvo = Number(localStorage.getItem(STORAGE_KEY_COLUNAS_GRID))
+      if ([2, 3, 4, 5, 6].includes(salvo)) return salvo
+    } catch {}
+    return 5
+  })
+
+  const [colunasCompacto, setColunasCompacto] = useState<number>(() => {
+    try {
+      const salvo = Number(localStorage.getItem(STORAGE_KEY_COLUNAS_COMPACTO))
+      if ([1, 2, 3].includes(salvo)) return salvo
+    } catch {}
+    return 2
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_MODO, modoVisualizacao)
+    } catch {}
+  }, [modoVisualizacao])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_COLUNAS_GRID, String(colunasGrid))
+    } catch {}
+  }, [colunasGrid])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_COLUNAS_COMPACTO, String(colunasCompacto))
+    } catch {}
+  }, [colunasCompacto])
 
   const [itemVisualizar, setItemVisualizar] = useState<MediaItem | null>(null)
   const [itemEditarMetadata, setItemEditarMetadata] = useState<MediaItem | null>(null)
@@ -700,29 +751,175 @@ export default function DownloadsVideo() {
             )}
           </HStack>
 
-          <HStack gap={1}>
-            <IconButton
-              size="sm"
-              variant={modoVisualizacao === 'grid' ? 'subtle' : 'ghost'}
-              colorPalette={modoVisualizacao === 'grid' ? 'brand' : 'gray'}
-              onClick={() => setModoVisualizacao('grid')}
-              aria-label="Grade"
-              title="Visualização em Grade"
+          <HStack gap={2} flexWrap="wrap" justify="flex-end">
+            {(modoVisualizacao === 'grid' || modoVisualizacao === 'galeria') && (
+              <HStack
+                gap={0.5}
+                bg="bg.muted"
+                p={1}
+                borderRadius="lg"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                display={{ base: 'none', lg: 'flex' }}
+                title="Atalhos de quantos cards aparecem por linha"
+              >
+                <Text
+                  fontSize="10px"
+                  fontWeight="bold"
+                  color="fg.subtle"
+                  px={1.5}
+                  textTransform="uppercase"
+                  letterSpacing="wider"
+                >
+                  Por linha:
+                </Text>
+                {[2, 3, 4, 5, 6].map((qtd) => (
+                  <Button
+                    key={qtd}
+                    size="2xs"
+                    variant={colunasGrid === qtd ? 'solid' : 'ghost'}
+                    colorPalette={colunasGrid === qtd ? 'brand' : 'gray'}
+                    onClick={() => setColunasGrid(qtd)}
+                    borderRadius="md"
+                    h={6}
+                    minW={6}
+                    px={1.5}
+                    fontSize="11px"
+                    fontWeight="bold"
+                    title={`${qtd} cards por linha`}
+                  >
+                    {qtd}
+                  </Button>
+                ))}
+              </HStack>
+            )}
+
+            {modoVisualizacao === 'compacto' && (
+              <HStack
+                gap={0.5}
+                bg="bg.muted"
+                p={1}
+                borderRadius="lg"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                display={{ base: 'none', lg: 'flex' }}
+                title="Atalhos de quantos cards compactos aparecem por linha"
+              >
+                <Text
+                  fontSize="10px"
+                  fontWeight="bold"
+                  color="fg.subtle"
+                  px={1.5}
+                  textTransform="uppercase"
+                  letterSpacing="wider"
+                >
+                  Por linha:
+                </Text>
+                {[1, 2, 3].map((qtd) => (
+                  <Button
+                    key={qtd}
+                    size="2xs"
+                    variant={colunasCompacto === qtd ? 'solid' : 'ghost'}
+                    colorPalette={colunasCompacto === qtd ? 'brand' : 'gray'}
+                    onClick={() => setColunasCompacto(qtd)}
+                    borderRadius="md"
+                    h={6}
+                    minW={6}
+                    px={1.5}
+                    fontSize="11px"
+                    fontWeight="bold"
+                    title={`${qtd} ${qtd === 1 ? 'item' : 'itens'} por linha`}
+                  >
+                    {qtd}
+                  </Button>
+                ))}
+              </HStack>
+            )}
+
+            <HStack
+              gap={0.5}
+              bg="bg.muted"
+              p={1}
               borderRadius="lg"
+              borderWidth="1px"
+              borderColor="border.subtle"
             >
-              <LayoutGrid size={16} />
-            </IconButton>
-            <IconButton
-              size="sm"
-              variant={modoVisualizacao === 'lista' ? 'subtle' : 'ghost'}
-              colorPalette={modoVisualizacao === 'lista' ? 'brand' : 'gray'}
-              onClick={() => setModoVisualizacao('lista')}
-              aria-label="Lista"
-              title="Visualização em Lista"
-              borderRadius="lg"
-            >
-              <List size={16} />
-            </IconButton>
+              <Button
+                size="2xs"
+                variant={modoVisualizacao === 'grid' ? 'solid' : 'ghost'}
+                colorPalette={modoVisualizacao === 'grid' ? 'brand' : 'gray'}
+                onClick={() => setModoVisualizacao('grid')}
+                borderRadius="md"
+                h={7}
+                px={2}
+                fontSize="xs"
+                title="Visualização em Grade (Cards Completos)"
+              >
+                <HStack gap={1.5}>
+                  <LayoutGrid size={14} />
+                  <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                    Grade
+                  </Text>
+                </HStack>
+              </Button>
+
+              <Button
+                size="2xs"
+                variant={modoVisualizacao === 'compacto' ? 'solid' : 'ghost'}
+                colorPalette={modoVisualizacao === 'compacto' ? 'brand' : 'gray'}
+                onClick={() => setModoVisualizacao('compacto')}
+                borderRadius="md"
+                h={7}
+                px={2}
+                fontSize="xs"
+                title="Visualização Compacta (Cards Horizontais)"
+              >
+                <HStack gap={1.5}>
+                  <Rows3 size={14} />
+                  <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                    Compacto
+                  </Text>
+                </HStack>
+              </Button>
+
+              <Button
+                size="2xs"
+                variant={modoVisualizacao === 'galeria' ? 'solid' : 'ghost'}
+                colorPalette={modoVisualizacao === 'galeria' ? 'brand' : 'gray'}
+                onClick={() => setModoVisualizacao('galeria')}
+                borderRadius="md"
+                h={7}
+                px={2}
+                fontSize="xs"
+                title="Visualização em Galeria / Mosaico (Foco nas Capas)"
+              >
+                <HStack gap={1.5}>
+                  <Grid2X2 size={14} />
+                  <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                    Galeria
+                  </Text>
+                </HStack>
+              </Button>
+
+              <Button
+                size="2xs"
+                variant={modoVisualizacao === 'lista' ? 'solid' : 'ghost'}
+                colorPalette={modoVisualizacao === 'lista' ? 'brand' : 'gray'}
+                onClick={() => setModoVisualizacao('lista')}
+                borderRadius="md"
+                h={7}
+                px={2}
+                fontSize="xs"
+                title="Visualização em Lista / Tabela Detalhada"
+              >
+                <HStack gap={1.5}>
+                  <List size={14} />
+                  <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+                    Lista
+                  </Text>
+                </HStack>
+              </Button>
+            </HStack>
           </HStack>
         </Flex>
 
@@ -818,11 +1015,13 @@ export default function DownloadsVideo() {
         </Flex>
 
         <Box w="full">
-          {modoVisualizacao === 'grid' ? (
+          {modoVisualizacao !== 'lista' ? (
             <GridVideos
               itens={itens}
               carregando={isLoading}
               selecionados={selecionados}
+              variante={modoVisualizacao}
+              colunas={modoVisualizacao === 'compacto' ? colunasCompacto : colunasGrid}
               categoriaFiltro={categoriaFiltro}
               nomeCategoriaFiltro={nomeCategoriaFiltro}
               onToggleSelect={handleToggleSelect}

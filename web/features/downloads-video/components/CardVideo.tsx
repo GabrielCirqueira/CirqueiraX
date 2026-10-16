@@ -53,9 +53,13 @@ import {
 } from '../utils/formatadores'
 import { identificarPlataforma } from '../utils/plataformaVideo'
 
+export type VarianteCardVideo = 'grid' | 'compacto' | 'galeria'
+
 export interface CardVideoProps {
   item: MediaItem
   selecionado: boolean
+  variante?: VarianteCardVideo
+  colunas?: number
   onToggleSelect: (uuid: string) => void
   onVisualizar?: (item: MediaItem) => void
   onEditarMetadata?: (item: MediaItem, abaInicial?: 'geral' | 'data' | 'duracao' | 'capa') => void
@@ -69,6 +73,8 @@ export interface CardVideoProps {
 export const CardVideo = memo(function CardVideo({
   item,
   selecionado,
+  variante = 'grid',
+  colunas = 5,
   onToggleSelect,
   onVisualizar,
   onEditarMetadata,
@@ -124,6 +130,7 @@ export const CardVideo = memo(function CardVideo({
   const plataformaInfo = urlOriginal ? identificarPlataforma(urlOriginal) : null
   const ehDuplicado = Boolean(item.isDuplicado || item.metadata?.duplicado)
   const enviadoGoogleFotos = Boolean(item.isEnviadoGoogleFotos || item.googlePhotosMediaId)
+  const densidadeAlta = colunas >= 6
 
   const handleDownloadDirecto = async (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -141,6 +148,522 @@ export const CardVideo = memo(function CardVideo({
     if (plataformaInfo.id === 'instagram') return <Instagram size={12} />
     if (plataformaInfo.id === 'twitter') return <Globe size={12} />
     return <Video size={12} />
+  }
+
+  if (variante === 'galeria') {
+    return (
+      <Card.Root
+        position="relative"
+        borderRadius="2xl"
+        borderWidth={selecionado ? '2px' : '1px'}
+        borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
+        bg="cirqueira.grey.950"
+        className="cv-auto"
+        overflow="hidden"
+        shadow={selecionado ? 'lg' : 'sm'}
+        outline={selecionado ? '2px solid' : 'none'}
+        outlineColor="cirqueira.brand.500"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Box position="relative" aspectRatio="16/10" w="full" bg="cirqueira.grey.950" overflow="hidden">
+          {temThumbnail ? (
+            <img
+              src={urlThumbnail}
+              alt={titulo}
+              referrerPolicy="no-referrer"
+              onError={handleErroImagem}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+              decoding="async"
+              loading="lazy"
+            />
+          ) : (
+            <VStack h="full" w="full" align="center" justify="center" gap={2} color="fg.subtle">
+              <Video size={34} strokeWidth={1.5} />
+            </VStack>
+          )}
+
+          <Box
+            position="absolute"
+            inset={0}
+            bgGradient="to-t"
+            gradientFrom="rgba(5, 7, 11, 0.96)"
+            gradientVia="rgba(5, 7, 11, 0.45)"
+            gradientTo="rgba(5, 7, 11, 0.55)"
+            pointerEvents="none"
+            zIndex={1}
+          />
+
+          <HStack position="absolute" top={2.5} left={2.5} zIndex={10} gap={1.5}>
+            <IconButton
+              size="xs"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleSelect(item.uuid)
+              }}
+              bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
+              _hover={{ bg: selecionado ? 'cirqueira.brand.600' : 'cirqueira.grey.950' }}
+              color="cirqueira.grey.0"
+              borderRadius="lg"
+              h={7}
+              w={7}
+              borderWidth="1px"
+              borderColor={selecionado ? 'cirqueira.brand.400' : 'border.subtle'}
+              aria-label={`Selecionar ${titulo}`}
+            >
+              {selecionado ? <Check size={14} strokeWidth={3} /> : <Square size={14} opacity={0.7} />}
+            </IconButton>
+
+            {plataformaInfo && (
+              <Badge
+                size="xs"
+                variant="subtle"
+                colorPalette={plataformaInfo.colorPalette}
+                bg="cirqueira.grey.950/85"
+                borderRadius="md"
+                px={2}
+                py={0.5}
+              >
+                <HStack gap={1}>
+                  {renderIconePlataforma()}
+                  <Text as="span">{plataformaInfo.nome}</Text>
+                </HStack>
+              </Badge>
+            )}
+          </HStack>
+
+          <HStack position="absolute" top={2.5} right={2.5} zIndex={10} gap={1.5}>
+            {duracaoFormatada && (
+              <Box
+                borderRadius="md"
+                bg="cirqueira.grey.950/85"
+                px={1.5}
+                py={0.5}
+                fontSize="11px"
+                fontWeight="bold"
+                fontFamily="mono"
+                color="cirqueira.grey.0"
+              >
+                {duracaoFormatada}
+              </Box>
+            )}
+            <Badge
+              size="xs"
+              variant="subtle"
+              colorPalette={statusInfo.colorPalette}
+              borderRadius="md"
+              px={2}
+              py={0.5}
+            >
+              {statusInfo.label}
+            </Badge>
+          </HStack>
+
+          <VStack
+            position="absolute"
+            bottom={0}
+            left={0}
+            right={0}
+            p={3}
+            gap={1.5}
+            align="stretch"
+            zIndex={10}
+          >
+            <Text
+              fontSize="xs"
+              fontWeight="bold"
+              color="white"
+              lineClamp={1}
+              title={titulo}
+              cursor="pointer"
+              _hover={{ color: 'cirqueira.brand.300' }}
+              onClick={() => onVisualizar?.(item)}
+            >
+              {titulo}
+            </Text>
+
+            <Flex align="center" justify="space-between" gap={2}>
+              <HStack gap={1.5} minW={0}>
+                {item.categoria?.nome ? (
+                  <Badge
+                    size="xs"
+                    variant="subtle"
+                    colorPalette="brand"
+                    borderRadius="md"
+                    cursor="pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onCategorizar?.(item)
+                    }}
+                  >
+                    <Text as="span" maxW="24" truncate>
+                      {item.categoria.nome}
+                    </Text>
+                  </Badge>
+                ) : (
+                  <Badge
+                    size="xs"
+                    variant="outline"
+                    colorPalette="amber"
+                    borderRadius="md"
+                    cursor="pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onCategorizar?.(item)
+                    }}
+                  >
+                    Sem cat.
+                  </Badge>
+                )}
+
+                <HStack
+                  gap={1}
+                  px={2}
+                  py={0.5}
+                  borderRadius="md"
+                  bg="whiteAlpha.200"
+                  color="whiteAlpha.900"
+                  fontSize="10px"
+                  cursor="pointer"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEditarMetadata?.(item, 'data')
+                  }}
+                  title="Clique para editar data e horário"
+                >
+                  <Calendar size={10} />
+                  <Text as="span">
+                    {dataMidia}, {horarioMidia}
+                  </Text>
+                </HStack>
+              </HStack>
+
+              <HStack gap={0.5} flexShrink={0}>
+                <IconButton
+                  size="2xs"
+                  variant="ghost"
+                  color="white"
+                  _hover={{ bg: 'whiteAlpha.200', color: 'cirqueira.brand.300' }}
+                  onClick={() => onVisualizar?.(item)}
+                  aria-label="Assistir"
+                  title="Assistir vídeo"
+                >
+                  <Play size={13} />
+                </IconButton>
+                <IconButton
+                  size="2xs"
+                  variant="ghost"
+                  color="white"
+                  _hover={{ bg: 'whiteAlpha.200' }}
+                  onClick={() => onEditarMetadata?.(item)}
+                  aria-label="Editar"
+                  title="Editar metadados"
+                >
+                  <Edit3 size={13} />
+                </IconButton>
+                {onApagar && (
+                  <IconButton
+                    size="2xs"
+                    variant="ghost"
+                    color="cirqueira.red.400"
+                    _hover={{ bg: 'whiteAlpha.200' }}
+                    onClick={() => onApagar?.(item.uuid)}
+                    aria-label="Apagar"
+                    title="Excluir vídeo"
+                  >
+                    <Trash2 size={13} />
+                  </IconButton>
+                )}
+              </HStack>
+            </Flex>
+          </VStack>
+        </Box>
+      </Card.Root>
+    )
+  }
+
+  if (variante === 'compacto') {
+    return (
+      <Card.Root
+        position="relative"
+        display="flex"
+        flexDirection="row"
+        alignItems="stretch"
+        borderRadius="xl"
+        borderWidth={selecionado ? '2px' : '1px'}
+        borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
+        bg="bg.panel"
+        className="cv-auto"
+        overflow="hidden"
+        shadow={selecionado ? 'md' : 'xs'}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        _hover={{
+          borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+        }}
+      >
+        <Box
+          position="relative"
+          w={{ base: '125px', sm: '155px' }}
+          minH="96px"
+          flexShrink={0}
+          bg="cirqueira.grey.950"
+          overflow="hidden"
+          cursor="pointer"
+          onClick={() => onVisualizar?.(item)}
+        >
+          {temThumbnail ? (
+            <img
+              src={urlThumbnail}
+              alt={titulo}
+              referrerPolicy="no-referrer"
+              onError={handleErroImagem}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+              decoding="async"
+              loading="lazy"
+            />
+          ) : (
+            <VStack h="full" w="full" align="center" justify="center" color="fg.subtle">
+              <Video size={26} strokeWidth={1.5} />
+            </VStack>
+          )}
+
+          <Box position="absolute" top={1.5} left={1.5} zIndex={5}>
+            <IconButton
+              size="2xs"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleSelect(item.uuid)
+              }}
+              bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
+              color="cirqueira.grey.0"
+              borderRadius="md"
+              h={6}
+              w={6}
+              aria-label={`Selecionar ${titulo}`}
+            >
+              {selecionado ? <Check size={12} strokeWidth={3} /> : <Square size={12} opacity={0.8} />}
+            </IconButton>
+          </Box>
+
+          {duracaoFormatada && (
+            <Box
+              position="absolute"
+              bottom={1.5}
+              right={1.5}
+              zIndex={5}
+              borderRadius="sm"
+              bg="cirqueira.grey.950/85"
+              px={1.5}
+              py={0.2}
+              fontSize="10px"
+              fontWeight="bold"
+              fontFamily="mono"
+              color="cirqueira.grey.0"
+            >
+              {duracaoFormatada}
+            </Box>
+          )}
+        </Box>
+
+        <Flex flex={1} direction="column" justify="space-between" p={3} gap={2} minW={0}>
+          <Flex align="flex-start" justify="space-between" gap={2}>
+            <VStack align="start" gap={0.5} minW={0} flex={1}>
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color="fg"
+                lineClamp={1}
+                title={titulo}
+                cursor="pointer"
+                _hover={{ color: 'cirqueira.brand.400' }}
+                onClick={() => onVisualizar?.(item)}
+              >
+                {titulo}
+              </Text>
+              <HStack gap={2} fontSize="11px" color="fg.subtle" minW={0} w="full">
+                <HStack gap={1} truncate>
+                  <User size={11} style={{ flexShrink: 0 }} />
+                  <Text as="span" truncate>
+                    {uploader}
+                  </Text>
+                </HStack>
+                {plataformaInfo && (
+                  <Badge size="xs" variant="subtle" colorPalette={plataformaInfo.colorPalette} borderRadius="sm">
+                    {plataformaInfo.nome}
+                  </Badge>
+                )}
+                {tamanhoFormatado && (
+                  <Text as="span" flexShrink={0} fontSize="10px" color="fg.muted">
+                    • {tamanhoFormatado}
+                  </Text>
+                )}
+              </HStack>
+            </VStack>
+
+            <Badge
+              size="xs"
+              variant="subtle"
+              colorPalette={statusInfo.colorPalette}
+              borderRadius="md"
+              flexShrink={0}
+            >
+              {statusInfo.label}
+            </Badge>
+          </Flex>
+
+          <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
+            <HStack gap={1.5} flexWrap="wrap">
+              {item.categoria?.nome ? (
+                <Badge
+                  size="xs"
+                  variant="subtle"
+                  colorPalette="brand"
+                  borderRadius="md"
+                  cursor="pointer"
+                  onClick={() => onCategorizar?.(item)}
+                >
+                  <HStack gap={1}>
+                    <Folder size={10} />
+                    <Text as="span" maxW="24" truncate>
+                      {item.categoria.nome}
+                    </Text>
+                  </HStack>
+                </Badge>
+              ) : (
+                <Badge
+                  size="xs"
+                  variant="outline"
+                  colorPalette="amber"
+                  borderRadius="md"
+                  cursor="pointer"
+                  onClick={() => onCategorizar?.(item)}
+                >
+                  <HStack gap={1}>
+                    <FolderPlus size={10} />
+                    <Text as="span">Sem cat.</Text>
+                  </HStack>
+                </Badge>
+              )}
+
+              <HStack
+                gap={1.5}
+                px={2}
+                py={0.5}
+                borderRadius="md"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                bg="bg.muted"
+                fontSize="11px"
+                cursor="pointer"
+                onClick={() => onEditarMetadata?.(item, 'data')}
+                _hover={{ borderColor: 'cirqueira.brand.500/40' }}
+                title="Clique para editar data e horário"
+              >
+                <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                  <Calendar size={11} />
+                </Box>
+                <Text as="span" fontWeight="medium" color="fg">
+                  {dataMidia}, {horarioMidia}
+                </Text>
+              </HStack>
+            </HStack>
+
+            <HStack gap={0.5} flexShrink={0}>
+              {(ehDuplicado || !enviadoGoogleFotos) && onForcarGoogleFotos && (
+                <IconButton
+                  size="2xs"
+                  variant="ghost"
+                  onClick={() => onForcarGoogleFotos?.(item)}
+                  aria-label="Google Fotos"
+                  title="Enviar para o Google Fotos"
+                  color={ehDuplicado ? 'cirqueira.amber.500' : 'fg.subtle'}
+                  borderRadius="md"
+                >
+                  <CloudUpload size={13} />
+                </IconButton>
+              )}
+              <IconButton
+                size="2xs"
+                variant="ghost"
+                onClick={handleDownloadDirecto}
+                disabled={baixando || ehArquivoRemovido}
+                aria-label="Baixar MP4"
+                title="Baixar arquivo MP4"
+                color={ehArquivoRemovido ? 'fg.subtle' : 'cirqueira.brand.500'}
+                borderRadius="md"
+              >
+                {baixando ? (
+                  <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <Download size={13} />
+                )}
+              </IconButton>
+              {onEditarMetadata && (
+                <IconButton
+                  size="2xs"
+                  variant="ghost"
+                  onClick={() => onEditarMetadata?.(item)}
+                  aria-label="Editar"
+                  title="Editar metadados"
+                  borderRadius="md"
+                >
+                  <Edit3 size={13} />
+                </IconButton>
+              )}
+              {onCategorizar && (
+                <IconButton
+                  size="2xs"
+                  variant="ghost"
+                  onClick={() => onCategorizar?.(item)}
+                  aria-label="Categorizar"
+                  title="Atribuir categoria"
+                  borderRadius="md"
+                >
+                  <FolderPlus size={13} />
+                </IconButton>
+              )}
+              {onRebaixar && (
+                <IconButton
+                  size="2xs"
+                  variant={ehArquivoRemovido ? 'subtle' : 'ghost'}
+                  colorPalette={ehArquivoRemovido ? 'orange' : undefined}
+                  onClick={() => onRebaixar?.(item.uuid)}
+                  aria-label="Rebaixar"
+                  title="Rebaixar vídeo"
+                  borderRadius="md"
+                >
+                  <DownloadCloud size={13} />
+                </IconButton>
+              )}
+              {onApagar && (
+                <IconButton
+                  size="2xs"
+                  variant="ghost"
+                  onClick={() => onApagar?.(item.uuid)}
+                  aria-label="Apagar"
+                  title="Excluir vídeo"
+                  color="cirqueira.red.500"
+                  borderRadius="md"
+                >
+                  <Trash2 size={13} />
+                </IconButton>
+              )}
+            </HStack>
+          </Flex>
+        </Flex>
+      </Card.Root>
+    )
   }
 
   return (
@@ -384,11 +907,11 @@ export const CardVideo = memo(function CardVideo({
         )}
       </Box>
 
-      <Card.Body display="flex" flex={1} flexDirection="column" p={4} gap={3}>
+      <Card.Body display="flex" flex={1} flexDirection="column" p={densidadeAlta ? 3 : 4} gap={densidadeAlta ? 2 : 3}>
         <Text
           as="h3"
           fontWeight="bold"
-          fontSize="sm"
+          fontSize={densidadeAlta ? 'xs' : 'sm'}
           color="fg"
           lineClamp={2}
           title={titulo}
