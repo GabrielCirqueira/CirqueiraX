@@ -392,16 +392,11 @@ export default function DownloadsVideo() {
     const uuidsParaRebaixar = itemRebaixarAlvo ? [itemRebaixarAlvo] : selecionados
     if (uuidsParaRebaixar.length === 0) return
 
-    rebaixarLoteMutate(
-      { uuids: uuidsParaRebaixar },
-      {
-        onSuccess: () => {
-          setModalConfirmarRebaixar(false)
-          setItemRebaixarAlvo(null)
-          setSelecionados((prev) => prev.filter((id) => !uuidsParaRebaixar.includes(id)))
-        },
-      }
-    )
+    // Fecha o modal na hora: o progresso aparece no toast de carregamento e no status do card
+    setModalConfirmarRebaixar(false)
+    setItemRebaixarAlvo(null)
+    setSelecionados((prev) => prev.filter((id) => !uuidsParaRebaixar.includes(id)))
+    rebaixarLoteMutate({ uuids: uuidsParaRebaixar })
   }
 
   return (
@@ -1508,7 +1503,7 @@ export default function DownloadsVideo() {
               <Dialog.Body p={0} py={2}>
                 <VStack gap={4} alignItems="stretch">
                   <Text fontSize="xs" color="fg.subtle">
-                    O download do arquivo de vídeo será reenfileirado a partir da URL original gravada nos metadados. Todas as datas alteradas, categorias e metadados existentes serão rigorosamente preservados, sem reenviar para o Google Fotos se já sincronizado.
+                    O vídeo será baixado novamente a partir da URL original gravada nos metadados. Com um vídeo só, o download acontece na hora e você acompanha pelo aviso e pelo status do card; com vários, eles entram na fila. Todas as datas alteradas, categorias e metadados existentes serão rigorosamente preservados, sem reenviar para o Google Fotos se já sincronizado.
                   </Text>
 
                   <HStack

@@ -33,11 +33,25 @@ final readonly class RebaixarMediaItemService
         private string $projectDir = '',
     ) {}
 
-    public function rebaixarIndividual(string|Uuid $uuid): MediaItem
+    public function rebaixarIndividual(string|Uuid $uuid, bool $sincrono = true): MediaItem
     {
         $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
         if (null === $mediaItem) {
             throw MediaItemException::midiaNaoEncontradaPorUuid();
+        }
+
+        $metadata = $mediaItem->metadata();
+        $urlOriginal = $metadata[MetadataKeys::URL_ORIGINAL]
+            ?? ($metadata['webpage_url'] ?? ($metadata['url'] ?? null));
+
+        if (!is_string($urlOriginal) || TextoUtil::estaEmBranco($urlOriginal)) {
+            $mediaItem->setErroMotivo('URL original da mídia não encontrada nos metadados para realizar o redownload.');
+            if ($mediaItem->status()->podeTransicionarPara(StatusMediaItem::ERRO)) {
+                $mediaItem->transicionarPara(StatusMediaItem::ERRO);
+            }
+            $this->mediaItemRepository->salvar($mediaItem);
+
+            throw MediaItemException::urlOriginalAusenteParaRebaixar();
         }
 
         $mediaItem->limparErro();
@@ -47,9 +61,32 @@ final readonly class RebaixarMediaItemService
         $this->mediaItemRepository->salvar($mediaItem);
 
         $uuidStr = $mediaItem->uuid()?->toString() ?? (string) $uuid;
-        $this->messageBus->dispatch(new RebaixarMediaItemMessage($uuidStr));
 
-        return $mediaItem;
+        if (!$sincrono) {
+            $this->messageBus->dispatch(new RebaixarMediaItemMessage($uuidStr));
+
+            return $mediaItem;
+        }
+
+        @set_time_limit(300);
+
+        try {
+            return $this->processarRebaixamento($uuidStr);
+        } catch (\Throwable $e) {
+            $this->logger?->error('Falha ao rebaixar mídia individualmente', [
+                'uuid' => $uuidStr,
+                'erro' => $e->getMessage(),
+            ]);
+
+            $itemAtualizado = $this->mediaItemRepository->buscarPorUuid($uuidStr) ?? $mediaItem;
+            $itemAtualizado->setErroMotivo('Falha ao rebaixar: ' . $e->getMessage());
+            if ($itemAtualizado->status()->podeTransicionarPara(StatusMediaItem::ERRO)) {
+                $itemAtualizado->transicionarPara(StatusMediaItem::ERRO);
+            }
+            $this->mediaItemRepository->salvar($itemAtualizado);
+
+            throw MediaItemException::falhaAoRebaixarMidia($e->getMessage());
+        }
     }
 
     /**
@@ -57,16 +94,28 @@ final readonly class RebaixarMediaItemService
      */
     public function rebaixarEmLote(RebaixarLoteDTO $dto): array
     {
+        $uuids = $dto->uuids();
+        $sincrono = 1 === count($uuids);
         $resultado = [];
-        foreach ($dto->uuids() as $uuid) {
+        $ultimoErro = null;
+
+        foreach ($uuids as $uuid) {
             try {
-                $resultado[] = $this->rebaixarIndividual($uuid);
+                $resultado[] = $this->rebaixarIndividual($uuid, $sincrono);
             } catch (\Throwable $e) {
-                $this->logger?->warning('Erro ao enfileirar rebaixamento do item', [
+                $ultimoErro = $e;
+                $this->logger?->warning('Erro ao processar rebaixamento do item', [
                     'uuid' => $uuid,
                     'erro' => $e->getMessage(),
                 ]);
             }
+        }
+
+        if ([] === $resultado && null !== $ultimoErro) {
+            if ($ultimoErro instanceof MediaItemException) {
+                throw $ultimoErro;
+            }
+            throw MediaItemException::falhaAoRebaixarMidia($ultimoErro->getMessage());
         }
 
         return $resultado;
@@ -113,7 +162,10 @@ final readonly class RebaixarMediaItemService
 
         $caminhoAnterior = $metadata[MetadataKeys::CAMINHO_LOCAL_ANTERIOR] ?? null;
         if (null === $diretorioDestino && is_string($caminhoAnterior) && TextoUtil::naoEstaEmBranco($caminhoAnterior)) {
-            $diretorioDestino = dirname($caminhoAnterior);
+            $dirAnterior = dirname($caminhoAnterior);
+            if (str_starts_with($dirAnterior, rtrim($baseStorage, '/')) || (is_dir($dirAnterior) && is_writable($dirAnterior))) {
+                $diretorioDestino = $dirAnterior;
+            }
         }
 
         if (null === $diretorioDestino) {

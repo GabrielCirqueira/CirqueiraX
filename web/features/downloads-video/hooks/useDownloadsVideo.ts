@@ -1,4 +1,4 @@
-import { addToast } from '@/shared/components/ui/toaster'
+import { addToast, toaster } from '@/shared/components/ui/toaster'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   apagarLote,
@@ -104,17 +104,69 @@ export function useClassificarIndividual() {
   })
 }
 
+function extrairMensagemErroApi(erro: unknown, padrao: string): string {
+  if (
+    typeof erro === 'object' &&
+    erro !== null &&
+    'response' in erro &&
+    typeof (erro as { response?: { data?: { error?: unknown; message?: unknown } } }).response?.data === 'object'
+  ) {
+    const data = (erro as { response?: { data?: { error?: unknown; message?: unknown } } }).response?.data
+    if (typeof data?.error === 'string' && data.error.trim().length > 0) {
+      return data.error
+    }
+    if (typeof data?.message === 'string' && data.message.trim().length > 0) {
+      return data.message
+    }
+  }
+  if (erro instanceof Error && erro.message.trim().length > 0) {
+    return erro.message
+  }
+  return padrao
+}
+
 export function useRebaixarLote() {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (input: RebaixarLoteInput) => rebaixarLote(input),
-    onSuccess: (itens) => {
-      addToast({ title: `${itens.length} download(s) reenfileirado(s)!`, color: 'success' })
-      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    onMutate: (input) => {
+      const individual = input.uuids.length === 1
+      const toastId = toaster.create({
+        title: individual
+          ? 'Baixando o vídeo novamente...'
+          : `Enfileirando ${input.uuids.length} vídeos para download...`,
+        description: individual
+          ? 'Isso pode levar alguns minutos. O card mostra o status enquanto o download acontece.'
+          : undefined,
+        type: 'loading',
+        duration: Number.POSITIVE_INFINITY,
+      })
+      // O backend grava o status "baixando" antes de iniciar o download; o refetch faz o card mostrá-lo
+      setTimeout(() => queryClient.invalidateQueries({ queryKey: ['media-itens'] }), 800)
+      return { toastId }
     },
-    onError: () => {
-      addToast({ title: 'Falha ao rebaixar itens selecionados.', color: 'danger' })
+    onSuccess: (itens) => {
+      addToast({
+        title:
+          itens.length === 1
+            ? 'Vídeo baixado novamente e restaurado com sucesso!'
+            : `${itens.length} vídeos enfileirados para download. O status é atualizado nos cards.`,
+        color: 'success',
+      })
+    },
+    onError: (erro) => {
+      addToast({
+        title: extrairMensagemErroApi(erro, 'Falha ao rebaixar itens selecionados.'),
+        color: 'danger',
+        duration: 8000,
+      })
+    },
+    onSettled: (_dados, _erro, _input, contexto) => {
+      if (contexto?.toastId) {
+        toaster.dismiss(contexto.toastId)
+      }
+      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
   })
 }
@@ -125,11 +177,18 @@ export function useRebaixarIndividual() {
   return useMutation({
     mutationFn: (uuid: string) => rebaixarIndividual(uuid),
     onSuccess: () => {
-      addToast({ title: 'Download do vídeo reenfileirado!', color: 'success' })
+      addToast({
+        title: 'Vídeo baixado novamente e restaurado no servidor com sucesso!',
+        color: 'success',
+      })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
-    onError: () => {
-      addToast({ title: 'Falha ao rebaixar o vídeo.', color: 'danger' })
+    onError: (erro) => {
+      addToast({
+        title: extrairMensagemErroApi(erro, 'Falha ao baixar o vídeo novamente.'),
+        color: 'danger',
+      })
+      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
   })
 }

@@ -34,7 +34,7 @@ export async function criarPedidoDownload(
   const { data } = await api.post<RespostaApi<PedidoDownloadResposta>>(
     '/api/v1/downloads',
     input,
-    { timeout: 180_000 }
+    { timeout: 300_000 }
   )
   return data.data
 }
@@ -50,14 +50,17 @@ export async function categorizarLote(input: CategorizarLoteInput): Promise<Medi
 export async function rebaixarLote(input: RebaixarLoteInput): Promise<MediaItem[]> {
   const { data } = await api.post<RespostaApi<MediaItem[]>>(
     '/api/v1/media-itens/lote/rebaixar',
-    input
+    input,
+    { timeout: 300_000 }
   )
   return data.data
 }
 
 export async function rebaixarIndividual(uuid: string): Promise<MediaItem> {
   const { data } = await api.post<RespostaApi<MediaItem>>(
-    `/api/v1/media-itens/${uuid}/rebaixar`
+    `/api/v1/media-itens/${uuid}/rebaixar`,
+    {},
+    { timeout: 300_000 }
   )
   return data.data
 }
