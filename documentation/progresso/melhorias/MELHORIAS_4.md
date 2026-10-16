@@ -322,9 +322,10 @@
     - `BaixarVideoService` passa a executar `baixarParaStorage($url)` antes de `extrairMetadata($url)`.
     - `YtDlpClient::baixarVideo()` utiliza `--write-info-json`, lê e armazena os metadados em cache em memória (`$this->metadataCache[$url]`) e remove o arquivo `.info.json` temporário.
     - Quando `extrairMetadata($url)` é chamado em seguida, retorna os metadados do cache em 0ms sem abrir um segundo processo `yt-dlp`, reduzindo o tempo por vídeo pela metade e evitando rate-limit.
-  - **Isolamento de Flags por Plataforma (`YtDlpClient::adicionarFlagsPlataforma`)**:
+  - **Pipeline Multi-Camada para TikTok (Portado da Franky) e Isolamento por Plataforma (`YtDlpClient`)**:
     - **YouTube**: recebe `--cookies youtube.txt`, `--remote-components ejs:github` e `youtube:player_client=web`.
-    - **TikTok**: não recebe cookies do YouTube; utiliza `--user-agent` de navegador desktop, `--referer https://www.tiktok.com/`, `--retries 5`, `--extractor-retries 5` e suporte opcional a `var/cookies/tiktok.txt`.
+    - **TikTok (Camada 1 — TikWM Sem Marca d'Água)**: consulta `https://www.tikwm.com/api/?url=...&hd=1` com proteção contra rate-limit, baixando o stream `.mp4` direto da CDN sem marca d'água (~2s por vídeo) e populando o cache de metadados (`title`, `uploader`, `duration`, `thumbnail`) sem sofrer bloqueio `HTTP 403` do WAF do TikTok em IPs de datacenter.
+    - **TikTok (Camada 2 — Fallback `yt-dlp` com Retentativa de Processo + Embed URL + oEmbed)**: caso a TikWM esteja indisponível, executa até 3 tentativas de processo do `yt-dlp` (já que `--retries` interno do `yt-dlp` não repete o `403` da página inicial) e faz fallback automático para `https://www.tiktok.com/embed/v2/{id}` enriquecido com título/autor via `https://www.tiktok.com/oembed`.
     - **X / Twitter e demais**: recebem `--retries 3` e `--extractor-retries 3` sem argumentos exclusivos do YouTube.
   - **Alinhamento de Timeouts no Nginx**:
     - Aumentados `fastcgi_read_timeout` em `devops/php/nginx-internal.conf` e `proxy_read_timeout` / `proxy_send_timeout` no Nginx do host de `90s` para `300s`.

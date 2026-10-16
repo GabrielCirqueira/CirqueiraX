@@ -36,15 +36,28 @@ final class YtDlpClient implements ExtratorVideoInterface
             return $cached;
         }
 
-        $comando = ['yt-dlp', '--dump-json', '--no-playlist'];
-        $this->adicionarFlagsPlataforma($comando, $url);
-        $comando[] = $url;
+        if ($this->ehUrlTiktok($url)) {
+            $infoTikwm = $this->consultarTikwmApi($url);
+            if (null !== $infoTikwm) {
+                return $infoTikwm['metadata'];
+            }
+        }
 
-        $process = new Process($comando);
-        $process->setTimeout(self::TIMEOUT_EXTRACAO_METADATA_SEGUNDOS);
-        $process->run();
+        $process = $this->executarYtDlpComFallback($url, function (string $alvoUrl): array {
+            $comando = ['yt-dlp', '--dump-json', '--no-playlist'];
+            $this->adicionarFlagsPlataforma($comando, $alvoUrl);
+            $comando[] = $alvoUrl;
+
+            return $comando;
+        }, self::TIMEOUT_EXTRACAO_METADATA_SEGUNDOS);
 
         if (!$process->isSuccessful()) {
+            if ($this->ehUrlTiktok($url)) {
+                $oembed = $this->buscarOembedTiktok($url);
+                if (null !== $oembed && null !== ($oembed['title'] ?? null)) {
+                    return $oembed;
+                }
+            }
             $motivo = $this->extrairMensagemErroRelevante($process->getErrorOutput());
             throw YtDlpException::falhaAoExtrairMetadataDoVideo($motivo);
         }
@@ -56,31 +69,38 @@ final class YtDlpClient implements ExtratorVideoInterface
         }
 
         /** @var array<string, mixed> $dados */
-        return $dados;
+        return $this->enriquecerMetadataTiktokComOembed($url, $dados);
     }
 
     public function baixarVideo(string $url, string $diretorioDestino): string
     {
+        if ($this->ehUrlTiktok($url)) {
+            $caminhoTikwm = $this->baixarTiktokViaTikwm($url, $diretorioDestino);
+            if (null !== $caminhoTikwm) {
+                return $caminhoTikwm;
+            }
+        }
+
         $templateSaida = $diretorioDestino . '/%(id)s.%(ext)s';
-        $comando = [
-            'yt-dlp',
-            '--no-playlist',
-            '--no-mtime',
-            '--write-info-json',
-            '--format',
-            self::FORMATO_VIDEO_PREFERIDO,
-            '--output',
-            $templateSaida,
-            '--print',
-            'after_move:filepath',
-        ];
+        $process = $this->executarYtDlpComFallback($url, function (string $alvoUrl) use ($templateSaida): array {
+            $comando = [
+                'yt-dlp',
+                '--no-playlist',
+                '--no-mtime',
+                '--write-info-json',
+                '--format',
+                self::FORMATO_VIDEO_PREFERIDO,
+                '--output',
+                $templateSaida,
+                '--print',
+                'after_move:filepath',
+            ];
 
-        $this->adicionarFlagsPlataforma($comando, $url);
-        $comando[] = $url;
+            $this->adicionarFlagsPlataforma($comando, $alvoUrl);
+            $comando[] = $alvoUrl;
 
-        $process = new Process($comando);
-        $process->setTimeout(self::TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS);
-        $process->run();
+            return $comando;
+        }, self::TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS);
 
         if (!$process->isSuccessful()) {
             $motivo = $this->extrairMensagemErroRelevante($process->getErrorOutput());
@@ -102,12 +122,304 @@ final class YtDlpClient implements ExtratorVideoInterface
                 $dados = json_decode($conteudoJson, true);
                 if (is_array($dados)) {
                     /** @var array<string, mixed> $dados */
-                    $this->metadataCache[$url] = $dados;
+                    $this->metadataCache[$url] = $this->enriquecerMetadataTiktokComOembed($url, $dados);
                 }
             }
         }
 
         return $caminhoArquivo;
+    }
+
+    private function ehUrlTiktok(string $url): bool
+    {
+        return 1 === preg_match('/tiktok\.com/i', $url);
+    }
+
+    /**
+     * Consulta a API TikWM (mesma estratégia usada pela Franky) para obter link sem marca d'água e metadados completos,
+     * contornando bloqueios HTTP 403 do TikTok em IPs de datacenter.
+     *
+     * @return array{video_url: string, id: string, metadata: array<string, mixed>}|null
+     */
+    private function consultarTikwmApi(string $url): ?array
+    {
+        $apiUrl = 'https://www.tikwm.com/api/?url=' . urlencode(trim($url)) . '&hd=1';
+        $contexto = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "User-Agent: " . self::USER_AGENT_CHROME . "\r\nAccept: application/json\r\n",
+                'timeout' => 15,
+                'ignore_errors' => true,
+            ],
+        ]);
+
+        for ($tentativa = 1; $tentativa <= 2; ++$tentativa) {
+            $resposta = @file_get_contents($apiUrl, false, $contexto);
+            if (!is_string($resposta) || '' === $resposta) {
+                if ($tentativa < 2) {
+                    usleep(1_200_000);
+                }
+                continue;
+            }
+
+            $json = json_decode($resposta, true);
+            if (!is_array($json)) {
+                return null;
+            }
+
+            $code = $json['code'] ?? -1;
+            $data = $json['data'] ?? null;
+
+            if (0 === $code && is_array($data)) {
+                $videoUrl = $data['play'] ?? ($data['hdplay'] ?? ($data['wmplay'] ?? null));
+                if (!is_string($videoUrl) || '' === trim($videoUrl)) {
+                    return null;
+                }
+
+                $id = isset($data['id']) && (is_string($data['id']) || is_int($data['id']))
+                    ? (string) $data['id']
+                    : ($this->extrairTiktokId($url) ?? (string) time());
+
+                $author = is_array($data['author'] ?? null) ? $data['author'] : [];
+                $uploader = $author['nickname'] ?? ($author['unique_id'] ?? 'TikTok');
+                $uploaderId = $author['unique_id'] ?? null;
+                $titulo = isset($data['title']) && is_string($data['title']) && '' !== trim($data['title'])
+                    ? trim($data['title'])
+                    : 'Vídeo do TikTok';
+                $duracao = isset($data['duration']) && is_numeric($data['duration']) ? (int) $data['duration'] : null;
+                $thumbnail = $data['cover'] ?? ($data['origin_cover'] ?? null);
+
+                return [
+                    'video_url' => $videoUrl,
+                    'id' => $id,
+                    'metadata' => [
+                        'id' => $id,
+                        'title' => $titulo,
+                        'uploader' => is_string($uploader) ? $uploader : 'TikTok',
+                        'uploader_id' => is_string($uploaderId) ? $uploaderId : null,
+                        'duration' => $duracao,
+                        'ext' => 'mp4',
+                        'thumbnail' => is_string($thumbnail) ? $thumbnail : null,
+                        'webpage_url' => $url,
+                    ],
+                ];
+            }
+
+            // Se bateu no rate-limit de 1 req/seg da TikWM, aguarda 1.2s e tenta mais uma vez
+            if ($tentativa < 2) {
+                usleep(1_200_000);
+            }
+        }
+
+        return null;
+    }
+
+    private function baixarTiktokViaTikwm(string $url, string $diretorioDestino): ?string
+    {
+        $info = $this->consultarTikwmApi($url);
+        if (null === $info) {
+            return null;
+        }
+
+        if (!is_dir($diretorioDestino)) {
+            @mkdir($diretorioDestino, 0775, true);
+        }
+
+        $caminhoDestino = rtrim($diretorioDestino, '/') . '/' . $info['id'] . '.mp4';
+        $contexto = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "User-Agent: " . self::USER_AGENT_CHROME . "\r\nReferer: https://www.tiktok.com/\r\nAccept: */*\r\n",
+                'timeout' => 90,
+                'follow_location' => 1,
+            ],
+        ]);
+
+        $streamEntrada = @fopen($info['video_url'], 'rb', false, $contexto);
+        if (false === $streamEntrada) {
+            return null;
+        }
+
+        $streamSaida = @fopen($caminhoDestino, 'wb');
+        if (false === $streamSaida) {
+            @fclose($streamEntrada);
+
+            return null;
+        }
+
+        @stream_copy_to_stream($streamEntrada, $streamSaida);
+        @fclose($streamEntrada);
+        @fclose($streamSaida);
+
+        if (!file_exists($caminhoDestino) || filesize($caminhoDestino) < 1000) {
+            @unlink($caminhoDestino);
+
+            return null;
+        }
+
+        $this->metadataCache[$url] = $info['metadata'];
+
+        return $caminhoDestino;
+    }
+
+    /**
+     * Executa o yt-dlp com retentativa de processo em erros transitórios (403/429) e fallback para Embed URL no TikTok.
+     *
+     * @param callable(string): list<string> $montarComando
+     */
+    private function executarYtDlpComFallback(string $url, callable $montarComando, float $timeout): Process
+    {
+        $maxTentativas = $this->ehUrlTiktok($url) ? 3 : 1;
+        $ultimoProcess = null;
+
+        for ($tentativa = 1; $tentativa <= $maxTentativas; ++$tentativa) {
+            $ultimoProcess = new Process($montarComando($url));
+            $ultimoProcess->setTimeout($timeout);
+            $ultimoProcess->run();
+
+            if ($ultimoProcess->isSuccessful()) {
+                return $ultimoProcess;
+            }
+
+            if ($this->ehErroPermanente($ultimoProcess->getErrorOutput())) {
+                break;
+            }
+
+            if ($tentativa < $maxTentativas) {
+                usleep(1_500_000);
+            }
+        }
+
+        if ($this->ehUrlTiktok($url)) {
+            $embedUrl = $this->obterTiktokEmbedUrl($url);
+            if (null !== $embedUrl && $embedUrl !== $url) {
+                $embedProcess = new Process($montarComando($embedUrl));
+                $embedProcess->setTimeout($timeout);
+                $embedProcess->run();
+
+                if ($embedProcess->isSuccessful()) {
+                    return $embedProcess;
+                }
+            }
+        }
+
+        /** @var Process $ultimoProcess */
+        return $ultimoProcess;
+    }
+
+    private function ehErroPermanente(string $stderr): bool
+    {
+        $padroes = [
+            'Private video',
+            'Video unavailable',
+            'This video is not available',
+            'has been removed',
+            'Video removed',
+            'was deleted',
+            'is not available in your country',
+            "This content isn't available",
+            'This video is DRM protected',
+        ];
+
+        foreach ($padroes as $padrao) {
+            if (false !== stripos($stderr, $padrao)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function extrairTiktokId(string $url): ?string
+    {
+        if (1 === preg_match('/video\/(\d+)/i', $url, $m)
+            || 1 === preg_match('/\/v\/(\d+)/i', $url, $m)
+            || 1 === preg_match('/embed\/v2\/(\d+)/i', $url, $m)
+            || 1 === preg_match('/(\d{18,20})/', $url, $m)
+        ) {
+            return $m[1];
+        }
+
+        return null;
+    }
+
+    private function obterTiktokEmbedUrl(string $url): ?string
+    {
+        if (!$this->ehUrlTiktok($url)) {
+            return null;
+        }
+
+        $id = $this->extrairTiktokId($url);
+
+        return null !== $id ? 'https://www.tiktok.com/embed/v2/' . $id : null;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function buscarOembedTiktok(string $url): ?array
+    {
+        if (!$this->ehUrlTiktok($url)) {
+            return null;
+        }
+
+        $oembedUrl = 'https://www.tiktok.com/oembed?url=' . urlencode($url);
+        $contexto = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "User-Agent: " . self::USER_AGENT_CHROME . "\r\n",
+                'timeout' => 10,
+                'ignore_errors' => true,
+            ],
+        ]);
+
+        $res = @file_get_contents($oembedUrl, false, $contexto);
+        if (!is_string($res) || '' === $res) {
+            return null;
+        }
+
+        $data = json_decode($res, true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        return [
+            'title' => $data['title'] ?? null,
+            'uploader' => $data['author_name'] ?? ($data['author_unique_id'] ?? 'TikTok'),
+            'uploader_id' => $data['author_unique_id'] ?? null,
+            'thumbnail' => $data['thumbnail_url'] ?? null,
+            'ext' => 'mp4',
+            'webpage_url' => $url,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     * @return array<string, mixed>
+     */
+    private function enriquecerMetadataTiktokComOembed(string $url, array $dados): array
+    {
+        if (!$this->ehUrlTiktok($url)) {
+            return $dados;
+        }
+
+        $tituloAtual = isset($dados['title']) && is_string($dados['title']) ? $dados['title'] : '';
+        if ('' === $tituloAtual || false !== stripos($tituloAtual, 'TikTok Embed')) {
+            $oembed = $this->buscarOembedTiktok($url);
+            if (null !== $oembed) {
+                if (!empty($oembed['title'])) {
+                    $dados['title'] = $oembed['title'];
+                }
+                if (empty($dados['uploader']) && !empty($oembed['uploader'])) {
+                    $dados['uploader'] = $oembed['uploader'];
+                }
+                if (empty($dados['thumbnail']) && !empty($oembed['thumbnail'])) {
+                    $dados['thumbnail'] = $oembed['thumbnail'];
+                }
+            }
+        }
+
+        return $dados;
     }
 
     /**
