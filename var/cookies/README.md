@@ -14,4 +14,16 @@ Esta pasta permite fornecer cookies de autenticação para plataformas de vídeo
    - `cookies.txt`
 5. O CirqueiraX detectará automaticamente o arquivo e passará `--cookies` para o `yt-dlp`.
 
+## Cookies por plataforma
+
+Cada plataforma usa só o seu arquivo, para que os cookies de uma não vazem para outra:
+
+| Plataforma | Arquivo |
+| :--- | :--- |
+| YouTube | `youtube.txt` (ou `cookies.txt`) |
+| TikTok | `tiktok.txt` |
+| Instagram | `instagram.txt` |
+
+O Instagram às vezes recusa posts acessados a partir da VPS ("empty media response"). Se isso virar regra, exporte os cookies do `instagram.com` logado (de preferência numa conta secundária) e salve como `instagram.txt`.
+
 > **Nota:** Arquivos de cookies contêm credenciais de sessão e são ignorados pelo Git (nunca serão comitados).
