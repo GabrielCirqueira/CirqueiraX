@@ -58,6 +58,12 @@ final class YtDlpClient implements ExtratorVideoInterface
                     return $oembed;
                 }
             }
+            if ($this->ehUrlTwitter($url)) {
+                $infoFxtwitter = $this->consultarFxtwitterApi($url);
+                if (null !== $infoFxtwitter) {
+                    return $infoFxtwitter['metadata'];
+                }
+            }
             $motivo = $this->extrairMensagemErroRelevante($process->getErrorOutput());
             throw YtDlpException::falhaAoExtrairMetadataDoVideo($motivo);
         }
@@ -103,6 +109,14 @@ final class YtDlpClient implements ExtratorVideoInterface
         }, self::TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS);
 
         if (!$process->isSuccessful()) {
+            // Tweets marcados como sensíveis não mostram a mídia para o guest token do yt-dlp
+            if ($this->ehUrlTwitter($url)) {
+                $caminhoFxtwitter = $this->baixarTwitterViaFxtwitter($url, $diretorioDestino);
+                if (null !== $caminhoFxtwitter) {
+                    return $caminhoFxtwitter;
+                }
+            }
+
             $motivo = $this->extrairMensagemErroRelevante($process->getErrorOutput());
             throw YtDlpException::falhaAoEfetuarDownloadDoVideo($motivo);
         }
@@ -221,21 +235,41 @@ final class YtDlpClient implements ExtratorVideoInterface
             return null;
         }
 
-        if (!is_dir($diretorioDestino)) {
-            @mkdir($diretorioDestino, 0775, true);
+        $caminhoDestino = $this->baixarArquivoDireto(
+            $info['video_url'],
+            rtrim($diretorioDestino, '/') . '/' . $info['id'] . '.mp4',
+            'https://www.tiktok.com/',
+        );
+        if (null === $caminhoDestino) {
+            return null;
         }
 
-        $caminhoDestino = rtrim($diretorioDestino, '/') . '/' . $info['id'] . '.mp4';
+        $this->metadataCache[$url] = $info['metadata'];
+
+        return $caminhoDestino;
+    }
+
+    /**
+     * Baixa um arquivo de vídeo direto da CDN para o caminho de destino.
+     * Retorna null se o download falhar ou o arquivo vier vazio.
+     */
+    private function baixarArquivoDireto(string $urlArquivo, string $caminhoDestino, string $referer): ?string
+    {
+        $diretorio = dirname($caminhoDestino);
+        if (!is_dir($diretorio)) {
+            @mkdir($diretorio, 0775, true);
+        }
+
         $contexto = stream_context_create([
             'http' => [
                 'method' => 'GET',
-                'header' => "User-Agent: " . self::USER_AGENT_CHROME . "\r\nReferer: https://www.tiktok.com/\r\nAccept: */*\r\n",
+                'header' => "User-Agent: " . self::USER_AGENT_CHROME . "\r\nReferer: " . $referer . "\r\nAccept: */*\r\n",
                 'timeout' => 90,
                 'follow_location' => 1,
             ],
         ]);
 
-        $streamEntrada = @fopen($info['video_url'], 'rb', false, $contexto);
+        $streamEntrada = @fopen($urlArquivo, 'rb', false, $contexto);
         if (false === $streamEntrada) {
             return null;
         }
@@ -254,6 +288,102 @@ final class YtDlpClient implements ExtratorVideoInterface
         if (!file_exists($caminhoDestino) || filesize($caminhoDestino) < 1000) {
             @unlink($caminhoDestino);
 
+            return null;
+        }
+
+        return $caminhoDestino;
+    }
+
+    private function ehUrlTwitter(string $url): bool
+    {
+        return null !== $this->extrairTweetId($url);
+    }
+
+    private function extrairTweetId(string $url): ?string
+    {
+        if (1 === preg_match('#^https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/[^/]+/status(?:es)?/(\d+)#i', trim($url), $m)) {
+            return $m[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * Consulta a API pública do FxTwitter, que devolve o MP4 inclusive de tweets marcados como sensíveis.
+     *
+     * @return array{video_url: string, id: string, metadata: array<string, mixed>}|null
+     */
+    private function consultarFxtwitterApi(string $url): ?array
+    {
+        $tweetId = $this->extrairTweetId($url);
+        if (null === $tweetId) {
+            return null;
+        }
+
+        $contexto = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => "User-Agent: " . self::USER_AGENT_CHROME . "\r\nAccept: application/json\r\n",
+                'timeout' => 15,
+                'ignore_errors' => true,
+            ],
+        ]);
+
+        $resposta = @file_get_contents('https://api.fxtwitter.com/status/' . $tweetId, false, $contexto);
+        if (!is_string($resposta) || '' === $resposta) {
+            return null;
+        }
+
+        $json = json_decode($resposta, true);
+        $tweet = is_array($json) ? ($json['tweet'] ?? null) : null;
+        if (!is_array($tweet)) {
+            return null;
+        }
+
+        $videos = $tweet['media']['videos'] ?? null;
+        $video = is_array($videos) && is_array($videos[0] ?? null) ? $videos[0] : null;
+        $videoUrl = $video['url'] ?? null;
+        if (!is_string($videoUrl) || '' === trim($videoUrl)) {
+            return null;
+        }
+
+        $autor = is_array($tweet['author'] ?? null) ? $tweet['author'] : [];
+        $texto = is_string($tweet['text'] ?? null) ? trim((string) preg_replace('#\s*https?://t\.co/\S+#', '', $tweet['text'])) : '';
+        $duracao = isset($video['duration']) && is_numeric($video['duration']) ? (int) round((float) $video['duration']) : null;
+
+        return [
+            'video_url' => $videoUrl,
+            'id' => $tweetId,
+            'metadata' => [
+                'id' => $tweetId,
+                'title' => '' !== $texto ? mb_substr($texto, 0, 200) : 'Vídeo do X',
+                'description' => '' !== $texto ? $texto : null,
+                'uploader' => is_string($autor['name'] ?? null) ? $autor['name'] : 'X / Twitter',
+                'uploader_id' => is_string($autor['screen_name'] ?? null) ? $autor['screen_name'] : null,
+                'duration' => $duracao,
+                'width' => isset($video['width']) && is_numeric($video['width']) ? (int) $video['width'] : null,
+                'height' => isset($video['height']) && is_numeric($video['height']) ? (int) $video['height'] : null,
+                'ext' => 'mp4',
+                'thumbnail' => is_string($video['thumbnail_url'] ?? null) ? $video['thumbnail_url'] : null,
+                'webpage_url' => $url,
+                'extractor' => 'fxtwitter',
+            ],
+        ];
+    }
+
+    private function baixarTwitterViaFxtwitter(string $url, string $diretorioDestino): ?string
+    {
+        $info = $this->consultarFxtwitterApi($url);
+        if (null === $info) {
+            return null;
+        }
+
+        $caminhoDestino = $this->baixarArquivoDireto(
+            $info['video_url'],
+            rtrim($diretorioDestino, '/') . '/' . $info['id'] . '.mp4',
+            'https://x.com/',
+        );
+        if (null === $caminhoDestino) {
             return null;
         }
 
@@ -493,6 +623,14 @@ final class YtDlpClient implements ExtratorVideoInterface
             return;
         }
 
+        if ($this->ehUrlTwitter($url)) {
+            $arquivoCookiesX = $this->resolverArquivoCookiesPlataforma('x');
+            if (null !== $arquivoCookiesX) {
+                $comando[] = '--cookies';
+                $comando[] = $arquivoCookiesX;
+            }
+        }
+
         if ($this->ehUrlInstagram($url)) {
             $comando[] = '--user-agent';
             $comando[] = self::USER_AGENT_CHROME;
@@ -555,6 +693,10 @@ final class YtDlpClient implements ExtratorVideoInterface
     {
         if (stripos($stderr, 'The provided YouTube account cookies are no longer valid') !== false) {
             return 'Os cookies do YouTube configurados no servidor expiraram ou foram invalidados pelo Google. Por favor, exporte um novo cookies.txt pelo navegador e atualize em var/cookies/youtube.txt.';
+        }
+
+        if (false !== stripos($stderr, 'No video could be found in this tweet')) {
+            return 'Não foi possível encontrar vídeo neste post do X, nem pelo yt-dlp nem pela API do FxTwitter. O post pode ter só imagem ou texto, ou o vídeo pode ter sido removido.';
         }
 
         if (false !== stripos($stderr, 'There is no video in this post')) {

@@ -68,7 +68,15 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
         }
 
         const novosItens: ItemFilaDownload[] = []
-        const urlsLimpos = urls.map((u) => u.trim()).filter(Boolean)
+        // Ignora links repetidos no mesmo envio e os que já estão aguardando ou baixando
+        const urlsAtivas = new Set(
+          get()
+            .itens.filter((it) => it.status === 'pendente' || it.status === 'baixando')
+            .map((it) => it.url)
+        )
+        const urlsLimpos = [...new Set(urls.map((u) => u.trim()).filter(Boolean))].filter(
+          (u) => !urlsAtivas.has(u)
+        )
 
         for (const url of urlsLimpos) {
           // Identifica a plataforma do link
@@ -92,11 +100,19 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
         }
 
         if (novosItens.length === 0) {
+          if (urls.some((u) => u.trim())) {
+            addToast({ title: 'Esse link já está na fila de downloads.', color: 'info' })
+          }
           return 0
         }
 
+        const urlsNovas = new Set(novosItens.map((it) => it.url))
         set((state) => ({
-          itens: [...state.itens, ...novosItens],
+          // Uma nova tentativa substitui o item com erro do mesmo link
+          itens: [
+            ...state.itens.filter((it) => !(it.status === 'erro' && urlsNovas.has(it.url))),
+            ...novosItens,
+          ],
           painelAberto: true,
         }))
 

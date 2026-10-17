@@ -23,7 +23,10 @@ Cada plataforma usa só o seu arquivo, para que os cookies de uma não vazem par
 | YouTube | `youtube.txt` (ou `cookies.txt`) |
 | TikTok | `tiktok.txt` |
 | Instagram | `instagram.txt` |
+| X / Twitter | `x.txt` |
 
 O Instagram às vezes recusa posts acessados a partir da VPS ("empty media response"). Se isso virar regra, exporte os cookies do `instagram.com` logado (de preferência numa conta secundária) e salve como `instagram.txt`.
+
+Para o X, os cookies são opcionais: tweets marcados como sensíveis já são baixados pela API pública do FxTwitter quando o yt-dlp não encontra o vídeo.
 
 > **Nota:** Arquivos de cookies contêm credenciais de sessão e são ignorados pelo Git (nunca serão comitados).
