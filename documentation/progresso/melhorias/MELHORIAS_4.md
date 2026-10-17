@@ -445,3 +445,30 @@
   - `src/Infra/YtDlp/YtDlpClient.php`
   - `web/features/downloads-video/components/PainelFilaDownloads.tsx`
   - `var/cookies/README.md`
+
+---
+
+### ✅ Melhoria 78 — Download de Vídeos do X Marcados como Sensíveis via FxTwitter e Fila sem Links Duplicados
+
+- **Status**: Concluído
+- **Data**: 17 de outubro de 2026
+- **Problema**:
+  - Links do X com vídeo (ex: `x.com/tud0osobregames/status/2109268197698420987`) falhavam com `No video could be found in this tweet`.
+  - O yt-dlp acessa o X com um guest token, sem login. Tweets marcados como sensíveis (`possibly_sensitive`) não mostram a mídia para esse token, então o yt-dlp não via o vídeo que existe no post.
+  - Cada nova tentativa do mesmo link criava mais um item na fila, que acumulava várias linhas de erro iguais.
+- **Solução**:
+  - **Camada de fallback FxTwitter no `YtDlpClient`**, no mesmo modelo do TikWM para o TikTok:
+    - Se o yt-dlp falhar num link do X, o cliente consulta `https://api.fxtwitter.com/status/{id}`, baixa o MP4 direto de `video.twimg.com` e guarda no cache os metadados: texto do post como título, autor, `@usuário`, duração, resolução e miniatura.
+    - O mesmo fallback vale para `extrairMetadata()`.
+    - O ID do tweet é extraído só de URLs `x.com`/`twitter.com/{usuario}/status/{id}`, ignorando `?s=20` e outros parâmetros.
+    - O download direto da CDN virou `baixarArquivoDireto()`, compartilhado entre TikWM e FxTwitter.
+    - Suporte opcional a `var/cookies/x.txt`.
+    - Se nenhuma das camadas encontrar vídeo, a mensagem explica que o post pode ter só imagem ou texto, ou que o vídeo foi removido.
+  - **Fila de downloads (`useFilaDownloadsStore`)**:
+    - Links repetidos no mesmo envio, ou que já estão pendentes ou baixando, são ignorados, com o aviso "Esse link já está na fila de downloads."
+    - Uma nova tentativa substitui o item com erro do mesmo link, em vez de empilhar outro.
+- **Validação**: o vídeo do post acima (5min29s, 50 MB) foi baixado em 8s no container de produção. TikTok via TikWM continuou funcionando.
+- **Arquivos**:
+  - `src/Infra/YtDlp/YtDlpClient.php`
+  - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
+  - `var/cookies/README.md`
