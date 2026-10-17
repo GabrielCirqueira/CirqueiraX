@@ -421,3 +421,27 @@
   - `web/features/downloads-video/DownloadsVideo.tsx`
   - `web/features/downloads-video/api.ts`
   - `web/features/downloads-video/hooks/useDownloadsVideo.ts`
+
+---
+
+### ✅ Melhoria 77 — Downloads do Instagram: Link sem Parâmetros de Rastreamento, Cookies Próprios, Retentativa e Mensagens Claras na Fila
+
+- **Status**: Concluído
+- **Data**: 17 de outubro de 2026
+- **Problema**:
+  - Um link de post do Instagram (`instagram.com/p/DeaC3LjBuLm/?rpxt=...`) falhava na fila com `Ocorreu uma falha durante o download do vídeo pelo yt-dlp.` e o resto da mensagem cortado.
+  - O yt-dlp respondia de duas formas para o mesmo post: `Instagram sent an empty media response`, um bloqueio intermitente do Instagram para IPs de datacenter, e `There is no video in this post`, porque o post era só de foto.
+  - O Instagram não tinha tratamento próprio no `YtDlpClient`: o link ia com os parâmetros de rastreamento, sem user-agent de navegador, sem cookies e sem nova tentativa.
+  - No painel da fila, o erro ficava na mesma linha da plataforma, cortado em 300px. A parte útil da mensagem nunca aparecia.
+- **Solução**:
+  - **`YtDlpClient`**:
+    - Links do Instagram são normalizados antes do yt-dlp, removendo `?igsh=`, `?rpxt=`, `?utm_...` e fragmentos.
+    - O Instagram recebe user-agent de navegador e usa `var/cookies/instagram.txt` quando o arquivo existe. A busca de cookies virou `resolverArquivoCookiesPlataforma()`, usada também pelo TikTok.
+    - O Instagram ganhou 2 tentativas, por causa do bloqueio intermitente. `There is no video in this post` é tratado como erro permanente e não é repetido.
+    - Mensagens traduzidas: post sem vídeo ("é foto ou carrossel só de fotos") e bloqueio por login, que orienta a criar ou renovar `var/cookies/instagram.txt` conforme o arquivo exista ou não.
+  - **`PainelFilaDownloads`**: o erro ganhou uma linha própria, com quebra de texto em até 3 linhas e a mensagem completa no `title`.
+  - **`var/cookies/README.md`**: tabela de arquivos de cookies por plataforma (YouTube, TikTok e Instagram).
+- **Arquivos**:
+  - `src/Infra/YtDlp/YtDlpClient.php`
+  - `web/features/downloads-video/components/PainelFilaDownloads.tsx`
+  - `var/cookies/README.md`
