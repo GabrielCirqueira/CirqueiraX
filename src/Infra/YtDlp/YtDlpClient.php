@@ -269,11 +269,18 @@ final class YtDlpClient implements ExtratorVideoInterface
      */
     private function executarYtDlpComFallback(string $url, callable $montarComando, float $timeout): Process
     {
-        $maxTentativas = $this->ehUrlTiktok($url) ? 3 : 1;
+        // O Instagram devolve "empty media response" de forma intermitente para IPs de datacenter
+        $maxTentativas = match (true) {
+            $this->ehUrlTiktok($url) => 3,
+            $this->ehUrlInstagram($url) => 2,
+            default => 1,
+        };
         $ultimoProcess = null;
 
+        $urlAlvo = $this->normalizarUrl($url);
+
         for ($tentativa = 1; $tentativa <= $maxTentativas; ++$tentativa) {
-            $ultimoProcess = new Process($montarComando($url));
+            $ultimoProcess = new Process($montarComando($urlAlvo));
             $ultimoProcess->setTimeout($timeout);
             $ultimoProcess->run();
 
@@ -307,6 +314,26 @@ final class YtDlpClient implements ExtratorVideoInterface
         return $ultimoProcess;
     }
 
+    /**
+     * Remove parâmetros de rastreamento de links do Instagram (?igsh=, ?rpxt=, ?utm_...),
+     * que não identificam o post e às vezes atrapalham a extração.
+     */
+    private function normalizarUrl(string $url): string
+    {
+        if (!$this->ehUrlInstagram($url)) {
+            return $url;
+        }
+
+        $semQuery = preg_replace('/[?#].*$/', '', trim($url));
+
+        return is_string($semQuery) && '' !== $semQuery ? $semQuery : $url;
+    }
+
+    private function ehUrlInstagram(string $url): bool
+    {
+        return 1 === preg_match('/instagram\.com/i', $url);
+    }
+
     private function ehErroPermanente(string $stderr): bool
     {
         $padroes = [
@@ -319,6 +346,7 @@ final class YtDlpClient implements ExtratorVideoInterface
             'is not available in your country',
             "This content isn't available",
             'This video is DRM protected',
+            'There is no video in this post',
         ];
 
         foreach ($padroes as $padrao) {
@@ -456,13 +484,24 @@ final class YtDlpClient implements ExtratorVideoInterface
             $comando[] = '--extractor-retries';
             $comando[] = '5';
 
-            $arquivoCookiesTiktok = $this->resolverArquivoCookiesTiktok();
+            $arquivoCookiesTiktok = $this->resolverArquivoCookiesPlataforma('tiktok');
             if (null !== $arquivoCookiesTiktok) {
                 $comando[] = '--cookies';
                 $comando[] = $arquivoCookiesTiktok;
             }
 
             return;
+        }
+
+        if ($this->ehUrlInstagram($url)) {
+            $comando[] = '--user-agent';
+            $comando[] = self::USER_AGENT_CHROME;
+
+            $arquivoCookiesInstagram = $this->resolverArquivoCookiesPlataforma('instagram');
+            if (null !== $arquivoCookiesInstagram) {
+                $comando[] = '--cookies';
+                $comando[] = $arquivoCookiesInstagram;
+            }
         }
 
         $comando[] = '--retries';
@@ -495,12 +534,12 @@ final class YtDlpClient implements ExtratorVideoInterface
         return null;
     }
 
-    private function resolverArquivoCookiesTiktok(): ?string
+    private function resolverArquivoCookiesPlataforma(string $plataforma): ?string
     {
         $candidatos = [
-            $this->projectDir . '/var/cookies/tiktok.txt',
-            '/var/www/html/var/cookies/tiktok.txt',
-            '/var/www/html/var/storage/cookies/tiktok.txt',
+            $this->projectDir . '/var/cookies/' . $plataforma . '.txt',
+            '/var/www/html/var/cookies/' . $plataforma . '.txt',
+            '/var/www/html/var/storage/cookies/' . $plataforma . '.txt',
         ];
 
         foreach ($candidatos as $candidato) {
@@ -516,6 +555,20 @@ final class YtDlpClient implements ExtratorVideoInterface
     {
         if (stripos($stderr, 'The provided YouTube account cookies are no longer valid') !== false) {
             return 'Os cookies do YouTube configurados no servidor expiraram ou foram invalidados pelo Google. Por favor, exporte um novo cookies.txt pelo navegador e atualize em var/cookies/youtube.txt.';
+        }
+
+        if (false !== stripos($stderr, 'There is no video in this post')) {
+            return 'Este post do Instagram não tem vídeo (é foto ou carrossel só de fotos). A Central de Downloads baixa apenas vídeos e Reels.';
+        }
+
+        if (false !== stripos($stderr, '[Instagram]')
+            && (false !== stripos($stderr, 'empty media response')
+                || false !== stripos($stderr, 'login required')
+                || false !== stripos($stderr, 'rate-limit reached')
+                || false !== stripos($stderr, 'Requested content is not available'))) {
+            return null !== $this->resolverArquivoCookiesPlataforma('instagram')
+                ? 'O Instagram recusou o acesso mesmo com os cookies do servidor. Eles podem ter expirado: exporte um novo instagram.txt logado no navegador e substitua em var/cookies/instagram.txt.'
+                : 'O Instagram só libera este post com login quando o acesso vem do servidor. Exporte os cookies do instagram.com (logado) e salve em var/cookies/instagram.txt.';
         }
 
         $linhas = explode("\n", $stderr);

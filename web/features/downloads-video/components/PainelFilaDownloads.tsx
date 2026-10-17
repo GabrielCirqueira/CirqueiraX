@@ -330,15 +330,19 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                           </Text>
                         </>
                       )}
-                      {item.erro && (
-                        <>
-                          <Text as="span">•</Text>
-                          <Text as="span" color="red.400" truncate maxW="300px">
-                            {item.erro}
-                          </Text>
-                        </>
-                      )}
                     </HStack>
+
+                    {item.erro && (
+                      <Text
+                        fontSize="10px"
+                        color="red.400"
+                        lineClamp={3}
+                        wordBreak="break-word"
+                        title={item.erro}
+                      >
+                        {item.erro}
+                      </Text>
+                    )}
                   </VStack>
                 </HStack>
 
