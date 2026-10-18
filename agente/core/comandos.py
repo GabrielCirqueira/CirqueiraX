@@ -488,6 +488,21 @@ def executar_comando_install(args: argparse.Namespace) -> None:
     import subprocess
     import shutil
 
+    if sys.platform == "win32":
+        script = config.DIRETORIO_RAIZ / "servico" / "instalar-servico-windows.ps1"
+        subprocess.run(
+            [
+                "powershell",
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                str(script),
+            ],
+            check=False,
+        )
+        return
+
     is_wsl = config.esta_no_wsl()
     diretorio_raiz = config.DIRETORIO_RAIZ
 

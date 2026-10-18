@@ -8,9 +8,11 @@ from watchdog.observers import Observer
 try:
     from . import config
     from .cliente import EXTENSOES_PERMITIDAS, enviar_print
+    from .estado import ja_enviado
 except ImportError:
     from core import config
     from core.cliente import EXTENSOES_PERMITIDAS, enviar_print
+    from core.estado import ja_enviado
 
 class ScreenshotEventHandler(FileSystemEventHandler):
     def __init__(self, callback_envio=enviar_print):
@@ -75,6 +77,40 @@ def deve_usar_polling(pasta: Path) -> bool:
     caminho_str = str(pasta.resolve())
     return caminho_str.startswith("/mnt/")
 
+def _enviar_pendentes(arquivos: list[Path], callback_envio) -> None:
+    for caminho in arquivos:
+        try:
+            callback_envio(caminho)
+        except Exception as exc:
+            logging.error(f"Falha ao reenviar print pendente [{caminho.name}]: {exc}")
+
+
+def varrer_pendentes(callback_envio=enviar_print) -> None:
+    """Envia prints que surgiram enquanto o agente estava parado."""
+    pasta = Path(config.WATCH_DIR)
+    if not pasta.is_dir():
+        return
+
+    pendentes = sorted(
+        (
+            caminho
+            for caminho in pasta.iterdir()
+            if caminho.is_file()
+            and caminho.suffix.lower() in EXTENSOES_PERMITIDAS
+            and not ja_enviado(caminho)
+        ),
+        key=lambda caminho: caminho.stat().st_mtime,
+    )
+    if not pendentes:
+        logging.info("Varredura inicial: nenhum print pendente.")
+        return
+
+    logging.info(f"Varredura inicial: {len(pendentes)} print(s) pendente(s).")
+    Thread(
+        target=_enviar_pendentes, args=(pendentes, callback_envio), daemon=True
+    ).start()
+
+
 def iniciar_watcher(callback_envio=enviar_print):
     pasta = Path(config.WATCH_DIR)
     handler = ScreenshotEventHandler(callback_envio=callback_envio)
@@ -101,4 +137,5 @@ def iniciar_watcher(callback_envio=enviar_print):
     observer.schedule(handler, str(pasta), recursive=False)
     observer.start()
     logging.info(f"Watcher ativo e monitorando a pasta: {pasta}")
+    varrer_pendentes(callback_envio)
     return observer

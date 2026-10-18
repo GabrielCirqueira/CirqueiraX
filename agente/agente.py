@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -26,10 +27,25 @@ from core.estado import (
 
 from core.status import exibir_status
 
-logging.basicConfig(
-    level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO),
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
+def _configurar_log() -> None:
+    handlers: list[logging.Handler] = []
+    if sys.stdout is not None:
+        handlers.append(logging.StreamHandler(sys.stdout))
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA") or str(Path.home())
+        pasta_log = Path(base) / "CirqueiraX"
+        pasta_log.mkdir(parents=True, exist_ok=True)
+        handlers.append(
+            logging.FileHandler(pasta_log / "agente.log", encoding="utf-8")
+        )
+    logging.basicConfig(
+        level=getattr(logging, config.LOG_LEVEL.upper(), logging.INFO),
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=handlers or None,
+    )
+
+
+_configurar_log()
 
 def validar_configuracao():
     if not config.AGENT_TOKEN:
