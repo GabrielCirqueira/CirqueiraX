@@ -11,6 +11,7 @@
 > - **M21–M40** → [MELHORIAS_2.md](MELHORIAS_2.md)
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
+> - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -92,3 +93,7 @@
 | M76 | Rebaixamento Individual Síncrono com Feedback de Progresso e Mensagens de Erro Claras para Vídeos com Arquivo Removido | ✅ Concluído | 16/10/2026 | [ver](MELHORIAS_4.md#melhoria-76--rebaixamento-individual-síncrono-com-feedback-de-progresso-e-mensagens-de-erro-claras-para-vídeos-com-arquivo-removido) |
 | M77 | Downloads do Instagram: Link sem Parâmetros de Rastreamento, Cookies Próprios, Retentativa e Mensagens Claras na Fila | ✅ Concluído | 17/10/2026 | [ver](MELHORIAS_4.md#melhoria-77--downloads-do-instagram-link-sem-parâmetros-de-rastreamento-cookies-próprios-retentativa-e-mensagens-claras-na-fila) |
 | M78 | Download de Vídeos do X Marcados como Sensíveis via FxTwitter e Fila sem Links Duplicados | ✅ Concluído | 17/10/2026 | [ver](MELHORIAS_4.md#melhoria-78--download-de-vídeos-do-x-marcados-como-sensíveis-via-fxtwitter-e-fila-sem-links-duplicados) |
+| M79 | Agente de Prints Independente no Windows, sem Depender do WSL | ✅ Concluído | 18/10/2026 | [ver](MELHORIAS_4.md#melhoria-79--agente-de-prints-independente-no-windows-sem-depender-do-wsl) |
+| M80 | Envio dos Prints que Ficaram Pendentes Enquanto o Agente Estava Parado | ✅ Concluído | 18/10/2026 | [ver](MELHORIAS_4.md#melhoria-80--envio-dos-prints-que-ficaram-pendentes-enquanto-o-agente-estava-parado) |
+| M81 | Remoção da Janela de CMD que Abria a Cada Minuto no Agente de Prints | ✅ Concluído | 18/10/2026 | [ver](MELHORIAS_5.md#melhoria-81--remoção-da-janela-de-cmd-que-abria-a-cada-minuto-no-agente-de-prints) |
+| M82 | Um Print Deixa de Ser Enviado Três Vezes pelo Agente | ✅ Concluído | 18/10/2026 | [ver](MELHORIAS_5.md#melhoria-82--um-print-deixa-de-ser-enviado-três-vezes-pelo-agente) |

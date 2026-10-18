@@ -85,15 +85,20 @@ If fso.FileExists(runtime) Then
   Set achou = re.Execute(txt)
   If achou.Count > 0 Then
     pid = achou(0).SubMatches(0)
-    Set ex = sh.Exec("cmd /c tasklist /FI ""PID eq " & pid & """ /NH")
-    saida = LCase(ex.StdOut.ReadAll)
-    If InStr(saida, pid) > 0 And InStr(saida, "nenhuma") = 0 And InStr(saida, "no tasks") = 0 Then
+    Set svc = GetObject("winmgmts:\\.\root\cimv2")
+    Set procs = svc.ExecQuery("SELECT ProcessId FROM Win32_Process WHERE ProcessId=" & pid)
+    If procs.Count > 0 Then
       vivo = True
     End If
   End If
 End If
 If Not vivo Then
-  sh.Run "cmd /c """ & dest & "\iniciar.bat""", 0, False
+  Set lockFile = fso.CreateTextFile(lock, True)
+  lockFile.WriteLine "em-execucao"
+  lockFile.Close
+  pythonw = dest & "\.venv\Scripts\pythonw.exe"
+  sh.CurrentDirectory = dest
+  sh.Run """" & pythonw & """ """ & dest & "\agente.py"" start", 0, False
 End If
 "@
 $vbsPath = Join-Path $Destino "vigia.vbs"
@@ -102,14 +107,7 @@ $vbsPath = Join-Path $Destino "vigia.vbs"
 $startup = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup\cirqueirax-agente.vbs"
 Copy-Item $vbsPath $startup -Force
 
-$fso = New-Object -ComObject Scripting.FileSystemObject
-$vbsCurto = $fso.GetFile($vbsPath).ShortPath
-$cmdTarefa = Join-Path $env:TEMP "cirqueirax-criar-tarefa.cmd"
-[System.IO.File]::WriteAllText(
-    $cmdTarefa,
-    "schtasks /Create /TN `"CirqueiraX_Agente`" /TR `"wscript.exe $vbsCurto`" /SC MINUTE /MO 1 /F`r`n"
-)
-cmd.exe /c $cmdTarefa | Out-Null
+schtasks.exe /Delete /TN "CirqueiraX_Agente" /F 2>$null | Out-Null
 wscript.exe $vbsPath
 Write-Output "Agente instalado em $Destino"
 Write-Output "Pasta vigiada: $screenshots"

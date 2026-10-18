@@ -472,3 +472,37 @@
   - `src/Infra/YtDlp/YtDlpClient.php`
   - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
   - `var/cookies/README.md`
+
+---
+
+### ✅ Melhoria 79 — Agente de Prints Independente no Windows, sem Depender do WSL
+
+- **Status**: Concluído
+- **Data**: 18 de outubro de 2026
+- **Problema**:
+  - O agente rodava dentro do WSL e só enxergava a pasta de prints do Windows enquanto o Linux estava ligado.
+  - Com o notebook em uso normal no Windows, o WSL desligava e os prints do dia não subiam para o https://x.cirqueira.com.
+- **Solução**:
+  - O agente passa a ficar instalado no próprio Windows, em `%LOCALAPPDATA%\CirqueiraX\agente`, com Python e pasta de screenshots locais.
+  - Sobe escondido no login, pela pasta Inicializar, e envia direto para o site.
+  - O serviço que rodava no WSL foi desligado para não enviar o mesmo print duas vezes.
+- **Arquivos**:
+  - `agente/servico/instalar-servico-windows.ps1`
+  - `agente/servico/instalar-servico-windows.bat`
+  - `agente/agente.py`
+  - `agente/core/comandos.py`
+
+---
+
+### ✅ Melhoria 80 — Envio dos Prints que Ficaram Pendentes Enquanto o Agente Estava Parado
+
+- **Status**: Concluído
+- **Data**: 18 de outubro de 2026
+- **Problema**:
+  - O agente só via arquivo novo depois que já estava rodando.
+  - Prints tirados com ele desligado ficavam na pasta e nunca subiam.
+- **Solução**:
+  - Ao iniciar, o agente percorre a pasta de screenshots e envia o que ainda não consta no histórico local.
+  - Os 16 prints parados desde 14/10 foram enviados para o site.
+- **Arquivos**:
+  - `agente/core/watcher.py`

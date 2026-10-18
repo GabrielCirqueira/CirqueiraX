@@ -10,7 +10,10 @@ Grandes features, épicos e migrações estruturais **não** entram aqui — vã
 |---|---|
 | [MELHORIAS.md](MELHORIAS.md) | Índice central com todas as melhorias (M1, M2, …) |
 | [MELHORIAS_1.md](MELHORIAS_1.md) | Detalhamento das melhorias **M1–M20** |
-| [MELHORIAS_N.md](MELHORIAS_N.md) | Próximos blocos de 20 melhorias cada |
+| [MELHORIAS_2.md](MELHORIAS_2.md) | Detalhamento das melhorias **M21–M40** |
+| [MELHORIAS_3.md](MELHORIAS_3.md) | Detalhamento das melhorias **M41–M60** |
+| [MELHORIAS_4.md](MELHORIAS_4.md) | Detalhamento das melhorias **M61–M80** |
+| [MELHORIAS_5.md](MELHORIAS_5.md) | Detalhamento das melhorias **M81–M100** |
 
 Cada arquivo sequencial agrupa **até 20 melhorias**.
 

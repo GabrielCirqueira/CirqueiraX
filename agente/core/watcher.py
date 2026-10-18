@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 import time
-from threading import Thread
+from threading import Lock, Thread
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -13,6 +13,10 @@ except ImportError:
     from core import config
     from core.cliente import EXTENSOES_PERMITIDAS, enviar_print
     from core.estado import ja_enviado
+
+_em_andamento: set[str] = set()
+_lock_andamento = Lock()
+
 
 class ScreenshotEventHandler(FileSystemEventHandler):
     def __init__(self, callback_envio=enviar_print):
@@ -32,14 +36,23 @@ class ScreenshotEventHandler(FileSystemEventHandler):
     def _processar_evento(self, caminho: Path):
         if caminho.suffix.lower() not in EXTENSOES_PERMITIDAS:
             return
-        Thread(target=self._estabilizar_e_enviar, args=(caminho,), daemon=True).start()
+        chave = str(caminho)
+        with _lock_andamento:
+            if chave in _em_andamento:
+                return
+            _em_andamento.add(chave)
+        Thread(target=self._estabilizar_e_enviar, args=(caminho, chave), daemon=True).start()
 
-    def _estabilizar_e_enviar(self, caminho: Path):
-        logging.info(
-            f"Detectado novo arquivo de print: {caminho.name}. Aguardando estabilização ({config.DEBOUNCE_SECONDS}s)..."
-        )
-        if self._aguardar_estabilizacao(caminho):
-            self.callback_envio(caminho)
+    def _estabilizar_e_enviar(self, caminho: Path, chave: str):
+        try:
+            logging.info(
+                f"Detectado novo arquivo de print: {caminho.name}. Aguardando estabilização ({config.DEBOUNCE_SECONDS}s)..."
+            )
+            if self._aguardar_estabilizacao(caminho):
+                self.callback_envio(caminho)
+        finally:
+            with _lock_andamento:
+                _em_andamento.discard(chave)
 
     def _aguardar_estabilizacao(self, caminho: Path) -> bool:
         tempo_inicio = time.time()
