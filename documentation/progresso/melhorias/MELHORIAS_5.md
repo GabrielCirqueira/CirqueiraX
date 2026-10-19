@@ -32,3 +32,26 @@
   - O histórico por hash continua ignorando o que já foi enviado.
 - **Arquivos**:
   - `agente/core/watcher.py`
+
+---
+
+### ✅ Melhoria 83 — Fila de Downloads Remove Itens Concluídos e Mantém Só Pendentes, em Download e com Erro
+
+- **Status**: Concluído
+- **Data**: 19 de outubro de 2026
+- **Problema**:
+  - Ao terminar, cada download era marcado como `concluido` e continuava no painel da fila e no `localStorage`. A lista crescia a cada vídeo baixado e só diminuía clicando em "Limpar Concluídos".
+- **Solução**:
+  - **`useFilaDownloadsStore`**:
+    - O download concluído sai da fila na hora. O vídeo já aparece na lista de downloads, e o toast "Download concluído" continua.
+    - A fila passa a ter só três estados: `pendente`, `baixando` e `erro`. O status `concluido` deixou de existir.
+    - O novo contador `concluidosLote` guarda quantos vídeos terminaram no lote atual, só para a barra de progresso. Ele zera quando um link é adicionado com a fila parada.
+    - Um `merge` no `persist` descarta os itens `concluido` que versões anteriores deixaram salvos no navegador.
+    - `limparConcluidos` foi substituído por `limparErros`.
+  - **`PainelFilaDownloads`**:
+    - O progresso e o "X/Y concluídos" somam os concluídos do lote com os itens que ainda estão na fila.
+    - Quando sobram só itens com erro, o cabeçalho fica vermelho e mostra "N download(s) com erro. Tente de novo ou remova da fila."
+    - O botão "Limpar Concluídos" virou "Limpar Erros". O painel some sozinho quando a fila esvazia.
+- **Arquivos**:
+  - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
+  - `web/features/downloads-video/components/PainelFilaDownloads.tsx`
