@@ -5,7 +5,8 @@ import { persist } from 'zustand/middleware'
 import { criarPedidoDownload } from '../api'
 import { identificarPlataforma, type PlataformaDetectada } from '../utils/plataformaVideo'
 
-export type StatusItemFila = 'pendente' | 'baixando' | 'concluido' | 'erro'
+// Itens concluídos saem da fila; nela só ficam os pendentes, o que está baixando e os que falharam
+export type StatusItemFila = 'pendente' | 'baixando' | 'erro'
 
 export interface ItemFilaDownload {
   id: string
@@ -26,6 +27,8 @@ interface FilaDownloadsState {
   pausado: boolean
   painelAberto: boolean
   processandoAtivo: boolean
+  /** Downloads concluídos no lote atual, usado só para a barra de progresso */
+  concluidosLote: number
 
   // Ações da Fila
   adicionarUrls: (
@@ -35,7 +38,7 @@ interface FilaDownloadsState {
     onItemConcluido?: () => void
   ) => number
   removerItem: (id: string) => void
-  limparConcluidos: () => void
+  limparErros: () => void
   limparTudo: () => void
   pausar: () => void
   retomar: (onItemConcluido?: () => void) => void
@@ -58,6 +61,7 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
       pausado: false,
       painelAberto: true,
       processandoAtivo: false,
+      concluidosLote: 0,
 
       setPainelAberto: (aberto) => set({ painelAberto: aberto }),
       togglePainel: () => set((state) => ({ painelAberto: !state.painelAberto })),
@@ -108,6 +112,8 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
 
         const urlsNovas = new Set(novosItens.map((it) => it.url))
         set((state) => ({
+          // Um lote novo (fila sem nada pendente ou baixando) zera o progresso
+          concluidosLote: urlsAtivas.size === 0 ? 0 : state.concluidosLote,
           // Uma nova tentativa substitui o item com erro do mesmo link
           itens: [
             ...state.itens.filter((it) => !(it.status === 'erro' && urlsNovas.has(it.url))),
@@ -138,14 +144,14 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
         }))
       },
 
-      limparConcluidos: () => {
+      limparErros: () => {
         set((state) => ({
-          itens: state.itens.filter((item) => item.status !== 'concluido'),
+          itens: state.itens.filter((item) => item.status !== 'erro'),
         }))
       },
 
       limparTudo: () => {
-        set({ itens: [] })
+        set({ itens: [], concluidosLote: 0 })
       },
 
       pausar: () => {
@@ -250,18 +256,10 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
             resposta.plataformaDescricao ||
             'Vídeo'
 
-          // Marca como concluído
+          // Concluído sai da fila; o vídeo já aparece na lista de downloads
           set((s) => ({
-            itens: s.itens.map((it) =>
-              it.id === proximo.id
-                ? {
-                    ...it,
-                    status: 'concluido',
-                    titulo,
-                    finalizadoEm: Date.now(),
-                  }
-                : it
-            ),
+            itens: s.itens.filter((it) => it.id !== proximo.id),
+            concluidosLote: s.concluidosLote + 1,
           }))
 
           addToast({
@@ -329,6 +327,15 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
         pausado: state.pausado,
         painelAberto: state.painelAberto,
       }),
+      // Descarta itens "concluido" que versões anteriores deixaram salvos no navegador
+      merge: (persistido, atual) => {
+        const estado = (persistido ?? {}) as Partial<FilaDownloadsState>
+        return {
+          ...atual,
+          ...estado,
+          itens: (estado.itens ?? []).filter((it) => (it.status as string) !== 'concluido'),
+        }
+      },
     }
   )
 )

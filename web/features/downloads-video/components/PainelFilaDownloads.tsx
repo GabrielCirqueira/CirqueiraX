@@ -11,7 +11,6 @@ import {
 } from '@chakra-ui/react'
 import {
   AlertCircle,
-  CheckCircle2,
   ChevronDown,
   ChevronUp,
   ExternalLink,
@@ -39,7 +38,8 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
     pausado,
     painelAberto,
     removerItem,
-    limparConcluidos,
+    limparErros,
+    concluidosLote,
     pausar,
     retomar,
     retentarItem,
@@ -53,12 +53,13 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
 
   const pendentes = itens.filter((i) => i.status === 'pendente')
   const baixando = itens.find((i) => i.status === 'baixando')
-  const concluidos = itens.filter((i) => i.status === 'concluido')
   const erros = itens.filter((i) => i.status === 'erro')
 
-  const total = itens.length
-  const concluidosTotal = concluidos.length
+  // Concluídos já saíram da lista; o progresso soma o que terminou no lote com o que ainda está nela
+  const total = concluidosLote + itens.length
+  const concluidosTotal = concluidosLote
   const percentual = total > 0 ? Math.round((concluidosTotal / total) * 100) : 0
+  const filaParada = !baixando && pendentes.length === 0
 
   return (
     <Box
@@ -92,8 +93,8 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                 ? 'cirqueira.brand.500/15'
                 : pausado
                   ? 'amber.500/15'
-                  : concluidosTotal === total
-                    ? 'green.500/15'
+                  : filaParada
+                    ? 'red.500/15'
                     : 'bg.muted'
             }
             color={
@@ -101,8 +102,8 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                 ? 'cirqueira.brand.400'
                 : pausado
                   ? 'amber.400'
-                  : concluidosTotal === total
-                    ? 'green.400'
+                  : filaParada
+                    ? 'red.400'
                     : 'fg.subtle'
             }
             display="inline-flex"
@@ -113,8 +114,8 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
               <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />
             ) : pausado ? (
               <Pause size={16} />
-            ) : concluidosTotal === total ? (
-              <CheckCircle2 size={16} />
+            ) : filaParada ? (
+              <AlertCircle size={16} />
             ) : (
               <Sparkles size={16} />
             )}
@@ -145,8 +146,8 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                 ? `Baixando agora: ${baixando.titulo || baixando.url}`
                 : pausado
                   ? 'Fila pausada temporariamente'
-                  : concluidosTotal === total
-                    ? 'Todos os downloads foram concluídos!'
+                  : filaParada
+                    ? `${erros.length} download(s) com erro. Tente de novo ou remova da fila.`
                     : `${pendentes.length} vídeo(s) aguardando na fila`}
             </Text>
           </VStack>
@@ -204,21 +205,21 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
             </Button>
           )}
 
-          {concluidos.length > 0 && (
+          {erros.length > 0 && (
             <Button
               size="xs"
               variant="ghost"
-              onClick={limparConcluidos}
+              onClick={limparErros}
               h={7}
               px={2}
               borderRadius="md"
               color="fg.subtle"
               _hover={{ color: 'fg' }}
-              title="Remover vídeos já concluídos da lista da fila"
+              title="Remover da fila os downloads que falharam"
             >
               <Trash2 size={13} />
               <Text as="span" ml={1} fontSize="xs" display={{ base: 'none', md: 'inline' }}>
-                Limpar Concluídos
+                Limpar Erros
               </Text>
             </Button>
           )}
@@ -273,18 +274,14 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                     bg={
                       item.status === 'baixando'
                         ? 'cirqueira.brand.500/20'
-                        : item.status === 'concluido'
-                          ? 'green.500/15'
-                          : item.status === 'erro'
+                        : item.status === 'erro'
                             ? 'red.500/15'
                             : 'bg.muted'
                     }
                     color={
                       item.status === 'baixando'
                         ? 'cirqueira.brand.400'
-                        : item.status === 'concluido'
-                          ? 'green.400'
-                          : item.status === 'erro'
+                        : item.status === 'erro'
                             ? 'red.400'
                             : 'fg.subtle'
                     }
@@ -356,13 +353,6 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                   {item.status === 'pendente' && (
                     <Badge size="xs" variant="subtle" colorPalette="gray" borderRadius="md">
                       #{index + 1} na fila
-                    </Badge>
-                  )}
-
-                  {item.status === 'concluido' && (
-                    <Badge size="xs" variant="subtle" colorPalette="green" borderRadius="md">
-                      <CheckCircle2 size={10} style={{ marginRight: '3px' }} />
-                      Concluído
                     </Badge>
                   )}
 
