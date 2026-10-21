@@ -111,3 +111,34 @@
   - `src/Exception/GoogleFotos/RegistroEnvioGoogleFotosException.php`
   - `src/Message/EnviarGoogleFotosMessage.php`, `src/MessageHandler/EnviarGoogleFotosMessageHandler.php`
   - `web/features/google-fotos/components/TabelaEnviosGoogleFotos.tsx`, `LinhaEnvioGoogleFotos.tsx`, `utils/enviosGoogleFotos.ts`, `hooks/useGoogleFotos.ts`, `api.ts`, `types.ts`, `GoogleFotos.tsx`
+
+---
+
+### ✅ Melhoria 86 — Dashboard Redesenhado em Estilo Minimalista, sem Gradientes
+
+- **Status**: Concluído
+- **Data**: 21 de outubro de 2026
+- **Problema**:
+  - O Dashboard tinha excesso de efeitos:
+    - halos em `radial-gradient` em cada card;
+    - barras e gráficos em `linear-gradient`;
+    - cores hex fixas e sombras;
+    - cards que subiam no hover;
+    - ícones em caixas coloridas e uma cor diferente para cada métrica.
+  - As abas usavam cards dentro de cards. O status do Google Fotos aparecia fixo como "Pronto", mesmo com a conta desconectada.
+- **Solução**:
+  - **Base visual**:
+    - `PainelDashboard`: superfície única com borda fina, sem sombra, título e ação opcionais.
+    - `IndicadorMetrica`: rótulo, número e detalhe, em cor neutra; vermelho só para erro e âmbar só para pendência.
+    - `BarraProporcao`: barra fina de cor sólida.
+  - **Indicadores**: os dois blocos (resumo e vídeos) viraram uma grade com divisórias de 1px, sem um card por número.
+  - **Topo da página**: as ações rápidas viraram uma linha de botões neutros, e o cabeçalho mostra só o título e o estado ("Tudo funcionando" ou "N erros pendentes").
+  - **Abas**: estilo linha.
+  - **Gráficos**: cores sólidas tiradas dos tokens do tema (`var(--chakra-colors-…)`). Eixos, grade e tooltip seguem o tema claro e o escuro.
+  - **Listas**: últimas mídias, serviços, categorias, sincronização e erros viraram listas com divisórias.
+  - **Serviços**: mostra o status real da conta do Google Fotos.
+  - **Código**: cálculos e mapas de rótulo saíram dos componentes para `utils/metricasDashboard.ts`.
+- **Arquivos**:
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/dashboard/components/PainelDashboard.tsx`, `CardsResumo.tsx`, `CardsVideosMetricas.tsx`, `BarraAcoesRapidas.tsx`, `GraficosDashboard.tsx`, `AtividadesRecentes.tsx`, `StatusIntegracoes.tsx`, `TabelaCategorias.tsx`, `PainelSync.tsx`, `FilaErros.tsx`
+  - `web/features/dashboard/utils/metricasDashboard.ts`
