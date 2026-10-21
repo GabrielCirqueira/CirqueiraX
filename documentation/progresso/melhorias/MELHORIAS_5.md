@@ -55,3 +55,24 @@
 - **Arquivos**:
   - `web/features/downloads-video/stores/useFilaDownloadsStore.ts`
   - `web/features/downloads-video/components/PainelFilaDownloads.tsx`
+
+---
+
+### ✅ Melhoria 84 — Prints Enviados ao Google Fotos com a Data de Captura e o Nome Real do Arquivo
+
+- **Status**: Concluído
+- **Data**: 21 de outubro de 2026
+- **Problema**:
+  - Com a conta do Google desconectada (`invalid_grant`), os envios falharam por dias. Depois de reconectar e retentar, 27 mídias subiram de uma vez.
+  - Os prints em PNG não têm data dentro do arquivo, e a API não permite informar a data. Por isso o Google Fotos registrou cada print com o horário do upload, e prints de 12/10 e 20/10 apareceram como sendo de 21/10.
+  - Sem `fileName` no `batchCreate`, todo item ganhava como nome a data do upload (ex.: `2026-10-21.png`).
+  - Os vídeos já tinham a data certa, porque o `creation_time` é gravado via FFmpeg. Nenhuma mídia foi enviada duas vezes: isso foi conferido no banco e na API do Google.
+- **Solução**:
+  - **`AplicarMetadataArquivoService::gerarCopiaPngComData()`**: gera uma cópia temporária do PNG com um chunk `eXIf` (DateTime, DateTimeOriginal, DateTimeDigitized e OffsetTimeOriginal) e um XMP (`xmp:CreateDate`) com a data de exibição da mídia. O arquivo original não muda, para manter o hash usado na detecção de duplicados.
+  - **`EnviarGoogleFotosService`**: PNGs sobem a partir dessa cópia, que é apagada logo depois do upload.
+  - **`GoogleFotosAPI::batchCreateMediaItems()`**: passa a enviar `fileName` com o nome real do arquivo.
+- **Observação**: a API do Google Fotos não permite alterar a data nem apagar itens já enviados. Os prints que subiram com a data errada precisam ser corrigidos no app ("Editar data e hora") ou apagados e reenviados.
+- **Arquivos**:
+  - `src/Service/MediaItem/AplicarMetadataArquivoService.php`
+  - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
+  - `src/Infra/GoogleFotos/GoogleFotosAPI.php`
