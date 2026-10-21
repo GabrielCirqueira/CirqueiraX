@@ -44,6 +44,7 @@ import { PainelFilaDownloads } from './components/PainelFilaDownloads'
 import { TabelaVideos } from './components/TabelaVideos'
 import { useLocalStorageState, useSEO } from '@/shared/hooks'
 import { CHAVES_STORAGE } from '@/shared/utils'
+import { alternarSelecao, aplicarSelecaoIntervalo } from './utils/selecaoIntervalo'
 import {
   useApagarLote,
   useAtualizarMetadata,
@@ -90,6 +91,7 @@ export default function DownloadsVideo() {
   const [origemFiltro, setOrigemFiltro] = useState<string>('')
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>('')
   const [selecionados, setSelecionados] = useState<string[]>([])
+  const [ancoraSelecao, setAncoraSelecao] = useState<string | null>(null)
 
   const [porPagina, setPorPagina] = useLocalStorageState<number>(
     CHAVES_STORAGE.DOWNLOADS_POR_PAGINA,
@@ -221,10 +223,18 @@ export default function DownloadsVideo() {
   }
 
   const handleToggleSelect = useCallback((uuid: string) => {
-    setSelecionados((prev) =>
-      prev.includes(uuid) ? prev.filter((id) => id !== uuid) : [...prev, uuid]
-    )
+    setAncoraSelecao(uuid)
+    setSelecionados((prev) => alternarSelecao(prev, uuid))
   }, [])
+
+  const handleSelecionarIntervalo = useCallback(
+    (uuid: string) => {
+      const ordem = itens.map((item) => item.uuid)
+      setSelecionados((prev) => aplicarSelecaoIntervalo(ordem, prev, ancoraSelecao, uuid))
+      setAncoraSelecao(uuid)
+    },
+    [itens, ancoraSelecao]
+  )
 
   const handleToggleSelectAll = useCallback(() => {
     if (selecionados.length === itens.length) {
@@ -236,6 +246,7 @@ export default function DownloadsVideo() {
 
   const handleLimparSelecao = useCallback(() => {
     setSelecionados([])
+    setAncoraSelecao(null)
   }, [])
 
   const nomeCategoriaFiltro = useMemo(() => {
@@ -1020,6 +1031,7 @@ export default function DownloadsVideo() {
               categoriaFiltro={categoriaFiltro}
               nomeCategoriaFiltro={nomeCategoriaFiltro}
               onToggleSelect={handleToggleSelect}
+              onSelecionarIntervalo={handleSelecionarIntervalo}
               onToggleSelectAll={handleToggleSelectAll}
               onSelectSomenteSemCategoria={handleSelectSomenteSemCategoria}
               onSelectSomenteCategorizados={handleSelectSomenteCategorizados}
@@ -1040,6 +1052,7 @@ export default function DownloadsVideo() {
               categoriaFiltro={categoriaFiltro}
               nomeCategoriaFiltro={nomeCategoriaFiltro}
               onToggleSelect={handleToggleSelect}
+              onSelecionarIntervalo={handleSelecionarIntervalo}
               onToggleSelectAll={handleToggleSelectAll}
               onSelectSomenteSemCategoria={handleSelectSomenteSemCategoria}
               onSelectSomenteCategorizados={handleSelectSomenteCategorizados}

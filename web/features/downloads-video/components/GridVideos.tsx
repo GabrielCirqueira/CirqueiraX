@@ -2,6 +2,10 @@ import { Badge, Box, Button, Flex, Grid, HStack, Text, VStack } from '@chakra-ui
 import { CheckSquare, Film, FolderCheck, Square, Tag, X } from 'lucide-react'
 import { memo, useMemo } from 'react'
 import type { MediaItem } from '../types'
+import {
+  bloquearSelecaoDeTextoComShift,
+  interceptarCliqueComShift,
+} from '../utils/selecaoIntervalo'
 import { CardVideo, type VarianteCardVideo } from './CardVideo'
 
 export interface GridVideosProps {
@@ -13,6 +17,7 @@ export interface GridVideosProps {
   categoriaFiltro?: string
   nomeCategoriaFiltro?: string
   onToggleSelect: (uuid: string) => void
+  onSelecionarIntervalo?: (uuid: string) => void
   onToggleSelectAll?: () => void
   onSelectSomenteSemCategoria?: () => void
   onSelectSomenteCategorizados?: () => void
@@ -60,6 +65,7 @@ export const GridVideos = memo(function GridVideos({
   categoriaFiltro = '',
   nomeCategoriaFiltro = '',
   onToggleSelect,
+  onSelecionarIntervalo,
   onToggleSelectAll,
   onSelectSomenteSemCategoria,
   onSelectSomenteCategorizados,
@@ -115,8 +121,10 @@ export const GridVideos = memo(function GridVideos({
   const labelBotaoPrincipal = useMemo(() => {
     if (todosSelecionados) return 'Desmarcar todos'
     if (algunsSelecionados) return `Selecionados (${selecionados.length}/${itens.length})`
-    if (categoriaFiltro === 'sem_categoria') return `Selecionar todos sem categoria (${itens.length})`
-    if (categoriaFiltro === 'com_categoria') return `Selecionar todos categorizados (${itens.length})`
+    if (categoriaFiltro === 'sem_categoria')
+      return `Selecionar todos sem categoria (${itens.length})`
+    if (categoriaFiltro === 'com_categoria')
+      return `Selecionar todos categorizados (${itens.length})`
     if (nomeCategoriaFiltro) return `Selecionar todos de "${nomeCategoriaFiltro}" (${itens.length})`
     return `Selecionar todos os vídeos (${itens.length})`
   }, [
@@ -274,7 +282,12 @@ export const GridVideos = memo(function GridVideos({
             )}
           </HStack>
 
-          <HStack gap={2} fontSize="xs" color="fg.subtle" justify={{ base: 'flex-start', md: 'flex-end' }}>
+          <HStack
+            gap={2}
+            fontSize="xs"
+            color="fg.subtle"
+            justify={{ base: 'flex-start', md: 'flex-end' }}
+          >
             <Text as="span">
               {itens.length} {itens.length === 1 ? 'vídeo nesta página' : 'vídeos nesta página'}
             </Text>
@@ -293,21 +306,29 @@ export const GridVideos = memo(function GridVideos({
         gap={variante === 'compacto' ? 3 : colunas >= 6 ? 3 : 4}
       >
         {itens.map((item) => (
-          <CardVideo
+          <Box
             key={item.uuid}
-            item={item}
-            selecionado={selecionados.includes(item.uuid)}
-            variante={variante}
-            colunas={colunas}
-            onToggleSelect={onToggleSelect}
-            onVisualizar={onVisualizar}
-            onEditarMetadata={onEditarMetadata}
-            onCategorizar={onCategorizar}
-            onRebaixar={onRebaixar}
-            onRetentar={onRetentar}
-            onApagar={onApagar}
-            onForcarGoogleFotos={onForcarGoogleFotos}
-          />
+            display="contents"
+            onMouseDownCapture={bloquearSelecaoDeTextoComShift}
+            onClickCapture={(evento) =>
+              interceptarCliqueComShift(evento, () => onSelecionarIntervalo?.(item.uuid))
+            }
+          >
+            <CardVideo
+              item={item}
+              selecionado={selecionados.includes(item.uuid)}
+              variante={variante}
+              colunas={colunas}
+              onToggleSelect={onToggleSelect}
+              onVisualizar={onVisualizar}
+              onEditarMetadata={onEditarMetadata}
+              onCategorizar={onCategorizar}
+              onRebaixar={onRebaixar}
+              onRetentar={onRetentar}
+              onApagar={onApagar}
+              onForcarGoogleFotos={onForcarGoogleFotos}
+            />
+          </Box>
         ))}
       </Grid>
     </VStack>

@@ -175,3 +175,21 @@
   - `web/features/downloads-video/DownloadsVideo.tsx`, `api.ts`, `types.ts`, `hooks/useDownloadsVideo.ts`
   - `web/features/downloads-video/components/BarraAcoesEmLote.tsx`, `ModalRemoverCategoriaLote.tsx`
   - `web/features/downloads-video/utils/remocaoCategoria.ts`
+
+---
+
+### ✅ Melhoria 88 — Seleção em Intervalo com Shift na Tela de Downloads
+
+- **Status**: Concluído
+- **Data**: 21 de outubro de 2026
+- **Problema**: para agir em lote era preciso marcar card por card.
+- **Solução**:
+  - Igual ao Google Fotos: o clique normal no seletor marca o card e vira o ponto de partida. **Shift + clique** em outro card seleciona todos os cards entre os dois, para frente ou para trás.
+  - Funciona nos modos grade, compacto, galeria e lista. Na tabela, Shift + clique vale na linha inteira.
+  - Se o ponto de partida estiver desmarcado, o intervalo é desmarcado. Sem ponto de partida, o Shift + clique só alterna o card.
+  - Com Shift, o clique não abre o visualizador e o navegador não seleciona texto.
+  - A lógica fica em `utils/selecaoIntervalo.ts`. `GridVideos` e `TabelaVideos` só interceptam o clique com Shift (`onClickCapture`) e chamam `onSelecionarIntervalo`.
+- **Arquivos**:
+  - `web/features/downloads-video/DownloadsVideo.tsx`
+  - `web/features/downloads-video/components/GridVideos.tsx`, `TabelaVideos.tsx`
+  - `web/features/downloads-video/utils/selecaoIntervalo.ts`

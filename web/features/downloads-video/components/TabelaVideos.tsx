@@ -35,6 +35,10 @@ import {
   formatarTamanhoBytes,
   obterStatusConfig,
 } from '../utils/formatadores'
+import {
+  bloquearSelecaoDeTextoComShift,
+  interceptarCliqueComShift,
+} from '../utils/selecaoIntervalo'
 
 export interface TabelaVideosProps {
   itens: MediaItem[]
@@ -43,6 +47,7 @@ export interface TabelaVideosProps {
   categoriaFiltro?: string
   nomeCategoriaFiltro?: string
   onToggleSelect: (uuid: string) => void
+  onSelecionarIntervalo?: (uuid: string) => void
   onToggleSelectAll?: () => void
   onSelectSomenteSemCategoria?: () => void
   onSelectSomenteCategorizados?: () => void
@@ -63,6 +68,7 @@ export const TabelaVideos = memo(function TabelaVideos({
   categoriaFiltro = '',
   nomeCategoriaFiltro = '',
   onToggleSelect,
+  onSelecionarIntervalo,
   onToggleSelectAll,
   onSelectSomenteSemCategoria,
   onSelectSomenteCategorizados,
@@ -389,6 +395,10 @@ export const TabelaVideos = memo(function TabelaVideos({
                 <Box
                   as="tr"
                   key={item.uuid}
+                  onMouseDownCapture={bloquearSelecaoDeTextoComShift}
+                  onClickCapture={(evento) =>
+                    interceptarCliqueComShift(evento, () => onSelecionarIntervalo?.(item.uuid))
+                  }
                   borderBottomWidth="1px"
                   borderColor="border.subtle"
                   bg={selecionado ? 'cirqueira.brand.500/5' : 'transparent'}
