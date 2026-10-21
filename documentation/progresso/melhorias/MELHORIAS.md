@@ -101,3 +101,4 @@
 | M84 | Prints Enviados ao Google Fotos com a Data de Captura e o Nome Real do Arquivo | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-84--prints-enviados-ao-google-fotos-com-a-data-de-captura-e-o-nome-real-do-arquivo) |
 | M85 | Histórico de Envios ao Google Fotos com Status, Conta, Tentativa e Erro | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-85--histórico-de-envios-ao-google-fotos-com-status-conta-tentativa-e-erro) |
 | M86 | Dashboard Redesenhado em Estilo Minimalista, sem Gradientes | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-86--dashboard-redesenhado-em-estilo-minimalista-sem-gradientes) |
+| M87 | Remover Categoria em Lote na Tela de Downloads | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-87--remover-categoria-em-lote-na-tela-de-downloads) |

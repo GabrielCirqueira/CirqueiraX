@@ -142,3 +142,36 @@
   - `web/features/dashboard/Dashboard.tsx`
   - `web/features/dashboard/components/PainelDashboard.tsx`, `CardsResumo.tsx`, `CardsVideosMetricas.tsx`, `BarraAcoesRapidas.tsx`, `GraficosDashboard.tsx`, `AtividadesRecentes.tsx`, `StatusIntegracoes.tsx`, `TabelaCategorias.tsx`, `PainelSync.tsx`, `FilaErros.tsx`
   - `web/features/dashboard/utils/metricasDashboard.ts`
+
+---
+
+### ✅ Melhoria 87 — Remover Categoria em Lote na Tela de Downloads
+
+- **Status**: Concluído
+- **Data**: 21 de outubro de 2026
+- **Problema**:
+  - Vídeos categorizados antes de ajustar a data e o horário iam para o Google Fotos com a data errada.
+  - Não havia como desfazer a categoria. Recategorizar não reenviava, porque a mídia já tinha `googlePhotosMediaId`.
+- **Solução**:
+  - **Backend**:
+    - `POST /api/v1/media-itens/lote/remover-categoria` (`RemoverCategoriaLoteDTO`) chama `RemoverCategoriaMediaItemService::removerEmLote`, com um único flush ao final.
+    - `MediaItem::removerCategoria()`:
+      - guarda a categoria antiga em `MetadataKeys::CATEGORIA_REMOVIDA_ID`;
+      - limpa a categoria, o `googlePhotosMediaId` e as chaves `google_photos_*`;
+      - volta o status para `sem_categoria`.
+    - Só vale para `classificado`, `distribuido_local`, `concluido` e `erro` (`StatusMediaItem::isRemocaoCategoriaPermitida`). Itens fora disso são ignorados e registrados no log.
+    - O arquivo continua na pasta da categoria; mandá-lo para `var/downloads` faria a limpeza semanal apagá-lo. Ao recategorizar uma mídia com categoria removida, `ClassificarMediaItemService` move o arquivo para a pasta nova. A distribuição regrava a data no arquivo e o envio ao Google Fotos acontece de novo.
+    - `classificarComo()` limpa a marca `categoria_removida_id`.
+  - **Frontend**:
+    - Botão "Remover categoria" na barra de seleção em lote.
+    - `ModalRemoverCategoriaLote` explica o fluxo: apagar manualmente no Google Fotos (a API não permite), ajustar data e horário, categorizar de novo.
+    - A seleção é mantida para usar "Distribuir horários" em seguida.
+    - O aviso é montado em `utils/remocaoCategoria.ts`.
+- **Arquivos**:
+  - `src/Controller/MediaItem/MediaItemController.php`
+  - `src/DataObject/RemoverCategoriaLoteDTO.php`
+  - `src/Service/MediaItem/RemoverCategoriaMediaItemService.php`, `ClassificarMediaItemService.php`
+  - `src/Entity/MediaItem.php`, `src/Enum/StatusMediaItem.php`, `src/Exception/MediaItem/MediaItemException.php`, `src/Support/MetadataKeys.php`
+  - `web/features/downloads-video/DownloadsVideo.tsx`, `api.ts`, `types.ts`, `hooks/useDownloadsVideo.ts`
+  - `web/features/downloads-video/components/BarraAcoesEmLote.tsx`, `ModalRemoverCategoriaLote.tsx`
+  - `web/features/downloads-video/utils/remocaoCategoria.ts`
