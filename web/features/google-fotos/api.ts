@@ -1,8 +1,11 @@
 import { api } from '@/config/api'
-import type { RespostaApi } from '@/shared/types/api'
+import type { RespostaApi, RespostaPaginada } from '@/shared/types/api'
 import type {
   CategoriaComAlbumDetalhe,
+  RegistroEnvioGoogleFotos,
   RespostaAlbunsGoogleFotos,
+  ResumoEnviosGoogleFotos,
+  StatusEnvioGoogleFotos,
   StatusGoogleFotos,
   VincularAlbumPayload,
 } from './types'
@@ -53,4 +56,30 @@ export async function concluirOAuthGoogleFotos(
 
 export async function desconectarGoogleFotos(): Promise<void> {
   await api.post<RespostaApi<{ desconectado: boolean }>>('/api/v1/google-fotos/desconectar')
+}
+
+export async function listarEnviosGoogleFotos(
+  pagina: number,
+  limite: number,
+  status: StatusEnvioGoogleFotos | null
+): Promise<RespostaPaginada<RegistroEnvioGoogleFotos>> {
+  const { data } = await api.get<RespostaPaginada<RegistroEnvioGoogleFotos>>(
+    '/api/v1/google-fotos/envios',
+    { params: { pagina, limite, status: status ?? undefined } }
+  )
+  return data
+}
+
+export async function obterResumoEnviosGoogleFotos(): Promise<ResumoEnviosGoogleFotos> {
+  const { data } = await api.get<RespostaApi<ResumoEnviosGoogleFotos>>(
+    '/api/v1/google-fotos/envios/resumo'
+  )
+  return data.data
+}
+
+export async function reenviarGoogleFotos(uuidRegistro: string): Promise<RegistroEnvioGoogleFotos> {
+  const { data } = await api.post<RespostaApi<RegistroEnvioGoogleFotos>>(
+    `/api/v1/google-fotos/envios/${uuidRegistro}/reenviar`
+  )
+  return data.data
 }

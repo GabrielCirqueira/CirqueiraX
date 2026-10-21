@@ -51,6 +51,7 @@ services:
             $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
 
     App\Interface\ArmazenamentoInterface: '@App\Infra\Storage\ArmazenamentoLocalClient'
+    App\Interface\MetadataImagemInterface: '@App\Infra\Imagem\MetadataImagemClient'
 
     App\Service\MediaItem\ClassificarMediaItemService:
         arguments:

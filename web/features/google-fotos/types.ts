@@ -46,3 +46,41 @@ export interface CategoriaComAlbumDetalhe {
   criadoEm?: string
   atualizadoEm?: string
 }
+
+export type StatusEnvioGoogleFotos = 'enviando' | 'enviado' | 'reaproveitado' | 'falha'
+
+export type OrigemEnvioGoogleFotos = 'automatico' | 'retentativa' | 'reenvio_manual' | 'forcado'
+
+export interface RegistroEnvioGoogleFotos {
+  uuid: string
+  mediaItemUuid: string
+  origemMidia: string
+  origemMidiaDescricao: string
+  nomeArquivo: string | null
+  tipoArquivo: string | null
+  tamanhoBytes: number | null
+  dataMidia: string
+  categoriaNome: string | null
+  albumId: string | null
+  contaEmail: string | null
+  status: StatusEnvioGoogleFotos
+  statusDescricao: string
+  origemEnvio: OrigemEnvioGoogleFotos
+  origemEnvioDescricao: string
+  tentativa: number
+  googlePhotosMediaId: string | null
+  googlePhotosUrl: string | null
+  erroMotivo: string | null
+  iniciadoEm: string
+  finalizadoEm: string | null
+  duracaoMs: number | null
+}
+
+export interface ResumoEnviosGoogleFotos {
+  enviados: number
+  reaproveitados: number
+  falhas: number
+  enviando: number
+  ultimaFalhaEm: string | null
+  ultimaFalhaMotivo: string | null
+}

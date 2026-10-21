@@ -3,19 +3,30 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   concluirOAuthGoogleFotos,
   desconectarGoogleFotos,
+  listarEnviosGoogleFotos,
   listarTodasCategorias,
   obterAlbunsGoogleFotos,
+  obterResumoEnviosGoogleFotos,
   obterStatusGoogleFotos,
   obterUrlOAuthGoogleFotos,
+  reenviarGoogleFotos,
   vincularAlbumCategoria,
 } from '../api'
+import type { StatusEnvioGoogleFotos } from '../types'
+import { extrairMensagemErroApi } from '../utils/enviosGoogleFotos'
 
 export const GOOGLE_FOTOS_QUERY_KEYS = {
   status: ['google-fotos', 'status'] as const,
   oauthUrl: ['google-fotos', 'oauth-url'] as const,
   albuns: ['google-fotos', 'albuns'] as const,
   categorias: ['google-fotos', 'todas-categorias'] as const,
+  envios: ['google-fotos', 'envios'] as const,
+  listaEnvios: (pagina: number, limite: number, status: StatusEnvioGoogleFotos | null) =>
+    ['google-fotos', 'envios', 'lista', pagina, limite, status] as const,
+  resumoEnvios: ['google-fotos', 'envios', 'resumo'] as const,
 }
+
+const INTERVALO_ATUALIZACAO_ENVIOS_MS = 15_000
 
 export function useStatusGoogleFotos() {
   return useQuery({
@@ -83,7 +94,7 @@ export function useUrlOAuthGoogleFotos(habilitado = false) {
     queryKey: GOOGLE_FOTOS_QUERY_KEYS.oauthUrl,
     queryFn: obterUrlOAuthGoogleFotos,
     enabled: habilitado,
-    staleTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
   })
 }
 
@@ -135,3 +146,53 @@ export function useDesconectarGoogleFotos() {
   })
 }
 
+export function useEnviosGoogleFotos(
+  pagina: number,
+  limite: number,
+  status: StatusEnvioGoogleFotos | null
+) {
+  return useQuery({
+    queryKey: GOOGLE_FOTOS_QUERY_KEYS.listaEnvios(pagina, limite, status),
+    queryFn: () => listarEnviosGoogleFotos(pagina, limite, status),
+    placeholderData: (anterior) => anterior,
+    refetchInterval: INTERVALO_ATUALIZACAO_ENVIOS_MS,
+    refetchIntervalInBackground: false,
+  })
+}
+
+export function useResumoEnviosGoogleFotos() {
+  return useQuery({
+    queryKey: GOOGLE_FOTOS_QUERY_KEYS.resumoEnvios,
+    queryFn: obterResumoEnviosGoogleFotos,
+    refetchInterval: INTERVALO_ATUALIZACAO_ENVIOS_MS,
+    refetchIntervalInBackground: false,
+  })
+}
+
+export function useReenviarGoogleFotos() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (uuidRegistro: string) => reenviarGoogleFotos(uuidRegistro),
+    onSuccess: (registro) => {
+      queryClient.invalidateQueries({ queryKey: GOOGLE_FOTOS_QUERY_KEYS.envios })
+      addToast({
+        title: 'Reenvio para o Google Fotos iniciado',
+        description: registro.nomeArquivo
+          ? `"${registro.nomeArquivo}" voltou para a fila de envio.`
+          : 'A mídia voltou para a fila de envio.',
+        type: 'success',
+      })
+    },
+    onError: (erro: unknown) => {
+      addToast({
+        title: 'Não foi possível reenviar',
+        description: extrairMensagemErroApi(
+          erro,
+          'Falha ao colocar a mídia de volta na fila de envio.'
+        ),
+        type: 'error',
+      })
+    },
+  })
+}

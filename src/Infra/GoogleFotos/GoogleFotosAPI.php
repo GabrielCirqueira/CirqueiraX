@@ -76,7 +76,6 @@ final class GoogleFotosAPI extends GoogleFotosClient
      */
     public function batchCreateMediaItems(string $accessToken, string $albumId, string $uploadToken, string $descricao, ?string $nomeArquivo = null): array
     {
-        // Sem fileName o Google Fotos nomeia o item com a data do upload
         $simpleMediaItem = ['uploadToken' => $uploadToken];
         if (null !== $nomeArquivo && '' !== trim($nomeArquivo)) {
             $simpleMediaItem['fileName'] = $nomeArquivo;

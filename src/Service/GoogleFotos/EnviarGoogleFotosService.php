@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Service\GoogleFotos;
 
 use App\Entity\MediaItem;
+use App\Entity\RegistroEnvioGoogleFotos;
 use App\Enum\StatusMediaItem;
 use App\Exception\Categoria\CategoriaException;
 use App\Exception\GoogleFotos\GoogleFotosAPIException;
 use App\Exception\MediaItem\MediaItemException;
 use App\Infra\GoogleFotos\GoogleFotosAPI;
+use App\Interface\MetadataImagemInterface;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
 use App\Repository\MediaItemRepository;
@@ -18,9 +20,12 @@ use App\Service\MediaItem\RebaixarMediaItemService;
 use App\Support\MetadataKeys;
 use App\Support\TextoUtil;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 final readonly class EnviarGoogleFotosService
 {
+    private const string MIME_PNG = 'image/png';
+
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
         private CategoriaRepository $categoriaRepository,
@@ -28,12 +33,14 @@ final readonly class EnviarGoogleFotosService
         private GoogleFotosOAuthService $oAuthService,
         private GoogleFotosAlbumService $albumService,
         private GoogleFotosAPI $googleFotosApi,
+        private RegistrarEnvioGoogleFotosService $registrarEnvioService,
+        private MetadataImagemInterface $metadataImagem,
         private ?RebaixarMediaItemService $rebaixarMediaItemService = null,
         private ?AplicarMetadataArquivoService $aplicarMetadataArquivoService = null,
         private ?LoggerInterface $logger = null,
     ) {}
 
-    public function executar(string $mediaItemUuid, bool $forcarUpload = false): MediaItem
+    public function executar(string $mediaItemUuid, bool $forcarUpload = false, bool $reenvioManual = false): MediaItem
     {
         $mediaItem = $this->mediaItemRepository->buscarPorUuid($mediaItemUuid);
         if (null === $mediaItem) {
@@ -65,6 +72,27 @@ final readonly class EnviarGoogleFotosService
             return $mediaItem;
         }
 
+        $registro = $this->registrarEnvioService->iniciar($mediaItem, $forcarUpload, $reenvioManual);
+
+        try {
+            $mediaItemEnviado = $this->enviarMidia($mediaItem, $mediaItemUuid, $forcarUpload, $registro);
+        } catch (Throwable $erro) {
+            $this->registrarEnvioService->registrarFalha($registro, $erro);
+
+            throw $erro;
+        }
+
+        $this->registrarEnvioService->finalizar($registro);
+
+        return $mediaItemEnviado;
+    }
+
+    private function enviarMidia(
+        MediaItem $mediaItem,
+        string $mediaItemUuid,
+        bool $forcarUpload,
+        RegistroEnvioGoogleFotos $registro,
+    ): MediaItem {
         $categoriaId = $mediaItem->categoriaId();
         if (TextoUtil::estaEmBranco($categoriaId)) {
             throw MediaItemException::categoriaDesejadaNaoDefinida();
@@ -127,6 +155,9 @@ final readonly class EnviarGoogleFotosService
                     ]);
                 }
 
+                $registro->vincularDestino(null, $categoria->nome(), $metadata[MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID] ?? null);
+                $registro->marcarReaproveitado($googleMediaId);
+
                 $mediaItem->limparErro();
                 $mediaItem->setMetadata($metadata);
                 $mediaItem->transicionarPara(StatusMediaItem::CONCLUIDO);
@@ -180,23 +211,22 @@ final readonly class EnviarGoogleFotosService
 
         $token = $this->oAuthService->obterAccessTokenValido($conta);
         $albumId = $this->albumService->obterOuCriarAlbumId($categoria);
+        $registro->vincularDestino($conta->email(), $categoria->nome(), $albumId);
 
         $this->aplicarMetadataArquivoService?->aplicarEmMediaItem($mediaItem);
 
         $caminhoLocalStr = (string) $caminhoLocal;
         $mimeType = mime_content_type($caminhoLocalStr) ?: 'application/octet-stream';
+        $registro->descreverArquivo(basename($caminhoLocalStr), $mimeType, $mediaItem->tamanhoBytes());
 
-        // PNG não carrega data de captura; sem ela o Google Fotos usa o horário do upload
-        $caminhoCopiaComData = 'image/png' === $mimeType
-            ? $this->aplicarMetadataArquivoService?->gerarCopiaPngComData($caminhoLocalStr, $mediaItem->dataExibicao())
+        $caminhoCopiaComData = self::MIME_PNG === $mimeType
+            ? $this->metadataImagem->gerarCopiaPngComData($caminhoLocalStr, $mediaItem->dataExibicao())
             : null;
 
         try {
             $uploadToken = $this->googleFotosApi->uploadBytes($token, $caminhoCopiaComData ?? $caminhoLocalStr, $mimeType);
         } finally {
-            if (null !== $caminhoCopiaComData) {
-                @unlink($caminhoCopiaComData);
-            }
+            $this->removerCopiaTemporaria($caminhoCopiaComData);
         }
         if (TextoUtil::estaEmBranco($uploadToken)) {
             throw GoogleFotosAPIException::falhaUploadBytes();
@@ -233,6 +263,9 @@ final readonly class EnviarGoogleFotosService
             throw GoogleFotosAPIException::mediaIdNaoRetornado();
         }
 
+        $urlGoogleFotos = $primeiroResultado['mediaItem']['productUrl'] ?? null;
+        $registro->marcarEnviado($googleMediaId, is_string($urlGoogleFotos) ? $urlGoogleFotos : null);
+
         $mediaItem->setGoogleFotosId($googleMediaId);
 
         $metadata = $mediaItem->metadata();
@@ -249,5 +282,14 @@ final readonly class EnviarGoogleFotosService
         $this->mediaItemRepository->salvar($mediaItem);
 
         return $mediaItem;
+    }
+
+    private function removerCopiaTemporaria(?string $caminhoCopia): void
+    {
+        if (null === $caminhoCopia) {
+            return;
+        }
+
+        $this->metadataImagem->removerCopia($caminhoCopia);
     }
 }

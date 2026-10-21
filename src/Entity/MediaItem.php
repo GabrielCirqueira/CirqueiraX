@@ -154,6 +154,11 @@ class MediaItem
         return $this->uuid;
     }
 
+    public function uuidTexto(): string
+    {
+        return (string) $this->uuid?->toString();
+    }
+
     public function hash(): string
     {
         return $this->hash;

@@ -21,7 +21,7 @@ final readonly class EnviarGoogleFotosMessageHandler
     public function __invoke(EnviarGoogleFotosMessage $message): void
     {
         try {
-            $this->enviarGoogleFotosService->executar($message->mediaItemUuid());
+            $this->enviarGoogleFotosService->executar($message->mediaItemUuid(), reenvioManual: $message->reenvioManual());
         } catch (\Throwable $e) {
             $mediaItem = $this->mediaItemRepository->buscarPorUuid($message->mediaItemUuid());
             if (null !== $mediaItem) {
