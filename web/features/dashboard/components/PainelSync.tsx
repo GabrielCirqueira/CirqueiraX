@@ -1,34 +1,18 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Grid,
-  HStack,
-  IconButton,
-  Skeleton,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
-import {
-  CheckCircle2,
-  FolderSync,
-  HardDrive,
-  Loader2,
-  RefreshCw,
-  Smartphone,
-  Wifi,
-  WifiOff,
-} from 'lucide-react'
+import { Badge, Box, Button, HStack, IconButton, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Loader2, RefreshCw } from 'lucide-react'
 import { memo, useState } from 'react'
 import { useSincronizarPasta, useStatusSync } from '../hooks/useDashboard'
 import type { PastaSync } from '../types'
 import { obterEstadoBadge } from '../utils/statusSync'
+import { PainelDashboard } from './PainelDashboard'
 
 export interface PainelSyncProps {
   pastas?: PastaSync[]
   carregando?: boolean
 }
+
+const CHAVES_CARREGANDO = ['sync-sk-1', 'sync-sk-2']
+const TEMPO_MENSAGEM_MS = 4000
 
 export const PainelSync = memo(function PainelSync({
   pastas: pastasList,
@@ -39,7 +23,7 @@ export const PainelSync = memo(function PainelSync({
   const [pastaEmAcao, setPastaEmAcao] = useState<string | null>(null)
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null)
 
-  const isOnline = statusQuery?.online ?? false
+  const online = statusQuery?.online ?? false
   const versao = statusQuery?.versao
   const pastas = pastasList ?? statusQuery?.pastas ?? []
   const carregando = carregandoProp ?? carregandoQuery
@@ -47,251 +31,129 @@ export const PainelSync = memo(function PainelSync({
   function handleSincronizar(pastaId: string) {
     setPastaEmAcao(pastaId)
     setMensagemSucesso(null)
-
     dispararSync(pastaId, {
-      onSuccess: (res) => {
-        setMensagemSucesso(res.mensagem || `Sincronização da pasta ${pastaId} iniciada.`)
+      onSuccess: (resposta) => {
+        setMensagemSucesso(resposta.mensagem || `Sincronização da pasta ${pastaId} iniciada.`)
         setPastaEmAcao(null)
-        setTimeout(() => setMensagemSucesso(null), 4000)
+        setTimeout(() => setMensagemSucesso(null), TEMPO_MENSAGEM_MS)
       },
-      onError: () => {
-        setPastaEmAcao(null)
-      },
+      onError: () => setPastaEmAcao(null),
     })
   }
 
-  if (carregando && pastas.length === 0) {
-    return (
-      <VStack w="full" gap={4} alignItems="stretch">
-        <HStack justify="space-between" align="center">
-          <Skeleton h={6} w={52} borderRadius="md" />
-          <Skeleton h={8} w={8} borderRadius="full" />
-        </HStack>
-        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
-          {['sync-sk-1', 'sync-sk-2'].map((chave) => (
-            <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
-              <Card.Body p={4}>
-                <Skeleton h={5} w={40} borderRadius="md" mb={2} />
-                <Skeleton h={4} w={56} borderRadius="md" mb={3} />
-                <Skeleton h={8} w={28} borderRadius="lg" />
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </Grid>
-      </VStack>
-    )
-  }
-
   return (
-    <VStack w="full" gap={4} alignItems="stretch">
-      <HStack justify="space-between" align="center" flexWrap="wrap" gap={2}>
-        <HStack gap={2.5}>
-          <Box p={2} borderRadius="lg" bg="cirqueira.cyan.500/10" color="cirqueira.cyan.500">
-            <FolderSync size={20} />
-          </Box>
-          <VStack gap={0.5} alignItems="flex-start">
-            <Text fontSize="base" fontWeight="semibold" color="fg">
-              Sincronização com Dispositivos (Syncthing)
-            </Text>
-            <Text fontSize="xs" color="fg.subtle">
-              Pastas observadas e transferência direta com celular/VPS
-            </Text>
-          </VStack>
-        </HStack>
-
+    <PainelDashboard
+      semEspacamento
+      titulo="Sincronização"
+      descricao="Pastas do Syncthing com o celular e a VPS"
+      acao={
         <HStack gap={2}>
-          <Badge
-            size="sm"
-            variant="subtle"
-            colorPalette={isOnline ? 'cyan' : 'gray'}
-            borderRadius="md"
-          >
-            <HStack gap={1.5}>
-              {isOnline ? (
-                <Box as="span" color="cirqueira.cyan.500" display="inline-flex">
-                  <Wifi size={12} color="currentColor" />
-                </Box>
-              ) : (
-                <WifiOff size={12} />
-              )}
-              <Text as="span">
-                {isOnline ? `Syncthing Ativo ${versao ? `(v${versao})` : ''}` : 'Syncthing Inativo'}
-              </Text>
-            </HStack>
-          </Badge>
-
+          <HStack gap={1.5} fontSize="xs" color="fg.subtle">
+            <Box
+              w={1.5}
+              h={1.5}
+              borderRadius="full"
+              bg={online ? 'cirqueira.green.500' : 'cirqueira.red.500'}
+            />
+            <Text as="span">{online ? `Online${versao ? ` · v${versao}` : ''}` : 'Offline'}</Text>
+          </HStack>
           <IconButton
-            size="sm"
+            size="xs"
             variant="ghost"
             borderRadius="lg"
+            color="fg.muted"
             onClick={() => refetch()}
             disabled={isFetching}
-            aria-label="Atualizar Status"
+            aria-label="Atualizar status"
           >
             <RefreshCw
-              size={14}
+              size={13}
               style={{ animation: isFetching ? 'spin 1s linear infinite' : 'none' }}
             />
           </IconButton>
         </HStack>
-      </HStack>
-
+      }
+    >
       {mensagemSucesso && (
-        <Box
-          p={3}
-          borderRadius="lg"
-          bg="cirqueira.emerald.500/10"
-          borderWidth="1px"
-          borderColor="cirqueira.emerald.500/20"
-          color="cirqueira.emerald.500"
-          fontSize="xs"
-          display="flex"
-          alignItems="center"
-          gap={2}
-        >
-          <Box as="span" flexShrink={0} display="inline-flex">
-            <CheckCircle2 size={16} />
-          </Box>
-          <Text as="span">{mensagemSucesso}</Text>
-        </Box>
+        <Text px={5} pb={3} fontSize="xs" color="cirqueira.green.500">
+          {mensagemSucesso}
+        </Text>
       )}
 
-      {pastas.length === 0 ? (
-        <Card.Root
-          borderWidth="1px"
-          borderColor="border.subtle"
-          bg="bg.panel"
-          p={6}
-          textAlign="center"
-        >
-          <Card.Body
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            gap={2}
-          >
-            <Smartphone size={32} style={{ opacity: 0.3 }} />
-            <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
-              Nenhuma pasta configurada no daemon do Syncthing.
-            </Text>
-            <Text fontSize="xs" color="fg.subtle">
-              As pastas sincronizadas pelo app móvel aparecerão aqui automaticamente.
-            </Text>
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <Grid w="full" templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
-          {pastas.map((pasta) => {
-            const badge = obterEstadoBadge(pasta.estado, pasta.emSincronizacao)
-            const BadgeIcon = badge.icon
-            const estaSincronizandoEstaPasta = sincronizando && pastaEmAcao === pasta.id
+      <VStack align="stretch" gap={0} borderTopWidth="1px" borderColor="border.subtle">
+        {carregando &&
+          pastas.length === 0 &&
+          CHAVES_CARREGANDO.map((chave) => (
+            <HStack key={chave} px={5} py={3} justify="space-between">
+              <Skeleton h={4} w="40%" />
+              <Skeleton h={4} w={24} />
+            </HStack>
+          ))}
 
-            return (
-              <Card.Root
-                key={pasta.id}
-                borderWidth="1px"
-                borderColor="border.subtle"
-                bg="bg.panel"
-                borderRadius="xl"
-                shadow="md"
-                transition="all 0.2s"
-                _hover={{ borderColor: 'cirqueira.cyan.500' }}
+        {!carregando && pastas.length === 0 && (
+          <Text px={5} py={8} fontSize="sm" color="fg.subtle" textAlign="center">
+            Nenhuma pasta configurada no Syncthing.
+          </Text>
+        )}
+
+        {pastas.map((pasta) => {
+          const estado = obterEstadoBadge(pasta.estado, pasta.emSincronizacao)
+          const sincronizandoEsta = sincronizando && pastaEmAcao === pasta.id
+          return (
+            <HStack
+              key={pasta.id}
+              justify="space-between"
+              gap={4}
+              px={5}
+              py={3}
+              borderBottomWidth="1px"
+              borderColor="border.subtle"
+              _last={{ borderBottomWidth: 0 }}
+              flexWrap={{ base: 'wrap', md: 'nowrap' }}
+            >
+              <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                <Text fontSize="sm" color="fg" truncate maxW="full">
+                  {pasta.label || pasta.id}
+                </Text>
+                <Text fontSize="xs" fontFamily="mono" color="fg.subtle" truncate maxW="full">
+                  {pasta.caminho || pasta.id}
+                </Text>
+              </VStack>
+
+              <Text fontSize="xs" color="fg.subtle" flexShrink={0}>
+                {pasta.tamanhoFormatado || '0 B'}
+              </Text>
+
+              <Badge
+                size="sm"
+                variant="subtle"
+                colorPalette={estado.colorPalette}
+                borderRadius="md"
+                flexShrink={0}
               >
-                <Card.Header
-                  display="flex"
-                  flexDirection="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  pb={2}
-                >
-                  <HStack gap={2.5}>
-                    <Box
-                      p={2}
-                      borderRadius="lg"
-                      bg="cirqueira.cyan.500/10"
-                      color="cirqueira.cyan.400"
-                    >
-                      <Smartphone size={16} />
-                    </Box>
-                    <VStack gap={0.5} alignItems="flex-start">
-                      <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
-                        {pasta.label || pasta.id}
-                      </Card.Title>
-                      <Text
-                        fontSize="11px"
-                        fontFamily="mono"
-                        color="fg.subtle"
-                        truncate
-                        maxW="200px"
-                      >
-                        {pasta.caminho || `ID: ${pasta.id}`}
-                      </Text>
-                    </VStack>
-                  </HStack>
+                {estado.label}
+              </Badge>
 
-                  <Badge
-                    size="sm"
-                    variant="subtle"
-                    colorPalette={badge.colorPalette}
-                    borderRadius="md"
-                  >
-                    <HStack gap={1}>
-                      <BadgeIcon
-                        size={12}
-                        style={{ animation: badge.animate ? 'spin 1s linear infinite' : 'none' }}
-                      />
-                      <Text as="span">{badge.label}</Text>
-                    </HStack>
-                  </Badge>
-                </Card.Header>
-
-                <Card.Body pt={2}>
-                  <HStack
-                    justify="space-between"
-                    align="center"
-                    py={2}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
-                    fontSize="xs"
-                    color="fg.subtle"
-                  >
-                    <HStack gap={1.5}>
-                      <Box as="span" color="cirqueira.cyan.500" display="inline-flex">
-                        <HardDrive size={14} color="currentColor" />
-                      </Box>
-                      <Text as="span">{pasta.tamanhoFormatado || '0 B'}</Text>
-                    </HStack>
-
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      colorPalette="cyan"
-                      disabled={estaSincronizandoEstaPasta || pasta.emSincronizacao}
-                      onClick={() => handleSincronizar(pasta.id)}
-                      fontSize="xs"
-                      fontWeight="medium"
-                      h={7}
-                    >
-                      {estaSincronizandoEstaPasta ? (
-                        <HStack gap={1.5}>
-                          <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
-                          <Text as="span">Solicitando...</Text>
-                        </HStack>
-                      ) : (
-                        <HStack gap={1.5}>
-                          <RefreshCw size={12} />
-                          <Text as="span">Sincronizar agora</Text>
-                        </HStack>
-                      )}
-                    </Button>
-                  </HStack>
-                </Card.Body>
-              </Card.Root>
-            )
-          })}
-        </Grid>
-      )}
-    </VStack>
+              <Button
+                size="xs"
+                variant="ghost"
+                borderRadius="lg"
+                color="fg.muted"
+                flexShrink={0}
+                disabled={sincronizandoEsta || pasta.emSincronizacao}
+                onClick={() => handleSincronizar(pasta.id)}
+              >
+                {sincronizandoEsta ? (
+                  <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <RefreshCw size={12} />
+                )}
+                Sincronizar
+              </Button>
+            </HStack>
+          )
+        })}
+      </VStack>
+    </PainelDashboard>
   )
 })

@@ -1,40 +1,20 @@
 import { ModalVincularAlbum } from '@/features/google-fotos'
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  Grid,
-  HStack,
-  IconButton,
-  Input,
-  Skeleton,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
-import {
-  AlertTriangle,
-  Cloud,
-  Edit3,
-  FileVideo,
-  Folder,
-  HardDrive,
-  Images,
-  Layers,
-  Link2,
-  Plus,
-  Search,
-} from 'lucide-react'
+import { Box, Button, HStack, IconButton, Input, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Edit3, Plus, Search } from 'lucide-react'
 import { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { CategoriaMetrica } from '../types'
+import { filtrarCategorias, isCategoriaEditavel, pluralizar } from '../utils/metricasDashboard'
 import { ModalCriarCategoria } from './ModalCriarCategoria'
 import { ModalEditarCategoria } from './ModalEditarCategoria'
+import { PainelDashboard } from './PainelDashboard'
 
 export interface TabelaCategoriasProps {
   categorias?: CategoriaMetrica[]
   carregando?: boolean
 }
+
+const CHAVES_CARREGANDO = ['cat-sk-1', 'cat-sk-2', 'cat-sk-3']
 
 export const TabelaCategorias = memo(function TabelaCategorias({
   categorias = [],
@@ -47,317 +27,130 @@ export const TabelaCategorias = memo(function TabelaCategorias({
     null
   )
 
-  const categoriasFiltradas = categorias.filter((cat) => {
-    const termo = busca.toLowerCase().trim()
-    if (!termo) return true
-    return cat.nome.toLowerCase().includes(termo) || cat.pastaLocal.toLowerCase().includes(termo)
-  })
-
-  if (carregando && categorias.length === 0) {
-    return (
-      <VStack w="full" gap={4} alignItems="stretch">
-        <HStack justify="space-between" align="center">
-          <Skeleton h={6} w={44} borderRadius="md" />
-          <Skeleton h={9} w={60} borderRadius="xl" />
-        </HStack>
-        <Grid
-          w="full"
-          templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
-          gap={4}
-        >
-          {['cat-sk-1', 'cat-sk-2', 'cat-sk-3'].map((chave) => (
-            <Card.Root key={chave} borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
-              <Card.Body p={4}>
-                <Skeleton h={5} w={32} borderRadius="md" mb={2} />
-                <Skeleton h={4} w={48} borderRadius="md" mb={3} />
-                <Skeleton h={8} w="full" borderRadius="lg" />
-              </Card.Body>
-            </Card.Root>
-          ))}
-        </Grid>
-      </VStack>
-    )
-  }
+  const categoriasFiltradas = filtrarCategorias(categorias, busca)
 
   return (
-    <VStack w="full" gap={4} alignItems="stretch">
-      <HStack justify="space-between" align="center" flexWrap="wrap" gap={3}>
-        <HStack gap={2.5}>
-          <Box p={2} borderRadius="lg" bg="cirqueira.purple.500/10" color="cirqueira.purple.500">
-            <Layers size={20} />
-          </Box>
-          <VStack gap={0.5} alignItems="flex-start">
-            <Text fontSize="base" fontWeight="semibold" color="fg">
-              Mapeamento por Categoria
-            </Text>
-            <Text fontSize="xs" color="fg.subtle">
-              Controle de pastas locais, álbuns e consumo de armazenamento
-            </Text>
-          </VStack>
-        </HStack>
-
-        <HStack gap={2} flexWrap="wrap" w={{ base: 'full', sm: 'auto' }}>
-          <Box position="relative" w={{ base: 'full', sm: '56' }}>
-            <Search
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                pointerEvents: 'none',
-                zIndex: 10,
-                opacity: 0.5,
-              }}
-            />
-            <Input
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar categoria..."
-              pl={9}
-              bg="bg.muted"
-              borderColor="border.subtle"
-              fontSize="xs"
-              h={9}
-              w="full"
-            />
-          </Box>
-
+    <PainelDashboard
+      semEspacamento
+      titulo="Categorias"
+      descricao="Pastas locais, álbuns do Google Fotos e espaço em disco"
+      acao={
+        <HStack gap={2}>
+          <Button asChild size="xs" variant="ghost" borderRadius="lg" color="fg.muted">
+            <Link to="/google-fotos">Álbuns</Link>
+          </Button>
           <Button
-            size="sm"
-            colorPalette="brand"
+            size="xs"
+            variant="outline"
             borderRadius="lg"
-            fontSize="xs"
-            h={9}
-            px={3}
             onClick={() => setModalCriarAberto(true)}
           >
-            <Plus size={14} style={{ marginRight: '6px' }} />
-            <Text as="span">Nova Categoria</Text>
+            <Plus size={12} />
+            Nova
           </Button>
-
-          <Link to="/google-fotos">
-            <Button
-              size="sm"
-              variant="subtle"
-              colorPalette="teal"
-              borderRadius="lg"
-              fontSize="xs"
-              h={9}
-              px={3}
-            >
-              <Images size={14} style={{ marginRight: '6px' }} />
-              <Text as="span">Gerenciar Álbuns Google</Text>
-            </Button>
-          </Link>
         </HStack>
-      </HStack>
-
-      {categoriasFiltradas.length === 0 ? (
-        <Card.Root
-          borderWidth="1px"
-          borderColor="border.subtle"
-          bg="bg.panel"
-          p={8}
-          textAlign="center"
-        >
-          <Card.Body
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            gap={3}
+      }
+    >
+      <Box px={5} pb={4}>
+        <Box position="relative" maxW={{ base: 'full', sm: '72' }}>
+          <Box
+            position="absolute"
+            left={3}
+            top="50%"
+            transform="translateY(-50%)"
+            color="fg.subtle"
+            zIndex={1}
           >
-            <Folder size={32} style={{ opacity: 0.3 }} />
-            {busca ? (
-              <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
-                Nenhuma categoria corresponde à busca.
-              </Text>
-            ) : (
-              <VStack gap={3}>
-                <Text fontSize="sm" fontWeight="medium" color="fg.subtle">
-                  Nenhuma categoria cadastrada no momento.
+            <Search size={14} />
+          </Box>
+          <Input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar categoria..."
+            size="sm"
+            pl={8}
+            borderRadius="lg"
+          />
+        </Box>
+      </Box>
+
+      <VStack align="stretch" gap={0} borderTopWidth="1px" borderColor="border.subtle">
+        {carregando &&
+          categorias.length === 0 &&
+          CHAVES_CARREGANDO.map((chave) => (
+            <HStack key={chave} px={5} py={3} justify="space-between">
+              <Skeleton h={4} w="40%" />
+              <Skeleton h={4} w={24} />
+            </HStack>
+          ))}
+
+        {!carregando && categoriasFiltradas.length === 0 && (
+          <Text px={5} py={8} fontSize="sm" color="fg.subtle" textAlign="center">
+            {busca ? 'Nenhuma categoria corresponde à busca.' : 'Nenhuma categoria cadastrada.'}
+          </Text>
+        )}
+
+        {categoriasFiltradas.map((categoria, indice) => {
+          const editavel = isCategoriaEditavel(categoria)
+          return (
+            <HStack
+              key={categoria.uuid || `categoria-${categoria.nome || indice}`}
+              justify="space-between"
+              gap={4}
+              px={5}
+              py={3}
+              borderBottomWidth="1px"
+              borderColor="border.subtle"
+              _last={{ borderBottomWidth: 0 }}
+              flexWrap={{ base: 'wrap', md: 'nowrap' }}
+            >
+              <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                <Text fontSize="sm" color="fg" truncate maxW="full">
+                  {categoria.nome}
                 </Text>
-                <Button
-                  size="sm"
-                  colorPalette="brand"
-                  borderRadius="xl"
-                  onClick={() => setModalCriarAberto(true)}
-                >
-                  <Plus size={14} style={{ marginRight: '6px' }} />
-                  <Text as="span">Cadastrar Primeira Categoria</Text>
-                </Button>
+                <Text fontSize="xs" fontFamily="mono" color="fg.subtle" truncate maxW="full">
+                  {categoria.pastaLocal || 'pasta padrão'}
+                </Text>
               </VStack>
-            )}
-          </Card.Body>
-        </Card.Root>
-      ) : (
-        <Grid
-          w="full"
-          templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}
-          gap={4}
-        >
-          {categoriasFiltradas.map((cat, idx) => {
-            const ehSemCategoria = !cat.uuid || cat.uuid === 'sem_categoria'
-            const itemKey = cat.uuid ? `cat-${cat.uuid}` : `cat-item-${cat.nome || idx}`
 
-            return (
-              <Card.Root
-                key={itemKey}
-                borderWidth="1px"
-                borderColor="border.subtle"
-                bg="bg.panel"
-                shadow="md"
-                transition="all 0.2s"
-                _hover={{ borderColor: 'cirqueira.brand.500' }}
-              >
-                <Card.Header
-                  display="flex"
-                  flexDirection="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  pb={2}
-                >
-                  <HStack gap={2.5}>
-                    <Box
-                      p={2}
-                      borderRadius="lg"
-                      bg="cirqueira.purple.500/10"
-                      color="cirqueira.purple.400"
-                    >
-                      <Folder size={16} />
-                    </Box>
-                    <VStack gap={0.5} alignItems="flex-start">
-                      <Card.Title fontSize="sm" fontWeight="semibold" color="fg">
-                        {cat.nome}
-                      </Card.Title>
-                      <Text
-                        fontSize="11px"
-                        fontFamily="mono"
-                        color="fg.subtle"
-                        truncate
-                        maxW="180px"
-                      >
-                        📁 {cat.pastaLocal || 'pasta padrão'}
-                      </Text>
-                    </VStack>
-                  </HStack>
+              <Text fontSize="xs" color="fg.subtle" w={{ md: '36' }} flexShrink={0}>
+                {pluralizar(categoria.totalItens, 'mídia', 'mídias')} · {categoria.tamanhoFormatado}
+              </Text>
 
-                  {!ehSemCategoria && (
-                    <IconButton
-                      size="sm"
+              <HStack gap={1} flexShrink={0} w={{ md: '56' }} justify="flex-end">
+                {!categoria.googlePhotosAlbumId && (
+                  <Text fontSize="xs" color="cirqueira.amber.500" mr={1}>
+                    Sem álbum
+                  </Text>
+                )}
+                {editavel && (
+                  <>
+                    <Button
+                      size="xs"
                       variant="ghost"
-                      onClick={() => setCategoriaEditando(cat)}
-                      aria-label="Editar Mapeamento"
+                      borderRadius="lg"
+                      color="fg.muted"
+                      onClick={() => setCategoriaVinculandoAlbum(categoria)}
                     >
-                      <Edit3 size={14} />
+                      {categoria.googlePhotosAlbumId ? 'Trocar álbum' : 'Vincular álbum'}
+                    </Button>
+                    <IconButton
+                      size="xs"
+                      variant="ghost"
+                      borderRadius="lg"
+                      color="fg.muted"
+                      aria-label="Editar categoria"
+                      onClick={() => setCategoriaEditando(categoria)}
+                    >
+                      <Edit3 size={13} />
                     </IconButton>
-                  )}
-                </Card.Header>
-
-                <Card.Body pt={2}>
-                  <HStack
-                    justify="space-between"
-                    align="center"
-                    py={2}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
-                    fontSize="xs"
-                    color="fg.subtle"
-                  >
-                    <HStack gap={1.5}>
-                      <Box as="span" color="cirqueira.blue.500" display="inline-flex">
-                        <FileVideo size={14} color="currentColor" />
-                      </Box>
-                      <Text as="span">
-                        {cat.totalItens} {cat.totalItens === 1 ? 'mídia' : 'mídias'}
-                      </Text>
-                    </HStack>
-
-                    <HStack gap={1.5}>
-                      <Box as="span" color="cirqueira.purple.500" display="inline-flex">
-                        <HardDrive size={14} color="currentColor" />
-                      </Box>
-                      <Text as="span" fontWeight="semibold" color="fg">
-                        {cat.tamanhoFormatado}
-                      </Text>
-                    </HStack>
-                  </HStack>
-
-                  <HStack
-                    pt={2}
-                    justify="space-between"
-                    align="center"
-                    fontSize="11px"
-                    flexWrap="wrap"
-                    gap={2}
-                  >
-                    {cat.googlePhotosAlbumId ? (
-                      <Badge size="sm" variant="subtle" colorPalette="green">
-                        <HStack gap={1}>
-                          <Cloud size={12} />
-                          <Text as="span">Google Fotos</Text>
-                        </HStack>
-                      </Badge>
-                    ) : (
-                      <Badge size="sm" variant="subtle" colorPalette="amber">
-                        <HStack gap={1}>
-                          <AlertTriangle size={12} />
-                          <Text as="span">Sem Álbum Google</Text>
-                        </HStack>
-                      </Badge>
-                    )}
-
-                    {!ehSemCategoria && (
-                      <HStack gap={1}>
-                        {!cat.googlePhotosAlbumId ? (
-                          <Button
-                            size="xs"
-                            variant="subtle"
-                            colorPalette="teal"
-                            onClick={() => setCategoriaVinculandoAlbum(cat)}
-                            fontSize="11px"
-                            h={6}
-                            px={2}
-                            borderRadius="md"
-                          >
-                            <Link2 size={12} style={{ marginRight: '4px' }} />
-                            Vincular Álbum
-                          </Button>
-                        ) : (
-                          <Button
-                            size="xs"
-                            variant="ghost"
-                            colorPalette="teal"
-                            onClick={() => setCategoriaVinculandoAlbum(cat)}
-                            fontSize="11px"
-                            h={6}
-                            px={2}
-                          >
-                            Trocar Álbum
-                          </Button>
-                        )}
-
-                        <Button
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => setCategoriaEditando(cat)}
-                          fontSize="11px"
-                          color="cirqueira.purple.500"
-                          p={1}
-                          h={6}
-                        >
-                          Editar pasta
-                        </Button>
-                      </HStack>
-                    )}
-                  </HStack>
-                </Card.Body>
-              </Card.Root>
-            )
-          })}
-        </Grid>
-      )}
+                  </>
+                )}
+              </HStack>
+            </HStack>
+          )
+        })}
+      </VStack>
 
       <ModalCriarCategoria aberto={modalCriarAberto} onFechar={() => setModalCriarAberto(false)} />
 
@@ -372,6 +165,6 @@ export const TabelaCategorias = memo(function TabelaCategorias({
         aberto={Boolean(categoriaVinculandoAlbum)}
         onFechar={() => setCategoriaVinculandoAlbum(null)}
       />
-    </VStack>
+    </PainelDashboard>
   )
 })
