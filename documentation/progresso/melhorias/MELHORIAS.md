@@ -99,3 +99,4 @@
 | M82 | Um Print Deixa de Ser Enviado Três Vezes pelo Agente | ✅ Concluído | 18/10/2026 | [ver](MELHORIAS_5.md#melhoria-82--um-print-deixa-de-ser-enviado-três-vezes-pelo-agente) |
 | M83 | Fila de Downloads Remove Itens Concluídos e Mantém Só Pendentes, em Download e com Erro | ✅ Concluído | 19/10/2026 | [ver](MELHORIAS_5.md#melhoria-83--fila-de-downloads-remove-itens-concluídos-e-mantém-só-pendentes-em-download-e-com-erro) |
 | M84 | Prints Enviados ao Google Fotos com a Data de Captura e o Nome Real do Arquivo | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-84--prints-enviados-ao-google-fotos-com-a-data-de-captura-e-o-nome-real-do-arquivo) |
+| M85 | Histórico de Envios ao Google Fotos com Status, Conta, Tentativa e Erro | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-85--histórico-de-envios-ao-google-fotos-com-status-conta-tentativa-e-erro) |

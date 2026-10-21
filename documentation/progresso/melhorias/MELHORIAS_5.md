@@ -68,11 +68,46 @@
   - Sem `fileName` no `batchCreate`, todo item ganhava como nome a data do upload (ex.: `2026-10-21.png`).
   - Os vídeos já tinham a data certa, porque o `creation_time` é gravado via FFmpeg. Nenhuma mídia foi enviada duas vezes: isso foi conferido no banco e na API do Google.
 - **Solução**:
-  - **`AplicarMetadataArquivoService::gerarCopiaPngComData()`**: gera uma cópia temporária do PNG com um chunk `eXIf` (DateTime, DateTimeOriginal, DateTimeDigitized e OffsetTimeOriginal) e um XMP (`xmp:CreateDate`) com a data de exibição da mídia. O arquivo original não muda, para manter o hash usado na detecção de duplicados.
+  - **`MetadataImagemClient::gerarCopiaPngComData()`** (`src/Infra/Imagem/`, via `MetadataImagemInterface`): gera uma cópia temporária do PNG com um chunk `eXIf` (DateTime, DateTimeOriginal, DateTimeDigitized e OffsetTimeOriginal) e um XMP (`xmp:CreateDate`) com a data de exibição da mídia. O arquivo original não muda, para manter o hash usado na detecção de duplicados.
   - **`EnviarGoogleFotosService`**: PNGs sobem a partir dessa cópia, que é apagada logo depois do upload.
   - **`GoogleFotosAPI::batchCreateMediaItems()`**: passa a enviar `fileName` com o nome real do arquivo.
 - **Observação**: a API do Google Fotos não permite alterar a data nem apagar itens já enviados. Os prints que subiram com a data errada precisam ser corrigidos no app ("Editar data e hora") ou apagados e reenviados.
 - **Arquivos**:
-  - `src/Service/MediaItem/AplicarMetadataArquivoService.php`
+  - `src/Infra/Imagem/MetadataImagemClient.php`
+  - `src/Interface/MetadataImagemInterface.php`
   - `src/Service/GoogleFotos/EnviarGoogleFotosService.php`
   - `src/Infra/GoogleFotos/GoogleFotosAPI.php`
+
+---
+
+### ✅ Melhoria 85 — Histórico de Envios ao Google Fotos com Status, Conta, Tentativa e Erro
+
+- **Status**: Concluído
+- **Data**: 21 de outubro de 2026
+- **Problema**:
+  - Não existia registro das tentativas de envio ao Google Fotos. Quando a conta caiu (`invalid_grant`), a única pista era o `erro_motivo` da mídia, sobrescrito a cada tentativa, e os logs do Messenger. Não dava para saber o que subiu, quando, para qual conta, em qual tentativa ou por que falhou.
+- **Solução**:
+  - **Entidade `RegistroEnvioGoogleFotos`** (tabela `registro_envio_google_fotos`): uma linha por tentativa. Guarda a mídia (uuid, origem, nome, tipo, tamanho e data da mídia), o destino (categoria, álbum e e-mail da conta), o status, a origem do envio, o número da tentativa, o id e o link no Google Fotos, o erro, o início, o fim e a duração.
+  - **Enums**:
+    - `StatusEnvioGoogleFotos`: `enviando`, `enviado`, `reaproveitado` e `falha`.
+    - `OrigemEnvioGoogleFotos`: `automatico`, `retentativa`, `reenvio_manual` e `forcado`. A tentativa é contada pelos registros anteriores da mesma mídia, então as retentativas automáticas do Messenger também aparecem.
+  - **`EnviarGoogleFotosService`**:
+    - Abre o registro antes do envio e marca o resultado: enviado, reaproveitado (o arquivo já existia no Google por duplicidade) ou falha com a mensagem do erro.
+    - Mídias já enviadas e as vindas da Franky continuam sendo ignoradas sem gerar registro.
+  - **`RegistrarEnvioGoogleFotosService`**: cria e finaliza os registros.
+  - **`ListarEnviosGoogleFotosService`**: listagem paginada com filtro por status e resumo das últimas 24h.
+  - **`ReenviarGoogleFotosService`**: recoloca a mídia na fila (`EnviarGoogleFotosMessage` com `reenvioManual`). Recusa a mídia que já está no Google.
+  - **API**: `GET /api/v1/google-fotos/envios`, `GET /api/v1/google-fotos/envios/resumo` e `POST /api/v1/google-fotos/envios/{uuid}/reenviar` (`EnviosGoogleFotosController`).
+  - **Frontend**:
+    - A página do Google Fotos ganhou a seção "Histórico de Envios": tabela com status, mídia, data da mídia, destino e conta, tentativa e origem, execução e duração, e o erro resumido (o `invalid_grant` vira "reconecte a conta").
+    - Tem filtros por status, contadores das últimas 24h, link "abrir no Google Fotos" e botão "Reenviar" nas falhas.
+    - Atualiza a cada 15s e aparece mesmo com a conta desconectada.
+- **Arquivos**:
+  - `src/Entity/RegistroEnvioGoogleFotos.php`, `src/Repository/RegistroEnvioGoogleFotosRepository.php`, `migrations/Version20261021112252.php`
+  - `src/Enum/StatusEnvioGoogleFotos.php`, `src/Enum/OrigemEnvioGoogleFotos.php`
+  - `src/Service/GoogleFotos/RegistrarEnvioGoogleFotosService.php`, `ListarEnviosGoogleFotosService.php`, `ReenviarGoogleFotosService.php`, `EnviarGoogleFotosService.php`
+  - `src/Controller/GoogleFotos/EnviosGoogleFotosController.php`, `src/Serializer/RegistroEnvioGoogleFotosSerializer.php`
+  - `src/DataObject/FiltroEnviosGoogleFotosDTO.php`, `src/DataObject/PaginaRegistrosEnvioGoogleFotosDTO.php`
+  - `src/Exception/GoogleFotos/RegistroEnvioGoogleFotosException.php`
+  - `src/Message/EnviarGoogleFotosMessage.php`, `src/MessageHandler/EnviarGoogleFotosMessageHandler.php`
+  - `web/features/google-fotos/components/TabelaEnviosGoogleFotos.tsx`, `LinhaEnvioGoogleFotos.tsx`, `utils/enviosGoogleFotos.ts`, `hooks/useGoogleFotos.ts`, `api.ts`, `types.ts`, `GoogleFotos.tsx`
