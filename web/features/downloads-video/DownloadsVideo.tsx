@@ -38,6 +38,7 @@ import { CampoNovoLink } from './components/CampoNovoLink'
 import { GridVideos } from './components/GridVideos'
 import { ModalDistribuirHorariosLote } from './components/ModalDistribuirHorariosLote'
 import { ModalEditarMetadata } from './components/ModalEditarMetadata'
+import { ModalRemoverCategoriaLote } from './components/ModalRemoverCategoriaLote'
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import { PainelFilaDownloads } from './components/PainelFilaDownloads'
 import { TabelaVideos } from './components/TabelaVideos'
@@ -53,6 +54,7 @@ import {
   useForcarGoogleFotos,
   useMediaItens,
   useRebaixarLote,
+  useRemoverCategoriaLote,
   useRetentarMediaItem,
   useRetentarTodos,
 } from './hooks/useDownloadsVideo'
@@ -128,6 +130,7 @@ export default function DownloadsVideo() {
   const [itemApagarAlvo, setItemApagarAlvo] = useState<string | null>(null)
 
   const [modalConfirmarRebaixar, setModalConfirmarRebaixar] = useState(false)
+  const [modalRemoverCategoriaAberto, setModalRemoverCategoriaAberto] = useState(false)
   const [itemRebaixarAlvo, setItemRebaixarAlvo] = useState<string | null>(null)
 
   const filtros = useMemo<FiltrosMediaItem>(() => {
@@ -161,6 +164,8 @@ export default function DownloadsVideo() {
     useClassificarIndividual()
   const { mutate: rebaixarLoteMutate, isPending: pendenteRebaixar } = useRebaixarLote()
   const { mutate: apagarLoteMutate, isPending: pendenteApagar } = useApagarLote()
+  const { mutate: removerCategoriaLoteMutate, isPending: pendenteRemoverCategoria } =
+    useRemoverCategoriaLote()
   const { mutate: atualizarMetadataMutate, isPending: pendenteMetadata } = useAtualizarMetadata()
   const { mutate: distribuirHorariosMutate, isPending: pendenteDistribuir } =
     useDistribuirHorariosLote()
@@ -375,6 +380,15 @@ export default function DownloadsVideo() {
           setSelecionados((prev) => prev.filter((id) => !uuidsParaApagar.includes(id)))
         },
       }
+    )
+  }
+
+  const handleConfirmarRemoverCategoria = () => {
+    if (selecionados.length === 0) return
+
+    removerCategoriaLoteMutate(
+      { uuids: selecionados },
+      { onSuccess: () => setModalRemoverCategoriaAberto(false) }
     )
   }
 
@@ -1114,10 +1128,15 @@ export default function DownloadsVideo() {
           onLimparSelecao={handleLimparSelecao}
           onDistribuirHorariosLote={() => setModalDistribuirAberto(true)}
           onCategorizarLote={handleAbrirCategorizarLote}
+          onRemoverCategoriaLote={() => setModalRemoverCategoriaAberto(true)}
           onRebaixarLote={handleAbrirRebaixarLote}
           onApagarLote={handleAbrirApagarLote}
           processando={
-            pendenteCategorizarLote || pendenteRebaixar || pendenteApagar || pendenteDistribuir
+            pendenteCategorizarLote ||
+            pendenteRebaixar ||
+            pendenteApagar ||
+            pendenteDistribuir ||
+            pendenteRemoverCategoria
           }
         />
 
@@ -1545,6 +1564,14 @@ export default function DownloadsVideo() {
           </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
+
+        <ModalRemoverCategoriaLote
+          aberto={modalRemoverCategoriaAberto}
+          totalSelecionados={selecionados.length}
+          processando={pendenteRemoverCategoria}
+          onFechar={() => setModalRemoverCategoriaAberto(false)}
+          onConfirmar={handleConfirmarRemoverCategoria}
+        />
 
         <ModalVisualizarMidia
           item={itemVisualizar}

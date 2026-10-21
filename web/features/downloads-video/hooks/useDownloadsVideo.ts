@@ -12,6 +12,7 @@ import {
   listarMediaItens,
   rebaixarIndividual,
   rebaixarLote,
+  removerCategoriaLote,
   retentarMediaItem,
   retentarTodos,
   forcarSincronizacaoGoogleFotos,
@@ -24,7 +25,9 @@ import type {
   FiltrosMediaItem,
   PedidoDownloadInput,
   RebaixarLoteInput,
+  RemoverCategoriaLoteInput,
 } from '../types'
+import { montarAvisoRemocaoCategoria } from '../utils/remocaoCategoria'
 
 export function useCategorias() {
   return useQuery({
@@ -189,6 +192,21 @@ export function useRebaixarIndividual() {
         color: 'danger',
       })
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    },
+  })
+}
+
+export function useRemoverCategoriaLote() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: RemoverCategoriaLoteInput) => removerCategoriaLote(input),
+    onSuccess: (itens, input) => {
+      addToast(montarAvisoRemocaoCategoria(itens.length, input.uuids.length))
+      queryClient.invalidateQueries({ queryKey: ['media-itens'] })
+    },
+    onError: () => {
+      addToast({ title: 'Falha ao remover a categoria dos vídeos.', color: 'danger' })
     },
   })
 }

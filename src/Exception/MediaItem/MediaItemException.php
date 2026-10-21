@@ -35,4 +35,9 @@ class MediaItemException extends \DomainException
     {
         return new self(sprintf('Não foi possível baixar o vídeo novamente: %s', $motivo), 422);
     }
+
+    public static function remocaoDeCategoriaNaoPermitida(): self
+    {
+        return new self('Só é possível remover a categoria de mídias categorizadas que não estejam baixando, distribuindo ou enviando ao Google Fotos.', 422);
+    }
 }

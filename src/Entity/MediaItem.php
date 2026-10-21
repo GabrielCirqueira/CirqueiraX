@@ -21,6 +21,13 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Index(name: 'IDX_MEDIA_ITEM_DATA_EXIBICAO', fields: ['dataExibicao'])]
 class MediaItem
 {
+    private const array CHAVES_METADATA_GOOGLE_FOTOS = [
+        MetadataKeys::GOOGLE_PHOTOS_ID,
+        MetadataKeys::GOOGLE_PHOTOS_ALBUM_ID,
+        MetadataKeys::GOOGLE_PHOTOS_UPLOADED_AT,
+        MetadataKeys::GOOGLE_PHOTOS_FORCADO,
+    ];
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private ?Uuid $uuid = null;
@@ -188,9 +195,39 @@ class MediaItem
     public function classificarComo(Categoria $categoria): self
     {
         $this->categoriaId = $categoria->uuid()?->toString() ?? $this->categoriaId;
+        unset($this->metadata[MetadataKeys::CATEGORIA_REMOVIDA_ID]);
         $this->transicionarPara(StatusMediaItem::CLASSIFICADO);
 
         return $this;
+    }
+
+    public function removerCategoria(): self
+    {
+        if (!$this->isRemocaoCategoriaPermitida()) {
+            throw MediaItemException::remocaoDeCategoriaNaoPermitida();
+        }
+
+        $this->metadata[MetadataKeys::CATEGORIA_REMOVIDA_ID] = $this->categoriaId;
+        foreach (self::CHAVES_METADATA_GOOGLE_FOTOS as $chave) {
+            unset($this->metadata[$chave]);
+        }
+
+        $this->categoriaId = null;
+        $this->googlePhotosMediaId = null;
+        $this->erroMotivo = null;
+        $this->transicionarPara(StatusMediaItem::SEM_CATEGORIA);
+
+        return $this;
+    }
+
+    public function isRemocaoCategoriaPermitida(): bool
+    {
+        return $this->isClassificado() && $this->status->isRemocaoCategoriaPermitida();
+    }
+
+    public function isCategoriaRemovida(): bool
+    {
+        return array_key_exists(MetadataKeys::CATEGORIA_REMOVIDA_ID, $this->metadata);
     }
 
     public function isClassificado(): bool

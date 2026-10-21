@@ -67,6 +67,10 @@ final readonly class ClassificarMediaItemService
             return $mediaItem;
         }
 
+        if ($mediaItem->isCategoriaRemovida()) {
+            $this->moverArquivoLocalParaNovaCategoria($mediaItem, $categoriaNova);
+        }
+
         $mediaItem->classificarComo($categoriaNova);
         $this->mediaItemRepository->salvar($mediaItem);
 

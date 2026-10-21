@@ -44,6 +44,14 @@ enum StatusMediaItem: string
         };
     }
 
+    public function isRemocaoCategoriaPermitida(): bool
+    {
+        return match ($this) {
+            self::CLASSIFICADO, self::DISTRIBUIDO_LOCAL, self::CONCLUIDO, self::ERRO => true,
+            default => false,
+        };
+    }
+
     public function isSemCategoria(): bool
     {
         return self::SEM_CATEGORIA === $this;

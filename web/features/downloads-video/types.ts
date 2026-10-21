@@ -97,6 +97,10 @@ export interface RebaixarLoteInput {
   uuids: string[]
 }
 
+export interface RemoverCategoriaLoteInput {
+  uuids: string[]
+}
+
 export interface ApagarLoteInput {
   uuids: string[]
 }

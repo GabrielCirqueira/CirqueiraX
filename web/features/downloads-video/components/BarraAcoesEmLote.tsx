@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Flex, HStack, Portal, Text } from '@chakra-ui/react'
-import { CalendarClock, DownloadCloud, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
+import { CalendarClock, DownloadCloud, FolderMinus, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
 import { memo } from 'react'
 
 export interface BarraAcoesEmLoteProps {
@@ -8,6 +8,7 @@ export interface BarraAcoesEmLoteProps {
   onLimparSelecao: () => void
   onDistribuirHorariosLote?: () => void
   onCategorizarLote: () => void
+  onRemoverCategoriaLote: () => void
   onRebaixarLote: () => void
   onApagarLote: () => void
   processando?: boolean
@@ -18,6 +19,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
   onLimparSelecao,
   onDistribuirHorariosLote,
   onCategorizarLote,
+  onRemoverCategoriaLote,
   onRebaixarLote,
   onApagarLote,
   processando = false,
@@ -134,6 +136,21 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
                 </Box>
               )}
               <Text as="span" whiteSpace="nowrap">Categorizar</Text>
+            </Button>
+
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={processando}
+              onClick={onRemoverCategoriaLote}
+              borderRadius="lg"
+              whiteSpace="nowrap"
+              flexShrink={0}
+            >
+              <Box as="span" color="cirqueira.amber.500" display="inline-flex" mr={1.5}>
+                <FolderMinus size={14} color="currentColor" />
+              </Box>
+              <Text as="span" whiteSpace="nowrap">Remover categoria</Text>
             </Button>
 
             <Button

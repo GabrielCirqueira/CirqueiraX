@@ -12,6 +12,7 @@ use App\DataObject\ClassificarManualDTO;
 use App\DataObject\DistribuirHorariosLoteDTO;
 use App\DataObject\FiltrarMediaItemDTO;
 use App\DataObject\RebaixarLoteDTO;
+use App\DataObject\RemoverCategoriaLoteDTO;
 use App\DataObject\UploadManualDTO;
 use App\Enum\OrigemMedia;
 use App\Repository\CategoriaRepository;
@@ -24,6 +25,7 @@ use App\Service\MediaItem\ClassificarMediaItemService;
 use App\Service\MediaItem\MediaItemService;
 use App\Service\MediaItem\ObterArquivoMidiaService;
 use App\Service\MediaItem\RebaixarMediaItemService;
+use App\Service\MediaItem\RemoverCategoriaMediaItemService;
 use App\Service\MediaItem\RetentarMediaItemService;
 use App\Service\MediaItem\UploadManualService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -44,6 +46,7 @@ final class MediaItemController extends DefaultController
         private readonly ClassificarMediaItemService $classificarMediaItemService,
         private readonly ApagarMediaItemService $apagarMediaItemService,
         private readonly RebaixarMediaItemService $rebaixarMediaItemService,
+        private readonly RemoverCategoriaMediaItemService $removerCategoriaMediaItemService,
         private readonly RetentarMediaItemService $retentarMediaItemService,
         private readonly AtualizarMetadataMediaItemService $atualizarMetadataMediaItemService,
         private readonly UploadManualService $uploadManualService,
@@ -102,6 +105,14 @@ final class MediaItemController extends DefaultController
     public function categorizarLote(#[MapRequestPayload] CategorizarLoteDTO $dto): Response
     {
         $itens = $this->classificarMediaItemService->classificarEmLote($dto);
+
+        return $this->success($this->mediaItemSerializer->normalizarLista($itens));
+    }
+
+    #[Route('/lote/remover-categoria', name: 'remover_categoria_lote', methods: ['POST'])]
+    public function removerCategoriaLote(#[MapRequestPayload] RemoverCategoriaLoteDTO $dto): Response
+    {
+        $itens = $this->removerCategoriaMediaItemService->removerEmLote($dto);
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }

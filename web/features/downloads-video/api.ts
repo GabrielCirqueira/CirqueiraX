@@ -12,6 +12,7 @@ import type {
   PedidoDownloadInput,
   PedidoDownloadResposta,
   RebaixarLoteInput,
+  RemoverCategoriaLoteInput,
 } from './types'
 
 export async function listarMediaItens(
@@ -42,6 +43,14 @@ export async function criarPedidoDownload(
 export async function categorizarLote(input: CategorizarLoteInput): Promise<MediaItem[]> {
   const { data } = await api.post<RespostaApi<MediaItem[]>>(
     '/api/v1/media-itens/lote/categorizar',
+    input
+  )
+  return data.data
+}
+
+export async function removerCategoriaLote(input: RemoverCategoriaLoteInput): Promise<MediaItem[]> {
+  const { data } = await api.post<RespostaApi<MediaItem[]>>(
+    '/api/v1/media-itens/lote/remover-categoria',
     input
   )
   return data.data
