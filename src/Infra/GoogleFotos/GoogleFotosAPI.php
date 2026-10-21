@@ -74,9 +74,15 @@ final class GoogleFotosAPI extends GoogleFotosClient
     /**
      * @return array<string, mixed>
      */
-    public function batchCreateMediaItems(string $accessToken, string $albumId, string $uploadToken, string $descricao): array
+    public function batchCreateMediaItems(string $accessToken, string $albumId, string $uploadToken, string $descricao, ?string $nomeArquivo = null): array
     {
-        return $this->executarComSemaforoERetry(function () use ($accessToken, $albumId, $uploadToken, $descricao) {
+        // Sem fileName o Google Fotos nomeia o item com a data do upload
+        $simpleMediaItem = ['uploadToken' => $uploadToken];
+        if (null !== $nomeArquivo && '' !== trim($nomeArquivo)) {
+            $simpleMediaItem['fileName'] = $nomeArquivo;
+        }
+
+        return $this->executarComSemaforoERetry(function () use ($accessToken, $albumId, $simpleMediaItem, $descricao) {
             $customThrow = static fn(RequestException $e): \Throwable => new GoogleFotosAPIException(
                 message: sprintf('Erro ao vincular mídia em lote no Google Fotos: %s', $e->getMessage()),
                 code: (int) $e->getCode(),
@@ -97,9 +103,7 @@ final class GoogleFotosAPI extends GoogleFotosClient
                         'newMediaItems' => [
                             [
                                 'description' => $descricao,
-                                'simpleMediaItem' => [
-                                    'uploadToken' => $uploadToken,
-                                ],
+                                'simpleMediaItem' => $simpleMediaItem,
                             ],
                         ],
                     ],
@@ -112,9 +116,9 @@ final class GoogleFotosAPI extends GoogleFotosClient
     /**
      * @return array<string, mixed>
      */
-    public function criarMediaItem(string $accessToken, string $uploadToken, string $albumId, string $descricao): array
+    public function criarMediaItem(string $accessToken, string $uploadToken, string $albumId, string $descricao, ?string $nomeArquivo = null): array
     {
-        return $this->batchCreateMediaItems($accessToken, $albumId, $uploadToken, $descricao);
+        return $this->batchCreateMediaItems($accessToken, $albumId, $uploadToken, $descricao, $nomeArquivo);
     }
 
     /**

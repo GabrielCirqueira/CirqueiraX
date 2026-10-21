@@ -186,7 +186,18 @@ final readonly class EnviarGoogleFotosService
         $caminhoLocalStr = (string) $caminhoLocal;
         $mimeType = mime_content_type($caminhoLocalStr) ?: 'application/octet-stream';
 
-        $uploadToken = $this->googleFotosApi->uploadBytes($token, $caminhoLocalStr, $mimeType);
+        // PNG não carrega data de captura; sem ela o Google Fotos usa o horário do upload
+        $caminhoCopiaComData = 'image/png' === $mimeType
+            ? $this->aplicarMetadataArquivoService?->gerarCopiaPngComData($caminhoLocalStr, $mediaItem->dataExibicao())
+            : null;
+
+        try {
+            $uploadToken = $this->googleFotosApi->uploadBytes($token, $caminhoCopiaComData ?? $caminhoLocalStr, $mimeType);
+        } finally {
+            if (null !== $caminhoCopiaComData) {
+                @unlink($caminhoCopiaComData);
+            }
+        }
         if (TextoUtil::estaEmBranco($uploadToken)) {
             throw GoogleFotosAPIException::falhaUploadBytes();
         }
@@ -197,7 +208,7 @@ final readonly class EnviarGoogleFotosService
             $mediaItem->origem()->value
         );
 
-        $resultado = $this->googleFotosApi->criarMediaItem($token, $uploadToken, $albumId, $descricao);
+        $resultado = $this->googleFotosApi->criarMediaItem($token, $uploadToken, $albumId, $descricao, basename($caminhoLocalStr));
 
         /** @var array<int, array<string, mixed>>|null $newMediaItemResults */
         $newMediaItemResults = $resultado['newMediaItemResults'] ?? null;

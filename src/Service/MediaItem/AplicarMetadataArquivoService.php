@@ -77,6 +77,96 @@ final readonly class AplicarMetadataArquivoService
         return true;
     }
 
+    /**
+     * Gera uma cópia temporária do PNG com a data de captura embutida (EXIF + XMP).
+     * Sem ela o Google Fotos registra a imagem com o horário do upload. O arquivo original
+     * não é alterado para manter o hash usado na detecção de duplicados.
+     * Retorna o caminho da cópia, ou null quando não for PNG ou não der para gerar.
+     */
+    public function gerarCopiaPngComData(string $caminhoArquivo, \DateTimeImmutable $data): ?string
+    {
+        $conteudo = @file_get_contents($caminhoArquivo);
+        if (false === $conteudo || !str_starts_with($conteudo, "\x89PNG\r\n\x1a\n")) {
+            return null;
+        }
+
+        $dataLocal = $data->setTimezone(new \DateTimeZone('America/Sao_Paulo'));
+        $chunksData = $this->montarChunkPng('eXIf', $this->montarExifData($dataLocal))
+            . $this->montarChunkPng('iTXt', "XML:com.adobe.xmp\0\0\0\0\0" . $this->montarXmpData($dataLocal));
+
+        // Percorre os chunks, descarta EXIF/XMP antigos e insere os novos logo após o IHDR
+        $saida = substr($conteudo, 0, 8);
+        $posicao = 8;
+        $tamanhoTotal = strlen($conteudo);
+        while ($posicao + 12 <= $tamanhoTotal) {
+            $tamanhoChunk = unpack('N', substr($conteudo, $posicao, 4))[1];
+            $tipo = substr($conteudo, $posicao + 4, 4);
+            $chunk = substr($conteudo, $posicao, 12 + $tamanhoChunk);
+            $posicao += 12 + $tamanhoChunk;
+
+            $ehXmp = 'iTXt' === $tipo && str_starts_with(substr($chunk, 8), "XML:com.adobe.xmp\0");
+            if ('eXIf' === $tipo || $ehXmp) {
+                continue;
+            }
+
+            $saida .= $chunk;
+            if ('IHDR' === $tipo) {
+                $saida .= $chunksData;
+            }
+        }
+
+        $caminhoCopia = sprintf('%s/cirqueirax_upload_%s.png', sys_get_temp_dir(), bin2hex(random_bytes(6)));
+        if (false === @file_put_contents($caminhoCopia, $saida)) {
+            $this->logger?->warning('Não foi possível gerar a cópia do PNG com a data de captura', [
+                'caminho' => $caminhoArquivo,
+            ]);
+
+            return null;
+        }
+
+        return $caminhoCopia;
+    }
+
+    private function montarChunkPng(string $tipo, string $dados): string
+    {
+        return pack('N', strlen($dados)) . $tipo . $dados . pack('N', crc32($tipo . $dados));
+    }
+
+    /**
+     * Bloco TIFF/EXIF mínimo (big-endian) com DateTime, DateTimeOriginal, DateTimeDigitized e OffsetTimeOriginal.
+     */
+    private function montarExifData(\DateTimeImmutable $data): string
+    {
+        $dataExif = $data->format('Y:m:d H:i:s') . "\0";
+        $offsetExif = $data->format('P') . "\0";
+        $entrada = static fn(int $tag, int $tipo, int $quantidade, int $valor): string => pack('nnNN', $tag, $tipo, $quantidade, $valor);
+
+        // IFD0 em 8 (2 entradas) termina em 38; DateTime ocupa 38..58; IFD Exif em 58 (3 entradas) termina em 100
+        $ifd0 = pack('n', 2)
+            . $entrada(0x0132, 2, 20, 38)
+            . $entrada(0x8769, 4, 1, 58)
+            . pack('N', 0);
+        $ifdExif = pack('n', 3)
+            . $entrada(0x9003, 2, 20, 100)
+            . $entrada(0x9004, 2, 20, 120)
+            . $entrada(0x9011, 2, 7, 140)
+            . pack('N', 0);
+
+        return "MM\x00\x2A" . pack('N', 8) . $ifd0 . $dataExif . $ifdExif . $dataExif . $dataExif . $offsetExif;
+    }
+
+    private function montarXmpData(\DateTimeImmutable $data): string
+    {
+        $dataIso = $data->format('Y-m-d\TH:i:sP');
+
+        return '<?xpacket begin="' . "\u{FEFF}" . '" id="W5M0MpCehiHzreSzNTczkc9d"?>'
+            . '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'
+            . '<rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/"'
+            . ' xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/" xmlns:exif="http://ns.adobe.com/exif/1.0/"'
+            . sprintf(' xmp:CreateDate="%1$s" photoshop:DateCreated="%1$s" exif:DateTimeOriginal="%1$s"/>', $dataIso)
+            . '</rdf:RDF></x:xmpmeta><?xpacket end="w"?>';
+    }
+
     public function interpretarDataHora(string $data, ?string $horario = null): ?\DateTimeImmutable
     {
         $dataLimpa = trim($data);
