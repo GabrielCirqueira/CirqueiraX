@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Moon,
+  PenLine,
   Sun,
   UploadCloud,
   User,
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/central-midias', label: 'Central de Mídias', icon: Layers },
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
   { href: '/prints', label: 'Prints & Capturas', icon: Camera },
+  { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine },
   { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud },
   { href: '/google-fotos', label: 'Google Fotos', icon: Images },
 ]

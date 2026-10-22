@@ -11,9 +11,11 @@ interface HeaderProps {
 }
 
 function getTituloRota(pathname: string): string {
-  if (pathname.startsWith('/central-midias') || pathname.startsWith('/todas-midias')) return 'Central de Mídias'
+  if (pathname.startsWith('/central-midias') || pathname.startsWith('/todas-midias'))
+    return 'Central de Mídias'
   if (pathname.startsWith('/downloads')) return 'Downloads de Vídeo'
   if (pathname.startsWith('/prints')) return 'Prints & Capturas'
+  if (pathname.startsWith('/editor-imagem')) return 'Editor de Imagem'
   if (pathname.startsWith('/upload-manual')) return 'Upload Manual'
   if (pathname.startsWith('/google-fotos')) return 'Google Fotos'
   return 'Dashboard'
