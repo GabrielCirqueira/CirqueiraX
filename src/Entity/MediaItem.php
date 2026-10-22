@@ -574,6 +574,11 @@ class MediaItem
         return in_array($this->origem, [OrigemMedia::PRINT_PESSOAL, OrigemMedia::PRINT_EMPRESA], true);
     }
 
+    public function isEditavelComoImagem(): bool
+    {
+        return !$this->isVideo() && !$this->isArquivoRemovido();
+    }
+
     public function isVideo(): bool
     {
         if ($this->isPrint()) {

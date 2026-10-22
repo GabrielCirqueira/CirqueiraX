@@ -11,6 +11,8 @@ final class MetadataKeys
     public const string CATEGORIA_ID_DESEJADA = 'categoria_id_desejada';
     public const string CATEGORIA_REMOVIDA_ID = 'categoria_removida_id';
     public const string TIMESTAMP_CAPTURA = 'timestamp_captura';
+    public const string HORARIO = 'horario';
+    public const string EDITADO_DE_UUID = 'editado_de_uuid';
     public const string ORIGEM_TOKEN = 'origem_token';
     public const string TITULO = 'titulo';
     public const string UPLOADER = 'uploader';
