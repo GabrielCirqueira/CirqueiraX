@@ -106,3 +106,4 @@
 | M89 | Editor de Imagem para Anotar Prints (Setas, Formas, Texto, Marcadores) | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-89--editor-de-imagem-para-anotar-prints-setas-formas-texto-marcadores) |
 | M90 | Editor de Imagem: Selecionar, Mover, Redimensionar e Ajustar Propriedades das Formas | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-90--editor-de-imagem-selecionar-mover-redimensionar-e-ajustar-propriedades-das-formas) |
 | M91 | Editor de Imagem Lembra as Últimas Configurações de Cada Ferramenta | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-91--editor-de-imagem-lembra-as-últimas-configurações-de-cada-ferramenta) |
+| M92 | Página de Downloads MP3 (Áudio Atrelado à Conta, Expira em 7 Dias) | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-92--página-de-downloads-mp3-áudio-atrelado-à-conta-expira-em-7-dias) |

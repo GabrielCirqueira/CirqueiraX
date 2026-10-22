@@ -299,3 +299,45 @@
   - `web/features/editor-imagem/hooks/useEditorImagem.ts`, `utils/fabricaAnotacoes.ts`, `utils/constantesEditor.ts`, `types.ts`
   - `web/features/editor-imagem/components/AreaEdicaoCanvas.tsx`, `BarraFerramentasEditor.tsx`, `EditorImagem.tsx`
   - `web/shared/utils/localStorageService.ts`
+
+---
+
+### ✅ Melhoria 92 — Página de Downloads MP3 (Áudio Atrelado à Conta, Expira em 7 Dias)
+
+- **Status**: Concluído
+- **Data**: 22 de outubro de 2026
+- **Problema**: para pegar só o áudio de um vídeo era preciso baixar o vídeo e converter por fora. A tela de Downloads carrega fluxos que não fazem sentido para áudio (categoria, horário, Google Fotos).
+- **Solução**:
+  - **Entidade nova `Audio`** (tabela `audio`), separada do `MediaItem` e ligada ao `Usuario` (`ON DELETE CASCADE`). Cada usuário só vê e baixa os próprios áudios.
+    - Status em `StatusAudio`: `pendente` → `baixando` → `disponivel`, ou `erro`; depois de 7 dias vira `expirado`.
+    - Métodos de intenção: `iniciarDownload`, `concluirDownload`, `registrarFalha`, `expirar`, `prepararParaRebaixar`. Predicados: `isDisponivel`, `isRebaixavel`, `isEmProcessamento`.
+  - **Download assíncrono**: `POST /api/v1/audios` cria o registro e despacha `BaixarAudioMessage` no Messenger. A resposta é imediata e a tela acompanha o progresso.
+  - **Extração com yt-dlp** (`YtDlpClient::baixarAudio`, porta `ExtratorAudioInterface`):
+    - gera MP3 na melhor qualidade, com título, artista e capa embutidos;
+    - os metadados (título, autor, duração, capa) vêm na mesma execução via `--print after_move`;
+    - TikTok e X caem no download de vídeo já existente (TikWM/FxTwitter) e convertem com ffmpeg quando o yt-dlp falha;
+    - aceita os mesmos links da tela de Downloads, agora também `music.youtube.com` e `m.youtube.com`.
+  - **Armazenamento**: arquivos em `var/audios/{uuid}.mp3`, num volume próprio (`audios_prod`), fora da pasta do Syncthing. O bootstrap cria a pasta com dono `www-data`.
+  - **Expiração em 7 dias** (`ExpirarAudiosAntigosService`, no Scheduler a cada 1 dia):
+    - remove o arquivo e marca o áudio como expirado, mantendo o registro;
+    - "Baixar de novo" (`POST /api/v1/audios/{uuid}/rebaixar`) gera o MP3 outra vez e renova os 7 dias;
+    - downloads presos há mais de 1 hora (worker reiniciado no meio) viram erro e também podem ser baixados de novo.
+  - **Rotas** (`AudioController`): `GET /api/v1/audios` (paginado), `POST /api/v1/audios`, `POST /{uuid}/rebaixar`, `DELETE /{uuid}`, `GET /{uuid}/arquivo` (download) e `GET /{uuid}/stream` (player).
+  - **Tela `/downloads-mp3`** (item "Downloads MP3" na sidebar):
+    - campo de link aceita vários links de uma vez; Ctrl + V em qualquer lugar da página já enfileira;
+    - lista com capa, título, autor, duração, tamanho, status e quanto falta para expirar;
+    - ações: ouvir no player, baixar o MP3, baixar de novo (expirado/erro), abrir o link original e remover (com confirmação);
+    - atualiza sozinha a cada 2,5 s enquanto houver áudio na fila ou convertendo, e para quando termina.
+  - **Correção de navegação**: o item ativo da sidebar e o título do header passaram a comparar o caminho exato. Antes, `/downloads-mp3` também acenderia "Downloads".
+  - **Testado**:
+    - o `YtDlpClient` real, na imagem de produção, baixou MP3 do YouTube, do YouTube Music e do TikTok com metadados e capa;
+    - a tela num Chrome headless com API simulada: fila, conversão, erro, baixar de novo, player, download, remoção, link recusado e layout no celular, sem erros no console.
+- **Arquivos**:
+  - `src/Entity/Audio.php`, `src/Enum/StatusAudio.php`, `src/Repository/AudioRepository.php`, `migrations/Version20261022232201.php`
+  - `src/Controller/Audio/AudioController.php`, `src/Serializer/AudioSerializer.php`, `src/Exception/Audio/AudioException.php`
+  - `src/Service/Audio/` (`SolicitarDownloadAudioService`, `BaixarAudioService`, `ConsultarAudiosService`, `ApagarAudioService`, `ExpirarAudiosAntigosService`)
+  - `src/Interface/ExtratorAudioInterface.php`, `src/Infra/YtDlp/YtDlpClient.php`, `src/Exception/Video/YtDlpException.php`
+  - `src/Message/BaixarAudioMessage.php`, `src/Message/ExpirarAudiosAntigosMessage.php` e handlers, `src/Schedule.php`
+  - `src/DataObject/` (`AudioBaixadoDTO`, `SolicitarDownloadAudioDTO`, `PaginaAudiosDTO`, `ResultadoExpiracaoAudiosDTO`)
+  - `config/services.yaml`, `devops/bootstrap.sh`, `devops/docker-compose.prod.yaml`, `src/Service/Video/ValidadorUrlPlataforma.php`
+  - `web/features/downloads-audio/` (página, componentes, hooks, utils), `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
