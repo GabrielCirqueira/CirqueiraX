@@ -1,3 +1,7 @@
+import {
+  isMidiaEditavelNoEditor,
+  montarRotaEditorImagem,
+} from '@/features/editor-imagem/utils/rotaEditor'
 import { addToast } from '@/shared/components/ui/toaster'
 import {
   Badge,
@@ -22,9 +26,11 @@ import {
   Image as ImageIcon,
   Laptop,
   Loader2,
+  PenLine,
   X,
 } from 'lucide-react'
 import { memo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { baixarArquivoPrint, copiarPrintParaClipboard, obterUrlStreamPrint } from '../api'
 import type { MediaItem } from '../types'
 
@@ -41,6 +47,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
   onFechar,
   onCategorizar,
 }: ModalVisualizarPrintProps) {
+  const navigate = useNavigate()
   const [baixando, setBaixando] = useState(false)
   const [copiando, setCopiando] = useState(false)
 
@@ -229,6 +236,18 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                   >
                     <FolderPlus size={14} />
                     <Text as="span">Categorizar</Text>
+                  </Button>
+                )}
+
+                {isMidiaEditavelNoEditor(item.status) && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
+                    borderRadius="lg"
+                  >
+                    <PenLine size={14} />
+                    <Text as="span">Editar</Text>
                   </Button>
                 )}
 

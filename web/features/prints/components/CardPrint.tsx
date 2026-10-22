@@ -1,3 +1,7 @@
+import {
+  isMidiaEditavelNoEditor,
+  montarRotaEditorImagem,
+} from '@/features/editor-imagem/utils/rotaEditor'
 import { addToast } from '@/shared/components/ui/toaster'
 import { Badge, Box, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
@@ -7,9 +11,11 @@ import {
   FolderPlus,
   Image as ImageIcon,
   Loader2,
+  PenLine,
   Trash2,
 } from 'lucide-react'
 import { memo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { baixarArquivoPrint, copiarPrintParaClipboard, obterUrlStreamPrint } from '../api'
 import type { MediaItem } from '../types'
 
@@ -30,6 +36,7 @@ export const CardPrint = memo(function CardPrint({
   onCategorizar,
   onApagar,
 }: CardPrintProps) {
+  const navigate = useNavigate()
   const [isHovered, setIsHovered] = useState(false)
   const [erroCarregamento, setErroCarregamento] = useState(false)
   const [baixando, setBaixando] = useState(false)
@@ -231,6 +238,31 @@ export const CardPrint = memo(function CardPrint({
         >
           {copiadoRecente ? <Check size={13} /> : <Copy size={13} />}
         </IconButton>
+
+        {isMidiaEditavelNoEditor(item.status) && (
+          <IconButton
+            size="xs"
+            w="26px"
+            h="26px"
+            minW="26px"
+            variant="ghost"
+            onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
+            bg="blackAlpha.750"
+            borderWidth="1px"
+            borderColor="whiteAlpha.200"
+            color="white"
+            _hover={{
+              bg: 'whiteAlpha.400',
+              color: 'cirqueira.brand.300',
+              transform: 'scale(1.1)',
+            }}
+            aria-label="Editar print"
+            title="Editar no editor de imagem (setas, texto, formas)"
+            borderRadius="md"
+          >
+            <PenLine size={13} />
+          </IconButton>
+        )}
 
         <IconButton
           size="xs"

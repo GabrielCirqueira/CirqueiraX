@@ -1,3 +1,7 @@
+import {
+  isMidiaEditavelNoEditor,
+  montarRotaEditorImagem,
+} from '@/features/editor-imagem/utils/rotaEditor'
 import { addToast } from '@/shared/components/ui/toaster'
 import { Badge, Box, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
@@ -13,12 +17,14 @@ import {
   HardDrive,
   Layers,
   Monitor,
+  PenLine,
   Play,
   Square,
   Trash2,
   UploadCloud,
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   baixarArquivoMidia,
   copiarImagemParaClipboard,
@@ -48,6 +54,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
   onCategorizar,
   onApagar,
 }: CardMidiaCentralProps) {
+  const navigate = useNavigate()
   const [isHovered, setIsHovered] = useState(false)
   const [erroCarregamento, setErroCarregamento] = useState(false)
   const [baixando, setBaixando] = useState(false)
@@ -395,6 +402,24 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
                 minW={6}
               >
                 {copiadoRecente ? <Check size={12} color="var(--chakra-colors-cirqueira-brand-400)" /> : <Copy size={12} />}
+              </IconButton>
+            )}
+
+            {!isVideo && isMidiaEditavelNoEditor(item.status) && (
+              <IconButton
+                size="xs"
+                variant="ghost"
+                color="cirqueira.grey.200"
+                _hover={{ bg: 'cirqueira.grey.800', color: 'cirqueira.grey.0' }}
+                aria-label="Editar imagem"
+                title="Editar no editor de imagem"
+                onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
+                borderRadius="md"
+                h={6}
+                w={6}
+                minW={6}
+              >
+                <PenLine size={12} />
               </IconButton>
             )}
 

@@ -1,3 +1,7 @@
+import {
+  isMidiaEditavelNoEditor,
+  montarRotaEditorImagem,
+} from '@/features/editor-imagem/utils/rotaEditor'
 import { addToast } from '@/shared/components/ui/toaster'
 import {
   Badge,
@@ -23,9 +27,11 @@ import {
   FolderPlus,
   HardDrive,
   Hash,
+  PenLine,
   X,
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   baixarArquivoMidia,
   copiarImagemParaClipboard,
@@ -54,6 +60,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
   categorias,
   onClassificar,
 }: ModalVisualizarMidiaCentralProps) {
+  const navigate = useNavigate()
   const [copiando, setCopiando] = useState(false)
   const [copiadoRecente, setCopiadoRecente] = useState(false)
   const [baixando, setBaixando] = useState(false)
@@ -318,6 +325,20 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                   </VStack>
 
                   <VStack align="stretch" gap={2} pt={3} borderTopWidth="1px" borderColor="border.subtle">
+                    {!isVideo && isMidiaEditavelNoEditor(item.status) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
+                        borderRadius="xl"
+                        w="full"
+                        fontWeight="semibold"
+                      >
+                        <PenLine size={14} style={{ marginRight: '6px' }} />
+                        <Text as="span">Editar Imagem</Text>
+                      </Button>
+                    )}
+
                     {!isVideo && (
                       <Button
                         size="sm"
