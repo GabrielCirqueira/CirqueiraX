@@ -18,6 +18,7 @@ services:
     volumes:
       - "${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}:/var/www/html/var/storage"
       - downloads_prod:/var/www/html/var/downloads
+      - audios_prod:/var/www/html/var/audios
       - thumbnails_prod:/var/www/html/var/cache/thumbnails
       - ../var/cookies:/var/www/html/var/cookies
     healthcheck:
@@ -50,6 +51,7 @@ services:
 volumes:
   db_data_prod:
   downloads_prod:
+  audios_prod:
   thumbnails_prod:
 
 networks:

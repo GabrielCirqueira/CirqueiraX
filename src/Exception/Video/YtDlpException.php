@@ -40,4 +40,24 @@ class YtDlpException extends \DomainException
     {
         return new self(sprintf('A URL informada "%s" é inválida ou não pertence a uma plataforma suportada.', $url), 400);
     }
+
+    public static function falhaAoEfetuarDownloadDoAudio(?string $detalhe = null): self
+    {
+        $mensagem = 'Ocorreu uma falha ao extrair o áudio pelo yt-dlp.';
+        if (null !== $detalhe && '' !== trim($detalhe)) {
+            $mensagem .= ' ' . trim($detalhe);
+        }
+
+        return new self($mensagem, 500);
+    }
+
+    public static function arquivoDeAudioBaixadoNaoEncontrado(): self
+    {
+        return new self('O arquivo MP3 gerado pelo yt-dlp não foi localizado no diretório de destino.', 500);
+    }
+
+    public static function falhaAoConverterVideoParaAudio(): self
+    {
+        return new self('Não foi possível converter o vídeo baixado para MP3 com o ffmpeg.', 500);
+    }
 }

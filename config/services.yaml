@@ -68,6 +68,10 @@ services:
             $cookiesPath: '%env(YTDLP_COOKIES_PATH)%'
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\Audio\BaixarAudioService:
+        arguments:
+            $diretorioAudios: '%kernel.project_dir%/var/audios'
+
     App\Service\MediaItem\RebaixarMediaItemService:
         arguments:
             $mediaStoragePath: '%env(MEDIA_STORAGE_PATH)%'

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Message\ExpirarAudiosAntigosMessage;
 use App\Message\LimparVideosAntigosMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -23,7 +24,8 @@ class Schedule implements ScheduleProviderInterface
             ->processOnlyLastMissedRun(true)
             ->add(
                 // Executa a cada 1 dia para expurgar vídeos antigos com mais de 7 dias
-                RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7))
+                RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7)),
+                RecurringMessage::every('1 day', new ExpirarAudiosAntigosMessage()),
             );
     }
 }

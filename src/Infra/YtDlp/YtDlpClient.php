@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace App\Infra\YtDlp;
 
+use App\DataObject\AudioBaixadoDTO;
 use App\Exception\Video\YtDlpException;
+use App\Interface\ExtratorAudioInterface;
 use App\Interface\ExtratorVideoInterface;
 use Symfony\Component\Process\Process;
 
-final class YtDlpClient implements ExtratorVideoInterface
+final class YtDlpClient implements ExtratorVideoInterface, ExtratorAudioInterface
 {
     private const float TIMEOUT_EXTRACAO_METADATA_SEGUNDOS = 60.0;
     private const float TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS = 300.0;
     private const string FORMATO_VIDEO_PREFERIDO = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+    private const float TIMEOUT_DOWNLOAD_AUDIO_SEGUNDOS = 900.0;
+    private const string FORMATO_AUDIO = 'mp3';
+    private const string QUALIDADE_AUDIO = '0';
+    private const string FORMATO_THUMBNAIL_AUDIO = 'jpg';
+    private const string CAMPOS_AUDIO_BAIXADO = 'after_move:%(.{filepath,title,uploader,channel,duration,thumbnail})j';
 
     private const string USER_AGENT_CHROME = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
@@ -142,6 +149,111 @@ final class YtDlpClient implements ExtratorVideoInterface
         }
 
         return $caminhoArquivo;
+    }
+
+    public function baixarAudio(string $url, string $diretorioDestino, string $nomeArquivo): AudioBaixadoDTO
+    {
+        $templateSaida = sprintf('%s/%s.%%(ext)s', $diretorioDestino, $nomeArquivo);
+        $process = $this->executarYtDlpComFallback($url, function (string $alvoUrl) use ($templateSaida): array {
+            $comando = [
+                'yt-dlp',
+                '--no-playlist',
+                '--no-mtime',
+                '--extract-audio',
+                '--audio-format',
+                self::FORMATO_AUDIO,
+                '--audio-quality',
+                self::QUALIDADE_AUDIO,
+                '--embed-metadata',
+                '--embed-thumbnail',
+                '--convert-thumbnails',
+                self::FORMATO_THUMBNAIL_AUDIO,
+                '--output',
+                $templateSaida,
+                '--print',
+                self::CAMPOS_AUDIO_BAIXADO,
+            ];
+
+            $this->adicionarFlagsPlataforma($comando, $alvoUrl);
+            $comando[] = $alvoUrl;
+
+            return $comando;
+        }, self::TIMEOUT_DOWNLOAD_AUDIO_SEGUNDOS);
+
+        if ($process->isSuccessful()) {
+            return $this->montarAudioBaixado($this->decodificarUltimaLinhaJson($process->getOutput()));
+        }
+
+        if ($this->ehUrlTiktok($url) || $this->ehUrlTwitter($url)) {
+            return $this->baixarAudioPeloVideo($url, $diretorioDestino, $nomeArquivo);
+        }
+
+        throw YtDlpException::falhaAoEfetuarDownloadDoAudio($this->extrairMensagemErroRelevante($process->getErrorOutput()));
+    }
+
+    private function baixarAudioPeloVideo(string $url, string $diretorioDestino, string $nomeArquivo): AudioBaixadoDTO
+    {
+        $caminhoVideo = $this->baixarVideo($url, $diretorioDestino);
+        $caminhoAudio = sprintf('%s/%s.%s', $diretorioDestino, $nomeArquivo, self::FORMATO_AUDIO);
+
+        $conversao = new Process(['ffmpeg', '-y', '-i', $caminhoVideo, '-vn', '-codec:a', 'libmp3lame', '-q:a', self::QUALIDADE_AUDIO, $caminhoAudio]);
+        $conversao->setTimeout(self::TIMEOUT_DOWNLOAD_AUDIO_SEGUNDOS);
+        $conversao->run();
+
+        if (is_file($caminhoVideo)) {
+            unlink($caminhoVideo);
+        }
+
+        if (!$conversao->isSuccessful()) {
+            throw YtDlpException::falhaAoConverterVideoParaAudio();
+        }
+
+        $metadata = $this->extrairMetadata($url);
+        $metadata['filepath'] = $caminhoAudio;
+
+        return $this->montarAudioBaixado($metadata);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodificarUltimaLinhaJson(string $saida): array
+    {
+        $linhas = array_filter(explode("\n", trim($saida)));
+        $dados = json_decode(trim((string) end($linhas)), true);
+        if (!is_array($dados)) {
+            throw YtDlpException::falhaAoProcessarJsonDeMetadata();
+        }
+
+        /** @var array<string, mixed> $dados */
+        return $dados;
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     */
+    private function montarAudioBaixado(array $dados): AudioBaixadoDTO
+    {
+        $caminhoArquivo = $this->textoOuNulo($dados['filepath'] ?? null);
+        if (null === $caminhoArquivo || !is_file($caminhoArquivo)) {
+            throw YtDlpException::arquivoDeAudioBaixadoNaoEncontrado();
+        }
+
+        $duracao = $dados['duration'] ?? null;
+
+        return new AudioBaixadoDTO(
+            caminhoArquivo: $caminhoArquivo,
+            tamanhoBytes: (int) filesize($caminhoArquivo),
+            titulo: $this->textoOuNulo($dados['title'] ?? null),
+            autor: $this->textoOuNulo($dados['uploader'] ?? null) ?? $this->textoOuNulo($dados['channel'] ?? null),
+            duracaoSegundos: is_numeric($duracao) ? (int) round((float) $duracao) : null,
+            thumbnailUrl: $this->textoOuNulo($dados['thumbnail'] ?? null),
+        );
+    }
+
+    private function textoOuNulo(mixed $valor): ?string
+    {
+        return is_string($valor) && '' !== trim($valor) ? trim($valor) : null;
     }
 
     private function ehUrlTiktok(string $url): bool
