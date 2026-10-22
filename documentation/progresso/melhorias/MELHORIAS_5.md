@@ -235,3 +235,42 @@
   - `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
   - `web/features/prints/components/CardPrint.tsx`, `ModalVisualizarPrint.tsx`
   - `web/features/central-midias/components/CardMidiaCentral.tsx`, `ModalVisualizarMidiaCentral.tsx`
+
+---
+
+### ✅ Melhoria 90 — Editor de Imagem: Selecionar, Mover, Redimensionar e Ajustar Propriedades das Formas
+
+- **Status**: Concluído
+- **Data**: 22 de outubro de 2026
+- **Problema**: depois de desenhada, uma forma não podia ser movida, redimensionada nem ajustada (borda, arredondamento, preenchimento). Só restava desfazer e desenhar de novo.
+- **Solução** (no editor da M89):
+  - **Ferramenta Selecionar** (tecla **V**): clicar numa anotação seleciona e arrastar move. Toda forma recém-criada já fica selecionada.
+    - Com outra ferramenta ativa, arrastar a borda da forma selecionada também move.
+  - **Alças**:
+    - Retângulo, círculo e área pixelada têm 8 alças. As dos cantos mudam largura e altura; as dos lados, só a horizontal ou só a vertical.
+    - Seta e linha têm alças nas duas pontas.
+    - O cursor muda conforme a alça.
+  - **Painel de propriedades** (aparece com uma forma selecionada):
+    - **Borda/Espessura** (deslizante) e **Arredondamento** dos cantos, só no retângulo.
+    - **Traço** sólido ou tracejado, em seta, linha, retângulo e círculo.
+    - **Preenchimento** vazio, translúcido ou sólido, em retângulo e círculo.
+    - **Texto**: tamanho e estilo (contorno ou etiqueta com fundo). **Marcador numerado**: tamanho.
+    - Trazer para frente, duplicar e excluir.
+    - A cor e a espessura da barra de ferramentas também se aplicam à forma selecionada.
+  - **Teclado**: Delete/Backspace exclui, Ctrl + D duplica, as setas movem 1px (com Shift, 10px) e Esc tira a seleção.
+  - **Duplo clique num texto** edita o conteúdo. Apagar todo o texto remove a anotação.
+  - **Histórico**:
+    - Virou snapshots (`passado`/`presente`/`futuro`, até 100 passos).
+    - Mover, redimensionar, mudar propriedade e excluir entram no desfazer/refazer.
+    - Arrastar e deslizantes mostram uma prévia ao vivo e geram um único passo no histórico, ao soltar.
+  - **Desempenho**: durante o arraste, a cena é redesenhada no `requestAnimationFrame`, sem re-render do React. A moldura e as alças ficam numa camada de sobreposição que não entra na imagem exportada.
+  - **Código**:
+    - `useCanvasEditor`: histórico, seleção e renderização. `useEditorImagem`: ponteiro, texto e ações.
+    - `utils/selecaoAnotacoes.ts`: caixas, acerto no clique e alças. `utils/transformacaoAnotacoes.ts`: mover, redimensionar, alterar e duplicar.
+    - `utils/desenhoSelecao.ts`: sobreposição. `utils/propriedadesPainel.ts`: quais controles cada tipo tem.
+  - **Testado** num Chrome headless (página real com a API simulada): esticar pelas alças, mover, deslizante de borda, tracejado, translúcido, mover a ponta da seta, duplicar, excluir, texto em etiqueta, edição com duplo clique, desfazer/refazer e salvar. Sem erros no console.
+- **Arquivos**:
+  - `web/features/editor-imagem/EditorImagem.tsx`, `types.ts`
+  - `web/features/editor-imagem/hooks/useCanvasEditor.ts`, `useEditorImagem.ts`
+  - `web/features/editor-imagem/components/PainelPropriedades.tsx`, `AreaEdicaoCanvas.tsx`, `BarraFerramentasEditor.tsx`
+  - `web/features/editor-imagem/utils/selecaoAnotacoes.ts`, `transformacaoAnotacoes.ts`, `desenhoSelecao.ts`, `propriedadesPainel.ts`, `desenhoCanvas.ts`, `historicoAnotacoes.ts`, `fabricaAnotacoes.ts`, `atalhosTeclado.ts`, `constantesEditor.ts`
