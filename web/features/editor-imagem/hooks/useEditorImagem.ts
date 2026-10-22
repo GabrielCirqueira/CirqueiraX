@@ -1,25 +1,29 @@
 import { addToast } from '@/shared/components/ui/toaster'
-import { type MouseEvent, type PointerEvent, useState } from 'react'
+import { useLocalStorageState } from '@/shared/hooks'
+import { CHAVES_STORAGE } from '@/shared/utils/localStorageService'
+import { type MouseEvent, type PointerEvent, useMemo, useState } from 'react'
 import type {
   AlteracaoAnotacao,
   Anotacao,
   AnotacaoTexto,
-  EstiloAnotacao,
+  EstiloExibido,
   FerramentaEditor,
   ImagemEditor,
   NivelEspessura,
   Ponto,
+  PreferenciasEditor,
+  PreferenciasFerramenta,
   TextoEmEdicao,
 } from '../types'
 import { criarImagemEditor, nomeDoArquivoColado } from '../utils/carregamentoImagem'
 import {
-  COR_PADRAO,
   DESLOCAMENTO_DUPLICADO,
+  ESPESSURA_POR_NIVEL,
   TAMANHO_ALCA_ACERTO_TELA,
   TOLERANCIA_ACERTO_TELA,
 } from '../utils/constantesEditor'
 import {
-  calcularEspessura,
+  calcularTamanhoFonte,
   criarArraste,
   criarNumero,
   criarTexto,
@@ -35,6 +39,15 @@ import {
   limitarAoRetangulo,
 } from '../utils/geometria'
 import { proximoNumeroMarcador } from '../utils/historicoAnotacoes'
+import {
+  FERRAMENTAS_PERSISTIVEIS,
+  extrairPreferencias,
+  isFerramentaComPreferencias,
+  isPreferenciasEditor,
+  mesclarPreferencias,
+  nivelDaEspessura,
+  resolverPreferencias,
+} from '../utils/preferenciasEditor'
 import {
   acertouAnotacao,
   cursorDaAlca,
@@ -52,7 +65,9 @@ import {
 import { useCanvasEditor } from './useCanvasEditor'
 
 const FERRAMENTA_INICIAL: FerramentaEditor = 'seta'
-const ESTILO_INICIAL: EstiloAnotacao = { cor: COR_PADRAO, nivelEspessura: 'media' }
+const PREFERENCIAS_INICIAIS: PreferenciasEditor = {}
+const OPCOES_FERRAMENTA_SALVA = { valoresPermitidos: FERRAMENTAS_PERSISTIVEIS }
+const OPCOES_PREFERENCIAS_SALVAS = { validar: isPreferenciasEditor }
 const BOTAO_PRINCIPAL_PONTEIRO = 0
 const TIPOS_SELECIONADOS_APOS_CRIAR: Anotacao['tipo'][] = [
   'seta',
@@ -66,14 +81,51 @@ const TIPOS_SELECIONADOS_APOS_CRIAR: Anotacao['tipo'][] = [
 
 export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
   const [imagemLocal, setImagemLocal] = useState<ImagemEditor | null>(null)
-  const [ferramenta, setFerramenta] = useState<FerramentaEditor>(FERRAMENTA_INICIAL)
-  const [estilo, setEstilo] = useState<EstiloAnotacao>(ESTILO_INICIAL)
+  const [ferramenta, setFerramenta] = useLocalStorageState<FerramentaEditor>(
+    CHAVES_STORAGE.EDITOR_IMAGEM_FERRAMENTA,
+    FERRAMENTA_INICIAL,
+    OPCOES_FERRAMENTA_SALVA
+  )
+  const [preferencias, setPreferencias] = useLocalStorageState<PreferenciasEditor>(
+    CHAVES_STORAGE.EDITOR_IMAGEM_PREFERENCIAS,
+    PREFERENCIAS_INICIAIS,
+    OPCOES_PREFERENCIAS_SALVAS
+  )
   const [textoEmEdicao, setTextoEmEdicao] = useState<TextoEmEdicao | null>(null)
   const [carregandoImagem, setCarregandoImagem] = useState(false)
 
   const imagem = imagemLocal ?? imagemDaMidia
   const canvas = useCanvasEditor(imagem)
   const { historico, historicoRef, interacaoRef, recorte } = canvas
+
+  function preferenciasDe(alvo: FerramentaEditor): PreferenciasFerramenta {
+    return resolverPreferencias(preferencias, alvo)
+  }
+
+  function lembrarPreferencias(anotacao: Anotacao) {
+    if (!imagem || !isFerramentaComPreferencias(anotacao.tipo)) return
+    const tipo = anotacao.tipo
+    const extraidas = extrairPreferencias(anotacao, imagem)
+    setPreferencias((atuais) => mesclarPreferencias(atuais, tipo, extraidas))
+  }
+
+  function lembrarDaFerramentaAtual(alteracao: Partial<PreferenciasFerramenta>) {
+    if (!isFerramentaComPreferencias(ferramenta)) return
+    const alvo = ferramenta
+    setPreferencias((atuais) => mesclarPreferencias(atuais, alvo, alteracao))
+  }
+
+  const estilo = useMemo<EstiloExibido>(() => {
+    const selecionada = canvas.selecionada
+    if (selecionada && imagem) {
+      return {
+        cor: selecionada.cor,
+        nivelEspessura: nivelDaEspessura(selecionada.espessura / calcularFatorEscala(imagem)),
+      }
+    }
+    const atuais = resolverPreferencias(preferencias, ferramenta)
+    return { cor: atuais.cor, nivelEspessura: nivelDaEspessura(atuais.espessura) }
+  }, [canvas.selecionada, imagem, preferencias, ferramenta])
 
   function pontoDaTela(clienteX: number, clienteY: number): Ponto | null {
     const canvasBase = canvas.canvasBaseRef.current
@@ -119,20 +171,24 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
       confirmarTextoExistente(textoEmEdicao.anotacaoId, texto)
       return
     }
-    if (texto) adicionarESelecionar(criarTexto(texto, textoEmEdicao.posicao, imagem, estilo))
+    if (!texto) return
+    const preferenciasTexto = { ...preferenciasDe('texto'), cor: textoEmEdicao.cor }
+    adicionarESelecionar(criarTexto(texto, textoEmEdicao.posicao, imagem, preferenciasTexto))
   }
 
   function abrirTexto(posicao: Ponto, anotacaoExistente: AnotacaoTexto | null) {
     const canvasBase = canvas.canvasBaseRef.current
-    if (!canvasBase || !recorte) return
+    if (!canvasBase || !recorte || !imagem) return
+    const preferenciasTexto = preferenciasDe('texto')
     setTextoEmEdicao({
       anotacaoId: anotacaoExistente?.id ?? null,
       posicao,
       posicaoTela: converterPontoParaTela(posicao, canvasBase, recorte),
       escalaTela: canvas.escalaAtual(),
       valor: anotacaoExistente?.texto ?? '',
-      tamanhoFonte: anotacaoExistente?.tamanhoFonte ?? null,
-      cor: anotacaoExistente?.cor ?? null,
+      tamanhoFonte:
+        anotacaoExistente?.tamanhoFonte ?? calcularTamanhoFonte(imagem, preferenciasTexto),
+      cor: anotacaoExistente?.cor ?? preferenciasTexto.cor,
     })
     canvas.ocultarDuranteEdicao(anotacaoExistente?.id ?? null)
   }
@@ -195,7 +251,7 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
 
     if (ferramenta === 'numero') {
       const numero = proximoNumeroMarcador(historicoRef.current.anotacoes)
-      adicionarESelecionar(criarNumero(numero, ponto, imagem, estilo))
+      adicionarESelecionar(criarNumero(numero, ponto, imagem, preferenciasDe('numero')))
       return
     }
 
@@ -203,8 +259,8 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     interacaoRef.current = {
       tipo: 'desenhando',
       anotacao: isFerramentaDeTraco(ferramenta)
-        ? criarTraco(ferramenta, ponto, imagem, estilo)
-        : criarArraste(ferramenta, ponto, imagem, estilo),
+        ? criarTraco(ferramenta, ponto, imagem, preferenciasDe(ferramenta))
+        : criarArraste(ferramenta, ponto, imagem, preferenciasDe(ferramenta)),
     }
     canvas.agendarDesenho(false)
   }
@@ -327,10 +383,9 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
     canvas.previsualizar(null)
     if (!selecionadaAtual) return
-    canvas.aplicarNoHistorico({
-      tipo: 'atualizar',
-      anotacao: alterarAnotacao(selecionadaAtual, alteracao),
-    })
+    const alterada = alterarAnotacao(selecionadaAtual, alteracao)
+    canvas.aplicarNoHistorico({ tipo: 'atualizar', anotacao: alterada })
+    lembrarPreferencias(alterada)
   }
 
   function excluirSelecionada() {
@@ -397,18 +452,24 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
   }
 
   function selecionarCor(cor: string) {
-    setEstilo((atual) => ({ ...atual, cor }))
+    setTextoEmEdicao((atual) => (atual && !atual.anotacaoId ? { ...atual, cor } : atual))
     const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
-    if (selecionadaAtual && selecionadaAtual.cor !== cor) confirmarAlteracao({ cor })
+    if (selecionadaAtual) {
+      confirmarAlteracao({ cor })
+      return
+    }
+    lembrarDaFerramentaAtual({ cor })
   }
 
   function selecionarEspessura(nivelEspessura: NivelEspessura) {
-    const novoEstilo = { ...estilo, nivelEspessura }
-    setEstilo(novoEstilo)
+    const espessuraRelativa = ESPESSURA_POR_NIVEL[nivelEspessura]
     const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
-    if (!selecionadaAtual || !imagem) return
-    if (!isPropriedadeEditavel(selecionadaAtual, 'espessura')) return
-    confirmarAlteracao({ espessura: calcularEspessura(imagem, novoEstilo) })
+    if (!selecionadaAtual) {
+      lembrarDaFerramentaAtual({ espessura: espessuraRelativa })
+      return
+    }
+    if (!imagem || !isPropriedadeEditavel(selecionadaAtual, 'espessura')) return
+    confirmarAlteracao({ espessura: espessuraRelativa * calcularFatorEscala(imagem) })
   }
 
   function atualizarTexto(valor: string) {

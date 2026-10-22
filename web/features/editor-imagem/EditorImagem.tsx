@@ -210,7 +210,6 @@ const EditorImagemView = memo(function EditorImagemView() {
             <AreaEdicaoCanvas
               imagem={imagem}
               ferramenta={editor.ferramenta}
-              estilo={editor.estilo}
               textoEmEdicao={editor.textoEmEdicao}
               registrarCanvasBase={editor.registrarCanvasBase}
               registrarCanvasSobreposicao={editor.registrarCanvasSobreposicao}

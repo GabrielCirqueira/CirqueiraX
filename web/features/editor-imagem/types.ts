@@ -97,9 +97,26 @@ export type AcaoHistorico =
   | { tipo: 'limpar' }
   | { tipo: 'reiniciar' }
 
-export interface EstiloAnotacao {
+export type FerramentaComPreferencias = Exclude<FerramentaEditor, 'selecionar' | 'recorte'>
+
+export interface PreferenciasFerramenta {
   cor: string
-  nivelEspessura: NivelEspessura
+  espessura: number
+  raioCanto: number
+  estiloBorda: EstiloBorda
+  preenchimento: TipoPreenchimento
+  tamanhoFonte: number
+  comFundo: boolean
+  raio: number
+}
+
+export type PreferenciasEditor = Partial<
+  Record<FerramentaComPreferencias, Partial<PreferenciasFerramenta>>
+>
+
+export interface EstiloExibido {
+  cor: string
+  nivelEspessura: NivelEspessura | null
 }
 
 export type AlteracaoAnotacao = Partial<{
@@ -129,8 +146,8 @@ export interface TextoEmEdicao {
   posicaoTela: Ponto
   escalaTela: number
   valor: string
-  tamanhoFonte: number | null
-  cor: string | null
+  tamanhoFonte: number
+  cor: string
 }
 
 export type ComandoAtalho =

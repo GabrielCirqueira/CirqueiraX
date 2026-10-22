@@ -17,7 +17,7 @@ import {
   Undo2,
 } from 'lucide-react'
 import { memo } from 'react'
-import type { EstiloAnotacao, FerramentaEditor, NivelEspessura } from '../types'
+import type { EstiloExibido, FerramentaEditor, NivelEspessura } from '../types'
 import { atalhoDaFerramenta } from '../utils/atalhosTeclado'
 import { CORES_ANOTACAO, NIVEIS_ESPESSURA, ROTULO_NIVEL_ESPESSURA } from '../utils/constantesEditor'
 
@@ -53,7 +53,7 @@ function Separador() {
 
 export interface BarraFerramentasEditorProps {
   ferramenta: FerramentaEditor
-  estilo: EstiloAnotacao
+  estilo: EstiloExibido
   podeDesfazer: boolean
   podeRefazer: boolean
   temAnotacoes: boolean

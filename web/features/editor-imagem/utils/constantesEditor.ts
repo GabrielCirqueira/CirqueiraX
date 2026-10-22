@@ -48,10 +48,8 @@ export const ATALHOS_FERRAMENTA: Record<string, FerramentaEditor> = {
 
 export const LADO_REFERENCIA_ESCALA = 1200
 export const TAMANHO_MINIMO_ARRASTE = 4
-export const MULTIPLICADOR_FONTE = 4.5
-export const TAMANHO_MINIMO_FONTE = 18
-export const MULTIPLICADOR_RAIO_NUMERO = 2.6
-export const RAIO_MINIMO_NUMERO = 14
+export const TAMANHO_FONTE_PADRAO = 27
+export const TAMANHO_RAIO_NUMERO_PADRAO = 16
 export const MULTIPLICADOR_MARCA_TEXTO = 4
 export const OPACIDADE_MARCA_TEXTO = 0.4
 export const TAMANHO_BLOCO_DESFOQUE = 12

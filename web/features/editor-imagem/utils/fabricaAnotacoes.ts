@@ -3,22 +3,14 @@ import type {
   AnotacaoNumero,
   AnotacaoTexto,
   AnotacaoTraco,
-  EstiloAnotacao,
   FerramentaDeArraste,
   FerramentaDeTraco,
   FerramentaEditor,
   ImagemEditor,
   Ponto,
+  PreferenciasFerramenta,
 } from '../types'
-import {
-  ESPESSURA_POR_NIVEL,
-  MULTIPLICADOR_FONTE,
-  MULTIPLICADOR_RAIO_NUMERO,
-  RAIO_CANTO_PADRAO,
-  RAIO_MINIMO_NUMERO,
-  TAMANHO_MINIMO_ARRASTE,
-  TAMANHO_MINIMO_FONTE,
-} from './constantesEditor'
+import { TAMANHO_MINIMO_ARRASTE } from './constantesEditor'
 import { calcularFatorEscala, distanciaEntre } from './geometria'
 
 const FERRAMENTAS_DE_TRACO: FerramentaEditor[] = ['pincel', 'marcaTexto']
@@ -45,28 +37,21 @@ export function gerarIdAnotacao(): string {
   return crypto.randomUUID()
 }
 
-export function calcularEspessura(imagem: ImagemEditor, estilo: EstiloAnotacao): number {
-  return ESPESSURA_POR_NIVEL[estilo.nivelEspessura] * calcularFatorEscala(imagem)
-}
-
-export function calcularTamanhoFonte(imagem: ImagemEditor, estilo: EstiloAnotacao): number {
-  return Math.max(
-    TAMANHO_MINIMO_FONTE * calcularFatorEscala(imagem),
-    calcularEspessura(imagem, estilo) * MULTIPLICADOR_FONTE
-  )
+function escalar(imagem: ImagemEditor, valorRelativo: number): number {
+  return valorRelativo * calcularFatorEscala(imagem)
 }
 
 export function criarTraco(
   ferramenta: FerramentaDeTraco,
   ponto: Ponto,
   imagem: ImagemEditor,
-  estilo: EstiloAnotacao
+  preferencias: PreferenciasFerramenta
 ): AnotacaoTraco {
   return {
     id: gerarIdAnotacao(),
     tipo: ferramenta,
-    cor: estilo.cor,
-    espessura: calcularEspessura(imagem, estilo),
+    cor: preferencias.cor,
+    espessura: escalar(imagem, preferencias.espessura),
     pontos: [ponto],
   }
 }
@@ -75,36 +60,43 @@ export function criarArraste(
   ferramenta: FerramentaDeArraste,
   ponto: Ponto,
   imagem: ImagemEditor,
-  estilo: EstiloAnotacao
+  preferencias: PreferenciasFerramenta
 ): AnotacaoArraste {
   return {
     id: gerarIdAnotacao(),
     tipo: ferramenta,
-    cor: estilo.cor,
-    espessura: calcularEspessura(imagem, estilo),
+    cor: preferencias.cor,
+    espessura: escalar(imagem, preferencias.espessura),
     inicio: ponto,
     fim: ponto,
-    raioCanto: RAIO_CANTO_PADRAO * calcularFatorEscala(imagem),
-    estiloBorda: 'solida',
-    preenchimento: 'nenhum',
+    raioCanto: escalar(imagem, preferencias.raioCanto),
+    estiloBorda: preferencias.estiloBorda,
+    preenchimento: preferencias.preenchimento,
   }
+}
+
+export function calcularTamanhoFonte(
+  imagem: ImagemEditor,
+  preferencias: PreferenciasFerramenta
+): number {
+  return escalar(imagem, preferencias.tamanhoFonte)
 }
 
 export function criarTexto(
   texto: string,
   posicao: Ponto,
   imagem: ImagemEditor,
-  estilo: EstiloAnotacao
+  preferencias: PreferenciasFerramenta
 ): AnotacaoTexto {
   return {
     id: gerarIdAnotacao(),
     tipo: 'texto',
-    cor: estilo.cor,
-    espessura: calcularEspessura(imagem, estilo),
+    cor: preferencias.cor,
+    espessura: escalar(imagem, preferencias.espessura),
     posicao,
     texto,
-    tamanhoFonte: calcularTamanhoFonte(imagem, estilo),
-    comFundo: false,
+    tamanhoFonte: calcularTamanhoFonte(imagem, preferencias),
+    comFundo: preferencias.comFundo,
   }
 }
 
@@ -112,20 +104,16 @@ export function criarNumero(
   numero: number,
   posicao: Ponto,
   imagem: ImagemEditor,
-  estilo: EstiloAnotacao
+  preferencias: PreferenciasFerramenta
 ): AnotacaoNumero {
-  const espessura = calcularEspessura(imagem, estilo)
   return {
     id: gerarIdAnotacao(),
     tipo: 'numero',
-    cor: estilo.cor,
-    espessura,
+    cor: preferencias.cor,
+    espessura: escalar(imagem, preferencias.espessura),
     posicao,
     numero,
-    raio: Math.max(
-      RAIO_MINIMO_NUMERO * calcularFatorEscala(imagem),
-      espessura * MULTIPLICADOR_RAIO_NUMERO
-    ),
+    raio: escalar(imagem, preferencias.raio),
   }
 }
 

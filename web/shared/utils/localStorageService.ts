@@ -9,6 +9,8 @@ export const CHAVES_STORAGE = {
   CENTRAL_MIDIAS_POR_PAGINA: 'central-midias:por-pagina',
   PRINTS_MODO_VISUALIZACAO: 'prints:modo-visualizacao',
   PRINTS_POR_PAGINA: 'prints:por-pagina',
+  EDITOR_IMAGEM_FERRAMENTA: 'editor-imagem:ferramenta',
+  EDITOR_IMAGEM_PREFERENCIAS: 'editor-imagem:preferencias',
 } as const
 
 export interface OpcoesLeituraStorage<T> {
