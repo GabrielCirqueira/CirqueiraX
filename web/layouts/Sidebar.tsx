@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Moon,
+  Music,
   PenLine,
   Sun,
   UploadCloud,
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/central-midias', label: 'Central de Mídias', icon: Layers },
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
+  { href: '/downloads-mp3', label: 'Downloads MP3', icon: Music },
   { href: '/prints', label: 'Prints & Capturas', icon: Camera },
   { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine },
   { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud },
@@ -140,7 +142,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             const Icone = item.icon
             const ativo =
               pathname === item.href ||
-              (item.href !== '/dashboard' && pathname.startsWith(item.href))
+              (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`))
 
             return (
               <Box key={item.href} w="full">

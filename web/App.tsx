@@ -34,6 +34,10 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/downloads-video/DownloadsVideo'))}
           />
           <Route
+            path="downloads-mp3"
+            lazy={() => lazyWithRetry(() => import('@/features/downloads-audio/DownloadsAudio'))}
+          />
+          <Route
             path="prints"
             lazy={() => lazyWithRetry(() => import('@/features/prints/Prints'))}
           />
