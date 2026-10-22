@@ -193,3 +193,45 @@
   - `web/features/downloads-video/DownloadsVideo.tsx`
   - `web/features/downloads-video/components/GridVideos.tsx`, `TabelaVideos.tsx`
   - `web/features/downloads-video/utils/selecaoIntervalo.ts`
+
+---
+
+### ✅ Melhoria 89 — Editor de Imagem para Anotar Prints (Setas, Formas, Texto, Marcadores)
+
+- **Status**: Concluído
+- **Data**: 22 de outubro de 2026
+- **Problema**: para apontar campos e valores em prints e mostrar a outras pessoas, era preciso abrir um editor externo a cada vez.
+- **Solução**:
+  - **Nova tela `/editor-imagem`** (menu "Editor de Imagem"):
+    - **Ctrl + V** em qualquer lugar da tela abre a imagem colada. Também dá para arrastar um arquivo ou escolher do computador.
+    - **Ferramentas**: seta, retângulo, círculo, linha, pincel, marca-texto, texto, marcador numerado (1, 2, 3…), pixelar (esconde dados sensíveis) e recorte.
+    - **Opções**: 8 cores e 3 espessuras. Espessura e fonte acompanham a resolução da imagem.
+    - **Shift**: deixa linhas e setas retas (passos de 45°) e retângulos e círculos com proporção de quadrado.
+    - **Atalhos de ferramenta**: A seta, R retângulo, E círculo, L linha, B pincel, H marca-texto, T texto, N número, D pixelar, C recorte.
+    - **Atalhos gerais**: Ctrl + Z desfazer, Ctrl + Y ou Ctrl + Shift + Z refazer, Ctrl + C copiar, Ctrl + S salvar, Esc cancelar.
+    - **Copiar**: o PNG editado vai para a área de transferência, na resolução original. Sem HTTPS, a imagem é baixada no lugar.
+    - **Baixar**: baixa o PNG editado.
+    - **Salvar**: grava a imagem no CirqueiraX, sem categoria ou numa categoria. Se a categoria tiver álbum do Google Fotos, a imagem segue o fluxo normal de distribuição e envio.
+  - **Desempenho**: duas camadas de canvas.
+    - A base (imagem + anotações) só é redesenhada quando uma anotação entra ou sai.
+    - O traço em andamento fica numa camada de rascunho desenhada com `requestAnimationFrame`, sem re-render do React a cada movimento.
+    - O pincel usa `getCoalescedEvents` para um traço suave.
+  - **Editar mídias existentes**: botão "Editar" nos cards e nos modais da **Central de Mídias** e de **Prints & Capturas**. Ele abre `/editor-imagem?midia=<uuid>` com a imagem original.
+    - Ao salvar, é criada uma **nova mídia**. A original não muda.
+    - A nova mídia herda a origem e a **data/hora** da original, então vai para o Google Fotos no dia certo.
+  - **Backend**: `POST /api/v1/media-itens/edicoes` (`EdicaoImagemController` → `SalvarEdicaoImagemService`).
+    - Recebe `arquivo` (PNG/JPEG/WebP, até 50 MB), `nomeArquivo`, `categoriaId` e `mediaItemOrigemUuid` (opcional), validados em `SalvarEdicaoImagemDTO`.
+    - Ingere a imagem por `IngestarMediaService` e classifica se houver categoria.
+    - Com mídia de origem: grava `editado_de_uuid`, `data` e `horario` (`MetadataKeys::EDITADO_DE_UUID` e `HORARIO`).
+    - `MediaItem::isEditavelComoImagem()` bloqueia vídeos e mídias sem arquivo. Os erros vêm de `EdicaoImagemException`.
+  - **Testado** num Chrome headless com a página real e a API simulada: colar, todas as ferramentas, desfazer/refazer, recorte e salvamento (sem origem e com mídia de origem, conferindo o PNG e os campos enviados).
+- **Arquivos**:
+  - `src/Controller/MediaItem/EdicaoImagemController.php`
+  - `src/Service/MediaItem/SalvarEdicaoImagemService.php`
+  - `src/DataObject/SalvarEdicaoImagemDTO.php`
+  - `src/Exception/MediaItem/EdicaoImagemException.php`
+  - `src/Entity/MediaItem.php`, `src/Support/MetadataKeys.php`
+  - `web/features/editor-imagem/` (página, `api.ts`, `types.ts`, hooks `useEditorImagem`, `useAtalhosEditor`, `useExportacaoEdicao`, `useEditorImagemApi`, componentes e `utils/`)
+  - `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
+  - `web/features/prints/components/CardPrint.tsx`, `ModalVisualizarPrint.tsx`
+  - `web/features/central-midias/components/CardMidiaCentral.tsx`, `ModalVisualizarMidiaCentral.tsx`

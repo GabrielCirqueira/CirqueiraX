@@ -103,3 +103,4 @@
 | M86 | Dashboard Redesenhado em Estilo Minimalista, sem Gradientes | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-86--dashboard-redesenhado-em-estilo-minimalista-sem-gradientes) |
 | M87 | Remover Categoria em Lote na Tela de Downloads | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-87--remover-categoria-em-lote-na-tela-de-downloads) |
 | M88 | Seleção em Intervalo com Shift na Tela de Downloads | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-88--seleção-em-intervalo-com-shift-na-tela-de-downloads) |
+| M89 | Editor de Imagem para Anotar Prints (Setas, Formas, Texto, Marcadores) | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-89--editor-de-imagem-para-anotar-prints-setas-formas-texto-marcadores) |
