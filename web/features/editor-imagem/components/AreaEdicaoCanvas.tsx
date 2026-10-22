@@ -1,13 +1,9 @@
 import { Box, Input, chakra } from '@chakra-ui/react'
-import type { KeyboardEvent, PointerEvent } from 'react'
+import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react'
 import type { EstiloAnotacao, FerramentaEditor, ImagemEditor, TextoEmEdicao } from '../types'
 import { montarFonte } from '../utils/desenhoCanvas'
 import { calcularTamanhoFonte } from '../utils/fabricaAnotacoes'
-
-const CURSOR_POR_FERRAMENTA: Partial<Record<FerramentaEditor, string>> = {
-  texto: 'text',
-  numero: 'copy',
-}
+import { cursorDaFerramenta } from '../utils/selecaoAnotacoes'
 
 const LARGURA_MINIMA_TEXTO_CARACTERES = 6
 
@@ -17,10 +13,11 @@ export interface AreaEdicaoCanvasProps {
   estilo: EstiloAnotacao
   textoEmEdicao: TextoEmEdicao | null
   registrarCanvasBase: (canvas: HTMLCanvasElement | null) => void
-  registrarCanvasRascunho: (canvas: HTMLCanvasElement | null) => void
+  registrarCanvasSobreposicao: (canvas: HTMLCanvasElement | null) => void
   onIniciarDesenho: (evento: PointerEvent<HTMLCanvasElement>) => void
   onMoverDesenho: (evento: PointerEvent<HTMLCanvasElement>) => void
   onFinalizarDesenho: () => void
+  onDuploClique: (evento: MouseEvent<HTMLCanvasElement>) => void
   onAtualizarTexto: (valor: string) => void
   onConfirmarTexto: () => void
   onCancelarTexto: () => void
@@ -32,10 +29,11 @@ export function AreaEdicaoCanvas({
   estilo,
   textoEmEdicao,
   registrarCanvasBase,
-  registrarCanvasRascunho,
+  registrarCanvasSobreposicao,
   onIniciarDesenho,
   onMoverDesenho,
   onFinalizarDesenho,
+  onDuploClique,
   onAtualizarTexto,
   onConfirmarTexto,
   onCancelarTexto,
@@ -52,8 +50,10 @@ export function AreaEdicaoCanvas({
   }
 
   const tamanhoFonteTela = textoEmEdicao
-    ? calcularTamanhoFonte(imagem, estilo) * textoEmEdicao.escalaTela
+    ? (textoEmEdicao.tamanhoFonte ?? calcularTamanhoFonte(imagem, estilo)) *
+      textoEmEdicao.escalaTela
     : 0
+  const corTexto = textoEmEdicao?.cor ?? estilo.cor
 
   return (
     <Box position="relative" lineHeight={0} shadow="lg" borderRadius="sm" maxW="full">
@@ -68,17 +68,18 @@ export function AreaEdicaoCanvas({
         borderRadius="sm"
       />
       <chakra.canvas
-        ref={registrarCanvasRascunho}
+        ref={registrarCanvasSobreposicao}
         position="absolute"
         inset={0}
         w="full"
         h="full"
         touchAction="none"
-        cursor={CURSOR_POR_FERRAMENTA[ferramenta] ?? 'crosshair'}
+        cursor={cursorDaFerramenta(ferramenta)}
         onPointerDown={onIniciarDesenho}
         onPointerMove={onMoverDesenho}
         onPointerUp={onFinalizarDesenho}
         onPointerCancel={onFinalizarDesenho}
+        onDoubleClick={onDuploClique}
       />
       {textoEmEdicao && (
         <Input
@@ -100,7 +101,7 @@ export function AreaEdicaoCanvas({
           value={textoEmEdicao.valor}
           onChange={(evento) => onAtualizarTexto(evento.target.value)}
           onKeyDown={aoTeclarNoTexto}
-          style={{ color: estilo.cor, font: montarFonte(tamanhoFonteTela) }}
+          style={{ color: corTexto, font: montarFonte(tamanhoFonteTela) }}
         />
       )}
     </Box>

@@ -33,6 +33,7 @@ export const ROTULO_NIVEL_ESPESSURA: Record<NivelEspessura, string> = {
 }
 
 export const ATALHOS_FERRAMENTA: Record<string, FerramentaEditor> = {
+  v: 'selecionar',
   b: 'pincel',
   h: 'marcaTexto',
   a: 'seta',
@@ -56,3 +57,20 @@ export const OPACIDADE_MARCA_TEXTO = 0.4
 export const TAMANHO_BLOCO_DESFOQUE = 12
 export const TIPO_IMAGEM_EXPORTADA = 'image/png'
 export const EXTENSAO_IMAGEM_EXPORTADA = 'png'
+export const RAIO_CANTO_PADRAO = 8
+export const DESLOCAMENTO_DUPLICADO = 24
+export const DESLOCAMENTO_SETAS_TECLADO = 1
+export const DESLOCAMENTO_SETAS_TECLADO_RAPIDO = 10
+export const TOLERANCIA_ACERTO_TELA = 8
+export const TAMANHO_ALCA_ACERTO_TELA = 12
+
+export interface LimitePropriedade {
+  minimo: number
+  maximo: number
+}
+
+export const LIMITES_PROPRIEDADE = {
+  espessura: { minimo: 1, maximo: 40 },
+  tamanhoFonte: { minimo: 10, maximo: 160 },
+  raio: { minimo: 8, maximo: 90 },
+} satisfies Record<string, LimitePropriedade>

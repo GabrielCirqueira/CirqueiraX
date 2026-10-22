@@ -1,4 +1,5 @@
 export type FerramentaEditor =
+  | 'selecionar'
   | 'pincel'
   | 'marcaTexto'
   | 'seta'
@@ -15,6 +16,12 @@ export type FerramentaDeArraste = 'seta' | 'linha' | 'retangulo' | 'elipse' | 'd
 export type FerramentaDeTraco = 'pincel' | 'marcaTexto'
 
 export type NivelEspessura = 'fina' | 'media' | 'grossa'
+
+export type EstiloBorda = 'solida' | 'tracejada'
+
+export type TipoPreenchimento = 'nenhum' | 'translucido' | 'solido'
+
+export type AlcaTransformacao = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'inicio' | 'fim'
 
 export interface Ponto {
   x: number
@@ -43,6 +50,9 @@ export interface AnotacaoArraste extends AnotacaoBase {
   tipo: FerramentaDeArraste
   inicio: Ponto
   fim: Ponto
+  raioCanto: number
+  estiloBorda: EstiloBorda
+  preenchimento: TipoPreenchimento
 }
 
 export interface AnotacaoTexto extends AnotacaoBase {
@@ -50,6 +60,7 @@ export interface AnotacaoTexto extends AnotacaoBase {
   posicao: Ponto
   texto: string
   tamanhoFonte: number
+  comFundo: boolean
 }
 
 export interface AnotacaoNumero extends AnotacaoBase {
@@ -72,11 +83,15 @@ export interface ImagemEditor {
 
 export interface HistoricoAnotacoes {
   anotacoes: Anotacao[]
-  desfeitas: Anotacao[]
+  passado: Anotacao[][]
+  futuro: Anotacao[][]
 }
 
 export type AcaoHistorico =
   | { tipo: 'adicionar'; anotacao: Anotacao }
+  | { tipo: 'atualizar'; anotacao: Anotacao }
+  | { tipo: 'remover'; id: string }
+  | { tipo: 'trazerParaFrente'; id: string }
   | { tipo: 'desfazer' }
   | { tipo: 'refazer' }
   | { tipo: 'limpar' }
@@ -87,11 +102,35 @@ export interface EstiloAnotacao {
   nivelEspessura: NivelEspessura
 }
 
+export type AlteracaoAnotacao = Partial<{
+  cor: string
+  espessura: number
+  raioCanto: number
+  estiloBorda: EstiloBorda
+  preenchimento: TipoPreenchimento
+  tamanhoFonte: number
+  comFundo: boolean
+  raio: number
+}>
+
+export type InteracaoPonteiro =
+  | { tipo: 'desenhando'; anotacao: Anotacao }
+  | { tipo: 'movendo'; original: Anotacao; origem: Ponto; atual: Anotacao }
+  | {
+      tipo: 'redimensionando'
+      original: Anotacao
+      alca: AlcaTransformacao
+      atual: Anotacao
+    }
+
 export interface TextoEmEdicao {
+  anotacaoId: string | null
   posicao: Ponto
   posicaoTela: Ponto
   escalaTela: number
   valor: string
+  tamanhoFonte: number | null
+  cor: string | null
 }
 
 export type ComandoAtalho =
@@ -100,6 +139,9 @@ export type ComandoAtalho =
   | { tipo: 'copiar' }
   | { tipo: 'salvar' }
   | { tipo: 'cancelar' }
+  | { tipo: 'excluir' }
+  | { tipo: 'duplicar' }
+  | { tipo: 'deslocar'; dx: number; dy: number }
   | { tipo: 'ferramenta'; ferramenta: FerramentaEditor }
 
 export interface SalvarEdicaoInput {

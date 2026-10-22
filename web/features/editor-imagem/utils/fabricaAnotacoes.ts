@@ -14,6 +14,7 @@ import {
   ESPESSURA_POR_NIVEL,
   MULTIPLICADOR_FONTE,
   MULTIPLICADOR_RAIO_NUMERO,
+  RAIO_CANTO_PADRAO,
   RAIO_MINIMO_NUMERO,
   TAMANHO_MINIMO_ARRASTE,
   TAMANHO_MINIMO_FONTE,
@@ -83,6 +84,9 @@ export function criarArraste(
     espessura: calcularEspessura(imagem, estilo),
     inicio: ponto,
     fim: ponto,
+    raioCanto: RAIO_CANTO_PADRAO * calcularFatorEscala(imagem),
+    estiloBorda: 'solida',
+    preenchimento: 'nenhum',
   }
 }
 
@@ -100,6 +104,7 @@ export function criarTexto(
     posicao,
     texto,
     tamanhoFonte: calcularTamanhoFonte(imagem, estilo),
+    comFundo: false,
   }
 }
 

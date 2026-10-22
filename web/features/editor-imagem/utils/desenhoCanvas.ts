@@ -19,8 +19,16 @@ const COR_CONTORNO_CLARO = 'rgba(255, 255, 255, 0.95)'
 const COR_CONTORNO_ESCURO = 'rgba(0, 0, 0, 0.75)'
 const LIMIAR_LUMINANCIA_COR_CLARA = 0.6
 const ANGULO_PONTA_SETA = Math.PI / 7
-const RAZAO_CANTO_RETANGULO = 0.12
 const RAZAO_CONTORNO_TEXTO = 0.16
+const RAZAO_ESPACAMENTO_TEXTO = 0.3
+const RAZAO_ALTURA_LINHA_TEXTO = 1.2
+const OPACIDADE_PREENCHIMENTO_TRANSLUCIDO = 0.22
+const RAZAO_TRACO_TRACEJADO = 2.4
+const RAZAO_ESPACO_TRACEJADO = 1.8
+const COR_TEXTO_SOBRE_CLARO = '#111111'
+const COR_TEXTO_SOBRE_ESCURO = '#FFFFFF'
+
+let contextoMedicao: CanvasRenderingContext2D | null = null
 
 export function montarFonte(tamanho: number): string {
   return FONTE_ANOTACAO.replace('{tamanho}', String(Math.round(tamanho)))
@@ -39,12 +47,55 @@ function corDeContorno(cor: string): string {
   return isCorClara(cor) ? COR_CONTORNO_ESCURO : COR_CONTORNO_CLARO
 }
 
+function corDoTextoSobre(cor: string): string {
+  return isCorClara(cor) ? COR_TEXTO_SOBRE_CLARO : COR_TEXTO_SOBRE_ESCURO
+}
+
 function prepararTraco(contexto: CanvasRenderingContext2D, cor: string, espessura: number) {
   contexto.strokeStyle = cor
   contexto.fillStyle = cor
   contexto.lineWidth = espessura
   contexto.lineCap = 'round'
   contexto.lineJoin = 'round'
+}
+
+function aplicarEstiloBorda(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArraste) {
+  if (anotacao.estiloBorda !== 'tracejada') return
+  contexto.setLineDash([
+    anotacao.espessura * RAZAO_TRACO_TRACEJADO,
+    anotacao.espessura * RAZAO_ESPACO_TRACEJADO,
+  ])
+}
+
+function preencherForma(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArraste) {
+  if (anotacao.preenchimento === 'nenhum') return
+  contexto.save()
+  contexto.globalAlpha =
+    anotacao.preenchimento === 'translucido' ? OPACIDADE_PREENCHIMENTO_TRANSLUCIDO : 1
+  contexto.fillStyle = anotacao.cor
+  contexto.fill()
+  contexto.restore()
+}
+
+function obterContextoMedicao(): CanvasRenderingContext2D | null {
+  contextoMedicao ??= document.createElement('canvas').getContext('2d')
+  return contextoMedicao
+}
+
+export function medirCaixaTexto(anotacao: AnotacaoTexto): Retangulo {
+  const contexto = obterContextoMedicao()
+  const espacamento = anotacao.tamanhoFonte * RAZAO_ESPACAMENTO_TEXTO
+  let larguraTexto = anotacao.texto.length * anotacao.tamanhoFonte * 0.55
+  if (contexto) {
+    contexto.font = montarFonte(anotacao.tamanhoFonte)
+    larguraTexto = contexto.measureText(anotacao.texto).width
+  }
+  return {
+    x: anotacao.posicao.x - espacamento,
+    y: anotacao.posicao.y - espacamento,
+    largura: larguraTexto + espacamento * 2,
+    altura: anotacao.tamanhoFonte * RAZAO_ALTURA_LINHA_TEXTO + espacamento * 2,
+  }
 }
 
 function desenharCaminhoSuave(contexto: CanvasRenderingContext2D, anotacao: AnotacaoTraco) {
@@ -98,11 +149,13 @@ function desenharSeta(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArra
 
   contexto.save()
   prepararTraco(contexto, anotacao.cor, espessura)
+  aplicarEstiloBorda(contexto, anotacao)
   contexto.beginPath()
   contexto.moveTo(inicio.x, inicio.y)
   contexto.lineTo(fim.x - Math.cos(angulo) * recuoHaste, fim.y - Math.sin(angulo) * recuoHaste)
   contexto.stroke()
 
+  contexto.setLineDash([])
   contexto.beginPath()
   contexto.moveTo(fim.x, fim.y)
   contexto.lineTo(
@@ -123,6 +176,7 @@ function desenharSeta(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArra
 function desenharLinha(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArraste) {
   contexto.save()
   prepararTraco(contexto, anotacao.cor, anotacao.espessura)
+  aplicarEstiloBorda(contexto, anotacao)
   contexto.beginPath()
   contexto.moveTo(anotacao.inicio.x, anotacao.inicio.y)
   contexto.lineTo(anotacao.fim.x, anotacao.fim.y)
@@ -132,12 +186,15 @@ function desenharLinha(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArr
 
 function desenharRetangulo(contexto: CanvasRenderingContext2D, anotacao: AnotacaoArraste) {
   const area = normalizarRetangulo(anotacao.inicio, anotacao.fim)
-  const raioCanto = Math.min(area.largura, area.altura) * RAZAO_CANTO_RETANGULO
+  const raioCanto = Math.max(0, Math.min(anotacao.raioCanto, area.largura / 2, area.altura / 2))
 
   contexto.save()
   prepararTraco(contexto, anotacao.cor, anotacao.espessura)
+  contexto.lineJoin = raioCanto > 0 ? 'round' : 'miter'
   contexto.beginPath()
   contexto.roundRect(area.x, area.y, area.largura, area.altura, raioCanto)
+  preencherForma(contexto, anotacao)
+  aplicarEstiloBorda(contexto, anotacao)
   contexto.stroke()
   contexto.restore()
 }
@@ -157,6 +214,8 @@ function desenharElipse(contexto: CanvasRenderingContext2D, anotacao: AnotacaoAr
     0,
     Math.PI * 2
   )
+  preencherForma(contexto, anotacao)
+  aplicarEstiloBorda(contexto, anotacao)
   contexto.stroke()
   contexto.restore()
 }
@@ -217,7 +276,25 @@ function desenharDesfoque(
   pixelarRegiao(contexto, fonte, regiao, recorte, TAMANHO_BLOCO_DESFOQUE * fatorEscala)
 }
 
+function desenharFundoTexto(contexto: CanvasRenderingContext2D, anotacao: AnotacaoTexto) {
+  const caixa = medirCaixaTexto(anotacao)
+  contexto.save()
+  contexto.fillStyle = anotacao.cor
+  contexto.beginPath()
+  contexto.roundRect(caixa.x, caixa.y, caixa.largura, caixa.altura, caixa.altura * 0.25)
+  contexto.fill()
+  contexto.fillStyle = corDoTextoSobre(anotacao.cor)
+  contexto.font = montarFonte(anotacao.tamanhoFonte)
+  contexto.textBaseline = 'top'
+  contexto.fillText(anotacao.texto, anotacao.posicao.x, anotacao.posicao.y)
+  contexto.restore()
+}
+
 export function desenharTexto(contexto: CanvasRenderingContext2D, anotacao: AnotacaoTexto) {
+  if (anotacao.comFundo) {
+    desenharFundoTexto(contexto, anotacao)
+    return
+  }
   contexto.save()
   contexto.font = montarFonte(anotacao.tamanhoFonte)
   contexto.textBaseline = 'top'
@@ -245,7 +322,7 @@ function desenharNumero(contexto: CanvasRenderingContext2D, anotacao: AnotacaoNu
   contexto.font = montarFonte(raio * 1.15)
   contexto.textAlign = 'center'
   contexto.textBaseline = 'middle'
-  contexto.fillStyle = isCorClara(cor) ? '#111111' : '#FFFFFF'
+  contexto.fillStyle = corDoTextoSobre(cor)
   contexto.fillText(String(numero), posicao.x, posicao.y + raio * 0.06)
   contexto.restore()
 }
@@ -322,42 +399,4 @@ export function renderizarCena(
   for (const anotacao of anotacoes) {
     desenharAnotacao(contexto, anotacao, recorte, fatorEscala, canvas)
   }
-}
-
-export function renderizarRascunho(
-  canvasRascunho: HTMLCanvasElement,
-  canvasBase: HTMLCanvasElement,
-  imagem: ImagemEditor,
-  anotacao: Anotacao | null,
-  recorte: Retangulo
-) {
-  ajustarTamanhoCanvas(canvasRascunho, recorte)
-  const contexto = prepararContexto(canvasRascunho, recorte)
-  if (!contexto || !anotacao) return
-
-  if (anotacao.tipo === 'recorte') {
-    desenharMascaraRecorte(contexto, anotacao, recorte)
-    return
-  }
-
-  desenharAnotacao(contexto, anotacao, recorte, calcularFatorEscala(imagem), canvasBase)
-}
-
-function desenharMascaraRecorte(
-  contexto: CanvasRenderingContext2D,
-  anotacao: AnotacaoArraste,
-  recorte: Retangulo
-) {
-  const area = normalizarRetangulo(anotacao.inicio, anotacao.fim)
-  contexto.save()
-  contexto.fillStyle = 'rgba(0, 0, 0, 0.55)'
-  contexto.beginPath()
-  contexto.rect(recorte.x, recorte.y, recorte.largura, recorte.altura)
-  contexto.rect(area.x, area.y, area.largura, area.altura)
-  contexto.fill('evenodd')
-  contexto.setLineDash([anotacao.espessura * 3, anotacao.espessura * 2])
-  contexto.lineWidth = Math.max(1, anotacao.espessura * 0.5)
-  contexto.strokeStyle = '#FFFFFF'
-  contexto.strokeRect(area.x, area.y, area.largura, area.altura)
-  contexto.restore()
 }

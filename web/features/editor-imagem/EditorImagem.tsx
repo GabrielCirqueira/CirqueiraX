@@ -8,6 +8,7 @@ import { AreaEdicaoCanvas } from './components/AreaEdicaoCanvas'
 import { BarraFerramentasEditor } from './components/BarraFerramentasEditor'
 import { CabecalhoEditor } from './components/CabecalhoEditor'
 import { type DadosSalvarEdicao, ModalSalvarEdicao } from './components/ModalSalvarEdicao'
+import { PainelPropriedades } from './components/PainelPropriedades'
 import { ZonaColarImagem } from './components/ZonaColarImagem'
 import { useAtalhosEditor } from './hooks/useAtalhosEditor'
 import { useEditorImagem } from './hooks/useEditorImagem'
@@ -92,6 +93,9 @@ const EditorImagemView = memo(function EditorImagemView() {
     if (comando.tipo === 'cancelar') editor.cancelarAcaoAtual()
     if (comando.tipo === 'copiar') copiar()
     if (comando.tipo === 'salvar') abrirModalSalvar()
+    if (comando.tipo === 'excluir') editor.excluirSelecionada()
+    if (comando.tipo === 'duplicar') editor.duplicarSelecionada()
+    if (comando.tipo === 'deslocar') editor.deslocarSelecionada(comando.dx, comando.dy)
   }
 
   useAtalhosEditor({ aoColarImagem: abrirImagem, aoExecutarComando: executarComando })
@@ -152,6 +156,7 @@ const EditorImagemView = memo(function EditorImagemView() {
             estilo={editor.estilo}
             podeDesfazer={editor.podeDesfazer}
             podeRefazer={editor.podeRefazer}
+            temAnotacoes={editor.temAnotacoes}
             onSelecionarFerramenta={editor.selecionarFerramenta}
             onSelecionarCor={editor.selecionarCor}
             onSelecionarEspessura={editor.selecionarEspessura}
@@ -159,6 +164,33 @@ const EditorImagemView = memo(function EditorImagemView() {
             onRefazer={editor.refazer}
             onLimpar={editor.limpar}
           />
+        )}
+
+        {imagem && (
+          <Box
+            minH={{ base: '46px', md: '54px' }}
+            h={{ md: '54px' }}
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            {editor.selecionada ? (
+              <PainelPropriedades
+                anotacao={editor.selecionada}
+                imagem={imagem}
+                onPrevisualizar={editor.previsualizarAlteracao}
+                onConfirmar={editor.confirmarAlteracao}
+                onTrazerParaFrente={editor.trazerSelecionadaParaFrente}
+                onDuplicar={editor.duplicarSelecionada}
+                onExcluir={editor.excluirSelecionada}
+              />
+            ) : (
+              <Text fontSize="xs" color="fg.subtle" textAlign="center">
+                Clique numa forma para mover, esticar pelas alças e ajustar borda, arredondamento e
+                preenchimento. Duplo clique edita um texto.
+              </Text>
+            )}
+          </Box>
         )}
 
         <Box
@@ -181,10 +213,11 @@ const EditorImagemView = memo(function EditorImagemView() {
               estilo={editor.estilo}
               textoEmEdicao={editor.textoEmEdicao}
               registrarCanvasBase={editor.registrarCanvasBase}
-              registrarCanvasRascunho={editor.registrarCanvasRascunho}
+              registrarCanvasSobreposicao={editor.registrarCanvasSobreposicao}
               onIniciarDesenho={editor.iniciarDesenho}
               onMoverDesenho={editor.moverDesenho}
               onFinalizarDesenho={editor.finalizarDesenho}
+              onDuploClique={editor.editarTextoComDuploClique}
               onAtualizarTexto={editor.atualizarTexto}
               onConfirmarTexto={editor.confirmarTexto}
               onCancelarTexto={editor.cancelarAcaoAtual}

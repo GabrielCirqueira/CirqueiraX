@@ -7,6 +7,7 @@ import {
   Highlighter,
   type LucideIcon,
   Minus,
+  MousePointer2,
   MoveUpRight,
   Pencil,
   Redo2,
@@ -27,6 +28,7 @@ interface OpcaoFerramenta {
 }
 
 const OPCOES_FERRAMENTA: OpcaoFerramenta[] = [
+  { ferramenta: 'selecionar', rotulo: 'Selecionar e mover', icone: MousePointer2 },
   { ferramenta: 'seta', rotulo: 'Seta', icone: MoveUpRight },
   { ferramenta: 'retangulo', rotulo: 'Retângulo', icone: Square },
   { ferramenta: 'elipse', rotulo: 'Círculo', icone: Circle },
@@ -54,6 +56,7 @@ export interface BarraFerramentasEditorProps {
   estilo: EstiloAnotacao
   podeDesfazer: boolean
   podeRefazer: boolean
+  temAnotacoes: boolean
   onSelecionarFerramenta: (ferramenta: FerramentaEditor) => void
   onSelecionarCor: (cor: string) => void
   onSelecionarEspessura: (nivel: NivelEspessura) => void
@@ -67,6 +70,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
   estilo,
   podeDesfazer,
   podeRefazer,
+  temAnotacoes,
   onSelecionarFerramenta,
   onSelecionarCor,
   onSelecionarEspessura,
@@ -199,7 +203,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
         _hover={{ color: 'cirqueira.red.500' }}
         aria-label="Limpar edições"
         title="Limpar todas as edições"
-        disabled={!podeDesfazer}
+        disabled={!temAnotacoes}
         onClick={onLimpar}
       >
         <Trash2 size={17} />
