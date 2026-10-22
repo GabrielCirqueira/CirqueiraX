@@ -105,3 +105,4 @@
 | M88 | Seleção em Intervalo com Shift na Tela de Downloads | ✅ Concluído | 21/10/2026 | [ver](MELHORIAS_5.md#melhoria-88--seleção-em-intervalo-com-shift-na-tela-de-downloads) |
 | M89 | Editor de Imagem para Anotar Prints (Setas, Formas, Texto, Marcadores) | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-89--editor-de-imagem-para-anotar-prints-setas-formas-texto-marcadores) |
 | M90 | Editor de Imagem: Selecionar, Mover, Redimensionar e Ajustar Propriedades das Formas | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-90--editor-de-imagem-selecionar-mover-redimensionar-e-ajustar-propriedades-das-formas) |
+| M91 | Editor de Imagem Lembra as Últimas Configurações de Cada Ferramenta | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-91--editor-de-imagem-lembra-as-últimas-configurações-de-cada-ferramenta) |

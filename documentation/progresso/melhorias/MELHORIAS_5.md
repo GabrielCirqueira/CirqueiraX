@@ -274,3 +274,28 @@
   - `web/features/editor-imagem/hooks/useCanvasEditor.ts`, `useEditorImagem.ts`
   - `web/features/editor-imagem/components/PainelPropriedades.tsx`, `AreaEdicaoCanvas.tsx`, `BarraFerramentasEditor.tsx`
   - `web/features/editor-imagem/utils/selecaoAnotacoes.ts`, `transformacaoAnotacoes.ts`, `desenhoSelecao.ts`, `propriedadesPainel.ts`, `desenhoCanvas.ts`, `historicoAnotacoes.ts`, `fabricaAnotacoes.ts`, `atalhosTeclado.ts`, `constantesEditor.ts`
+
+---
+
+### ✅ Melhoria 91 — Editor de Imagem Lembra as Últimas Configurações de Cada Ferramenta
+
+- **Status**: Concluído
+- **Data**: 22 de outubro de 2026
+- **Problema**: a cada imagem nova era preciso reconfigurar cor, borda, arredondamento, traço e preenchimento.
+- **Solução**:
+  - **Preferências por ferramenta no localStorage** (`cirqueirax:editor-imagem:preferencias`). Cada tipo guarda as suas: retângulo, círculo, seta, linha, pincel, marca-texto, texto, marcador e pixelar.
+    - Os valores salvos são a cor, a espessura, o arredondamento, o traço (sólido/tracejado), o preenchimento, o tamanho e o estilo do texto, e o tamanho do marcador.
+  - **Quando salva**:
+    - ao mudar uma propriedade da forma selecionada (painel ou cor/espessura da barra), a configuração final vale para aquele tipo;
+    - sem nada selecionado, a cor e a espessura da barra valem para a ferramenta ativa.
+  - **Quando usa**: toda forma nova sai com as preferências do seu tipo. A barra mostra a cor e a espessura da ferramenta ativa ou da forma selecionada.
+  - **Última ferramenta usada** também é lembrada (`cirqueirax:editor-imagem:ferramenta`). O recorte não é restaurado.
+  - **Tamanhos relativos à resolução**: espessura, arredondamento e tamanhos são salvos divididos pelo fator de escala da imagem. Assim, a mesma configuração fica proporcional num print pequeno ou num 4K.
+  - **Robustez**: o que vem do storage passa por validação campo a campo (cor hexadecimal, números finitos, enums conhecidos). Valor inválido volta ao padrão.
+  - Usa o `useLocalStorageState`/`localStorageService` que já existiam (chaves em `CHAVES_STORAGE`).
+  - **Testado** num Chrome headless: retângulo configurado como azul, tracejado, translúcido e borda 30, e seta em verde. Depois de recarregar a página e colar outra imagem, o retângulo e a seta novos vieram com essas configurações e o círculo, nunca configurado, veio com o padrão. A última ferramenta foi restaurada.
+- **Arquivos**:
+  - `web/features/editor-imagem/utils/preferenciasEditor.ts` (novo)
+  - `web/features/editor-imagem/hooks/useEditorImagem.ts`, `utils/fabricaAnotacoes.ts`, `utils/constantesEditor.ts`, `types.ts`
+  - `web/features/editor-imagem/components/AreaEdicaoCanvas.tsx`, `BarraFerramentasEditor.tsx`, `EditorImagem.tsx`
+  - `web/shared/utils/localStorageService.ts`
