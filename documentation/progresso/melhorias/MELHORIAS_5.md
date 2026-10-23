@@ -341,3 +341,33 @@
   - `src/DataObject/` (`AudioBaixadoDTO`, `SolicitarDownloadAudioDTO`, `PaginaAudiosDTO`, `ResultadoExpiracaoAudiosDTO`)
   - `config/services.yaml`, `devops/bootstrap.sh`, `devops/docker-compose.prod.yaml`, `src/Service/Video/ValidadorUrlPlataforma.php`
   - `web/features/downloads-audio/` (página, componentes, hooks, utils), `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
+
+---
+
+### ✅ Melhoria 93 — Página de Downloads MP3 Redesenhada (Grade de Capas, Player Fixo, Cabeçalho com Contadores)
+
+- **Status**: Concluído
+- **Data**: 23 de outubro de 2026
+- **Problema**: a página de Downloads MP3 (M92) era uma lista simples, visualmente pobre perto das outras telas, sobretudo da de Downloads de Vídeo.
+- **Solução**:
+  - **Cabeçalho** no mesmo padrão da tela de vídeos: ícone, título, contadores (total, prontos, convertendo, erros), o aviso "Arquivos guardados por 7 dias" e o botão Atualizar.
+  - **Campo de link** em card próprio:
+    - mostra o ícone da plataforma detectada e um botão para limpar o campo;
+    - com o campo vazio, "Colar e baixar" lê a área de transferência e já enfileira; com link digitado, aparece "Baixar MP3" (ou "Baixar N MP3");
+    - indicador de quantos áudios estão convertendo e chips das plataformas suportadas.
+  - **Grade de cards** (1 a 6 colunas conforme a largura):
+    - capa 16:10, selo da plataforma e duração sobre a capa;
+    - botão de play no centro, que aparece no hover (sempre visível no celular);
+    - capas de áudios na fila, com erro ou expirados ficam em cinza, com ícone e rótulo do estado;
+    - título, autor, status e tamanho;
+    - barra de validade com os dias restantes, que fica âmbar quando falta menos de 30% do prazo;
+    - ações: MP3, Baixar de novo, link original e remover.
+  - **Player fixo** no rodapé da página ("Tocando agora"), com capa, título e autor, controles, download e fechar. Ele continua tocando ao trocar de página da grade e fecha sozinho se o áudio for removido.
+  - **Carregamento com skeleton** e estado vazio ilustrado.
+  - Sem gradientes, seguindo o padrão minimalista da M86.
+  - **Testado** num Chrome headless com API simulada: tema claro e escuro, desktop e celular (sem rolagem horizontal), fila, erro, expirado, player e campo com link. Nenhum erro no console.
+- **Arquivos**:
+  - `web/features/downloads-audio/DownloadsAudio.tsx`, `types.ts`, `utils/audios.ts`
+  - `web/features/downloads-audio/components/CabecalhoDownloadsAudio.tsx`, `CardAudio.tsx`, `GradeAudios.tsx`, `PlayerAudio.tsx` (novos)
+  - `web/features/downloads-audio/components/CampoLinkAudio.tsx`, `CapaAudio.tsx`
+  - removidos: `ItemAudio.tsx`, `ListaAudios.tsx`
