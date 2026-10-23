@@ -15,6 +15,7 @@ final class YtDlpClient implements ExtratorVideoInterface, ExtratorAudioInterfac
     private const float TIMEOUT_EXTRACAO_METADATA_SEGUNDOS = 60.0;
     private const float TIMEOUT_DOWNLOAD_VIDEO_SEGUNDOS = 300.0;
     private const string FORMATO_VIDEO_PREFERIDO = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best';
+    private const string ORDENACAO_FORMATO_VIDEO = 'res:1080,vcodec:h264';
     private const float TIMEOUT_DOWNLOAD_AUDIO_SEGUNDOS = 900.0;
     private const string FORMATO_AUDIO = 'mp3';
     private const string QUALIDADE_AUDIO = '0';
@@ -104,6 +105,8 @@ final class YtDlpClient implements ExtratorVideoInterface, ExtratorAudioInterfac
                 '--write-info-json',
                 '--format',
                 self::FORMATO_VIDEO_PREFERIDO,
+                '--format-sort',
+                self::ORDENACAO_FORMATO_VIDEO,
                 '--output',
                 $templateSaida,
                 '--print',
