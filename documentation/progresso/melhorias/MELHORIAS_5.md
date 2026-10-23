@@ -393,3 +393,21 @@
   - **Correção**: `--force-overwrites` no download de vídeo e no de áudio (o "Baixar de novo" do MP3 reaproveita o nome `{uuid}.mp3`). Com o mesmo arquivo falso na pasta, o download veio em 3840x2160.
   - Na pasta `var/downloads` havia 99 arquivos órfãos (~1,1 GB) que nenhum item referencia. Eles não são mais reaproveitados.
 - **Arquivos**: `src/Infra/YtDlp/YtDlpClient.php`
+
+---
+
+### ✅ Melhoria 95 — Downloads de Vídeo Limitados a Full HD em H.264 (Arquivos Menores e Compatíveis)
+
+- **Status**: Concluído
+- **Data**: 23 de outubro de 2026
+- **Problema**: depois da M94, vídeos do YouTube passaram a vir na maior qualidade disponível. Em geral isso era 4K em AV1, com cerca de 170 MB para 3 minutos e um codec que nem todo celular, TV ou app reproduz.
+- **Solução**:
+  - `--format-sort res:1080,vcodec:h264` no download de vídeo (constante `ORDENACAO_FORMATO_VIDEO` no `YtDlpClient`).
+  - Escolhe a maior resolução até 1080p e, entre as opções dessa resolução, prefere H.264 (avc1), que toca em qualquer dispositivo.
+  - O limite vale para o **menor lado** do vídeo, então vídeos verticais continuam em até 1080x1920.
+  - Vídeos que só existem em resolução menor continuam na melhor disponível. O filtro de formato (mp4 + m4a) não mudou.
+- **Testado** em produção (`omG1VuyA92w`, 2 min 25 s):
+  - antes: 3840x2160 AV1, 185 MB;
+  - depois: 1920x1080 H.264, 75 MB.
+  - A simulação também conferiu um vídeo vertical, que ficou na melhor resolução disponível (608x1080), e um vídeo antigo de 240p.
+- **Arquivos**: `src/Infra/YtDlp/YtDlpClient.php`
