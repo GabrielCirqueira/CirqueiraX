@@ -704,8 +704,6 @@ final class YtDlpClient implements ExtratorVideoInterface, ExtratorAudioInterfac
                 $comando[] = $arquivoCookies;
                 $comando[] = '--remote-components';
                 $comando[] = 'ejs:github';
-                $comando[] = '--extractor-args';
-                $comando[] = 'youtube:player_client=web';
             } else {
                 $comando[] = '--extractor-args';
                 $comando[] = 'youtube:player_client=android';
