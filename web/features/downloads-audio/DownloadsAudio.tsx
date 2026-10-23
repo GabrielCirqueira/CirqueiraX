@@ -1,9 +1,10 @@
-import { AppContainer } from '@/layouts/AppContainer'
 import { useSEO } from '@/shared/hooks'
-import { Text, VStack } from '@chakra-ui/react'
+import { Box, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
+import { CabecalhoDownloadsAudio } from './components/CabecalhoDownloadsAudio'
 import { CampoLinkAudio } from './components/CampoLinkAudio'
-import { ListaAudios } from './components/ListaAudios'
+import { GradeAudios } from './components/GradeAudios'
+import { PlayerAudio } from './components/PlayerAudio'
 import { useColarLinksNaPagina } from './hooks/useColarLinksNaPagina'
 import {
   useApagarAudio,
@@ -11,6 +12,8 @@ import {
   useRebaixarAudio,
   useSolicitarDownloadAudio,
 } from './hooks/useDownloadsAudio'
+import type { Audio } from './types'
+import { contarAudiosPorStatus } from './utils/audios'
 
 export function Component() {
   useSEO({
@@ -20,53 +23,63 @@ export function Component() {
   })
 
   const [pagina, setPagina] = useState(1)
-  const [reproduzindoUuid, setReproduzindoUuid] = useState<string | null>(null)
+  const [audioTocando, setAudioTocando] = useState<Audio | null>(null)
 
-  const { data, isLoading } = useAudios(pagina)
+  const { data, isLoading, isFetching, refetch } = useAudios(pagina)
   const solicitar = useSolicitarDownloadAudio()
   const rebaixar = useRebaixarAudio()
   const apagar = useApagarAudio()
+  const contagem = contarAudiosPorStatus(data)
 
   function solicitarDownloads(urls: string[]) {
     setPagina(1)
     solicitar.mutate(urls)
   }
 
-  function alternarReproducao(uuid: string) {
-    setReproduzindoUuid((atual) => (atual === uuid ? null : uuid))
+  function alternarReproducao(audio: Audio) {
+    setAudioTocando((atual) => (atual?.uuid === audio.uuid ? null : audio))
+  }
+
+  function apagarAudio(uuid: string) {
+    if (audioTocando?.uuid === uuid) setAudioTocando(null)
+    apagar.mutate(uuid)
   }
 
   useColarLinksNaPagina(solicitarDownloads)
 
   return (
-    <AppContainer maxWidth="5xl" paddingY="8" paddingX="6">
+    <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
       <VStack align="stretch" gap={6} w="full">
-        <VStack align="flex-start" gap={1}>
-          <Text as="h1" fontSize="2xl" fontWeight="semibold" color="fg" letterSpacing="tight">
-            Downloads MP3
-          </Text>
-          <Text fontSize="sm" color="fg.subtle">
-            Cole um link e baixe só o áudio. Depois de 7 dias o arquivo sai do servidor, mas dá para
-            baixar de novo.
-          </Text>
-        </VStack>
+        <CabecalhoDownloadsAudio
+          contagem={contagem}
+          atualizando={isFetching}
+          onAtualizar={() => refetch()}
+        />
 
-        <CampoLinkAudio enviando={solicitar.isPending} onSolicitar={solicitarDownloads} />
+        <CampoLinkAudio
+          enviando={solicitar.isPending}
+          emProcessamento={contagem.emProcessamento}
+          onSolicitar={solicitarDownloads}
+        />
 
-        <ListaAudios
+        <GradeAudios
           pagina={data}
           carregando={isLoading}
           agora={Date.now()}
-          reproduzindoUuid={reproduzindoUuid}
+          tocandoUuid={audioTocando?.uuid ?? null}
           rebaixandoUuid={rebaixar.isPending ? (rebaixar.variables ?? null) : null}
           apagandoUuid={apagar.isPending ? (apagar.variables ?? null) : null}
           onMudarPagina={setPagina}
           onAlternarReproducao={alternarReproducao}
           onRebaixar={rebaixar.mutate}
-          onApagar={apagar.mutate}
+          onApagar={apagarAudio}
         />
+
+        {audioTocando && (
+          <PlayerAudio audio={audioTocando} onFechar={() => setAudioTocando(null)} />
+        )}
       </VStack>
-    </AppContainer>
+    </Box>
   )
 }
 

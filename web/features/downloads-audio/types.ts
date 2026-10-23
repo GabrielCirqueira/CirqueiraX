@@ -38,3 +38,10 @@ export interface AparenciaStatusAudio {
   rotulo: string
   paleta: PaletaStatusAudio
 }
+
+export interface ContagemStatusAudios {
+  total: number
+  prontos: number
+  emProcessamento: number
+  comErro: number
+}

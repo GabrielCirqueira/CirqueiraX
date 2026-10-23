@@ -1,5 +1,16 @@
+import {
+  type PlataformaDetectada,
+  identificarPlataforma,
+} from '@/features/downloads-video/utils/plataformaVideo'
 import axios from 'axios'
-import type { AparenciaStatusAudio, Audio, PaginaAudios, StatusAudio } from '../types'
+import { Globe, Instagram, type LucideIcon, Video, Youtube } from 'lucide-react'
+import type {
+  AparenciaStatusAudio,
+  Audio,
+  ContagemStatusAudios,
+  PaginaAudios,
+  StatusAudio,
+} from '../types'
 
 export const AUDIOS_POR_PAGINA = 20
 export const INTERVALO_ATUALIZACAO_AUDIOS_MS = 2500
@@ -9,6 +20,9 @@ const HORAS_POR_DIA = 24
 const SEGUNDOS_POR_MINUTO = 60
 const SEGUNDOS_POR_HORA = 3600
 const LIMITE_RESUMO_ERRO = 180
+const DIAS_RETENCAO_AUDIO = 7
+const PERCENTUAL_TOTAL = 100
+const PERCENTUAL_VALIDADE_CRITICA = 30
 
 const APARENCIA_STATUS_AUDIO: Record<StatusAudio, AparenciaStatusAudio> = {
   pendente: { rotulo: 'Na fila', paleta: 'gray' },
@@ -17,6 +31,13 @@ const APARENCIA_STATUS_AUDIO: Record<StatusAudio, AparenciaStatusAudio> = {
   erro: { rotulo: 'Erro', paleta: 'red' },
   expirado: { rotulo: 'Expirado', paleta: 'gray' },
 }
+
+export const PLATAFORMAS_SUPORTADAS_AUDIO: { nome: string; icone: LucideIcon; paleta: string }[] = [
+  { nome: 'YouTube', icone: Youtube, paleta: 'red' },
+  { nome: 'TikTok', icone: Video, paleta: 'cyan' },
+  { nome: 'Instagram', icone: Instagram, paleta: 'pink' },
+  { nome: 'X / Twitter', icone: Globe, paleta: 'blue' },
+]
 
 export function obterAparenciaStatusAudio(status: StatusAudio): AparenciaStatusAudio {
   return APARENCIA_STATUS_AUDIO[status]
@@ -75,6 +96,33 @@ export function descreverValidadeAudio(audio: Audio, agora: number): string | nu
   if (horasRestantes < HORAS_POR_DIA) return `Expira em ${Math.ceil(horasRestantes)} h`
   const dias = Math.ceil(horasRestantes / HORAS_POR_DIA)
   return dias === 1 ? 'Expira amanhã' : `Expira em ${dias} dias`
+}
+
+export function calcularPercentualValidadeAudio(audio: Audio, agora: number): number | null {
+  if (!audio.isDisponivel || !audio.expiraEm) return null
+  const horasRestantes = (new Date(audio.expiraEm).getTime() - agora) / MILISSEGUNDOS_POR_HORA
+  const horasTotais = DIAS_RETENCAO_AUDIO * HORAS_POR_DIA
+  const percentual = (horasRestantes / horasTotais) * PERCENTUAL_TOTAL
+  return Math.min(PERCENTUAL_TOTAL, Math.max(0, percentual))
+}
+
+export function isValidadeCritica(percentual: number): boolean {
+  return percentual <= PERCENTUAL_VALIDADE_CRITICA
+}
+
+export function contarAudiosPorStatus(pagina: PaginaAudios | undefined): ContagemStatusAudios {
+  const audios = pagina?.audios ?? []
+  return {
+    total: pagina?.total ?? 0,
+    prontos: audios.filter((audio) => audio.isDisponivel).length,
+    emProcessamento: audios.filter((audio) => audio.isEmProcessamento).length,
+    comErro: audios.filter((audio) => audio.status === 'erro').length,
+  }
+}
+
+export function identificarPlataformaAudio(audio: Audio): PlataformaDetectada | null {
+  const plataforma = identificarPlataforma(audio.url)
+  return plataforma?.conhecido ? plataforma : null
 }
 
 export function resumirErroAudio(erroMotivo: string | null): string | null {
