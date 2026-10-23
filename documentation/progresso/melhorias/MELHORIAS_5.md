@@ -386,4 +386,10 @@
   - **sem forçar cliente**: todos os formatos, até 4K (2160p).
 - **Solução**: com cookies, o comando não força mais nenhum cliente e deixa o yt-dlp escolher (mantendo `--cookies` e `--remote-components ejs:github`). Sem cookies continua o `android`.
 - **Testado** em produção: o mesmo vídeo que tinha vindo em 640x360 (`omG1VuyA92w`) baixou em 3840x2160.
+- **Segunda causa (arquivo antigo reaproveitado)**: depois da correção, o mesmo vídeo baixado de novo continuou em 360p.
+  - O download salva em `var/downloads/{id}.mp4`, e ali ainda estava o arquivo de 360p da primeira tentativa.
+  - Quando o arquivo já existe, o yt-dlp responde "has already been downloaded" e devolve o arquivo antigo sem baixar nada.
+  - Reproduzido em produção: com um arquivo falso de mesmo nome na pasta, o `YtDlpClient` devolveu o arquivo falso.
+  - **Correção**: `--force-overwrites` no download de vídeo e no de áudio (o "Baixar de novo" do MP3 reaproveita o nome `{uuid}.mp3`). Com o mesmo arquivo falso na pasta, o download veio em 3840x2160.
+  - Na pasta `var/downloads` havia 99 arquivos órfãos (~1,1 GB) que nenhum item referencia. Eles não são mais reaproveitados.
 - **Arquivos**: `src/Infra/YtDlp/YtDlpClient.php`
