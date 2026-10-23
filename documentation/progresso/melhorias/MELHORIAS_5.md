@@ -371,3 +371,19 @@
   - `web/features/downloads-audio/components/CabecalhoDownloadsAudio.tsx`, `CardAudio.tsx`, `GradeAudios.tsx`, `PlayerAudio.tsx` (novos)
   - `web/features/downloads-audio/components/CampoLinkAudio.tsx`, `CapaAudio.tsx`
   - removidos: `ItemAudio.tsx`, `ListaAudios.tsx`
+
+---
+
+### ✅ Melhoria 94 — Vídeos do YouTube Voltam a Baixar na Melhor Qualidade (Não Mais 360p)
+
+- **Status**: Concluído
+- **Data**: 23 de outubro de 2026
+- **Problema**: vídeos do YouTube passaram a chegar em 640x360. O `YtDlpClient` forçava `--extractor-args youtube:player_client=web` quando havia cookies, e o YouTube deixou de entregar os formatos separados (DASH) para esse cliente sem PO token. Sobrava só o formato 18 (360p com áudio AAC de 96 kbps), que também deixava ruins os MP3 da M92.
+- **Diagnóstico** (`yt-dlp -F` em produção, yt-dlp 2026.10.21, com cookies):
+  - `player_client=web`: só o formato 18 (360p);
+  - `mweb`: só 360p;
+  - `web_safari`: até 1080p;
+  - **sem forçar cliente**: todos os formatos, até 4K (2160p).
+- **Solução**: com cookies, o comando não força mais nenhum cliente e deixa o yt-dlp escolher (mantendo `--cookies` e `--remote-components ejs:github`). Sem cookies continua o `android`.
+- **Testado** em produção: o mesmo vídeo que tinha vindo em 640x360 (`omG1VuyA92w`) baixou em 3840x2160.
+- **Arquivos**: `src/Infra/YtDlp/YtDlpClient.php`

@@ -108,3 +108,4 @@
 | M91 | Editor de Imagem Lembra as Últimas Configurações de Cada Ferramenta | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-91--editor-de-imagem-lembra-as-últimas-configurações-de-cada-ferramenta) |
 | M92 | Página de Downloads MP3 (Áudio Atrelado à Conta, Expira em 7 Dias) | ✅ Concluído | 22/10/2026 | [ver](MELHORIAS_5.md#melhoria-92--página-de-downloads-mp3-áudio-atrelado-à-conta-expira-em-7-dias) |
 | M93 | Página de Downloads MP3 Redesenhada (Grade de Capas, Player Fixo, Cabeçalho com Contadores) | ✅ Concluído | 23/10/2026 | [ver](MELHORIAS_5.md#melhoria-93--página-de-downloads-mp3-redesenhada-grade-de-capas-player-fixo-cabeçalho-com-contadores) |
+| M94 | Vídeos do YouTube Voltam a Baixar na Melhor Qualidade (Não Mais 360p) | ✅ Concluído | 23/10/2026 | [ver](MELHORIAS_5.md#melhoria-94--vídeos-do-youtube-voltam-a-baixar-na-melhor-qualidade-não-mais-360p) |
