@@ -132,11 +132,34 @@
   - `web/features/livros-audio/components/PaginaPdf.tsx`
   - `web/features/livros-audio/index.ts`
 
-### ⏳ Tópico 148 — Frontend — visualizador em formato de livro
-- **Status**: Pendente
+### ✅ Tópico 148 — Frontend — visualizador em formato de livro
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criado o hook de controle `useLeitorLivro.ts` para gerenciar página atual, escala/zoom (de 80% a 250%), modo de exibição (página única / página dupla) e alternância de tela cheia.
+  - Implementado o componente `BarraSuperiorLeitor.tsx` com navegação de retorno à biblioteca, título do livro, badge de progresso, controles granulares de zoom (aumentar, diminuir, resetar), botão de página dupla com ícone dinâmico e alternância de tela cheia.
+  - Implementado o componente `VisualizadorLivro.tsx` com acabamento de folha de livro, suporte a modo página dupla com simulação de lombada central em gradiente, botões laterais flutuantes para folheio rápido e navegação por teclado (`ArrowLeft`, `ArrowRight`, `PageUp`, `PageDown`) sem `useEffect`.
+  - Criada a página do leitor `LeitorLivroAudio.tsx` carregando o livro e o documento PDF com tratamento de estados de carregamento e erro amigáveis.
+  - Registrada a rota `/livros-audio/:uuid` em `web/App.tsx`.
+- **Arquivos**:
+  - `web/features/livros-audio/hooks/useLeitorLivro.ts`
+  - `web/features/livros-audio/components/BarraSuperiorLeitor.tsx`
+  - `web/features/livros-audio/components/VisualizadorLivro.tsx`
+  - `web/features/livros-audio/LeitorLivroAudio.tsx`
+  - `web/App.tsx`
 
-### ⏳ Tópico 149 — Frontend — barra inferior do livro e abertura na página salva
-- **Status**: Pendente
+### ✅ Tópico 149 — Frontend — barra inferior do livro e abertura na página salva
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Implementado o componente `BarraInferiorLeitor.tsx` contendo slider de páginas Chakra UI v3 (`Slider.Root`, `Slider.Control`, `Slider.Track`, `Slider.Range`, `Slider.Thumbs`), contador numérico tabular `X / Y`, badge de porcentagem lida e botão de marcador com indicação de estado persistido.
+  - Implementada a abertura automática na página salva (`livro.paginaAtual`) vinda do backend através da inicialização de estado em `useLeitorLivro` sem violar a regra de ausência de `useEffect`.
+  - Integrada a mutação `useSalvarPosicaoLivroAudio` para persistência automática ao navegar entre páginas e salvamento manual via botão "Salvar Marcador".
+  - Build validado com sucesso e sem erros no Vite (`npm run build`).
+- **Arquivos**:
+  - `web/features/livros-audio/components/BarraInferiorLeitor.tsx`
+  - `web/features/livros-audio/LeitorLivroAudio.tsx`
+  - `web/features/livros-audio/index.ts`
 
 ### ⏳ Tópico 150 — Infra — extração de texto do PDF por página
 - **Status**: Pendente
