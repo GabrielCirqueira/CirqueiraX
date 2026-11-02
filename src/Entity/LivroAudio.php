@@ -37,6 +37,18 @@ class LivroAudio
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $totalPaginas = 0;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 1])]
+    private int $paginaAtual = 1;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $blocoAtual = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $segundosNoBloco = 0;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $ultimaEscutaEm = null;
+
     #[ORM\Column(type: 'string', enumType: StatusLivroAudio::class)]
     private StatusLivroAudio $status;
 
@@ -210,9 +222,40 @@ class LivroAudio
         return $this->tamanhoBytes;
     }
 
+    public function atualizarPosicao(int $paginaAtual, ?int $blocoAtual = null, int $segundosNoBloco = 0): self
+    {
+        $this->paginaAtual = max(1, $paginaAtual);
+        $this->blocoAtual = null !== $blocoAtual ? max(0, $blocoAtual) : null;
+        $this->segundosNoBloco = max(0, $segundosNoBloco);
+        $this->ultimaEscutaEm = new DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
     public function totalPaginas(): int
     {
         return $this->totalPaginas;
+    }
+
+    public function paginaAtual(): int
+    {
+        return $this->paginaAtual;
+    }
+
+    public function blocoAtual(): ?int
+    {
+        return $this->blocoAtual;
+    }
+
+    public function segundosNoBloco(): int
+    {
+        return $this->segundosNoBloco;
+    }
+
+    public function ultimaEscutaEm(): ?DateTimeImmutable
+    {
+        return $this->ultimaEscutaEm;
     }
 
     public function status(): StatusLivroAudio

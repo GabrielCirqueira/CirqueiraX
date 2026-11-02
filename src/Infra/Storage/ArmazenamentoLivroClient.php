@@ -31,7 +31,7 @@ final class ArmazenamentoLivroClient implements ArmazenamentoLivroInterface
 
         try {
             $arquivoSalvo = $arquivo->move($diretorioDestino, self::NOME_ARQUIVO_PDF);
-            @chmod($arquivoSalvo->getPathname(), 0664);
+            @chmod($arquivoSalvo->getPathname(), 0o664);
 
             return $arquivoSalvo->getPathname();
         } catch (FileException) {

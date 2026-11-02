@@ -44,6 +44,7 @@ web/
 │   ├── editor-imagem/
 │   ├── google-fotos/
 │   ├── home/               Sem rota no momento
+│   ├── livros-audio/
 │   ├── not-found/
 │   ├── prints/
 │   └── upload-manual/

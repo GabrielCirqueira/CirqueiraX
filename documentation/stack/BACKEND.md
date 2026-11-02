@@ -114,6 +114,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `GET` | `/livros-audio` | Lista os livros do usuário |
 | `POST` | `/livros-audio` | Upload de PDF de livro |
 | `GET` | `/livros-audio/{uuid}` | Detalhes do livro |
+| `PUT` | `/livros-audio/{uuid}/posicao` | Salva o marcador de leitura (página/bloco/segundos) |
 | `DELETE` | `/livros-audio/{uuid}` | Apaga o livro e arquivos |
 | `GET` | `/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
 

@@ -14,3 +14,8 @@ framework:
             policy: 'token_bucket'
             limit: 300
             rate: { interval: '1 minute' }
+
+        marcador_posicao:
+            policy: 'token_bucket'
+            limit: 180
+            rate: { interval: '1 minute' }

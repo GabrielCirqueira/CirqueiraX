@@ -57,11 +57,41 @@
   - `src/Serializer/LivroAudioSerializer.php`
   - `src/Controller/LivroAudio/LivroAudioController.php`
 
-### ⏳ Tópico 144 — Marcador de leitura — endpoint de posição e campos de retomada
-- **Status**: Pendente
+### ✅ Tópico 144 — Marcador de leitura — endpoint de posição e campos de retomada
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Adicionados os campos `paginaAtual` (default 1), `blocoAtual` (nullable), `segundosNoBloco` (default 0) e `ultimaEscutaEm` (nullable) na entidade `LivroAudio`.
+  - Criado o método de domínio `atualizarPosicao(int $paginaAtual, ?int $blocoAtual = null, int $segundosNoBloco = 0): self` com atualização automática de `ultimaEscutaEm` e `atualizadoEm`.
+  - Gerada e aplicada a migration `Version20261102212500.php` via `make doctrine-diff` e `make migrate`, com validação de schema 100% sincronizado via `make doctrine-validate`.
+  - Criado o DTO `SalvarPosicaoLivroDTO` em `src/DataObject/` com validações de constraints (`Positive`, `PositiveOrZero`).
+  - Configurado o rate limiter `marcador_posicao` em `config/packages/rate_limiter.yaml` com política `token_bucket` (180 req/min).
+  - Implementado o serviço `SalvarPosicaoLivroService` em `src/Service/LivroAudio/` para persistir o progresso do usuário.
+  - Implementado o endpoint `PUT /api/v1/livros-audio/{uuid}/posicao` no `LivroAudioController` com rate limiter por usuário/livro e resposta serializada atualizada via `LivroAudioSerializer`.
+- **Arquivos**:
+  - `src/Entity/LivroAudio.php`
+  - `migrations/Version20261102212500.php`
+  - `src/DataObject/SalvarPosicaoLivroDTO.php`
+  - `src/Service/LivroAudio/SalvarPosicaoLivroService.php`
+  - `config/packages/rate_limiter.yaml`
+  - `src/Serializer/LivroAudioSerializer.php`
+  - `src/Controller/LivroAudio/LivroAudioController.php`
 
-### ⏳ Tópico 145 — Frontend — estrutura da feature livros-audio (types, api, hooks)
-- **Status**: Pendente
+### ✅ Tópico 145 — Frontend — estrutura da feature livros-audio (types, api, hooks)
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criada a pasta da feature `web/features/livros-audio/` seguindo a arquitetura modular do frontend.
+  - Criado `types.ts` com esquemas Zod (`statusLivroAudioSchema`, `livroAudioSchema`, `salvarPosicaoLivroSchema`) e tipos TypeScript inferidos (`LivroAudio`, `StatusLivroAudio`, `SalvarPosicaoLivro`, `UploadLivroAudioPayload`).
+  - Criado `api.ts` com integração via cliente `@/config/api`, validação de retornos com Zod (`listarLivrosAudio`, `obterLivroAudio`, `fazerUploadLivroAudio`, `salvarPosicaoLivroAudio`, `apagarLivroAudio`, `obterUrlPdfLivro`).
+  - Criado `hooks/useLivrosAudio.ts` com TanStack React Query (`useLivrosAudio`, `useLivroAudio`, `useUploadLivroAudio`, `useSalvarPosicaoLivroAudio`, `useApagarLivroAudio`), toasts automáticos via `addToast`, sem uso de `useEffect` e com atualização otimista/invalidação de queries.
+  - Criado `index.ts` com re-exportação unificada da feature.
+  - Código formatado e validado sem erros com Biome (`npx biome check web/features/livros-audio`).
+- **Arquivos**:
+  - `web/features/livros-audio/types.ts`
+  - `web/features/livros-audio/api.ts`
+  - `web/features/livros-audio/hooks/useLivrosAudio.ts`
+  - `web/features/livros-audio/index.ts`
 
 ### ⏳ Tópico 146 — Frontend — biblioteca de livros com upload, cards e progresso
 - **Status**: Pendente

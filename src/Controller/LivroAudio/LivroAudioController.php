@@ -6,16 +6,20 @@ namespace App\Controller\LivroAudio;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\ArquivoMidiaDTO;
+use App\DataObject\SalvarPosicaoLivroDTO;
 use App\DataObject\UploadLivroAudioDTO;
 use App\Entity\Usuario;
 use App\Serializer\LivroAudioSerializer;
 use App\Service\LivroAudio\ApagarLivroAudioService;
 use App\Service\LivroAudio\ConsultarLivrosAudioService;
+use App\Service\LivroAudio\SalvarPosicaoLivroService;
 use App\Service\LivroAudio\UploadLivroAudioService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -28,7 +32,9 @@ final class LivroAudioController extends DefaultController
         private readonly ConsultarLivrosAudioService $consultarLivrosAudioService,
         private readonly UploadLivroAudioService $uploadLivroAudioService,
         private readonly ApagarLivroAudioService $apagarLivroAudioService,
+        private readonly SalvarPosicaoLivroService $salvarPosicaoLivroService,
         private readonly LivroAudioSerializer $livroAudioSerializer,
+        private readonly RateLimiterFactory $marcadorPosicaoLimiter,
     ) {}
 
     #[Route('', name: 'listar', methods: ['GET'])]
@@ -52,6 +58,24 @@ final class LivroAudioController extends DefaultController
     public function detalhar(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
         $livro = $this->consultarLivrosAudioService->obterDoUsuario($uuid, $usuario);
+
+        return $this->success($this->livroAudioSerializer->normalizar($livro));
+    }
+
+    #[Route('/{uuid}/posicao', name: 'salvar_posicao', methods: ['PUT'])]
+    public function salvarPosicao(
+        string $uuid,
+        #[MapRequestPayload]
+        SalvarPosicaoLivroDTO $dto,
+        #[CurrentUser]
+        Usuario $usuario,
+    ): Response {
+        $limiter = $this->marcadorPosicaoLimiter->create(sprintf('%s_%s', $usuario->getUserIdentifier(), $uuid));
+        if (!$limiter->consume(1)->isAccepted()) {
+            return $this->tooManyRequests('Limite de atualizações de posição excedido.');
+        }
+
+        $livro = $this->salvarPosicaoLivroService->executar($uuid, $dto, $usuario);
 
         return $this->success($this->livroAudioSerializer->normalizar($livro));
     }

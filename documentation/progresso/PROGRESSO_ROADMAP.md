@@ -159,8 +159,8 @@
 | 141 | Entidade LivroAudio, enum de status e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 142 | Upload do PDF e armazenamento em volume próprio | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 143 | Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
-| 144 | Marcador de leitura — endpoint de posição e campos de retomada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
-| 145 | Frontend — estrutura da feature livros-audio (types, api, hooks) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 144 | Marcador de leitura — endpoint de posição e campos de retomada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
+| 145 | Frontend — estrutura da feature livros-audio (types, api, hooks) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 146 | Frontend — biblioteca de livros com upload, cards e progresso | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
 | 147 | Frontend — carregamento e renderização de páginas com pdf.js | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
 | 148 | Frontend — visualizador em formato de livro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
