@@ -32,8 +32,8 @@
 ## Checklist
 
 - [x] **141. Entidade LivroAudio, enum de status e migration**
-- [ ] **142. Upload do PDF e armazenamento em volume próprio**
-- [ ] **143. Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF**
+- [x] **142. Upload do PDF e armazenamento em volume próprio**
+- [x] **143. Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF**
 - [ ] **144. Marcador de leitura — endpoint de posição e campos de retomada**
 - [ ] **145. Frontend — estrutura da feature livros-audio (types, api, hooks)**
 - [ ] **146. Frontend — biblioteca de livros com upload, cards e progresso**

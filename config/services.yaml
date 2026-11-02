@@ -52,6 +52,11 @@ services:
 
     App\Interface\ArmazenamentoInterface: '@App\Infra\Storage\ArmazenamentoLocalClient'
     App\Interface\MetadataImagemInterface: '@App\Infra\Imagem\MetadataImagemClient'
+    App\Interface\ArmazenamentoLivroInterface: '@App\Infra\Storage\ArmazenamentoLivroClient'
+
+    App\Infra\Storage\ArmazenamentoLivroClient:
+        arguments:
+            $diretorioBaseLivros: '%kernel.project_dir%/var/livros'
 
     App\Service\MediaItem\ClassificarMediaItemService:
         arguments:

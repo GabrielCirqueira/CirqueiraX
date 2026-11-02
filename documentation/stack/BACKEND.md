@@ -26,12 +26,12 @@ API Symfony do CirqueiraX. Controllers ficam leves, regras de negócio vivem em 
 src/
 ├── Command/        Comandos de console
 ├── Controller/     Audio, Auth, Categoria, Common, Dashboard, GoogleFotos,
-│                   Ingestao, MediaItem, OrigemRegra, Sistema, Sync e Video
+│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Sistema, Sync e Video
 ├── DataObject/     DTOs de entrada
 ├── Entity/         Entidades Doctrine
 ├── Enum/           Enums de domínio
 ├── EventListener/  Listeners
-├── Exception/      Exceções por domínio
+├── Exception/      Exceções por domínio (LivroAudio, Storage, Video...)
 ├── Infra/          GoogleFotos, GoogleOAuth, Imagem, Storage, Syncthing e YtDlp
 ├── Interface/      Contratos
 ├── Message/        Mensagens do Messenger
@@ -40,7 +40,7 @@ src/
 ├── Security/       TokenAgenteAuthenticator
 ├── Serializer/     Contratos JSON de saída
 ├── Service/        Audio, Categoria, Dashboard, Distribuicao, GoogleFotos,
-│                   Ingestao, MediaItem, OrigemRegra, Seguranca, Usuario e Video
+│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Seguranca, Usuario e Video
 ├── Support/        Utilitários, como MetadataKeys
 ├── Schedule.php    Rotinas do Scheduler
 └── Kernel.php
@@ -106,6 +106,16 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `GET` | `/audios/{uuid}/arquivo` | Baixa o MP3 |
 | `GET` | `/audios/{uuid}/stream` | Reproduz |
 | `POST` | `/ingestao/print` | Recebe um print; exige `ROLE_AGENTE` |
+
+### Livros em áudio
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/livros-audio` | Lista os livros do usuário |
+| `POST` | `/livros-audio` | Upload de PDF de livro |
+| `GET` | `/livros-audio/{uuid}` | Detalhes do livro |
+| `DELETE` | `/livros-audio/{uuid}` | Apaga o livro e arquivos |
+| `GET` | `/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
 
 ### Categorias e regras
 

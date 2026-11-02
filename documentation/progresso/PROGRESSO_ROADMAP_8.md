@@ -19,11 +19,43 @@
   - `src/Repository/LivroAudioRepository.php`
   - `migrations/Version20261102210112.php`
 
-### ⏳ Tópico 142 — Upload do PDF e armazenamento em volume próprio
-- **Status**: Pendente
+### ✅ Tópico 142 — Upload do PDF e armazenamento em volume próprio
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criado o DTO `UploadLivroAudioDTO` como carregador de dados puro sem I/O, com validação de arquivo PDF (MIME `application/pdf`, `application/x-pdf` e tamanho máximo de 500 MB).
+  - Criada a interface `ArmazenamentoLivroInterface` e o cliente de infraestrutura `ArmazenamentoLivroClient` em `src/Infra/Storage/` para isolar todas as operações em disco (salvar PDF, contar páginas via parsing de catálogo PDF, remover diretório recursivo).
+  - Configurado o cliente de armazenamento no `config/services.yaml` com injeção do diretório `%kernel.project_dir%/var/livros`.
+  - Criada a classe `LivroAudioException` em `src/Exception/LivroAudio/` com métodos de fábrica estáticos em português.
+  - Implementado o serviço de caso de uso `UploadLivroAudioService` em `src/Service/LivroAudio/` para validar, armazenar o PDF no volume, calcular total de páginas e persistir o `LivroAudio`.
+  - Declarado o volume persistente `livros_prod` montado em `/var/www/html/var/livros` em `devops/docker-compose.prod.yaml`.
+- **Arquivos**:
+  - `src/DataObject/UploadLivroAudioDTO.php`
+  - `src/Interface/ArmazenamentoLivroInterface.php`
+  - `src/Infra/Storage/ArmazenamentoLivroClient.php`
+  - `src/Exception/LivroAudio/LivroAudioException.php`
+  - `src/Service/LivroAudio/UploadLivroAudioService.php`
+  - `config/services.yaml`
+  - `devops/docker-compose.prod.yaml`
 
-### ⏳ Tópico 143 — Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF
-- **Status**: Pendente
+### ✅ Tópico 143 — Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criado o serviço `ConsultarLivrosAudioService` em `src/Service/LivroAudio/` com métodos para listar livros do usuário, obter livro individual com checagem de propriedade e preparar o `ArquivoMidiaDTO` para servir o PDF.
+  - Criado o serviço `ApagarLivroAudioService` em `src/Service/LivroAudio/` para apagar os arquivos físicos no disco via `ArmazenamentoLivroInterface` e remover a entidade no repositório.
+  - Criado o serializador `LivroAudioSerializer` em `src/Serializer/` para formatar os retornos da API em JSON estável sem expor entidades cruas.
+  - Criado o controller `LivroAudioController` em `src/Controller/LivroAudio/` estendendo `DefaultController` com os endpoints:
+    - `GET /api/v1/livros-audio`: lista livros do usuário autenticado.
+    - `POST /api/v1/livros-audio`: upload de novo livro em PDF.
+    - `GET /api/v1/livros-audio/{uuid}`: detalhes do livro.
+    - `DELETE /api/v1/livros-audio/{uuid}`: exclusão do livro e arquivos.
+    - `GET /api/v1/livros-audio/{uuid}/pdf`: stream e exibição inline do PDF original via `BinaryFileResponse` com ETag automático.
+- **Arquivos**:
+  - `src/Service/LivroAudio/ConsultarLivrosAudioService.php`
+  - `src/Service/LivroAudio/ApagarLivroAudioService.php`
+  - `src/Serializer/LivroAudioSerializer.php`
+  - `src/Controller/LivroAudio/LivroAudioController.php`
 
 ### ⏳ Tópico 144 — Marcador de leitura — endpoint de posição e campos de retomada
 - **Status**: Pendente
