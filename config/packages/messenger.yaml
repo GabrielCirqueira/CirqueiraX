@@ -11,6 +11,15 @@ framework:
                 retry_strategy:
                     max_retries: 3
                     multiplier: 2
+            livro_audio:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: livro_audio
+                    use_notify: true
+                    check_delayed_interval: 60000
+                retry_strategy:
+                    max_retries: 3
+                    multiplier: 2
             failed: 'doctrine://default?queue_name=failed'
 
         default_bus: messenger.bus.default
@@ -20,6 +29,8 @@ framework:
 
         routing:
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
+            'App\Message\ProcessarLivroAudioMessage': livro_audio
+            'App\Message\GerarAudioBlocoMessage': livro_audio
             'App\Message\*': async
 
 

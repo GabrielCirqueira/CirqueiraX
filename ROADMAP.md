@@ -44,8 +44,8 @@
 - [x] **151. Entidade LivroAudioBloco e migration**
 - [x] **152. Pipeline de limpeza do texto e divisão em blocos por páginas**
 - [x] **153. Infra — sintetizador de voz com edge-tts e Piper**
-- [ ] **154. Fila dedicada e mensagens do livro em áudio**
-- [ ] **155. Geração do áudio dos blocos**
+- [x] **154. Fila dedicada e mensagens do livro em áudio**
+- [x] **155. Geração do áudio dos blocos**
 - [ ] **156. Stream do bloco e renovação do token de acesso**
 - [ ] **157. Retenção e controle de espaço em disco dos livros**
 - [ ] **158. Frontend — player de áudio com capítulos e configurações**

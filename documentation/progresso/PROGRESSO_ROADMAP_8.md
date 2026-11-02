@@ -241,11 +241,46 @@
   - `src/Infra/Audio/EdgeTtsClient.php`
   - `config/services.yaml`
 
-### ⏳ Tópico 154 — Fila dedicada e mensagens do livro em áudio
-- **Status**: Pendente
+### ✅ Tópico 154 — Fila dedicada e mensagens do livro em áudio
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Configurado o transporte dedicado `livro_audio` em `config/packages/messenger.yaml` com fila própria no Doctrine (`queue_name: livro_audio`) e estratégia de retentativas (`max_retries: 3`, `multiplier: 2`).
+  - Configurado o roteamento específico no Symfony Messenger para direcionar `App\Message\ProcessarLivroAudioMessage` e `App\Message\GerarAudioBlocoMessage` para o transporte `livro_audio`, isolando totalmente o processamento de livros da fila geral `async` de mídias.
+  - Adicionado o worker dedicado `[program:messenger-livro-audio]` no Supervisor de desenvolvimento (`devops/supervisord.conf`) e de produção (`devops/php/supervisord-prod.conf`) consumindo a fila `livro_audio` com limite de memória de 256MB e reinício automático.
+  - Criadas as mensagens `ProcessarLivroAudioMessage` e `GerarAudioBlocoMessage` em `src/Message/`.
+  - Criados os message handlers `ProcessarLivroAudioMessageHandler` e `GerarAudioBlocoMessageHandler` em `src/MessageHandler/` com injeção de dependência e delegação direta aos serviços responsáveis.
+- **Arquivos**:
+  - `config/packages/messenger.yaml`
+  - `devops/supervisord.conf`
+  - `devops/php/supervisord-prod.conf`
+  - `src/Message/ProcessarLivroAudioMessage.php`
+  - `src/Message/GerarAudioBlocoMessage.php`
+  - `src/MessageHandler/ProcessarLivroAudioMessageHandler.php`
+  - `src/MessageHandler/GerarAudioBlocoMessageHandler.php`
 
-### ⏳ Tópico 155 — Geração do áudio dos blocos
-- **Status**: Pendente
+### ✅ Tópico 155 — Geração do áudio dos blocos
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criado o serviço `GerarAudioBlocoService` em `src/Service/LivroAudio/`:
+    - Busca e validação do bloco por UUID com idempotência (ignora se já estiver `pronto`).
+    - Transição de status do bloco para `gerando` e do livro para `gerando_audio`.
+    - Resolução e criação do diretório persistente de áudios em `var/livros/{uuid}/blocos/`.
+    - Execução da síntese de áudio através de `SintetizadorVozInterface` gerando o arquivo MP3 sequencial (`bloco_{numero}.mp3`).
+    - Gravação da duração exata em segundos e do tamanho em bytes no `LivroAudioBloco`.
+    - Atualização do status geral do livro: concluído (`pronto`) quando todos os blocos estiverem sintetizados, ou `parcial` caso haja falhas pontuais permitindo retentativa.
+    - Registro de falha pontual no bloco (`registrarFalha`) em caso de exceção, relançando para permitir retentativas automáticas do Messenger.
+  - Criado o serviço `ProcessarLivroAudioService` em `src/Service/LivroAudio/`:
+    - Orquestra a extração do PDF e divisão inicial em blocos caso o livro ainda não possua blocos cadastrados via `DividirLivroEmBlocosService`.
+    - Suporte a retentativas recuperando blocos não prontos com `listarNaoProntosDoLivro`.
+    - Despacho assíncrono de cada `GerarAudioBlocoMessage` para a fila dedicada `livro_audio`.
+  - Atualizado `UploadLivroAudioService` para disparar assincronamente `ProcessarLivroAudioMessage` logo após o upload do PDF, tornando o fluxo de processamento de áudio 100% automático e não-bloqueante.
+- **Arquivos**:
+  - `src/Service/LivroAudio/GerarAudioBlocoService.php`
+  - `src/Service/LivroAudio/ProcessarLivroAudioService.php`
+  - `src/Service/LivroAudio/UploadLivroAudioService.php`
+  - `src/Repository/LivroAudioBlocoRepository.php`
 
 ### ⏳ Tópico 156 — Stream do bloco e renovação do token de acesso
 - **Status**: Pendente

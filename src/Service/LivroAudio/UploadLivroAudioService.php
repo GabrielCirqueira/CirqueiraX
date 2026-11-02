@@ -9,7 +9,9 @@ use App\Entity\LivroAudio;
 use App\Entity\Usuario;
 use App\Exception\LivroAudio\LivroAudioException;
 use App\Interface\ArmazenamentoLivroInterface;
+use App\Message\ProcessarLivroAudioMessage;
 use App\Repository\LivroAudioRepository;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final readonly class UploadLivroAudioService
@@ -19,6 +21,7 @@ final readonly class UploadLivroAudioService
     public function __construct(
         private LivroAudioRepository $livroAudioRepository,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
+        private MessageBusInterface $messageBus,
         private ValidatorInterface $validator,
     ) {}
 
@@ -52,6 +55,8 @@ final readonly class UploadLivroAudioService
         $livro->definirTotalPaginas($totalPaginas);
 
         $this->livroAudioRepository->salvar($livro);
+
+        $this->messageBus->dispatch(new ProcessarLivroAudioMessage($livro->uuidTexto()));
 
         return $livro;
     }

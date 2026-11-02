@@ -91,4 +91,22 @@ class LivroAudioBlocoRepository extends ServiceEntityRepository
 
         return $blocos;
     }
+
+    /**
+     * @return list<LivroAudioBloco>
+     */
+    public function listarNaoProntosDoLivro(LivroAudio $livro): array
+    {
+        /** @var list<LivroAudioBloco> $blocos */
+        $blocos = $this->createQueryBuilder('b')
+            ->andWhere('b.livro = :livro')
+            ->andWhere('b.status != :statusPronto')
+            ->setParameter('livro', $livro)
+            ->setParameter('statusPronto', StatusLivroAudioBloco::PRONTO)
+            ->orderBy('b.numeroBloco', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $blocos;
+    }
 }
