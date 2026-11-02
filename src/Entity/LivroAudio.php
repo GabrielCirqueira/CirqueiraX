@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Enum\StatusLivroAudio;
 use App\Repository\LivroAudioRepository;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
@@ -61,6 +63,11 @@ class LivroAudio
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $atualizadoEm;
 
+    /** @var Collection<int, LivroAudioBloco> */
+    #[ORM\OneToMany(mappedBy: 'livro', targetEntity: LivroAudioBloco::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['numeroBloco' => 'ASC'])]
+    private Collection $blocos;
+
     public function __construct(
         Usuario $usuario,
         string $titulo,
@@ -75,6 +82,7 @@ class LivroAudio
         $this->totalPaginas = max(0, $totalPaginas);
         $this->tamanhoBytes = $tamanhoBytes;
         $this->status = StatusLivroAudio::ENVIADO;
+        $this->blocos = new ArrayCollection();
         $this->criadoEm = new DateTimeImmutable();
         $this->atualizadoEm = $this->criadoEm;
     }
@@ -276,5 +284,22 @@ class LivroAudio
     public function atualizadoEm(): DateTimeImmutable
     {
         return $this->atualizadoEm;
+    }
+
+    /**
+     * @return Collection<int, LivroAudioBloco>
+     */
+    public function blocos(): Collection
+    {
+        return $this->blocos;
+    }
+
+    public function adicionarBloco(LivroAudioBloco $bloco): self
+    {
+        if (!$this->blocos->contains($bloco)) {
+            $this->blocos->add($bloco);
+        }
+
+        return $this;
     }
 }

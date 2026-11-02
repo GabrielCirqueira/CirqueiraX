@@ -40,8 +40,8 @@
 - [x] **147. Frontend — carregamento e renderização de páginas com pdf.js**
 - [x] **148. Frontend — visualizador em formato de livro**
 - [x] **149. Frontend — barra inferior do livro e abertura na página salva**
-- [ ] **150. Infra — extração de texto do PDF por página**
-- [ ] **151. Entidade LivroAudioBloco e migration**
+- [x] **150. Infra — extração de texto do PDF por página**
+- [x] **151. Entidade LivroAudioBloco e migration**
 - [ ] **152. Pipeline de limpeza do texto e divisão em blocos por páginas**
 - [ ] **153. Infra — sintetizador de voz com edge-tts e Piper**
 - [ ] **154. Fila dedicada e mensagens do livro em áudio**

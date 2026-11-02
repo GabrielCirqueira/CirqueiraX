@@ -161,11 +161,39 @@
   - `web/features/livros-audio/LeitorLivroAudio.tsx`
   - `web/features/livros-audio/index.ts`
 
-### ⏳ Tópico 150 — Infra — extração de texto do PDF por página
-- **Status**: Pendente
+### ✅ Tópico 150 — Infra — extração de texto do PDF por página
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Instalado o utilitário nativo de alta performance `poppler-utils` (`pdftotext`) nas imagens Docker (`devops/php/Dockerfile` e `devops/php/Dockerfile.prod`).
+  - Criada a interface `ExtratorTextoPdfInterface` em `src/Interface/` com os métodos `extrairTextoDaPagina(string $caminhoPdf, int $numeroPagina): string` e `extrairTextoDeIntervalo(string $caminhoPdf, int $paginaInicio, int $paginaFim): array`.
+  - Criada a classe de exceção personalizada `ExtratorPdfException` em `src/Exception/Pdf/` com métodos estáticos descritivos em português.
+  - Implementado o cliente de infraestrutura `ExtratorTextoPdfClient` em `src/Infra/Pdf/` utilizando `Symfony\Component\Process\Process`, timeout configurável em constante (`30.0s`), codificação `UTF-8` e validações de integridade de arquivo e página.
+  - Registrado o serviço e a interface no container DI em `config/services.yaml`.
+- **Arquivos**:
+  - `devops/php/Dockerfile`
+  - `devops/php/Dockerfile.prod`
+  - `src/Interface/ExtratorTextoPdfInterface.php`
+  - `src/Exception/Pdf/ExtratorPdfException.php`
+  - `src/Infra/Pdf/ExtratorTextoPdfClient.php`
+  - `config/services.yaml`
 
-### ⏳ Tópico 151 — Entidade LivroAudioBloco e migration
-- **Status**: Pendente
+### ✅ Tópico 151 — Entidade LivroAudioBloco e migration
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criado o enum `StatusLivroAudioBloco` com os estados `pendente`, `gerando`, `pronto` e `erro`, incluindo métodos descritivos e predicados booleanos `is*`.
+  - Criada a entidade `LivroAudioBloco` com UUID v7 como chave primária, relacionamento ManyToOne com `LivroAudio` (com `onDelete: CASCADE`), campos `numeroBloco`, `paginaInicio`, `paginaFim`, `texto`, `caminhoAudio`, `duracaoSegundos`, `tamanhoBytes`, `status`, `erroMotivo`, `criadoEm` e `atualizadoEm`.
+  - Implementados métodos de intenção de domínio (`iniciarGeracao`, `concluirGeracao`, `registrarFalha`) e predicados `is*`.
+  - Atualizada a entidade `LivroAudio` com relacionamento OneToMany inverso para `LivroAudioBloco` (`$blocos`, `Collection`).
+  - Criado o repositório `LivroAudioBlocoRepository` com métodos para persistência, busca por número de bloco, listagem por livro e busca de blocos pendentes para a fila de geração.
+  - Gerada e aplicada a migration `Version20261102215610.php` via `make doctrine-diff` e `make migrate`, com validação do schema 100% sincronizado via `make doctrine-validate`.
+- **Arquivos**:
+  - `src/Enum/StatusLivroAudioBloco.php`
+  - `src/Entity/LivroAudioBloco.php`
+  - `src/Entity/LivroAudio.php`
+  - `src/Repository/LivroAudioBlocoRepository.php`
+  - `migrations/Version20261102215610.php`
 
 ### ⏳ Tópico 152 — Pipeline de limpeza do texto e divisão em blocos por páginas
 - **Status**: Pendente

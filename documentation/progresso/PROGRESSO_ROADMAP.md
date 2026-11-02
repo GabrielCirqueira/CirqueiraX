@@ -165,8 +165,8 @@
 | 147 | Frontend — carregamento e renderização de páginas com pdf.js | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 148 | Frontend — visualizador em formato de livro | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 149 | Frontend — barra inferior do livro e abertura na página salva | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
-| 150 | Infra — extração de texto do PDF por página | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
-| 151 | Entidade LivroAudioBloco e migration | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 150 | Infra — extração de texto do PDF por página | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
+| 151 | Entidade LivroAudioBloco e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 152 | Pipeline de limpeza do texto e divisão em blocos por páginas | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
 | 153 | Infra — sintetizador de voz com edge-tts e Piper | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
 | 154 | Fila dedicada e mensagens do livro em áudio | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |

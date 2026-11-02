@@ -53,6 +53,7 @@ services:
     App\Interface\ArmazenamentoInterface: '@App\Infra\Storage\ArmazenamentoLocalClient'
     App\Interface\MetadataImagemInterface: '@App\Infra\Imagem\MetadataImagemClient'
     App\Interface\ArmazenamentoLivroInterface: '@App\Infra\Storage\ArmazenamentoLivroClient'
+    App\Interface\ExtratorTextoPdfInterface: '@App\Infra\Pdf\ExtratorTextoPdfClient'
 
     App\Infra\Storage\ArmazenamentoLivroClient:
         arguments:
