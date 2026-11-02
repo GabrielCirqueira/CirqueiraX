@@ -54,6 +54,7 @@ services:
     App\Interface\MetadataImagemInterface: '@App\Infra\Imagem\MetadataImagemClient'
     App\Interface\ArmazenamentoLivroInterface: '@App\Infra\Storage\ArmazenamentoLivroClient'
     App\Interface\ExtratorTextoPdfInterface: '@App\Infra\Pdf\ExtratorTextoPdfClient'
+    App\Interface\SintetizadorVozInterface: '@App\Infra\Audio\EdgeTtsClient'
 
     App\Infra\Storage\ArmazenamentoLivroClient:
         arguments:
