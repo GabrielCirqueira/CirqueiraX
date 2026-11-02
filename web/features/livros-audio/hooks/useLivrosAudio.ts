@@ -4,6 +4,7 @@ import axios from 'axios'
 import {
   apagarLivroAudio,
   fazerUploadLivroAudio,
+  listarBlocosLivroAudio,
   listarLivrosAudio,
   obterLivroAudio,
   salvarPosicaoLivroAudio,
@@ -36,6 +37,16 @@ export function useLivroAudio(uuid: string) {
     queryFn: () => obterLivroAudio(uuid),
     enabled: Boolean(uuid),
     refetchInterval: (query) => (query.state.data?.isEmProcessamento ? 3000 : false),
+  })
+}
+
+export function useBlocosLivroAudio(uuid: string) {
+  return useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, uuid, 'blocos'],
+    queryFn: () => listarBlocosLivroAudio(uuid),
+    enabled: Boolean(uuid),
+    refetchInterval: (query) =>
+      query.state.data?.some((b) => b.isGerando || b.isPendente) ? 3000 : false,
   })
 }
 

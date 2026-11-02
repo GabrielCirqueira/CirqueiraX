@@ -3,8 +3,10 @@ import type { RespostaApi } from '@/shared/types/api'
 import { z } from 'zod'
 import {
   type LivroAudio,
+  type LivroAudioBloco,
   type SalvarPosicaoLivro,
   type UploadLivroAudioPayload,
+  livroAudioBlocoSchema,
   livroAudioSchema,
   salvarPosicaoLivroSchema,
 } from './types'
@@ -24,6 +26,11 @@ export async function listarLivrosAudio(): Promise<LivroAudio[]> {
 export async function obterLivroAudio(uuid: string): Promise<LivroAudio> {
   const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}`)
   return livroAudioSchema.parse(data.data)
+}
+
+export async function listarBlocosLivroAudio(uuid: string): Promise<LivroAudioBloco[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/blocos`)
+  return z.array(livroAudioBlocoSchema).parse(data.data)
 }
 
 export async function fazerUploadLivroAudio(payload: UploadLivroAudioPayload): Promise<LivroAudio> {

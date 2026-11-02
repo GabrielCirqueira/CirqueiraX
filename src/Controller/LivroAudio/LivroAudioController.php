@@ -9,6 +9,7 @@ use App\DataObject\ArquivoMidiaDTO;
 use App\DataObject\SalvarPosicaoLivroDTO;
 use App\DataObject\UploadLivroAudioDTO;
 use App\Entity\Usuario;
+use App\Serializer\LivroAudioBlocoSerializer;
 use App\Serializer\LivroAudioSerializer;
 use App\Service\LivroAudio\ApagarLivroAudioService;
 use App\Service\LivroAudio\ConsultarLivrosAudioService;
@@ -34,6 +35,7 @@ final class LivroAudioController extends DefaultController
         private readonly ApagarLivroAudioService $apagarLivroAudioService,
         private readonly SalvarPosicaoLivroService $salvarPosicaoLivroService,
         private readonly LivroAudioSerializer $livroAudioSerializer,
+        private readonly LivroAudioBlocoSerializer $livroAudioBlocoSerializer,
         private readonly RateLimiterFactory $marcadorPosicaoLimiter,
     ) {}
 
@@ -60,6 +62,14 @@ final class LivroAudioController extends DefaultController
         $livro = $this->consultarLivrosAudioService->obterDoUsuario($uuid, $usuario);
 
         return $this->success($this->livroAudioSerializer->normalizar($livro));
+    }
+
+    #[Route('/{uuid}/blocos', name: 'listar_blocos', methods: ['GET'])]
+    public function listarBlocos(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        $blocos = $this->consultarLivrosAudioService->listarBlocosDoLivro($uuid, $usuario);
+
+        return $this->success($this->livroAudioBlocoSerializer->normalizarLista($blocos));
     }
 
     #[Route('/{uuid}/posicao', name: 'salvar_posicao', methods: ['PUT'])]

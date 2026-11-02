@@ -1,15 +1,20 @@
 import { useSEO } from '@/shared/hooks'
 import { Button, Center, Flex, Spinner, Text, VStack } from '@chakra-ui/react'
 import { ArrowLeft, BookOpen, TriangleAlert } from 'lucide-react'
-import { memo, useRef } from 'react'
+import { memo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { obterUrlPdfLivro } from './api'
 import { BarraInferiorLeitor } from './components/BarraInferiorLeitor'
 import { BarraSuperiorLeitor } from './components/BarraSuperiorLeitor'
+import { PlayerAudioLivro } from './components/PlayerAudioLivro'
 import { VisualizadorLivro } from './components/VisualizadorLivro'
 import { useDocumentoPdf } from './hooks/useDocumentoPdf'
 import { useLeitorLivro } from './hooks/useLeitorLivro'
-import { useLivroAudio, useSalvarPosicaoLivroAudio } from './hooks/useLivrosAudio'
+import {
+  useBlocosLivroAudio,
+  useLivroAudio,
+  useSalvarPosicaoLivroAudio,
+} from './hooks/useLivrosAudio'
 import type { LivroAudio } from './types'
 import type { PDFDocumentProxy } from './utils/pdf'
 
@@ -21,15 +26,17 @@ interface ConteudoLeitorProps {
 const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: ConteudoLeitorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const salvarPosicaoMutation = useSalvarPosicaoLivroAudio()
+  const { data: blocos = [] } = useBlocosLivroAudio(livro.uuid)
+  const [acompanharAudio, setAcompanharAudio] = useState(true)
   const totalPaginas = documento.numPages || livro.totalPaginas || 1
 
-  function salvarPosicao(pagina: number) {
+  function salvarPosicao(pagina: number, bloco?: number | null, segundos?: number) {
     salvarPosicaoMutation.mutate({
       uuid: livro.uuid,
       posicao: {
         paginaAtual: pagina,
-        blocoAtual: null,
-        segundosNoBloco: 0,
+        blocoAtual: bloco !== undefined ? bloco : livro.blocoAtual,
+        segundosNoBloco: segundos ?? 0,
       },
     })
   }
@@ -88,6 +95,18 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         onAvancar={avancarPagina}
         onVoltar={voltarPagina}
       />
+
+      {blocos.length > 0 && (
+        <PlayerAudioLivro
+          livro={livro}
+          blocos={blocos}
+          paginaAtualLeitor={paginaAtual}
+          acompanharAudio={acompanharAudio}
+          onAlternarAcompanharAudio={() => setAcompanharAudio((prev) => !prev)}
+          onMudarPaginaLeitor={mudarPagina}
+          onSalvarPosicao={salvarPosicao}
+        />
+      )}
 
       <BarraInferiorLeitor
         paginaAtual={paginaAtual}

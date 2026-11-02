@@ -6,6 +6,7 @@ namespace App\Service\LivroAudio;
 
 use App\DataObject\ArquivoMidiaDTO;
 use App\Entity\LivroAudio;
+use App\Entity\LivroAudioBloco;
 use App\Entity\Usuario;
 use App\Exception\LivroAudio\LivroAudioException;
 use App\Interface\ArmazenamentoLivroInterface;
@@ -81,5 +82,15 @@ final readonly class ConsultarLivrosAudioService
             nomeArquivo: $nomeArquivo,
             mimeType: self::MIME_TYPE_AUDIO,
         );
+    }
+
+    /**
+     * @return list<LivroAudioBloco>
+     */
+    public function listarBlocosDoLivro(string $uuid, Usuario $usuario): array
+    {
+        $livro = $this->obterDoUsuario($uuid, $usuario);
+
+        return $this->livroAudioBlocoRepository->listarPorLivro($livro);
     }
 }

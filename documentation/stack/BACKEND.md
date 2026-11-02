@@ -117,6 +117,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `PUT` | `/livros-audio/{uuid}/posicao` | Salva o marcador de leitura (página/bloco/segundos) |
 | `DELETE` | `/livros-audio/{uuid}` | Apaga o livro e arquivos |
 | `GET` | `/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
+| `GET` | `/livros-audio/{uuid}/blocos` | Lista os blocos e capítulos de áudio gerados |
 | `GET` | `/livros-audio/{uuid}/blocos/{numeroBloco}/stream` | Reproduz o bloco de áudio (suporta Range) |
 
 ### Categorias e regras

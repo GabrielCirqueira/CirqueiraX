@@ -40,8 +40,30 @@ export const salvarPosicaoLivroSchema = z.object({
   segundosNoBloco: z.number().int().min(0).default(0),
 })
 
+export const statusLivroAudioBlocoSchema = z.enum(['pendente', 'gerando', 'pronto', 'erro'])
+
+export const livroAudioBlocoSchema = z.object({
+  uuid: z.string().uuid(),
+  numeroBloco: z.number().int(),
+  paginaInicio: z.number().int(),
+  paginaFim: z.number().int(),
+  duracaoSegundos: z.number().int().nullable(),
+  tamanhoBytes: z.number().int().nullable(),
+  status: statusLivroAudioBlocoSchema,
+  statusDescricao: z.string(),
+  isPronto: z.boolean(),
+  isGerando: z.boolean(),
+  isPendente: z.boolean(),
+  isErro: z.boolean(),
+  erroMotivo: z.string().nullable(),
+  criadoEm: z.string(),
+  atualizadoEm: z.string(),
+})
+
 export type StatusLivroAudio = z.infer<typeof statusLivroAudioSchema>
 export type LivroAudio = z.infer<typeof livroAudioSchema>
+export type StatusLivroAudioBloco = z.infer<typeof statusLivroAudioBlocoSchema>
+export type LivroAudioBloco = z.infer<typeof livroAudioBlocoSchema>
 export type SalvarPosicaoLivro = z.infer<typeof salvarPosicaoLivroSchema>
 
 export interface UploadLivroAudioPayload {

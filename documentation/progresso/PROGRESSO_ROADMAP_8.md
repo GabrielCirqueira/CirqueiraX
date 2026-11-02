@@ -316,11 +316,47 @@
   - `web/features/livros-audio/components/CardLivroAudio.tsx`
   - `documentation/regras/RETENCAO_E_LIMPEZA.md`
 
-### ⏳ Tópico 158 — Frontend — player de áudio com capítulos e configurações
-- **Status**: Pendente
+### ✅ Tópico 158 — Frontend — player de áudio com capítulos e configurações
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criado o serializer `LivroAudioBlocoSerializer` em `src/Serializer/` normalizando os blocos com paginação e status.
+  - Criado o endpoint `GET /api/v1/livros-audio/{uuid}/blocos` no `LivroAudioController` e método `listarBlocosDoLivro` em `ConsultarLivrosAudioService`.
+  - Definidos schemas Zod e types TypeScript para `LivroAudioBloco` e `StatusLivroAudioBloco` em `web/features/livros-audio/types.ts`.
+  - Implementada a função `listarBlocosLivroAudio` em `web/features/livros-audio/api.ts` e o hook TanStack Query `useBlocosLivroAudio` com polling inteligente quando houver blocos sendo gerados.
+  - Criado o componente `PlayerAudioLivro` em `web/features/livros-audio/components/PlayerAudioLivro.tsx`:
+    - Controles de reprodução: Play/Pause, avançar 15s, retroceder 15s, próximo bloco e bloco anterior.
+    - Barra de progresso interativa com busca (seek) e contadores de tempo decorrido e duração total.
+    - Seletor de velocidade de reprodução rápida (0.75x, 1x, 1.25x, 1.5x, 2x) aplicando diretamente no `playbackRate`.
+    - Gaveta de seleção de capítulos/blocos com indicador de intervalo de páginas, duração e status.
+    - Integração com a `Media Session API` do navegador (`navigator.mediaSession`) para exibição de metadados e controle de áudio na tela de bloqueio e central de notificações de celulares e desktops.
+    - Retomada exata do bloco e segundo salvos e persistência periódica da posição (`timeupdate`, `pause`, `pagehide`).
+- **Arquivos**:
+  - `src/Serializer/LivroAudioBlocoSerializer.php`
+  - `src/Service/LivroAudio/ConsultarLivrosAudioService.php`
+  - `src/Controller/LivroAudio/LivroAudioController.php`
+  - `web/features/livros-audio/types.ts`
+  - `web/features/livros-audio/api.ts`
+  - `web/features/livros-audio/hooks/useLivrosAudio.ts`
+  - `web/features/livros-audio/components/PlayerAudioLivro.tsx`
 
-### ⏳ Tópico 159 — Sincronização entre páginas do livro e o áudio
-- **Status**: Pendente
+### ✅ Tópico 159 — Sincronização entre páginas do livro e o áudio
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criados utilitários de sincronização bidirecional em `web/features/livros-audio/utils/sincronizacao.ts`:
+    - `encontrarBlocoPorPagina`: localiza o bloco de áudio correspondente a uma página do PDF.
+    - `calcularPaginaPorTempoBloco`: interpola o tempo decorrido dentro do bloco para determinar qual página está sendo lida.
+    - `formatarTempoAudio`: formatação de tempo em `mm:ss` ou `hh:mm:ss`.
+  - Implementado o interruptor "Acompanhar áudio" / "Folhear livre" no `PlayerAudioLivro`:
+    - **Acompanhar áudio ativo (padrão):** a página do visualizador vira automaticamente conforme o áudio avança no bloco; ao virar manualmente de página no visualizador, o áudio salta para o bloco da página aberta.
+    - **Folhear livre:** o usuário pode folhear o PDF para qualquer página sem interromper nem alterar a reprodução do áudio que está tocando.
+  - Integrado o `PlayerAudioLivro` com o `VisualizadorLivro` e `BarraInferiorLeitor` dentro de `LeitorLivroAudio.tsx`.
+- **Arquivos**:
+  - `web/features/livros-audio/utils/sincronizacao.ts`
+  - `web/features/livros-audio/components/PlayerAudioLivro.tsx`
+  - `web/features/livros-audio/LeitorLivroAudio.tsx`
+  - `web/features/livros-audio/index.ts`
 
 ### ⏳ Tópico 160 — Teste end-to-end do fluxo completo e documentação atualizada
 - **Status**: Pendente
