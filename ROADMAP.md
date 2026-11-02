@@ -36,8 +36,8 @@
 - [x] **143. Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF**
 - [x] **144. Marcador de leitura — endpoint de posição e campos de retomada**
 - [x] **145. Frontend — estrutura da feature livros-audio (types, api, hooks)**
-- [ ] **146. Frontend — biblioteca de livros com upload, cards e progresso**
-- [ ] **147. Frontend — carregamento e renderização de páginas com pdf.js**
+- [x] **146. Frontend — biblioteca de livros com upload, cards e progresso**
+- [x] **147. Frontend — carregamento e renderização de páginas com pdf.js**
 - [ ] **148. Frontend — visualizador em formato de livro**
 - [ ] **149. Frontend — barra inferior do livro e abertura na página salva**
 - [ ] **150. Infra — extração de texto do PDF por página**

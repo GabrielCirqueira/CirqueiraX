@@ -93,11 +93,44 @@
   - `web/features/livros-audio/hooks/useLivrosAudio.ts`
   - `web/features/livros-audio/index.ts`
 
-### ⏳ Tópico 146 — Frontend — biblioteca de livros com upload, cards e progresso
-- **Status**: Pendente
+### ✅ Tópico 146 — Frontend — biblioteca de livros com upload, cards e progresso
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Criados utilitários de apresentação em `web/features/livros-audio/utils/livros.ts` (`calcularProgressoLeitura`, `obterAparenciaStatusLivro`, `formatarTamanhoLivro`, `formatarDataRelativa`, `contarLivrosPorStatus`).
+  - Implementado o componente `ModalUploadLivro.tsx` com suporte a drag-and-drop de arquivo PDF, campo de título opcional, validação de tipos e integração com `useUploadLivroAudio`.
+  - Implementado o componente `CardLivroAudio.tsx` com barra de progresso de leitura Chakra UI, badges de status, contagem de páginas, atalho para abrir o leitor (`/livros-audio/{uuid}`), download do PDF original e exclusão com confirmação.
+  - Implementado o componente `GradeLivrosAudio.tsx` com estado de carregamento skeleton, visual de lista vazia amigável e grid responsivo.
+  - Implementado o componente `CabecalhoLivrosAudio.tsx` com título, contadores de status agregados e botões de ação ("Atualizar" e "Novo Livro").
+  - Implementada a página principal `LivrosAudio.tsx` com metadados `useSEO` e rota protegida `/livros-audio` registrada em `web/App.tsx`.
+  - Adicionado item de navegação `Livros em Áudio` na `Sidebar.tsx` e título de rota no `Header.tsx`.
+- **Arquivos**:
+  - `web/features/livros-audio/utils/livros.ts`
+  - `web/features/livros-audio/components/ModalUploadLivro.tsx`
+  - `web/features/livros-audio/components/CardLivroAudio.tsx`
+  - `web/features/livros-audio/components/GradeLivrosAudio.tsx`
+  - `web/features/livros-audio/components/CabecalhoLivrosAudio.tsx`
+  - `web/features/livros-audio/LivrosAudio.tsx`
+  - `web/layouts/Sidebar.tsx`
+  - `web/layouts/Header.tsx`
+  - `web/App.tsx`
 
-### ⏳ Tópico 147 — Frontend — carregamento e renderização de páginas com pdf.js
-- **Status**: Pendente
+### ✅ Tópico 147 — Frontend — carregamento e renderização de páginas com pdf.js
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Instalado o pacote `pdfjs-dist` e configurado o carregamento do worker via Vite URL (`pdfjs-dist/build/pdf.worker.min.mjs?url`).
+  - Criado o utilitário `web/features/livros-audio/utils/pdf.ts` com funções `carregarDocumentoPdf` e `renderizarPaginaEmCanvas` (suporte a telas retina via `devicePixelRatio` e controle de cancelamento com `renderTask.cancel()`).
+  - Criado o hook `useDocumentoPdf.ts` com cache TanStack Query em memória (`staleTime: Infinity`).
+  - Implementado o componente `PaginaPdf.tsx` para renderização reativa da página em `<canvas>` sem `useEffect`, utilizando ref callback com cancelamento automático de tarefas concorrentes e estados de loading/error.
+  - Re-exportado o módulo completo em `web/features/livros-audio/index.ts`.
+  - Validado com Biome (`npx biome check`) e compilado com sucesso no build do Vite (`npm run build`).
+- **Arquivos**:
+  - `package.json`
+  - `web/features/livros-audio/utils/pdf.ts`
+  - `web/features/livros-audio/hooks/useDocumentoPdf.ts`
+  - `web/features/livros-audio/components/PaginaPdf.tsx`
+  - `web/features/livros-audio/index.ts`
 
 ### ⏳ Tópico 148 — Frontend — visualizador em formato de livro
 - **Status**: Pendente

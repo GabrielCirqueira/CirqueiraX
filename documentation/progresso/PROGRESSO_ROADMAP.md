@@ -161,8 +161,8 @@
 | 143 | Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 144 | Marcador de leitura — endpoint de posição e campos de retomada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 145 | Frontend — estrutura da feature livros-audio (types, api, hooks) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
-| 146 | Frontend — biblioteca de livros com upload, cards e progresso | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
-| 147 | Frontend — carregamento e renderização de páginas com pdf.js | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 146 | Frontend — biblioteca de livros com upload, cards e progresso | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
+| 147 | Frontend — carregamento e renderização de páginas com pdf.js | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 148 | Frontend — visualizador em formato de livro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
 | 149 | Frontend — barra inferior do livro e abertura na página salva | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
 | 150 | Infra — extração de texto do PDF por página | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
