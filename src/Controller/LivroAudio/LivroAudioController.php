@@ -96,6 +96,18 @@ final class LivroAudioController extends DefaultController
         return $this->responderArquivo($arquivo, ResponseHeaderBag::DISPOSITION_INLINE);
     }
 
+    #[Route('/{uuid}/blocos/{numeroBloco}/stream', name: 'stream_bloco', methods: ['GET'])]
+    public function streamBloco(
+        string $uuid,
+        int $numeroBloco,
+        #[CurrentUser]
+        Usuario $usuario,
+    ): Response {
+        $arquivo = $this->consultarLivrosAudioService->obterArquivoBloco($uuid, $numeroBloco, $usuario);
+
+        return $this->responderArquivo($arquivo, ResponseHeaderBag::DISPOSITION_INLINE);
+    }
+
     private function responderArquivo(ArquivoMidiaDTO $arquivo, string $disposicao): Response
     {
         $resposta = new BinaryFileResponse($arquivo->caminhoFisico());

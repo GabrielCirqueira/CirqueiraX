@@ -282,11 +282,39 @@
   - `src/Service/LivroAudio/UploadLivroAudioService.php`
   - `src/Repository/LivroAudioBlocoRepository.php`
 
-### ⏳ Tópico 156 — Stream do bloco e renovação do token de acesso
-- **Status**: Pendente
+### ✅ Tópico 156 — Stream do bloco e renovação do token de acesso
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Implementado o endpoint `GET /api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/stream` no `LivroAudioController` servindo áudios MP3 sequenciais com `BinaryFileResponse`, suporte completo a cabeçalho `Range` (HTTP 206 Partial Content), ETag e Content-Type `audio/mpeg`.
+  - Criado o método `obterArquivoBloco` em `ConsultarLivrosAudioService` validando permissão do usuário, existência do bloco e disponibilidade física do arquivo em disco.
+  - Adicionadas as exceções de domínio `blocoNaoEncontrado` e `audioBlocoNaoDisponivel` em `LivroAudioException`.
+  - Confirmado o suporte a autenticação por query parameter `?token=...` configurado no `LexikJWTAuthenticationBundle` para tags nativas `<audio>`.
+  - Criada a função auxiliar `obterUrlStreamBloco` em `web/features/livros-audio/api.ts` permitindo obter a URL do bloco com token autenticado e suporte a sobreposição/renovação de token na transição entre blocos e no tratamento de 401.
+- **Arquivos**:
+  - `src/Controller/LivroAudio/LivroAudioController.php`
+  - `src/Service/LivroAudio/ConsultarLivrosAudioService.php`
+  - `src/Exception/LivroAudio/LivroAudioException.php`
+  - `web/features/livros-audio/api.ts`
 
-### ⏳ Tópico 157 — Retenção e controle de espaço em disco dos livros
-- **Status**: Pendente
+### ✅ Tópico 157 — Retenção e controle de espaço em disco dos livros
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **O que foi feito**:
+  - Definida e formalizada a política de ciclo de vida e retenção: livros em áudio possuem **retenção permanente**, isentos da expiração automática de 7 dias aplicada a downloads efêmeros de música/áudios.
+  - Garantido que a remoção de um livro via `DELETE /api/v1/livros-audio/{uuid}` (`ApagarLivroAudioService` e `ArmazenamentoLivroClient::removerLivro`) expurga recursivamente todo o diretório do livro em `var/livros/{uuid}/`, incluindo o PDF original e todos os arquivos MP3 de blocos gerados, além da cascata relacional no banco (`onDelete: CASCADE`).
+  - Adicionado o método `tamanhoTotalBytes` na entidade `LivroAudio` somando os bytes do PDF e de todos os blocos gerados.
+  - Serializado o campo `tamanhoTotalBytes` em `LivroAudioSerializer` e adicionado aos tipos Zod/TypeScript em `web/features/livros-audio/types.ts`.
+  - Atualizado o card de exibição da biblioteca (`CardLivroAudio.tsx`) para apresentar o tamanho total consumido em disco pelo livro.
+  - Atualizado o `HealthController` (`/api/v1/health`) para monitorar o espaço livre específico do volume persistente de livros (`disk_livros`, apontando para `var/livros`), com status crítico caso o espaço livre seja inferior a 100 MB.
+  - Criada a documentação arquitetural em `documentation/regras/RETENCAO_E_LIMPEZA.md`.
+- **Arquivos**:
+  - `src/Entity/LivroAudio.php`
+  - `src/Serializer/LivroAudioSerializer.php`
+  - `src/Controller/Sistema/HealthController.php`
+  - `web/features/livros-audio/types.ts`
+  - `web/features/livros-audio/components/CardLivroAudio.tsx`
+  - `documentation/regras/RETENCAO_E_LIMPEZA.md`
 
 ### ⏳ Tópico 158 — Frontend — player de áudio com capítulos e configurações
 - **Status**: Pendente

@@ -17,6 +17,7 @@ export const livroAudioSchema = z.object({
   blocoAtual: z.number().int().nullable(),
   segundosNoBloco: z.number().int(),
   tamanhoBytes: z.number().int(),
+  tamanhoTotalBytes: z.number().int().optional(),
   status: statusLivroAudioSchema,
   statusDescricao: z.string(),
   erroMotivo: z.string().nullable(),

@@ -230,6 +230,16 @@ class LivroAudio
         return $this->tamanhoBytes;
     }
 
+    public function tamanhoTotalBytes(): int
+    {
+        $total = $this->tamanhoBytes ?? 0;
+        foreach ($this->blocos as $bloco) {
+            $total += $bloco->tamanhoBytes() ?? 0;
+        }
+
+        return $total;
+    }
+
     public function atualizarPosicao(int $paginaAtual, ?int $blocoAtual = null, int $segundosNoBloco = 0): self
     {
         $this->paginaAtual = max(1, $paginaAtual);

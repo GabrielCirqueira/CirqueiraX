@@ -93,7 +93,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
                 {livro.titulo}
               </Text>
               <Text fontSize="xs" color="cirqueira.grey.500">
-                {formatarTamanhoLivro(livro.tamanhoBytes)}
+                {formatarTamanhoLivro(livro.tamanhoTotalBytes ?? livro.tamanhoBytes)}
               </Text>
             </VStack>
           </HStack>

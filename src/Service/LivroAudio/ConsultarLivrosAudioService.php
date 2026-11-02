@@ -9,15 +9,18 @@ use App\Entity\LivroAudio;
 use App\Entity\Usuario;
 use App\Exception\LivroAudio\LivroAudioException;
 use App\Interface\ArmazenamentoLivroInterface;
+use App\Repository\LivroAudioBlocoRepository;
 use App\Repository\LivroAudioRepository;
 
 final readonly class ConsultarLivrosAudioService
 {
     private const string EXTENSAO_PDF = '.pdf';
     private const string MIME_TYPE_PDF = 'application/pdf';
+    private const string MIME_TYPE_AUDIO = 'audio/mpeg';
 
     public function __construct(
         private LivroAudioRepository $livroAudioRepository,
+        private LivroAudioBlocoRepository $livroAudioBlocoRepository,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
     ) {}
 
@@ -54,6 +57,29 @@ final readonly class ConsultarLivrosAudioService
             caminhoFisico: $caminhoPdf,
             nomeArquivo: $nomeArquivo,
             mimeType: self::MIME_TYPE_PDF,
+        );
+    }
+
+    public function obterArquivoBloco(string $uuid, int $numeroBloco, Usuario $usuario): ArquivoMidiaDTO
+    {
+        $livro = $this->obterDoUsuario($uuid, $usuario);
+        $bloco = $this->livroAudioBlocoRepository->buscarPorLivroENumero($livro, $numeroBloco);
+
+        if (null === $bloco) {
+            throw LivroAudioException::blocoNaoEncontrado($numeroBloco);
+        }
+
+        $caminhoAudio = $bloco->caminhoAudio();
+        if (null === $caminhoAudio || !file_exists($caminhoAudio) || !is_readable($caminhoAudio)) {
+            throw LivroAudioException::audioBlocoNaoDisponivel($numeroBloco);
+        }
+
+        $nomeArquivo = sprintf('livro_%s_bloco_%d.mp3', $livro->uuidTexto(), $numeroBloco);
+
+        return new ArquivoMidiaDTO(
+            caminhoFisico: $caminhoAudio,
+            nomeArquivo: $nomeArquivo,
+            mimeType: self::MIME_TYPE_AUDIO,
         );
     }
 }

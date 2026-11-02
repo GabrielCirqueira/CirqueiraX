@@ -37,4 +37,14 @@ final class LivroAudioException extends DomainException
     {
         return new self(sprintf('O arquivo PDF não foi encontrado no caminho "%s".', $caminho), 404);
     }
+
+    public static function blocoNaoEncontrado(int $numeroBloco): self
+    {
+        return new self(sprintf('O bloco de número %d do livro em áudio não foi encontrado.', $numeroBloco), 404);
+    }
+
+    public static function audioBlocoNaoDisponivel(int $numeroBloco): self
+    {
+        return new self(sprintf('O áudio do bloco %d ainda não está disponível para reprodução.', $numeroBloco), 404);
+    }
 }

@@ -60,3 +60,13 @@ export async function apagarLivroAudio(uuid: string): Promise<void> {
 export function obterUrlPdfLivro(uuid: string): string {
   return comToken(`${URL_LIVROS_AUDIO}/${uuid}/pdf`)
 }
+
+export function obterUrlStreamBloco(
+  uuid: string,
+  numeroBloco: number,
+  tokenSobrescrever?: string
+): string {
+  const token = tokenSobrescrever ?? localStorage.getItem('token')
+  const baseUrl = `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/stream`
+  return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl
+}

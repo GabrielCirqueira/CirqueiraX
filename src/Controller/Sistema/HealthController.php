@@ -21,15 +21,18 @@ final class HealthController extends DefaultController
     public function health(): Response
     {
         $databaseStatus = $this->checkDatabase();
-        $diskStatus = $this->checkDisk();
-        $isHealthy = 'ok' === $databaseStatus['status'] && 'ok' === $diskStatus['status'];
+        $diskStatus = $this->checkDisk('/');
+        $caminhoLivros = sprintf('%s/var/livros', $this->getParameter('kernel.project_dir'));
+        $diskLivrosStatus = $this->checkDisk($caminhoLivros);
+        $isHealthy = 'ok' === $databaseStatus['status'] && 'ok' === $diskStatus['status'] && 'ok' === $diskLivrosStatus['status'];
 
         return $this->success([
             'status' => $isHealthy ? 'ok' : 'unhealthy',
-            'timestamp' => (new DateTime())->format(DateTimeInterface::ATOM),
+            'timestamp' => new DateTime()->format(DateTimeInterface::ATOM),
             'services' => [
                 'database' => $databaseStatus,
                 'disk' => $diskStatus,
+                'disk_livros' => $diskLivrosStatus,
             ],
             'version' => $_ENV['APP_VERSION'] ?? '1.0.0-dev',
         ], $isHealthy ? Response::HTTP_OK : Response::HTTP_SERVICE_UNAVAILABLE);
@@ -55,9 +58,10 @@ final class HealthController extends DefaultController
     /**
      * @return array{status: string, free_mb: float, threshold_mb: int}
      */
-    private function checkDisk(): array
+    private function checkDisk(string $caminho = '/'): array
     {
-        $freeSpace = disk_free_space('/') ?: 0;
+        $diretorioAlvo = is_dir($caminho) ? $caminho : '/';
+        $freeSpace = disk_free_space($diretorioAlvo) ?: 0;
         $threshold = 100 * 1024 * 1024;
 
         return [
