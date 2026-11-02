@@ -175,4 +175,4 @@
 | 157 | Retenção e controle de espaço em disco dos livros | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 158 | Frontend — player de áudio com capítulos e configurações | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 159 | Sincronização entre páginas do livro e o áudio | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
-| 160 | Teste end-to-end do fluxo completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 160 | Teste end-to-end do fluxo completo e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |

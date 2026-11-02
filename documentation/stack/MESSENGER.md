@@ -55,6 +55,7 @@ ClassificarMediaItemService ◄─┘
 | `DistribuirLocalMessage` | Classificação | Copia para `{storage}/{pastaLocal}`, reaplica metadados e marca `distribuido_local` |
 | `EnviarGoogleFotosMessage` | Classificação, retentativa, reenvio | Envia ou reaproveita a mídia no álbum |
 | `BaixarAudioMessage` | `POST /api/v1/audios` | Gera o MP3 |
+| `GerarAudioBlocoMessage` | Processamento de Livro | Sintetiza voz neural Edge TTS e grava em `var/livros/{uuid}/blocos/{numero}.mp3` |
 | `RebaixarMediaItemMessage` | Rebaixar em lote | Baixa de novo um vídeo |
 | `LimparVideosAntigosMessage` | Scheduler | Remove vídeos com mais de 7 dias |
 | `ExpirarAudiosAntigosMessage` | Scheduler | Expira MP3 e encerra áudios presos |

@@ -1,7 +1,7 @@
 # CirqueiraX — Visão Geral Técnica
 
 **Última atualização:** 02/11/2026
-**Situação:** 140 tópicos de roadmap e 95 melhorias concluídos ([progresso](../progresso/README.md))
+**Situação:** 160 tópicos de roadmap e 95 melhorias concluídos ([progresso](../progresso/README.md))
 **Produção:** https://x.cirqueira.com
 
 Para uma visão voltada ao usuário final, veja [FUNCIONALIDADES_DO_SISTEMA.md](FUNCIONALIDADES_DO_SISTEMA.md).
@@ -43,7 +43,9 @@ Classificação (OrigemRegra ou decisão manual)
         └──► Envio ao Google Fotos ──► Álbum da categoria
 
 Rotinas diárias: limpeza de vídeos e expiração de áudios
-Módulo separado: Downloads MP3 (entidade Audio)
+Módulos isolados: 
+├── Downloads MP3 (entidade Audio)
+└── Livros em Áudio (entidades LivroAudio e LivroAudioBloco)
 ```
 
 ### Stack
@@ -54,7 +56,7 @@ Módulo separado: Downloads MP3 (entidade Audio)
 | Assíncrono | Symfony Messenger (transporte Doctrine) e Scheduler |
 | Frontend | React 19, TypeScript 5.9, Vite 7, Chakra UI 3 |
 | Banco | MySQL 8.3 |
-| Mídia | yt-dlp, ffmpeg, TikWM, FxTwitter |
+| Mídia | yt-dlp, ffmpeg, TikWM, FxTwitter, pdftotext, edge-tts |
 | Integrações | Syncthing REST API, Google Photos Library API |
 | Agente | Python (requests, watchdog, python-dotenv) |
 
@@ -71,6 +73,8 @@ Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.m
 | `/central-midias`, `/todas-midias` | Central de Mídias | [CENTRAL_MIDIAS.md](CENTRAL_MIDIAS.md) |
 | `/downloads` | Downloads de vídeo | [DOWNLOADS_VIDEOS.md](DOWNLOADS_VIDEOS.md) |
 | `/downloads-mp3` | Downloads MP3 | [DOWNLOADS_AUDIO.md](DOWNLOADS_AUDIO.md) |
+| `/livros-audio` | Livros em Áudio | [LIVROS_AUDIO.md](LIVROS_AUDIO.md) |
+| `/livros-audio/:uuid` | Leitor de Livro em Áudio | [LIVROS_AUDIO.md](LIVROS_AUDIO.md) |
 | `/prints` | Prints & Capturas | [PRINTS.md](PRINTS.md) |
 | `/editor-imagem` | Editor de Imagem | [EDITOR_IMAGEM.md](EDITOR_IMAGEM.md) |
 | `/upload-manual` | Upload Manual | [UPLOAD_MANUAL.md](UPLOAD_MANUAL.md) |

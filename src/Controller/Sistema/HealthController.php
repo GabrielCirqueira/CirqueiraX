@@ -28,7 +28,7 @@ final class HealthController extends DefaultController
 
         return $this->success([
             'status' => $isHealthy ? 'ok' : 'unhealthy',
-            'timestamp' => new DateTime()->format(DateTimeInterface::ATOM),
+            'timestamp' => (new DateTime())->format(DateTimeInterface::ATOM),
             'services' => [
                 'database' => $databaseStatus,
                 'disk' => $diskStatus,

@@ -90,6 +90,16 @@ Transforma vídeos em música para você ouvir ou baixar.
 
 > **Importante:** os arquivos MP3 ficam disponíveis por **7 dias**. Depois disso o arquivo é removido, mas você pode baixar de novo. Se quiser guardar uma música para sempre, baixe para o seu dispositivo.
 
+### Livros em Áudio
+
+Transforma seus livros em formato PDF em audiolivros interativos com narração em português por voz neural.
+
+- Envie arquivos PDF de livros com facilidade pelo seletor ou arrastando para a tela.
+- O sistema extrai os textos e sintetiza a leitura com voz neural de alta naturalidade dividida em blocos e capítulos.
+- Leitor de PDF integrado com virada de página automática sincronizada com o áudio ("Seguir áudio") ou navegação livre ("Folhear livre").
+- Player com controle de velocidade (0.75x a 2.0x), avanço/retrocesso de 15 segundos e integração com a central de mídia/tela de bloqueio do celular ou computador.
+- Marcador de leitura automático que salva onde você parou para continuar de qualquer lugar.
+
 ### Prints & Capturas
 
 É a galeria de capturas de tela, limpa e no estilo do Google Fotos.

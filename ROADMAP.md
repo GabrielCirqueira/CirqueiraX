@@ -50,7 +50,7 @@
 - [x] **157. Retenção e controle de espaço em disco dos livros**
 - [x] **158. Frontend — player de áudio com capítulos e configurações**
 - [x] **159. Sincronização entre páginas do livro e o áudio**
-- [ ] **160. Teste end-to-end do fluxo completo e documentação atualizada**
+- [x] **160. Teste end-to-end do fluxo completo e documentação atualizada**
 
 ## Detalhamento
 
