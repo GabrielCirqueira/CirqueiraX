@@ -1,59 +1,57 @@
-# Funcionalidade: Upload Manual de Mídias
+# Funcionalidade: Upload Manual
 
-O módulo de **Upload Manual** permite enviar arquivos avulsos de imagens e vídeos diretamente pelo navegador para a biblioteca central do CirqueiraX, com validação de formato, barra de progresso em tempo real e encaminhamento automático para o pipeline de distribuição e backup.
+A tela **Upload Manual** (`/upload-manual`) envia fotos e vídeos que já estão no dispositivo. Os arquivos seguem o mesmo pipeline das demais mídias, com origem `manual`.
 
 ---
 
-## 1. Visão Geral do Fluxo
+## 1. Fluxo
 
 ```
-[ Usuário arrasta arquivos para o Dropzone ]
-                    │
-                    ▼
-       Validação no Cliente (MIME type e tamanho)
-                    │
-                    ▼
-     POST /api/v1/media-itens/upload-manual
-     (multipart/form-data com barra de progresso)
-                    │
-                    ▼
-          [ Backend Symfony ]
-                    │
-    ├─ 1. Validação de Extensão e MIME real (finfo)
-    ├─ 2. Cálculo de Hash SHA-256 e Deduplicação
-    ├─ 3. Gravação no Storage Local (var/storage/)
-    ├─ 4. Criação do MediaItem (origem: upload_manual)
+[ Arrastar, selecionar ou Ctrl+V ]
+                │
+                ▼
+    Validação no navegador (tipo e tamanho)
+                │
+                ▼
+    POST /api/v1/media-itens/upload (multipart)
+                │
+    ├─ 1. Valida o MIME real
+    ├─ 2. Grava o temporário em {tmp}/cirqueirax_uploads
+    ├─ 3. Ingestão com dedupe
+    │     └─ Duplicado: devolve o item existente e _warning: item_duplicado_existente
     │
-    └─ 5. Disparo do Messenger Worker:
-          ├─ Se categoria informada: Classifica, distribui local e envia pro Google Fotos
-          └─ Se não informada: Fica como 'sem_categoria' para triagem
+    └─ 4. Com categoria: classifica, distribui e envia ao Google Fotos
+          Sem categoria: fica como sem_categoria
 ```
 
 ---
 
-## 2. Formatos e Limites Suportados
+## 2. Formatos e limites
 
-### 2.1. Tipos MIME Permitidos
-- **Imagens**: `image/jpeg`, `image/png`, `image/webp`, `image/gif`.
-- **Vídeos**: `video/mp4`, `video/webm`, `video/quicktime` (.mov), `video/x-msvideo` (.avi), `video/mkv`, `video/x-matroska`.
-
-### 2.2. Limites de Upload
-- Limite configurável no PHP e Nginx: padrão de até **500 MB** por arquivo.
-- Deduplicação inteligente: se você enviar uma foto ou vídeo que já existe no sistema, o CirqueiraX detecta pelo hash SHA-256 e retorna o registro já existente sem duplicar espaço em disco.
+- **Imagens:** `image/png`, `image/jpeg`, `image/webp`, `image/gif`.
+- **Vídeos:** `video/mp4`, `video/webm`, `video/quicktime`, `video/x-msvideo`, `video/mkv`, `video/x-matroska`.
+- **Tamanho:** até 500 MB por arquivo.
+- **PHP e Nginx:** limite de 500M, `max_execution_time` de 300 s e `memory_limit` de 512M.
 
 ---
 
-## 3. Interface Web (`/upload`)
+## 3. Interface
 
-A tela de upload manual conta com:
+- Dropzone, seletor de arquivos e **Ctrl+V** global com arquivos.
+- Categoria padrão antes do envio.
+- Categoria por item, para os selecionados, para todos ou para os que estão sem categoria.
+- Progresso de envio.
+- Filtros: Todas, Sem Categoria, Classificadas e Com Erro.
+- Visões em grade e tabela, com busca por nome ou hash.
+- **Limpar Concluídos** tira da lista os itens já processados.
 
-1. **Área de Dropzone Reativa**:
-   - Arraste múltiplos arquivos diretamente da sua área de trabalho ou explorador de arquivos.
-   - Pré-visualização de miniaturas (thumbnails) geradas localmente pelo navegador antes do envio.
-2. **Seletor de Categoria Prévia**:
-   - Permite escolher para onde as mídias devem ir antes de subir (ex: `Prints`, `videos/memes`, `Shingeki no Kyojin`, etc.).
-   - Se nenhuma categoria for selecionada, os arquivos entram como `sem_categoria` e podem ser organizados depois.
-3. **Barra de Progresso Individual e Geral**:
-   - Utiliza a propriedade `onUploadProgress` do Axios para exibir porcentagem de envio real e velocidade estimada.
-4. **Resumo Pós-Envio**:
-   - Exibe a lista de itens enviados com sucesso, links diretos para visualização e contagem de itens duplicados detectados.
+### Arquivo duplicado
+
+O item aparece como **Já Existente (Não Duplicado)**, e nenhum arquivo novo é criado. O modal **Sim, Sincronizar Mesmo Assim** chama `POST /api/v1/media-itens/{uuid}/forcar-google-fotos`. A mesma ação existe no botão **Forçar Google Fotos**.
+
+---
+
+## 4. Código
+
+- **Frontend:** `web/features/upload-manual/`, com a lógica em `hooks/useUploadManual.ts`.
+- **Backend:** `MediaItemController`, `POST /api/v1/media-itens/upload`.

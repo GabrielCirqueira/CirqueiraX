@@ -1,139 +1,199 @@
-# Backend (src/)
+# Backend (`src/`)
 
-Este documento descreve a API/backend Symfony. O cirqueiraX v5 segue uma arquitetura orientada a serviços e lógica de negócio desacoplada, com um **núcleo enxuto** e módulos opcionais ativados conforme a necessidade do projeto.
+API Symfony do CirqueiraX. Controllers ficam leves, regras de negócio vivem em services, e integrações externas ficam em `src/Infra/`.
 
-## Tecnologias e Stack
+## Tecnologias
 
 | Tecnologia | Papel |
 | :--- | :--- |
-| **PHP 8.4** | Runtime; Readonly Classes, Enums, Typed Properties, Attributes |
-| **Symfony 7.3** | Framework principal (HTTP, DI container, Console) |
-| **Doctrine ORM 3** | Mapeamento objeto-relacional, Unit of Work, migrations |
-| **Lexik JWT** | Emissão e validação de access tokens (RS256, TTL 1h) |
-| **Gesdinet Refresh Token** | Refresh tokens persistidos no banco (TTL 30 dias) |
-| **Nelmio CORS** | Configuração CORS para `/api/*` |
-| **Symfony Rate Limiter** | Proteção contra brute-force no login (5/min) e limitador de ingestão (300/min) |
-| **Monolog** | Logs estruturados (texto em dev, JSON em prod) |
-| **PHPStan 2** | Análise estática — nível 6 |
+| **PHP 8.4** | Runtime |
+| **Symfony 7.3** | Framework HTTP, DI e Console |
+| **Doctrine ORM 3 / DBAL 3** | Persistência e migrations |
+| **Symfony Messenger e Scheduler** | Filas e rotinas agendadas |
+| **Lexik JWT** | Access tokens RS256 |
+| **Gesdinet Refresh Token** | Refresh tokens no banco |
+| **Nelmio CORS** | CORS |
+| **Symfony Rate Limiter** | Limites de requisição |
+| **Monolog e Sentry** | Logs e erros |
+| **Guzzle** | Clientes HTTP |
+| **Pentatrion Vite Bundle** | Integração com o Vite |
+| **PHPStan 2** | Análise estática |
+| **yt-dlp e ffmpeg** | Download e tratamento de mídia |
 
-> **Módulos opcionais** ? ativados via `setup.sh` ou instalação manual:
-> - `?? async` ? `symfony/doctrine-messenger` + `symfony/scheduler` (filas e tarefas agendadas)
-> - `?? observability` ? `sentry/sentry-symfony` (rastreamento de erros em produção)
+## Estrutura
 
-## Estrutura de Diretórios
-
-```
+```text
 src/
-├── Command/        CLI: AppSeedCommand, CronHeartbeatCommand, JwtMasterCommand
-├── Controller/     API REST — roteamento e orquestração leve
-├── DataObject/     DTOs de entrada tipados (validados por atributos Symfony)
-├── Entity/         Entidades Doctrine (Usuario, RefreshToken)
-├── Enum/           Enums PHP 8.1+
-├── EventListener/  Listeners + Event/ (fatos de domínio)
-├── Feature/        *Feature.php + TaggedIterator (lógica grande em vários services)
-├── Infra/          Clientes HTTP de infraestrutura externa (*Client.php via Guzzle)
-├── Interface/      Contratos PHP (*Interface.php)
-├── Repository/     Acesso ao banco de dados (queries DQL/QueryBuilder)
-├── Serializer/     Contratos JSON de saída (protegem frontend de mudanças internas)
-├── Service/        Lógica de negócio — um service = uma ação (executar())
+├── Command/        Comandos de console
+├── Controller/     Audio, Auth, Categoria, Common, Dashboard, GoogleFotos,
+│                   Ingestao, MediaItem, OrigemRegra, Sistema, Sync e Video
+├── DataObject/     DTOs de entrada
+├── Entity/         Entidades Doctrine
+├── Enum/           Enums de domínio
+├── EventListener/  Listeners
+├── Exception/      Exceções por domínio
+├── Infra/          GoogleFotos, GoogleOAuth, Imagem, Storage, Syncthing e YtDlp
+├── Interface/      Contratos
+├── Message/        Mensagens do Messenger
+├── MessageHandler/ Handlers
+├── Repository/     Consultas
+├── Security/       TokenAgenteAuthenticator
+├── Serializer/     Contratos JSON de saída
+├── Service/        Audio, Categoria, Dashboard, Distribuicao, GoogleFotos,
+│                   Ingestao, MediaItem, OrigemRegra, Seguranca, Usuario e Video
+├── Support/        Utilitários, como MetadataKeys
+├── Schedule.php    Rotinas do Scheduler
 └── Kernel.php
 ```
 
-> Se o módulo `async` estiver ativo, o setup adiciona:
-> `src/Message/`, `src/MessageHandler/`, `src/Schedule/`
-
 ## `DefaultController`
 
-Todo controller de API extends `App\Controller\DefaultController`. SPA fica em `FrontendController`.
+Controllers de API estendem `App\Controller\Common\DefaultController`.
 
 | Método | HTTP | JSON |
 | :--- | :--- | :--- |
 | `$this->success($data)` | 200 | `{ success: true, data }` |
 | `$this->created($data)` | 201 | `{ success: true, data }` |
 | `$this->noContent()` | 204 | vazio |
+| `$this->unprocessable(...)` | 422 | Erro de validação |
 | `$this->error('codigo', $status, $details?)` | 4xx | `{ success: false, error, details? }` |
 | `$this->paginated($itens, $total, $pagina, $porPagina)` | 200 | `{ success, data, total, pagina, porPagina }` |
 
-```php
-public function criar(#[MapRequestPayload] CriarUsuarioDTO $dto): Response
-{
-    $usuario = $this->criarUsuarioService->executar($dto);
+## API
 
-    return $this->created($this->serializer->serializar($usuario));
-}
-```
+Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 
-Service devolve o dado. Erro previsto: `throw new \DomainException('username_taken', 409)` — o `KernelExceptionListener` responde no mesmo envelope.
+### Sistema e autenticação
 
-## Rotas e API
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/health` | Público; banco e disco |
+| `POST` | `/auth/login` | Público; login |
+| `POST` | `/token/refresh` | Público; renova o token |
+| `GET` | `/auth/me` | Usuário atual |
 
-- Prefixo obrigatório: `/api/v1/`
-- Recursos no plural: `/api/v1/usuarios`, `/api/v1/pedidos`
-- Configuração via atributo `#[Route]` nos Controllers
-- Respostas de erro padronizadas pelo `KernelExceptionListener`
+### Mídias
 
-**Endpoints do core:**
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/media-itens` | Lista com filtros |
+| `GET` | `/media-itens/contagens` | Contadores por aba |
+| `POST` | `/media-itens/upload` | Upload manual |
+| `POST` | `/media-itens/edicoes` | Salva edição do editor |
+| `POST` | `/media-itens/retentar` | Retenta todos os erros |
+| `POST` | `/media-itens/lote/categorizar` | Categoriza em lote |
+| `POST` | `/media-itens/lote/remover-categoria` | Remove categoria em lote |
+| `POST` | `/media-itens/lote/rebaixar` | Rebaixa em lote |
+| `POST` | `/media-itens/lote/apagar` | Apaga em lote |
+| `POST` | `/media-itens/lote/distribuir-horarios` | Distribui datas |
+| `GET`, `PATCH` | `/media-itens/{uuid}` | Detalhe e edição |
+| `PATCH` | `/media-itens/{uuid}/categoria` | Categoriza |
+| `POST` | `/media-itens/{uuid}/retentar` | Retenta |
+| `POST` | `/media-itens/{uuid}/rebaixar` | Rebaixa |
+| `POST` | `/media-itens/{uuid}/forcar-google-fotos` | Força o envio |
+| `GET` | `/media-itens/{uuid}/stream` | Reprodução |
+| `GET` | `/media-itens/{uuid}/thumbnail` | Miniatura |
+| `GET` | `/media-itens/{uuid}/download` | Download |
 
-| Método | Rota | Acesso | Descrição |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/health` | Público | Status da aplicação (DB, disco) |
-| `POST` | `/api/v1/auth/login` | Público | Login → `{ token, refresh_token }` |
-| `POST` | `/api/v1/auth/registro` | Público | Cadastro de novo usuário |
-| `GET` | `/api/v1/auth/me` | JWT | Dados do usuário autenticado |
-| `POST` | `/api/v1/token/refresh` | Público | Renova o access token |
-| `GET` | `/api/v1/media-itens` | JWT | Lista paginada de itens de mídia |
-| `GET` | `/api/v1/media-itens/{uuid}` | JWT | Detalhes de um item de mídia |
-| `PATCH` | `/api/v1/media-itens/{uuid}/categoria` | JWT | Classificação manual de categoria |
-| `POST` | `/api/v1/media-itens/retentar` | JWT / Agente | Reprocessa em lote todas as mídias com erro |
-| `POST` | `/api/v1/media-itens/{uuid}/retentar` | JWT / Agente | Reprocessa individualmente uma mídia com erro |
-| `GET` | `/api/v1/dashboard/resumo` | JWT | Resumo de métricas por status e origem |
-| `GET` | `/api/v1/dashboard/categorias` | JWT | Métricas agregadas por categoria e tamanho |
-| `GET` | `/api/v1/dashboard/erros` | JWT | Fila paginada de itens com erro e motivo de falha |
-| `POST` | `/api/v1/dashboard/erros/retentar` | JWT | Reprocessa em lote todas as mídias com erro do dashboard |
-| `GET` | `/api/v1/sync/pastas` | JWT | Status e progresso das pastas no Syncthing |
-| `POST` | `/api/v1/sync/pastas/{id}/sincronizar` | JWT | Dispara rescan/sincronização de pasta no Syncthing |
-| `POST` | `/api/v1/downloads` | JWT | Solicita download assíncrono de vídeo (aceita `categoriaId` opcional) |
-| `GET` | `/api/v1/categorias` | JWT | Lista todas as categorias cadastradas com seus álbuns vinculados |
-| `POST` | `/api/v1/categorias` | JWT | Cadastra categoria com criação automática do álbum correspondente |
-| `PATCH` | `/api/v1/categorias/{uuid}/album` | JWT | Vínculo/alteração manual de álbum do Google Fotos à categoria |
-| `GET` | `/api/v1/google-fotos/status` | JWT | Verifica status de conexão OAuth da conta Google Fotos |
-| `GET` | `/api/v1/google-fotos/albuns` | JWT | Lista álbuns criados pela app com status de vínculo e categorias órfãs |
+### Downloads, áudio e ingestão
 
-## Google Fotos & Escopos OAuth2
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/downloads` | Baixa um vídeo de forma síncrona (`url`, `categoriaId?`) |
+| `GET`, `POST` | `/audios` | Lista ou pede um áudio |
+| `POST` | `/audios/{uuid}/rebaixar` | Baixa de novo |
+| `DELETE` | `/audios/{uuid}` | Apaga |
+| `GET` | `/audios/{uuid}/arquivo` | Baixa o MP3 |
+| `GET` | `/audios/{uuid}/stream` | Reproduz |
+| `POST` | `/ingestao/print` | Recebe um print; exige `ROLE_AGENTE` |
 
-O CirqueiraX utiliza os escopos oficiais da Google Photos Library API para criação e gestão de álbuns criados pelo próprio aplicativo:
+### Categorias e regras
 
-| Escopo | Finalidade |
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET`, `POST` | `/categorias` | Lista ou cria |
+| `GET`, `PUT`, `PATCH`, `DELETE` | `/categorias/{uuid}` | Detalhe, edição e remoção |
+| `PATCH` | `/categorias/{uuid}/album` | Vincula álbum |
+| `GET`, `POST` | `/origem-regras` | Lista ou cria |
+| `GET`, `PUT`, `DELETE` | `/origem-regras/{uuid}` | Detalhe, edição e remoção |
+
+### Dashboard e sincronização
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/dashboard/resumo` | Métricas gerais |
+| `GET` | `/dashboard/categorias` | Métricas por categoria |
+| `GET` | `/dashboard/erros` | Fila de erros |
+| `POST` | `/dashboard/erros/retentar` | Retenta os erros |
+| `GET` | `/sync/pastas` | Estado do Syncthing |
+| `POST` | `/sync/pastas/{id}/sincronizar` | Dispara o rescan |
+
+### Google Fotos
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/google-fotos/status` | Estado da conexão |
+| `GET` | `/google-fotos/oauth/url` | URL de consentimento |
+| `POST` | `/google-fotos/oauth/concluir` | Conclui o OAuth |
+| `POST` | `/google-fotos/desconectar` | Desconecta |
+| `GET` | `/google-fotos/albuns` | Álbuns e vínculos |
+| `GET` | `/google-fotos/envios` | Histórico |
+| `GET` | `/google-fotos/envios/resumo` | Contadores |
+| `POST` | `/google-fotos/envios/{uuid}/reenviar` | Reenvia |
+
+## Entidades e enums
+
+Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
+
+| Enum | Valores |
 | :--- | :--- |
-| `photoslibrary.appendonly` | Upload e criação de novas mídias e fotos |
-| `photoslibrary.readonly.appcreateddata` | Listagem de álbuns criados pelo CirqueiraX |
-| `photoslibrary.edit.appcreateddata` | Gerenciamento de itens e álbuns criados pelo app |
-| `userinfo.email` | Identificação do e-mail da conta vinculada |
+| `OrigemMedia` | `print_empresa`, `print_pessoal`, `bot_telegram`, `download`, `manual` |
+| `StatusMediaItem` | `recebido`, `em_fila`, `sem_categoria`, `classificado`, `distribuindo`, `baixando`, `distribuido_local`, `enviando_google_fotos`, `concluido`, `erro`, `arquivo_removido`, `arquivo_expurgado` |
+| `StatusAudio` | `pendente`, `baixando`, `disponivel`, `erro`, `expirado` |
+| `StatusEnvioGoogleFotos` | `enviando`, `enviado`, `reaproveitado`, `falha` |
+| `OrigemEnvioGoogleFotos` | `automatico`, `retentativa`, `reenvio_manual`, `forcado` |
+| `TipoCliente` | `usuario`, `agente` |
 
-> [!NOTE]
-> Contas autorizadas antes da atualização de escopos granulares devem executar `make google-fotos-autorizar` para emitir novo refresh token com permissões de leitura/edição de álbuns.
+`PlataformaVideo` identifica as plataformas de vídeo.
 
-## Regras de Ouro
+## Comandos de console
 
-1. **Envelope HTTP**: Controller de API sempre extends `DefaultController` e retorna `Response` via `$this->success()` / `$this->error()`. Chaves JSON em inglês (`success`, `data`, `error`).
-2. **Early Return**: Ordene Guard Clauses pelo custo — verificação local → banco → API externa.
-3. **Serializer obrigatório**: Todo endpoint que retorna dados de entidade usa `src/Serializer/`. Nunca retorne a entidade diretamente.
-4. **Readonly**: Use `readonly` em classes DTO e propriedades imutáveis.
+| Comando | Função |
+| :--- | :--- |
+| `app:seed` | Popula dados iniciais |
+| `app:seed:origem-regras` | Cria categorias e regras padrão |
+| `app:usuario:criar` | Cria usuário |
+| `app:agente:gerar-token` | Gera token de agente |
+| `app:jwt:master` | Gera JWT administrativo |
+| `app:google-fotos:autorizar-conta` | Autoriza a conta Google |
+| `app:google-fotos:enviar` | Envia pendentes |
+| `app:google-fotos:limpar-duplicados-franky` | Trata duplicados do Franky |
+| `app:media:limpar-videos-antigos` | Limpa vídeos (`--dias`, `--dry-run`) |
+| `app:media:rebaixar` | Rebaixa mídias |
+| `app:media:retentar` | Retenta mídias com erro |
+| `app:media:indexar-metadados` | Indexa metadados antigos |
+| `app:cron:heartbeat` | Teste de agendamento |
 
-## Banco de Dados e Migrations
+## Regras de ouro
+
+1. **Envelope HTTP:** controllers de API estendem `DefaultController` e respondem com seus métodos.
+2. **Early return:** ordene as validações do custo menor para o maior: local, banco, API externa.
+3. **Serializer obrigatório:** nunca devolva uma entidade diretamente.
+4. **Readonly:** use `readonly` em DTOs e propriedades imutáveis.
+
+## Banco de dados
 
 ```bash
-make doctrine-diff      # Gera migration por diff do schema (nunca criar arquivo à mão)
+make doctrine-diff      # Gera migration a partir do schema
 make migrate            # Aplica migrations pendentes
-make doctrine-validate  # Valida mappings e schema 100% sincronizados
+make doctrine-validate  # Valida mappings e schema
 make rollback           # Reverte a última migration (só em dev)
 ```
 
-## Qualidade (QA)
+## Qualidade
 
 ```bash
-make phpstan          # Análise estática nível 6
-make check-naming     # Validação de nomenclatura e padrões
-make fix-php          # Auto-correção de estilo
+make phpstan
+make check-naming
+make fix-php
 ```
-

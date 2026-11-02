@@ -1,86 +1,72 @@
-# Funcionalidade: Captura, Ingestão e Galeria de Prints
+# Funcionalidade: Prints e Capturas
 
-O módulo de **Prints** é o sistema automatizado do CirqueiraX para capturar telas em computadores locais e corporativos, ingeri-las de forma transparente e organizá-las em uma galeria moderna e minimalista inspirada no Google Fotos.
+O módulo de **Prints** recebe capturas de tela enviadas pelo [Agente](AGENTE.md), classifica automaticamente pela origem e exibe tudo em uma galeria no estilo Google Fotos.
 
 ---
 
-## 1. Visão Geral da Arquitetura
+## 1. Fluxo
 
 ```
-[ Computador do Trabalho ]        [ Computador Pessoal ]
-  (print_empresa)                  (print_pessoal)
-         │                                │
-         ▼                                ▼
-   [ agente.py ]                    [ agente.py ]
-         │                                │
-         └────────────────┬───────────────┘
-                          │ POST /api/v1/ingestao/print
-                          │ Header: X-Agent-Token: cx_ag_...
-                          ▼
-             [ Backend CirqueiraX ]
-                          │
-     ├─ TokenAgenteAuthenticator valida e identifica a origem
-     ├─ Calcula SHA-256 e deduplica
-     ├─ OrigemRegra mapeia ambas as origens ──► Categoria 'Prints'
-     │
-     ├─ Salva em disco: ~/cirqueirax/sync_media/prints/print_<data>_<hash>.png
-     │
-     ├─ Syncthing detecta via fsWatcher ──► Sincroniza para o Celular
-     │
-     └─ Messenger worker ──► Upload para o Álbum 'Prints' no Google Fotos
+[ PC da empresa ]               [ PC pessoal ]
+ (print_empresa)                (print_pessoal)
+        │                              │
+        └─────────── agente ───────────┘
+                       │ POST /api/v1/ingestao/print
+                       │ X-Agent-Token: cx_ag_...
+                       ▼
+                 Backend CirqueiraX
+                       │
+     ├─ Autentica e identifica a origem pelo token
+     ├─ IngestarPrintService: temporário em cirqueirax_prints
+     │  nome print_YYYYMMDD_His_<hex>.<ext>
+     ├─ Dedupe e ingestão
+     └─ ClassificarMediaMessage: OrigemRegra ──► categoria Prints
+                       │
+           ┌───────────┴───────────┐
+           ▼                       ▼
+   Copia para prints/      Envia ao álbum no Google Fotos
+   (Syncthing replica)
 ```
 
----
-
-## 2. Regra das Origens e Pasta Única
-
-- **Pasta Única no Disco**: Não existem pastas separadas de trabalho e pessoal. Todas as capturas de tela são consolidadas em:
-  ```
-  sync_media/prints/
-  ```
-- **Diferenciação por Metadados no Banco de Dados**:
-  A distinção entre prints da empresa e de casa é mantida no campo `origem` do banco (`print_empresa` vs `print_pessoal`).
-- **Filtros e Badges na Interface**:
-  Na galeria de prints, você pode filtrar apenas capturas do trabalho, apenas de casa ou visualizar todas juntas.
+A rota exige `ROLE_AGENTE` e usa o limitador `ingestao`, de 300 requisições por minuto.
 
 ---
 
-## 3. Galeria de Prints na Web (`/prints`)
+## 2. Origens e pasta única
 
-A interface foi projetada com foco em **clareza visual e produtividade**:
+Prints da empresa e pessoais ficam na mesma pasta, `prints/`. A diferença é mantida no campo `origem` (`print_empresa` ou `print_pessoal`).
 
-### 3.1. Design Minimalista (Estilo Google Fotos)
-- **Cards Limpos**: As imagens ocupam o espaço visual principal sem bordas pesadas ou poluição de botões estáticos.
-- **Micro-ações no Hover**: Ao passar o cursor do mouse sobre o card, surgem ícones discretos e com cantos arredondados na parte inferior:
-  - 📋 **Copiar Imagem**: Escreve o binário da imagem diretamente na área de transferência do sistema operacional (`navigator.clipboard.write`). Você pode colar imediatamente (`Ctrl + V`) no Discord, Slack, WhatsApp ou qualquer outro aplicativo.
-  - ⬇️ **Download Direto**: Baixa o arquivo PNG original para o seu navegador.
-  - 📁 **Categorizar**: Permite mover o print para outra categoria.
-  - 🗑️ **Excluir**: Remove a captura do banco e do disco.
-
-### 3.2. Visualizador em Tela Cheia (Lightbox)
-- Ao clicar em qualquer print, ele se expande em um visualizador escuro de alta definição.
-- Suporte a zoom, navegação por teclado (setas esquerda/direita para navegar entre prints) e visualização de metadados completos (data exata, resolução, tamanho e hash).
+A tela `/prints` consulta com `origem=prints`, que reúne as duas origens. Hoje não há filtro para separá-las nessa tela.
 
 ---
 
-## 4. Agentes Clientes (`agente/agente.py`)
+## 3. Galeria (`/prints`)
 
-Para que as capturas cheguem ao servidor sem nenhuma intervenção manual:
+- 20 itens por página.
+- Visões em grade e lista.
+- Busca e filtros por status e categoria.
+- Seleção múltipla, com categorizar e apagar em lote.
 
-1. **Gere o token de cada máquina no servidor**:
-   ```bash
-   make agente-token ARGS="\"PC Empresa\" print_empresa"
-   make agente-token ARGS="\"PC Pessoal\" print_pessoal"
-   ```
-2. **Configure o `.env` do agente na máquina**:
-   ```bash
-   SERVER_URL=http://localhost:4010/api/v1/ingestao/print
-   AGENT_TOKEN=cx_ag_...
-   WATCH_DIR=/mnt/c/Users/<usuario>/Pictures/Screenshots # (ou ~/Pictures/Screenshots)
-   ```
-3. **Instale como serviço em segundo plano**:
-   - No WSL2: `python3 agente.py install`
-   - No Linux nativo: `./servico/instalar-servico-linux.sh`
-   - No Windows nativo: `servico\instalar-servico-windows.bat`
+### Ações em cada print
 
-Sempre que você pressionar a tecla de PrintScreen no sistema operacional, a imagem é detectada em menos de 3 segundos e despachada automaticamente.
+| Ação | Comportamento |
+| :--- | :--- |
+| **Copiar** | Grava a imagem na área de transferência com `navigator.clipboard.write` |
+| **Baixar** | Baixa o arquivo original |
+| **Categorizar** | Move para outra categoria |
+| **Editar** | Abre no [Editor de Imagem](EDITOR_IMAGEM.md) |
+| **Excluir** | Remove registro e arquivo |
+| **Visualizar** | Abre `ModalVisualizarPrint` |
+
+---
+
+## 4. Instalação do agente
+
+Veja [AGENTE.md](AGENTE.md). Em resumo:
+
+```bash
+make agente-token ARGS="\"PC Empresa\" print_empresa"
+make agente-token ARGS="\"PC Pessoal\" print_pessoal"
+```
+
+Cada máquina recebe o próprio token, que define a origem dos prints dela.

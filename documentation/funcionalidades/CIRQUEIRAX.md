@@ -1,315 +1,182 @@
-# CirqueiraX — Documentação Técnica
+# CirqueiraX — Visão Geral Técnica
 
-**Versão:** 1.0 Final (v1.0 Completa — 120/120 Tópicos Concluídos)
-**Última atualização:** 28/09/2026
-**Stack base:** cirqueiraX v5.0.0 (Symfony 7.3 + React 19, DDD/Clean Architecture) — Módulos `async` (Messenger + Supervisor) e `ui-extra` (Recharts) 100% ativos e integrados
+**Última atualização:** 02/11/2026
+**Situação:** 140 tópicos de roadmap e 95 melhorias concluídos ([progresso](../progresso/README.md))
+**Produção:** https://x.cirqueira.com
+
+Para uma visão voltada ao usuário final, veja [FUNCIONALIDADES_DO_SISTEMA.md](FUNCIONALIDADES_DO_SISTEMA.md).
 
 ---
 
-## 1. Visão geral
+## 1. O que é
 
-CirqueiraX é o hub central de gerenciamento e organização de mídia pessoal. O sistema resolve um problema hoje manual e repetitivo: mídias vindas de múltiplas origens (download de plataformas, capturas de tela, uploads manuais) precisam ser classificadas, distribuídas para pastas locais sincronizadas (via Syncthing) e enviadas para os álbuns correspondentes no Google Fotos — sem intervenção manual diária.
+CirqueiraX é um hub pessoal de mídias. Ele recebe arquivos de várias origens, elimina duplicados, classifica por categoria, distribui para pastas sincronizadas com Syncthing e envia para álbuns do Google Fotos.
 
-O sistema nasce como módulo de mídia, mas é desenhado para crescer como hub geral de ferramentas pessoais (v2+).
+### Princípios de design
 
-### 1.1 Problema que resolve
+1. **Fonte única de verdade:** só o backend escreve estado. O frontend nunca fala direto com Syncthing ou Google Fotos.
+2. **A categoria decide o destino:** ela concentra a pasta local e o álbum.
+3. **Reprocessar não duplica:** hash e registros de envio tornam as etapas repetíveis.
+4. **Limites da API são aceitos:** o sistema só gerencia no Google Fotos o que ele mesmo enviou.
+5. **Trabalho pesado em segundo plano:** classificação, distribuição e envio rodam no Messenger.
 
-| Hoje (manual) | Com CirqueiraX |
-|---|---|
-| Vídeo baixado → Syncthing → celular → backup manual pro Google Fotos | Vídeo baixado → categorizado → distribuído automaticamente pra pasta local **e** Google Fotos |
-| Print do PC da empresa/pessoal → upload manual no álbum certo | Agente detecta print → classifica pela origem → upload automático |
-| Sem visão consolidada do que já foi processado, onde está, e o que falhou | Dashboard único com status de todo o pipeline |
-| Celular como ponto único de sincronização de tudo | Celular sincroniza só o que você quiser, quando quiser |
-
-### 1.2 Princípios de design
-
-1. **Fonte única de verdade**: o backend (Symfony) é o único que escreve estado. Dashboard nunca fala direto com Syncthing ou Google Fotos — sempre via API própria.
-2. **Categoria decide o destino**: cada item de mídia pertence a uma categoria, e a categoria carrega o mapeamento pra pasta local + álbum Google Fotos. Não existe lógica de destino espalhada pelo código.
-3. **Idempotência em tudo**: qualquer worker pode reprocessar um item sem duplicar resultado (hash de arquivo como chave).
-4. **Upload é de mão única**: o sistema nunca tenta ler ou auditar o que já existe na biblioteca do Google Fotos (limitação da API desde 2025 — só é possível gerenciar conteúdo criado pela própria aplicação).
-5. **Fila assíncrona, não requisição síncrona**: ingestão, classificação e upload rodam como jobs via Symfony Messenger, nunca bloqueando a UI.
+Há duas exceções ao princípio 5. O download de vídeo e o rebaixar individual rodam dentro da requisição, com timeout de 300 s. O pipeline depois do download continua assíncrono.
 
 ---
 
 ## 2. Arquitetura
 
-### 2.1 Componentes
-
 ```
-Fontes de mídia
-├── Bot de download (link → vídeo)
-├── Agente de print — PC empresa
-├── Agente de print — PC pessoal
-└── Upload manual (dashboard)
+Fontes
+├── Tela de Downloads (link ──► vídeo)
+├── Agente de prints (PC empresa e PC pessoal)
+├── Upload manual
+└── Editor de imagem (nova mídia)
         │
         ▼
-Serviço de ingestão (fila assíncrona, dedupe por hash)
+Ingestão (dedupe: SHA-256 ► MD5 ► hash visual ► URL)
         │
         ▼
-Motor de classificação (regra por categoria/origem, ou decisão manual)
+Classificação (OrigemRegra ou decisão manual)
         │
-        ├──► Worker de distribuição local (pasta X/Y/Z → Syncthing sincroniza)
-        │
-        └──► Worker de upload Google Fotos (API appendonly → álbum correspondente)
-        │
-        ▼
-Dashboard (React) — consome API própria, nunca fala direto com Syncthing/Google
+        ├──► Distribuição local ──► Syncthing ──► Celular e PCs
+        └──► Envio ao Google Fotos ──► Álbum da categoria
+
+Rotinas diárias: limpeza de vídeos e expiração de áudios
+Módulo separado: Downloads MP3 (entidade Audio)
 ```
 
-### 2.2 Stack
+### Stack
 
-- **Backend**: PHP 8.4 + Symfony 7.3, JSON API, Clean Architecture/DDD (herdado do Catalyst Skeleton)
-- **Async**: Symfony Messenger + workers dedicados por tipo de job (ingestão, classificação, distribuição local, upload Google Fotos)
-- **Frontend**: React 19 + TypeScript, SPA
-- **Banco**: o mesmo do skeleton (MySQL via Docker)
-- **Integrações externas**: Syncthing REST API, Google Photos Library API (`photoslibrary.appendonly`, `photoslibrary.edit.appcreateddata`)
+| Camada | Tecnologia |
+| :--- | :--- |
+| Backend | PHP 8.4, Symfony 7.3, Doctrine ORM 3 |
+| Assíncrono | Symfony Messenger (transporte Doctrine) e Scheduler |
+| Frontend | React 19, TypeScript 5.9, Vite 7, Chakra UI 3 |
+| Banco | MySQL 8.3 |
+| Mídia | yt-dlp, ffmpeg, TikWM, FxTwitter |
+| Integrações | Syncthing REST API, Google Photos Library API |
+| Agente | Python (requests, watchdog, python-dotenv) |
 
-### 2.3 Fluxo de estados de um item de mídia
-
-```
-recebido → em_fila → classificado → distribuindo → distribuido_local
-                                                  → enviando_google_fotos → concluido
-                                                                          → erro (com motivo)
-```
-
-Cada transição é registrada com timestamp, pra permitir auditoria e retry granular.
+Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.md), [AUTH.md](../stack/AUTH.md) e [MESSENGER.md](../stack/MESSENGER.md).
 
 ---
 
-## 3. Módulos (v1)
+## 3. Páginas e módulos
 
-### 3.1 Downloads de vídeo
+| Rota | Tela | Documento |
+| :--- | :--- | :--- |
+| `/login` | Login | [AUTH.md](../stack/AUTH.md) |
+| `/`, `/dashboard`, `/app` | Dashboard | [DASHBOARD.md](DASHBOARD.md) |
+| `/central-midias`, `/todas-midias` | Central de Mídias | [CENTRAL_MIDIAS.md](CENTRAL_MIDIAS.md) |
+| `/downloads` | Downloads de vídeo | [DOWNLOADS_VIDEOS.md](DOWNLOADS_VIDEOS.md) |
+| `/downloads-mp3` | Downloads MP3 | [DOWNLOADS_AUDIO.md](DOWNLOADS_AUDIO.md) |
+| `/prints` | Prints & Capturas | [PRINTS.md](PRINTS.md) |
+| `/editor-imagem` | Editor de Imagem | [EDITOR_IMAGEM.md](EDITOR_IMAGEM.md) |
+| `/upload-manual` | Upload Manual | [UPLOAD_MANUAL.md](UPLOAD_MANUAL.md) |
+| `/google-fotos` | Google Fotos | [GOOGLE_FOTOS.md](GOOGLE_FOTOS.md) |
 
-**Objetivo**: baixar mídia de qualquer plataforma suportada (YouTube, TikTok, Twitter/X, Instagram, + o que o `yt-dlp` cobrir) e roteá-la.
+Processos sem tela própria:
 
-**Funcionalidades Implementadas**:
-- Campo de input de link com validação de URL e detecção em tempo real de plataformas (`CampoNovoLink`).
-- Fila de download com status em tempo real via polling automático e mensagens assíncronas no Messenger (`BaixarVideoMessage` -> `BaixarVideoMessageHandler` via `yt-dlp`).
-- Extração de metadados completa (`ExtrairMetadataVideoService`): título, uploader, duração, thumbnail e url original.
-- Ingestão automática pós-download (`IngestarMediaService`) acionando o pipeline de classificação e distribuição.
-- Grid de itens (`GridVideos` e `CardVideo`): thumbnail com fallback, badges de status, duração, uploader, categoria vinculada e data relativa.
-- Seleção múltipla (checkbox por card + selecionar/desmarcar todos).
-- Filtros e busca: por status, origem, busca textual por título/canal/hash e paginação backend integrada.
-- Ações em lote e individuais (`BarraAcoesEmLote` e modais interativos): categorizar, rebaixar (redownload), editar metadados parciais, retentar falhas e apagar arquivos do disco e banco.
-
-**Estrutura Técnica Real**:
-- **Backend**:
-  - DTOs: `BaixarVideoDTO`, `FiltrarMediaItemDTO`, `CategorizarLoteDTO`, `RebaixarLoteDTO`, `ApagarLoteDTO`, `AtualizarMetadataMediaItemDTO`.
-  - Services: `BaixarVideoService`, `BaixarVideoDownloadService`, `ExtrairMetadataVideoService`, `MediaItemService`, `ValidadorUrlPlataforma`.
-  - Mensagens & Handlers: `BaixarVideoMessage`, `BaixarVideoMessageHandler`.
-  - Controllers & Endpoints: `DownloadController` (`POST /api/v1/downloads`), `MediaItemController` (`GET /api/v1/media-itens`, `POST /api/v1/media-itens/lote/*`, `PATCH /api/v1/media-itens/{uuid}`).
-- **Frontend**:
-  - `web/features/downloads-video/`: `types.ts`, `api.ts`, `hooks/useDownloadsVideo.ts`, `components/CardVideo.tsx`, `components/GridVideos.tsx`, `components/CampoNovoLink.tsx`, `components/BarraAcoesEmLote.tsx`, `DownloadsVideo.tsx`.
-  - `web/pages/DownloadsVideo/DownloadsVideo.tsx`: ponto de entrada da rota `/downloads`.
-
-
-### 3.2 Prints automáticos
-
-**Objetivo**: eliminar upload manual de screenshots, mantendo a separação entre PC da empresa e PC pessoal.
-
-**Componentes**:
-- Agente leve rodando em cada máquina, monitorando a pasta de screenshots do sistema operacional
-- Cada agente tem uma origem fixa e pré-configurada (não pergunta categoria toda vez — já sabe pra onde vai)
-- Debounce de arquivo (evita processar captura ainda sendo escrita em disco)
-- Envio pro serviço de ingestão central com metadata de origem anexada
-
-**Sem página de decisão manual no fluxo padrão** — a automação é o objetivo principal deste módulo. Reclassificação manual, se necessário, acontece pelo dashboard.
-
-### 3.3 Upload manual
-
-**Objetivo**: cobrir mídia que não passa pelo bot nem pelos agentes de print — arquivos que já existem no dispositivo do usuário.
-
-**Funcionalidades**:
-- Área de drag-and-drop / seleção de múltiplos arquivos (foto e vídeo misturados)
-- Checagem de duplicidade por hash antes de aceitar (aviso, não bloqueio silencioso)
-- Fila de triagem pós-upload: cada arquivo aparece sem categoria até o usuário definir
-- Mesma UI de seleção em lote + definição de destino usada nos outros módulos
-- Pipeline mais curto que o de download: upload → classificar → distribuir (sem etapa de "baixar")
-
-### 3.4 Motor de classificação e roteamento
-
-Não é uma página — é o núcleo do sistema, usado pelos três módulos acima.
-
-**Responsabilidades**:
-- Manter o cadastro de categorias: nome, pasta local correspondente, `album_id` do Google Fotos correspondente
-- Receber itens da fila de ingestão e aplicar a categoria (automática por regra de origem, ou aguardando decisão manual)
-- Garantir idempotência: hash do arquivo como chave de deduplicação
-- Dois workers de distribuição, disparados após a classificação:
-  - **Worker de distribuição local**: copia/move o arquivo pra pasta observada pelo Syncthing
-  - **Worker de upload Google Fotos**: usa a API com escopo `appendonly`, envia o arquivo, adiciona ao álbum, e **grava o `media_id` retornado no banco** — esse dado é essencial pra permitir reclassificação futura (trocar de álbum exige `batchAddMediaItems`/`batchRemoveMediaItems`, e só é possível pra itens que o próprio app enviou)
-
-**Regras de categoria por origem** (configuráveis):
-- Print PC empresa → categoria fixa (sem decisão manual)
-- Print PC pessoal → categoria fixa (sem decisão manual)
-- Bot de download → categoria escolhida no pedido ou no dashboard
-- Upload manual → categoria escolhida no dashboard
-
-### 3.5 Dashboard
-
-**Objetivo**: visão e controle central de todo o ecossistema — não só mídia, mas o pipeline inteiro.
-
-**Seções**:
-
-1. **Visão geral**
-   - Cards de totais: total de itens, baixado, classificado, sincronizado localmente, no Google Fotos, com erro
-   - Quebra por origem: bot / print-empresa / print-pessoal / upload-manual
-
-2. **Por categoria**
-   - Lista de categorias com contagem de itens, tamanho total, pasta local e álbum Google Fotos mapeados
-   - Edição do mapeamento categoria → pasta/álbum direto pela UI (sem mexer em config)
-
-3. **Status de sincronização**
-   - Estado de cada pasta no Syncthing (ativa/pausada) por dispositivo
-   - Botão de "sincronizar agora" por pasta, via API REST do Syncthing (sem precisar abrir o app no celular)
-   - Espaço usado: VPS, celular, e o que já está seguro no Google Fotos (indicador de "pode limpar local")
-
-4. **Erros e retry**
-   - Lista de falhas (distribuição local ou upload Google Fotos) com motivo
-   - Ação de reenviar/reprocessar item por item ou em lote
-
-5. **Reclassificação manual**
-   - Trocar categoria de um item já processado — dispara mover de pasta local e trocar de álbum no Google Fotos (usando o `media_id` guardado)
-
-6. **Upload manual** (módulo 3.3, acessível a partir do dashboard)
-
-### 3.6 Gestão de Álbuns do Google Fotos
-
-**Objetivo**: Visualizar os álbuns criados e gerenciados pela aplicação, controlar status de vínculo com as categorias locais, vincular álbuns órfãos e integrar a escolha de álbum no momento do download.
-
-**Funcionalidades Implementadas**:
-- **Gate de Conexão Google (`GateConexaoGoogle`)**: Verificação de status da conta via `GET /api/v1/google-fotos/status` (`StatusContaGoogleFotosDTO`, `ObterStatusContaGoogleFotosService`), exibindo instruções de autenticação CLI (`make google-fotos-autorizar`) quando desconectado e liberando a interface com badge de e-mail e data de conexão quando ativo.
-- **Listagem e Cruzamento de Álbuns (`GridAlbuns`)**: Consumo de `GET /api/v1/google-fotos/albuns` (`ListarAlbunsGoogleFotosService`), cruzando os álbuns retornados pelo Google Fotos com a base de categorias do banco, identificando álbuns vinculados (`vinculado: true` com nome e pasta local) e álbuns órfãos (`vinculado: false`).
-- **Cards de Métricas Rápidas**: Contagem de total de álbuns, vinculados, órfãos e categorias sem álbum no Google Fotos.
-- **Vínculo Manual Bidirecional (`ModalVincularAlbum`)**: Vínculo e alteração de álbuns e categorias com persistência via `PATCH /api/v1/categorias/{uuid}/album` (`VincularAlbumDTO`, `VincularAlbumCategoriaService`).
-- **Guia de Migração Manual (`AvisoMigracaoAlbuns`)**: Card explicativo sobre as restrições de escopo da Google Photos API (`photoslibrary.readonly.appcreateddata`, `photoslibrary.appendonly`) e guia prático em 3 passos para migração de fotos de álbuns legados.
-- **Categorização Prévia no Download (`CampoNovoLink`)**: Seletor de categorias integrado com indicador de álbum Google Fotos, enviando `categoriaId` no `POST /api/v1/downloads` para que a mídia nasça classificada e seja despachada imediatamente para distribuição local e Google Fotos.
-- **Navegação Cruzada**: Atalho "Gerenciar Álbuns Google" no Dashboard (`TabelaCategorias`) e atalho "Dashboard" nos cards de álbuns vinculados (`GridAlbuns`).
+- [Categorias e regras](CATEGORIAS_E_REGRAS.md)
+- [Agente de prints](AGENTE.md)
+- [Syncthing](SYNCTHING.md)
+- [Retenção, limpeza e rebaixar](RETENCAO_E_LIMPEZA.md)
 
 ---
 
-## 4. Modelo de dados (essencial)
+## 4. Ciclo de vida de uma mídia
 
-### 4.1 `media_item`
+```
+recebido ──► em_fila ──► sem_categoria (aguarda o usuário)
+                    └──► classificado ──► distribuindo ──► distribuido_local
+                                                                 │
+                                       enviando_google_fotos ◄───┘
+                                                 │
+                                             concluido ──► arquivo_removido
+                                                                 │
+                                                baixando ◄───────┘ (rebaixar)
+
+Qualquer etapa pode terminar em erro, com o motivo salvo em erroMotivo.
+```
+
+| Status | Significado |
+| :--- | :--- |
+| `recebido`, `em_fila` | Entrada no pipeline |
+| `sem_categoria` | Aguarda decisão manual |
+| `classificado` | Categoria definida |
+| `distribuindo`, `distribuido_local` | Cópia para a pasta da categoria |
+| `baixando` | Download ou rebaixar em andamento |
+| `enviando_google_fotos` | Envio ao álbum |
+| `concluido` | Pipeline completo |
+| `erro` | Falha, com motivo |
+| `arquivo_removido` | Arquivo removido pela retenção; o registro permanece |
+| `arquivo_expurgado` | Nome legado, mantido por compatibilidade |
+
+As mudanças de status ficam em `historicoStatus`, com data e hora.
+
+---
+
+## 5. Modelo de dados
+
+| Entidade | Finalidade |
+| :--- | :--- |
+| `MediaItem` | Mídia e todo o seu estado |
+| `Categoria` | Destino: pasta e álbum |
+| `OrigemRegra` | Categoria automática por origem |
+| `Audio` | MP3 baixado por um usuário |
+| `ContaGoogleFotos` | Conta conectada e tokens |
+| `RegistroEnvioGoogleFotos` | Histórico de envios |
+| `TokenAgente` | Credencial de cada agente |
+| `Usuario` | Usuários do sistema |
+| `RefreshToken` | Renovação de sessão |
+
+### Campos principais de `MediaItem`
+
 | Campo | Descrição |
-|---|---|
-| `id` | identificador interno |
-| `hash` | hash do arquivo, usado pra deduplicação |
-| `origem` | `bot` \| `print_empresa` \| `print_pessoal` \| `upload_manual` |
-| `status` | `recebido` \| `em_fila` \| `classificado` \| `distribuindo` \| `distribuido_local` \| `enviando_google_fotos` \| `concluido` \| `erro` |
-| `categoria_id` | FK pra `categoria` (nullable até classificação) |
-| `caminho_local` | path do arquivo na VPS/pasta observada |
-| `google_photos_media_id` | id retornado pela API do Google Fotos após upload (nullable até envio) |
-| `plataforma_origem` | quando vem do bot: YouTube/TikTok/Twitter/Instagram etc |
-| `metadata` | título, uploader, data de captura, tamanho |
-| `erro_motivo` | texto do último erro, se houver |
-| `criado_em`, `atualizado_em` | timestamps |
-
-### 4.2 `categoria`
-| Campo | Descrição |
-|---|---|
-| `id` | identificador interno |
-| `nome` | ex: X, Y, Z |
-| `pasta_local` | caminho da pasta observada pelo Syncthing |
-| `google_photos_album_id` | id do álbum criado pela app via `albums.create` |
-
-### 4.3 `origem_regra`
-Mapeia origem fixa → categoria automática (usado pelos agentes de print, que não pedem decisão manual).
+| :--- | :--- |
+| `uuid` | Identificador UUID v7 |
+| `hash` | Hash único, usado na deduplicação |
+| `origem` | `print_empresa`, `print_pessoal`, `bot_telegram`, `download` ou `manual` |
+| `status` | Veja a seção 4 |
+| `categoriaId` | Categoria, se houver |
+| `caminhoLocal` | Arquivo no disco; nulo depois da retenção |
+| `googlePhotosMediaId` | ID retornado pelo Google |
+| `thumbnailUrl` | Miniatura |
+| `metadata` | JSON com título, autor, datas, tamanho, plataforma e demais dados |
+| `erroMotivo` | Último erro |
+| `historicoStatus` | Histórico de transições |
+| `criadoEm`, `atualizadoEm` | Datas de controle |
+| `dataExibicao` | Data usada na ordenação da tela de Downloads |
 
 ---
 
-## 5. Integrações externas
+## 6. Armazenamento
 
-### 5.1 Syncthing
-- REST API local/remota pra: consultar status de pasta, pausar/retomar pasta, disparar sync sob demanda
-- Sync no celular fica com granularidade de **pasta/categoria**, não arquivo individual — o Syncthing não tem (ainda) modo nativo de "baixar sob demanda" por arquivo, essa é uma limitação conhecida e aceita no design
-
-### 5.2 Google Photos API
-- Escopo `photoslibrary.appendonly` para upload e criação de álbum
-- Escopo `photoslibrary.edit.appcreateddata` para editar título/capa de álbum criado pela app
-- Escopo `photoslibrary.readonly.appcreateddata` para listar álbuns gerenciados pela aplicação
-- **Limitação de Escopo & Política de Segurança do Google**: A API do Google Photos não permite listar nem auditar álbuns ou fotos criados previamente ou fora da aplicação. Apenas os recursos gerados pelo próprio CirqueiraX estão acessíveis para leitura e gestão.
-- **Guia de Migração Manual de Álbuns Antigos**:
-  1. *Criação da Categoria*: Crie a categoria no CirqueiraX para gerar o álbum correspondente no Google Fotos com controle total de ciclo de vida.
-  2. *Seleção Manual no Google Fotos*: Acesse [photos.google.com](https://photos.google.com), entre no álbum legado/antigo e selecione as mídias desejadas.
-  3. *Adição ao Álbum CirqueiraX*: Use a função "Adicionar a (+)" e escolha o álbum gerenciado pelo CirqueiraX. As fotos passarão a integrar o álbum sem perder a catalogação.
-- **Componentes no Frontend**:
-  - `GateConexaoGoogle.tsx`: Gate de autenticação e feedback do status OAuth da conta.
-  - `GridAlbuns.tsx`: Grid visual com capa, contagem de itens e status de vínculo com categorias.
-  - `ModalVincularAlbum.tsx`: Modal bidirecional de vinculação manual entre álbuns e categorias.
-  - `AvisoMigracaoAlbuns.tsx`: Card explicativo integrado orientando o usuário sobre a política da API e passos de migração.
-- Quota: 10.000 requisições/dia por projeto (upload, listagem, filtros); 75.000/dia pra acesso a bytes de mídia
-- Suporte a múltiplas contas (PC empresa e PC pessoal podem autenticar contas diferentes) — cada credencial OAuth gerenciada e renovada separadamente
+| Local | Conteúdo | Produção |
+| :--- | :--- | :--- |
+| `var/storage` | Pastas das categorias, sincronizadas | `${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}` |
+| `var/downloads` | Vídeos baixados | Volume `downloads_prod` |
+| `var/audios` | MP3 | Volume `audios_prod` |
+| Miniaturas | Capas em cache | Volume `thumbnails_prod` |
+| `var/cookies` | Cookies para o yt-dlp | Pasta montada a partir de `../var/cookies` |
 
 ---
 
-## 6. Fora do escopo da v1
+## 7. Fora do escopo
 
-Explicitamente adiado, não esquecido:
-
-- Reclassificação em massa retroativa de itens que já estavam no Google Fotos **antes** do sistema existir (fora do alcance da API, exigiria trabalho manual ou Google Takeout)
-- Qualquer leitura/auditoria da biblioteca já existente no Google Fotos (bloqueado pela própria API)
-- Múltiplas categorias simultâneas por item (v1 assume 1 item → 1 categoria; modelo N:N fica pra v2 se necessário)
-- Sync verdadeiramente sob demanda por arquivo individual no celular (limitação do Syncthing, não do CirqueiraX)
-- Expansão do hub pra outras ferramentas além de mídia (v2+)
+- Ler ou auditar a biblioteca existente no Google Fotos, por limitação da API.
+- Apagar mídias ou mudar datas no Google Fotos pela API.
+- Várias categorias por item: cada mídia tem uma só.
+- Sincronização sob demanda de arquivo individual, por limitação do Syncthing.
+- Cadastro público de usuários.
 
 ---
 
-## 7. Roadmap de implementação sugerido
+## 8. Pontos conhecidos
 
-**Fase 1 — Motor + downloads de vídeo**
-Aproveita a base que já existe (bot + Syncthing). Cadastro de categorias, fila de ingestão, workers de distribuição local e upload Google Fotos, grid de downloads com seleção em lote.
-
-**Fase 2 — Agentes de print**
-Script de watcher pra cada PC, com origem fixa mapeada, integrado à mesma fila de ingestão da Fase 1.
-
-**Fase 3 — Upload manual**
-Página de drag-and-drop reaproveitando o motor de classificação já existente.
-
-**Fase 4 — Dashboard completo**
-Visão geral, por categoria, status de sync, erros/retry, reclassificação manual — consumindo o estado que os workers das fases anteriores já estão escrevendo.
-
----
-
-## 8. Perguntas em aberto (a decidir antes/durante a implementação)
-
-- [ ] Categorização no momento do pedido de download, ou só depois no grid?
-- [ ] Múltiplas categorias por item — mantém 1:1 na v1 ou já desenha N:N?
-- [ ] Onde os agentes de print rodam de forma persistente (serviço do SO, tarefa agendada, daemon)?
-- [ ] Retenção de arquivo local após confirmação de upload no Google Fotos — mantém indefinidamente ou libera espaço automaticamente após X dias?
-
----
-
-## 9. Achados da análise técnica do projeto já montado (21/09/2026)
-
-Revisão feita em cima do setup real (`scripts/setup.sh` já rodado), `DOCUMENTACAO_TECNICA.md`, o guia de padrões do time e o `README.md` do cirqueiraX v5. Registrado aqui para não perder o levantamento — resolução fica para quando a implementação começar.
-
-### 9.1 Conflitos entre documentos (resolvido no Tópico 40 do Roadmap)
-
-| Conflito | Estado Inicial | Resolução Definitiva |
-|---|---|---|
-| Biblioteca de UI | Conflito HeroUI vs Shadcn UI | HeroUI v3 + Tailwind CSS v4 como stack oficial obrigatória de UI |
-| Animação | Conflito tailwindcss-motion vs Framer Motion | `tailwindcss-motion` como padrão oficial de animação; Framer Motion opcional via `ui-extra` apenas para `AnimatePresence` |
-| Gráficos | Recharts no módulo `ui-extra` | Recharts ativado (Tópico 24) como única biblioteca adicional do `ui-extra` em uso |
-
-### 9.2 Módulos opcionais desativados no setup atual
-
-Confirmado no log de setup: `async=0 | observability=0 | ui-extra=0`.
-
-- **`async` (Messenger + Scheduler + Supervisor) — bloqueador real**: todo o motor de classificação e roteamento (seção 3.4) pressupõe fila assíncrona e workers. Sem o módulo ativo, download/upload/distribuição rodariam de forma síncrona no request HTTP — trava a UI e não sobrevive a restart de container no meio de um job. **Precisa ser ativado antes da Fase 1 do roadmap.**
-- **`observability` (Sentry)**: recomendado dado que o pipeline depende de três integrações externas com falhas possíveis (Syncthing, Google Photos API, yt-dlp). Sem isso, only Monolog em arquivo/stderr — funcional, mas exige checagem manual.
-- **`ui-extra` (Framer Motion + Recharts)**: necessário para os gráficos do dashboard (seção 3.5) e para cumprir a regra de animação do guia de padrões, caso essa regra seja mantida.
-
-### 9.3 Lacunas de infraestrutura não cobertas por nenhum documento
-
-- **Volume compartilhado com o Syncthing**: nenhum bind mount documentado entre o container Symfony e a pasta observada pelo Syncthing na VPS. Necessário para o worker de distribuição local (seção 3.4) conseguir escrever onde o Syncthing lê.
-- **Autenticação máquina-a-máquina**: `security.yaml` documentado só cobre login humano via JWT. Os agentes de print e o serviço de ingestão do bot precisam de um mecanismo próprio (ex: token de serviço de longa duração por agente), distinto do fluxo de refresh token de 30 dias pensado para o usuário humano.
-- **Rate limiter de ingestão**: o limitador `api` (60 req/min) pode bloquear rajadas de screenshots ou uploads em lote. Vale um limitador dedicado para os endpoints de ingestão dos módulos 3.1–3.3.
-- **Armazenamento de credenciais OAuth multi-conta**: nenhuma estratégia definida para guardar com segurança os refresh tokens do Google Fotos de contas diferentes (PC empresa vs PC pessoal) — precisa de coluna criptografada ou tabela de segredos dedicada.
-
-### 9.4 Ordem recomendada para destravar a implementação
-
-1. Resolver o conflito de UI (HeroUI vs Shadcn/Framer Motion) ✅ Concluído (Tópico 40)
-2. Ativar o módulo `async` (pré-requisito estrutural, não opcional para este projeto)
-3. Definir autenticação dos agentes/bot (separada do JWT de usuário)
-4. Adicionar volume Docker compartilhado com o Syncthing
-5. Definir onde/como guardar os tokens OAuth multi-conta do Google Fotos
+- O download de vídeo é síncrono, e `BaixarVideoMessage` não é despachada pela aplicação.
+- A fila de downloads depende da aba aberta e não recomeça sozinha depois de recarregar a página.
+- `devops/crontab` existe, mas a imagem de produção não inicia cron. As rotinas de produção usam o Scheduler.
+- `web/features/home/Home.tsx` não está ligada a nenhuma rota.
+- A origem `bot_telegram` continua no modelo e nos filtros, mas este repositório não contém um bot.

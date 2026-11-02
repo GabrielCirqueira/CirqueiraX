@@ -1,346 +1,204 @@
-# Guia Completo do Agente de Ingestão de Prints (`./agente/`)
+# Agente de Prints (`agente/`)
 
-O **Agente CirqueiraX** é o componente cliente multiplataforma desenvolvido em Python que roda em segundo plano nas máquinas do usuário (PCs de trabalho, estações pessoais, laptops) para capturar e enviar automaticamente capturas de tela (screenshots) para o servidor central do CirqueiraX.
-
----
-
-## 1. Visão Geral e Filosofia de Design
-
-No fluxo de trabalho tradicional, salvar um print de trabalho ou pessoal requer:
-1. Tirar a captura de tela.
-2. Localizar o arquivo salvo no sistema de arquivos.
-3. Abrir o navegador ou aplicativo de armazenamento.
-4. Fazer upload manual e escolher a pasta ou álbum correto.
-
-Com o **Agente CirqueiraX**, esse atrito é **reduzido a zero**:
-- Você tira o print (`PrintScreen`, atalho do sistema ou ferramenta de captura).
-- O agente detecta o novo arquivo instantaneamente na pasta do SO.
-- Após estabilização da escrita em disco, calcula a assinatura digital (hash SHA-256) para deduplicação.
-- O agente despacha o arquivo via API (`POST /api/v1/ingestao/print`) autenticado por um token de serviço exclusivo daquela máquina (`X-Agent-Token`).
-- O servidor CirqueiraX reconhece a origem (ex: `print_empresa` ou `print_pessoal`) e classifica automaticamente na pasta e álbum configurados, sem nenhuma ação manual do usuário.
+O **Agente CirqueiraX** é um programa em Python que roda em segundo plano no computador. Ele observa a pasta de screenshots e envia cada print novo ao servidor, sem ação manual.
 
 ---
 
-## 2. Diagrama de Fluxo e Arquitetura
+## 1. Fluxo
 
 ```
-┌────────────────────────────────────────────────────────┐
-│ MÁQUINA CLIENTE (PC Empresa / PC Pessoal)              │
-│                                                        │
-│  [ Captura de Tela ] ──► Salva em ~/Pictures/Screenshots
-│                                │
-│                                ▼
-│  [ watcher.py ] ───────► Evento de criação/modificação
-│                                │
-│                                ▼
-│  [ watcher.py ] ───────► Aguarda estabilização (Debounce 3s)
-│                                │
-│                                ▼
-│  [ estado.py ] ────────► Calcula SHA-256 e confere estado local
-│                                │
-│                                ├─ Já enviado? ──► Ignora
-│                                └─ Novo? ───────► Prossegue
-│                                                        │
-│                                                        ▼
-│  [ cliente.py ] ───────► POST multipart /api/v1/ingestao/print
-│                          Header: X-Agent-Token: cx_ag_...
-└────────────────────────────────┬───────────────────────┘
-                                 │ HTTPS / HTTP
-                                 ▼
-┌────────────────────────────────────────────────────────┐
-│ SERVIDOR CIRQUEIRAX (VPS / Backend Symfony)            │
-│                                                        │
-│  1. TokenAgenteAuthenticator valida o cabeçalho        │
-│  2. IngestarPrintService recebe o arquivo              │
-│  3. OrigemRegra mapeia token.origem ──► Categoria      │
-│  4. Arquivo distribuído localmente e sincronizado      │
-│     via Syncthing e Google Fotos (se configurado)      │
-└────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│ COMPUTADOR                                           │
+│                                                      │
+│  Captura de tela salva na pasta observada            │
+│              │                                       │
+│              ▼                                       │
+│  watcher.py: detecta e aguarda o arquivo estabilizar │
+│              │                                       │
+│              ▼                                       │
+│  estado.py: calcula o SHA-256                        │
+│              ├─ Já enviado ──► ignora                │
+│              └─ Novo ────────► envia                 │
+│              │                                       │
+│              ▼                                       │
+│  cliente.py: POST /api/v1/ingestao/print             │
+│              Header X-Agent-Token: cx_ag_...         │
+└──────────────┬───────────────────────────────────────┘
+               ▼
+┌──────────────────────────────────────────────────────┐
+│ SERVIDOR                                             │
+│  Autentica o token e identifica a origem             │
+│  Ingere, classifica, distribui e envia ao Google     │
+└──────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 3. Estrutura do Diretório `./agente/`
-
-O agente adota uma arquitetura modular limpa, isolando o núcleo de código Python, os templates de configuração e os utilitários de inicialização:
+## 2. Estrutura
 
 ```text
 agente/
-├── agente.py                # Ponto de entrada canônico (CLI: start, status, test)
-├── requirements.txt         # Dependências do pacote (watchdog, requests, python-dotenv)
-├── README.md                # Guia rápido de uso local
-├── .env.example             # Template padrão de variáveis de ambiente
-│
-├── core/                    # Módulo Python interno com as responsabilidades desacopladas
-│   ├── __init__.py          # Exportações do pacote
-│   ├── config.py            # Validação e carregamento de configurações e caminhos
-│   ├── estado.py            # Deduplicação SHA-256 e persistência de estatísticas/status
-│   ├── cliente.py           # Cliente HTTP multipart resiliente com backoff exponencial
-│   ├── watcher.py           # Observer watchdog do sistema de arquivos com debounce
-│   └── status.py            # Dashboard visual ANSI para o terminal (modo snapshot e live)
-│
-├── env/                     # Modelos de configuração prontos por perfil
-│   ├── .env.example         # Exemplo base
-│   ├── .env.empresa.example # Exemplo pronto para máquina corporativa (print_empresa)
-│   └── .env.pessoal.example # Exemplo pronto para máquina pessoal (print_pessoal)
-│
-├── scripts/                 # Atalhos convenientes para terminal do usuário
-│   ├── status.sh            # Script rápido de status para Linux / macOS
-│   └── status.bat           # Script rápido de status para Windows
-│
-└── servico/                 # Daemons e serviços de segundo plano do SO
-    ├── cirqueirax-agente.service     # Definição Systemd User Service (Linux)
-    ├── instalar-servico-linux.sh     # Instalador automático para Linux
-    ├── instalar-servico-windows.bat  # Instalador de tarefa agendada (Windows)
-    └── com.cirqueirax.agente.plist   # Definição Launchd Daemon (macOS)
+├── agente.py                 CLI do agente
+├── requirements.txt          watchdog, requests, python-dotenv
+├── README.md
+├── core/
+│   ├── comandos.py           Implementação dos comandos da CLI
+│   ├── config.py             Configurações e caminhos
+│   ├── estado.py             Hashes enviados e estatísticas
+│   ├── cliente.py            Envio HTTP com novas tentativas
+│   ├── watcher.py            Observador, debounce e varredura de pendentes
+│   └── status.py             Painel no terminal
+├── env/                      Modelos de .env (padrão, empresa e pessoal)
+├── scripts/                  status.sh e status.bat
+└── servico/
+    ├── instalar-servico-windows.ps1   Instalador atual do Windows
+    ├── instalar-servico-windows.bat   Instalador antigo por tarefa agendada
+    ├── instalar-servico-wsl.sh
+    ├── instalar-servico-linux.sh
+    ├── cirqueirax-agente.service      Serviço systemd de usuário
+    └── com.cirqueirax.agente.plist    Launchd (macOS)
 ```
-
-| Componente | Responsabilidade |
-| :--- | :--- |
-| [`agente.py`](file:///home/gabriel/dev/CirqueiraX/agente/agente.py) | CLI canônico do agente: `start`, `status`, `test` e `version`. |
-| [`core/watcher.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/watcher.py) | Observador do sistema de arquivos (`watchdog`): captura eventos e estabiliza arquivos com debounce de 3s. |
-| [`core/estado.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/estado.py) | Gerenciador de estado local e deduplicação: cálculo de hash SHA-256 e métricas diárias/acumuladas. |
-| [`core/cliente.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/cliente.py) | Cliente HTTP (`requests`): envio multipart/form-data com retry e backoff exponencial para falhas de rede. |
-| [`core/config.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/config.py) | Configurações dinâmicas carregadas a partir de variáveis de ambiente e arquivos `.env`. |
-| [`core/status.py`](file:///home/gabriel/dev/CirqueiraX/agente/core/status.py) | Formatador e renderizador do dashboard ANSI no terminal (com suporte ao flag `--watch`). |
 
 ---
 
-## 4. Variáveis de Ambiente e Configuração
-
-O arquivo `config.py` carrega o `.env` do diretório do agente:
+## 3. Configuração
 
 ```bash
-# URL do endpoint de ingestão de prints no backend (Porta 4010 no Nginx de desenvolvimento)
-SERVER_URL=http://localhost:4010/api/v1/ingestao/print
+# Endpoint de ingestão
+SERVER_URL=https://x.cirqueira.com/api/v1/ingestao/print
 
-# Token de serviço emitido no backend (obrigatório)
+# Token da máquina (obrigatório)
 AGENT_TOKEN=cx_ag_seu_token_aqui
 
-# Diretório a ser monitorado onde o SO salva screenshots
+# Pasta observada
 WATCH_DIR=~/Pictures/Screenshots
 
-# Segundos que o tamanho do arquivo deve permanecer fixo antes do envio
+# Segundos de espera para o arquivo estabilizar
 DEBOUNCE_SECONDS=3.0
 
-# Arquivo JSON local para rastreamento de hashes já enviados
+# Hashes já enviados
 STATE_FILE=~/.cirqueirax_enviados.json
 
-# Nível de verbosidade do log (DEBUG, INFO, WARNING, ERROR)
+# Nome da máquina
+INSTANCE_NAME=PC-Principal
+
+# Observação por varredura, necessária em /mnt/c no WSL
+USE_POLLING=true
+POLLING_INTERVAL=1.5
+
 LOG_LEVEL=INFO
 ```
 
----
-
-## 5. Como Emitir Tokens no Backend
-
-Cada máquina cliente deve possuir seu próprio token. No backend do CirqueiraX, utilize o comando:
-
-```bash
-# Token para a máquina corporativa
-make agente-token ARGS="\"Agente PC Empresa\" print_empresa"
-
-# Token para a máquina pessoal
-make agente-token ARGS="\"Agente PC Pessoal\" print_pessoal"
-```
-
-O comando exibirá a chave gerada (prefixada por `cx_ag_...`). Copie essa chave para o `AGENT_TOKEN` no `.env` da respectiva máquina.
+A origem (`print_empresa` ou `print_pessoal`) vem do token no servidor, não do `.env`.
 
 ---
 
-## 6. Instalação e Execução
+## 4. Gerar o token
 
-### 6.1. Em Desenvolvimento / Testes Manuais
-
-```bash
-cd agente
-python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env      # Configure os valores no .env
-python3 agente.py
-```
-
-### 6.2. Em Produção como Serviço de Sistema Operacional
-
-#### WSL2 (Vigiando a Pasta do Windows com PollingObserver)
-Para rodar no WSL2 monitorando a pasta de prints do Windows (`/mnt/c/Users/<usuario>/Pictures/Screenshots`), utilize o instalador com suporte automático a `PollingObserver`:
+Cada máquina tem o próprio token:
 
 ```bash
-chmod +x agente/servico/instalar-servico-wsl.sh
-./agente/servico/instalar-servico-wsl.sh
+make agente-token ARGS="\"PC Empresa\" print_empresa"
+make agente-token ARGS="\"PC Pessoal\" print_pessoal"
 ```
-Ou via comando CLI:
+
+O comando mostra a chave `cx_ag_...`. Copie para `AGENT_TOKEN`. No banco fica apenas o hash SHA-256 dela.
+
+---
+
+## 5. Instalação
+
+### Windows (recomendado)
+
+```powershell
+python agente\agente.py install
+# ou
+powershell -ExecutionPolicy Bypass -File agente\servico\instalar-servico-windows.ps1
+```
+
+Comportamento atual (M79 e M81):
+
+- Copia o agente para `%LOCALAPPDATA%\CirqueiraX\agente`.
+- Procura a pasta `Pictures\Screenshots` ou `Pictures\Capturas de tela`.
+- Usa `https://x.cirqueira.com/api/v1/ingestao/print` como `SERVER_URL` padrão.
+- Inicia oculto no login, pela pasta **Inicializar** do Windows.
+- Grava o log em `agente.log`, dentro da pasta de instalação.
+
+O agente nativo substituiu o serviço do WSL nesse fluxo, portanto mantenha só um deles ativo por máquina.
+
+### WSL2
+
 ```bash
 python3 agente/agente.py install
 ```
 
-#### Linux Nativo (Systemd User Service)
-O script configura o serviço no systemd do próprio usuário (sem necessidade de privilégios de root):
+O assistente configura o caminho em `/mnt/c/...` e ativa o polling, porque essa montagem não entrega eventos do sistema de arquivos.
+
+### Linux
+
 ```bash
-chmod +x agente/servico/instalar-servico-linux.sh
 ./agente/servico/instalar-servico-linux.sh
+systemctl --user status cirqueirax-agente.service
+journalctl --user -u cirqueirax-agente.service -f
 ```
-- Status: `systemctl --user status cirqueirax-agente.service`
-- Logs: `journalctl --user -u cirqueirax-agente.service -f`
 
-#### Windows Nativo (Agendador de Tarefas)
-Execute o script em lote na pasta `servico` (caso queira rodar o Python nativo do Windows em vez de rodar dentro do WSL):
-```cmd
-agente\servico\instalar-servico-windows.bat
-```
-Ele cria a tarefa `CirqueiraX_Agente` para rodar automaticamente ao efetuar login.
+### macOS
 
-#### macOS (Launchd)
 ```bash
-mkdir -p ~/Library/LaunchAgents
 cp agente/servico/com.cirqueirax.agente.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.cirqueirax.agente.plist
 ```
 
----
-
-## 7. Comandos Utilitários do Terminal e Troca de Ambientes
-
-O agente fornece uma suíte de comandos utilitários diretamente no terminal, permitindo gerenciar variáveis de ambiente, trocar entre ambiente local e produção sem abrir arquivos de texto, testar conectividade, despachar imagens avulsas para validação imediata e resetar históricos locais.
-
-### 7.1. Alteração de URL e Alternador de Ambientes (`url` e `env`)
-
-Para testar o agente localmente e alternar dinamicamente para VPS ou produção:
+### Desenvolvimento
 
 ```bash
-# Visualizar a URL atual, ambiente detectado e ping de teste
-python3 agente/agente.py url
-
-# Alterar a URL diretamente pelo terminal (grava automaticamente no .env)
-python3 agente/agente.py url http://localhost:4010
-python3 agente/agente.py url https://cirqueirax.com
-
-# Alternar rapidamente entre perfis de ambiente:
-python3 agente/agente.py env local             # http://localhost:4010/api/v1/ingestao/print
-python3 agente/agente.py env local 4010        # http://localhost:4010/api/v1/ingestao/print
-python3 agente/agente.py env prod https://meusite.com  # Produção HTTPS
-python3 agente/agente.py env vps 72.60.14.61   # http://72.60.14.61:8080/api/v1/ingestao/print
+cd agente
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python3 agente.py start
 ```
 
-> [!TIP]
-> O agente normaliza URLs automaticamente: ao informar apenas `http://localhost:4010` ou `https://meusite.com`, o caminho `/api/v1/ingestao/print` é anexado automaticamente.
+---
 
-### 7.2. Painel e Gerenciador de Configurações (`config`)
+## 6. Comandos
+
+| Comando | Função |
+| :--- | :--- |
+| `start` | Inicia o observador |
+| `status` | Mostra o painel; `--watch` atualiza ao vivo |
+| `url` | Mostra ou altera a URL do servidor |
+| `env` | Alterna entre perfis `local`, `prod` e `vps` |
+| `config` | Mostra ou altera configurações |
+| `test` | Testa API e token |
+| `send` | Envia uma imagem; `--force` ignora a dedupe local |
+| `reset` | Limpa `--hashes`, `--stats` ou `--all` |
+| `install` | Instala conforme o sistema |
 
 ```bash
-# Exibir o painel de variáveis carregadas com validação de arquivos
-python3 agente/agente.py config
-
-# Alterar variáveis individuais com persistência no .env
-python3 agente/agente.py config --token cx_ag_a837a4f7...
+python3 agente/agente.py url https://x.cirqueira.com
+python3 agente/agente.py env local 4010
+python3 agente/agente.py env prod https://seu-dominio.com
+python3 agente/agente.py env vps <IP_DA_VPS>
+python3 agente/agente.py config --token cx_ag_...
 python3 agente/agente.py config --watch-dir ~/Pictures/Screenshots
 python3 agente/agente.py config --name "Notebook Pessoal"
-
-# Definir ou consultar chaves arbitrárias
 python3 agente/agente.py config set LOG_LEVEL DEBUG
 python3 agente/agente.py config get SERVER_URL
+python3 agente/agente.py send /caminho/imagem.png --force
 ```
 
-### 7.3. Testes Manuais e Envio Avulso de Print (`test` e `send`)
-
-Excelente para validar a comunicação com a API, validação do token e regras de ingestão sem precisar aguardar um print real do SO:
-
-```bash
-# Testar saúde da API e autenticação do token
-python3 agente/agente.py test
-
-# Testar uma URL ou token temporário antes de salvar no .env
-python3 agente/agente.py test --url https://cirqueirax.com
-
-# Despachar manualmente uma imagem para validação imediata
-python3 agente/agente.py send /caminho/para/imagem.png
-
-# Forçar reenvio (ignora deduplicação local SHA-256)
-python3 agente/agente.py send /caminho/para/imagem.png --force
-```
-
-### 7.4. Limpeza de Histórico e Estado Local (`reset`)
-
-```bash
-# Limpar hashes de arquivos enviados (permite reenviar imagens locais existentes)
-python3 agente/agente.py reset --hashes
-
-# Zerar contadores diários e acumulados
-python3 agente/agente.py reset --stats
-
-# Limpar tanto hashes quanto estatísticas
-python3 agente/agente.py reset --all
-```
-
-### 7.5. Painel de Status e Métricas (`status`)
-
-Exibe o painel visual formatado com cores ANSI (estilo `systemctl status`):
-
-```bash
-# Via CLI canônico do agente
-python3 agente/agente.py status
-
-# Modo Live Monitor (atualiza o terminal a cada 2 segundos):
-python3 agente/agente.py status --watch
-
-# Ou diretamente pelos atalhos em scripts/
-./agente/scripts/status.sh          # No Linux / macOS
-agente\scripts\status.bat           # No Windows
-./agente/scripts/status.sh -w       # Live monitor
-```
-
-### 7.3. Exemplo de Saída do Terminal
-
-```text
-● CirqueiraX Agente — Ingestão de Prints
-──────────────────────────────────────────────────────────────
-  Status:            ● Ativo (em execução) (PID 28419, rodando há 2h 15m)
-  Perfil/Máquina:    PC Empresa
-  Pasta Vigiada:     /home/usuario/Pictures/Screenshots [OK]
-  Servidor:          https://cirqueirax.com/api/v1/ingestao/print
-  Conexão API:       ● Online (HTTP 200)
-  Token de Acesso:   cx_ag_a8...5fb8
-
-  Estatísticas de Hoje (11/10/2026):
-  ├─ Enviados hoje:       14 prints (32.4 MB)
-  ├─ Falhas hoje:         0
-  └─ Taxa de sucesso:     100.0%
-
-  Métricas Acumuladas (Histórico Geral):
-  ├─ Total de envios:     342 arquivos (891.2 MB)
-  └─ Total de falhas:     1
-
-  Último Envio Concluído:
-  └─ ✔ Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
-
-  Última Falha Registrada:
-  └─ ✖ Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
-     Motivo: Falha após 3 tentativas (Timeout de rede)
-
-  Atividades Recentes (Últimos Eventos):
-  • ✔ Sucesso: Screenshot_20261011_183005.png (2.1 MB) — 18:30:05 (há 2m)
-  • ✔ Sucesso: Screenshot_20261011_181512.png (1.8 MB) — 18:15:12 (há 17m)
-  • ✖ Falha:   Screenshot_20261011_152010.png — 15:20:10 (há 3h 12m)
-──────────────────────────────────────────────────────────────
-```
-
-### 7.4. Teste de Conexão Rápido
-
-```bash
-python3 agente/agente.py test
-```
+Ao informar apenas o domínio, o agente completa o caminho `/api/v1/ingestao/print`.
 
 ---
 
-## 8. Tolerância a Falhas e Resiliência
+## 7. Resiliência
 
-1. **Escrita Incompleta do Arquivo (Debounce)**:
-   Aguardar `DEBOUNCE_SECONDS` com comparação contínua de tamanho em bytes (`st_size`) previne uploads de imagens cortadas ou corrompidas.
-2. **Quedas Temporárias de Conexão**:
-   Caso o servidor esteja reiniciando ou sem conexão temporária, o agente executa até 3 tentativas com pausa exponencial (`2s`, `4s`, `8s`).
-3. **Idempotência Garantida**:
-   Se o agente reiniciar ou o sistema operacional disparar múltiplos eventos para o mesmo arquivo, o hash SHA-256 gravado no `STATE_FILE` garante que a imagem não será duplicada no banco nem consumirá banda desnecessária.
-4. **Desacoplamento Assíncrono**:
-   O processamento pesado (geração de thumbnails, categorização, cópia para o Syncthing e upload para o Google Fotos) ocorre via Symfony Messenger no servidor; a resposta HTTP para o agente é rápida e assíncrona.
-
+1. **Arquivo incompleto:** o envio espera `DEBOUNCE_SECONDS` com o tamanho estável.
+2. **Queda de conexão:** até 3 tentativas com espera crescente.
+3. **Sem duplicação local:** o SHA-256 em `STATE_FILE` impede novo envio do mesmo arquivo.
+4. **Sem duplicação no servidor:** a ingestão também faz dedupe.
+5. **Prints perdidos (M80):** `varrer_pendentes` envia ao iniciar o que chegou com o agente desligado.
+6. **Envio múltiplo (M82):** o `_lock_andamento` impede que eventos repetidos enviem o mesmo arquivo em paralelo.
+7. **Limite do servidor:** 300 requisições por minuto, por token.

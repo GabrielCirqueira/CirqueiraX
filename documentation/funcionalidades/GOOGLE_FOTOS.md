@@ -1,116 +1,169 @@
-# Funcionalidade: Integração com Google Fotos
+# Funcionalidade: Google Fotos
 
-A integração do **CirqueiraX** com o **Google Fotos** permite fazer backup e organizar automaticamente capturas de tela e vídeos em álbuns dedicados da sua conta do Google Fotos, operando de forma 100% assíncrona e em segundo plano.
-
----
-
-## 1. Princípios e Limitações da API
-
-1. **Upload Append-Only**: O CirqueiraX cria novas mídias e gerencia apenas o conteúdo enviado por ele mesmo. Devido a limitações oficiais de segurança da Google Photos Library API (em vigor desde 2025), aplicações de terceiros não podem deletar ou alterar fotos já existentes na biblioteca do usuário fora dos itens que a própria aplicação criou.
-2. **Escopos Granulares OAuth 2.0**:
-   - `https://www.googleapis.com/auth/photoslibrary.appendonly` — Permite carregar bytes de fotos e vídeos e criar itens na biblioteca.
-   - `https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata` — Permite listar álbuns criados pelo CirqueiraX.
-   - `https://www.googleapis.com/auth/photoslibrary.edit.appcreateddata` — Permite adicionar mídias aos álbuns criados pelo aplicativo.
-   - `https://www.googleapis.com/auth/userinfo.email` — Identifica a conta vinculada.
-3. **Associação por Categoria**: Cada mídia no CirqueiraX pertence a uma `Categoria`. Se a categoria tiver um `google_photos_album_id` configurado, o upload para a nuvem ocorre automaticamente após a classificação da mídia.
+A integração faz o backup das mídias em álbuns do Google Fotos. O envio roda em segundo plano, por categoria, e cada tentativa fica registrada no **Histórico de Envios**.
 
 ---
 
-## 2. Fluxo de Autorização e Credenciais (OAuth 2.0)
+## 1. Princípios e limitações
 
-### 2.1. Variáveis de Ambiente no `.env`
-O arquivo `.env` do backend armazena as credenciais do aplicativo configuradas no Google Cloud Console:
+- **Só o que o app criou:** a Google Photos Library API só dá acesso ao conteúdo enviado pelo próprio CirqueiraX.
+- **Sem apagar e sem mudar data (M84):** a API não exclui mídias nem altera a data de itens já enviados. Por isso, apagar no CirqueiraX não apaga no Google Fotos.
+- **Conta única:** o sistema trabalha com uma conta principal (`ContaGoogleFotos`).
 
-```bash
-GOOGLE_CLIENT_ID=seu_google_client_id_aqui.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=seu_google_client_secret_aqui
-```
+### Escopos OAuth
 
-### 2.2. Como Conectar a Conta do Google Fotos
-A autorização inicial gera uma URL de consentimento do Google e salva o `refresh_token` de longa duração no banco de dados através da CLI:
+| Escopo | Uso |
+| :--- | :--- |
+| `photoslibrary.appendonly` | Enviar mídias e criar álbuns |
+| `photoslibrary.readonly.appcreateddata` | Listar o que o app criou |
+| `photoslibrary.edit.appcreateddata` | Gerenciar itens e álbuns do app |
+| `photoslibrary` e `photoslibrary.sharing` | Também solicitados na autorização |
+| `userinfo.email` e `openid` | Identificar a conta |
 
-```bash
-# Executar comando de autorização
-docker exec -it cirqueirax_symfony php bin/console app:google-fotos:autorizar
-```
-Ou pelo atalho do Makefile:
+A lista oficial está em `AutorizarContaGoogleFotosService::SCOPES`.
+
+---
+
+## 2. Conectar a conta
+
+### Pela tela `/google-fotos`
+
+1. Clique em conectar. `ModalConectarGoogleFotos` abre a URL de consentimento (`GET /api/v1/google-fotos/oauth/url`).
+2. Autorize no Google.
+3. Copie a URL final ou o código (`http://localhost/?code=...`) e cole no modal.
+4. O sistema conclui com `POST /api/v1/google-fotos/oauth/concluir`.
+
+Com o token expirado, a tela mostra **Reconectar**. **Desconectar** usa `POST /api/v1/google-fotos/desconectar`.
+
+### Pelo terminal
+
 ```bash
 make google-fotos-autorizar
+# ou
+php bin/console app:google-fotos:autorizar-conta
 ```
 
-1. O comando exibirá uma URL do Google no terminal.
-2. Abra a URL no navegador, faça login na sua conta do Google e autorize as permissões.
-3. O Google exibirá um código de autorização ou redirecionará para a rota de callback.
-4. Cole o código no terminal quando solicitado.
-5. O backend troca o código pelo `refresh_token` e salva na tabela de configurações.
-6. A partir desse momento, o backend renova os tokens de acesso temporários automaticamente sem necessidade de qualquer intervenção do usuário.
+### Credenciais
+
+```bash
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
 
 ---
 
-## 3. Pipeline de Sincronização Assíncrona
+## 3. Envio
 
 ```
-[ Mídia Classificada com Álbum ]
+[ Mídia classificada com álbum ]
               │
-              ▼
     EnviarGoogleFotosMessage
               │
-              ▼
-   [ Symfony Messenger Worker ]
+    EnviarGoogleFotosService
+       ├─ Já enviado ou Franky? ──► ignora, sem registro
+       ├─ Conteúdo igual já enviado? ──► reaproveita o mediaId e associa ao álbum
+       ├─ Arquivo faltando? ──► tenta rebaixar
+       ├─ PNG? ──► cópia temporária com data em eXIf/XMP
+       └─ Sobe os bytes e cria o item no álbum
               │
-              ▼
-   EnviarGoogleFotosMessageHandler
+    RegistrarEnvioGoogleFotosService
               │
-              ▼
-   GooglePhotosUploadService
-       ├─ 1. Valida/Renova Access Token (GooglePhotosTokenService)
-       ├─ 2. Envia bytes brutos em chunks (X-Goog-Upload-Protocol: raw)
-       ├─ 3. Recebe uploadToken temporário do Google
-       └─ 4. Executa batchCreate vinculando uploadToken ao albumId
-              │
-              ▼
-   Atualiza MediaItem (status = concluido, googlePhotosMediaItemId = ...)
+    status concluido
 ```
 
-### 3.1. Tratamento de Erros e Quota
-- **Falha de Rede Temporária**: O Symfony Messenger realiza até 3 retentativas automáticas com espera exponencial.
-- **Quota Excedida ou Token Revogado**: O item é marcado com status `erro` e o motivo detalhado é salvo em `erro_motivo`.
-- **Reprocessamento**: Pelo painel do dashboard ou pela listagem de mídias, basta clicar em **Retentar** para recolocar o upload na fila.
+- `GoogleFotosAlbumService::obterOuCriarAlbumId` cria o álbum automaticamente quando a categoria ainda não tem um.
+- O envio inclui `fileName`, para o Google mostrar o nome do arquivo.
+- A descrição fica no formato `CirqueiraX | Categoria: X | Origem: Y`.
+- Vídeos e imagens saem com a data gravada no arquivo. Em PNG, ela é aplicada por `MetadataImagemClient::gerarCopiaPngComData`.
+
+### Controle de concorrência
+
+`GoogleFotosAPI::executarComSemaforoERetry` serializa as escritas com um lock de arquivo, espera 300 ms entre elas e faz até 4 tentativas em respostas 429, com espera progressiva e aleatória. Isso evita o erro de escrita concorrente mesmo com dois workers.
+
+### Falhas
+
+O Messenger faz até 3 novas tentativas com espera crescente. Se a falha persistir, o item fica como `erro`, com o motivo em `erroMotivo`, e pode ser retentado pela interface. Veja [MESSENGER.md](../stack/MESSENGER.md).
 
 ---
 
-## 4. Gerenciamento de Álbuns na Interface Web (`/google-fotos`)
+## 4. Tela `/google-fotos`
 
-A tela de Google Fotos oferece gestão completa da integração:
+### Álbuns
 
-1. **Badge de Status de Conexão**: Mostra se a conta está conectada e o e-mail da conta vinculada.
-2. **Listagem de Álbuns**:
-   - Título do álbum no Google Fotos.
-   - Quantidade de mídias contidas no álbum.
-   - Categoria do CirqueiraX vinculada (ex: `Prints`, `videos/memes`, etc.).
-3. **Criação de Novos Álbuns**: Permite criar um álbum novo diretamente pelo CirqueiraX, registrando-o instantaneamente no Google Fotos.
-4. **Vinculação Manual**: Permite associar qualquer categoria local a um álbum remoto existente.
+- `GateConexaoGoogle` mostra o estado da conexão.
+- `GridAlbuns` cruza os álbuns do Google com as categorias e identifica vinculados e órfãos.
+- `ModalVincularAlbum` liga categorias e álbuns via `PATCH /api/v1/categorias/{uuid}/album`.
+- `AvisoMigracaoAlbuns` explica a migração de fotos antigas.
+
+A tela não cria álbuns: eles nascem no primeiro envio de cada categoria.
+
+### Migrar álbuns antigos
+
+1. Crie a categoria no CirqueiraX e gere o álbum.
+2. Abra o álbum antigo em [photos.google.com](https://photos.google.com) e selecione as mídias.
+3. Use **Adicionar a** e escolha o álbum do CirqueiraX.
+
+### Histórico de Envios
+
+Entidade `RegistroEnvioGoogleFotos`, criada na migration `Version20261021112252`.
+
+- Tabela com filtro por status e contadores das últimas 24 horas.
+- Link para o item no Google Fotos.
+- Botão **Reenviar**.
+- Atualização automática a cada 15 segundos.
+
+| Status | Significado |
+| :--- | :--- |
+| `enviando` | Em andamento |
+| `enviado` | Bytes enviados com sucesso |
+| `reaproveitado` | Usou um item já enviado |
+| `falha` | Não foi concluído |
+
+| Origem do envio | Significado |
+| :--- | :--- |
+| `automatico` | Pipeline normal |
+| `retentativa` | Retentativa de erro |
+| `reenvio_manual` | Botão Reenviar |
+| `forcado` | Forçar Google Fotos |
 
 ---
 
-## 5. Prevenção de Duplicatas e Deduplicação Inteligente
+## 5. Duplicados
 
-Para evitar consumo desnecessário de cota da API do Google Fotos e acúmulo de arquivos repetidos na nuvem e no disco, o CirqueiraX conta com uma camada robusta de **deduplicação baseada em metadados**:
+1. Na ingestão, o sistema compara SHA-256, MD5, hash visual e URL. Quando encontra um item igual, descarta o temporário e devolve o existente.
+2. No envio, um item com `googlePhotosMediaId` não sobe de novo.
+3. Conteúdo igual em outra categoria só é associado ao álbum novo, sem novo upload.
+4. **Forçar Google Fotos** ignora esse bloqueio e grava `google_photos_forcado: true`.
 
-1. **Extração e Persistência de Metadados (`ExtratorMetadataService`)**:
-   - Cada arquivo ingerido tem seus metadados extraídos automaticamente: `hash_sha256`, `hash_md5`, `tamanho_bytes`, `mime_type`, `dimensoes` (para imagens), `data_criacao_arquivo` e `fingerprint` (`<tamanho>:<md5>`).
-2. **Identificação Prévia de Duplicatas**:
-   - Quando um arquivo é enviado novamente (via Upload Manual, download de vídeo com a mesma URL/conteúdo ou prints do celular), o sistema cruza os hashes e fingerprints com o banco de dados.
-   - O item existente é identificado, e o arquivo temporário duplicado é descartado do disco para não ocupar espaço redundante.
-3. **Bloqueio de Upload Repetido no Google Fotos (`EnviarGoogleFotosService`)**:
-   - **Guarda de Idempotência**: Se o item já tiver um `googlePhotosMediaId` ou metadado `google_photos_id`, o serviço aborta imediatamente sem reenviar bytes.
-   - **Reaproveitamento de IDs entre Registros**: Se um arquivo tiver conteúdo idêntico a outro já enviado anteriormente ao Google Fotos, o `googlePhotosMediaId` é reutilizado. Caso a mídia pertença a outra categoria/álbum, ela é apenas associada ao novo álbum via API, **sem fazer upload repetido dos bytes**.
-4. **Confirmação e Sincronização Forçada a Pedido do Usuário**:
-   - Quando uma mídia é enviada e identificada como duplicada no frontend, um modal interativo notifica o usuário e pergunta se deseja sincronizar com o Google Fotos mesmo assim.
-   - Se confirmado, o endpoint `POST /api/v1/media-itens/{uuid}/forcar-google-fotos` efetua o upload e inclusão no álbum remoto ignorando o bloqueio de duplicidade e registra `google_photos_forcado: true` nos metadados.
-   - O usuário também pode acionar essa sincronização a qualquer momento através do botão **Forçar Google Fotos** nos cards de triagem e na fila de upload.
-5. **Comando de Indexação de Metadados**:
-   - Para reindexar ou preencher metadados de itens históricos já existentes no banco de dados:
-     ```bash
-     docker exec -it cirqueirax_symfony php bin/console app:media:indexar-metadados
-     ```
+Para indexar metadados de itens antigos:
+
+```bash
+php bin/console app:media:indexar-metadados
+```
+
+---
+
+## 6. API
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/google-fotos/status` | Estado da conexão |
+| `GET` | `/api/v1/google-fotos/oauth/url` | URL de consentimento |
+| `POST` | `/api/v1/google-fotos/oauth/concluir` | Conclui a autorização |
+| `POST` | `/api/v1/google-fotos/desconectar` | Desconecta a conta |
+| `GET` | `/api/v1/google-fotos/albuns` | Lista álbuns e vínculos |
+| `GET` | `/api/v1/google-fotos/envios` | Histórico |
+| `GET` | `/api/v1/google-fotos/envios/resumo` | Contadores |
+| `POST` | `/api/v1/google-fotos/envios/{uuid}/reenviar` | Reenvia |
+| `POST` | `/api/v1/media-itens/{uuid}/forcar-google-fotos` | Força o envio |
+
+---
+
+## 7. Comandos
+
+| Comando | Função |
+| :--- | :--- |
+| `app:google-fotos:autorizar-conta` | Autoriza a conta pelo terminal |
+| `app:google-fotos:enviar` | Envia mídias pendentes |
+| `app:google-fotos:limpar-duplicados-franky` | Trata duplicados de itens importados do Franky |
+| `app:media:indexar-metadados` | Preenche metadados de itens antigos |

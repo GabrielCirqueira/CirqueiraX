@@ -8,7 +8,6 @@
 | [funcionalidades/](funcionalidades/) | Como funcionam os processos e regras de negócio de cada módulo do sistema |
 | [stack/](stack/) | Arquitetura técnica: frontend, backend, autenticação, processamento assíncrono |
 | [ops/](ops/) | Como operar o repositório: Docker, deploy, Makefile, CLI, lint |
-| [referencia/](referencia/) | Visão global, árvore de pastas e padrões de arquitetura |
 | [progresso/](progresso/) | Roadmap, índice de tópicos e melhorias pontuais |
 
 ---
@@ -17,15 +16,21 @@
 
 | Arquivo | Descrição |
 | :--- | :--- |
-| [funcionalidades/CIRQUEIRAX.md](funcionalidades/CIRQUEIRAX.md) | Visão geral do hub, princípios de design e arquitetura macro |
-| [guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md](guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md) | **Manual definitivo do ecossistema**: sincronização, Google Fotos, Celular (Syncthing-Fork) e Agente PC |
-| [funcionalidades/PRINTS.md](funcionalidades/PRINTS.md) | Captura de screenshots, deduplicação SHA-256 e galeria minimalista (Google Fotos) |
-| [funcionalidades/AGENTE.md](funcionalidades/AGENTE.md) | Agente cliente Python (`agente.py`), daemons (WSL/Linux/Windows) e comandos do terminal |
-| [funcionalidades/DOWNLOADS_VIDEOS.md](funcionalidades/DOWNLOADS_VIDEOS.md) | Download yt-dlp, extração de metadados, player, triagem e escalonamento de horários em lote |
-| [funcionalidades/GOOGLE_FOTOS.md](funcionalidades/GOOGLE_FOTOS.md) | Backup OAuth2, upload append-only, criação e vinculação de álbuns |
-| [funcionalidades/SYNCTHING.md](funcionalidades/SYNCTHING.md) | Sincronização via pasta raiz única (`cirqueirax-media`), `.stignore` e réplica no Android |
-| [funcionalidades/UPLOAD_MANUAL.md](funcionalidades/UPLOAD_MANUAL.md) | Upload manual via dropzone na web, barra de progresso e validação MIME |
-| [funcionalidades/CATEGORIAS_E_REGRAS.md](funcionalidades/CATEGORIAS_E_REGRAS.md) | Motor de regras de origem (`OrigemRegra`), categorias e distribuição física em disco |
+| [funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md](funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md) | **Guia para o cliente**: todas as páginas e funcionalidades em linguagem simples |
+| [funcionalidades/CIRQUEIRAX.md](funcionalidades/CIRQUEIRAX.md) | Visão técnica geral: arquitetura, páginas, ciclo da mídia e modelo de dados |
+| [guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md](guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md) | **Manual do ecossistema**: sincronização, Google Fotos, Celular (Syncthing-Fork) e Agente PC |
+| [funcionalidades/DASHBOARD.md](funcionalidades/DASHBOARD.md) | Painel inicial, métricas, categorias, sincronização e fila de erros |
+| [funcionalidades/CENTRAL_MIDIAS.md](funcionalidades/CENTRAL_MIDIAS.md) | Biblioteca unificada, abas, filtros, ações em lote e atalhos |
+| [funcionalidades/DOWNLOADS_VIDEOS.md](funcionalidades/DOWNLOADS_VIDEOS.md) | Download de vídeos, fila, estratégias por plataforma, triagem e horários em lote |
+| [funcionalidades/DOWNLOADS_AUDIO.md](funcionalidades/DOWNLOADS_AUDIO.md) | Download de MP3, player, estados e retenção de 7 dias |
+| [funcionalidades/PRINTS.md](funcionalidades/PRINTS.md) | Ingestão de screenshots e galeria de prints |
+| [funcionalidades/EDITOR_IMAGEM.md](funcionalidades/EDITOR_IMAGEM.md) | Editor de imagem, ferramentas, atalhos e salvamento como nova mídia |
+| [funcionalidades/UPLOAD_MANUAL.md](funcionalidades/UPLOAD_MANUAL.md) | Upload pela web, formatos, limites e duplicados |
+| [funcionalidades/AGENTE.md](funcionalidades/AGENTE.md) | Agente de prints em Python, instalação por sistema e comandos |
+| [funcionalidades/GOOGLE_FOTOS.md](funcionalidades/GOOGLE_FOTOS.md) | OAuth, envio, álbuns, duplicados e histórico de envios |
+| [funcionalidades/SYNCTHING.md](funcionalidades/SYNCTHING.md) | Pasta sincronizada, integração e réplica no Android |
+| [funcionalidades/CATEGORIAS_E_REGRAS.md](funcionalidades/CATEGORIAS_E_REGRAS.md) | Categorias, regras de origem, distribuição e troca de categoria |
+| [funcionalidades/RETENCAO_E_LIMPEZA.md](funcionalidades/RETENCAO_E_LIMPEZA.md) | Limpeza de vídeos, expiração de áudios e rebaixar |
 
 ---
 

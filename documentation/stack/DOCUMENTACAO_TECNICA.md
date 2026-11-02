@@ -1,6 +1,8 @@
-# cirqueiraX — Documentação Técnica
+# CirqueiraX — Documentação Técnica
 
-Referência técnica completa do **cirqueiraX** — fundação opinativa para aplicações full-stack construídas com **PHP 8.4 + Symfony 7.3** no backend e **React 19 + TypeScript 5.9** no frontend.
+Referência técnica do **CirqueiraX**, hub pessoal de mídias construído com **PHP 8.4 + Symfony 7.3** no backend e **React 19 + TypeScript 5.9** no frontend.
+
+> **Última revisão:** 02/11/2026. Regras de negócio e fluxos estão em [funcionalidades/](../funcionalidades/CIRQUEIRAX.md).
 
 ---
 
@@ -44,16 +46,17 @@ Referência técnica completa do **cirqueiraX** — fundação opinativa para ap
 | Monolog | 3.x | Logs estruturados (JSON em produção) | ✅ Core |
 | PHPStan | 2.x | Análise estática — nível 6 | ✅ Core |
 | PHP_CodeSniffer | 3.x | Estilo de código PSR-12 | ✅ Core |
-| Symfony Messenger | 7.x | Fila de mensagens com transporte Doctrine | 🔧 Módulo `async` |
-| Symfony Scheduler | 7.x | Tarefas agendadas nativas | 🔧 Módulo `async` |
-| Supervisor | 4.x | Gerenciador de processos (workers Messenger) | 🔧 Módulo `async` |
-| Sentry SDK | 5.x | Rastreamento de erros em produção | 🔧 Módulo `observability` |
+| Symfony Messenger | 7.x | Fila de mensagens com transporte Doctrine | ✅ Core |
+| Symfony Scheduler | 7.x | Tarefas agendadas nativas | ✅ Core |
+| Supervisor | 4.x | Gerenciador de processos (workers, PHP-FPM e Nginx em produção) | ✅ Core |
+| Sentry SDK | 5.x | Rastreamento de erros em produção | ✅ Core |
+| yt-dlp e ffmpeg | — | Download e tratamento de áudio, vídeo e metadados | ✅ Core |
 
 ### Frontend
 
 | Tecnologia | Versão | Papel | Core? |
 | :--- | :--- | :--- | :--- |
-| React | 19.1 | UI reativa com Concurrent Mode | ✅ Core |
+| React | 19.2 | UI reativa com Concurrent Mode | ✅ Core |
 | TypeScript | 5.9 | Tipagem estática — modo strict | ✅ Core |
 | Vite | 7.2 | Build tool e dev server (HMR ultra-rápido) | ✅ Core |
 | TanStack Query | 5.90 | Cache de dados do servidor, refetching, invalidação | ✅ Core |
@@ -62,15 +65,14 @@ Referência técnica completa do **cirqueiraX** — fundação opinativa para ap
 | React Router DOM | 7.9 | Roteamento client-side com lazy loading | ✅ Core |
 | React Hook Form | 7.66 | Formulários performáticos com validação Zod | ✅ Core |
 | Zod | 4.1 | Validação de schemas (forms, respostas de API) | ✅ Core |
-| HeroUI v3 | 3.2 | Componentes UI acessíveis e prontos | ✅ Core |
-| Tailwind CSS | 4.x | Motor de estilo CSS-first — sem `tailwind.config.js` | ✅ Core |
-| tailwindcss-motion | 1.x | Animações simples via classe Tailwind — zero JS | ✅ Core |
+| Chakra UI | 3.37 | Design system e primitivos de layout | ✅ Core |
+| Tailwind CSS | 4.x | Dependência restante da migração para Chakra (M7); não é o padrão de UI | — |
+| tailwindcss-motion | 1.x | Dependência restante da migração para Chakra (M7) | — |
 | Lucide React | — | Conjunto de ícones | ✅ Core |
 | Recharts | 2.x | Gráficos reativos baseados em SVG (`web/shared/ui/chart.tsx`) | ✅ Core |
 | Biome | 1.9 | Linter + formatter + organizador de imports | ✅ Core |
-| Motion (Framer) | — | Animações com `AnimatePresence` | 🔧 Módulo `ui-extra` |
 | Husky | 9.x | Git hooks (pre-commit) | ✅ Core |
-| lint-staged | 15.x | Executa linters apenas nos arquivos staged | ✅ Core |
+| lint-staged | 16.x | Executa linters apenas nos arquivos staged | ✅ Core |
 | Commitlint | 20.x | Enforça Conventional Commits na mensagem do commit | ✅ Core |
 
 ---
@@ -79,108 +81,55 @@ Referência técnica completa do **cirqueiraX** — fundação opinativa para ap
 
 ```text
 .
-├── assets/                   # Assets Symfony (Encore/Stimulus)
-├── bin/
-│   └── console               # Console Symfony
-│
-├── cli/                      # Scripts de produtividade para desenvolvimento local
-│   ├── new-feature.sh        # Scaffolding automático de nova feature
-│   ├── run-qa.sh             # Executa bateria completa de QA
-│   ├── check-naming.sh       # Verifica nomenclatura de classes/métodos
-│   ├── phpstan.sh            # Roda PHPStan isolado
-│   ├── phpcs.sh              # Roda PHP_CodeSniffer
-│   ├── phpcbf.sh             # Auto-correção PHP_CodeSniffer
-│   ├── phpcbf-diff.sh        # Mostra diff antes de corrigir
-│   ├── frontend-lint.sh      # Roda Biome lint no frontend
-│   ├── frontend-fix.sh       # Corrige lints e formata frontend via Biome
-│   ├── install-hooks.sh      # Instala hooks do Husky
-│   ├── pre-commit.sh         # Hook pre-commit (PHPStan + Biome)
-│   ├── remove-comments.sh    # Remove comentários desnecessários
-│   └── symfony               # Atalho: php bin/console dentro do container
-│
+├── agente/                   # Agente Python de prints
+├── bin/console               # Console Symfony
+├── cli/                      # Scripts de QA, lint e atalhos de desenvolvimento
 ├── config/
-│   ├── bundles.php           # Registro de bundles Symfony
-│   ├── preload.php           # OPcache preloading
-│   ├── routes.yaml           # Rotas globais
-│   ├── services.yaml         # DI container: autowiring, parâmetros
-│   ├── jwt/                  # Chaves RS256 (geradas pelo bootstrap.sh)
-│   └── packages/             # Configuração de cada bundle
-│       ├── security.yaml                      # Firewalls, voters, role hierarchy
-│       ├── lexik_jwt_authentication.yaml      # TTL do access token
-│       ├── gesdinet_jwt_refresh_token.yaml    # TTL do refresh token (30 dias)
-│       ├── rate_limiter.yaml                  # Limitadores (login/api)
-│       ├── nelmio_cors.yaml                   # Regras CORS
-│       ├── monolog.yaml                       # Canais de log e handlers
-│       ├── messenger.yaml                     # [módulo async]  Transports e routing de mensagens
-│       └── sentry.yaml                        # [módulo observability] Configuração do Sentry
-│
+│   ├── jwt/                  # Chaves RS256
+│   ├── packages/             # Configuração dos bundles
+│   ├── routes.yaml
+│   └── services.yaml         # DI, clientes externos e parâmetros
 ├── devops/
 │   ├── docker-compose.yaml       # Stack de desenvolvimento
-│   ├── docker-compose.prod.yaml  # Stack de produção (multi-stage)
-│   ├── bootstrap.sh              # Startup da aplicação (JWT keys, permissões)
-│   ├── crontab                   # Crontab para container dev
-│   ├── apache/000-default.conf   # VirtualHost Apache (dev)
-│   ├── nginx/prod.conf           # Nginx com TLS 1.2/1.3 e cache de assets
-│   ├── php/Dockerfile            # Multi-stage: base → dev → builder → prod
-│   └── vite/Dockerfile           # Container de desenvolvimento Vite
-│
-├── migrations/               # Versionamento do schema (Doctrine Migrations)
-│
-├── public/
-│   ├── index.php             # Front controller Symfony
-│   └── build/                # Assets compilados pelo Vite (gitignored)
-│
-├── src/                      # Código PHP da aplicação
-│   ├── Kernel.php
-│   ├── Command/              # Comandos CLI (Console Component)
-│   ├── Controller/           # DefaultController (API) + FrontendController (SPA)
-│   ├── DataObject/           # DTOs: entrada validada de dados
-│   ├── Entity/               # Entidades Doctrine (UUID v7 como PK)
-│   ├── Enum/                 # Enums PHP 8.1+ usados em entidades e DTOs
-│   ├── EventListener/        # Listeners + Event/ (fatos de domínio)
-│   ├── Feature/              # TaggedIterator — lógica grande em vários services
-│   ├── Interface/            # Contratos PHP (*Interface.php)
-│   ├── Repository/           # Acesso ao banco de dados via Doctrine
-│   ├── Serializer/           # Normalizadores para o JSON de saída (contrato da API)
-│   ├── Service/              # Lógica de negócio e orquestração
-│   │
-│   │   [módulo async — copiados pelo setup.sh quando --async é ativado]
-│   ├── Message/              # Payloads de mensagens para o Messenger
-│   ├── MessageHandler/       # Handlers que consomem as mensagens
-│   └── Schedule/             # Tarefas agendadas (Symfony Scheduler)
-│
-├── templates/
-│   └── base.html.twig        # Base para e-mails e fallback server-side
-│
-├── web/                      # Código TypeScript/React da SPA
-│   ├── App.tsx               # Raiz da aplicação: providers e roteamento
-│   ├── main.tsx              # Entry point: ReactDOM.createRoot
-│   ├── index.css             # CSS global do frontend
-│   ├── vite-env.d.ts         # Types de variáveis de ambiente Vite
-│   ├── assets/               # Imagens e ícones estáticos
-│   ├── config/api.ts         # Instância Axios centralizada com interceptores JWT
-│   ├── contexts/             # Contextos React globais (ThemeProvider)
-│   ├── features/             # Módulos funcionais autossuficientes
-│   │   └── auth/             # Módulo de autenticação (páginas, calls, hooks)
-│   ├── layouts/              # MainLayout (Header + Footer), AuthLayout, AppContainer
-│   ├── pages/                # Páginas folha carregadas via React.lazy()
-│   ├── routes/RotaProtegida.tsx  # Guard: redireciona para /login se não autenticado
-│   ├── shared/ui/layout.tsx  # Primitivos: Flex, HStack, VStack, Box, Container
-│   ├── shared/               # Componentes, hooks e utils reutilizáveis
-│   └── stores/useAuthStore.ts    # Estado de autenticação (Zustand + persist)
-│
-├── .tooling/                  # Todas as configurações centralizadas
-│   ├── frontend/             # Configurações do frontend (biome, vite, tailwind, etc)
-│   ├── quality/              # Configurações de qualidade (phpstan, phpcs)
-│   ├── backend/              # Configurações backend (importmap)
-│   └── git/                  # Configurações git (commitlint)
-├── composer.json             # Dependências PHP + autoloading PSR-4
-├── Makefile                  # Atalhos de comandos
-├── package.json              # Dependências Node + scripts npm
-├── ports.env                 # Mapeamento de portas do ambiente local
-├── documentation/            # Índice em README.md — guias, stack, ops, referencia, progresso
-├── scripts/setup.sh          # Script de bootstrap inicial completo
-├── .cirqueirax-modules/        # Módulos opcionais (async, observability, ui-extra)
+│   ├── docker-compose.prod.yaml  # Stack de produção
+│   ├── bootstrap.sh              # Inicialização do container
+│   ├── crontab                   # Agenda usada fora da imagem de produção
+│   ├── supervisord.conf          # Processos em desenvolvimento
+│   ├── ports.env                 # Portas e MEDIA_STORAGE_PATH locais
+│   ├── nginx/                    # dev.conf e prod.conf
+│   └── php/                      # Dockerfile, Dockerfile.prod e supervisord-prod.conf
+├── documentation/            # Índice em documentation/README.md
+├── migrations/               # Doctrine Migrations
+├── public/                   # Front controller e assets compilados
+├── scripts/                  # Setup, deploy, update, backup, monitor e roadmap
+├── src/
+│   ├── Command/              # Comandos de console
+│   ├── Controller/           # Controllers por domínio; base em Common/DefaultController
+│   ├── DataObject/           # DTOs
+│   ├── Entity/               # Entidades Doctrine
+│   ├── Enum/                 # Enums de domínio
+│   ├── EventListener/        # Listeners
+│   ├── Exception/            # Exceções por domínio
+│   ├── Infra/                # GoogleFotos, GoogleOAuth, Imagem, Storage, Syncthing e YtDlp
+│   ├── Interface/            # Contratos
+│   ├── Message/              # Mensagens do Messenger
+│   ├── MessageHandler/       # Handlers
+│   ├── Repository/           # Consultas
+│   ├── Security/             # TokenAgenteAuthenticator
+│   ├── Serializer/           # Contratos JSON
+│   ├── Service/              # Regras de negócio
+│   ├── Support/              # Utilitários
+│   ├── ValueObject/          # Objetos de valor
+│   ├── Schedule.php          # Rotinas do Scheduler
+│   └── Kernel.php
+├── templates/                # Templates Twig
+├── var/                      # storage, downloads, audios, cookies, cache e logs
+├── web/                      # SPA React; detalhes em FRONTEND.md
+├── .skeleton-modules/        # Módulos do template original
+├── .tooling/                 # Configurações de frontend, qualidade, backend e git
+├── composer.json
+├── Makefile
+├── package.json
 └── ROADMAP.md                # Backlog do lote atual
 ```
 
@@ -204,9 +153,9 @@ O arquivo `.env` na raiz contém os valores padrão para desenvolvimento. Em pro
 
 | Variável | Exemplo | Descrição |
 | :--- | :--- | :--- |
-| `DATABASE_URL` | `mysql://app:secret@db:3306/catalyst` | DSN Doctrine completo. O host `db` é o nome do service no Docker Compose. |
+| `DATABASE_URL` | `mysql://app:secret@database:3306/cirqueirax` | DSN Doctrine completo. O host é o nome do service no Docker Compose. |
 | `MYSQL_ROOT_PASSWORD` | `rootsecret` | Senha root do container MySQL. |
-| `MYSQL_DATABASE` | `catalyst` | Nome do banco criado automaticamente. |
+| `MYSQL_DATABASE` | `cirqueirax` | Nome do banco criado automaticamente. |
 | `MYSQL_USER` | `app` | Usuário da aplicação. |
 | `MYSQL_PASSWORD` | `secret` | Senha do usuário da aplicação. |
 
@@ -238,20 +187,39 @@ Variáveis prefixadas com `VITE_` são expostas ao bundle via `import.meta.env`.
 
 | Variável | Exemplo | Descrição |
 | :--- | :--- | :--- |
-| `VITE_API_URL` | `http://localhost:1010` | URL base da API consumida pelo Axios. |
+| `VITE_API_URL` | `http://localhost:4010` | URL base da API consumida pelo Axios. |
+| `VITE_API_BASE_URL` | `http://localhost:4010` | URL base alternativa da API. |
+
+### Integrações e mídia
+
+| Variável | Exemplo | Descrição |
+| :--- | :--- | :--- |
+| `MEDIA_STORAGE_PATH` | `/var/syncthing/cirqueirax` | Pasta do host montada em `var/storage` e sincronizada pelo Syncthing. |
+| `GOOGLE_CLIENT_ID` | `...apps.googleusercontent.com` | Cliente OAuth do Google. |
+| `GOOGLE_CLIENT_SECRET` | `<segredo>` | Segredo do cliente OAuth. |
+| `SYNCTHING_API_URL` | `http://localhost:8384` | REST API do Syncthing. |
+| `SYNCTHING_API_KEY` | `<chave>` | Chave da REST API do Syncthing. |
+
+### Deploy
+
+| Variável | Exemplo | Descrição |
+| :--- | :--- | :--- |
+| `DEPLOY_PORT` | `8089` | Porta exposta pelo container de produção. |
+| `DEPLOY_DOMAIN` | `x.cirqueira.com` | Domínio de produção. |
+| `DEPLOY_BRANCH` | `main` | Branch usada no deploy. |
 
 ---
 
 ## 4. Gestão de Portas
 
-Definidas em `ports.env` e referenciadas pelo `docker-compose.yaml`. Edite esse arquivo para evitar conflitos com outros projetos locais.
+Definidas em `devops/ports.env` e referenciadas pelo `docker-compose.yaml`. Edite esse arquivo para evitar conflitos com outros projetos locais.
 
 | Container | Serviço | Porta Host (padrão) |
 | :--- | :--- | :--- |
-| `webserver` | Apache / Backend API | **1010** |
-| `supervisor` | Painel Supervisor | **1011** |
-| `vite` | Dev server frontend | **1012** |
-| `db` | MySQL (acesso externo) | **1013** |
+| `cirqueirax_nginx` | Backend API | **4010** |
+| `cirqueirax_symfony` | Painel Supervisor | **4011** |
+| `cirqueirax_vite_react` | Dev server frontend | **4012** |
+| `cirqueirax_database` | MySQL (acesso externo) | **4013** |
 
 ---
 
@@ -264,25 +232,26 @@ Definidas em `ports.env` e referenciadas pelo `docker-compose.yaml`. Edite esse 
 | **Entidades** | `src/Entity/` | Domínio rico. Invariantes e regras de negócio internas. PK em UUID v7. Sem getters/setters anêmicos. |
 | **DTOs** | `src/DataObject/` | Mapeiam o payload HTTP para um objeto tipado antes de chegar ao Service. |
 | **Repositórios** | `src/Repository/` | Único lugar onde o `EntityManager` é injetado. Queries em DQL/QueryBuilder. |
-| **Interfaces** | `src/Interface/` | Contratos. Porta (repo/HTTP) ou família tagged: `#[AutoconfigureTag]` + vários services + Feature. |
-| **Services** | `src/Service/` | **Uma** ação. `executar()`. Sem query. Peças de uma família tagged também são services. |
-| **Features** | `src/Feature/` | Padrão para lógica grande/repetida: `TaggedIterator` sobre vários services. Não faz query. Não concentra lógica num arquivo. |
+| **Interfaces** | `src/Interface/` | Contratos. Portas para repositórios e serviços externos. |
+| **Services** | `src/Service/` | **Uma** ação. `executar()`. Sem query. |
+| **Infra** | `src/Infra/` | Clientes de sistemas externos: yt-dlp, Google, Syncthing, imagem e armazenamento. |
 | **Serializers** | `src/Serializer/` | Definem o contrato JSON de saída. Protegem o frontend de mudanças internas no banco. |
-| **Controllers** | `src/Controller/` | API extends `DefaultController` (`Response`). SPA em `FrontendController`. |
+| **Controllers** | `src/Controller/` | API extends `Common/DefaultController` (`Response`). SPA em `Sistema/FrontendController`. |
 | **Events / Listeners** | `src/EventListener/` (`Event/` = fato, classes irmãs = reação) | Desacoplamento de efeitos colaterais (e-mail, auditoria). |
-| **Messages / Handlers** | `src/Message/`, `src/MessageHandler/` | Processamento assíncrono via Messenger. **Módulo `async` — só existe se ativado no setup.** |
+| **Messages / Handlers** | `src/Message/`, `src/MessageHandler/` | Processamento assíncrono via Messenger. |
 | **Commands** | `src/Command/` | CLI da aplicação via `php bin/console`. |
-| **Schedule** | `src/Schedule/` | Tarefas recorrentes nativas do Symfony Scheduler. **Módulo `async` — só existe se ativado no setup.** |
+| **Schedule** | `src/Schedule.php` | Tarefas recorrentes do Symfony Scheduler. |
 
 ### 5.2 `DefaultController`
 
-Todo controller de API extends `src/Controller/DefaultController.php` e devolve `Response`. Chaves JSON em inglês.
+Todo controller de API extends `src/Controller/Common/DefaultController.php` e devolve `Response`. Chaves JSON em inglês.
 
 | Método | HTTP | JSON |
 | :--- | :--- | :--- |
 | `$this->success($data)` | 200 | `{ success: true, data }` |
 | `$this->created($data)` | 201 | `{ success: true, data }` |
 | `$this->noContent()` | 204 | vazio |
+| `$this->unprocessable(...)` | 422 | Erro de validação |
 | `$this->error('codigo', $status, $details?)` | 4xx | `{ success: false, error, details? }` |
 | `$this->paginated($itens, $total, $pagina, $porPagina)` | 200 | `{ success, data, total, pagina, porPagina }` |
 
@@ -327,8 +296,8 @@ O sistema usa dois tokens:
 
 | Token | Bundle | TTL padrão | Como é armazenado |
 | :--- | :--- | :--- | :--- |
-| Access token | LexikJWTAuthenticationBundle | 1 hora (`JWT_TTL`) | Memória JS (Zustand) |
-| Refresh token | GesdinetJWTRefreshTokenBundle | 30 dias | Corpo da resposta / Cookie HttpOnly |
+| Access token | LexikJWTAuthenticationBundle | 1 hora (`JWT_TTL`) | Zustand persistido |
+| Refresh token | GesdinetJWTRefreshTokenBundle | 30 dias, renovável | Banco de dados |
 
 **Fluxo completo:**
 
@@ -353,7 +322,6 @@ Configurações:
 
 Endpoints públicos configurados em `access_control` (sem token necessário):
 - `POST /api/v1/auth/login`
-- `POST /api/v1/auth/registro`
 - `POST /api/v1/token/refresh`
 - `GET  /api/v1/health`
 
@@ -363,8 +331,9 @@ Endpoints públicos configurados em `access_control` (sem token necessário):
 
 | Limitador | Endpoint | Limite | Janela |
 | :--- | :--- | :--- | :--- |
-| `login` | `/api/v1/auth/login` | 5 tentativas | 1 minuto |
-| `api` | Todos os endpoints autenticados | 60 requisições | 1 minuto |
+| `login_throttling` | `/api/v1/auth/login` | 5 tentativas | 1 minuto |
+| `ingestao` | `/api/v1/ingestao/*` | 300 requisições | 1 minuto |
+| `api_standard` | Definido, mas sem consumidor no código | 60 requisições | 1 minuto |
 
 Respostas acima do limite retornam `HTTP 429 Too Many Requests`.
 
@@ -449,16 +418,15 @@ public function executar(int $filialId, bool $isAfastado): Pedido
 O frontend é organizado por domínios funcionais, não por tipo de arquivo. Cada módulo em `web/features/` é autossuficiente:
 
 ```text
-web/features/auth/
-├── pages/
-│   ├── Login.tsx
-│   └── Register.tsx
-├── hooks/
-│   └── useLogin.ts          # Hook local com TanStack Query mutation
-├── api/
-│   └── authApi.ts           # Chamadas Axios específicas de autenticação
-└── components/
-    └── FormularioLogin.tsx
+web/features/<modulo>/
+├── <Modulo>.tsx             # Tela principal
+├── components/              # Componentes da feature
+├── hooks/                   # Queries, mutations e lógica
+├── stores/                  # Zustand, quando necessário
+├── utils/                   # Funções auxiliares
+├── api.ts                   # Chamadas HTTP
+├── types.ts                 # Tipos
+└── index.ts                 # Exportações
 ```
 
 ### 6.2 Instância Axios — `web/config/api.ts`
@@ -541,9 +509,9 @@ const queryClient = new QueryClient({
 });
 ```
 
-### 6.7 Tema (HeroUI)
+### 6.7 Tema (Chakra UI)
 
-O tema é gerenciado pelo `HeroUIProvider` (em `web/main.tsx`). O modo escuro é ativado adicionando a classe `dark` ao elemento `<html>` — o `web/contexts/ThemeContext.tsx` fornece o hook `useTheme()` para alternar entre `light` e `dark`. Tailwind v4 respeita a mesma convenção de classe.
+O tema é definido em `web/config/theme/` e aplicado pelo `Provider` de `web/shared/components/ui/provider`, em `web/main.tsx`. O `ThemeProvider` de `web/contexts/ThemeContext.tsx` fornece o hook `useTheme()` para alternar entre `light` e `dark`.
 
 ### 6.9 Primitivos de Layout e Texto — Regra Obrigatória
 
@@ -828,163 +796,16 @@ export function useProdutos(pagina: number) {
 
 ## 8. Mensageria Assíncrona
 
-> **Módulo Opcional:** Messenger + Scheduler são opt-in na v5. Ative com `--async` no `setup.sh` ou instale manualmente: `composer require symfony/doctrine-messenger symfony/scheduler`. Arquivos de configuração disponíveis em `.cirqueirax-modules/async/`.
+O transporte é Doctrine, na tabela `messenger_messages`, com as filas `async` e `failed`. Todas as mensagens em `App\Message\*` vão para `async`. Em produção, o Supervisor mantém dois consumidores de `async` e um de `scheduler_default`.
 
-### Symfony Messenger
-
-O transporte padrão é **Doctrine** (tabela `messenger_messages`). Não é necessário configurar Redis ou RabbitMQ para começar.
+As rotinas recorrentes ficam em `src/Schedule.php`:
 
 ```php
-// 1. Crie o payload (Message)
-final readonly class EnviarEmailBoasVindas
-{
-    public function __construct(
-        public string $email,
-        public string $nome,
-    ) {}
-}
-
-// 2. Crie o Handler
-#[AsMessageHandler]
-final class EnviarEmailBoasVindasHandler
-{
-    public function __invoke(EnviarEmailBoasVindas $message): void
-    {
-        // Lógica de envio de e-mail...
-    }
-}
-
-// 3. Dispatch no Service
-$this->bus->dispatch(new EnviarEmailBoasVindas($usuario->email, $usuario->nome));
+RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7)),
+RecurringMessage::every('1 day', new ExpirarAudiosAntigosMessage()),
 ```
 
-O roteamento de mensagens está em `config/packages/messenger.yaml`.
-
-### Symfony Scheduler
-
-Tarefas recorrentes ficam em `src/Schedule/` e implementam `ScheduleInterface`:
-
-```php
-#[AsSchedule]
-final class TarefasRecorrentes implements ScheduleInterface
-{
-    public function getSchedule(): Schedule
-    {
-        return (new Schedule())->add(
-            RecurringMessage::cron('0 2 * * *', new GerarRelatorioNocturno()),
-        );
-    }
-}
-```
-
-### Workers (Supervisor)
-
-Em produção, o Supervisor mantém os workers do Messenger sempre ativos. Configuração em `supervisord.conf`:
-
-```ini
-[program:messenger]
-command=php /var/www/html/bin/console messenger:consume async --time-limit=3600
-autostart=true
-autorestart=true
-numprocs=2
-```
-
-### Outbox Pattern
-
-Use o Outbox quando a operação de negócio e o dispatch de mensagem precisam ser **atômicos** — ou seja, a mensagem só pode ser enviada se o dado foi persisitido com sucesso, e vice-versa. Sem Outbox, um crash entre o `flush()` e o `dispatch()` resulta em dado salvo mas evento perdido.
-
-**Estrutura da tabela outbox (`migration`):**
-
-```sql
-CREATE TABLE outbox_events (
-    id         CHAR(36)     NOT NULL PRIMARY KEY,
-    tipo       VARCHAR(255) NOT NULL,
-    payload    JSON         NOT NULL,
-    criado_em  DATETIME(6)  NOT NULL,
-    enviado_em DATETIME(6)  NULL
-);
-```
-
-**Entidade (`src/Entity/OutboxEvent.php`):**
-
-```php
-#[ORM\Entity]
-#[ORM\Table(name: 'outbox_events')]
-class OutboxEvent
-{
-    #[ORM\Id, ORM\Column(type: 'uuid')]
-    private Uuid $id;
-
-    #[ORM\Column]
-    private string $tipo;
-
-    #[ORM\Column(type: 'json')]
-    private array $payload;
-
-    #[ORM\Column]
-    private \DateTimeImmutable $criadoEm;
-
-    #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $enviadoEm = null;
-
-    public function __construct(string $tipo, array $payload)
-    {
-        $this->id       = Uuid::v7();
-        $this->tipo     = $tipo;
-        $this->payload  = $payload;
-        $this->criadoEm = new \DateTimeImmutable();
-    }
-
-    public function marcarComoEnviado(): void
-    {
-        $this->enviadoEm = new \DateTimeImmutable();
-    }
-
-    public function foiEnviado(): bool { return $this->enviadoEm !== null; }
-    public function getTipo(): string  { return $this->tipo; }
-    public function getPayload(): array { return $this->payload; }
-}
-```
-
-**Uso no Service (mesma transação que o dado principal):**
-
-```php
-public function executar(CriarPedidoDTO $dto): Pedido
-{
-    $pedido = new Pedido(...);
-    $this->em->persist($pedido);
-
-    $evento = new OutboxEvent('pedido.criado', ['id' => (string) $pedido->getId()]);
-    $this->em->persist($evento);
-
-    $this->em->flush();
-
-    return $pedido;
-}
-```
-
-**Worker (`src/Command/ProcessarOutboxCommand.php`):**
-
-```php
-#[AsCommand(name: 'app:outbox:processar')]
-class ProcessarOutboxCommand extends Command
-{
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $eventos = $this->outboxRepository->buscarNaoEnviados(limite: 100);
-
-        foreach ($eventos as $evento) {
-            $this->bus->dispatch(new GenericOutboxMessage($evento->getTipo(), $evento->getPayload()));
-            $evento->marcarComoEnviado();
-        }
-
-        $this->em->flush();
-        return Command::SUCCESS;
-    }
-}
-```
-
-Agende o worker via `MainScheduler` para rodar a cada 30 segundos ou conforme a latência aceitável do sistema.
+Catálogo de mensagens, pipeline e tratamento de falhas em [MESSENGER.md](MESSENGER.md).
 
 ---
 
@@ -1030,7 +851,7 @@ Tipos aceitos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `per
 
 ## 10. Scaffolding e Makefile
 
-### `cli/new-feature.sh`
+### `scripts/new-feature.sh`
 
 Script interativo que gera a estrutura completa de uma nova feature. Para a feature `Produto`, gera:
 
@@ -1078,94 +899,58 @@ Script interativo que gera a estrutura completa de uma nova feature. Para a feat
 
 ## 11. DevOps e Produção
 
-### 11.1 Dockerfile Multi-stage (`devops/php/Dockerfile`)
+### 11.1 Imagens
 
-```
-base    →  php:8.4-fpm-alpine + extensões (pdo_mysql, zip, intl, opcache)
-  │
-  ├── dev      →  base + Xdebug (via pecl); OPcache em modo permissivo
-  │
-  ├── builder  →  base + Composer; executa composer install --no-dev --optimize-autoloader
-  │
-  └── prod     →  copia vendor/ do builder; USER www-data; sem Xdebug; OPcache agressivo
-```
+- `devops/php/Dockerfile`: imagem de desenvolvimento, baseada em `php:8.4-fpm-alpine`.
+- `devops/php/Dockerfile.prod`: build em estágios para Composer, frontend (`node:22-alpine`) e imagem final, com Nginx, Supervisor, Python, yt-dlp e ffmpeg.
 
-O stage `prod` é a imagem final em `devops/docker-compose.prod.yaml`.
+### 11.2 `devops/bootstrap.sh`
 
-### 11.2 `devops/bootstrap.sh` — Startup do Container
-
-Executado como entrypoint do container PHP:
-
-1. Ajusta permissões de `var/cache/` e `var/log/`
-2. Se as chaves JWT não existirem, executa `php bin/console lexik:jwt:generate-keypair`
-3. Em `APP_ENV=prod`, verifica se `APP_SECRET` ainda é o valor padrão — se sim, **aborta o container com erro**
+Prepara o container: valida `APP_SECRET` em produção e encerra com erro se ainda for o valor padrão, gera as chaves JWT que faltarem e ajusta o ambiente da aplicação.
 
 ### 11.3 Stack de Produção
 
 ```
 Internet
    ↓
-Nginx (TLS 1.2/1.3, HTTP/2, Certbot)
+Proxy reverso do host (HTTPS)
    ↓
-PHP-FPM port 9000 (Alpine, sem Xdebug, OPcache ativo)
+cirqueirax_symfony_prod
+├── Nginx interno
+├── PHP-FPM
+├── messenger (2 processos)
+└── scheduler
    ↓
-MySQL 8.3
-   +
-Supervisor → Workers Messenger (2 processos, auto-restart)
+cirqueirax_database_prod (MySQL 8.3)
 ```
 
-Definida em `devops/docker-compose.prod.yaml`.
+Compose `cirqueirax-prod`, definido em `devops/docker-compose.prod.yaml`.
 
-### 11.4 Nginx de Produção (`devops/nginx/prod.conf`)
+### 11.4 Volumes
 
-- TLS 1.2 e 1.3 com certificados Let's Encrypt (Certbot)
-- HTTP/2 habilitado
-- Cache agressivo de assets estáticos: `Cache-Control: max-age=31536000, immutable`
-- Proxy reverso para PHP-FPM via FastCGI
-- Headers de segurança: HSTS, `X-Content-Type-Options`, `X-Frame-Options`
+| Origem | Destino no container |
+| :--- | :--- |
+| `${MEDIA_STORAGE_PATH:-/var/syncthing/cirqueirax}` | `/var/www/html/var/storage` |
+| `downloads_prod` | `/var/www/html/var/downloads` |
+| `audios_prod` | `/var/www/html/var/audios` |
+| `thumbnails_prod` | `/var/www/html/var/cache/thumbnails` |
+| `../var/cookies` | `/var/www/html/var/cookies` |
+| `db_data_prod` | `/var/lib/mysql` |
 
-### 11.5 `devops/deploy.sh` — Deploy Completo
+### 11.5 Scripts
 
-```bash
-git pull origin main
-composer install --no-dev --optimize-autoloader
-npm ci && npm run build
-php bin/console doctrine:migrations:migrate --no-interaction
-php bin/console cache:clear --env=prod
-sudo systemctl reload nginx
-```
+| Script | Função |
+| :--- | :--- |
+| `scripts/deploy.sh` | Deploy completo |
+| `scripts/update.sh` | Atualização |
+| `scripts/backup.sh` | Backup |
+| `scripts/monitor.sh` | Monitoramento de containers e saúde |
 
-### 11.6 `devops/update.sh` — Atualização Incremental
+Procedimentos em [DEPLOY_PRODUCAO.md](../ops/DEPLOY_PRODUCAO.md).
 
-Semelhante ao deploy, mas detecta se há mudanças de schema antes de rodar migrations, minimizando tempo de indisponibilidade.
+### 11.6 Agendamento
 
-### 11.7 `devops/backup.sh`
-
-Cria dump MySQL com `mysqldump`, comprime com `gzip` e salva com timestamp:
-
-```
-backup_2026-01-15_02-30-00.sql.gz
-```
-
-### 11.8 `devops/monitor.sh`
-
-Verifica e reporta:
-- Status dos containers Docker
-- Resposta do endpoint `GET /api/v1/health`
-- Uso de disco
-- Status dos workers do Supervisor
-
-Pode enviar alerta por e-mail/webhook em caso de falha (configurável no topo do script).
-
-### 11.9 SSL / Certbot
-
-```bash
-# Emitir certificado inicial
-certbot --nginx -d api.meusite.com.br
-
-# Renovação automática (crontab configurado no container nginx)
-certbot renew --quiet
-```
+Em produção, as rotinas usam o Symfony Scheduler. O arquivo `devops/crontab` não é iniciado pela imagem de produção.
 
 ---
 
@@ -1187,7 +972,7 @@ Exemplo de log JSON em produção:
 ```json
 {
   "message": "Falha ao processar mensagem",
-  "context": { "mensagem": "EnviarEmailBoasVindas", "tentativa": 3 },
+  "context": { "mensagem": "EnviarGoogleFotosMessage", "tentativa": 3 },
   "level": 400,
   "level_name": "ERROR",
   "channel": "messenger",
@@ -1216,13 +1001,22 @@ Resposta esperada:
 
 ```json
 {
-  "status": "ok",
-  "database": "ok",
-  "timestamp": "2026-01-15T02:30:00+00:00"
+  "success": true,
+  "data": {
+    "status": "ok",
+    "timestamp": "2026-11-02T10:00:00-03:00",
+    "services": {
+      "database": { "status": "ok" },
+      "disk": { "status": "ok", "free_mb": 2048.0, "threshold_mb": 100 }
+    },
+    "version": "1.0.0-dev"
+  }
 }
 ```
 
-Usado pelo `devops/monitor.sh` e por load balancers / orquestradores de containers.
+Se o banco ou o disco falhar, a rota responde `503`.
+
+Usado pelo `scripts/monitor.sh` e pelo healthcheck do Docker.
 
 ---
 
@@ -1283,48 +1077,9 @@ Tipos aceitos: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `per
 
 ## 14. Versionamento do CirqueiraX
 
-O cirqueiraX é versionado via **branches Git** no mesmo repositório. Cada versão maior vive em uma branch própria e permanece estável (sem novos commits após o lançamento da próxima versão).
+O desenvolvimento acontece na branch `main`, e o histórico de entregas fica em [progresso/](../progresso/README.md). O projeto nasceu de um template Symfony e React, cujos módulos ainda estão em `.skeleton-modules/`.
 
-| Branch | Versão | Status |
-| :--- | :--- | :--- |
-| `main` | **v5** (atual) | Desenvolvimento ativo — núcleo enxuto + módulos opt-in |
-| `cirqueirax-V4` | v4 | Estável — Symfony 7.3, React 19, stack monolítica |
-| `cirqueirax-v3` | v3 | Estável — somente bugfixes críticos |
-| `cirqueirax-v2` | v2 | Legado — sem manutenção |
-| `cirqueirax-v1` | v1 | Legado — sem manutenção |
-
-### Como iniciar um projeto novo
-
-Sempre use `main` como base:
-
-```bash
-git clone <repo> meu-projeto
-cd meu-projeto
-git checkout -b main-meu-projeto main  # branch local isolada do cirqueirax
-```
-
-### Como propagar melhorias do cirqueirax para um projeto existente
-
-A propagação é **manual e intencional** — esse é o trade-off aceito ao usar o modelo de branches. Projetos existentes divergem do cirqueirax, e isso é esperado.
-
-Fluxo recomendado:
-
-1. Identifique o commit/PR no cirqueirax que contém a melhoria
-2. Use `git cherry-pick <hash>` ou aplique manualmente no projeto destino
-3. Resolva conflitos caso o projeto já tenha divergido naquela área
-
-```bash
-# No repositório do projeto existente:
-git remote add cirqueirax <repo-cirqueirax>
-git fetch cirqueirax main
-git cherry-pick <hash-do-commit-no-cirqueirax>
-```
-
-### Política de breaking changes
-
-- Mudanças de interface (contrato de API, estrutura de pastas, padrões obrigatórios) só ocorrem em versões maiores (nova branch)
-- `main` pode receber adições retrocompatíveis a qualquer momento
-- Projetos derivados **nunca** devem fazer merge de `main` do cirqueirax diretamente — usam cherry-pick seletivo
+Commits seguem Conventional Commits, e a publicação usa `make push`.
 
 ---
 
@@ -1345,4 +1100,4 @@ Se o tópico mudar contrato técnico: frontend → `documentation/stack/FRONTEND
 
 ---
 
-*cirqueiraX — mantido com rigor de engenharia Symfony & React.*
+*CirqueiraX — documentação técnica.*

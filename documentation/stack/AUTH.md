@@ -1,100 +1,113 @@
-# Autenticação e Segurança (JWT & Token de Agente)
+# Autenticação e Segurança
 
-O **CirqueiraX** adota uma estratégia de autenticação dupla e totalmente *stateless*, atendendo tanto aos usuários humanos na interface web quanto aos processos clientes autônomos em segundo plano (agentes de captura de prints nas máquinas cliente).
-
----
-
-## 1. Visão Geral dos Mecanismos de Autenticação
-
-| Canal de Acesso | Mecanismo | Identificador | Destinatário | Escopo |
-| :--- | :--- | :--- | :--- | :--- |
-| **Interface Web (React / SPA)** | **JWT (RS256)** | `Authorization: Bearer <token>` | Usuários autenticados | Acesso total à API e Dashboard |
-| **Agente de Prints (Python CLI)** | **Token de Agente** | `X-Agent-Token: cx_ag_...` | Máquinas do usuário (PC Empresa / PC Casa) | Ingestão dedicada em `/api/v1/ingestao/print` |
-| **Google Photos API** | **OAuth 2.0** | Refresh Token persistido | Backend CirqueiraX | Uploads append-only e gestão de álbuns |
+O CirqueiraX usa autenticação sem sessão no servidor, com mecanismos diferentes para pessoas, agentes e Google Fotos.
 
 ---
 
-## 2. Autenticação de Usuários Web (JWT)
+## 1. Mecanismos
 
-A autenticação web utiliza **LexikJWTAuthenticationBundle** e **GesdinetJWTRefreshTokenBundle** com assinatura assimétrica **RS256** (RSA 4096 bits com SHA-256).
+| Canal | Mecanismo | Credencial | Escopo |
+| :--- | :--- | :--- | :--- |
+| Interface web | JWT RS256 | `Authorization: Bearer <token>` | API completa |
+| Stream, thumbnail e áudio | JWT na query | `?token=<token>` | Recursos abertos por tags de mídia |
+| Agente de prints | Token de agente | `X-Agent-Token: cx_ag_...` | `POST /api/v1/ingestao/print` |
+| Administração | JWT master | Gerado por `app:jwt:master` | Uso em linha de comando |
+| Google Fotos | OAuth 2.0 | Tokens em `ContaGoogleFotos` | Backup e álbuns |
 
-### 2.1. Chaves Criptográficas (RSA)
-As chaves residem no diretório protegido `config/jwt/`:
-- `private.pem`: Assina os tokens de acesso emitidos pelo backend. Nunca deve ser exposta.
-- `public.pem`: Valida a assinatura de tokens recebidos em cada requisição.
+---
 
-Para gerar novas chaves (setup inicial ou rotação):
+## 2. Usuários
+
+Não existe cadastro pela API nem pela interface. Os usuários são criados no terminal:
+
+```bash
+php bin/console app:usuario:criar
+```
+
+O provider de segurança é uma `chain`, com a entidade `Usuario` e o usuário em memória `master-cli`, usado por `app:jwt:master`.
+
+### Login
+
+O firewall `json_login` lê os campos `username` e `senha`.
+
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{ "username": "...", "senha": "..." }
+```
+
+### Tokens
+
+| Token | Duração | Observação |
+| :--- | :--- | :--- |
+| Access token (JWT) | `JWT_TTL`, padrão de 1 hora | Assinado com chave RSA |
+| Refresh token | 30 dias | Persistido no banco, com `ttl_update: true`, que renova o prazo a cada uso |
+
+As chaves ficam em `config/jwt/`. `private.pem` nunca deve ser exposta.
+
 ```bash
 php bin/console lexik:jwt:generate-keypair
 ```
 
-### 2.2. Ciclo de Vida dos Tokens
-- **Access Token (`JWT`)**: Tempo de vida curto (**1 hora**). Carrega os claims do usuário (`id`, `username`, `roles`).
-- **Refresh Token**: Tempo de vida longo (**30 dias**), persistido no banco na tabela `refresh_tokens`.
+### Endpoints
 
-### 2.3. Endpoints de Autenticação de Usuários
-| Método | Endpoint | Acesso | Descrição |
+| Método | Rota | Acesso | Descrição |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/login` | Público | Autentica com credenciais, retornando `{ token, refresh_token }` |
-| `POST` | `/api/v1/auth/registro` | Público | Cadastro de novos usuários |
-| `POST` | `/api/v1/token/refresh` | Público | Emite novo access token a partir de um refresh token válido |
-| `GET` | `/api/v1/auth/me` | Bearer JWT | Retorna perfil e permissões do usuário logado |
+| `POST` | `/api/v1/auth/login` | Público | Autentica e devolve os tokens |
+| `POST` | `/api/v1/token/refresh` | Público | Renova o access token |
+| `GET` | `/api/v1/auth/me` | JWT | Dados do usuário logado |
+| `GET` | `/api/v1/health` | Público | Saúde da aplicação |
 
-### 2.4. Renovação Automática no Frontend (`web/config/api.ts`)
-O cliente Axios possui interceptores reativos:
-1. Ao receber resposta `401 Unauthorized`, pausa requisições pendentes.
-2. Faz chamada silenciosa para `POST /api/v1/token/refresh`.
-3. Atualiza o token no Zustand store (`useAuthStore`) e `localStorage`.
-4. Re-executa as requisições que estavam pausadas.
-5. Se o refresh token expirar ou for inválido, limpa o estado e redireciona para `/login`.
+Todas as demais rotas em `/api` exigem `IS_AUTHENTICATED_FULLY`.
+
+### Renovação no frontend
+
+O interceptor em `web/config/api.ts`:
+
+1. Recebe a resposta `401`.
+2. Chama `POST /api/v1/token/refresh`.
+3. Atualiza o token.
+4. Refaz as requisições pendentes.
+5. Se o refresh falhar, limpa a sessão e volta para o login.
+
+O estado fica em `useAuthStore`, com Zustand persistido. Como o token também é usado em URLs de mídia, ele aparece nessas requisições e pode constar em logs de acesso.
 
 ---
 
-## 3. Autenticação de Agentes (`TokenAgenteAuthenticator`)
+## 3. Agentes
 
-Para permitir que agentes Python rodando no Windows, Linux ou WSL enviem prints sem expor credenciais de login interativo, o sistema implementa o autenticador customizado `TokenAgenteAuthenticator`.
-
-### 3.1. Como Funciona
-- O agente envia cada print no cabeçalho HTTP:
-  ```http
-  X-Agent-Token: cx_ag_seu_token_aqui
-  ```
-- O autenticador consulta a entidade `TokenAgente` no banco:
-  - Valida se o token existe e está ativo (`ativo = 1`).
-  - Obtém a `origem` configurada para aquela máquina (ex: `OrigemMedia::PRINT_EMPRESA` ou `OrigemMedia::PRINT_PESSOAL`).
-  - Atualiza o carimbo de data/hora do último uso (`ultimo_uso_em`).
-  - Injeta a identidade e origem do agente no contexto da requisição.
-
-### 3.2. Como Emitir Tokens para Máquinas
-No terminal do backend (via Makefile):
+`TokenAgenteAuthenticator` lê `X-Agent-Token`, calcula o SHA-256 e procura o registro em `TokenAgente`. Só tokens ativos passam. A origem vem desse registro, e a rota de ingestão exige `ROLE_AGENTE`.
 
 ```bash
-# Emitir token para a máquina corporativa
 make agente-token ARGS="\"PC Empresa\" print_empresa"
-
-# Emitir token para o computador pessoal
 make agente-token ARGS="\"PC Pessoal\" print_pessoal"
 ```
 
-A chave gerada (`cx_ag_...`) é salva no `.env` do respectivo agente (`AGENT_TOKEN`).
+A chave em texto aberto aparece só na geração. No banco fica apenas o hash.
 
 ---
 
-## 4. Rate Limiting e Proteção contra Abuso
+## 4. Limites de requisições
 
-O sistema utiliza o componente **Symfony Rate Limiter** configurado em `config/packages/rate_limiter.yaml`:
-- **Login Web**: Limite estrito de **5 tentativas por minuto** por IP, mitigando ataques de força bruta.
-- **Ingestão de Prints**: Limite generoso de **300 requisições por minuto** por token de agente, permitindo envios rápidos em sequência sem interrupção.
+Definidos em `config/packages/rate_limiter.yaml`, com política `token_bucket`:
+
+| Limitador | Limite | Aplicação |
+| :--- | :--- | :--- |
+| `login_throttling` | 5 por minuto | Login |
+| `api_standard` | 60 por minuto | Definido na configuração, mas nenhum código o consome hoje |
+| `ingestao` | 300 por minuto | `IngestaoRateLimiterListener`, por token ou IP |
+
+Ao estourar `ingestao`, a resposta é `429` com o cabeçalho `Retry-After`.
 
 ---
 
-## 5. Resumo de Segurança e Parâmetros
+## 5. Resumo
 
 | Parâmetro | Valor |
 | :--- | :--- |
-| **Assinatura JWT** | RS256 (RSA assimétrico) |
-| **Validade Access Token** | 3600 segundos (1 hora) |
-| **Validade Refresh Token** | 2.592.000 segundos (30 dias) |
-| **Hashing de Senhas** | `auto` (Argon2id ou Bcrypt com salt nativo) |
-| **Formato de Token de Agente** | Chave opaca prefixada `cx_ag_` (SHA-256) |
-| **Políticas de CORS** | Restrito a domínios autorizados via `nelmio_cors.yaml` |
+| Assinatura JWT | RS256 |
+| Access token | `JWT_TTL` |
+| Refresh token | 30 dias, renovável |
+| Token de agente | Chave `cx_ag_`, armazenada em SHA-256 |
+| CORS | `config/packages/nelmio_cors.yaml` |
