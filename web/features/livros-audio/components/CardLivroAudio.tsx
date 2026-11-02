@@ -9,7 +9,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { BookOpen, Download, FileText, Headphones, Trash2 } from 'lucide-react'
+import { BookOpen, Download, FileText, Headphones, Play, Trash2 } from 'lucide-react'
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { obterUrlPdfLivro } from '../api'
@@ -19,16 +19,19 @@ import {
   formatarDataRelativa,
   formatarTamanhoLivro,
   obterAparenciaStatusLivro,
+  obterProgressoAudio,
 } from '../utils/livros'
 
 interface CardLivroAudioProps {
   livro: LivroAudio
+  partesNaFrente?: number
   apagando?: boolean
   onApagar: (uuid: string) => void
 }
 
 export const CardLivroAudio = memo(function CardLivroAudio({
   livro,
+  partesNaFrente = 0,
   apagando = false,
   onApagar,
 }: CardLivroAudioProps) {
@@ -36,6 +39,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
   const aparencia = obterAparenciaStatusLivro(livro.status)
   const progresso = calcularProgressoLeitura(livro.paginaAtual, livro.totalPaginas)
   const urlDownloadPdf = obterUrlPdfLivro(livro.uuid)
+  const progressoAudio = obterProgressoAudio(livro, partesNaFrente)
 
   function handleAbrirLeitor() {
     navigate(`/livros-audio/${livro.uuid}`)
@@ -112,6 +116,23 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             {aparencia.rotulo}
           </Badge>
         </HStack>
+
+        <Box bg="cirqueira.grey.900/50" borderRadius="lg" p={3}>
+          <HStack gap={1.5} align="center" mb={1.5}>
+            <Headphones size={13} color="var(--chakra-colors-cirqueira-brand-400)" />
+            <Text fontSize="xs" fontWeight="bold" color="cirqueira.grey.100">
+              {progressoAudio.titulo}
+            </Text>
+          </HStack>
+          <Progress.Root value={progressoAudio.percentual} size="xs" colorPalette="brand">
+            <Progress.Track bg="cirqueira.grey.900" borderRadius="full">
+              <Progress.Range borderRadius="full" />
+            </Progress.Track>
+          </Progress.Root>
+          <Text fontSize="11px" color="cirqueira.grey.400" mt={1.5}>
+            {progressoAudio.detalhe}
+          </Text>
+        </Box>
 
         <Box pt={2}>
           <HStack justify="space-between" align="center" mb={1.5}>
@@ -193,8 +214,12 @@ export const CardLivroAudio = memo(function CardLivroAudio({
           px={3}
           onClick={handleAbrirLeitor}
         >
-          <BookOpen size={13} style={{ marginRight: '4px' }} />
-          Continuar
+          {livro.temAudioParaOuvir ? (
+            <Play size={13} style={{ marginRight: '4px' }} />
+          ) : (
+            <BookOpen size={13} style={{ marginRight: '4px' }} />
+          )}
+          {livro.temAudioParaOuvir ? 'Ouvir agora' : 'Ler PDF'}
         </Button>
       </HStack>
     </Box>

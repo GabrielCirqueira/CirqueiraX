@@ -110,3 +110,5 @@
 | M93 | Página de Downloads MP3 Redesenhada (Grade de Capas, Player Fixo, Cabeçalho com Contadores) | ✅ Concluído | 23/10/2026 | [ver](MELHORIAS_5.md#melhoria-93--página-de-downloads-mp3-redesenhada-grade-de-capas-player-fixo-cabeçalho-com-contadores) |
 | M94 | Vídeos do YouTube Voltam a Baixar na Melhor Qualidade (Não Mais 360p) | ✅ Concluído | 23/10/2026 | [ver](MELHORIAS_5.md#melhoria-94--vídeos-do-youtube-voltam-a-baixar-na-melhor-qualidade-não-mais-360p) |
 | M95 | Downloads de Vídeo Limitados a Full HD em H.264 (Arquivos Menores e Compatíveis) | ✅ Concluído | 23/10/2026 | [ver](MELHORIAS_5.md#melhoria-95--downloads-de-vídeo-limitados-a-full-hd-em-h264-arquivos-menores-e-compatíveis) |
+| M96 | Leitor de Livros em Áudio Abre em Navegadores Mais Antigos e o Áudio Não Depende Mais do PDF | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-96--leitor-de-livros-em-áudio-abre-em-navegadores-mais-antigos-e-o-áudio-não-depende-mais-do-pdf) |
+| M97 | Progresso Real da Geração de Áudio no Painel de Livros | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-97--progresso-real-da-geração-de-áudio-no-painel-de-livros) |

@@ -411,3 +411,50 @@
   - depois: 1920x1080 H.264, 75 MB.
   - A simulação também conferiu um vídeo vertical, que ficou na melhor resolução disponível (608x1080), e um vídeo antigo de 240p.
 - **Arquivos**: `src/Infra/YtDlp/YtDlpClient.php`
+
+---
+
+### ✅ Melhoria 96 — Leitor de Livros em Áudio Abre em Navegadores Mais Antigos e o Áudio Não Depende Mais do PDF
+
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **Problema**: no primeiro uso em produção, o livro já tinha áudio gerado, mas o usuário não encontrava nenhum botão para ouvir.
+- **Causas**:
+  - O Nginx interno servia o worker do pdf.js (`.mjs`) como `application/octet-stream`, tipo que o navegador recusa para módulos JavaScript. Encontrado na conferência do deploy.
+  - A versão padrão do `pdfjs-dist` 6.5 usa recursos muito novos do navegador, como `Map.getOrInsertComputed`. No Chrome 130, o leitor parava em "Não foi possível abrir o livro".
+  - O player só era montado depois que o PDF abria. Se o PDF falhasse, a tela ficava sem nenhum controle de áudio.
+- **Solução**:
+  - `location ~* \.mjs$` no Nginx interno, servindo o arquivo como `text/javascript`.
+  - Troca para a build legada do pdf.js (`pdfjs-dist/legacy/build/pdf.mjs` e o worker correspondente).
+  - Novo componente `LeitorSemPdf`: se as páginas não abrirem, o livro abre mesmo assim, com o player e o progresso do áudio.
+  - O `cMapUrl` deixa de apontar para a versão fixa 4.10.38 e passa a usar a versão instalada do pdf.js.
+- **Testado** em produção, na versão publicada, com navegador automático em Chrome 130 e Chrome 156, em tamanho de computador e de celular:
+  - o PDF real abriu e o botão de reproduzir apareceu;
+  - o MP3 real carregou (4 min 57 s);
+  - a lista de livros e de partes foi simulada, sem usar uma conta real;
+  - o caminho do `LeitorSemPdf` não foi exercitado, porque o PDF abriu nos dois navegadores.
+- **Arquivos**:
+  - `devops/php/nginx-internal.conf`
+  - `web/features/livros-audio/utils/pdf.ts`, `LeitorLivroAudio.tsx`, `index.ts`
+  - `web/features/livros-audio/components/LeitorSemPdf.tsx` (novo)
+
+---
+
+### ✅ Melhoria 97 — Progresso Real da Geração de Áudio no Painel de Livros
+
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **Problema**: o painel mostrava só "Enviado" ou "Gerando áudio". Não dava para saber que parte do áudio já podia ser ouvida, quanto faltava, ou que o segundo livro estava apenas esperando o primeiro terminar.
+- **Solução**:
+  - `LivroAudio` ganhou `totalBlocos()`, `blocosProntos()`, `blocosComErro()`, `segundosAudioProntos()` e `temAudioParaOuvir()`, expostos pelo `LivroAudioSerializer`.
+  - O card mostra partes prontas, barra de progresso, áudio já disponível e previsão restante.
+  - O status `enviado` passou a aparecer como "Na fila", com aviso de quando o livro deve começar.
+  - O botão do card virou **Ouvir agora** quando existe áudio e **Ler PDF** quando ainda não existe.
+  - Novo componente `AvisoProgressoAudio`, exibido no leitor acima do player.
+  - A previsão considera cerca de 1 minuto por parte (`MINUTOS_POR_PARTE`), com base no ritmo medido em produção, de cerca de 53 segundos.
+- **Testado** em produção: os contadores conferiram com os livros reais (30 de 249 partes, 3 h 05 de áudio, e um livro na fila). O texto do card e do leitor foi conferido na versão publicada, com dados simulados.
+- **Arquivos**:
+  - `src/Entity/LivroAudio.php`, `src/Serializer/LivroAudioSerializer.php`
+  - `web/features/livros-audio/types.ts`, `utils/livros.ts`, `LeitorLivroAudio.tsx`, `index.ts`
+  - `web/features/livros-audio/components/CardLivroAudio.tsx`, `GradeLivrosAudio.tsx`
+  - `web/features/livros-audio/components/AvisoProgressoAudio.tsx` (novo)

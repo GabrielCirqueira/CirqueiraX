@@ -2,6 +2,7 @@ import { Box, Button, Center, SimpleGrid, Skeleton, Text, VStack } from '@chakra
 import { BookOpen, Plus } from 'lucide-react'
 import { memo } from 'react'
 import type { LivroAudio } from '../types'
+import { contarPartesNaFrente } from '../utils/livros'
 import { CardLivroAudio } from './CardLivroAudio'
 
 interface GradeLivrosAudioProps {
@@ -100,6 +101,7 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
         <CardLivroAudio
           key={livro.uuid}
           livro={livro}
+          partesNaFrente={contarPartesNaFrente(livro, livros)}
           apagando={apagandoUuid === livro.uuid}
           onApagar={onApagarLivro}
         />

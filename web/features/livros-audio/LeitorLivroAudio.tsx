@@ -4,8 +4,10 @@ import { ArrowLeft, BookOpen, TriangleAlert } from 'lucide-react'
 import { memo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { obterUrlPdfLivro } from './api'
+import { AvisoProgressoAudio } from './components/AvisoProgressoAudio'
 import { BarraInferiorLeitor } from './components/BarraInferiorLeitor'
 import { BarraSuperiorLeitor } from './components/BarraSuperiorLeitor'
+import { LeitorSemPdf } from './components/LeitorSemPdf'
 import { PlayerAudioLivro } from './components/PlayerAudioLivro'
 import { VisualizadorLivro } from './components/VisualizadorLivro'
 import { useDocumentoPdf } from './hooks/useDocumentoPdf'
@@ -96,6 +98,8 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         onVoltar={voltarPagina}
       />
 
+      <AvisoProgressoAudio livro={livro} />
+
       {blocos.length > 0 && (
         <PlayerAudioLivro
           livro={livro}
@@ -134,7 +138,7 @@ export function Component() {
   })
 
   const urlPdf = livro ? obterUrlPdfLivro(livro.uuid) : null
-  const { data: documento, isLoading: carregandoPdf, isError: erroPdf } = useDocumentoPdf(urlPdf)
+  const { data: documento, isLoading: carregandoPdf } = useDocumentoPdf(urlPdf)
 
   if (carregandoLivro || carregandoPdf) {
     return (
@@ -162,7 +166,7 @@ export function Component() {
     )
   }
 
-  if (erroLivro || erroPdf || !livro || !documento) {
+  if (erroLivro || !livro) {
     return (
       <Center w="full" h="80vh">
         <VStack gap={4} maxW="md" textAlign="center" p={6}>
@@ -179,7 +183,7 @@ export function Component() {
               Não foi possível abrir o livro
             </Text>
             <Text fontSize="xs" color="cirqueira.grey.400">
-              O arquivo PDF pode estar indisponível ou você não possui permissão para acessá-lo.
+              O livro pode ter sido apagado ou você não possui permissão para acessá-lo.
             </Text>
           </VStack>
           <Button
@@ -196,6 +200,10 @@ export function Component() {
         </VStack>
       </Center>
     )
+  }
+
+  if (!documento) {
+    return <LeitorSemPdf key={livro.uuid} livro={livro} />
   }
 
   return <ConteudoLeitor key={livro.uuid} livro={livro} documento={documento} />

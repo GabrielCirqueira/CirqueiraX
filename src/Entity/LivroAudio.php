@@ -240,6 +240,38 @@ class LivroAudio
         return $total;
     }
 
+    public function totalBlocos(): int
+    {
+        return $this->blocos->count();
+    }
+
+    public function blocosProntos(): int
+    {
+        return $this->blocos->filter(static fn(LivroAudioBloco $bloco): bool => $bloco->isPronto())->count();
+    }
+
+    public function blocosComErro(): int
+    {
+        return $this->blocos->filter(static fn(LivroAudioBloco $bloco): bool => $bloco->isErro())->count();
+    }
+
+    public function segundosAudioProntos(): int
+    {
+        $total = 0;
+        foreach ($this->blocos as $bloco) {
+            if ($bloco->isPronto()) {
+                $total += $bloco->duracaoSegundos() ?? 0;
+            }
+        }
+
+        return $total;
+    }
+
+    public function temAudioParaOuvir(): bool
+    {
+        return $this->blocosProntos() > 0;
+    }
+
     public function atualizarPosicao(int $paginaAtual, ?int $blocoAtual = null, int $segundosNoBloco = 0): self
     {
         $this->paginaAtual = max(1, $paginaAtual);

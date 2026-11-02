@@ -1,5 +1,6 @@
-import * as pdfjsLib from 'pdfjs-dist'
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'
+import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl
 
@@ -8,11 +9,11 @@ export interface TarefaRenderizacaoPagina {
   cancelar: () => void
 }
 
-export async function carregarDocumentoPdf(url: string): Promise<pdfjsLib.PDFDocumentProxy> {
+export async function carregarDocumentoPdf(url: string): Promise<PDFDocumentProxy> {
   const loadingTask = pdfjsLib.getDocument({
     url,
     withCredentials: false,
-    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/cmaps/',
+    cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
     cMapPacked: true,
   })
 
@@ -20,7 +21,7 @@ export async function carregarDocumentoPdf(url: string): Promise<pdfjsLib.PDFDoc
 }
 
 export function renderizarPaginaEmCanvas(
-  pagina: pdfjsLib.PDFPageProxy,
+  pagina: PDFPageProxy,
   canvas: HTMLCanvasElement,
   escala = 1.5
 ): TarefaRenderizacaoPagina {
@@ -59,4 +60,4 @@ export function renderizarPaginaEmCanvas(
   }
 }
 
-export type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist'
+export type { PDFDocumentProxy, PDFPageProxy }
