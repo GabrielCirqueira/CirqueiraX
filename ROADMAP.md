@@ -1,365 +1,253 @@
-# Roadmap — Feature 6: Gestão de Álbuns do Google Fotos
+# Roadmap — Livros em Áudio
 
-> Backlog e planejamento do projeto. Cada tópico descreve o que existe (ou faltava), por que importa e o que precisa acontecer. Marque `[x]` no checklist ao concluir.
+> Premissas deste lote: voz gratuita (edge-tts, com Piper como reserva atrás de uma interface); PDFs com texto selecionável (PDF escaneado é recusado com mensagem clara, OCR fica fora do lote); o módulo é independente do pipeline de mídias, sem categoria, Syncthing ou Google Fotos, no mesmo desenho do módulo Downloads MP3.
 
-**Numeração:** tópicos 121–140.
-
-**Índice visual:** [PROGRESSO_ROADMAP.md](documentation/progresso/PROGRESSO_ROADMAP.md) · **Detalhamento:** [PROGRESSO_ROADMAP_7.md](documentation/progresso/PROGRESSO_ROADMAP_7.md)
-
----
-
-## Restrição de API que molda esta feature
-
-A Library API do Google Fotos, desde a mudança de política de março de 2025, restringe os escopos disponíveis a `photoslibrary.appendonly`, `photoslibrary.readonly.appcreateddata` e `photoslibrary.edit.appcreateddata`. Isso significa que `albums.list`/`albums.get` **só retornam álbuns criados pelo próprio CirqueiraX** — álbuns feitos manualmente no Google Fotos antes do app existir são invisíveis para a API, e não há endpoint de "adoção" de álbum alheio (`sharedAlbums:join` exige que o app tenha criado e compartilhado o álbum originalmente). Por isso esta feature não lista "todos os seus álbuns do Google Fotos" — ela gerencia os álbuns que o **CirqueiraX cria e controla**, e a migração de conteúdo de álbuns antigos feitos manualmente continua sendo uma ação manual do usuário dentro do próprio app Google Fotos.
-
----
+**Numeração:** tópicos 141–160.
 
 ## Índice
 
 | # | Tópico |
 |---|---|
-| 121 | Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta |
-| 122 | Escopo readonly.appcreateddata — atualização da URL de autorização OAuth |
-| 123 | GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list |
-| 124 | Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app |
-| 125 | Cruzamento de álbuns com Categoria — campo vinculada/orfã |
-| 126 | Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId |
-| 127 | Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade |
-| 128 | DTO e validação de criação de categoria já nomeando o álbum futuro |
-| 129 | Frontend — estrutura da feature google-fotos (types, api, hooks) |
-| 130 | Frontend — tela de status/conexão da conta Google Fotos (gate) |
-| 131 | Frontend — grid de álbuns do CirqueiraX com capa e contagem |
-| 132 | Frontend — modal de vínculo manual de álbum à categoria |
-| 133 | Frontend — indicador de categorias sem álbum ainda vinculado |
-| 134 | Frontend — aviso/guia de migração manual de álbuns antigos |
-| 135 | Backend — BaixarVideoDTO aceita categoriaId opcional na criação |
-| 136 | Backend — BaixarVideoService aplica categoria já na criação do download |
-| 137 | Frontend — CampoNovoLink.tsx com seletor de categoria/álbum |
-| 138 | Página GoogleFotos.tsx completa, rota e item no Header |
-| 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) |
-| 140 | Teste end-to-end do fluxo completo e documentação atualizada |
-
----
+| 141 | Entidade LivroAudio, enum de status e migration |
+| 142 | Upload do PDF e armazenamento em volume próprio |
+| 143 | Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF |
+| 144 | Marcador de leitura — endpoint de posição e campos de retomada |
+| 145 | Frontend — estrutura da feature livros-audio (types, api, hooks) |
+| 146 | Frontend — biblioteca de livros com upload, cards e progresso |
+| 147 | Frontend — carregamento e renderização de páginas com pdf.js |
+| 148 | Frontend — visualizador em formato de livro |
+| 149 | Frontend — barra inferior do livro e abertura na página salva |
+| 150 | Infra — extração de texto do PDF por página |
+| 151 | Entidade LivroAudioBloco e migration |
+| 152 | Pipeline de limpeza do texto e divisão em blocos por páginas |
+| 153 | Infra — sintetizador de voz com edge-tts e Piper |
+| 154 | Fila dedicada e mensagens do livro em áudio |
+| 155 | Geração do áudio dos blocos |
+| 156 | Stream do bloco e renovação do token de acesso |
+| 157 | Retenção e controle de espaço em disco dos livros |
+| 158 | Frontend — player de áudio com capítulos e configurações |
+| 159 | Sincronização entre páginas do livro e o áudio |
+| 160 | Teste end-to-end do fluxo completo e documentação atualizada |
 
 ## Checklist
 
-- [x] **121. Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta**
-- [x] **122. Escopo readonly.appcreateddata — atualização da URL de autorização OAuth**
-- [x] **123. GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list**
-- [x] **124. Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app**
-- [x] **125. Cruzamento de álbuns com Categoria — campo vinculada/orfã**
-- [x] **126. Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId**
-- [ ] **127. Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade**
-- [ ] **128. DTO e validação de criação de categoria já nomeando o álbum futuro**
-- [ ] **129. Frontend — estrutura da feature google-fotos (types, api, hooks)**
-- [ ] **130. Frontend — tela de status/conexão da conta Google Fotos (gate)**
-- [ ] **131. Frontend — grid de álbuns do CirqueiraX com capa e contagem**
-- [ ] **132. Frontend — modal de vínculo manual de álbum à categoria**
-- [ ] **133. Frontend — indicador de categorias sem álbum ainda vinculado**
-- [ ] **134. Frontend — aviso/guia de migração manual de álbuns antigos**
-- [ ] **135. Backend — BaixarVideoDTO aceita categoriaId opcional na criação**
-- [ ] **136. Backend — BaixarVideoService aplica categoria já na criação do download**
-- [ ] **137. Frontend — CampoNovoLink.tsx com seletor de categoria/álbum**
-- [ ] **138. Página GoogleFotos.tsx completa, rota e item no Header**
-- [ ] **139. Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)**
-- [ ] **140. Teste end-to-end do fluxo completo e documentação atualizada**
-
----
+- [x] **141. Entidade LivroAudio, enum de status e migration**
+- [ ] **142. Upload do PDF e armazenamento em volume próprio**
+- [ ] **143. Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF**
+- [ ] **144. Marcador de leitura — endpoint de posição e campos de retomada**
+- [ ] **145. Frontend — estrutura da feature livros-audio (types, api, hooks)**
+- [ ] **146. Frontend — biblioteca de livros com upload, cards e progresso**
+- [ ] **147. Frontend — carregamento e renderização de páginas com pdf.js**
+- [ ] **148. Frontend — visualizador em formato de livro**
+- [ ] **149. Frontend — barra inferior do livro e abertura na página salva**
+- [ ] **150. Infra — extração de texto do PDF por página**
+- [ ] **151. Entidade LivroAudioBloco e migration**
+- [ ] **152. Pipeline de limpeza do texto e divisão em blocos por páginas**
+- [ ] **153. Infra — sintetizador de voz com edge-tts e Piper**
+- [ ] **154. Fila dedicada e mensagens do livro em áudio**
+- [ ] **155. Geração do áudio dos blocos**
+- [ ] **156. Stream do bloco e renovação do token de acesso**
+- [ ] **157. Retenção e controle de espaço em disco dos livros**
+- [ ] **158. Frontend — player de áudio com capítulos e configurações**
+- [ ] **159. Sincronização entre páginas do livro e o áudio**
+- [ ] **160. Teste end-to-end do fluxo completo e documentação atualizada**
 
 ## Detalhamento
 
-### 121. Endpoint GET /api/v1/google-fotos/status — verifica conexão da conta
+### Tópico 141 — Entidade LivroAudio, enum de status e migration
 
-**O que existe hoje**
-O fluxo de autorização OAuth já existe (`AutorizarContaGoogleFotosCommand`, Feature 1 tópico 33) e salva a conta em `ContaGoogleFotos`, mas não há nenhum endpoint HTTP que o frontend possa consultar para saber se a autorização já foi feita. Hoje isso só é verificável olhando o banco direto.
+**O que existe hoje:** o sistema tem `MediaItem` e `Audio`, mas nada que represente um livro com PDF, progresso de leitura e áudio por capítulos.
 
-**Por que importa**
-É o gate da feature inteira: a tela de gestão de álbuns não deve nem renderizar o conteúdo se não houver conta conectada, e precisa saber disso de forma reativa sem acoplar lógica de autenticação Google no frontend.
+**Por que importa:** sem uma entidade própria, o livro não tem espaço individual nem lugar para guardar o marcador de retomada.
 
-**O que precisa acontecer**
-- Criar `GoogleFotosController` (ou estender o existente) com `GET /api/v1/google-fotos/status`
-- Retornar `{ conectado: bool, email: string|null, conectadoEm: string|null }` consultando `ContaGoogleFotosRepository`
-- Não expor o `refreshTokenCriptografado` nem qualquer dado sensível no payload
+**O que precisa acontecer:** criar `LivroAudio` (UUID v7, dono `Usuario`, `titulo`, `totalPaginas`, `status`, `erroMotivo`, `criadoEm`) e o enum `StatusLivroAudio` (`enviado`, `extraindo`, `gerando_audio`, `parcial`, `pronto`, `erro`). Incluir métodos de intenção e predicados `is*` na entidade e no enum. A migration sai de `make doctrine-diff`, nunca à mão, e o schema é validado com `make doctrine-validate`.
 
 ---
 
-### 122. Escopo readonly.appcreateddata — atualização da URL de autorização OAuth
+### Tópico 142 — Upload do PDF e armazenamento em volume próprio
 
-**O que existe hoje**
-A URL de autorização montada em `AutorizarContaGoogleFotosCommand` usa o escopo `photoslibrary` (acesso amplo, já parcialmente obsoleto) junto com `userinfo.email`, conforme visto na autorização já realizada.
+**O que existe hoje:** o upload manual aceita só imagens e vídeos, com checagem de MIME e limite de 500 MB. Não há pasta nem volume para PDFs.
 
-**Por que importa**
-Para o endpoint de listagem de álbuns (tópico 124) funcionar de forma confiável e alinhada à política atual do Google, o app deve pedir explicitamente `photoslibrary.readonly.appcreateddata` (leitura de álbuns/itens criados pelo próprio app) além de `photoslibrary.appendonly` (upload), evitando depender apenas do escopo amplo que pode ser descontinuado.
+**Por que importa:** o PDF original precisa ficar guardado para o visualizador e para regerar o áudio sem novo upload, sem se misturar com as mídias sincronizadas pelo Syncthing.
 
-**O que precisa acontecer**
-- Atualizar a montagem da URL de autorização para solicitar os três escopos válidos: `photoslibrary.appendonly`, `photoslibrary.readonly.appcreateddata`, `photoslibrary.edit.appcreateddata`
-- Documentar que contas já autorizadas antes dessa mudança (como a conta de teste já conectada) precisam passar por `make google-fotos-autorizar` novamente para emitir um novo refresh token com os escopos corretos
-- Atualizar `documentation/stack/BACKEND.md` com os escopos oficiais
+**O que precisa acontecer:** criar `UploadLivroAudioDTO` (sem I/O) e `UploadLivroAudioService`, que valida o MIME `application/pdf`, grava o arquivo via `ArmazenamentoLivroClient` em `src/Infra/Storage/` (com interface), lê o total de páginas e cria o `LivroAudio`. Adicionar o volume `livros_prod` ao `docker-compose.prod.yaml`. Exceções por contexto em `src/Exception/LivroAudio/`, constantes no topo das classes e zero I/O cru no Service.
 
 ---
 
-### 123. GoogleFotosAlbumService::listarAlbunsDoApp() — chamada a albums.list
+### Tópico 143 — Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF
 
-**O que existe hoje**
-`GoogleFotosAlbumService` (Feature 2, tópico 54) só tem `criarOuObter()`, que cria ou retorna o ID já salvo — nunca consulta a lista real de álbuns existentes na conta.
+**O que existe hoje:** não há rotas para livros. O padrão de listagem, detalhe e exclusão existe em `/audios` e `/media-itens`.
 
-**Por que importa**
-É a peça central da feature: sem esse método não há como popular a tela de álbuns nem cruzar o que existe no Google Fotos com o que está salvo em `Categoria`.
+**Por que importa:** a biblioteca e o visualizador dependem desses contratos.
 
-**O que precisa acontecer**
-- Adicionar `listarAlbunsDoApp(ContaGoogleFotos $conta): array` em `GoogleFotosAlbumService`
-- Chamar `GET https://photoslibrary.googleapis.com/v1/albums` com paginação (`pageToken`), acumulando todas as páginas
-- Mapear cada álbum retornado para um array simples: `id`, `titulo`, `urlCapa` (`coverPhotoBaseUrl`), `totalItens` (`mediaItemsCount`)
-- Tratar resposta vazia (nenhum álbum criado pelo app ainda) sem lançar exceção
+**O que precisa acontecer:** criar `LivroAudioController` em `src/Controller/LivroAudio/` com `GET /api/v1/livros-audio`, `GET /api/v1/livros-audio/{uuid}`, `DELETE /api/v1/livros-audio/{uuid}` e `GET /api/v1/livros-audio/{uuid}/pdf`. Controller estende `DefaultController`, consultas vão para `LivroAudioRepository`, saída por `LivroAudioSerializer`, e cada livro só é visível ao seu dono.
 
 ---
 
-### 124. Endpoint GET /api/v1/google-fotos/albuns — lista álbuns criados pelo app
+### Tópico 144 — Marcador de leitura — endpoint de posição e campos de retomada
 
-**O que existe hoje**
-Nenhum endpoint expõe os álbuns do Google Fotos ao frontend.
+**O que existe hoje:** o sistema não guarda posição de leitura nem de escuta. As preferências locais usam `localStorage`, que não acompanha o usuário entre aparelhos.
 
-**Por que importa**
-É o dado que alimenta a tela principal da feature — sem ele não há grid de álbuns para mostrar.
+**Por que importa:** o marcador é a promessa central da página: sair e voltar exatamente de onde parou, em qualquer dispositivo.
 
-**O que precisa acontecer**
-- Adicionar `GET /api/v1/google-fotos/albuns` no `GoogleFotosController`
-- Delegar para `GoogleFotosAlbumService::listarAlbunsDoApp()` usando a conta ativa
-- Retornar `404`/payload vazio com mensagem clara se não houver conta conectada (reaproveitando a checagem do tópico 121)
-- Cache curto (ex: 60s) opcional para evitar bater na API do Google a cada refresh de tela
+**O que precisa acontecer:** adicionar a `LivroAudio` os campos `paginaAtual`, `blocoAtual`, `segundosNoBloco` e `ultimaEscutaEm`, com migration. Criar `PUT /api/v1/livros-audio/{uuid}/posicao` com `SalvarPosicaoLivroDTO` validado e um `SalvarPosicaoLivroService` que atualiza via método de intenção da entidade. O endpoint deve ser leve, pois será chamado com frequência, e entrar no rate limiter adequado.
 
 ---
 
-### 125. Cruzamento de álbuns com Categoria — campo vinculada/orfã
+### Tópico 145 — Frontend — estrutura da feature livros-audio (types, api, hooks)
 
-**O que existe hoje**
-`Categoria` já guarda `googlePhotosAlbumId` (Feature 1, tópico 35), mas não há lógica que cruze essa informação com a lista real de álbuns do Google.
+**O que existe hoje:** as features existentes seguem o padrão `types.ts`, `api.ts`, `hooks/` e `index.ts` (por exemplo, `downloads-audio`). Não há feature para livros.
 
-**Por que importa**
-O usuário precisa ver, de forma clara, quais álbuns do Google Fotos já estão amarrados a uma categoria do sistema e quais ainda estão "soltos" (criados pelo app mas sem categoria associada, ou vice-versa).
+**Por que importa:** manter a mesma estrutura evita código fora do padrão e permite reaproveitar o `api` central com refresh de token.
 
-**O que precisa acontecer**
-- No `DashboardService` ou em um novo `GoogleFotosService`, cruzar a lista de `listarAlbunsDoApp()` com todas as `Categoria` cadastradas
-- Para cada álbum, marcar `categoriaVinculada: string|null` (nome da categoria, se houver)
-- Para cada categoria sem `googlePhotosAlbumId` preenchido, marcar como `pendente_vinculo: true`
-- Expor esse cruzamento no mesmo endpoint do tópico 124 ou em um endpoint dedicado `GET /api/v1/google-fotos/albuns/resumo`
+**O que precisa acontecer:** criar `web/features/livros-audio/` com `types.ts`, `api.ts`, `hooks/useLivrosAudio.ts` (`useQuery` e `useMutation` com toast e invalidação) e `index.ts`. A página nunca chama Axios, sem `useEffect`, sem comentários e com nomes em português. Os dados da API são validados com Zod.
 
 ---
 
-### 126. Endpoint PATCH /api/v1/categorias/{uuid}/album — vínculo manual de albumId
+### Tópico 146 — Frontend — biblioteca de livros com upload, cards e progresso
 
-**O que existe hoje**
-O único jeito de uma `Categoria` ganhar um `googlePhotosAlbumId` hoje é automaticamente, via `criarOuObter()` na primeira mídia enviada (Feature 2, tópico 54). Não há endpoint para vincular manualmente.
+**O que existe hoje:** o menu lateral leva às telas atuais, e o upload manual tem dropzone para mídias. Não existe tela de livros.
 
-**Por que importa**
-É o botão central do fluxo pedido: usuário vê um álbum que o CirqueiraX já criou (por exemplo, de um teste anterior) e quer linkar explicitamente a uma categoria, ou trocar o vínculo.
+**Por que importa:** é a porta de entrada: onde o usuário sobe PDFs e escolhe qual livro abrir.
 
-**O que precisa acontecer**
-- Criar `VincularAlbumDTO` com `googlePhotosAlbumId` (string, obrigatório)
-- Adicionar `PATCH /api/v1/categorias/{uuid}/album` no `CategoriaController`
-- Validar que o `albumId` informado realmente existe na lista retornada por `listarAlbunsDoApp()` antes de salvar (evita digitar um ID inválido)
-- Persistir via `CategoriaService`
+**O que precisa acontecer:** criar a página `LivrosAudio.tsx` com dropzone de PDF, grade de cards (capa = primeira página, título, percentual lido, status de geração do áudio) e ação de apagar. Registrar a rota protegida `/livros-audio` com `lazyWithRetry` em `web/App.tsx` e o item no menu lateral. Usar só primitivos Chakra e tokens da paleta `cirqueira.*`. A lógica de formatação e progresso fica em `utils/`.
 
 ---
 
-### 127. Ajuste em criarOuObter() — respeitar vínculo manual e evitar duplicidade
+### Tópico 147 — Frontend — carregamento e renderização de páginas com pdf.js
 
-**O que existe hoje**
-`criarOuObter()` cria um álbum novo sempre que a categoria não tem `googlePhotosAlbumId`. Com o vínculo manual do tópico 126 isso já resolve a maior parte do problema, mas falta uma trava explícita.
+**O que existe hoje:** nenhuma dependência de renderização de PDF no frontend.
 
-**Por que importa**
-Sem esse ajuste, existe uma janela entre "categoria criada" e "álbum vinculado manualmente" em que, se uma mídia for enviada antes do vínculo, o sistema cria um álbum duplicado por engano.
+**Por que importa:** o visualizador depende de desenhar páginas sem travar o navegador, principalmente em livros de centenas de páginas e no celular.
 
-**O que precisa acontecer**
-- Nenhuma mudança funcional necessária em `criarOuObter()` em si (a lógica de "se já tem ID, usa; senão cria" já é a correta) — o ajuste é de **processo**: documentar e, na UI, incentivar vincular o álbum antes do primeiro envio daquela categoria
-- Adicionar log de warning quando um álbum é criado automaticamente para uma categoria nova, facilitando auditoria
+**O que precisa acontecer:** adicionar `pdfjs-dist` e configurar o worker no Vite. Criar um hook que baixa o PDF pelo `api` autenticado e abre o documento, e um componente `PaginaCanvas` que renderiza uma página sob demanda. Manter em memória só a página atual e as vizinhas, descartando as distantes. O desenho no canvas, por ser imperativo, usa `useMountEffect`, sem `useEffect`.
 
 ---
 
-### 128. DTO e validação de criação de categoria já nomeando o álbum futuro
+### Tópico 148 — Frontend — visualizador em formato de livro
 
-**O que existe hoje**
-`CriarCategoriaDTO` (Feature 1, tópico 35) já aceita `nome`, `pastaLocal` e `googlePhotosAlbumId` opcional.
+**O que existe hoje:** não há visualização de documento em formato de livro.
 
-**Por que importa**
-Pequeno ajuste de validação para deixar explícito, na hora da criação, que se o campo `googlePhotosAlbumId` for deixado em branco, um álbum será criado automaticamente com o nome da categoria — e isso precisa estar visível tanto na API (mensagem de validação) quanto na UI.
+**Por que importa:** é a experiência pedida: capa, páginas abertas lado a lado e virada de página como um livro de verdade.
 
-**O que precisa acontecer**
-- Adicionar mensagem descritiva no DTO/documentação da API sobre esse comportamento
-- Nenhuma mudança de schema necessária, apenas clareza de contrato
+**O que precisa acontecer:** criar `VisualizadorLivro` com a página 1 sozinha como capa, depois pares (2-3, 4-5...), setas laterais e navegação por teclado. Avaliar a StPageFlip (`react-pageflip`) para a animação de virada, **validando antes a compatibilidade com o React 19**; se não for compatível, montar o par de páginas em CSS sem animação. Em telas estreitas, exibir uma página por vez.
 
 ---
 
-### 129. Frontend — estrutura da feature google-fotos (types, api, hooks)
+### Tópico 149 — Frontend — barra inferior do livro e abertura na página salva
 
-**O que existe hoje**
-Não existe nenhuma pasta de feature dedicada a Google Fotos no frontend — o que existe hoje (`GoogleFotosOAuthService`, `GoogleFotosAlbumService`) é só backend.
+**O que existe hoje:** o visualizador do tópico 148 ainda não tem controles de navegação nem sabe onde o usuário parou.
 
-**Por que importa**
-Segue o mesmo padrão arquitetural já usado em `dashboard`, `downloads-video` e `upload-manual` — necessário antes de construir qualquer componente visual.
+**Por que importa:** contador, miniaturas e zoom tornam o livro navegável, e abrir na página certa fecha a promessa do marcador na parte visual.
 
-**O que precisa acontecer**
-- Criar `web/features/google-fotos/` com `types.ts` (interfaces `StatusGoogleFotos`, `AlbumGoogleFotos`, `CategoriaComAlbum`), `api.ts` (cliente para os endpoints dos tópicos 121/124/126) e `index.ts`
-- Criar hooks em `hooks/useGoogleFotos.ts` com TanStack Query: `useStatusGoogleFotos`, `useAlbunsGoogleFotos`, `useVincularAlbum`
+**O que precisa acontecer:** criar a barra inferior com contador (ex.: 17/788), grade de miniaturas, índice quando o PDF tiver sumário, zoom e menu "…" reservado para as configurações de áudio. Ao virar a página, salvar `paginaAtual` pelo endpoint do tópico 144 com debounce. Ao abrir, ir direto para a página salva.
 
 ---
 
-### 130. Frontend — tela de status/conexão da conta Google Fotos (gate)
+### Tópico 150 — Infra — extração de texto do PDF por página
 
-**O que existe hoje**
-Nenhuma tela do frontend verifica ou exibe o status de conexão com o Google Fotos — a autorização só acontece via CLI (`make google-fotos-autorizar`).
+**O que existe hoje:** a imagem de produção tem `python3`, `yt-dlp` e `ffmpeg`, mas nenhuma ferramenta de leitura de texto de PDF. Processos externos só podem rodar em `src/Infra/`.
 
-**Por que importa**
-É exatamente o comportamento pedido: "se eu ainda não tiver logado no Google, ele não deixa eu entrar nessa página". Sem essa tela, o usuário não tem feedback visual do estado da conexão.
+**Por que importa:** o áudio só existe se o texto for extraído por página, o que também permite casar áudio e páginas depois.
 
-**O que precisa acontecer**
-- Criar `web/features/google-fotos/components/GateConexaoGoogle.tsx`
-- Usar `useStatusGoogleFotos()`: se `conectado: false`, mostrar card centralizado explicando que é preciso autorizar via `make google-fotos-autorizar` (ou, se houver endpoint de autorização iniciável pelo navegador, um botão "Conectar Google Fotos" apontando pra ele) e bloquear o restante da página
-- Se `conectado: true`, mostrar badge com o e-mail conectado e data de autorização, liberando o conteúdo
+**O que precisa acontecer:** criar `ExtratorTextoPdfInterface` e um client em `src/Infra/` que chama um script Python com PyMuPDF e devolve texto por página e o sumário, quando houver. **Validar a instalação do PyMuPDF na imagem Alpine**; se falhar, usar `pdftotext` (poppler). Detectar PDF sem texto e recusar com exceção descritiva. Timeouts e caminhos como constantes.
 
 ---
 
-### 131. Frontend — grid de álbuns do CirqueiraX com capa e contagem
+### Tópico 151 — Entidade LivroAudioBloco e migration
 
-**O que existe hoje**
-Nada — este é o componente visual central da feature.
+**O que existe hoje:** `LivroAudio` guarda o livro, mas nada representa as partes do áudio.
 
-**Por que importa**
-É a "vitrine" que substitui a ideia original de "ver meus álbuns do Google Fotos", agora mostrando os álbuns que o próprio CirqueiraX gerencia, com dados reais (capa, nome, quantidade de itens).
+**Por que importa:** dividir em blocos é o que permite começar a ouvir antes de o livro terminar, repetir só o que falhou e retomar por bloco.
 
-**O que precisa acontecer**
-- Criar `web/features/google-fotos/components/GridAlbuns.tsx`
-- Grid responsivo de cards usando `urlCapa` como imagem de fundo, `titulo`, `totalItens` e um badge indicando `categoriaVinculada` (verde, com nome) ou `pendente_vinculo` (âmbar, "sem categoria vinculada")
-- Estado vazio elegante quando `listarAlbunsDoApp()` não retorna nada ainda (nenhum álbum criado pelo CirqueiraX até o momento)
-- Skeleton de carregamento consistente com os demais grids do sistema (`GridVideos`, Feature 3)
+**O que precisa acontecer:** criar `LivroAudioBloco` (livro, `ordem`, `titulo` do capítulo, `paginaInicio`, `paginaFim`, `status`, `duracaoSegundos`, caminho do MP3, `erroMotivo`), o enum `StatusBlocoAudio` e o `LivroAudioBlocoRepository`. Migration gerada por `make doctrine-diff`.
 
 ---
 
-### 132. Frontend — modal de vínculo manual de álbum à categoria
+### Tópico 152 — Pipeline de limpeza do texto e divisão em blocos por páginas
 
-**O que existe hoje**
-Nada no frontend; backend pronto a partir do tópico 126.
+**O que existe hoje:** o texto extraído vem cru, com cabeçalhos, rodapés, números de página e palavras quebradas por hífen, que atrapalham a leitura em voz alta.
 
-**Por que importa**
-É a ação concreta que o usuário pediu: "selecionar e vincular na categoria".
+**Por que importa:** texto sujo gera áudio ruim, e blocos mal cortados quebram a ligação entre áudio e páginas.
 
-**O que precisa acontecer**
-- Criar `web/features/google-fotos/components/ModalVincularAlbum.tsx`
-- Ao clicar num álbum sem vínculo no grid, abrir modal com seletor das categorias existentes (via `useCategorias`, já usado em outras features)
-- Ao confirmar, chamar `useVincularAlbum()` (`PATCH /api/v1/categorias/{uuid}/album`) e invalidar a query de álbuns/categorias
-- Permitir também o caminho inverso: a partir da tela de categorias (`TabelaCategorias`, Feature 5 tópico 116), abrir o mesmo modal pré-filtrado pelos álbuns disponíveis
+**O que precisa acontecer:** criar uma Feature em `src/Feature/LivroAudio/` com etapas de limpeza via `#[TaggedIterator]` e prioridade (remover cabeçalho e rodapé repetidos, números de página, juntar hifenização, normalizar quebras). Depois, dividir em blocos de ~3.000 caracteres por parágrafo, respeitando capítulos do sumário e registrando a faixa de páginas de cada bloco.
 
 ---
 
-### 133. Frontend — indicador de categorias sem álbum ainda vinculado
+### Tópico 153 — Infra — sintetizador de voz com edge-tts e Piper
 
-**O que existe hoje**
-`TabelaCategorias.tsx` (Feature 5, tópico 116) lista categorias com pasta local e indicador de vínculo com Google Fotos, mas de forma genérica.
+**O que existe hoje:** não há geração de voz no sistema. O módulo de MP3 usa só `yt-dlp` e `ffmpeg`.
 
-**Por que importa**
-Fecha o ciclo de visibilidade: o usuário precisa enxergar tanto "álbuns do Google sem categoria" (tópico 131) quanto "categorias sem álbum" — as duas pontas do mesmo problema.
+**Por que importa:** o `edge-tts` é não oficial, então a troca de motor precisa ser barata, e o Piper roda offline como reserva.
 
-**O que precisa acontecer**
-- Atualizar `TabelaCategorias.tsx` para destacar visualmente (badge âmbar) categorias cujo `googlePhotosAlbumId` é nulo
-- Adicionar ação rápida "Vincular álbum" na linha da categoria, abrindo o `ModalVincularAlbum` do tópico 132
+**O que precisa acontecer:** criar `SintetizadorVozInterface` com duas implementações, `EdgeTtsClient` e `PiperClient`, em `src/Infra/Voz/`. A voz e o motor ativo vêm do `services.yaml`, sem `getenv()`. Atualizar o `Dockerfile.prod` com as dependências e, para o Piper, o modelo pt-BR. Exceções por contexto e constantes no topo da classe.
 
 ---
 
-### 134. Frontend — aviso/guia de migração manual de álbuns antigos
+### Tópico 154 — Fila dedicada e mensagens do livro em áudio
 
-**O que existe hoje**
-Nada — esse é um ponto de educação do usuário, não uma função automatizável (ver a seção "Restrição de API" no topo deste documento).
+**O que existe hoje:** há uma única fila `async` com 2 workers, usada por classificação, distribuição e envio ao Google Fotos. Um livro gera centenas de mensagens.
 
-**Por que importa**
-Evita frustração: sem esse aviso, o usuário pode esperar que álbuns antigos feitos manualmente no Google Fotos apareçam na tela e, ao não verem, achar que há um bug.
+**Por que importa:** sem isolar a fila, a geração de um livro atrasaria o pipeline de mídias inteiro.
 
-**O que precisa acontecer**
-- Adicionar um card informativo fixo na tela `GoogleFotos.tsx` explicando, em linguagem simples, por que álbuns criados fora do CirqueiraX não aparecem aqui, e o passo manual recomendado (abrir o Google Fotos, selecionar as fotos do álbum antigo, usar "Adicionar a álbum" apontando para o álbum novo criado pelo CirqueiraX)
-- Linkar esse texto também em `documentation/funcionalidades/CIRQUEIRAX.md`
+**O que precisa acontecer:** criar um transporte e uma fila próprios para o livro em áudio, com worker dedicado em `devops/supervisord.conf` e `devops/php/supervisord-prod.conf`. Criar `ProcessarLivroAudioMessage` e `GerarAudioBlocoMessage` com handlers que só delegam ao Service, mantendo as regras de retry do Messenger.
 
 ---
 
-### 135. Backend — BaixarVideoDTO aceita categoriaId opcional na criação
+### Tópico 155 — Geração do áudio dos blocos
 
-**O que existe hoje**
-`BaixarVideoDTO` (Feature 3, tópico 61) só tem `url`. A classificação de categoria só acontece depois, manualmente, via modal na tela de downloads.
+**O que existe hoje:** nenhuma etapa transforma texto em MP3 por bloco, nem registra duração ou falha por bloco.
 
-**Por que importa**
-É o pedido explícito: "na página de download, toda vez que eu baixar uma mídia, eu consigo selecionar a categoria/álbum correspondente" — hoje isso só é possível depois do download concluído, não no momento de pedir o download.
+**Por que importa:** é o coração do módulo, e precisa ser retomável: a falha de um bloco não pode perder o resto.
 
-**O que precisa acontecer**
-- Adicionar campo opcional `categoriaId` (`?string`, validado como UUID existente) em `BaixarVideoDTO`
-- Manter compatibilidade: se não informado, comportamento atual (vai para `EM_FILA` aguardando classificação manual) continua igual
+**O que precisa acontecer:** criar `GerarAudioBlocoService`, que sintetiza o bloco, grava o MP3 em `var/livros/{uuid}/`, mede a duração com `ffmpeg` e atualiza o status. O `ProcessarLivroAudioMessage` extrai, limpa, cria os blocos e despacha uma mensagem por bloco. O livro passa por `extraindo`, `gerando_audio`, `parcial` e `pronto`, com `erroMotivo` quando falhar, e a retentativa só reprocessa os blocos com erro.
 
 ---
 
-### 136. Backend — BaixarVideoService aplica categoria já na criação do download
+### Tópico 156 — Stream do bloco e renovação do token de acesso
 
-**O que existe hoje**
-`BaixarVideoService` (Feature 3, tópico 63) apenas valida a URL e despacha `BaixarVideoMessage`, sem qualquer noção de categoria.
+**O que existe hoje:** o stream de áudio usa o JWT na query string, porque o `<audio>` não envia cabeçalho. O token dura 1 hora.
 
-**Por que importa**
-Conecta o DTO atualizado (tópico 135) ao restante do pipeline — sem isso o campo novo seria apenas decorativo.
+**Por que importa:** em escuta longa, o token pode vencer no meio do livro e os pedidos de seek passarem a retornar 401.
 
-**O que precisa acontecer**
-- `BaixarVideoMessage` ganha propriedade opcional `categoriaId`
-- Em `BaixarVideoMessageHandler` (Feature 3, tópico 65), após a ingestão via `IngestarMediaService`, se `categoriaId` foi informado, chamar imediatamente `MediaItemService::classificarManualmente()` (reaproveitando a lógica da Feature 2, tópico 50) — o item já nasce classificado e os dispatches de `DistribuirLocalMessage`/`EnviarGoogleFotosMessage` seguem automaticamente
+**O que precisa acontecer:** criar `GET /api/v1/livros-audio/{uuid}/blocos/{ordem}/stream` com suporte a Range. **Confirmar no código atual como o token do stream é validado e como o refresh acontece.** No frontend, renovar a URL do bloco ao trocar de bloco e ao receber erro de autorização, para a escuta não cair.
 
 ---
 
-### 137. Frontend — CampoNovoLink.tsx com seletor de categoria/álbum
+### Tópico 157 — Retenção e controle de espaço em disco dos livros
 
-**O que existe hoje**
-`CampoNovoLink.tsx` (Feature 3, tópico 78) só tem o campo de URL, detecção de plataforma e botão de enviar.
+**O que existe hoje:** os MP3 expiram em 7 dias e o agendador limpa vídeos antigos. O health check já monitora o disco.
 
-**Por que importa**
-É a peça de interface que entrega o pedido do usuário de forma direta — selecionar a categoria/álbum já no momento de colar o link.
+**Por que importa:** expirar um livro em 7 dias obrigaria a regerar áudio caro, e um livro longo pode ocupar centenas de MB.
 
-**O que precisa acontecer**
-- Adicionar um seletor de categoria (reaproveitando `useCategorias`) ao lado do campo de URL, com opção "Classificar depois" como padrão (mantém o comportamento atual se o usuário não escolher nada)
-- Ao enviar, incluir `categoriaId` selecionado no payload de `POST /api/v1/downloads`
-- Mostrar, junto a cada categoria no seletor, se ela já tem álbum vinculado (reaproveitando o cruzamento do tópico 125) — reforça visualmente que aquele vídeo vai cair num álbum real
+**O que precisa acontecer:** definir uma política própria para áudio de livro, sem expiração automática de 7 dias. Garantir que apagar um livro remove o PDF e todos os MP3. Exibir o espaço usado por livro na biblioteca e incluir `var/livros` no cuidado de espaço do health check. Documentar a escolha em `RETENCAO_E_LIMPEZA.md`.
 
 ---
 
-### 138. Página GoogleFotos.tsx completa, rota e item no Header
+### Tópico 158 — Frontend — player de áudio com capítulos e configurações
 
-**O que existe hoje**
-Nenhuma rota de Google Fotos existe no `App.tsx` nem no `Header.tsx`.
+**O que existe hoje:** o módulo Downloads MP3 tem um player fixo "Tocando agora", sem capítulos, sem retomada e sem configurações.
 
-**Por que importa**
-Consolida todos os componentes da feature (gate, grid, modal) em uma página navegável de verdade.
+**Por que importa:** o player é onde o marcador acontece: o usuário ouve, sai e volta continuando do mesmo ponto.
 
-**O que precisa acontecer**
-- Criar `web/features/google-fotos/GoogleFotos.tsx` compondo `GateConexaoGoogle` → `GridAlbuns` → `ModalVincularAlbum` → card de aviso de migração (tópico 134)
-- Registrar rota `/google-fotos` em `web/App.tsx` dentro do `MainLayout`
-- Adicionar item de navegação no `web/layouts/Header.tsx`
+**O que precisa acontecer:** criar o player do livro com lista de capítulos, play/pause, velocidade, seleção de voz quando houver mais de uma e integração com a Media Session API para controles do aparelho. Salvar a posição pelos eventos do `<audio>` (`onTimeUpdate` com limite de frequência, `onPause`, `onEnded`) e ao sair da página (`pagehide`, via `useMountEffect`). Ao abrir, carregar o bloco salvo e pular para o segundo gravado. **Testar a escuta com a tela bloqueada no celular.**
 
 ---
 
-### 139. Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns)
+### Tópico 159 — Sincronização entre páginas do livro e o áudio
 
-**O que existe hoje**
-`TabelaCategorias.tsx` no Dashboard (Feature 5) e a nova página `/google-fotos` resolveriam o mesmo problema a partir de pontos de entrada diferentes, sem se referenciar.
+**O que existe hoje:** visualizador e player são independentes, mesmo com cada bloco já guardando a faixa de páginas que cobre.
 
-**Por que importa**
-Evita que o usuário ache que são duas features desconectadas — reforça que é um único conceito (categoria ⇄ álbum) visto de dois ângulos.
+**Por que importa:** é o que une as duas metades: ouvir enquanto o livro vira a página sozinho, e ouvir a partir da página que o usuário abriu.
 
-**O que precisa acontecer**
-- Adicionar link/botão "Gerenciar álbuns do Google Fotos" na aba de Categorias do Dashboard, apontando para `/google-fotos`
-- No sentido inverso, a partir de um álbum vinculado na página `/google-fotos`, permitir navegar direto para a categoria correspondente no Dashboard
+**O que precisa acontecer:** criar em `utils/` a lógica que traduz bloco e tempo em página e o inverso. Com o áudio tocando, avançar a página exibida; ao virar a página manualmente, pular o áudio para o bloco correspondente. O marcador passa a guardar bloco, segundo e página de forma consistente. Um interruptor "acompanhar áudio" permite virar páginas sem mexer no áudio.
 
 ---
 
-### 140. Teste end-to-end do fluxo completo e documentação atualizada
+### Tópico 160 — Teste end-to-end do fluxo completo e documentação atualizada
 
-**O que existe hoje**
-Nenhum teste cobre especificamente o ciclo "ver álbuns → vincular → baixar vídeo já categorizado → conferir no Google Fotos".
+**O que existe hoje:** o módulo estará implementado em partes, sem validação de ponta a ponta nem documentação própria.
 
-**Por que importa**
-Fecha a Feature 6 com confiança de que o fluxo pedido pelo usuário funciona ponta a ponta, não só em partes isoladas.
+**Por que importa:** o fluxo atravessa upload, extração, fila, voz, stream, visualizador e marcador, e uma falha em qualquer elo quebra a promessa.
 
-**O que precisa acontecer**
-- Validar manualmente: reautorizar a conta com os novos escopos (tópico 122) → conferir que `/google-fotos` mostra o(s) álbum(ns) já criados em testes anteriores → vincular um álbum existente a uma categoria nova → baixar um vídeo já escolhendo essa categoria em `CampoNovoLink` → confirmar no Dashboard que o item chegou a `concluido` → confirmar no Google Fotos que caiu no álbum certo
-- Rodar `make lint-all` / `npx biome check` / `npm run build` sem erros
-- Atualizar `documentation/funcionalidades/CIRQUEIRAX.md` (nova seção 3.6 — Gestão de Álbuns do Google Fotos), `documentation/stack/FRONTEND.md` (nova feature na árvore de diretórios) e `documentation/stack/BACKEND.md` (novos endpoints e escopos OAuth)
+**O que precisa acontecer:** validar o fluxo completo com um PDF real: upload, abrir como livro, gerar o áudio, ouvir, sair no meio, voltar e retomar da página e do segundo corretos. Validar também PDF sem texto, falha de um bloco com retentativa e apagar um livro. Rodar `make phpstan`, `make frontend-lint` e `make build`. Criar `documentation/funcionalidades/LIVROS_AUDIO.md` e atualizar `BACKEND.md`, `FRONTEND.md`, `MESSENGER.md` e `CIRQUEIRAX.md`.

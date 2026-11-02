@@ -143,14 +143,15 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 
 ## Entidades e enums
 
-Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
+Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
 
 | Enum | Valores |
 | :--- | :--- |
 | `OrigemMedia` | `print_empresa`, `print_pessoal`, `bot_telegram`, `download`, `manual` |
 | `StatusMediaItem` | `recebido`, `em_fila`, `sem_categoria`, `classificado`, `distribuindo`, `baixando`, `distribuido_local`, `enviando_google_fotos`, `concluido`, `erro`, `arquivo_removido`, `arquivo_expurgado` |
 | `StatusAudio` | `pendente`, `baixando`, `disponivel`, `erro`, `expirado` |
-| `StatusEnvioGoogleFotos` | `enviando`, `enviado`, `reaproveitado`, `falha` |
+| `StatusLivroAudio` | `enviado`, `extraindo`, `gerando_audio`, `parcial`, `pronto`, `erro` |
+| `StatusEnvioGoogleFotos` | `enviado`, `reaproveitado`, `falha` |
 | `OrigemEnvioGoogleFotos` | `automatico`, `retentativa`, `reenvio_manual`, `forcado` |
 | `TipoCliente` | `usuario`, `agente` |
 

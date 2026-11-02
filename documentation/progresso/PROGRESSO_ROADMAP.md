@@ -12,6 +12,7 @@
 > - **Tópicos 81+** → [PROGRESSO_ROADMAP_5.md](PROGRESSO_ROADMAP_5.md)
 > - **Tópicos 101+** → [PROGRESSO_ROADMAP_6.md](PROGRESSO_ROADMAP_6.md)
 > - **Tópicos 121+** → [PROGRESSO_ROADMAP_7.md](PROGRESSO_ROADMAP_7.md)
+> - **Tópicos 141+** → [PROGRESSO_ROADMAP_8.md](PROGRESSO_ROADMAP_8.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -155,3 +156,23 @@
 | 138 | Página GoogleFotos.tsx completa, rota e item no Header | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 139 | Atalho cruzado no Dashboard (TabelaCategorias → Gestão de Álbuns) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
 | 140 | Teste end-to-end do fluxo completo e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_7.md) |
+| 141 | Entidade LivroAudio, enum de status e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
+| 142 | Upload do PDF e armazenamento em volume próprio | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 143 | Endpoints da biblioteca — listar, detalhar, apagar e servir o PDF | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 144 | Marcador de leitura — endpoint de posição e campos de retomada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 145 | Frontend — estrutura da feature livros-audio (types, api, hooks) | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 146 | Frontend — biblioteca de livros com upload, cards e progresso | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 147 | Frontend — carregamento e renderização de páginas com pdf.js | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 148 | Frontend — visualizador em formato de livro | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 149 | Frontend — barra inferior do livro e abertura na página salva | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 150 | Infra — extração de texto do PDF por página | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 151 | Entidade LivroAudioBloco e migration | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 152 | Pipeline de limpeza do texto e divisão em blocos por páginas | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 153 | Infra — sintetizador de voz com edge-tts e Piper | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 154 | Fila dedicada e mensagens do livro em áudio | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 155 | Geração do áudio dos blocos | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 156 | Stream do bloco e renovação do token de acesso | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 157 | Retenção e controle de espaço em disco dos livros | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 158 | Frontend — player de áudio com capítulos e configurações | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 159 | Sincronização entre páginas do livro e o áudio | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
+| 160 | Teste end-to-end do fluxo completo e documentação atualizada | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_8.md) |
