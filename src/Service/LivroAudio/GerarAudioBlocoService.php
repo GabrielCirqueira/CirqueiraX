@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\LivroAudio;
 
 use App\Entity\LivroAudio;
+use App\Interface\ArmazenamentoLivroInterface;
 use App\Interface\SintetizadorVozInterface;
 use App\Repository\LivroAudioBlocoRepository;
 use App\Repository\LivroAudioRepository;
@@ -17,6 +18,8 @@ final readonly class GerarAudioBlocoService
         private LivroAudioBlocoRepository $livroAudioBlocoRepository,
         private LivroAudioRepository $livroAudioRepository,
         private SintetizadorVozInterface $sintetizadorVoz,
+        private DefinirIdiomaLivroAudioService $definirIdiomaLivro,
+        private ArmazenamentoLivroInterface $armazenamentoLivro,
         private LoggerInterface $logger,
     ) {}
 
@@ -57,15 +60,33 @@ final readonly class GerarAudioBlocoService
 
         $caminhoMp3 = sprintf('%s/bloco_%d.mp3', $diretorioBlocos, $bloco->numeroBloco());
 
+        $livroUuid = $livro->uuidTexto();
+        $voz = $this->definirIdiomaLivro->executar($livro)->voz();
+        $livroFoiApagado = fn(): bool => !$this->livroAudioRepository->existe($livroUuid);
+
         try {
-            $resultado = $this->sintetizadorVoz->sintetizar($bloco->texto(), $caminhoMp3);
+            $resultado = $this->sintetizadorVoz->sintetizar($bloco->texto(), $caminhoMp3, $voz, $livroFoiApagado);
+
+            if ($livroFoiApagado()) {
+                $this->armazenamentoLivro->removerLivro($livroUuid);
+
+                return;
+            }
+
             $bloco->concluirGeracao(
                 caminhoAudio: $resultado->caminhoAudio(),
                 duracaoSegundos: $resultado->duracaoSegundos(),
                 tamanhoBytes: $resultado->tamanhoBytes(),
+                voz: $voz,
             );
             $this->livroAudioBlocoRepository->salvar($bloco, true);
         } catch (Throwable $e) {
+            if ($livroFoiApagado()) {
+                $this->armazenamentoLivro->removerLivro($livroUuid);
+
+                return;
+            }
+
             $bloco->registrarFalha($e->getMessage());
             $this->livroAudioBlocoRepository->salvar($bloco, true);
             $this->atualizarStatusGeralLivro($livro);

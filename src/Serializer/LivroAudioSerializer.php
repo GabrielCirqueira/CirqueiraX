@@ -23,6 +23,8 @@ final readonly class LivroAudioSerializer
             'segundosNoBloco' => $livro->segundosNoBloco(),
             'tamanhoBytes' => $livro->tamanhoBytes(),
             'tamanhoTotalBytes' => $livro->tamanhoTotalBytes(),
+            'idioma' => $livro->idioma()?->value,
+            'idiomaDescricao' => $livro->idioma()?->descricao(),
             'totalBlocos' => $livro->totalBlocos(),
             'blocosProntos' => $livro->blocosProntos(),
             'blocosComErro' => $livro->blocosComErro(),

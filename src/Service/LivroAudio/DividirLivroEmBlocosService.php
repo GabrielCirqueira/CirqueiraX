@@ -21,6 +21,7 @@ final readonly class DividirLivroEmBlocosService
         private LimpezaTextoPdfService $limpezaTexto,
         private LivroAudioBlocoRepository $livroAudioBlocoRepository,
         private LivroAudioRepository $livroAudioRepository,
+        private DefinirIdiomaLivroAudioService $definirIdiomaLivro,
     ) {}
 
     /**
@@ -85,6 +86,7 @@ final readonly class DividirLivroEmBlocosService
         }
 
         $this->livroAudioBlocoRepository->flush();
+        $this->definirIdiomaLivro->executar($livro);
 
         if (!empty($blocosCriados)) {
             $livro->iniciarGeracaoAudio();

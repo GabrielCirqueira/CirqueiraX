@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\IdiomaLivroAudio;
 use App\Enum\StatusLivroAudioBloco;
 use App\Repository\LivroAudioBlocoRepository;
 use DateTimeImmutable;
@@ -46,6 +47,9 @@ class LivroAudioBloco
 
     #[ORM\Column(type: 'bigint', nullable: true)]
     private ?int $tamanhoBytes = null;
+
+    #[ORM\Column(type: 'string', length: 64, nullable: true)]
+    private ?string $voz = null;
 
     #[ORM\Column(type: 'string', enumType: StatusLivroAudioBloco::class)]
     private StatusLivroAudioBloco $status;
@@ -156,9 +160,10 @@ class LivroAudioBloco
         return $this;
     }
 
-    public function concluirGeracao(string $caminhoAudio, int $duracaoSegundos, int $tamanhoBytes): self
+    public function concluirGeracao(string $caminhoAudio, int $duracaoSegundos, int $tamanhoBytes, string $voz): self
     {
         $this->caminhoAudio = $caminhoAudio;
+        $this->voz = $voz;
         $this->duracaoSegundos = $duracaoSegundos;
         $this->tamanhoBytes = $tamanhoBytes;
         $this->status = StatusLivroAudioBloco::PRONTO;
@@ -166,6 +171,24 @@ class LivroAudioBloco
         $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
+    }
+
+    public function reiniciarGeracao(): self
+    {
+        $this->caminhoAudio = null;
+        $this->duracaoSegundos = null;
+        $this->tamanhoBytes = null;
+        $this->voz = null;
+        $this->status = StatusLivroAudioBloco::PENDENTE;
+        $this->erroMotivo = null;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function foiGeradoComVoz(string $voz): bool
+    {
+        return ($this->voz ?? IdiomaLivroAudio::PT->voz()) === $voz;
     }
 
     public function registrarFalha(string $motivo): self

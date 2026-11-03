@@ -505,3 +505,27 @@
   - `web/features/livros-audio/components/PlayerAudioLivro.tsx`
   - `web/features/livros-audio/hooks/useLeitorLivro.ts`
   - `web/features/livros-audio/LeitorLivroAudio.tsx`
+
+---
+
+### 🟡 Melhoria 100 — Voz do Livro em Áudio no Idioma do Livro
+
+- **Status**: Código pronto, aguardando publicação em produção
+- **Data**: 02 de novembro de 2026
+- **Problema**: um PDF em inglês foi narrado com a voz fixa `pt-BR-AntonioNeural`, com pronúncia de português.
+- **Solução**:
+  - Enum `IdiomaLivroAudio` (português, inglês, espanhol, francês, italiano e alemão), com a voz de cada idioma.
+  - `DetectorIdiomaTextoService` conta palavras frequentes de cada idioma em uma amostra de até 30 mil caracteres. Sem correspondência, usa português.
+  - `DefinirIdiomaLivroAudioService` grava o idioma em `livro_audio.idioma`, na divisão do livro ou na primeira parte gerada depois da publicação.
+  - `livro_audio_bloco.voz` registra a voz usada em cada parte. Partes antigas, sem esse dado, contam como geradas em português.
+  - Comando `app:livro-audio:corrigir-voz`: refaz as partes prontas com voz errada, limpa a fila `livro_audio` e recoloca os livros na ordem de envio.
+  - O card mostra "Voz em inglês".
+- **Testado** na imagem nova, fora de produção: os seis idiomas foram detectados corretamente, texto vazio caiu em português e a voz inglesa gerou um MP3 válido como `www-data`. Migration, comando e fluxo completo ainda não rodaram em produção.
+- **Arquivos**:
+  - `src/Enum/IdiomaLivroAudio.php`, `migrations/Version20261103000000.php` (novos)
+  - `src/Service/LivroAudio/DetectorIdiomaTextoService.php`, `DefinirIdiomaLivroAudioService.php`, `CorrigirVozLivrosAudioService.php` (novos)
+  - `src/Command/CorrigirVozLivrosAudioCommand.php` (novo)
+  - `src/Entity/LivroAudio.php`, `LivroAudioBloco.php`, `src/Repository/LivroAudioRepository.php`
+  - `src/Service/LivroAudio/GerarAudioBlocoService.php`, `DividirLivroEmBlocosService.php`, `src/Serializer/LivroAudioSerializer.php`
+  - `web/features/livros-audio/types.ts`, `components/CardLivroAudio.tsx`
+  - `documentation/funcionalidades/LIVROS_AUDIO.md`

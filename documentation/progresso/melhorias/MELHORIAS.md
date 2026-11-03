@@ -12,6 +12,7 @@
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 > - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
+> - **M101–M120** → [MELHORIAS_6.md](MELHORIAS_6.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -114,3 +115,5 @@
 | M97 | Progresso Real da Geração de Áudio no Painel de Livros | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-97--progresso-real-da-geração-de-áudio-no-painel-de-livros) |
 | M98 | Player do Livro em Áudio Volta a Aparecer (Consulta de Partes Retornava Vazio) | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-98--player-do-livro-em-áudio-volta-a-aparecer-consulta-de-partes-retornava-vazio) |
 | M99 | Player do Livro Toca Sem Quebrar a Tela | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-99--player-do-livro-toca-sem-quebrar-a-tela) |
+| M100 | Voz do Livro em Áudio no Idioma do Livro | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-100--voz-do-livro-em-áudio-no-idioma-do-livro) |
+| M101 | Apagar Livro Interrompe a Geração e Libera a Fila na Hora | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-101--apagar-livro-interrompe-a-geração-e-libera-a-fila-na-hora) |

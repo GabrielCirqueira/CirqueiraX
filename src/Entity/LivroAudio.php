@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\IdiomaLivroAudio;
 use App\Enum\StatusLivroAudio;
 use App\Repository\LivroAudioRepository;
 use DateTimeImmutable;
@@ -56,6 +57,9 @@ class LivroAudio
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $erroMotivo = null;
+
+    #[ORM\Column(type: 'string', length: 5, nullable: true, enumType: IdiomaLivroAudio::class)]
+    private ?IdiomaLivroAudio $idioma = null;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
@@ -238,6 +242,19 @@ class LivroAudio
         }
 
         return $total;
+    }
+
+    public function idioma(): ?IdiomaLivroAudio
+    {
+        return $this->idioma;
+    }
+
+    public function definirIdioma(IdiomaLivroAudio $idioma): self
+    {
+        $this->idioma = $idioma;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
     }
 
     public function totalBlocos(): int

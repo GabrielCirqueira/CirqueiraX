@@ -20,7 +20,7 @@ final readonly class ApagarLivroAudioService
     {
         $livro = $this->consultarLivrosAudioService->obterDoUsuario($uuid, $usuario);
 
-        $this->armazenamentoLivro->removerLivro($uuid);
         $this->livroAudioRepository->remover($livro);
+        $this->armazenamentoLivro->removerLivro($uuid);
     }
 }

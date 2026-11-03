@@ -98,6 +98,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
               </Text>
               <Text fontSize="xs" color="cirqueira.grey.500">
                 {formatarTamanhoLivro(livro.tamanhoTotalBytes ?? livro.tamanhoBytes)}
+                {livro.idiomaDescricao ? ` · Voz em ${livro.idiomaDescricao.toLowerCase()}` : ''}
               </Text>
             </VStack>
           </HStack>

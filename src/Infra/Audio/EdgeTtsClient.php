@@ -14,8 +14,9 @@ final class EdgeTtsClient implements SintetizadorVozInterface
     public const string VOZ_PADRAO = 'pt-BR-AntonioNeural';
     private const float TIMEOUT_SINTESE_SEGUNDOS = 180.0;
     private const float TIMEOUT_PROBE_SEGUNDOS = 15.0;
+    private const int INTERVALO_CANCELAMENTO_MICROSSEGUNDOS = 500000;
 
-    public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null): ResultadoSinteseVozDTO
+    public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null, ?callable $deveCancelar = null): ResultadoSinteseVozDTO
     {
         $textoLimpo = trim($texto);
         if ('' === $textoLimpo) {
@@ -41,7 +42,18 @@ final class EdgeTtsClient implements SintetizadorVozInterface
 
         $processo = new Process($comando);
         $processo->setTimeout(self::TIMEOUT_SINTESE_SEGUNDOS);
-        $processo->run();
+        $processo->start();
+
+        while ($processo->isRunning()) {
+            if (null !== $deveCancelar && $deveCancelar()) {
+                $processo->stop(0);
+
+                throw SinteseVozException::cancelada();
+            }
+
+            usleep(self::INTERVALO_CANCELAMENTO_MICROSSEGUNDOS);
+            $processo->checkTimeout();
+        }
 
         if (!$processo->isSuccessful()) {
             throw SinteseVozException::falhaAoExecutarSintese($processo->getErrorOutput());

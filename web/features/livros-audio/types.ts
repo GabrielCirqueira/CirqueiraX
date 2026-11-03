@@ -18,6 +18,8 @@ export const livroAudioSchema = z.object({
   segundosNoBloco: z.number().int(),
   tamanhoBytes: z.number().int(),
   tamanhoTotalBytes: z.number().int().optional(),
+  idioma: z.string().nullable(),
+  idiomaDescricao: z.string().nullable(),
   totalBlocos: z.number().int(),
   blocosProntos: z.number().int(),
   blocosComErro: z.number().int(),

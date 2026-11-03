@@ -8,5 +8,8 @@ use App\DataObject\ResultadoSinteseVozDTO;
 
 interface SintetizadorVozInterface
 {
-    public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null): ResultadoSinteseVozDTO;
+    /**
+     * @param (callable(): bool)|null $deveCancelar
+     */
+    public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null, ?callable $deveCancelar = null): ResultadoSinteseVozDTO;
 }

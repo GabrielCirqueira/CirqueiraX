@@ -15,6 +15,8 @@ use Symfony\Component\Uid\Uuid;
  */
 class LivroAudioRepository extends ServiceEntityRepository
 {
+    private const string FILA_GERACAO = 'livro_audio';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, LivroAudio::class);
@@ -39,6 +41,30 @@ class LivroAudioRepository extends ServiceEntityRepository
     public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    public function existe(string $uuid): bool
+    {
+        return false !== $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT 1 FROM livro_audio WHERE uuid = ?',
+            [Uuid::fromString($uuid)->toBinary()],
+        );
+    }
+
+    /**
+     * @return list<LivroAudio>
+     */
+    public function listarPorEnvio(): array
+    {
+        return $this->findBy([], ['criadoEm' => 'ASC']);
+    }
+
+    public function limparFilaDeGeracao(): void
+    {
+        $this->getEntityManager()->getConnection()->executeStatement(
+            'DELETE FROM messenger_messages WHERE queue_name = ?',
+            [self::FILA_GERACAO],
+        );
     }
 
     public function buscarPorUuid(string $uuid): ?LivroAudio

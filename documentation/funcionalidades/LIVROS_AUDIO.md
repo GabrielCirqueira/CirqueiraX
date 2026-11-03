@@ -1,6 +1,6 @@
 # Funcionalidade: Livros em Áudio
 
-A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livros digitais em formato PDF em audiolivros interativos com narração em voz neural em português (Edge TTS). O leitor integrado sincroniza o áudio com as páginas do livro, salvando o progresso da leitura para retomada contínua em qualquer dispositivo.
+A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livros digitais em formato PDF em audiolivros interativos com narração em voz neural (Edge TTS) no idioma detectado do livro: português, inglês, espanhol, francês, italiano ou alemão. O leitor integrado sincroniza o áudio com as páginas do livro, salvando o progresso da leitura para retomada contínua em qualquer dispositivo.
 
 ---
 
