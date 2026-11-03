@@ -42,6 +42,9 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
 }: PlayerAudioLivroProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const ultimoSalvamentoRef = useRef<number>(0)
+  const ultimoTempoRef = useRef<number>(0)
+  const posicaoRetomadaRef = useRef(false)
+  const deveTocarAoCarregarRef = useRef(false)
   const [tocando, setTocando] = useState(false)
   const [tempoAtual, setTempoAtual] = useState(0)
   const [duracao, setDuracao] = useState(0)
@@ -81,24 +84,18 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     [blocoAtivo, onSalvarPosicao]
   )
 
-  useEffect(() => {
-    if (livro.segundosNoBloco > 0 && audioRef.current && audioUrl) {
-      audioRef.current.currentTime = livro.segundosNoBloco
-      setTempoAtual(livro.segundosNoBloco)
-    }
-  }, [audioUrl, livro.segundosNoBloco])
+  const salvarProgressoRef = useRef(salvarProgresso)
+  salvarProgressoRef.current = salvarProgresso
 
   useEffect(() => {
     if (!acompanharAudio || !blocoAtivo) return
     const blocoDaPagina = encontrarBlocoPorPagina(blocos, paginaAtualLeitor)
     if (blocoDaPagina?.isPronto && blocoDaPagina.numeroBloco !== blocoAtivo.numeroBloco) {
+      deveTocarAoCarregarRef.current = tocando
       setBlocoAtivo(blocoDaPagina)
       setTempoAtual(0)
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0
-      }
     }
-  }, [paginaAtualLeitor, acompanharAudio, blocos, blocoAtivo])
+  }, [paginaAtualLeitor, acompanharAudio, blocos, blocoAtivo, tocando])
 
   useEffect(() => {
     if (!('mediaSession' in navigator) || !blocoAtivo) return
@@ -132,17 +129,17 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   }, [blocoAtivo, livro.titulo, duracao])
 
   useEffect(() => {
-    function handleBeforeUnload() {
-      if (audioRef.current && blocoAtivo) {
-        salvarProgresso(audioRef.current.currentTime)
+    function salvarAoSair() {
+      if (ultimoTempoRef.current > 0) {
+        salvarProgressoRef.current(ultimoTempoRef.current)
       }
     }
-    window.addEventListener('pagehide', handleBeforeUnload)
+    window.addEventListener('pagehide', salvarAoSair)
     return () => {
-      window.removeEventListener('pagehide', handleBeforeUnload)
-      handleBeforeUnload()
+      window.removeEventListener('pagehide', salvarAoSair)
+      salvarAoSair()
     }
-  }, [salvarProgresso, blocoAtivo])
+  }, [])
 
   function alternarPlayPause() {
     if (!audioRef.current || !audioUrl) return
@@ -174,13 +171,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     if (blocoAtivo && audioRef.current) {
       salvarProgresso(audioRef.current.currentTime)
     }
+    deveTocarAoCarregarRef.current = true
+    ultimoTempoRef.current = 0
     setBlocoAtivo(novoBloco)
     setTempoAtual(0)
     setMostrarListaCapitulos(false)
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0
-      audioRef.current.play()
-    }
     if (acompanharAudio) {
       onMudarPaginaLeitor(novoBloco.paginaInicio)
     }
@@ -237,11 +232,23 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             if (audioRef.current) {
               setDuracao(audioRef.current.duration || 0)
               audioRef.current.playbackRate = VELOCIDADES[indiceVelocidade] ?? 1
+              if (!posicaoRetomadaRef.current) {
+                posicaoRetomadaRef.current = true
+                if (blocoAtivo?.numeroBloco === livro.blocoAtual && livro.segundosNoBloco > 0) {
+                  audioRef.current.currentTime = livro.segundosNoBloco
+                  setTempoAtual(livro.segundosNoBloco)
+                }
+              }
+              if (deveTocarAoCarregarRef.current) {
+                deveTocarAoCarregarRef.current = false
+                audioRef.current.play()
+              }
             }
           }}
           onTimeUpdate={() => {
             if (!audioRef.current || !blocoAtivo) return
             const atual = audioRef.current.currentTime
+            ultimoTempoRef.current = atual
             setTempoAtual(atual)
 
             if (acompanharAudio) {

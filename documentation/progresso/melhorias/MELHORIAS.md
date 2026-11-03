@@ -113,3 +113,4 @@
 | M96 | Leitor de Livros em Áudio Abre em Navegadores Mais Antigos e o Áudio Não Depende Mais do PDF | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-96--leitor-de-livros-em-áudio-abre-em-navegadores-mais-antigos-e-o-áudio-não-depende-mais-do-pdf) |
 | M97 | Progresso Real da Geração de Áudio no Painel de Livros | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-97--progresso-real-da-geração-de-áudio-no-painel-de-livros) |
 | M98 | Player do Livro em Áudio Volta a Aparecer (Consulta de Partes Retornava Vazio) | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-98--player-do-livro-em-áudio-volta-a-aparecer-consulta-de-partes-retornava-vazio) |
+| M99 | Player do Livro Toca Sem Quebrar a Tela | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-99--player-do-livro-toca-sem-quebrar-a-tela) |

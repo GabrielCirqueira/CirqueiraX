@@ -478,3 +478,30 @@
 - **Solução**: `listarPorLivro` e `listarNaoProntosDoLivro` passam `$livro->uuid()->toBinary()`.
 - **Testado** em produção: `listarPorLivro` devolveu 249, `listarNaoProntosDoLivro` devolveu 207 e a lista serializada voltou a ter cerca de 89 KB. O consumo pela conta real do usuário ainda dependia de nova abertura do livro no navegador.
 - **Arquivos**: `src/Repository/LivroAudioBlocoRepository.php`
+
+---
+
+### ✅ Melhoria 99 — Player do Livro Toca Sem Quebrar a Tela
+
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **Problema**: ao apertar Play, a página caía em "Unexpected Application Error" com o erro #185 do React (atualizações em laço).
+- **Causas**:
+  - O efeito de salvar ao sair dependia de `salvarProgresso`, recriado a cada render. A limpeza do efeito salvava a posição, a mutação renderizava a tela, e o ciclo recomeçava. Reproduzido com navegador automático: 54 chamadas de `PUT /posicao` em poucos segundos.
+  - O efeito de retomada reaplicava `livro.segundosNoBloco` sempre que a posição era salva, o que faria o áudio voltar a cada salvamento.
+  - `selecionarBloco` chamava `play()` antes de o `<audio>` trocar de arquivo, então a parte seguinte não começava sozinha.
+  - O acompanhamento de página pelo áudio usava `mudarPagina`, que salvava a posição com 0 segundos.
+- **Solução**:
+  - Salvamento ao sair com `salvarProgressoRef` e `ultimoTempoRef`, em um efeito que roda uma única vez.
+  - A posição salva é retomada só uma vez, em `onLoadedMetadata`.
+  - `deveTocarAoCarregarRef` inicia a próxima parte quando o arquivo carrega.
+  - Novo `irParaPagina` em `useLeitorLivro`, que muda a página sem salvar. O acompanhamento do áudio usa essa função.
+- **Testado** em produção, na versão publicada, com navegador automático, PDF, MP3 e dados reais do livro, e respostas da API simuladas:
+  - o tempo avançou sem voltar (2 → 14 s), com 3 salvamentos em 14 s, em vez de 54;
+  - a pausa funcionou;
+  - "Próximo capítulo" começou a parte 2 sozinho, e a página acompanhou;
+  - voltar e avançar 15 s, velocidade e a chamada real de `PUT /posicao` não foram exercitados nesse teste.
+- **Arquivos**:
+  - `web/features/livros-audio/components/PlayerAudioLivro.tsx`
+  - `web/features/livros-audio/hooks/useLeitorLivro.ts`
+  - `web/features/livros-audio/LeitorLivroAudio.tsx`

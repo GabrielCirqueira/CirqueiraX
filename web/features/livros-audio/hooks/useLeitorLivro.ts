@@ -21,15 +21,23 @@ export function useLeitorLivro({
   const [modoDuplo, setModoDuplo] = useState(false)
   const [telaCheia, setTelaCheia] = useState(false)
 
-  const mudarPagina = useCallback(
+  const irParaPagina = useCallback(
     (novaPagina: number) => {
       const paginaSegura = Math.min(Math.max(1, novaPagina), Math.max(1, totalPaginas))
       setPaginaAtual(paginaSegura)
+      return paginaSegura
+    },
+    [totalPaginas]
+  )
+
+  const mudarPagina = useCallback(
+    (novaPagina: number) => {
+      const paginaSegura = irParaPagina(novaPagina)
       if (onSalvarPosicao) {
         onSalvarPosicao(paginaSegura)
       }
     },
-    [totalPaginas, onSalvarPosicao]
+    [irParaPagina, onSalvarPosicao]
   )
 
   const avancarPagina = useCallback(() => {
@@ -78,6 +86,7 @@ export function useLeitorLivro({
     escala,
     modoDuplo,
     telaCheia,
+    irParaPagina,
     mudarPagina,
     avancarPagina,
     voltarPagina,

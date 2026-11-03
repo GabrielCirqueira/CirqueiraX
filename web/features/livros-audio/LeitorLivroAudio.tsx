@@ -48,6 +48,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
     escala,
     modoDuplo,
     telaCheia,
+    irParaPagina,
     mudarPagina,
     avancarPagina,
     voltarPagina,
@@ -107,7 +108,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
           paginaAtualLeitor={paginaAtual}
           acompanharAudio={acompanharAudio}
           onAlternarAcompanharAudio={() => setAcompanharAudio((prev) => !prev)}
-          onMudarPaginaLeitor={mudarPagina}
+          onMudarPaginaLeitor={irParaPagina}
           onSalvarPosicao={salvarPosicao}
         />
       )}
