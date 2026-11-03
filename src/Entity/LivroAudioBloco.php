@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Enum\IdiomaLivroAudio;
 use App\Enum\StatusLivroAudioBloco;
 use App\Repository\LivroAudioBlocoRepository;
 use DateTimeImmutable;
@@ -188,7 +187,7 @@ class LivroAudioBloco
 
     public function foiGeradoComVoz(string $voz): bool
     {
-        return ($this->voz ?? IdiomaLivroAudio::PT->voz()) === $voz;
+        return $this->voz === $voz;
     }
 
     public function registrarFalha(string $motivo): self

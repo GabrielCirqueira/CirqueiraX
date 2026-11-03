@@ -62,3 +62,17 @@
   - `web/features/livros-audio/components/PaginaPdf.tsx`
   - `web/features/livros-audio/LeitorLivroAudio.tsx`
   - `web/features/livros-audio/hooks/useLeitorLivro.ts`
+
+---
+
+### 🟡 Melhoria 104 — Refazer Áudio Gerado Antes da Narração Corrigida
+
+- **Status**: Código pronto, aguardando publicação em produção
+- **Data**: 03 de novembro de 2026
+- **Problema**: as partes geradas antes da M100 e da M102 continuavam com uma pausa de cerca de 1 s no fim de cada linha do PDF. O `corrigir-voz` não refazia essas partes, porque tratava a voz vazia como pt-BR. O "MANUAL DO ALUNO PBL" tinha 81 pausas acima de 0,8 s só na parte 1.
+- **Solução**:
+  - `LivroAudioBloco::foiGeradoComVoz` só considera certa a parte que registrou a voz usada. Voz vazia indica áudio gerado pelo código antigo.
+  - `app:livro-audio:corrigir-voz` passa a refazer essas partes também, sem reenviar o livro.
+- **Arquivos**:
+  - `src/Entity/LivroAudioBloco.php`
+  - `src/Command/CorrigirVozLivrosAudioCommand.php`

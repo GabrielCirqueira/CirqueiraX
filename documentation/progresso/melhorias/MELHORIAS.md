@@ -119,3 +119,4 @@
 | M101 | Apagar Livro Interrompe a Geração e Libera a Fila na Hora | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-101--apagar-livro-interrompe-a-geração-e-libera-a-fila-na-hora) |
 | M102 | Narração Sem Pausa em Toda Quebra de Linha | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-102--narração-sem-pausa-em-toda-quebra-de-linha) |
 | M103 | Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-103--redesign-do-leitor-em-formato-de-livro-3d-e-player-unificado-no-tema-do-sistema) |
+| M104 | Refazer Áudio Gerado Antes da Narração Corrigida | 🟡 Aguardando publicação | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-104--refazer-áudio-gerado-antes-da-narração-corrigida) |
