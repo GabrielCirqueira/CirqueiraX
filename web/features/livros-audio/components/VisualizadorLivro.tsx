@@ -54,8 +54,8 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
       overflow="auto"
       p={{ base: 3, md: 8 }}
       pb={{ base: 24, md: 28 }}
-      bg="#090c17"
-      backgroundImage="radial-gradient(ellipse at 50% 30%, #161b33 0%, #0d1020 60%, #060810 100%), radial-gradient(1.5px 1.5px at 12% 18%, rgba(255,255,255,0.35), transparent), radial-gradient(1px 1px at 28% 68%, rgba(255,255,255,0.2), transparent), radial-gradient(1.5px 1.5px at 75% 22%, rgba(255,255,255,0.3), transparent), radial-gradient(1px 1px at 88% 70%, rgba(255,255,255,0.22), transparent), radial-gradient(2px 2px at 92% 38%, rgba(129,140,248,0.35), transparent)"
+      bg="cirqueira.grey.950"
+      backgroundImage="radial-gradient(ellipse at 50% 30%, #252a28 0%, #191b1a 60%, #121313 100%), radial-gradient(1.5px 1.5px at 12% 18%, rgba(0, 186, 156, 0.25), transparent), radial-gradient(1px 1px at 28% 68%, rgba(255, 255, 255, 0.12), transparent), radial-gradient(1.5px 1.5px at 75% 22%, rgba(0, 186, 156, 0.2), transparent), radial-gradient(1px 1px at 88% 70%, rgba(255, 255, 255, 0.12), transparent), radial-gradient(2px 2px at 92% 38%, rgba(0, 186, 156, 0.25), transparent)"
       userSelect="none"
     >
       <IconButton
@@ -68,13 +68,14 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
         w={{ base: '44px', md: '52px' }}
         h={{ base: '44px', md: '52px' }}
         borderRadius="full"
-        bg="rgba(16, 20, 36, 0.75)"
+        bg="cirqueira.grey.900/85"
         backdropFilter="blur(16px)"
-        border="1px solid rgba(255, 255, 255, 0.12)"
+        border="1px solid"
+        borderColor="cirqueira.grey.800"
         color="cirqueira.grey.100"
         shadow="0 10px 30px rgba(0, 0, 0, 0.7)"
         _hover={{
-          bg: 'rgba(32, 38, 66, 0.95)',
+          bg: 'cirqueira.grey.800',
           color: 'white',
           transform: 'translateY(-50%) scale(1.08)',
           borderColor: 'cirqueira.brand.500',
@@ -93,10 +94,11 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
             <Box
               position="absolute"
               inset="-10px"
-              bg="#0d101d"
+              bg="cirqueira.grey.900"
               borderRadius="28px"
-              boxShadow="0 30px 80px -15px rgba(0, 0, 0, 0.95), 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.1)"
-              border="1px solid rgba(255, 255, 255, 0.06)"
+              boxShadow="0 30px 80px -15px rgba(0, 0, 0, 0.95), 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.05)"
+              border="1px solid"
+              borderColor="cirqueira.grey.800"
               zIndex={0}
             />
 
@@ -107,7 +109,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
               transform="translateX(-50%)"
               w="36px"
               h="12px"
-              bg="#080a13"
+              bg="cirqueira.grey.950"
               borderRadius="0 0 8px 8px"
               boxShadow="0 4px 8px rgba(0, 0, 0, 0.9)"
               zIndex={1}
@@ -243,13 +245,14 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
         w={{ base: '44px', md: '52px' }}
         h={{ base: '44px', md: '52px' }}
         borderRadius="full"
-        bg="rgba(16, 20, 36, 0.75)"
+        bg="cirqueira.grey.900/85"
         backdropFilter="blur(16px)"
-        border="1px solid rgba(255, 255, 255, 0.12)"
+        border="1px solid"
+        borderColor="cirqueira.grey.800"
         color="cirqueira.grey.100"
         shadow="0 10px 30px rgba(0, 0, 0, 0.7)"
         _hover={{
-          bg: 'rgba(32, 38, 66, 0.95)',
+          bg: 'cirqueira.grey.800',
           color: 'white',
           transform: 'translateY(-50%) scale(1.08)',
           borderColor: 'cirqueira.brand.500',

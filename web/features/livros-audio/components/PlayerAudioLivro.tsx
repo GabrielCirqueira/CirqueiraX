@@ -249,10 +249,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
       bottom={0}
       left={0}
       right={0}
-      bg="rgba(11, 14, 25, 0.95)"
+      bg="cirqueira.grey.950/95"
       backdropFilter="blur(20px)"
       borderTop="1px solid"
-      borderColor="rgba(255, 255, 255, 0.08)"
+      borderColor="cirqueira.grey.900"
       boxShadow="0 -10px 40px rgba(0, 0, 0, 0.7)"
       px={{ base: 3, md: 6 }}
       py={2.5}
@@ -326,22 +326,24 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           right={{ base: 4, md: 24 }}
           w={{ base: 'calc(100vw - 32px)', sm: '380px' }}
           maxH="340px"
-          bg="#0d1020"
-          border="1px solid rgba(255, 255, 255, 0.12)"
+          bg="cirqueira.grey.900"
+          border="1px solid"
+          borderColor="cirqueira.grey.800"
           borderRadius="2xl"
           p={3.5}
           overflowY="auto"
-          boxShadow="0 20px 50px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(99, 102, 241, 0.2)"
+          boxShadow="0 20px 50px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--chakra-colors-cirqueira-brand-500)/20"
           zIndex={60}
         >
           <HStack
             justify="space-between"
             mb={2.5}
             pb={2}
-            borderBottom="1px solid rgba(255,255,255,0.06)"
+            borderBottom="1px solid"
+            borderColor="cirqueira.grey.800"
           >
             <HStack gap={2}>
-              <ListMusic size={16} color="#818cf8" />
+              <ListMusic size={16} color="var(--chakra-colors-cirqueira-brand-400)" />
               <Text fontSize="xs" fontWeight="bold" color="white">
                 Sumário e Capítulos
               </Text>
@@ -429,12 +431,12 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               w="44px"
               h="44px"
               borderRadius="full"
-              background="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
+              background="linear-gradient(135deg, var(--chakra-colors-cirqueira-brand-500) 0%, var(--chakra-colors-cirqueira-brand-400) 100%)"
               color="white"
-              boxShadow="0 0 20px rgba(99, 102, 241, 0.45)"
+              boxShadow="0 0 20px var(--chakra-colors-cirqueira-brand-500)/45"
               _hover={{
                 transform: 'scale(1.06)',
-                boxShadow: '0 0 25px rgba(99, 102, 241, 0.65)',
+                boxShadow: '0 0 25px var(--chakra-colors-cirqueira-brand-400)/70',
               }}
               transition="all 0.15s ease"
               disabled={!audioUrl}
@@ -543,7 +545,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               <Slider.Control>
                 <Slider.Track bg="rgba(255, 255, 255, 0.1)" h="5px" borderRadius="full">
                   <Slider.Range
-                    background="linear-gradient(to right, #6366f1, #a855f7)"
+                    background="linear-gradient(to right, var(--chakra-colors-cirqueira-brand-600), var(--chakra-colors-cirqueira-brand-400))"
                     borderRadius="full"
                   />
                 </Slider.Track>
@@ -551,7 +553,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
                   index={0}
                   boxSize="13px"
                   bg="white"
-                  boxShadow="0 0 10px rgba(168, 85, 247, 0.8)"
+                  boxShadow="0 0 10px var(--chakra-colors-cirqueira-brand-400)/80"
                 />
               </Slider.Control>
             </Slider.Root>
@@ -596,9 +598,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             px={2.5}
             h="28px"
             color="cirqueira.grey.200"
-            bg="rgba(255, 255, 255, 0.05)"
-            border="1px solid rgba(255, 255, 255, 0.08)"
-            _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.1)' }}
+            bg="cirqueira.grey.900"
+            border="1px solid"
+            borderColor="cirqueira.grey.800"
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
             onClick={alternarVelocidade}
             fontSize="xs"
             fontWeight="semibold"
@@ -613,11 +616,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             borderRadius="lg"
             px={2.5}
             h="28px"
-            color={mostrarSumario ? 'white' : 'cirqueira.grey.200'}
-            bg={mostrarSumario ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.05)'}
+            color={mostrarSumario ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            bg={mostrarSumario ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
             border="1px solid"
-            borderColor={mostrarSumario ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.08)'}
-            _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.1)' }}
+            borderColor={mostrarSumario ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'}
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
             onClick={() => setMostrarSumario((prev) => !prev)}
             fontSize="xs"
             fontWeight="semibold"
@@ -628,8 +631,9 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
 
           <HStack
             gap={1}
-            bg="rgba(255, 255, 255, 0.04)"
-            border="1px solid rgba(255, 255, 255, 0.08)"
+            bg="cirqueira.grey.900"
+            border="1px solid"
+            borderColor="cirqueira.grey.800"
             borderRadius="lg"
             px={1.5}
             py="2px"
@@ -700,11 +704,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             borderRadius="lg"
             px={2.5}
             h="28px"
-            color={isPosicaoSalva ? 'cirqueira.green.400' : 'cirqueira.grey.300'}
-            bg={isPosicaoSalva ? 'rgba(74, 222, 128, 0.1)' : 'transparent'}
+            color={isPosicaoSalva ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
+            bg={isPosicaoSalva ? 'cirqueira.brand.500/15' : 'transparent'}
             border="1px solid"
-            borderColor={isPosicaoSalva ? 'rgba(74, 222, 128, 0.25)' : 'transparent'}
-            _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
+            borderColor={isPosicaoSalva ? 'cirqueira.brand.500/35' : 'transparent'}
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
             disabled={salvandoMarcador}
             onClick={onSalvarMarcador}
             fontSize="xs"

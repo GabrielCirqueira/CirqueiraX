@@ -49,9 +49,9 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
       w="full"
       h={14}
       px={{ base: 3, md: 6 }}
-      bg="#0b0e1b"
+      bg="cirqueira.grey.950"
       borderBottom="1px solid"
-      borderColor="rgba(255, 255, 255, 0.08)"
+      borderColor="cirqueira.grey.900"
       display="flex"
       alignItems="center"
       justifyContent="space-between"
@@ -62,11 +62,12 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           as="button"
           p="7px"
           borderRadius="xl"
-          bg="rgba(99, 102, 241, 0.15)"
-          border="1px solid rgba(99, 102, 241, 0.3)"
-          color="#818cf8"
+          bg="cirqueira.brand.500/15"
+          border="1px solid"
+          borderColor="cirqueira.brand.500/30"
+          color="cirqueira.brand.400"
           cursor="pointer"
-          _hover={{ bg: 'rgba(99, 102, 241, 0.25)', transform: 'scale(1.04)' }}
+          _hover={{ bg: 'cirqueira.brand.500/25', transform: 'scale(1.04)' }}
           transition="all 0.15s ease"
           onClick={() => navigate('/livros-audio')}
           title="Voltar para a Biblioteca"
@@ -89,7 +90,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
             Biblioteca
           </Button>
 
-          <ChevronRight size={14} color="#71717a" />
+          <ChevronRight size={14} color="var(--chakra-colors-cirqueira-grey-500)" />
 
           <Text
             fontSize="sm"
@@ -105,9 +106,10 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           <Badge
             size="sm"
             variant="solid"
-            bg="#212544"
-            color="#c7d2fe"
-            border="1px solid rgba(99, 102, 241, 0.3)"
+            bg="cirqueira.brand.500/20"
+            color="cirqueira.brand.300"
+            border="1px solid"
+            borderColor="cirqueira.brand.500/35"
             borderRadius="full"
             px={2.5}
             py="2px"
@@ -126,7 +128,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           variant="ghost"
           borderRadius="lg"
           color="cirqueira.grey.300"
-          _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
+          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
           aria-label="Buscar no livro"
           title="Buscar no livro"
         >
@@ -140,9 +142,10 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           px={2.5}
           h="32px"
           color="cirqueira.grey.200"
-          bg="rgba(255, 255, 255, 0.05)"
-          border="1px solid rgba(255, 255, 255, 0.08)"
-          _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.1)' }}
+          bg="cirqueira.grey.900"
+          border="1px solid"
+          borderColor="cirqueira.grey.800"
+          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
           onClick={alternarProximoZoom}
           title="Alterar zoom do livro"
           fontSize="xs"
@@ -157,10 +160,10 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           variant="ghost"
           borderRadius="lg"
           color={modoDuplo ? 'cirqueira.brand.400' : 'cirqueira.grey.300'}
-          bg={modoDuplo ? 'rgba(99, 102, 241, 0.15)' : 'transparent'}
+          bg={modoDuplo ? 'cirqueira.brand.500/15' : 'transparent'}
           border="1px solid"
-          borderColor={modoDuplo ? 'rgba(99, 102, 241, 0.3)' : 'transparent'}
-          _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
+          borderColor={modoDuplo ? 'cirqueira.brand.500/35' : 'transparent'}
+          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
           aria-label={modoDuplo ? 'Alternar para página única' : 'Alternar para livro aberto'}
           title={
             modoDuplo ? 'Alternar para página única' : 'Alternar para livro aberto (duas páginas)'
