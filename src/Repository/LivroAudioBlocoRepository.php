@@ -67,7 +67,7 @@ class LivroAudioBlocoRepository extends ServiceEntityRepository
         /** @var list<LivroAudioBloco> $blocos */
         $blocos = $this->createQueryBuilder('b')
             ->andWhere('b.livro = :livro')
-            ->setParameter('livro', $livro)
+            ->setParameter('livro', $livro->uuid()->toBinary())
             ->orderBy('b.numeroBloco', 'ASC')
             ->getQuery()
             ->getResult();
@@ -101,7 +101,7 @@ class LivroAudioBlocoRepository extends ServiceEntityRepository
         $blocos = $this->createQueryBuilder('b')
             ->andWhere('b.livro = :livro')
             ->andWhere('b.status != :statusPronto')
-            ->setParameter('livro', $livro)
+            ->setParameter('livro', $livro->uuid()->toBinary())
             ->setParameter('statusPronto', StatusLivroAudioBloco::PRONTO)
             ->orderBy('b.numeroBloco', 'ASC')
             ->getQuery()

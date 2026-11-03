@@ -458,3 +458,23 @@
   - `web/features/livros-audio/types.ts`, `utils/livros.ts`, `LeitorLivroAudio.tsx`, `index.ts`
   - `web/features/livros-audio/components/CardLivroAudio.tsx`, `GradeLivrosAudio.tsx`
   - `web/features/livros-audio/components/AvisoProgressoAudio.tsx` (novo)
+
+---
+
+### ✅ Melhoria 98 — Player do Livro em Áudio Volta a Aparecer (Consulta de Partes Retornava Vazio)
+
+- **Status**: Concluído
+- **Data**: 02 de novembro de 2026
+- **Problema**: mesmo com horas de áudio gerado, o leitor não mostrava play, pausa, avanço nem velocidade. O painel informava o áudio disponível, mas o player não aparecia.
+- **Causa**:
+  - O log do Nginx mostrou `GET /api/v1/livros-audio/{uuid}/blocos` com 200, mas apenas 37 bytes, em vez de cerca de 89 KB.
+  - `LivroAudioBlocoRepository` passava a entidade em `setParameter('livro', $livro)`. Como a chave do livro é um UUID binário, a consulta não encontrava nenhuma linha.
+  - Em produção: `listarPorLivro` devolvia 0, enquanto `findBy` devolvia 249.
+  - Com a lista vazia, o leitor não montava o `PlayerAudioLivro`.
+- **Por que o teste da M96 não pegou**: a lista de partes foi simulada no navegador, e a leitura direta dos dados usou `findBy`, que converte o UUID corretamente.
+- **Efeitos que a mesma falha causaria**:
+  - `GerarAudioBlocoService` não atualizaria o status geral, então o livro nunca chegaria a "Pronto".
+  - `ProcessarLivroAudioService` não veria as partes existentes e, em uma nova tentativa, poderia dividir o livro de novo e duplicar partes. Nenhuma duplicata foi encontrada no banco.
+- **Solução**: `listarPorLivro` e `listarNaoProntosDoLivro` passam `$livro->uuid()->toBinary()`.
+- **Testado** em produção: `listarPorLivro` devolveu 249, `listarNaoProntosDoLivro` devolveu 207 e a lista serializada voltou a ter cerca de 89 KB. O consumo pela conta real do usuário ainda dependia de nova abertura do livro no navegador.
+- **Arquivos**: `src/Repository/LivroAudioBlocoRepository.php`
