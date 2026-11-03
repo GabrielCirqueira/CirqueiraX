@@ -5,7 +5,6 @@ import { memo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { obterUrlPdfLivro } from './api'
 import { AvisoProgressoAudio } from './components/AvisoProgressoAudio'
-import { BarraInferiorLeitor } from './components/BarraInferiorLeitor'
 import { BarraSuperiorLeitor } from './components/BarraSuperiorLeitor'
 import { LeitorSemPdf } from './components/LeitorSemPdf'
 import { PlayerAudioLivro } from './components/PlayerAudioLivro'
@@ -49,12 +48,12 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
     modoDuplo,
     telaCheia,
     irParaPagina,
-    mudarPagina,
     avancarPagina,
     voltarPagina,
     aumentarZoom,
     diminuirZoom,
     resetarZoom,
+    definirEscala,
     alternarModoDuplo,
     alternarTelaCheia,
   } = useLeitorLivro({
@@ -85,6 +84,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         onAumentarZoom={aumentarZoom}
         onDiminuirZoom={diminuirZoom}
         onResetarZoom={resetarZoom}
+        onDefinirEscala={definirEscala}
         onAlternarModoDuplo={alternarModoDuplo}
         onAlternarTelaCheia={() => alternarTelaCheia(containerRef.current)}
       />
@@ -101,26 +101,19 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
 
       <AvisoProgressoAudio livro={livro} />
 
-      {blocos.length > 0 && (
-        <PlayerAudioLivro
-          livro={livro}
-          blocos={blocos}
-          paginaAtualLeitor={paginaAtual}
-          acompanharAudio={acompanharAudio}
-          onAlternarAcompanharAudio={() => setAcompanharAudio((prev) => !prev)}
-          onMudarPaginaLeitor={irParaPagina}
-          onSalvarPosicao={salvarPosicao}
-        />
-      )}
-
-      <BarraInferiorLeitor
-        paginaAtual={paginaAtual}
+      <PlayerAudioLivro
+        livro={livro}
+        blocos={blocos}
+        paginaAtualLeitor={paginaAtual}
         totalPaginas={totalPaginas}
         marcadorSalvo={livro.paginaAtual}
-        salvando={salvarPosicaoMutation.isPending}
-        onMudarPagina={mudarPagina}
-        onAvancar={avancarPagina}
-        onVoltar={voltarPagina}
+        salvandoMarcador={salvarPosicaoMutation.isPending}
+        acompanharAudio={acompanharAudio}
+        onAlternarAcompanharAudio={() => setAcompanharAudio((prev) => !prev)}
+        onMudarPaginaLeitor={irParaPagina}
+        onAvancarPaginaLeitor={avancarPagina}
+        onVoltarPaginaLeitor={voltarPagina}
+        onSalvarPosicao={salvarPosicao}
         onSalvarMarcador={() => salvarPosicao(paginaAtual)}
       />
     </Flex>

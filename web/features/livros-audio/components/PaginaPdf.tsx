@@ -64,9 +64,8 @@ export function PaginaPdf({ documento, numeroPagina, escala = 1.5 }: PaginaPdfPr
         <Center
           position="absolute"
           inset={0}
-          bg="cirqueira.grey.950/80"
-          backdropFilter="blur(4px)"
-          borderRadius="xl"
+          bg="rgba(255, 255, 255, 0.7)"
+          backdropFilter="blur(2px)"
           zIndex={2}
         >
           <Spinner size="lg" color="cirqueira.brand.500" />
@@ -79,9 +78,7 @@ export function PaginaPdf({ documento, numeroPagina, escala = 1.5 }: PaginaPdfPr
         display="block"
         maxW="full"
         h="auto"
-        borderRadius="xl"
-        shadow="2xl"
-        bg="cirqueira.grey.950"
+        bg="transparent"
       />
     </Box>
   )

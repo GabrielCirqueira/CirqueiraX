@@ -18,8 +18,21 @@ export function useLeitorLivro({
 }: OpcoesLeitorLivro) {
   const [paginaAtual, setPaginaAtual] = useState(() => Math.max(1, paginaInicial))
   const [escala, setEscala] = useState(ESCALA_PADRAO)
-  const [modoDuplo, setModoDuplo] = useState(false)
+  const [modoDuplo, setModoDuplo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024
+    }
+    return false
+  })
   const [telaCheia, setTelaCheia] = useState(false)
+
+  const definirEscala = useCallback((novaEscala: number) => {
+    const escalaSegura = Math.min(
+      ESCALA_MAXIMA,
+      Math.max(ESCALA_MINIMA, Number(novaEscala.toFixed(2)))
+    )
+    setEscala(escalaSegura)
+  }, [])
 
   const irParaPagina = useCallback(
     (novaPagina: number) => {
@@ -93,6 +106,7 @@ export function useLeitorLivro({
     aumentarZoom,
     diminuirZoom,
     resetarZoom,
+    definirEscala,
     alternarModoDuplo,
     alternarTelaCheia,
   }
