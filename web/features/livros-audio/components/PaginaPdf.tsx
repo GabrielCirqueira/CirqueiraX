@@ -15,7 +15,17 @@ interface PaginaPdfProps {
   numeroPagina: number
   escala?: number
   destaque?: LocalizacaoTrecho | null
+  destaquePalavra?: LocalizacaoTrecho | null
   seguirDestaque?: boolean
+}
+
+const TRANSICAO_FRASE =
+  'left 0.28s ease-out, top 0.28s ease-out, width 0.28s ease-out, height 0.28s ease-out, background-color 0.2s ease'
+const TRANSICAO_PALAVRA =
+  'left 0.14s ease-out, top 0.14s ease-out, width 0.14s ease-out, height 0.14s ease-out'
+
+function filtrarSegmentos(destaque: LocalizacaoTrecho | null, numeroPagina: number) {
+  return destaque?.segmentos.filter((segmento) => segmento.pagina === numeroPagina) ?? []
 }
 
 export function PaginaPdf({
@@ -23,6 +33,7 @@ export function PaginaPdf({
   numeroPagina,
   escala = 1.5,
   destaque = null,
+  destaquePalavra = null,
   seguirDestaque = false,
 }: PaginaPdfProps) {
   const tarefaRef = useRef<TarefaRenderizacaoPagina | null>(null)
@@ -39,14 +50,19 @@ export function PaginaPdf({
   })
 
   const segmentosDaPagina = useMemo(
-    () => destaque?.segmentos.filter((segmento) => segmento.pagina === numeroPagina) ?? [],
+    () => filtrarSegmentos(destaque, numeroPagina),
     [destaque, numeroPagina]
   )
+  const segmentosPalavra = useMemo(
+    () => filtrarSegmentos(destaquePalavra, numeroPagina),
+    [destaquePalavra, numeroPagina]
+  )
+  const modoPalavra = destaquePalavra !== null
 
   const { data: itensTexto } = useQuery({
     queryKey: ['pdf-texto', documento.fingerprints?.[0] ?? 'doc', numeroPagina],
     queryFn: () => obterItensTextoPagina(documento, numeroPagina),
-    enabled: segmentosDaPagina.length > 0,
+    enabled: segmentosDaPagina.length > 0 || segmentosPalavra.length > 0,
     staleTime: Number.POSITIVE_INFINITY,
   })
 
@@ -56,6 +72,14 @@ export function PaginaPdf({
         ? calcularRetangulosDestaque(paginaPdf, itensTexto, segmentosDaPagina)
         : [],
     [paginaPdf, itensTexto, segmentosDaPagina]
+  )
+
+  const retangulosPalavra = useMemo(
+    () =>
+      paginaPdf && itensTexto && segmentosPalavra.length > 0
+        ? calcularRetangulosDestaque(paginaPdf, itensTexto, segmentosPalavra)
+        : [],
+    [paginaPdf, itensTexto, segmentosPalavra]
   )
 
   useEffect(() => {
@@ -121,17 +145,37 @@ export function PaginaPdf({
 
       {retangulosDestaque.map((retangulo, indice) => (
         <Box
-          key={`${retangulo.esquerda}-${retangulo.topo}`}
+          key={`frase-${indice}`}
           ref={indice === 0 ? primeiroDestaqueRef : undefined}
           position="absolute"
           left={`${retangulo.esquerda}%`}
           top={`${retangulo.topo}%`}
           w={`${retangulo.largura}%`}
           h={`${retangulo.altura}%`}
-          bg="cirqueira.brand.300/45"
+          bg={modoPalavra ? 'cirqueira.brand.200/25' : 'cirqueira.brand.300/45'}
           mixBlendMode="multiply"
-          borderRadius="2px"
+          borderRadius="3px"
           pointerEvents="none"
+          transition={TRANSICAO_FRASE}
+          animation="fade-in 0.25s ease-out"
+          zIndex={1}
+        />
+      ))}
+
+      {retangulosPalavra.map((retangulo, indice) => (
+        <Box
+          key={`palavra-${indice}`}
+          position="absolute"
+          left={`${retangulo.esquerda}%`}
+          top={`${retangulo.topo}%`}
+          w={`${retangulo.largura}%`}
+          h={`${retangulo.altura}%`}
+          bg="cirqueira.brand.400/55"
+          mixBlendMode="multiply"
+          borderRadius="4px"
+          pointerEvents="none"
+          transition={TRANSICAO_PALAVRA}
+          animation="fade-in 0.15s ease-out"
           zIndex={1}
         />
       ))}

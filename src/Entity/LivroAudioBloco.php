@@ -51,7 +51,7 @@ class LivroAudioBloco
     private ?string $voz = null;
 
     /**
-     * @var list<array{inicio: float, fim: float, texto: string}>|null
+     * @var list<array{inicio: float, fim: float, texto: string, palavras?: list<array{inicio: float, fim: float, texto: string}>}>|null
      */
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $trechos = null;
@@ -166,7 +166,7 @@ class LivroAudioBloco
     }
 
     /**
-     * @param list<array{inicio: float, fim: float, texto: string}> $trechos
+     * @param list<array{inicio: float, fim: float, texto: string, palavras?: list<array{inicio: float, fim: float, texto: string}>}> $trechos
      */
     public function concluirGeracao(string $caminhoAudio, int $duracaoSegundos, int $tamanhoBytes, string $voz, array $trechos): self
     {
@@ -202,7 +202,7 @@ class LivroAudioBloco
     }
 
     /**
-     * @return list<array{inicio: float, fim: float, texto: string}>
+     * @return list<array{inicio: float, fim: float, texto: string, palavras?: list<array{inicio: float, fim: float, texto: string}>}>
      */
     public function trechos(): array
     {
@@ -212,6 +212,13 @@ class LivroAudioBloco
     public function possuiTrechos(): bool
     {
         return null !== $this->trechos && [] !== $this->trechos;
+    }
+
+    public function possuiPalavras(): bool
+    {
+        $primeiroTrecho = $this->trechos[0] ?? null;
+
+        return is_array($primeiroTrecho) && [] !== ($primeiroTrecho['palavras'] ?? []);
     }
 
     public function registrarFalha(string $motivo): self

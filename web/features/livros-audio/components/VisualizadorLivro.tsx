@@ -12,6 +12,7 @@ interface VisualizadorLivroProps {
   escala: number
   modoDuplo: boolean
   destaque?: LocalizacaoTrecho | null
+  destaquePalavra?: LocalizacaoTrecho | null
   seguirDestaque?: boolean
   onAvancar: () => void
   onVoltar: () => void
@@ -24,6 +25,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
   escala,
   modoDuplo,
   destaque = null,
+  destaquePalavra = null,
   seguirDestaque = false,
   onAvancar,
   onVoltar,
@@ -135,6 +137,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                   numeroPagina={paginaEsquerda}
                   escala={escala}
                   destaque={destaque}
+                  destaquePalavra={destaquePalavra}
                   seguirDestaque={seguirDestaque}
                 />
 
@@ -186,6 +189,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                       numeroPagina={paginaDireita}
                       escala={escala}
                       destaque={destaque}
+                      destaquePalavra={destaquePalavra}
                       seguirDestaque={seguirDestaque}
                     />
 
@@ -247,6 +251,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
               numeroPagina={paginaAtual}
               escala={escala}
               destaque={destaque}
+              destaquePalavra={destaquePalavra}
               seguirDestaque={seguirDestaque}
             />
 

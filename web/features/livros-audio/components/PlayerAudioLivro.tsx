@@ -18,7 +18,7 @@ import {
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
 import { type NarracaoAtual, useNarracaoAtual } from '../hooks/useNarracaoAtual'
-import type { LivroAudio, LivroAudioBloco } from '../types'
+import type { LivroAudio, LivroAudioBloco, ModoDestaqueNarracao } from '../types'
 import type { PDFDocumentProxy } from '../utils/pdf'
 import { encontrarBlocoPorPagina, formatarTempoAudio } from '../utils/sincronizacao'
 
@@ -34,6 +34,8 @@ interface PlayerAudioLivroProps {
   salvandoMarcador?: boolean
   acompanharAudio: boolean
   onAlternarAcompanharAudio: () => void
+  modoDestaque?: ModoDestaqueNarracao
+  onAlternarModoDestaque?: () => void
   onMudarPaginaLeitor: (pagina: number) => void
   onAvancarPaginaLeitor?: () => void
   onVoltarPaginaLeitor?: () => void
@@ -55,6 +57,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   salvandoMarcador = false,
   acompanharAudio,
   onAlternarAcompanharAudio,
+  modoDestaque = 'frase',
+  onAlternarModoDestaque,
   onMudarPaginaLeitor,
   onAvancarPaginaLeitor,
   onVoltarPaginaLeitor,
@@ -99,11 +103,14 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     return obterUrlStreamBloco(livro.uuid, blocoAtivo.numeroBloco)
   }, [livro.uuid, blocoAtivo])
 
+  const obterTempoAtual = useCallback(() => audioRef.current?.currentTime ?? null, [])
   const narracao = useNarracaoAtual({
     livroUuid: livro.uuid,
     bloco: blocoAtivo,
     documento,
     segundos: tempoAtual,
+    tocando,
+    obterTempoAtual,
   })
   const paginaNarrada = narracao?.pagina ?? null
   const paginaNarradaRef = useRef<number | null>(paginaNarrada)
@@ -804,6 +811,26 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           >
             {acompanharAudio ? 'Seguir áudio' : 'Folhear livre'}
           </Button>
+
+          {onAlternarModoDestaque && (
+            <Button
+              size="xs"
+              variant="subtle"
+              colorPalette="gray"
+              onClick={onAlternarModoDestaque}
+              fontSize="10px"
+              h="26px"
+              px={2}
+              borderRadius="full"
+              title={
+                modoDestaque === 'palavra'
+                  ? 'Destacando a palavra falada. Clique para destacar a frase inteira'
+                  : 'Destacando a frase inteira. Clique para destacar palavra por palavra'
+              }
+            >
+              {modoDestaque === 'palavra' ? 'Por palavra' : 'Por frase'}
+            </Button>
+          )}
         </HStack>
       </Flex>
     </Box>

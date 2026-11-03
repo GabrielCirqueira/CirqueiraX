@@ -100,3 +100,24 @@
   - `web/features/livros-audio/utils/localizacaoNarracao.ts` (novo), `hooks/useNarracaoAtual.ts` (novo)
   - `web/features/livros-audio/utils/pdf.ts`, `components/PlayerAudioLivro.tsx`, `PaginaPdf.tsx`, `VisualizadorLivro.tsx`, `LeitorSemPdf.tsx`
   - `web/features/livros-audio/LeitorLivroAudio.tsx`, `api.ts`, `types.ts`, `hooks/useLivrosAudio.ts`
+
+---
+
+### 🟡 Melhoria 106 — Destaque Preciso, com Transição e por Palavra ou Frase
+
+- **Status**: Publicada em produção em 03/11/2026, falta validar no uso
+- **Data**: 03 de novembro de 2026
+- **Problema**: o destaque da M105 às vezes cortava uma letra ou palavra, porque calculava a largura pela quantidade de caracteres. A troca de frase era seca, sem transição, e só existia destaque por frase.
+- **Solução**:
+  - **Tempo de cada palavra**: o novo `bin/sintetizar-voz.py` usa a biblioteca `edge_tts` com `WordBoundary` e grava o áudio e o tempo de cada palavra. O `AgrupadorPalavrasNarracao` junta as palavras em frases pela pontuação do texto narrado. Cada frase em `livro_audio_bloco.trechos` passa a ter `palavras`, e o bloco informa `possuiPalavras`. Substitui o `LeitorLegendaSrt`.
+  - **Medida real**: a largura do destaque é medida com a fonte do próprio PDF (a que o pdf.js carrega), e a altura usa a ascendente e a descendente da fonte. Inclui pontuação de abertura e fechamento, com uma pequena folga.
+  - **Transição**: os retângulos deslizam de uma frase ou palavra para a seguinte e aparecem com fade.
+  - **Escolha do modo**: botão "Por frase / Por palavra" no player, lembrado no navegador. No modo palavra, a frase fica com um tom claro e a palavra falada em destaque. O acompanhamento usa `requestAnimationFrame` durante a reprodução, para a palavra não atrasar.
+  - `app:livro-audio:corrigir-voz` refaz as partes que ainda não têm o tempo das palavras.
+- **Testado** fora de produção com a parte 1 do "MANUAL DO ALUNO PBL": 41 frases e 608 palavras localizadas no PDF, sem falhas, e destaque conferido em capturas.
+- **Arquivos**:
+  - `bin/sintetizar-voz.py` (novo), `src/Infra/Audio/EdgeTtsClient.php`, `src/Infra/Audio/AgrupadorPalavrasNarracao.php` (novo), `src/Infra/Audio/LeitorLegendaSrt.php` (removido)
+  - `src/DataObject/PalavraNarracaoDTO.php` (novo), `src/DataObject/TrechoNarracaoDTO.php`, `config/services.yaml`
+  - `src/Entity/LivroAudioBloco.php`, `src/Serializer/LivroAudioBlocoSerializer.php`, `src/Service/LivroAudio/ConsultarLivrosAudioService.php`, `CorrigirVozLivrosAudioService.php`, `src/Command/CorrigirVozLivrosAudioCommand.php`
+  - `web/features/livros-audio/utils/pdf.ts`, `utils/localizacaoNarracao.ts`, `hooks/useNarracaoAtual.ts`, `types.ts`
+  - `web/features/livros-audio/components/PaginaPdf.tsx`, `VisualizadorLivro.tsx`, `PlayerAudioLivro.tsx`, `LeitorLivroAudio.tsx`

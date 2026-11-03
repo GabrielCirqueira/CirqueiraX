@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { useMemo } from 'react'
-import type { LivroAudioBloco } from '../types'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { LivroAudioBloco, TrechoNarracao } from '../types'
 import {
   type LocalizacaoTrecho,
   encontrarIndiceTrecho,
@@ -16,6 +16,7 @@ export interface NarracaoAtual {
   texto: string | null
   pagina: number
   localizacao: LocalizacaoTrecho | null
+  localizacaoPalavra: LocalizacaoTrecho | null
 }
 
 interface OpcoesNarracaoAtual {
@@ -23,6 +24,20 @@ interface OpcoesNarracaoAtual {
   bloco: LivroAudioBloco | null
   documento: PDFDocumentProxy | null
   segundos: number
+  tocando: boolean
+  obterTempoAtual: () => number | null
+}
+
+interface PosicaoNarracao {
+  frase: number
+  palavra: number
+}
+
+function calcularPosicao(trechos: TrechoNarracao[], segundos: number): PosicaoNarracao {
+  const frase = encontrarIndiceTrecho(trechos, segundos)
+  const palavras = trechos[frase]?.palavras ?? []
+  const palavra = palavras.length > 0 ? encontrarIndiceTrecho(palavras, segundos) : -1
+  return { frase, palavra }
 }
 
 export function useNarracaoAtual({
@@ -30,8 +45,11 @@ export function useNarracaoAtual({
   bloco,
   documento,
   segundos,
+  tocando,
+  obterTempoAtual,
 }: OpcoesNarracaoAtual): NarracaoAtual | null {
   const { data: trechos = [] } = useTrechosBloco(livroUuid, bloco)
+  const [posicao, setPosicao] = useState<PosicaoNarracao>({ frase: -1, palavra: -1 })
 
   const { data: localizacoes } = useQuery({
     queryKey: [
@@ -63,21 +81,58 @@ export function useNarracaoAtual({
     staleTime: Number.POSITIVE_INFINITY,
   })
 
-  const indice = useMemo(() => encontrarIndiceTrecho(trechos, segundos), [trechos, segundos])
+  const atualizarPosicao = useCallback(
+    (tempo: number) => {
+      const nova = calcularPosicao(trechos, tempo)
+      setPosicao((atual) =>
+        atual.frase === nova.frase && atual.palavra === nova.palavra ? atual : nova
+      )
+    },
+    [trechos]
+  )
+
+  useEffect(() => {
+    atualizarPosicao(segundos)
+  }, [atualizarPosicao, segundos])
+
+  useEffect(() => {
+    if (!tocando || trechos.length === 0) return
+
+    let quadro = 0
+    const acompanhar = () => {
+      const tempo = obterTempoAtual()
+      if (tempo !== null) atualizarPosicao(tempo)
+      quadro = requestAnimationFrame(acompanhar)
+    }
+    quadro = requestAnimationFrame(acompanhar)
+
+    return () => cancelAnimationFrame(quadro)
+  }, [tocando, trechos.length, obterTempoAtual, atualizarPosicao])
+
   const paginaEstimada = bloco ? calcularPaginaPorTempoBloco(bloco, segundos) : null
 
   return useMemo(() => {
     if (!bloco || paginaEstimada === null) return null
 
-    if (indice < 0) {
-      return { indice: -1, texto: null, pagina: paginaEstimada, localizacao: null }
+    const indice = posicao.frase
+    if (indice < 0 || indice >= trechos.length) {
+      return {
+        indice: -1,
+        texto: null,
+        pagina: paginaEstimada,
+        localizacao: null,
+        localizacaoPalavra: null,
+      }
     }
+
+    const localizacao = localizacoes?.[indice] ?? null
 
     return {
       indice,
       texto: trechos[indice]?.texto ?? null,
       pagina: encontrarPaginaLocalizada(localizacoes, indice) ?? paginaEstimada,
-      localizacao: localizacoes?.[indice] ?? null,
+      localizacao,
+      localizacaoPalavra: localizacao?.palavras?.[posicao.palavra] ?? null,
     }
-  }, [bloco, indice, trechos, localizacoes, paginaEstimada])
+  }, [bloco, posicao, trechos, localizacoes, paginaEstimada])
 }

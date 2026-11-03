@@ -85,7 +85,7 @@ final readonly class ConsultarLivrosAudioService
     }
 
     /**
-     * @return list<array{inicio: float, fim: float, texto: string}>
+     * @return list<array{inicio: float, fim: float, texto: string, palavras?: list<array{inicio: float, fim: float, texto: string}>}>
      */
     public function listarTrechosDoBloco(string $uuid, int $numeroBloco, Usuario $usuario): array
     {

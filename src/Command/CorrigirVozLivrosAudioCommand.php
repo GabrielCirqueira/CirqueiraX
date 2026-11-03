@@ -13,7 +13,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'app:livro-audio:corrigir-voz',
-    description: 'Detecta o idioma dos livros e refaz as partes geradas com a voz errada, antes da narração corrigida ou sem as marcações de frases.',
+    description: 'Detecta o idioma dos livros e refaz as partes geradas com a voz errada, antes da narração corrigida ou sem as marcações de frases e palavras.',
 )]
 final class CorrigirVozLivrosAudioCommand extends Command
 {

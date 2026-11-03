@@ -32,7 +32,7 @@ final readonly class CorrigirVozLivrosAudioService
             $voz = $this->definirIdiomaLivro->executar($livro)->voz();
 
             foreach ($blocos as $bloco) {
-                if ($bloco->isPronto() && (!$bloco->foiGeradoComVoz($voz) || !$bloco->possuiTrechos())) {
+                if ($bloco->isPronto() && (!$bloco->foiGeradoComVoz($voz) || !$bloco->possuiPalavras())) {
                     $bloco->reiniciarGeracao();
                     ++$partesReiniciadas;
                 }

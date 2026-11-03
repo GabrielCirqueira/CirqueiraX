@@ -17,12 +17,28 @@ import {
   useSalvarPosicaoLivroAudio,
 } from './hooks/useLivrosAudio'
 import type { NarracaoAtual } from './hooks/useNarracaoAtual'
-import type { LivroAudio } from './types'
+import type { LivroAudio, ModoDestaqueNarracao } from './types'
 import type { PDFDocumentProxy } from './utils/pdf'
 
 interface ConteudoLeitorProps {
   livro: LivroAudio
   documento: PDFDocumentProxy
+}
+
+const CHAVE_MODO_DESTAQUE = 'livros-audio:modo-destaque'
+
+function lerModoDestaque(): ModoDestaqueNarracao {
+  try {
+    return localStorage.getItem(CHAVE_MODO_DESTAQUE) === 'palavra' ? 'palavra' : 'frase'
+  } catch {
+    return 'frase'
+  }
+}
+
+function salvarModoDestaque(modo: ModoDestaqueNarracao) {
+  try {
+    localStorage.setItem(CHAVE_MODO_DESTAQUE, modo)
+  } catch {}
 }
 
 const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: ConteudoLeitorProps) {
@@ -31,6 +47,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
   const { data: blocos = [] } = useBlocosLivroAudio(livro.uuid)
   const [acompanharAudio, setAcompanharAudio] = useState(true)
   const [narracao, setNarracao] = useState<NarracaoAtual | null>(null)
+  const [modoDestaque, setModoDestaque] = useState<ModoDestaqueNarracao>(lerModoDestaque)
   const totalPaginas = documento.numPages || livro.totalPaginas || 1
 
   function salvarPosicao(pagina: number, bloco?: number | null, segundos?: number) {
@@ -41,6 +58,14 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         blocoAtual: bloco !== undefined ? bloco : livro.blocoAtual,
         segundosNoBloco: segundos ?? 0,
       },
+    })
+  }
+
+  function alternarModoDestaque() {
+    setModoDestaque((atual) => {
+      const novo = atual === 'palavra' ? 'frase' : 'palavra'
+      salvarModoDestaque(novo)
+      return novo
     })
   }
 
@@ -98,6 +123,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         escala={escala}
         modoDuplo={modoDuplo}
         destaque={narracao?.localizacao ?? null}
+        destaquePalavra={modoDestaque === 'palavra' ? (narracao?.localizacaoPalavra ?? null) : null}
         seguirDestaque={acompanharAudio}
         onAvancar={avancarPagina}
         onVoltar={voltarPagina}
@@ -117,6 +143,8 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         salvandoMarcador={salvarPosicaoMutation.isPending}
         acompanharAudio={acompanharAudio}
         onAlternarAcompanharAudio={() => setAcompanharAudio((prev) => !prev)}
+        modoDestaque={modoDestaque}
+        onAlternarModoDestaque={alternarModoDestaque}
         onMudarPaginaLeitor={irParaPagina}
         onAvancarPaginaLeitor={avancarPagina}
         onVoltarPaginaLeitor={voltarPagina}

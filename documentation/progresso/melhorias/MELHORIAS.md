@@ -121,3 +121,4 @@
 | M103 | Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema | ✅ Concluída | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-103--redesign-do-leitor-em-formato-de-livro-3d-e-player-unificado-no-tema-do-sistema) |
 | M104 | Refazer Áudio Gerado Antes da Narração Corrigida | ✅ Concluída | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-104--refazer-áudio-gerado-antes-da-narração-corrigida) |
 | M105 | Mostrar a Página e a Frase que Estão Sendo Lidas | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-105--mostrar-a-página-e-a-frase-que-estão-sendo-lidas) |
+| M106 | Destaque Preciso, com Transição e por Palavra ou Frase | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-106--destaque-preciso-com-transição-e-por-palavra-ou-frase) |

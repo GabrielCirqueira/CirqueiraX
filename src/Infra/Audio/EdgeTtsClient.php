@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infra\Audio;
 
+use App\DataObject\PalavraNarracaoDTO;
 use App\DataObject\ResultadoSinteseVozDTO;
 use App\DataObject\TrechoNarracaoDTO;
 use App\Exception\Audio\SinteseVozException;
@@ -18,7 +19,8 @@ final class EdgeTtsClient implements SintetizadorVozInterface
     private const int INTERVALO_CANCELAMENTO_MICROSSEGUNDOS = 500000;
 
     public function __construct(
-        private readonly LeitorLegendaSrt $leitorLegendaSrt,
+        private readonly AgrupadorPalavrasNarracao $agrupadorPalavras,
+        private readonly string $projectDir,
     ) {}
 
     public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null, ?callable $deveCancelar = null): ResultadoSinteseVozDTO
@@ -34,18 +36,24 @@ final class EdgeTtsClient implements SintetizadorVozInterface
         }
 
         $vozEscolhida = $voz ?? self::VOZ_PADRAO;
-        $caminhoLegenda = $caminhoDestinoMp3 . '.srt';
+        $caminhoTexto = $caminhoDestinoMp3 . '.txt';
+        $caminhoPalavras = $caminhoDestinoMp3 . '.palavras.json';
+
+        if (false === file_put_contents($caminhoTexto, $textoLimpo)) {
+            throw SinteseVozException::arquivoDestinoInvalido($caminhoTexto);
+        }
 
         $comando = [
-            'edge-tts',
-            '--voice',
+            'python3',
+            $this->projectDir . '/bin/sintetizar-voz.py',
+            '--voz',
             $vozEscolhida,
-            '--text',
-            $textoLimpo,
-            '--write-media',
+            '--arquivo-texto',
+            $caminhoTexto,
+            '--audio',
             $caminhoDestinoMp3,
-            '--write-subtitles',
-            $caminhoLegenda,
+            '--palavras',
+            $caminhoPalavras,
         ];
 
         $processo = new Process($comando);
@@ -55,7 +63,7 @@ final class EdgeTtsClient implements SintetizadorVozInterface
         while ($processo->isRunning()) {
             if (null !== $deveCancelar && $deveCancelar()) {
                 $processo->stop(0);
-                $this->removerArquivo($caminhoLegenda);
+                $this->removerArquivos($caminhoTexto, $caminhoPalavras);
 
                 throw SinteseVozException::cancelada();
             }
@@ -64,13 +72,15 @@ final class EdgeTtsClient implements SintetizadorVozInterface
             $processo->checkTimeout();
         }
 
+        $this->removerArquivos($caminhoTexto);
+
         if (!$processo->isSuccessful()) {
-            $this->removerArquivo($caminhoLegenda);
+            $this->removerArquivos($caminhoPalavras);
 
             throw SinteseVozException::falhaAoExecutarSintese($processo->getErrorOutput());
         }
 
-        $trechos = $this->lerTrechos($caminhoLegenda);
+        $trechos = $this->lerTrechos($textoLimpo, $caminhoPalavras);
 
         if (!file_exists($caminhoDestinoMp3) || 0 === (int) filesize($caminhoDestinoMp3)) {
             throw SinteseVozException::falhaAoExecutarSintese('O arquivo de áudio não foi gerado ou está vazio.');
@@ -90,22 +100,42 @@ final class EdgeTtsClient implements SintetizadorVozInterface
     /**
      * @return list<TrechoNarracaoDTO>
      */
-    private function lerTrechos(string $caminhoLegenda): array
+    private function lerTrechos(string $texto, string $caminhoPalavras): array
     {
-        if (!is_file($caminhoLegenda)) {
+        if (!is_file($caminhoPalavras)) {
             return [];
         }
 
-        $conteudo = (string) file_get_contents($caminhoLegenda);
-        $this->removerArquivo($caminhoLegenda);
+        $conteudo = (string) file_get_contents($caminhoPalavras);
+        $this->removerArquivos($caminhoPalavras);
 
-        return $this->leitorLegendaSrt->ler($conteudo);
+        $dados = json_decode($conteudo, true);
+        if (!is_array($dados)) {
+            return [];
+        }
+
+        $palavras = [];
+        foreach ($dados as $dado) {
+            if (!is_array($dado) || !isset($dado['inicio'], $dado['fim'], $dado['texto'])) {
+                continue;
+            }
+
+            $palavras[] = new PalavraNarracaoDTO(
+                inicio: (float) $dado['inicio'],
+                fim: (float) $dado['fim'],
+                texto: (string) $dado['texto'],
+            );
+        }
+
+        return $this->agrupadorPalavras->agrupar($texto, $palavras);
     }
 
-    private function removerArquivo(string $caminho): void
+    private function removerArquivos(string ...$caminhos): void
     {
-        if (is_file($caminho)) {
-            unlink($caminho);
+        foreach ($caminhos as $caminho) {
+            if (is_file($caminho)) {
+                unlink($caminho);
+            }
         }
     }
 

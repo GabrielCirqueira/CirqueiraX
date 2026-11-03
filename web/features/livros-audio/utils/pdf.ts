@@ -64,6 +64,9 @@ export interface ItemTextoPdf {
   texto: string
   transform: number[]
   largura: number
+  fonte: string
+  ascendente: number
+  descendente: number
 }
 
 export interface SegmentoDestaque {
@@ -81,10 +84,13 @@ export interface RetanguloDestaque {
   altura: number
 }
 
-const PROPORCAO_ASCENDENTE = 0.85
-const PROPORCAO_ALTURA_LINHA = 1.1
-const FOLGA_FINAL_CARACTERES = 0.6
+const ASCENDENTE_PADRAO = 0.85
+const DESCENDENTE_PADRAO = -0.22
+const FOLGA_VERTICAL = 0.08
+const FOLGA_HORIZONTAL = 0.12
+const TAMANHO_FONTE_MEDICAO = 100
 const PADRAO_PONTUACAO = /[^\p{L}\p{N}\s]/u
+let contextoMedicao: CanvasRenderingContext2D | null | undefined
 const cacheItensTexto = new WeakMap<PDFDocumentProxy, Map<number, Promise<ItemTextoPdf[]>>>()
 
 export function obterItensTextoPagina(
@@ -107,17 +113,56 @@ export function obterItensTextoPagina(
     .getPage(numeroPagina)
     .then((pagina) => pagina.getTextContent())
     .then((conteudo) =>
-      conteudo.items.flatMap((item) =>
-        'str' in item
-          ? [{ texto: item.str, transform: item.transform as number[], largura: item.width }]
-          : []
-      )
+      conteudo.items.flatMap((item) => {
+        if (!('str' in item)) return []
+        const estilo = conteudo.styles[item.fontName]
+        return [
+          {
+            texto: item.str,
+            transform: item.transform as number[],
+            largura: item.width,
+            fonte: `"${item.fontName}", ${estilo?.fontFamily ?? 'sans-serif'}`,
+            ascendente: estilo?.ascent || ASCENDENTE_PADRAO,
+            descendente: estilo?.descent || DESCENDENTE_PADRAO,
+          },
+        ]
+      })
     )
 
   promessa.catch(() => cache.delete(numeroPagina))
   cache.set(numeroPagina, promessa)
 
   return promessa
+}
+
+function obterContextoMedicao(): CanvasRenderingContext2D | null {
+  if (contextoMedicao === undefined) {
+    contextoMedicao =
+      typeof document !== 'undefined' ? document.createElement('canvas').getContext('2d') : null
+  }
+  return contextoMedicao
+}
+
+function criarMedidorItem(item: ItemTextoPdf): (posicao: number) => number {
+  const total = item.texto.length
+  const contexto = obterContextoMedicao()
+  const proporcional = (posicao: number) => posicao / total
+
+  if (!contexto) return proporcional
+
+  contexto.font = `${TAMANHO_FONTE_MEDICAO}px ${item.fonte}`
+  const larguraTotal = contexto.measureText(item.texto).width
+  if (larguraTotal <= 0) return proporcional
+
+  return (posicao: number) => {
+    if (posicao <= 0) return 0
+    if (posicao >= total) return 1
+    return contexto.measureText(item.texto.slice(0, posicao)).width / larguraTotal
+  }
+}
+
+function ehPontuacao(caractere: string | undefined): boolean {
+  return caractere !== undefined && PADRAO_PONTUACAO.test(caractere)
 }
 
 export function calcularRetangulosDestaque(
@@ -134,33 +179,35 @@ export function calcularRetangulosDestaque(
       if (!item || item.texto.length === 0) continue
 
       const totalCaracteres = item.texto.length
+      const comecaNesteItem = indice === segmento.itemInicio
       const terminaNesteItem = indice === segmento.itemFim
-      const de = indice === segmento.itemInicio ? segmento.caractereInicio : 0
+      let de = comecaNesteItem ? segmento.caractereInicio : 0
       let ate = terminaNesteItem ? segmento.caractereFim : totalCaracteres
-      while (
-        terminaNesteItem &&
-        ate < totalCaracteres &&
-        PADRAO_PONTUACAO.test(item.texto[ate] ?? '')
-      ) {
-        ate++
-      }
+
+      while (comecaNesteItem && de > 0 && ehPontuacao(item.texto[de - 1])) de--
+      while (terminaNesteItem && ate < totalCaracteres && ehPontuacao(item.texto[ate])) ate++
+      while (de < ate && item.texto[de] === ' ') de++
+      while (ate > de && item.texto[ate - 1] === ' ') ate--
       if (ate <= de) continue
 
       const posicao = pdfjsLib.Util.transform(viewport.transform, item.transform)
       const alturaFonte = Math.hypot(posicao[2] ?? 0, posicao[3] ?? 0)
       const larguraItem = item.largura * viewport.scale
-      const esquerda = (posicao[4] ?? 0) + larguraItem * (de / totalCaracteres)
-      const folga = terminaNesteItem && ate < totalCaracteres ? FOLGA_FINAL_CARACTERES : 0
-      const largura = larguraItem * ((ate - de + folga) / totalCaracteres)
-      const topo = (posicao[5] ?? 0) - alturaFonte * PROPORCAO_ASCENDENTE
+      if (larguraItem <= 0 || alturaFonte <= 0) continue
 
-      if (largura <= 0 || alturaFonte <= 0) continue
+      const medir = criarMedidorItem(item)
+      const folgaHorizontal = alturaFonte * FOLGA_HORIZONTAL
+      const folgaVertical = alturaFonte * FOLGA_VERTICAL
+      const esquerda = (posicao[4] ?? 0) + larguraItem * medir(de) - folgaHorizontal
+      const direita = (posicao[4] ?? 0) + larguraItem * medir(ate) + folgaHorizontal
+      const topo = (posicao[5] ?? 0) - alturaFonte * item.ascendente - folgaVertical
+      const altura = alturaFonte * (item.ascendente - item.descendente) + folgaVertical * 2
 
       retangulos.push({
         esquerda: (esquerda / viewport.width) * 100,
         topo: (topo / viewport.height) * 100,
-        largura: (largura / viewport.width) * 100,
-        altura: ((alturaFonte * PROPORCAO_ALTURA_LINHA) / viewport.height) * 100,
+        largura: ((direita - esquerda) / viewport.width) * 100,
+        altura: (altura / viewport.height) * 100,
       })
     }
   }

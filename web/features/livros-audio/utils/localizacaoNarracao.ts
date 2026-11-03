@@ -9,6 +9,7 @@ export interface PaginaComTexto {
 export interface LocalizacaoTrecho {
   pagina: number
   segmentos: SegmentoDestaque[]
+  palavras?: (LocalizacaoTrecho | null)[]
 }
 
 interface MapaTexto {
@@ -22,6 +23,7 @@ const TAMANHOS_PREFIXO = [24, 12]
 const TAMANHO_SUFIXO = 24
 const JANELA_BUSCA_EXTRA = 1500
 const MULTIPLICADOR_JANELA = 3
+const FOLGA_BUSCA_PALAVRA = 40
 const PADRAO_ACENTOS = /\p{M}/gu
 const PADRAO_NAO_ALFANUMERICO = /[^\p{L}\p{N}]/gu
 
@@ -101,6 +103,37 @@ function montarLocalizacao(mapa: MapaTexto, inicio: number, fim: number): Locali
   return primeiro ? { pagina: primeiro.pagina, segmentos } : null
 }
 
+interface PalavrasLocalizadas {
+  localizacoes: (LocalizacaoTrecho | null)[]
+  fim: number
+}
+
+function localizarPalavras(
+  mapa: MapaTexto,
+  trecho: TrechoNarracao,
+  inicioTrecho: number,
+  fimTrecho: number
+): PalavrasLocalizadas | null {
+  let cursor = inicioTrecho
+  let ultimo = -1
+
+  const localizacoes = trecho.palavras.map((palavra) => {
+    const agulha = normalizarTextoNarracao(palavra.texto)
+    if (agulha.length === 0) return null
+
+    const posicao = mapa.normalizado.indexOf(agulha, cursor)
+    if (posicao < 0 || posicao > fimTrecho + FOLGA_BUSCA_PALAVRA) return null
+
+    const fim = posicao + agulha.length
+    cursor = fim
+    ultimo = fim
+
+    return montarLocalizacao(mapa, posicao, fim)
+  })
+
+  return ultimo >= 0 ? { localizacoes, fim: ultimo } : null
+}
+
 export function localizarTrechos(
   paginas: PaginaComTexto[],
   trechos: TrechoNarracao[]
@@ -116,14 +149,21 @@ export function localizarTrechos(
     const inicio = buscarInicio(mapa.normalizado, agulha, cursor, limite)
     if (inicio < 0) return null
 
-    const fim = Math.min(mapa.normalizado.length, inicio + agulha.length)
+    const fimEstimado = Math.min(mapa.normalizado.length, inicio + agulha.length)
+    const palavras = localizarPalavras(mapa, trecho, inicio, fimEstimado)
+    const fim = palavras ? Math.max(fimEstimado, palavras.fim) : fimEstimado
     cursor = fim
 
-    return montarLocalizacao(mapa, inicio, fim)
+    const localizacao = montarLocalizacao(mapa, inicio, fim)
+    if (localizacao && palavras) {
+      localizacao.palavras = palavras.localizacoes
+    }
+
+    return localizacao
   })
 }
 
-export function encontrarIndiceTrecho(trechos: TrechoNarracao[], segundos: number): number {
+export function encontrarIndiceTrecho(trechos: { inicio: number }[], segundos: number): number {
   if (trechos.length === 0) return -1
 
   let esquerda = 0
