@@ -17,16 +17,17 @@ import {
 } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
+import { type NarracaoAtual, useNarracaoAtual } from '../hooks/useNarracaoAtual'
 import type { LivroAudio, LivroAudioBloco } from '../types'
-import {
-  calcularPaginaPorTempoBloco,
-  encontrarBlocoPorPagina,
-  formatarTempoAudio,
-} from '../utils/sincronizacao'
+import type { PDFDocumentProxy } from '../utils/pdf'
+import { encontrarBlocoPorPagina, formatarTempoAudio } from '../utils/sincronizacao'
 
 interface PlayerAudioLivroProps {
   livro: LivroAudio
   blocos: LivroAudioBloco[]
+  documento?: PDFDocumentProxy | null
+  modoDuplo?: boolean
+  onNarracaoAtual?: (narracao: NarracaoAtual | null) => void
   paginaAtualLeitor: number
   totalPaginas: number
   marcadorSalvo?: number
@@ -45,6 +46,9 @@ const VELOCIDADES = [0.75, 1.0, 1.25, 1.5, 2.0]
 export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   livro,
   blocos,
+  documento = null,
+  modoDuplo = false,
+  onNarracaoAtual,
   paginaAtualLeitor,
   totalPaginas,
   marcadorSalvo,
@@ -95,11 +99,41 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     return obterUrlStreamBloco(livro.uuid, blocoAtivo.numeroBloco)
   }, [livro.uuid, blocoAtivo])
 
+  const narracao = useNarracaoAtual({
+    livroUuid: livro.uuid,
+    bloco: blocoAtivo,
+    documento,
+    segundos: tempoAtual,
+  })
+  const paginaNarrada = narracao?.pagina ?? null
+  const paginaNarradaRef = useRef<number | null>(paginaNarrada)
+  paginaNarradaRef.current = paginaNarrada
+  const audioFoiUsadoRef = useRef(false)
+  const onNarracaoAtualRef = useRef(onNarracaoAtual)
+  onNarracaoAtualRef.current = onNarracaoAtual
+  const paginaLeitorRef = useRef({ pagina: paginaAtualLeitor, modoDuplo, onMudarPaginaLeitor })
+  paginaLeitorRef.current = { pagina: paginaAtualLeitor, modoDuplo, onMudarPaginaLeitor }
+
+  useEffect(() => {
+    onNarracaoAtualRef.current?.(audioFoiUsadoRef.current ? narracao : null)
+  }, [narracao])
+
+  useEffect(() => {
+    if (!acompanharAudio || paginaNarrada === null || (!tocando && !audioFoiUsadoRef.current))
+      return
+    const leitor = paginaLeitorRef.current
+    const visivel =
+      paginaNarrada === leitor.pagina || (leitor.modoDuplo && paginaNarrada === leitor.pagina + 1)
+    if (!visivel) {
+      leitor.onMudarPaginaLeitor(paginaNarrada)
+    }
+  }, [paginaNarrada, acompanharAudio, tocando])
+
   const salvarProgresso = useCallback(
     (segundos: number) => {
       if (!blocoAtivo) return
-      const paginaCalculada = calcularPaginaPorTempoBloco(blocoAtivo, segundos)
-      onSalvarPosicao(paginaCalculada, blocoAtivo.numeroBloco, Math.floor(segundos))
+      const pagina = paginaNarradaRef.current ?? blocoAtivo.paginaInicio
+      onSalvarPosicao(pagina, blocoAtivo.numeroBloco, Math.floor(segundos))
     },
     [blocoAtivo, onSalvarPosicao]
   )
@@ -264,6 +298,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           src={audioUrl}
           preload="metadata"
           onPlay={() => {
+            audioFoiUsadoRef.current = true
             setTocando(true)
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing'
           }}
@@ -295,18 +330,14 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             ultimoTempoRef.current = atual
             setTempoAtual(atual)
 
-            if (acompanharAudio) {
-              const paginaAlvo = calcularPaginaPorTempoBloco(blocoAtivo, atual)
-              if (paginaAlvo !== paginaAtualLeitor) {
-                onMudarPaginaLeitor(paginaAlvo)
-              }
-            }
-
             const agora = Date.now()
             if (agora - ultimoSalvamentoRef.current > 6000) {
               ultimoSalvamentoRef.current = agora
               salvarProgresso(atual)
             }
+          }}
+          onSeeked={() => {
+            audioFoiUsadoRef.current = true
           }}
           onEnded={() => {
             setTocando(false)
@@ -410,6 +441,40 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             })}
           </Flex>
         </Box>
+      )}
+
+      {narracao && (audioFoiUsadoRef.current || tocando) && (
+        <HStack
+          as="button"
+          maxW="1600px"
+          w="full"
+          mx="auto"
+          mb={2}
+          gap={2}
+          minW={0}
+          textAlign="left"
+          cursor="pointer"
+          onClick={() => onMudarPaginaLeitor(narracao.pagina)}
+          title="Ir para a página que está sendo lida"
+        >
+          <Badge
+            size="sm"
+            variant="subtle"
+            colorPalette="brand"
+            borderRadius="md"
+            flexShrink={0}
+            fontVariantNumeric="tabular-nums"
+          >
+            {narracao.localizacao || !narracao.texto
+              ? `Página ${narracao.pagina}`
+              : `Perto da página ${narracao.pagina}`}
+          </Badge>
+          <Text fontSize="xs" color="cirqueira.grey.300" truncate minW={0}>
+            {narracao.texto
+              ? `Lendo agora: “${narracao.texto}”`
+              : `Parte ${blocoAtivo?.numeroBloco ?? ''}, páginas ${blocoAtivo?.paginaInicio ?? ''} a ${blocoAtivo?.paginaFim ?? ''}`}
+          </Text>
+        </HStack>
       )}
 
       <Flex

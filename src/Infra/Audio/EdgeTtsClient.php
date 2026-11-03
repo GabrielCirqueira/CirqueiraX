@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infra\Audio;
 
 use App\DataObject\ResultadoSinteseVozDTO;
+use App\DataObject\TrechoNarracaoDTO;
 use App\Exception\Audio\SinteseVozException;
 use App\Interface\SintetizadorVozInterface;
 use Symfony\Component\Process\Process;
@@ -15,6 +16,10 @@ final class EdgeTtsClient implements SintetizadorVozInterface
     private const float TIMEOUT_SINTESE_SEGUNDOS = 180.0;
     private const float TIMEOUT_PROBE_SEGUNDOS = 15.0;
     private const int INTERVALO_CANCELAMENTO_MICROSSEGUNDOS = 500000;
+
+    public function __construct(
+        private readonly LeitorLegendaSrt $leitorLegendaSrt,
+    ) {}
 
     public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null, ?callable $deveCancelar = null): ResultadoSinteseVozDTO
     {
@@ -29,6 +34,7 @@ final class EdgeTtsClient implements SintetizadorVozInterface
         }
 
         $vozEscolhida = $voz ?? self::VOZ_PADRAO;
+        $caminhoLegenda = $caminhoDestinoMp3 . '.srt';
 
         $comando = [
             'edge-tts',
@@ -38,6 +44,8 @@ final class EdgeTtsClient implements SintetizadorVozInterface
             $textoLimpo,
             '--write-media',
             $caminhoDestinoMp3,
+            '--write-subtitles',
+            $caminhoLegenda,
         ];
 
         $processo = new Process($comando);
@@ -47,6 +55,7 @@ final class EdgeTtsClient implements SintetizadorVozInterface
         while ($processo->isRunning()) {
             if (null !== $deveCancelar && $deveCancelar()) {
                 $processo->stop(0);
+                $this->removerArquivo($caminhoLegenda);
 
                 throw SinteseVozException::cancelada();
             }
@@ -56,8 +65,12 @@ final class EdgeTtsClient implements SintetizadorVozInterface
         }
 
         if (!$processo->isSuccessful()) {
+            $this->removerArquivo($caminhoLegenda);
+
             throw SinteseVozException::falhaAoExecutarSintese($processo->getErrorOutput());
         }
+
+        $trechos = $this->lerTrechos($caminhoLegenda);
 
         if (!file_exists($caminhoDestinoMp3) || 0 === (int) filesize($caminhoDestinoMp3)) {
             throw SinteseVozException::falhaAoExecutarSintese('O arquivo de áudio não foi gerado ou está vazio.');
@@ -70,7 +83,30 @@ final class EdgeTtsClient implements SintetizadorVozInterface
             caminhoAudio: $caminhoDestinoMp3,
             duracaoSegundos: $duracaoSegundos,
             tamanhoBytes: $tamanhoBytes,
+            trechos: $trechos,
         );
+    }
+
+    /**
+     * @return list<TrechoNarracaoDTO>
+     */
+    private function lerTrechos(string $caminhoLegenda): array
+    {
+        if (!is_file($caminhoLegenda)) {
+            return [];
+        }
+
+        $conteudo = (string) file_get_contents($caminhoLegenda);
+        $this->removerArquivo($caminhoLegenda);
+
+        return $this->leitorLegendaSrt->ler($conteudo);
+    }
+
+    private function removerArquivo(string $caminho): void
+    {
+        if (is_file($caminho)) {
+            unlink($caminho);
+        }
     }
 
     private function obterDuracaoAudio(string $caminhoAudio): int

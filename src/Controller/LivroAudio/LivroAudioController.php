@@ -106,6 +106,16 @@ final class LivroAudioController extends DefaultController
         return $this->responderArquivo($arquivo, ResponseHeaderBag::DISPOSITION_INLINE);
     }
 
+    #[Route('/{uuid}/blocos/{numeroBloco}/trechos', name: 'listar_trechos_bloco', methods: ['GET'])]
+    public function listarTrechosBloco(
+        string $uuid,
+        int $numeroBloco,
+        #[CurrentUser]
+        Usuario $usuario,
+    ): Response {
+        return $this->success($this->consultarLivrosAudioService->listarTrechosDoBloco($uuid, $numeroBloco, $usuario));
+    }
+
     #[Route('/{uuid}/blocos/{numeroBloco}/stream', name: 'stream_bloco', methods: ['GET'])]
     public function streamBloco(
         string $uuid,

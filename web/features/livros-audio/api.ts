@@ -5,10 +5,12 @@ import {
   type LivroAudio,
   type LivroAudioBloco,
   type SalvarPosicaoLivro,
+  type TrechoNarracao,
   type UploadLivroAudioPayload,
   livroAudioBlocoSchema,
   livroAudioSchema,
   salvarPosicaoLivroSchema,
+  trechoNarracaoSchema,
 } from './types'
 
 const URL_LIVROS_AUDIO = '/api/v1/livros-audio'
@@ -31,6 +33,16 @@ export async function obterLivroAudio(uuid: string): Promise<LivroAudio> {
 export async function listarBlocosLivroAudio(uuid: string): Promise<LivroAudioBloco[]> {
   const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/blocos`)
   return z.array(livroAudioBlocoSchema).parse(data.data)
+}
+
+export async function listarTrechosBloco(
+  uuid: string,
+  numeroBloco: number
+): Promise<TrechoNarracao[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(
+    `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/trechos`
+  )
+  return z.array(trechoNarracaoSchema).parse(data.data)
 }
 
 export async function fazerUploadLivroAudio(payload: UploadLivroAudioPayload): Promise<LivroAudio> {

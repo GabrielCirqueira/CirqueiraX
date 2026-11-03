@@ -85,6 +85,21 @@ final readonly class ConsultarLivrosAudioService
     }
 
     /**
+     * @return list<array{inicio: float, fim: float, texto: string}>
+     */
+    public function listarTrechosDoBloco(string $uuid, int $numeroBloco, Usuario $usuario): array
+    {
+        $livro = $this->obterDoUsuario($uuid, $usuario);
+        $bloco = $this->livroAudioBlocoRepository->buscarPorLivroENumero($livro, $numeroBloco);
+
+        if (null === $bloco) {
+            throw LivroAudioException::blocoNaoEncontrado($numeroBloco);
+        }
+
+        return $bloco->trechos();
+    }
+
+    /**
      * @return list<LivroAudioBloco>
      */
     public function listarBlocosDoLivro(string $uuid, Usuario $usuario): array

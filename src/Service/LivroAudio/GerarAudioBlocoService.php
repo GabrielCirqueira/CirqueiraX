@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\LivroAudio;
 
+use App\DataObject\TrechoNarracaoDTO;
 use App\Entity\LivroAudio;
 use App\Interface\ArmazenamentoLivroInterface;
 use App\Interface\SintetizadorVozInterface;
@@ -84,6 +85,10 @@ final readonly class GerarAudioBlocoService
                 duracaoSegundos: $resultado->duracaoSegundos(),
                 tamanhoBytes: $resultado->tamanhoBytes(),
                 voz: $voz,
+                trechos: array_map(
+                    static fn(TrechoNarracaoDTO $trecho): array => $trecho->paraArray(),
+                    $resultado->trechos(),
+                ),
             );
             $this->livroAudioBlocoRepository->salvar($bloco, true);
         } catch (Throwable $e) {

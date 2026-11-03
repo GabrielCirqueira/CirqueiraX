@@ -17,10 +17,14 @@ export const LeitorSemPdf = memo(function LeitorSemPdf({ livro }: LeitorSemPdfPr
   const { data: blocos = [] } = useBlocosLivroAudio(livro.uuid)
   const [pagina, setPagina] = useState(livro.paginaAtual)
 
-  function salvarPosicao(paginaAtual: number, bloco: number, segundos: number) {
+  function salvarPosicao(paginaAtual: number, bloco?: number | null, segundos?: number) {
     salvarPosicaoMutation.mutate({
       uuid: livro.uuid,
-      posicao: { paginaAtual, blocoAtual: bloco, segundosNoBloco: segundos },
+      posicao: {
+        paginaAtual,
+        blocoAtual: bloco ?? livro.blocoAtual,
+        segundosNoBloco: segundos ?? 0,
+      },
     })
   }
 
@@ -72,6 +76,7 @@ export const LeitorSemPdf = memo(function LeitorSemPdf({ livro }: LeitorSemPdfPr
           livro={livro}
           blocos={blocos}
           paginaAtualLeitor={pagina}
+          totalPaginas={livro.totalPaginas ?? 1}
           acompanharAudio={false}
           onAlternarAcompanharAudio={() => {}}
           onMudarPaginaLeitor={setPagina}

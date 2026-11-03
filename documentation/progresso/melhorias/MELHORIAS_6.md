@@ -6,7 +6,7 @@
 
 ### 🟡 Melhoria 101 — Apagar Livro Interrompe a Geração e Libera a Fila na Hora
 
-- **Status**: Código pronto, aguardando publicação em produção
+- **Status**: Publicada em produção em 03/11/2026, falta validar no uso
 - **Data**: 02 de novembro de 2026
 - **Problema**: ao apagar um livro, a parte em geração continuava até o fim, por até cerca de 1 minuto, antes de o próximo livro começar. Os MP3 também podiam ficar no disco, porque o worker rodava como root e a exclusão roda como `www-data`.
 - **Solução**:
@@ -25,9 +25,9 @@
 
 ---
 
-### 🟡 Melhoria 102 — Narração Sem Pausa em Toda Quebra de Linha
+### ✅ Melhoria 102 — Narração Sem Pausa em Toda Quebra de Linha
 
-- **Status**: Código pronto, aguardando publicação em produção
+- **Status**: Concluída e publicada em produção em 03/11/2026
 - **Data**: 02 de novembro de 2026
 - **Problema**: o texto extraído do PDF mantinha uma quebra para cada linha física da página, e a voz parava em cada uma, mesmo no meio da frase. A narração ficava truncada e mais longa.
 - **Solução**:
@@ -43,9 +43,9 @@
 
 ---
 
-### 🟡 Melhoria 103 — Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema
+### ✅ Melhoria 103 — Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema
 
-- **Status**: Código pronto, aguardando publicação em produção
+- **Status**: Concluída e publicada em produção em 03/11/2026
 - **Data**: 02 de novembro de 2026
 - **Problema**: o leitor de PDF apresentava páginas estáticas cruas lado a lado sem aspecto de livro físico, contava com duas barras inferiores concorrentes (uma para paginação/zoom e outra para o player de áudio) e utilizava estilos em tons roxos descolados da identidade visual do sistema.
 - **Solução**:
@@ -65,9 +65,9 @@
 
 ---
 
-### 🟡 Melhoria 104 — Refazer Áudio Gerado Antes da Narração Corrigida
+### ✅ Melhoria 104 — Refazer Áudio Gerado Antes da Narração Corrigida
 
-- **Status**: Código pronto, aguardando publicação em produção
+- **Status**: Concluída e publicada em produção em 03/11/2026
 - **Data**: 03 de novembro de 2026
 - **Problema**: as partes geradas antes da M100 e da M102 continuavam com uma pausa de cerca de 1 s no fim de cada linha do PDF. O `corrigir-voz` não refazia essas partes, porque tratava a voz vazia como pt-BR. O "MANUAL DO ALUNO PBL" tinha 81 pausas acima de 0,8 s só na parte 1.
 - **Solução**:
@@ -76,3 +76,27 @@
 - **Arquivos**:
   - `src/Entity/LivroAudioBloco.php`
   - `src/Command/CorrigirVozLivrosAudioCommand.php`
+
+---
+
+### 🟡 Melhoria 105 — Mostrar a Página e a Frase que Estão Sendo Lidas
+
+- **Status**: Publicada em produção em 03/11/2026, falta validar no uso
+- **Data**: 03 de novembro de 2026
+- **Problema**: durante o áudio não dava para saber em que página ou linha a narração estava. O "Seguir áudio" estimava a página pela proporção do tempo dentro da parte.
+- **Solução**:
+  - **Backend**: o `EdgeTtsClient` gera a legenda (`--write-subtitles`), e o `LeitorLegendaSrt` converte em frases com início e fim. As frases ficam em `livro_audio_bloco.trechos` (JSON, migração `Version20261103150000`) e saem em `GET /api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/trechos`. O bloco informa `possuiTrechos`.
+  - **Localização**: `localizarTrechos` acha cada frase no texto das páginas do PDF (pdf.js), comparando só letras e números, sem acentos. Assim ignora hifenização, pontuação, ligaduras e números de página.
+  - **Leitor**: a página vira para a frase atual, e a frase aparece destacada no PDF, linha por linha. O player mostra "Página X" e "Lendo agora: …", e um clique leva à página. A página só vira quando a frase sai das páginas visíveis.
+  - `app:livro-audio:corrigir-voz` também refaz as partes sem marcações.
+  - Corrigido de passagem: `LeitorSemPdf` não passava `totalPaginas` ao player e tinha assinatura incompatível em `salvarPosicao`.
+- **Testado** fora de produção com a parte 1 do "MANUAL DO ALUNO PBL": as 34 frases foram localizadas na página certa, e o destaque conferido em capturas das páginas 1 a 3.
+- **Arquivos**:
+  - `src/Infra/Audio/EdgeTtsClient.php`, `src/Infra/Audio/LeitorLegendaSrt.php` (novo)
+  - `src/DataObject/TrechoNarracaoDTO.php` (novo), `src/DataObject/ResultadoSinteseVozDTO.php`
+  - `src/Entity/LivroAudioBloco.php`, `migrations/Version20261103150000.php` (novo)
+  - `src/Service/LivroAudio/GerarAudioBlocoService.php`, `ConsultarLivrosAudioService.php`, `CorrigirVozLivrosAudioService.php`
+  - `src/Controller/LivroAudio/LivroAudioController.php`, `src/Serializer/LivroAudioBlocoSerializer.php`, `src/Command/CorrigirVozLivrosAudioCommand.php`
+  - `web/features/livros-audio/utils/localizacaoNarracao.ts` (novo), `hooks/useNarracaoAtual.ts` (novo)
+  - `web/features/livros-audio/utils/pdf.ts`, `components/PlayerAudioLivro.tsx`, `PaginaPdf.tsx`, `VisualizadorLivro.tsx`, `LeitorSemPdf.tsx`
+  - `web/features/livros-audio/LeitorLivroAudio.tsx`, `api.ts`, `types.ts`, `hooks/useLivrosAudio.ts`

@@ -50,6 +50,12 @@ class LivroAudioBloco
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $voz = null;
 
+    /**
+     * @var list<array{inicio: float, fim: float, texto: string}>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $trechos = null;
+
     #[ORM\Column(type: 'string', enumType: StatusLivroAudioBloco::class)]
     private StatusLivroAudioBloco $status;
 
@@ -159,10 +165,14 @@ class LivroAudioBloco
         return $this;
     }
 
-    public function concluirGeracao(string $caminhoAudio, int $duracaoSegundos, int $tamanhoBytes, string $voz): self
+    /**
+     * @param list<array{inicio: float, fim: float, texto: string}> $trechos
+     */
+    public function concluirGeracao(string $caminhoAudio, int $duracaoSegundos, int $tamanhoBytes, string $voz, array $trechos): self
     {
         $this->caminhoAudio = $caminhoAudio;
         $this->voz = $voz;
+        $this->trechos = [] !== $trechos ? $trechos : null;
         $this->duracaoSegundos = $duracaoSegundos;
         $this->tamanhoBytes = $tamanhoBytes;
         $this->status = StatusLivroAudioBloco::PRONTO;
@@ -178,6 +188,7 @@ class LivroAudioBloco
         $this->duracaoSegundos = null;
         $this->tamanhoBytes = null;
         $this->voz = null;
+        $this->trechos = null;
         $this->status = StatusLivroAudioBloco::PENDENTE;
         $this->erroMotivo = null;
         $this->atualizadoEm = new DateTimeImmutable();
@@ -188,6 +199,19 @@ class LivroAudioBloco
     public function foiGeradoComVoz(string $voz): bool
     {
         return $this->voz === $voz;
+    }
+
+    /**
+     * @return list<array{inicio: float, fim: float, texto: string}>
+     */
+    public function trechos(): array
+    {
+        return $this->trechos ?? [];
+    }
+
+    public function possuiTrechos(): bool
+    {
+        return null !== $this->trechos && [] !== $this->trechos;
     }
 
     public function registrarFalha(string $motivo): self

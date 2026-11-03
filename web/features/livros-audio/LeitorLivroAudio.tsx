@@ -16,6 +16,7 @@ import {
   useLivroAudio,
   useSalvarPosicaoLivroAudio,
 } from './hooks/useLivrosAudio'
+import type { NarracaoAtual } from './hooks/useNarracaoAtual'
 import type { LivroAudio } from './types'
 import type { PDFDocumentProxy } from './utils/pdf'
 
@@ -29,6 +30,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
   const salvarPosicaoMutation = useSalvarPosicaoLivroAudio()
   const { data: blocos = [] } = useBlocosLivroAudio(livro.uuid)
   const [acompanharAudio, setAcompanharAudio] = useState(true)
+  const [narracao, setNarracao] = useState<NarracaoAtual | null>(null)
   const totalPaginas = documento.numPages || livro.totalPaginas || 1
 
   function salvarPosicao(pagina: number, bloco?: number | null, segundos?: number) {
@@ -95,6 +97,8 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         totalPaginas={totalPaginas}
         escala={escala}
         modoDuplo={modoDuplo}
+        destaque={narracao?.localizacao ?? null}
+        seguirDestaque={acompanharAudio}
         onAvancar={avancarPagina}
         onVoltar={voltarPagina}
       />
@@ -104,6 +108,9 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
       <PlayerAudioLivro
         livro={livro}
         blocos={blocos}
+        documento={documento}
+        modoDuplo={modoDuplo}
+        onNarracaoAtual={setNarracao}
         paginaAtualLeitor={paginaAtual}
         totalPaginas={totalPaginas}
         marcadorSalvo={livro.paginaAtual}

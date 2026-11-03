@@ -510,7 +510,7 @@
 
 ### 🟡 Melhoria 100 — Voz do Livro em Áudio no Idioma do Livro
 
-- **Status**: Código pronto, aguardando publicação em produção
+- **Status**: Publicada em produção em 03/11/2026, falta validar no uso
 - **Data**: 02 de novembro de 2026
 - **Problema**: um PDF em inglês foi narrado com a voz fixa `pt-BR-AntonioNeural`, com pronúncia de português.
 - **Solução**:

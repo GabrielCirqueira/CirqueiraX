@@ -27,6 +27,7 @@ final readonly class LivroAudioBlocoSerializer
             'isGerando' => $bloco->isGerando(),
             'isPendente' => $bloco->isPendente(),
             'isErro' => $bloco->isErro(),
+            'possuiTrechos' => $bloco->possuiTrechos(),
             'erroMotivo' => $bloco->erroMotivo(),
             'criadoEm' => $bloco->criadoEm()->format(DateTimeInterface::ATOM),
             'atualizadoEm' => $bloco->atualizadoEm()->format(DateTimeInterface::ATOM),

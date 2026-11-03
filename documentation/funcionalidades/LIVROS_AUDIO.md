@@ -98,7 +98,7 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
      - Menu de capítulos/blocos com indicação visual de status (pronto, gerando, erro).
      - Integração com **Media Session API** para controle de áudio na tela de bloqueio e central de mídia do celular ou desktop.
    - **Sincronização Bidirecional:**
-     - **Seguir áudio:** virada de páginas automática calculada a partir do tempo decorrido dentro do bloco de áudio.
+     - **Seguir áudio:** a página vira para onde está a frase lida. O `edge-tts` grava o início e o fim de cada frase (`livro_audio_bloco.trechos`), o leitor localiza a frase no texto do PDF e a destaca na página. O player mostra a página e o trecho lido. Partes sem essas marcações usam uma estimativa pelo tempo decorrido.
      - **Folhear livre:** permite folhear páginas do PDF sem interromper a reprodução do áudio atual.
      - Navegação por clique na página do PDF pula a reprodução para o bloco correspondente.
 
@@ -115,4 +115,5 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
 | `PUT` | `/api/v1/livros-audio/{uuid}/posicao` | Atualiza o marcador de leitura (página/bloco/segundos) |
 | `DELETE` | `/api/v1/livros-audio/{uuid}` | Apaga o livro, metadados e arquivos de áudio |
 | `GET` | `/api/v1/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
+| `GET` | `/api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/trechos` | Frases da parte com início e fim em segundos |
 | `GET` | `/api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/stream` | Stream HTTP do bloco de áudio (suporte a cabeçalho `Range`) |

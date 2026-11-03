@@ -62,9 +62,16 @@ export const livroAudioBlocoSchema = z.object({
   isGerando: z.boolean(),
   isPendente: z.boolean(),
   isErro: z.boolean(),
+  possuiTrechos: z.boolean(),
   erroMotivo: z.string().nullable(),
   criadoEm: z.string(),
   atualizadoEm: z.string(),
+})
+
+export const trechoNarracaoSchema = z.object({
+  inicio: z.number(),
+  fim: z.number(),
+  texto: z.string(),
 })
 
 export type StatusLivroAudio = z.infer<typeof statusLivroAudioSchema>
@@ -72,6 +79,7 @@ export type LivroAudio = z.infer<typeof livroAudioSchema>
 export type StatusLivroAudioBloco = z.infer<typeof statusLivroAudioBlocoSchema>
 export type LivroAudioBloco = z.infer<typeof livroAudioBlocoSchema>
 export type SalvarPosicaoLivro = z.infer<typeof salvarPosicaoLivroSchema>
+export type TrechoNarracao = z.infer<typeof trechoNarracaoSchema>
 
 export interface UploadLivroAudioPayload {
   arquivo: File

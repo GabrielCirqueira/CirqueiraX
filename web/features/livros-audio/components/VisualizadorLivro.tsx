@@ -1,6 +1,7 @@
 import { Box, Center, HStack, IconButton, Text } from '@chakra-ui/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { type KeyboardEvent, memo, useRef } from 'react'
+import type { LocalizacaoTrecho } from '../utils/localizacaoNarracao'
 import type { PDFDocumentProxy } from '../utils/pdf'
 import { PaginaPdf } from './PaginaPdf'
 
@@ -10,6 +11,8 @@ interface VisualizadorLivroProps {
   totalPaginas: number
   escala: number
   modoDuplo: boolean
+  destaque?: LocalizacaoTrecho | null
+  seguirDestaque?: boolean
   onAvancar: () => void
   onVoltar: () => void
 }
@@ -20,6 +23,8 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
   totalPaginas,
   escala,
   modoDuplo,
+  destaque = null,
+  seguirDestaque = false,
   onAvancar,
   onVoltar,
 }: VisualizadorLivroProps) {
@@ -125,7 +130,13 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                 overflow="hidden"
                 boxShadow="-2px 0 0 rgba(0, 0, 0, 0.1), -4px 1px 0 rgba(0, 0, 0, 0.08), -6px 2px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.1), 0 7px 0 rgba(0, 0, 0, 0.08), 0 10px 0 rgba(0, 0, 0, 0.05), -18px 20px 40px rgba(0, 0, 0, 0.6)"
               >
-                <PaginaPdf documento={documento} numeroPagina={paginaEsquerda} escala={escala} />
+                <PaginaPdf
+                  documento={documento}
+                  numeroPagina={paginaEsquerda}
+                  escala={escala}
+                  destaque={destaque}
+                  seguirDestaque={seguirDestaque}
+                />
 
                 <Box
                   position="absolute"
@@ -170,7 +181,13 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
               >
                 {paginaDireita ? (
                   <>
-                    <PaginaPdf documento={documento} numeroPagina={paginaDireita} escala={escala} />
+                    <PaginaPdf
+                      documento={documento}
+                      numeroPagina={paginaDireita}
+                      escala={escala}
+                      destaque={destaque}
+                      seguirDestaque={seguirDestaque}
+                    />
 
                     <Box
                       position="absolute"
@@ -225,7 +242,13 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
             overflow="hidden"
             boxShadow="0 4px 0 rgba(0, 0, 0, 0.1), 0 8px 0 rgba(0, 0, 0, 0.08), 0 12px 0 rgba(0, 0, 0, 0.05), 0 25px 60px rgba(0, 0, 0, 0.75)"
           >
-            <PaginaPdf documento={documento} numeroPagina={paginaAtual} escala={escala} />
+            <PaginaPdf
+              documento={documento}
+              numeroPagina={paginaAtual}
+              escala={escala}
+              destaque={destaque}
+              seguirDestaque={seguirDestaque}
+            />
 
             <Box position="absolute" bottom="12px" right="20px" pointerEvents="none" zIndex={4}>
               <Text

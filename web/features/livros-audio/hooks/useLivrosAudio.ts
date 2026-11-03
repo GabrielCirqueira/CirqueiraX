@@ -6,10 +6,11 @@ import {
   fazerUploadLivroAudio,
   listarBlocosLivroAudio,
   listarLivrosAudio,
+  listarTrechosBloco,
   obterLivroAudio,
   salvarPosicaoLivroAudio,
 } from '../api'
-import type { SalvarPosicaoLivro, UploadLivroAudioPayload } from '../types'
+import type { LivroAudioBloco, SalvarPosicaoLivro, UploadLivroAudioPayload } from '../types'
 
 export const LIVROS_AUDIO_QUERY_KEY = ['livros-audio'] as const
 
@@ -47,6 +48,17 @@ export function useBlocosLivroAudio(uuid: string) {
     enabled: Boolean(uuid),
     refetchInterval: (query) =>
       query.state.data?.some((b) => b.isGerando || b.isPendente) ? 3000 : false,
+  })
+}
+
+export function useTrechosBloco(uuid: string, bloco: LivroAudioBloco | null) {
+  const numeroBloco = bloco?.numeroBloco ?? 0
+
+  return useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, uuid, 'trechos', numeroBloco, bloco?.atualizadoEm],
+    queryFn: () => listarTrechosBloco(uuid, numeroBloco),
+    enabled: Boolean(uuid && bloco?.isPronto && bloco.possuiTrechos),
+    staleTime: Number.POSITIVE_INFINITY,
   })
 }
 

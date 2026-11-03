@@ -115,8 +115,9 @@
 | M97 | Progresso Real da Geração de Áudio no Painel de Livros | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-97--progresso-real-da-geração-de-áudio-no-painel-de-livros) |
 | M98 | Player do Livro em Áudio Volta a Aparecer (Consulta de Partes Retornava Vazio) | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-98--player-do-livro-em-áudio-volta-a-aparecer-consulta-de-partes-retornava-vazio) |
 | M99 | Player do Livro Toca Sem Quebrar a Tela | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-99--player-do-livro-toca-sem-quebrar-a-tela) |
-| M100 | Voz do Livro em Áudio no Idioma do Livro | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-100--voz-do-livro-em-áudio-no-idioma-do-livro) |
-| M101 | Apagar Livro Interrompe a Geração e Libera a Fila na Hora | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-101--apagar-livro-interrompe-a-geração-e-libera-a-fila-na-hora) |
-| M102 | Narração Sem Pausa em Toda Quebra de Linha | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-102--narração-sem-pausa-em-toda-quebra-de-linha) |
-| M103 | Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-103--redesign-do-leitor-em-formato-de-livro-3d-e-player-unificado-no-tema-do-sistema) |
-| M104 | Refazer Áudio Gerado Antes da Narração Corrigida | 🟡 Aguardando publicação | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-104--refazer-áudio-gerado-antes-da-narração-corrigida) |
+| M100 | Voz do Livro em Áudio no Idioma do Livro | 🟡 Publicado, falta validar | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-100--voz-do-livro-em-áudio-no-idioma-do-livro) |
+| M101 | Apagar Livro Interrompe a Geração e Libera a Fila na Hora | 🟡 Publicado, falta validar | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-101--apagar-livro-interrompe-a-geração-e-libera-a-fila-na-hora) |
+| M102 | Narração Sem Pausa em Toda Quebra de Linha | ✅ Concluída | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-102--narração-sem-pausa-em-toda-quebra-de-linha) |
+| M103 | Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema | ✅ Concluída | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-103--redesign-do-leitor-em-formato-de-livro-3d-e-player-unificado-no-tema-do-sistema) |
+| M104 | Refazer Áudio Gerado Antes da Narração Corrigida | ✅ Concluída | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-104--refazer-áudio-gerado-antes-da-narração-corrigida) |
+| M105 | Mostrar a Página e a Frase que Estão Sendo Lidas | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-105--mostrar-a-página-e-a-frase-que-estão-sendo-lidas) |
