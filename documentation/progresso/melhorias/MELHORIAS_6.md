@@ -54,7 +54,7 @@
   - **Player Inferior Unificado**: Eliminação das barras duplicadas e fusão em um único dock inferior contendo:
     - Controles de áudio: Play/Pause em destaque com gradiente da marca, barra de progresso interativa com tempo decorrido/total, controle de volume com mute rápido e seletor de velocidade (`0.75x` a `2.0x`).
     - Controles do leitor: Botão da gaveta de sumário/partes, paginação com input interativo (`< Página X de Y >`), botão de marcar página atual e download do PDF original.
-  - **Identidade Visual do Sistema**: Remoção de qualquer tom roxo e aplicação consistente dos tokens oficiais da marca (`cirqueira.brand` em âmbar/dourado e `cirqueira.grey` em cinza escuro/superfícies), garantindo harmonia visual com o restante da plataforma.
+  - **Identidade Visual do Sistema**: Remoção completa de qualquer tom roxo/violeta ou radial-gradients com hexadecimais arbitrários. Aplicação estrita dos tokens oficiais da marca (`cirqueira.brand.500` em verde esmeralda no botão de play, slider e destaques, e `cirqueira.grey.950`/`cirqueira.grey.900` em cinza escuro para superfícies e bordas), garantindo harmonia visual com o restante da plataforma.
 - **Arquivos**:
   - `web/features/livros-audio/components/VisualizadorLivro.tsx`
   - `web/features/livros-audio/components/PlayerAudioLivro.tsx`

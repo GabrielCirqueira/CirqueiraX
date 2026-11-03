@@ -90,7 +90,9 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
             Biblioteca
           </Button>
 
-          <ChevronRight size={14} color="var(--chakra-colors-cirqueira-grey-500)" />
+          <Box color="cirqueira.grey.500" display="inline-flex">
+            <ChevronRight size={14} />
+          </Box>
 
           <Text
             fontSize="sm"
@@ -178,7 +180,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           variant="ghost"
           borderRadius="lg"
           color="cirqueira.grey.300"
-          _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
+          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
           aria-label={telaCheia ? 'Sair da tela cheia' : 'Tela cheia'}
           title={telaCheia ? 'Sair da tela cheia (Esc)' : 'Tela cheia (F11)'}
           onClick={onAlternarTelaCheia}

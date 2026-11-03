@@ -342,8 +342,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             borderBottom="1px solid"
             borderColor="cirqueira.grey.800"
           >
-            <HStack gap={2}>
-              <ListMusic size={16} color="var(--chakra-colors-cirqueira-brand-400)" />
+            <HStack gap={2} color="cirqueira.brand.400">
+              <ListMusic size={16} />
               <Text fontSize="xs" fontWeight="bold" color="white">
                 Sumário e Capítulos
               </Text>
@@ -431,12 +431,13 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               w="44px"
               h="44px"
               borderRadius="full"
-              background="linear-gradient(135deg, var(--chakra-colors-cirqueira-brand-500) 0%, var(--chakra-colors-cirqueira-brand-400) 100%)"
+              bg="cirqueira.brand.500"
               color="white"
-              boxShadow="0 0 20px var(--chakra-colors-cirqueira-brand-500)/45"
+              boxShadow="0 4px 16px rgba(0, 151, 125, 0.45)"
               _hover={{
+                bg: 'cirqueira.brand.600',
                 transform: 'scale(1.06)',
-                boxShadow: '0 0 25px var(--chakra-colors-cirqueira-brand-400)/70',
+                boxShadow: '0 6px 20px rgba(0, 151, 125, 0.6)',
               }}
               transition="all 0.15s ease"
               disabled={!audioUrl}
@@ -544,16 +545,13 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             >
               <Slider.Control>
                 <Slider.Track bg="rgba(255, 255, 255, 0.1)" h="5px" borderRadius="full">
-                  <Slider.Range
-                    background="linear-gradient(to right, var(--chakra-colors-cirqueira-brand-600), var(--chakra-colors-cirqueira-brand-400))"
-                    borderRadius="full"
-                  />
+                  <Slider.Range bg="cirqueira.brand.500" borderRadius="full" />
                 </Slider.Track>
                 <Slider.Thumb
                   index={0}
                   boxSize="13px"
                   bg="white"
-                  boxShadow="0 0 10px var(--chakra-colors-cirqueira-brand-400)/80"
+                  boxShadow="0 0 10px rgba(0, 151, 125, 0.8)"
                 />
               </Slider.Control>
             </Slider.Root>

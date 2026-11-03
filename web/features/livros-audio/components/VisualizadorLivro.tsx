@@ -55,7 +55,6 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
       p={{ base: 3, md: 8 }}
       pb={{ base: 24, md: 28 }}
       bg="cirqueira.grey.950"
-      backgroundImage="radial-gradient(ellipse at 50% 30%, #252a28 0%, #191b1a 60%, #121313 100%), radial-gradient(1.5px 1.5px at 12% 18%, rgba(0, 186, 156, 0.25), transparent), radial-gradient(1px 1px at 28% 68%, rgba(255, 255, 255, 0.12), transparent), radial-gradient(1.5px 1.5px at 75% 22%, rgba(0, 186, 156, 0.2), transparent), radial-gradient(1px 1px at 88% 70%, rgba(255, 255, 255, 0.12), transparent), radial-gradient(2px 2px at 92% 38%, rgba(0, 186, 156, 0.25), transparent)"
       userSelect="none"
     >
       <IconButton
@@ -118,13 +117,13 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
             <HStack position="relative" align="flex-start" justify="center" gap={0} zIndex={2}>
               <Box
                 position="relative"
-                bg="#ffffff"
+                bg="white"
                 borderTopLeftRadius="18px"
                 borderBottomLeftRadius="18px"
                 borderTopRightRadius={0}
                 borderBottomRightRadius={0}
                 overflow="hidden"
-                boxShadow="-2px 0 0 #e4dfd7, -4px 1px 0 #cfc9be, -6px 2px 0 #bcaba0, 0 4px 0 #e4dfd7, 0 7px 0 #cfc9be, 0 10px 0 #bcaba0, -18px 20px 40px rgba(0, 0, 0, 0.6)"
+                boxShadow="-2px 0 0 rgba(0, 0, 0, 0.1), -4px 1px 0 rgba(0, 0, 0, 0.08), -6px 2px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.1), 0 7px 0 rgba(0, 0, 0, 0.08), 0 10px 0 rgba(0, 0, 0, 0.05), -18px 20px 40px rgba(0, 0, 0, 0.6)"
               >
                 <PaginaPdf documento={documento} numeroPagina={paginaEsquerda} escala={escala} />
 
@@ -143,7 +142,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                   <Text
                     fontSize="11px"
                     fontWeight="600"
-                    color="#71717a"
+                    color="cirqueira.grey.500"
                     fontVariantNumeric="tabular-nums"
                   >
                     {paginaEsquerda}
@@ -161,13 +160,13 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
 
               <Box
                 position="relative"
-                bg="#ffffff"
+                bg="white"
                 borderTopRightRadius="18px"
                 borderBottomRightRadius="18px"
                 borderTopLeftRadius={0}
                 borderBottomLeftRadius={0}
                 overflow="hidden"
-                boxShadow="2px 0 0 #e4dfd7, 4px 1px 0 #cfc9be, 6px 2px 0 #bcaba0, 0 4px 0 #e4dfd7, 0 7px 0 #cfc9be, 0 10px 0 #bcaba0, 18px 20px 40px rgba(0, 0, 0, 0.6)"
+                boxShadow="2px 0 0 rgba(0, 0, 0, 0.1), 4px 1px 0 rgba(0, 0, 0, 0.08), 6px 2px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.1), 0 7px 0 rgba(0, 0, 0, 0.08), 0 10px 0 rgba(0, 0, 0, 0.05), 18px 20px 40px rgba(0, 0, 0, 0.6)"
               >
                 {paginaDireita ? (
                   <>
@@ -194,7 +193,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                       <Text
                         fontSize="11px"
                         fontWeight="600"
-                        color="#71717a"
+                        color="cirqueira.grey.500"
                         fontVariantNumeric="tabular-nums"
                       >
                         {paginaDireita}
@@ -202,8 +201,15 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                     </Box>
                   </>
                 ) : (
-                  <Center w="400px" minH="580px" bg="#faf8f5" p={6} borderLeft="1px solid #e4dfd7">
-                    <Text color="#a1a1aa" fontSize="sm" fontWeight="medium">
+                  <Center
+                    w="400px"
+                    minH="580px"
+                    bg="cirqueira.grey.50"
+                    p={6}
+                    borderLeft="1px solid"
+                    borderColor="cirqueira.grey.200"
+                  >
+                    <Text color="cirqueira.grey.400" fontSize="sm" fontWeight="medium">
                       Fim do livro
                     </Text>
                   </Center>
@@ -214,10 +220,10 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
         ) : (
           <Box
             position="relative"
-            bg="#ffffff"
+            bg="white"
             borderRadius="18px"
             overflow="hidden"
-            boxShadow="0 4px 0 #e4dfd7, 0 8px 0 #cfc9be, 0 12px 0 #bcaba0, 0 25px 60px rgba(0, 0, 0, 0.75)"
+            boxShadow="0 4px 0 rgba(0, 0, 0, 0.1), 0 8px 0 rgba(0, 0, 0, 0.08), 0 12px 0 rgba(0, 0, 0, 0.05), 0 25px 60px rgba(0, 0, 0, 0.75)"
           >
             <PaginaPdf documento={documento} numeroPagina={paginaAtual} escala={escala} />
 
@@ -225,7 +231,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
               <Text
                 fontSize="11px"
                 fontWeight="600"
-                color="#71717a"
+                color="cirqueira.grey.500"
                 fontVariantNumeric="tabular-nums"
               >
                 {paginaAtual}
