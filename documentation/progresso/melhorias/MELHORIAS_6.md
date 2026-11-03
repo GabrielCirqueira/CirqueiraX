@@ -40,3 +40,25 @@
   - `src/Service/LivroAudio/PrepararTextoNarracaoService.php` (novo)
   - `src/Service/LivroAudio/GerarAudioBlocoService.php`
   - `src/Enum/IdiomaLivroAudio.php`
+
+---
+
+### 🟡 Melhoria 103 — Redesign do Leitor em Formato de Livro 3D e Player Unificado no Tema do Sistema
+
+- **Status**: Código pronto, aguardando publicação em produção
+- **Data**: 02 de novembro de 2026
+- **Problema**: o leitor de PDF apresentava páginas estáticas cruas lado a lado sem aspecto de livro físico, contava com duas barras inferiores concorrentes (uma para paginação/zoom e outra para o player de áudio) e utilizava estilos em tons roxos descolados da identidade visual do sistema.
+- **Solução**:
+  - **Formato de Livro 3D Aberto**: Estrutura com capa dura de fundo, lombada central vincada, profundidade de folhas empilhadas nas bordas externas (`stacked paper edges`), sombras de curvatura interna nas páginas e numeração de rodapé.
+  - **Navegação Lateral Flutuante**: Botões circulares translúcidos (`<` e `>`) flutuantes nas laterais com efeito blur e animação suave ao hover.
+  - **Player Inferior Unificado**: Eliminação das barras duplicadas e fusão em um único dock inferior contendo:
+    - Controles de áudio: Play/Pause em destaque com gradiente da marca, barra de progresso interativa com tempo decorrido/total, controle de volume com mute rápido e seletor de velocidade (`0.75x` a `2.0x`).
+    - Controles do leitor: Botão da gaveta de sumário/partes, paginação com input interativo (`< Página X de Y >`), botão de marcar página atual e download do PDF original.
+  - **Identidade Visual do Sistema**: Remoção de qualquer tom roxo e aplicação consistente dos tokens oficiais da marca (`cirqueira.brand` em âmbar/dourado e `cirqueira.grey` em cinza escuro/superfícies), garantindo harmonia visual com o restante da plataforma.
+- **Arquivos**:
+  - `web/features/livros-audio/components/VisualizadorLivro.tsx`
+  - `web/features/livros-audio/components/PlayerAudioLivro.tsx`
+  - `web/features/livros-audio/components/BarraSuperiorLeitor.tsx`
+  - `web/features/livros-audio/components/PaginaPdf.tsx`
+  - `web/features/livros-audio/LeitorLivroAudio.tsx`
+  - `web/features/livros-audio/hooks/useLeitorLivro.ts`
