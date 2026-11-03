@@ -117,3 +117,4 @@
 | M99 | Player do Livro Toca Sem Quebrar a Tela | ✅ Concluído | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-99--player-do-livro-toca-sem-quebrar-a-tela) |
 | M100 | Voz do Livro em Áudio no Idioma do Livro | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_5.md#melhoria-100--voz-do-livro-em-áudio-no-idioma-do-livro) |
 | M101 | Apagar Livro Interrompe a Geração e Libera a Fila na Hora | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-101--apagar-livro-interrompe-a-geração-e-libera-a-fila-na-hora) |
+| M102 | Narração Sem Pausa em Toda Quebra de Linha | 🟡 Aguardando publicação | 02/11/2026 | [ver](MELHORIAS_6.md#melhoria-101--apagar-livro-interrompe-a-geração-e-libera-a-fila-na-hora) |

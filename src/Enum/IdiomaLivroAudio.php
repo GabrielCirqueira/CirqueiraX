@@ -29,7 +29,7 @@ enum IdiomaLivroAudio: string
     {
         return match ($this) {
             self::PT => 'pt-BR-AntonioNeural',
-            self::EN => 'en-US-GuyNeural',
+            self::EN => 'en-US-AndrewNeural',
             self::ES => 'es-ES-AlvaroNeural',
             self::FR => 'fr-FR-HenriNeural',
             self::IT => 'it-IT-DiegoNeural',

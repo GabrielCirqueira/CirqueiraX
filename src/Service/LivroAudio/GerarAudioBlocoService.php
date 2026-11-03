@@ -19,6 +19,7 @@ final readonly class GerarAudioBlocoService
         private LivroAudioRepository $livroAudioRepository,
         private SintetizadorVozInterface $sintetizadorVoz,
         private DefinirIdiomaLivroAudioService $definirIdiomaLivro,
+        private PrepararTextoNarracaoService $prepararTextoNarracao,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
         private LoggerInterface $logger,
     ) {}
@@ -65,7 +66,12 @@ final readonly class GerarAudioBlocoService
         $livroFoiApagado = fn(): bool => !$this->livroAudioRepository->existe($livroUuid);
 
         try {
-            $resultado = $this->sintetizadorVoz->sintetizar($bloco->texto(), $caminhoMp3, $voz, $livroFoiApagado);
+            $resultado = $this->sintetizadorVoz->sintetizar(
+                $this->prepararTextoNarracao->preparar($bloco->texto()),
+                $caminhoMp3,
+                $voz,
+                $livroFoiApagado,
+            );
 
             if ($livroFoiApagado()) {
                 $this->armazenamentoLivro->removerLivro($livroUuid);

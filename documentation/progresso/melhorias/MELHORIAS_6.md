@@ -22,3 +22,21 @@
   - `src/Service/LivroAudio/GerarAudioBlocoService.php`, `ApagarLivroAudioService.php`
   - `src/Repository/LivroAudioRepository.php`
   - `devops/php/supervisord-prod.conf`
+
+---
+
+### 🟡 Melhoria 102 — Narração Sem Pausa em Toda Quebra de Linha
+
+- **Status**: Código pronto, aguardando publicação em produção
+- **Data**: 02 de novembro de 2026
+- **Problema**: o texto extraído do PDF mantinha uma quebra para cada linha física da página, e a voz parava em cada uma, mesmo no meio da frase. A narração ficava truncada e mais longa.
+- **Solução**:
+  - `PrepararTextoNarracaoService` junta as linhas de um mesmo parágrafo logo antes da síntese. O parágrafo termina em linha com pontuação final que seja mais curta que a largura normal da página. Títulos curtos ganham ponto para manter uma pausa natural.
+  - `GerarAudioBlocoService` usa esse texto só para a síntese. O texto salvo no banco não muda, e partes ainda pendentes já saem corrigidas.
+  - A voz em inglês passa de `en-US-GuyNeural` (categoria notícia) para `en-US-AndrewNeural` (categoria conversa).
+- **Medido** com as 60 primeiras linhas do "MANUAL DO ALUNO PBL", usando `silencedetect` (silêncios acima de 0,35 s): de 72 para 37 pausas, e de 251 s para 211 s de áudio. A voz em inglês foi escolhida pela classificação da própria lista do `edge-tts`, sem audição comparativa.
+- **Limitação**: partes já prontas continuam com o áudio antigo. Para refazer, é preciso reenviar o livro.
+- **Arquivos**:
+  - `src/Service/LivroAudio/PrepararTextoNarracaoService.php` (novo)
+  - `src/Service/LivroAudio/GerarAudioBlocoService.php`
+  - `src/Enum/IdiomaLivroAudio.php`
