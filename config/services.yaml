@@ -60,6 +60,10 @@ services:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
+    App\Service\LivroAudio\GerenciarVozesLivroAudioService:
+        arguments:
+            $diretorioBaseLivros: '%kernel.project_dir%/var/livros'
+
     App\Infra\Storage\ArmazenamentoLivroClient:
         arguments:
             $diretorioBaseLivros: '%kernel.project_dir%/var/livros'

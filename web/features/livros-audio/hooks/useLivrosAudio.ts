@@ -7,8 +7,11 @@ import {
   listarBlocosLivroAudio,
   listarLivrosAudio,
   listarTrechosBloco,
+  listarVozesLivro,
   obterLivroAudio,
+  removerVozLivro,
   salvarPosicaoLivroAudio,
+  solicitarVozLivro,
 } from '../api'
 import type { LivroAudioBloco, SalvarPosicaoLivro, UploadLivroAudioPayload } from '../types'
 
@@ -51,14 +54,73 @@ export function useBlocosLivroAudio(uuid: string) {
   })
 }
 
-export function useTrechosBloco(uuid: string, bloco: LivroAudioBloco | null) {
+export function chaveTrechosBloco(
+  uuid: string,
+  numeroBloco: number,
+  voz: string | null,
+  atualizadoEm?: string
+) {
+  return [...LIVROS_AUDIO_QUERY_KEY, uuid, 'trechos', numeroBloco, voz ?? 'principal', atualizadoEm]
+}
+
+export function useTrechosBloco(
+  uuid: string,
+  bloco: LivroAudioBloco | null,
+  voz: string | null = null
+) {
   const numeroBloco = bloco?.numeroBloco ?? 0
 
   return useQuery({
-    queryKey: [...LIVROS_AUDIO_QUERY_KEY, uuid, 'trechos', numeroBloco, bloco?.atualizadoEm],
-    queryFn: () => listarTrechosBloco(uuid, numeroBloco),
-    enabled: Boolean(uuid && bloco?.isPronto && bloco.possuiTrechos),
+    queryKey: chaveTrechosBloco(uuid, numeroBloco, voz, voz ? undefined : bloco?.atualizadoEm),
+    queryFn: () => listarTrechosBloco(uuid, numeroBloco, voz),
+    enabled: Boolean(uuid && bloco?.isPronto && (voz || bloco.possuiTrechos)),
     staleTime: Number.POSITIVE_INFINITY,
+  })
+}
+
+export function useVozesLivro(uuid: string) {
+  return useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, uuid, 'vozes'],
+    queryFn: () => listarVozesLivro(uuid),
+    enabled: Boolean(uuid),
+    refetchInterval: (query) =>
+      query.state.data?.some((voz) => voz.status === 'gerando') ? 4000 : false,
+  })
+}
+
+export function useSolicitarVozLivro(uuid: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (voz: string) => solicitarVozLivro(uuid, voz),
+    onSuccess: (vozes) => {
+      queryClient.setQueryData([...LIVROS_AUDIO_QUERY_KEY, uuid, 'vozes'], vozes)
+    },
+    onError: (erro) => {
+      addToast({
+        title: 'Não foi possível gerar a voz',
+        description: extrairMensagemErro(erro, 'Tente novamente em instantes.'),
+        type: 'error',
+      })
+    },
+  })
+}
+
+export function useRemoverVozLivro(uuid: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (voz: string) => removerVozLivro(uuid, voz),
+    onSuccess: (vozes) => {
+      queryClient.setQueryData([...LIVROS_AUDIO_QUERY_KEY, uuid, 'vozes'], vozes)
+    },
+    onError: (erro) => {
+      addToast({
+        title: 'Não foi possível remover a voz',
+        description: extrairMensagemErro(erro, 'Tente novamente em instantes.'),
+        type: 'error',
+      })
+    },
   })
 }
 

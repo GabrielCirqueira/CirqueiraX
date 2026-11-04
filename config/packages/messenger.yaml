@@ -31,6 +31,7 @@ framework:
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
             'App\Message\ProcessarLivroAudioMessage': livro_audio
             'App\Message\GerarAudioBlocoMessage': livro_audio
+            'App\Message\GerarAudioBlocoVozMessage': livro_audio
             'App\Message\*': async
 
 

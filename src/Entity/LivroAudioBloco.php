@@ -196,6 +196,11 @@ class LivroAudioBloco
         return $this;
     }
 
+    public function voz(): ?string
+    {
+        return $this->voz;
+    }
+
     public function foiGeradoComVoz(string $voz): bool
     {
         return $this->voz === $voz;

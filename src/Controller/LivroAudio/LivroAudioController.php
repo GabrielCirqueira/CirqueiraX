@@ -13,6 +13,7 @@ use App\Serializer\LivroAudioBlocoSerializer;
 use App\Serializer\LivroAudioSerializer;
 use App\Service\LivroAudio\ApagarLivroAudioService;
 use App\Service\LivroAudio\ConsultarLivrosAudioService;
+use App\Service\LivroAudio\GerenciarVozesLivroAudioService;
 use App\Service\LivroAudio\SalvarPosicaoLivroService;
 use App\Service\LivroAudio\UploadLivroAudioService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -34,6 +35,7 @@ final class LivroAudioController extends DefaultController
         private readonly UploadLivroAudioService $uploadLivroAudioService,
         private readonly ApagarLivroAudioService $apagarLivroAudioService,
         private readonly SalvarPosicaoLivroService $salvarPosicaoLivroService,
+        private readonly GerenciarVozesLivroAudioService $gerenciarVozesLivroAudioService,
         private readonly LivroAudioSerializer $livroAudioSerializer,
         private readonly LivroAudioBlocoSerializer $livroAudioBlocoSerializer,
         private readonly RateLimiterFactory $marcadorPosicaoLimiter,
@@ -45,6 +47,12 @@ final class LivroAudioController extends DefaultController
         $livros = $this->consultarLivrosAudioService->listarDoUsuario($usuario);
 
         return $this->success($this->livroAudioSerializer->normalizarLista($livros));
+    }
+
+    #[Route('/vozes/{voz}/amostra', name: 'amostra_voz', methods: ['GET'], priority: 10)]
+    public function amostraVoz(string $voz): Response
+    {
+        return $this->responderArquivo($this->gerenciarVozesLivroAudioService->obterAmostra($voz), ResponseHeaderBag::DISPOSITION_INLINE);
     }
 
     #[Route('', name: 'upload', methods: ['POST'])]
@@ -110,22 +118,44 @@ final class LivroAudioController extends DefaultController
     public function listarTrechosBloco(
         string $uuid,
         int $numeroBloco,
+        Request $request,
         #[CurrentUser]
         Usuario $usuario,
     ): Response {
-        return $this->success($this->consultarLivrosAudioService->listarTrechosDoBloco($uuid, $numeroBloco, $usuario));
+        return $this->success($this->consultarLivrosAudioService->listarTrechosDoBloco($uuid, $numeroBloco, $usuario, $request->query->getString('voz')));
     }
 
     #[Route('/{uuid}/blocos/{numeroBloco}/stream', name: 'stream_bloco', methods: ['GET'])]
     public function streamBloco(
         string $uuid,
         int $numeroBloco,
+        Request $request,
         #[CurrentUser]
         Usuario $usuario,
     ): Response {
-        $arquivo = $this->consultarLivrosAudioService->obterArquivoBloco($uuid, $numeroBloco, $usuario);
+        $arquivo = $this->consultarLivrosAudioService->obterArquivoBloco($uuid, $numeroBloco, $usuario, $request->query->getString('voz'));
 
         return $this->responderArquivo($arquivo, ResponseHeaderBag::DISPOSITION_INLINE);
+    }
+
+    #[Route('/{uuid}/vozes', name: 'listar_vozes', methods: ['GET'])]
+    public function listarVozes(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->gerenciarVozesLivroAudioService->listar($uuid, $usuario));
+    }
+
+    #[Route('/{uuid}/vozes', name: 'solicitar_voz', methods: ['POST'])]
+    public function solicitarVoz(string $uuid, Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $voz = (string) ($request->toArray()['voz'] ?? '');
+
+        return $this->success($this->gerenciarVozesLivroAudioService->solicitar($uuid, $voz, $usuario));
+    }
+
+    #[Route('/{uuid}/vozes/{voz}', name: 'remover_voz', methods: ['DELETE'])]
+    public function removerVoz(string $uuid, string $voz, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->gerenciarVozesLivroAudioService->remover($uuid, $voz, $usuario));
     }
 
     private function responderArquivo(ArquivoMidiaDTO $arquivo, string $disposicao): Response

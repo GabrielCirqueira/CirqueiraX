@@ -82,6 +82,19 @@ export const trechoNarracaoSchema = z.object({
   palavras: z.array(palavraNarracaoSchema).default([]),
 })
 
+export const vozLivroAudioSchema = z.object({
+  id: z.string(),
+  nome: z.string(),
+  descricao: z.string(),
+  principal: z.boolean(),
+  status: z.enum(['pronta', 'gerando', 'parcial', 'erro', 'nao_gerada']),
+  totalBlocos: z.number(),
+  blocosProntos: z.array(z.number()),
+  blocosComErro: z.number(),
+})
+
+export type VozLivroAudio = z.infer<typeof vozLivroAudioSchema>
+
 export type StatusLivroAudio = z.infer<typeof statusLivroAudioSchema>
 export type LivroAudio = z.infer<typeof livroAudioSchema>
 export type StatusLivroAudioBloco = z.infer<typeof statusLivroAudioBlocoSchema>

@@ -47,4 +47,19 @@ final class LivroAudioException extends DomainException
     {
         return new self(sprintf('O áudio do bloco %d ainda não está disponível para reprodução.', $numeroBloco), 404);
     }
+
+    public static function vozIndisponivel(string $voz): self
+    {
+        return new self(sprintf('A voz "%s" não está disponível para este livro.', $voz), 422);
+    }
+
+    public static function vozPrincipalNaoRemovivel(): self
+    {
+        return new self('A voz principal do livro não pode ser removida.', 422);
+    }
+
+    public static function falhaAoGerarAmostra(string $voz): self
+    {
+        return new self(sprintf('Não foi possível gerar a amostra da voz "%s".', $voz), 502);
+    }
 }

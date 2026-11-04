@@ -122,3 +122,4 @@
 | M104 | Refazer Áudio Gerado Antes da Narração Corrigida | ✅ Concluída | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-104--refazer-áudio-gerado-antes-da-narração-corrigida) |
 | M105 | Mostrar a Página e a Frase que Estão Sendo Lidas | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-105--mostrar-a-página-e-a-frase-que-estão-sendo-lidas) |
 | M106 | Destaque Preciso, com Transição e por Palavra ou Frase | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-106--destaque-preciso-com-transição-e-por-palavra-ou-frase) |
+| M107 | Escolher e Trocar a Voz do Narrador | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-107--escolher-e-trocar-a-voz-do-narrador) |

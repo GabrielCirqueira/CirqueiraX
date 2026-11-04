@@ -7,10 +7,12 @@ import {
   type SalvarPosicaoLivro,
   type TrechoNarracao,
   type UploadLivroAudioPayload,
+  type VozLivroAudio,
   livroAudioBlocoSchema,
   livroAudioSchema,
   salvarPosicaoLivroSchema,
   trechoNarracaoSchema,
+  vozLivroAudioSchema,
 } from './types'
 
 const URL_LIVROS_AUDIO = '/api/v1/livros-audio'
@@ -37,12 +39,37 @@ export async function listarBlocosLivroAudio(uuid: string): Promise<LivroAudioBl
 
 export async function listarTrechosBloco(
   uuid: string,
-  numeroBloco: number
+  numeroBloco: number,
+  voz: string | null = null
 ): Promise<TrechoNarracao[]> {
   const { data } = await api.get<RespostaApi<unknown>>(
-    `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/trechos`
+    `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/trechos`,
+    { params: voz ? { voz } : undefined }
   )
   return z.array(trechoNarracaoSchema).parse(data.data)
+}
+
+export async function listarVozesLivro(uuid: string): Promise<VozLivroAudio[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/vozes`)
+  return z.array(vozLivroAudioSchema).parse(data.data)
+}
+
+export async function solicitarVozLivro(uuid: string, voz: string): Promise<VozLivroAudio[]> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/vozes`, {
+    voz,
+  })
+  return z.array(vozLivroAudioSchema).parse(data.data)
+}
+
+export async function removerVozLivro(uuid: string, voz: string): Promise<VozLivroAudio[]> {
+  const { data } = await api.delete<RespostaApi<unknown>>(
+    `${URL_LIVROS_AUDIO}/${uuid}/vozes/${encodeURIComponent(voz)}`
+  )
+  return z.array(vozLivroAudioSchema).parse(data.data)
+}
+
+export function obterUrlAmostraVoz(voz: string): string {
+  return comToken(`${URL_LIVROS_AUDIO}/vozes/${encodeURIComponent(voz)}/amostra`)
 }
 
 export async function fazerUploadLivroAudio(payload: UploadLivroAudioPayload): Promise<LivroAudio> {
@@ -83,9 +110,14 @@ export function obterUrlPdfLivro(uuid: string): string {
 export function obterUrlStreamBloco(
   uuid: string,
   numeroBloco: number,
+  voz: string | null = null,
   tokenSobrescrever?: string
 ): string {
   const token = tokenSobrescrever ?? localStorage.getItem('token')
+  const parametros = new URLSearchParams()
+  if (voz) parametros.set('voz', voz)
+  if (token) parametros.set('token', token)
+  const consulta = parametros.toString()
   const baseUrl = `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/stream`
-  return token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl
+  return consulta ? `${baseUrl}?${consulta}` : baseUrl
 }

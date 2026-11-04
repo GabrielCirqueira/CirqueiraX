@@ -23,6 +23,7 @@ interface OpcoesNarracaoAtual {
   livroUuid: string
   bloco: LivroAudioBloco | null
   documento: PDFDocumentProxy | null
+  voz: string | null
   segundos: number
   tocando: boolean
   obterTempoAtual: () => number | null
@@ -44,11 +45,12 @@ export function useNarracaoAtual({
   livroUuid,
   bloco,
   documento,
+  voz,
   segundos,
   tocando,
   obterTempoAtual,
 }: OpcoesNarracaoAtual): NarracaoAtual | null {
-  const { data: trechos = [] } = useTrechosBloco(livroUuid, bloco)
+  const { data: trechos = [] } = useTrechosBloco(livroUuid, bloco, voz)
   const [posicao, setPosicao] = useState<PosicaoNarracao>({ frase: -1, palavra: -1 })
 
   const { data: localizacoes } = useQuery({
@@ -57,6 +59,7 @@ export function useNarracaoAtual({
       livroUuid,
       bloco?.numeroBloco,
       bloco?.atualizadoEm,
+      voz,
       trechos.length,
     ],
     queryFn: async () => {

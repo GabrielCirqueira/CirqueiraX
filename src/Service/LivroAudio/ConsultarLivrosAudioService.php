@@ -7,10 +7,12 @@ namespace App\Service\LivroAudio;
 use App\DataObject\ArquivoMidiaDTO;
 use App\Entity\LivroAudio;
 use App\Entity\LivroAudioBloco;
+use App\Entity\LivroAudioBlocoVoz;
 use App\Entity\Usuario;
 use App\Exception\LivroAudio\LivroAudioException;
 use App\Interface\ArmazenamentoLivroInterface;
 use App\Repository\LivroAudioBlocoRepository;
+use App\Repository\LivroAudioBlocoVozRepository;
 use App\Repository\LivroAudioRepository;
 
 final readonly class ConsultarLivrosAudioService
@@ -23,6 +25,8 @@ final readonly class ConsultarLivrosAudioService
         private LivroAudioRepository $livroAudioRepository,
         private LivroAudioBlocoRepository $livroAudioBlocoRepository,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
+        private LivroAudioBlocoVozRepository $livroAudioBlocoVozRepository,
+        private ResolverVozLivroAudioService $resolverVoz,
     ) {}
 
     /**
@@ -61,16 +65,12 @@ final readonly class ConsultarLivrosAudioService
         );
     }
 
-    public function obterArquivoBloco(string $uuid, int $numeroBloco, Usuario $usuario): ArquivoMidiaDTO
+    public function obterArquivoBloco(string $uuid, int $numeroBloco, Usuario $usuario, ?string $voz = null): ArquivoMidiaDTO
     {
         $livro = $this->obterDoUsuario($uuid, $usuario);
-        $bloco = $this->livroAudioBlocoRepository->buscarPorLivroENumero($livro, $numeroBloco);
+        $audio = $this->buscarAudioDoBloco($livro, $numeroBloco, $voz);
 
-        if (null === $bloco) {
-            throw LivroAudioException::blocoNaoEncontrado($numeroBloco);
-        }
-
-        $caminhoAudio = $bloco->caminhoAudio();
+        $caminhoAudio = $audio->caminhoAudio();
         if (null === $caminhoAudio || !file_exists($caminhoAudio) || !is_readable($caminhoAudio)) {
             throw LivroAudioException::audioBlocoNaoDisponivel($numeroBloco);
         }
@@ -87,16 +87,30 @@ final readonly class ConsultarLivrosAudioService
     /**
      * @return list<array{inicio: float, fim: float, texto: string, palavras?: list<array{inicio: float, fim: float, texto: string}>}>
      */
-    public function listarTrechosDoBloco(string $uuid, int $numeroBloco, Usuario $usuario): array
+    public function listarTrechosDoBloco(string $uuid, int $numeroBloco, Usuario $usuario, ?string $voz = null): array
     {
         $livro = $this->obterDoUsuario($uuid, $usuario);
-        $bloco = $this->livroAudioBlocoRepository->buscarPorLivroENumero($livro, $numeroBloco);
 
+        return $this->buscarAudioDoBloco($livro, $numeroBloco, $voz)->trechos();
+    }
+
+    private function buscarAudioDoBloco(LivroAudio $livro, int $numeroBloco, ?string $voz): LivroAudioBloco|LivroAudioBlocoVoz
+    {
+        $bloco = $this->livroAudioBlocoRepository->buscarPorLivroENumero($livro, $numeroBloco);
         if (null === $bloco) {
             throw LivroAudioException::blocoNaoEncontrado($numeroBloco);
         }
 
-        return $bloco->trechos();
+        if (null === $voz || '' === $voz || $voz === $this->resolverVoz->vozPrincipal($livro)) {
+            return $bloco;
+        }
+
+        $blocoVoz = $this->livroAudioBlocoVozRepository->buscarPorBlocoEVoz($bloco, $voz);
+        if (null === $blocoVoz || !$blocoVoz->isPronto()) {
+            throw LivroAudioException::audioBlocoNaoDisponivel($numeroBloco);
+        }
+
+        return $blocoVoz;
     }
 
     /**

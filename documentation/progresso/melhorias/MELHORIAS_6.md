@@ -121,3 +121,25 @@
   - `src/Entity/LivroAudioBloco.php`, `src/Serializer/LivroAudioBlocoSerializer.php`, `src/Service/LivroAudio/ConsultarLivrosAudioService.php`, `CorrigirVozLivrosAudioService.php`, `src/Command/CorrigirVozLivrosAudioCommand.php`
   - `web/features/livros-audio/utils/pdf.ts`, `utils/localizacaoNarracao.ts`, `hooks/useNarracaoAtual.ts`, `types.ts`
   - `web/features/livros-audio/components/PaginaPdf.tsx`, `VisualizadorLivro.tsx`, `PlayerAudioLivro.tsx`, `LeitorLivroAudio.tsx`
+
+---
+
+### 🟡 Melhoria 107 — Escolher e Trocar a Voz do Narrador
+
+- **Status**: Publicada em produção em 03/11/2026, falta validar no uso
+- **Data**: 03 de novembro de 2026
+- **Problema**: cada livro tinha uma única voz, escolhida pelo idioma (Antonio para português), sem opção de ouvir outra.
+- **Solução**:
+  - **Catálogo** (`VozNarracao`): Antonio, Francisca e Thalita (pt-BR), Duarte e Raquel (pt-PT) e as multilíngues Andrew, Brian, Ava e Emma. Livros em outro idioma só oferecem as multilíngues. Todas mandam o tempo de cada palavra, então o destaque por palavra funciona em qualquer voz.
+  - **Várias vozes por livro**: a voz principal continua em `livro_audio_bloco`. Cada voz adicional gera o áudio de cada parte em `livro_audio_bloco_voz` (migração `Version20261104000000`), com arquivos em `blocos/vozes/{voz}/`. A geração usa a fila `livro_audio` (`GerarAudioBlocoVozMessage`) e não mexe no status do livro.
+  - **API**: `GET /{uuid}/vozes` (vozes com status e partes prontas), `POST /{uuid}/vozes` (gera uma voz), `DELETE /{uuid}/vozes/{voz}` (apaga o áudio da voz), `GET /vozes/{voz}/amostra` (amostra curta, gerada uma vez e guardada em `var/livros/amostras`). `stream` e `trechos` aceitam `?voz=`.
+  - **Player**: botão com o nome da voz abre o painel "Vozes do narrador", com amostra, gerar, usar e apagar. A troca continua da mesma frase, pela marcação de tempo das frases nas duas vozes. Partes que ainda não ficaram prontas na voz escolhida tocam na voz principal e trocam sozinhas quando ficam prontas. A voz escolhida fica lembrada por livro no navegador.
+  - Apagar a voz durante a geração cancela a síntese em andamento.
+- **Testado** fora de produção: as 9 vozes geraram áudio e tempo de palavras com o script de síntese, o container do Symfony passou no `lint:container`, as rotas novas aparecem no `debug:router` e o mapeamento passou no `doctrine:schema:validate`.
+- **Arquivos**:
+  - `src/Enum/VozNarracao.php`, `src/Entity/LivroAudioBlocoVoz.php`, `src/Repository/LivroAudioBlocoVozRepository.php`, `migrations/Version20261104000000.php` (novos)
+  - `src/Message/GerarAudioBlocoVozMessage.php`, `src/MessageHandler/GerarAudioBlocoVozMessageHandler.php` (novos), `config/packages/messenger.yaml`
+  - `src/Service/LivroAudio/GerarAudioBlocoVozService.php`, `GerenciarVozesLivroAudioService.php`, `ResolverVozLivroAudioService.php` (novos), `ConsultarLivrosAudioService.php`
+  - `src/Controller/LivroAudio/LivroAudioController.php`, `src/Entity/LivroAudioBloco.php`, `src/Exception/LivroAudio/LivroAudioException.php`, `config/services.yaml`
+  - `web/features/livros-audio/components/PainelVozes.tsx` (novo), `components/PlayerAudioLivro.tsx`
+  - `web/features/livros-audio/api.ts`, `types.ts`, `hooks/useLivrosAudio.ts`, `hooks/useNarracaoAtual.ts`

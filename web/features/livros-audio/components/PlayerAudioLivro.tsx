@@ -1,4 +1,5 @@
 import { Badge, Box, Button, Flex, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Bookmark,
   BookmarkCheck,
@@ -6,6 +7,7 @@ import {
   ChevronRight,
   Download,
   ListMusic,
+  Mic,
   Pause,
   Play,
   RotateCcw,
@@ -16,11 +18,25 @@ import {
   X,
 } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
+import { listarTrechosBloco, obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
+import {
+  chaveTrechosBloco,
+  useRemoverVozLivro,
+  useSolicitarVozLivro,
+  useVozesLivro,
+} from '../hooks/useLivrosAudio'
 import { type NarracaoAtual, useNarracaoAtual } from '../hooks/useNarracaoAtual'
-import type { LivroAudio, LivroAudioBloco, ModoDestaqueNarracao } from '../types'
+import type {
+  LivroAudio,
+  LivroAudioBloco,
+  ModoDestaqueNarracao,
+  TrechoNarracao,
+  VozLivroAudio,
+} from '../types'
+import { encontrarIndiceTrecho } from '../utils/localizacaoNarracao'
 import type { PDFDocumentProxy } from '../utils/pdf'
 import { encontrarBlocoPorPagina, formatarTempoAudio } from '../utils/sincronizacao'
+import { PainelVozes } from './PainelVozes'
 
 interface PlayerAudioLivroProps {
   livro: LivroAudio
@@ -44,6 +60,43 @@ interface PlayerAudioLivroProps {
 }
 
 const VELOCIDADES = [0.75, 1.0, 1.25, 1.5, 2.0]
+
+function chaveVozLivro(livroUuid: string): string {
+  return `livros-audio:voz:${livroUuid}`
+}
+
+function lerVozSalva(livroUuid: string): string | null {
+  try {
+    return localStorage.getItem(chaveVozLivro(livroUuid))
+  } catch {
+    return null
+  }
+}
+
+function salvarVozEscolhida(livroUuid: string, voz: string | null) {
+  try {
+    if (voz) {
+      localStorage.setItem(chaveVozLivro(livroUuid), voz)
+    } else {
+      localStorage.removeItem(chaveVozLivro(livroUuid))
+    }
+  } catch {}
+}
+
+function calcularTempoEquivalente(
+  trechosAtuais: TrechoNarracao[],
+  trechosNovos: TrechoNarracao[],
+  segundos: number
+): number | null {
+  const indice = encontrarIndiceTrecho(trechosAtuais, segundos)
+  const atual = trechosAtuais[indice]
+  const novo = trechosNovos[indice]
+  if (!atual || !novo) return null
+
+  const duracaoAtual = Math.max(atual.fim - atual.inicio, 0.01)
+  const fracao = Math.min(1, Math.max(0, (segundos - atual.inicio) / duracaoAtual))
+  return novo.inicio + fracao * (novo.fim - novo.inicio)
+}
 
 export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   livro,
@@ -78,6 +131,14 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const [mostrarVolume, setMostrarVolume] = useState(false)
   const [indiceVelocidade, setIndiceVelocidade] = useState(1)
   const [mostrarSumario, setMostrarSumario] = useState(false)
+  const [mostrarVozes, setMostrarVozes] = useState(false)
+  const [vozEscolhida, setVozEscolhida] = useState<string | null>(() => lerVozSalva(livro.uuid))
+  const [vozEmAcao, setVozEmAcao] = useState<string | null>(null)
+  const retomarEmRef = useRef<{ segundos: number; tocar: boolean } | null>(null)
+  const queryClient = useQueryClient()
+  const { data: vozes = [], isLoading: carregandoVozes } = useVozesLivro(livro.uuid)
+  const solicitarVozMutation = useSolicitarVozLivro(livro.uuid)
+  const removerVozMutation = useRemoverVozLivro(livro.uuid)
 
   const blocoInicial = useMemo(() => {
     if (blocos.length === 0) return null
@@ -98,16 +159,90 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     }
   }, [blocoAtivo, blocoInicial])
 
+  const vozPrincipal = vozes.find((voz) => voz.principal) ?? null
+  const vozSelecionada =
+    vozes.find((voz) => voz.id === vozEscolhida && voz.blocosProntos.length > 0) ?? vozPrincipal
+
+  const vozDoBlocoPara = useCallback(
+    (numeroBloco: number, idVoz: string | null): string | null => {
+      const voz = vozes.find((item) => item.id === idVoz)
+      if (!voz || voz.principal || !voz.blocosProntos.includes(numeroBloco)) return null
+      return voz.id
+    },
+    [vozes]
+  )
+
+  const vozDesejada = blocoAtivo ? vozDoBlocoPara(blocoAtivo.numeroBloco, vozEscolhida) : null
+  const [vozCarregada, setVozCarregada] = useState<{ bloco: number; voz: string | null } | null>(
+    null
+  )
+  const vozDoBloco =
+    blocoAtivo && vozCarregada?.bloco === blocoAtivo.numeroBloco ? vozCarregada.voz : null
+  const vozDoBlocoPronta = Boolean(blocoAtivo && vozCarregada?.bloco === blocoAtivo.numeroBloco)
+
+  useEffect(() => {
+    if (carregandoVozes || !blocoAtivo) return
+    const numeroBloco = blocoAtivo.numeroBloco
+    if (vozCarregada?.bloco === numeroBloco && vozCarregada.voz === vozDesejada) return
+
+    const audio = audioRef.current
+    const mesmoBloco = vozCarregada?.bloco === numeroBloco
+    if (!mesmoBloco || !audio || audio.currentTime === 0) {
+      setVozCarregada({ bloco: numeroBloco, voz: vozDesejada })
+      return
+    }
+
+    let cancelado = false
+    const vozAnterior = vozCarregada?.voz ?? null
+    const segundos = audio.currentTime
+    const tocar = !audio.paused
+    const duracaoAnterior = audio.duration || 0
+
+    const buscarTrechos = (voz: string | null) =>
+      queryClient.fetchQuery({
+        queryKey: chaveTrechosBloco(
+          livro.uuid,
+          numeroBloco,
+          voz,
+          voz ? undefined : blocoAtivo.atualizadoEm
+        ),
+        queryFn: () => listarTrechosBloco(livro.uuid, numeroBloco, voz),
+        staleTime: Number.POSITIVE_INFINITY,
+      })
+
+    Promise.all([buscarTrechos(vozAnterior), buscarTrechos(vozDesejada)])
+      .then(([trechosAnteriores, trechosNovos]) => {
+        const duracaoNova = trechosNovos.at(-1)?.fim ?? 0
+        return (
+          calcularTempoEquivalente(trechosAnteriores, trechosNovos, segundos) ??
+          (duracaoAnterior > 0 && duracaoNova > 0
+            ? (segundos / duracaoAnterior) * duracaoNova
+            : segundos)
+        )
+      })
+      .catch(() => segundos)
+      .then((destino) => {
+        if (cancelado) return
+        retomarEmRef.current = { segundos: Math.max(0, destino), tocar }
+        setVozCarregada({ bloco: numeroBloco, voz: vozDesejada })
+      })
+
+    return () => {
+      cancelado = true
+    }
+  }, [carregandoVozes, blocoAtivo, vozDesejada, vozCarregada, queryClient, livro.uuid])
+
   const audioUrl = useMemo(() => {
-    if (!blocoAtivo || !blocoAtivo.isPronto) return ''
-    return obterUrlStreamBloco(livro.uuid, blocoAtivo.numeroBloco)
-  }, [livro.uuid, blocoAtivo])
+    if (!blocoAtivo || !blocoAtivo.isPronto || !vozDoBlocoPronta) return ''
+    return obterUrlStreamBloco(livro.uuid, blocoAtivo.numeroBloco, vozDoBloco)
+  }, [livro.uuid, blocoAtivo, vozDoBloco, vozDoBlocoPronta])
 
   const obterTempoAtual = useCallback(() => audioRef.current?.currentTime ?? null, [])
   const narracao = useNarracaoAtual({
     livroUuid: livro.uuid,
     bloco: blocoAtivo,
     documento,
+    voz: vozDoBloco,
     segundos: tempoAtual,
     tocando,
     obterTempoAtual,
@@ -246,6 +381,35 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     }
   }
 
+  function selecionarVoz(voz: VozLivroAudio) {
+    const novaVoz = voz.principal ? null : voz.id
+    setVozEscolhida(novaVoz)
+    salvarVozEscolhida(livro.uuid, novaVoz)
+  }
+
+  async function gerarVoz(voz: VozLivroAudio) {
+    setVozEmAcao(voz.id)
+    try {
+      await solicitarVozMutation.mutateAsync(voz.id)
+    } finally {
+      setVozEmAcao(null)
+    }
+  }
+
+  async function removerVoz(voz: VozLivroAudio) {
+    if (!window.confirm(`Apagar o áudio da voz ${voz.nome} deste livro?`)) return
+    setVozEmAcao(voz.id)
+    try {
+      if (vozEscolhida === voz.id) {
+        const principal = vozes.find((item) => item.principal)
+        if (principal) selecionarVoz(principal)
+      }
+      await removerVozMutation.mutateAsync(voz.id)
+    } finally {
+      setVozEmAcao(null)
+    }
+  }
+
   function selecionarBloco(novoBloco: LivroAudioBloco) {
     if (!novoBloco.isPronto) return
     if (blocoAtivo && audioRef.current) {
@@ -318,6 +482,14 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             if (audioRef.current) {
               setDuracao(audioRef.current.duration || 0)
               audioRef.current.playbackRate = VELOCIDADES[indiceVelocidade] ?? 1.0
+              const retomarEm = retomarEmRef.current
+              if (retomarEm) {
+                retomarEmRef.current = null
+                posicaoRetomadaRef.current = true
+                audioRef.current.currentTime = retomarEm.segundos
+                setTempoAtual(retomarEm.segundos)
+                if (retomarEm.tocar) deveTocarAoCarregarRef.current = true
+              }
               if (!posicaoRetomadaRef.current) {
                 posicaoRetomadaRef.current = true
                 if (blocoAtivo?.numeroBloco === livro.blocoAtual && livro.segundosNoBloco > 0) {
@@ -355,6 +527,20 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         >
           <track kind="captions" />
         </audio>
+      )}
+
+      {mostrarVozes && (
+        <PainelVozes
+          vozes={vozes}
+          vozSelecionada={vozSelecionada?.id ?? null}
+          numeroBlocoAtivo={blocoAtivo?.numeroBloco ?? null}
+          carregando={carregandoVozes}
+          vozEmAcao={vozEmAcao}
+          onSelecionar={selecionarVoz}
+          onGerar={gerarVoz}
+          onRemover={removerVoz}
+          onFechar={() => setMostrarVozes(false)}
+        />
       )}
 
       {mostrarSumario && (
@@ -691,12 +877,38 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             border="1px solid"
             borderColor={mostrarSumario ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'}
             _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
-            onClick={() => setMostrarSumario((prev) => !prev)}
+            onClick={() => {
+              setMostrarVozes(false)
+              setMostrarSumario((prev) => !prev)
+            }}
             fontSize="xs"
             fontWeight="semibold"
           >
             <ListMusic size={14} style={{ marginRight: '5px' }} />
             Sumário
+          </Button>
+
+          <Button
+            size="xs"
+            variant="ghost"
+            borderRadius="lg"
+            px={2.5}
+            h="28px"
+            color={mostrarVozes ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            bg={mostrarVozes ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
+            border="1px solid"
+            borderColor={mostrarVozes ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'}
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+            onClick={() => {
+              setMostrarSumario(false)
+              setMostrarVozes((prev) => !prev)
+            }}
+            fontSize="xs"
+            fontWeight="semibold"
+            title="Escolher a voz do narrador"
+          >
+            <Mic size={14} style={{ marginRight: '5px' }} />
+            {vozSelecionada ? vozSelecionada.nome : 'Voz'}
           </Button>
 
           <HStack
