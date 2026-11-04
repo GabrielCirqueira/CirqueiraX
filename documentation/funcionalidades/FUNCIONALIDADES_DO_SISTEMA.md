@@ -92,13 +92,16 @@ Transforma vídeos em música para você ouvir ou baixar.
 
 ### Livros em Áudio
 
-Transforma seus livros em formato PDF em audiolivros interativos com narração em português por voz neural.
+Transforma seus livros em formato PDF em audiolivros interativos com narração por voz neural no idioma do livro (português, inglês, espanhol, francês, italiano ou alemão).
 
 - Envie arquivos PDF de livros com facilidade pelo seletor ou arrastando para a tela.
 - O sistema extrai os textos e sintetiza a leitura com voz neural de alta naturalidade dividida em blocos e capítulos.
 - Leitor de PDF integrado com virada de página automática sincronizada com o áudio ("Seguir áudio") ou navegação livre ("Folhear livre").
 - Player com controle de velocidade (0.75x a 2.0x), avanço/retrocesso de 15 segundos e integração com a central de mídia/tela de bloqueio do celular ou computador.
 - Marcador de leitura automático que salva onde você parou para continuar de qualquer lugar.
+- A frase lida fica destacada no PDF. Você escolhe se o destaque segue a frase inteira ou cada palavra.
+- Se você abrir outra página e der play, a leitura começa nessa página.
+- Escolha entre nove vozes: ouça uma amostra, gere o livro na voz que preferir e troque a qualquer momento, continuando da mesma frase.
 
 ### Prints & Capturas
 

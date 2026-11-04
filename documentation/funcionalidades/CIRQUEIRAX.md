@@ -45,7 +45,7 @@ Classificação (OrigemRegra ou decisão manual)
 Rotinas diárias: limpeza de vídeos e expiração de áudios
 Módulos isolados: 
 ├── Downloads MP3 (entidade Audio)
-└── Livros em Áudio (entidades LivroAudio e LivroAudioBloco)
+└── Livros em Áudio (entidades LivroAudio, LivroAudioBloco e LivroAudioBlocoVoz)
 ```
 
 ### Stack
@@ -56,7 +56,7 @@ Módulos isolados:
 | Assíncrono | Symfony Messenger (transporte Doctrine) e Scheduler |
 | Frontend | React 19, TypeScript 5.9, Vite 7, Chakra UI 3 |
 | Banco | MySQL 8.3 |
-| Mídia | yt-dlp, ffmpeg, TikWM, FxTwitter, pdftotext, edge-tts |
+| Mídia | yt-dlp, ffmpeg, TikWM, FxTwitter, pdftotext, edge-tts (biblioteca Python `edge_tts`) |
 | Integrações | Syncthing REST API, Google Photos Library API |
 | Agente | Python (requests, watchdog, python-dotenv) |
 
@@ -134,6 +134,9 @@ As mudanças de status ficam em `historicoStatus`, com data e hora.
 | `TokenAgente` | Credencial de cada agente |
 | `Usuario` | Usuários do sistema |
 | `RefreshToken` | Renovação de sessão |
+| `LivroAudio` | Livro em PDF enviado para narração |
+| `LivroAudioBloco` | Parte do livro na voz principal, com áudio e tempos das frases e palavras |
+| `LivroAudioBlocoVoz` | A mesma parte gerada em outra voz |
 
 ### Campos principais de `MediaItem`
 
@@ -163,6 +166,7 @@ As mudanças de status ficam em `historicoStatus`, com data e hora.
 | `var/downloads` | Vídeos baixados | Volume `downloads_prod` |
 | `var/audios` | MP3 | Volume `audios_prod` |
 | Miniaturas | Capas em cache | Volume `thumbnails_prod` |
+| `var/livros` | PDFs, áudios dos livros (todas as vozes) e amostras de voz | Volume `livros_prod` |
 | `var/cookies` | Cookies para o yt-dlp | Pasta montada a partir de `../var/cookies` |
 
 ---

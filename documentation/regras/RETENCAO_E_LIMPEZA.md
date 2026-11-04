@@ -35,9 +35,12 @@ Quando um livro em áudio é excluído (`DELETE /api/v1/livros-audio/{uuid}`):
    - O arquivo PDF original (`{uuid}.pdf`).
    - O subdiretório de blocos (`blocos/`).
    - Todos os fragmentos sintetizados (`bloco_1.mp3`, `bloco_2.mp3`, ...).
+   - Os áudios das vozes adicionais (`blocos/vozes/{voz}/`).
    - O diretório raiz do livro.
 2. **Exclusão Lógica e Relacional:**
-   No banco de dados relacional, a relação `LivroAudio` → `LivroAudioBloco` possui `onDelete: CASCADE`, garantindo a remoção atômica de todos os blocos e metadados na mesma transação.
+   No banco de dados relacional, as relações `LivroAudio` → `LivroAudioBloco` → `LivroAudioBlocoVoz` possuem `onDelete: CASCADE`, garantindo a remoção atômica de todos os blocos, vozes e metadados na mesma transação.
+
+Ao remover só uma voz adicional (`DELETE /api/v1/livros-audio/{uuid}/vozes/{voz}`), são apagadas a pasta `blocos/vozes/{voz}/` e as linhas dessa voz. As amostras de voz em `var/livros/amostras/` são compartilhadas entre livros e não expiram.
 
 ---
 

@@ -118,7 +118,12 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `DELETE` | `/livros-audio/{uuid}` | Apaga o livro e arquivos |
 | `GET` | `/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
 | `GET` | `/livros-audio/{uuid}/blocos` | Lista os blocos e capítulos de áudio gerados |
-| `GET` | `/livros-audio/{uuid}/blocos/{numeroBloco}/stream` | Reproduz o bloco de áudio (suporta Range) |
+| `GET` | `/livros-audio/{uuid}/blocos/{numeroBloco}/stream` | Reproduz o bloco de áudio (suporta Range; `?voz=` para outra voz) |
+| `GET` | `/livros-audio/{uuid}/blocos/{numeroBloco}/trechos` | Frases do bloco com tempos e palavras (`?voz=`) |
+| `GET` | `/livros-audio/{uuid}/vozes` | Vozes do livro e status |
+| `POST` | `/livros-audio/{uuid}/vozes` | Gera o livro em outra voz |
+| `DELETE` | `/livros-audio/{uuid}/vozes/{voz}` | Apaga uma voz adicional |
+| `GET` | `/livros-audio/vozes/{voz}/amostra` | Amostra curta da voz |
 
 ### Categorias e regras
 
@@ -156,7 +161,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 
 ## Entidades e enums
 
-Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBloco`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
+Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBloco`, `LivroAudioBlocoVoz`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
 
 | Enum | Valores |
 | :--- | :--- |
@@ -165,6 +170,7 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `StatusAudio` | `pendente`, `baixando`, `disponivel`, `erro`, `expirado` |
 | `StatusLivroAudio` | `enviado`, `extraindo`, `gerando_audio`, `parcial`, `pronto`, `erro` |
 | `StatusLivroAudioBloco` | `pendente`, `gerando`, `pronto`, `erro` |
+| `VozNarracao` | `pt-BR-AntonioNeural`, `pt-BR-FranciscaNeural`, `pt-BR-ThalitaMultilingualNeural`, `pt-PT-DuarteNeural`, `pt-PT-RaquelNeural`, `en-US-AndrewMultilingualNeural`, `en-US-BrianMultilingualNeural`, `en-US-AvaMultilingualNeural`, `en-US-EmmaMultilingualNeural` |
 | `StatusEnvioGoogleFotos` | `enviado`, `reaproveitado`, `falha` |
 | `OrigemEnvioGoogleFotos` | `automatico`, `retentativa`, `reenvio_manual`, `forcado` |
 | `TipoCliente` | `usuario`, `agente` |
