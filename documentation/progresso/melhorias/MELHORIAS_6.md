@@ -159,3 +159,37 @@
 - **Arquivos**:
   - `web/features/livros-audio/utils/localizacaoNarracao.ts`
   - `web/features/livros-audio/hooks/useNarracaoAtual.ts`, `components/PlayerAudioLivro.tsx`
+
+---
+
+### 🟡 Melhoria 109 — Narração Mais Limpa e Recursos de Escuta
+
+- **Status**: Publicada em produção em 04/11/2026, falta validar no uso
+- **Data**: 04 de novembro de 2026
+- **Problema**: a voz lia o cabeçalho repetido ("Os Protocolos dos Sábios de Sião - 13 -") a cada página, às vezes no meio da frase, e os marcadores de nota como "(5)". A extração com `pdftotext -layout` misturava linhas de textos em duas colunas. Não havia como ensinar a pronúncia de siglas e abreviações. No player faltavam timer de sono, o tempo do livro inteiro, um recuo ao retomar e a passagem para a próxima parte sem espera.
+- **Solução (texto)**:
+  - **Extração com posição**: `ExtratorTextoPdfClient::extrairLayoutDoDocumento` roda `pdftotext -bbox-layout` uma vez no PDF inteiro e devolve cada linha com posição, altura e bloco. A ordem de leitura do Poppler separa as colunas. Se falhar, volta para a extração antiga por página.
+  - **Cabeçalho e rodapé**: `MontarTextoNarracaoLivroService` descarta linhas na faixa de cima (10%) ou de baixo (8%) da página que se repetem em 3 páginas ou mais (comparando só as letras) e as que só têm número.
+  - **Notas**: opção por livro (`livro_audio.modo_notas`):
+    - *No fim do capítulo* (padrão para livros novos): tira os marcadores "(5)", "[5]" e números sobrescritos, e lê as notas de rodapé (linhas menores no pé da página) antes do próximo título de capítulo, com "Nota 5." no início.
+    - *Pular notas*: também pula as seções que começam com um título "Notas", "Notas e comentários" etc. até o próximo capítulo.
+    - *Ler normalmente*: lê como está.
+  - **Títulos**: linhas com fonte maior ganham ponto final, para a voz pausar, e títulos quebrados em duas linhas viram um só. Linhas só com símbolos (marcadores de lista) são ignoradas.
+  - **Dicionário de pronúncia**: lista por livro (`livro_audio.pronuncias`) aplicada por `AplicarPronunciasService` depois de montar os parágrafos e antes da voz, em palavra inteira e sem diferenciar maiúsculas. Para "não ler", basta deixar a pronúncia vazia.
+  - **Refazer a narração**: `PUT /api/v1/livros-audio/{uuid}/narracao` salva os ajustes e `RefazerNarracaoLivroAudioService` extrai o texto de novo mantendo as mesmas partes, reinicia a voz principal e as vozes extras e enfileira tudo a partir da parte que está sendo ouvida. Se uma parte for reiniciada enquanto o worker gera o áudio dela, o resultado antigo é descartado. Livros narrados antes desta melhoria aparecem com o aviso para refazer (`versao_narracao` = 1).
+- **Solução (escuta)**:
+  - **Timer de sono**: 15, 30, 45 ou 60 minutos (só conta enquanto toca) ou "no fim desta parte", com o volume baixando nos últimos 15 s (ou 10 s antes do fim da parte).
+  - **Tempo do livro**: barra fina abaixo da parte com o percentual do livro e quanto falta na velocidade atual. Clicar na barra leva para aquele ponto do livro. Partes ainda sem áudio entram com estimativa por página.
+  - **Recuo ao retomar**: depois de uma pausa de 30 s ou mais, e ao reabrir o livro na posição salva, o áudio volta 5 s.
+  - **Próxima parte pré-carregada**: enquanto uma parte toca, o áudio e as frases da próxima já são baixados. O stream com `?v=` (data da geração) agora vai com cache de 7 dias no navegador, e a troca de parte não remonta mais o player.
+- **Testado** fora de produção:
+  - Com o PDF dos Protocolos (84 páginas): 0 cabeçalhos lidos, colunas do resumo na ordem certa, 235 marcadores removidos, os 24 capítulos presentes no modo "pular" (cerca de 10 mil palavras de notas a menos).
+  - Com o "MANUAL DO ALUNO PBL": mesmo texto nos três modos.
+  - Player no Chromium com a página real e API simulada: retomada em 7 s para posição salva em 12 s, recuo de 5 s depois de 40 s de pausa e nenhum após pausa curta, timer "fim da parte" baixando o volume e parando sem avançar, contagem do timer de 15 min, pré-carga da parte 2, salto pela barra do livro para a parte 3, envio dos ajustes.
+- **Arquivos**:
+  - `src/Infra/Pdf/ExtratorTextoPdfClient.php`, `src/Interface/ExtratorTextoPdfInterface.php`, `src/DataObject/LinhaPdfDTO.php`, `src/DataObject/PaginaPdfDTO.php` (novos DTOs)
+  - `src/Service/LivroAudio/MontarTextoNarracaoLivroService.php`, `ExtrairTextoNarracaoLivroService.php`, `AplicarPronunciasService.php`, `RefazerNarracaoLivroAudioService.php`, `ConfigurarNarracaoLivroAudioService.php` (novos)
+  - `src/Service/LivroAudio/DividirLivroEmBlocosService.php`, `GerarAudioBlocoService.php`, `GerarAudioBlocoVozService.php`
+  - `src/Enum/ModoNotasLivroAudio.php`, `src/DataObject/ConfigurarNarracaoLivroDTO.php` (novos), `src/Entity/LivroAudio.php`, `src/Entity/LivroAudioBloco.php`, `migrations/Version20261104120000.php`
+  - `src/Repository/LivroAudioBlocoRepository.php`, `LivroAudioBlocoVozRepository.php`, `src/Serializer/LivroAudioSerializer.php`, `src/Controller/LivroAudio/LivroAudioController.php`, `src/Exception/LivroAudio/LivroAudioException.php`
+  - `web/features/livros-audio/components/PainelNarracao.tsx` (novo), `components/PlayerAudioLivro.tsx`, `api.ts`, `types.ts`, `hooks/useLivrosAudio.ts`

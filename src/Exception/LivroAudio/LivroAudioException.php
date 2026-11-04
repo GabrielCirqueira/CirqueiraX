@@ -53,6 +53,11 @@ final class LivroAudioException extends DomainException
         return new self(sprintf('A voz "%s" não está disponível para este livro.', $voz), 422);
     }
 
+    public static function narracaoEmPreparo(): self
+    {
+        return new self('O texto do livro ainda está sendo extraído. Aguarde para ajustar a narração.', 409);
+    }
+
     public static function vozPrincipalNaoRemovivel(): self
     {
         return new self('A voz principal do livro não pode ser removida.', 422);

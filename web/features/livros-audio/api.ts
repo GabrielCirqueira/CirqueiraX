@@ -2,6 +2,7 @@ import { api } from '@/config/api'
 import type { RespostaApi } from '@/shared/types/api'
 import { z } from 'zod'
 import {
+  type ConfigurarNarracaoPayload,
   type LivroAudio,
   type LivroAudioBloco,
   type SalvarPosicaoLivro,
@@ -68,6 +69,17 @@ export async function removerVozLivro(uuid: string, voz: string): Promise<VozLiv
   return z.array(vozLivroAudioSchema).parse(data.data)
 }
 
+export async function configurarNarracaoLivro(
+  uuid: string,
+  payload: ConfigurarNarracaoPayload
+): Promise<LivroAudio> {
+  const { data } = await api.put<RespostaApi<unknown>>(
+    `${URL_LIVROS_AUDIO}/${uuid}/narracao`,
+    payload
+  )
+  return livroAudioSchema.parse(data.data)
+}
+
 export function obterUrlAmostraVoz(voz: string): string {
   return comToken(`${URL_LIVROS_AUDIO}/vozes/${encodeURIComponent(voz)}/amostra`)
 }
@@ -111,11 +123,13 @@ export function obterUrlStreamBloco(
   uuid: string,
   numeroBloco: number,
   voz: string | null = null,
+  versao?: string,
   tokenSobrescrever?: string
 ): string {
   const token = tokenSobrescrever ?? localStorage.getItem('token')
   const parametros = new URLSearchParams()
   if (voz) parametros.set('voz', voz)
+  if (versao) parametros.set('v', String(Date.parse(versao) || versao))
   if (token) parametros.set('token', token)
   const consulta = parametros.toString()
   const baseUrl = `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/stream`

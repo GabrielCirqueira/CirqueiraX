@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\LivroAudio;
 use App\Entity\LivroAudioBloco;
 use App\Entity\LivroAudioBlocoVoz;
+use App\Enum\StatusLivroAudioBloco;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -55,6 +56,14 @@ class LivroAudioBlocoVozRepository extends ServiceEntityRepository
     {
         return false !== $this->getEntityManager()->getConnection()->fetchOne(
             'SELECT 1 FROM livro_audio_bloco_voz WHERE uuid = ?',
+            [Uuid::fromString($uuid)->toBinary()],
+        );
+    }
+
+    public function foiReiniciado(string $uuid): bool
+    {
+        return StatusLivroAudioBloco::PENDENTE->value === $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT status FROM livro_audio_bloco_voz WHERE uuid = ?',
             [Uuid::fromString($uuid)->toBinary()],
         );
     }

@@ -9,6 +9,13 @@ export const statusLivroAudioSchema = z.enum([
   'erro',
 ])
 
+export const modoNotasLivroAudioSchema = z.enum(['normal', 'fim_capitulo', 'pular'])
+
+export const pronunciaLivroSchema = z.object({
+  de: z.string(),
+  para: z.string(),
+})
+
 export const livroAudioSchema = z.object({
   uuid: z.string().uuid(),
   titulo: z.string(),
@@ -25,6 +32,9 @@ export const livroAudioSchema = z.object({
   blocosComErro: z.number().int(),
   segundosAudioProntos: z.number().int(),
   temAudioParaOuvir: z.boolean(),
+  modoNotas: modoNotasLivroAudioSchema.default('normal'),
+  pronuncias: z.array(pronunciaLivroSchema).default([]),
+  narracaoDesatualizada: z.boolean().default(false),
   status: statusLivroAudioSchema,
   statusDescricao: z.string(),
   erroMotivo: z.string().nullable(),
@@ -103,6 +113,13 @@ export type SalvarPosicaoLivro = z.infer<typeof salvarPosicaoLivroSchema>
 export type TrechoNarracao = z.infer<typeof trechoNarracaoSchema>
 export type PalavraNarracao = z.infer<typeof palavraNarracaoSchema>
 export type ModoDestaqueNarracao = 'frase' | 'palavra'
+export type ModoNotasLivroAudio = z.infer<typeof modoNotasLivroAudioSchema>
+export type PronunciaLivro = z.infer<typeof pronunciaLivroSchema>
+
+export interface ConfigurarNarracaoPayload {
+  modoNotas: ModoNotasLivroAudio
+  pronuncias: PronunciaLivro[]
+}
 
 export interface UploadLivroAudioPayload {
   arquivo: File

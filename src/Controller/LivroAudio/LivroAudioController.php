@@ -6,12 +6,14 @@ namespace App\Controller\LivroAudio;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\ArquivoMidiaDTO;
+use App\DataObject\ConfigurarNarracaoLivroDTO;
 use App\DataObject\SalvarPosicaoLivroDTO;
 use App\DataObject\UploadLivroAudioDTO;
 use App\Entity\Usuario;
 use App\Serializer\LivroAudioBlocoSerializer;
 use App\Serializer\LivroAudioSerializer;
 use App\Service\LivroAudio\ApagarLivroAudioService;
+use App\Service\LivroAudio\ConfigurarNarracaoLivroAudioService;
 use App\Service\LivroAudio\ConsultarLivrosAudioService;
 use App\Service\LivroAudio\GerenciarVozesLivroAudioService;
 use App\Service\LivroAudio\SalvarPosicaoLivroService;
@@ -29,6 +31,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 final class LivroAudioController extends DefaultController
 {
     private const string NOME_FALLBACK_PDF = 'livro.pdf';
+    private const int CACHE_AUDIO_VERSIONADO_SEGUNDOS = 604800;
 
     public function __construct(
         private readonly ConsultarLivrosAudioService $consultarLivrosAudioService,
@@ -36,6 +39,7 @@ final class LivroAudioController extends DefaultController
         private readonly ApagarLivroAudioService $apagarLivroAudioService,
         private readonly SalvarPosicaoLivroService $salvarPosicaoLivroService,
         private readonly GerenciarVozesLivroAudioService $gerenciarVozesLivroAudioService,
+        private readonly ConfigurarNarracaoLivroAudioService $configurarNarracaoLivroAudioService,
         private readonly LivroAudioSerializer $livroAudioSerializer,
         private readonly LivroAudioBlocoSerializer $livroAudioBlocoSerializer,
         private readonly RateLimiterFactory $marcadorPosicaoLimiter,
@@ -98,6 +102,19 @@ final class LivroAudioController extends DefaultController
         return $this->success($this->livroAudioSerializer->normalizar($livro));
     }
 
+    #[Route('/{uuid}/narracao', name: 'configurar_narracao', methods: ['PUT'])]
+    public function configurarNarracao(
+        string $uuid,
+        #[MapRequestPayload]
+        ConfigurarNarracaoLivroDTO $dto,
+        #[CurrentUser]
+        Usuario $usuario,
+    ): Response {
+        $livro = $this->configurarNarracaoLivroAudioService->executar($uuid, $dto, $usuario);
+
+        return $this->success($this->livroAudioSerializer->normalizar($livro));
+    }
+
     #[Route('/{uuid}', name: 'apagar', methods: ['DELETE'])]
     public function apagar(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
@@ -134,8 +151,14 @@ final class LivroAudioController extends DefaultController
         Usuario $usuario,
     ): Response {
         $arquivo = $this->consultarLivrosAudioService->obterArquivoBloco($uuid, $numeroBloco, $usuario, $request->query->getString('voz'));
+        $resposta = $this->responderArquivo($arquivo, ResponseHeaderBag::DISPOSITION_INLINE);
 
-        return $this->responderArquivo($arquivo, ResponseHeaderBag::DISPOSITION_INLINE);
+        if ($request->query->has('v')) {
+            $resposta->setPrivate();
+            $resposta->setMaxAge(self::CACHE_AUDIO_VERSIONADO_SEGUNDOS);
+        }
+
+        return $resposta;
     }
 
     #[Route('/{uuid}/vozes', name: 'listar_vozes', methods: ['GET'])]

@@ -19,6 +19,7 @@ final readonly class GerarAudioBlocoVozService
         private LivroAudioRepository $livroAudioRepository,
         private SintetizadorVozInterface $sintetizadorVoz,
         private PrepararTextoNarracaoService $prepararTextoNarracao,
+        private AplicarPronunciasService $aplicarPronuncias,
         private ResolverVozLivroAudioService $resolverVoz,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
         private LoggerInterface $logger,
@@ -59,13 +60,14 @@ final readonly class GerarAudioBlocoVozService
 
         try {
             $resultado = $this->sintetizadorVoz->sintetizar(
-                $this->prepararTextoNarracao->preparar($bloco->texto()),
+                $this->aplicarPronuncias->aplicar($this->prepararTextoNarracao->preparar($bloco->texto()), $livro->pronuncias()),
                 $caminhoMp3,
                 $blocoVoz->voz(),
                 $deveCancelar,
             );
         } catch (Throwable $e) {
-            if ($this->descartarSeCancelado($livroFoiApagado, $vozFoiRemovida, $livroUuid, $caminhoMp3)) {
+            if ($this->descartarSeCancelado($livroFoiApagado, $vozFoiRemovida, $livroUuid, $caminhoMp3)
+                || $this->livroAudioBlocoVozRepository->foiReiniciado($blocoVozUuid)) {
                 return;
             }
 
@@ -75,7 +77,8 @@ final readonly class GerarAudioBlocoVozService
             throw $e;
         }
 
-        if ($this->descartarSeCancelado($livroFoiApagado, $vozFoiRemovida, $livroUuid, $caminhoMp3)) {
+        if ($this->descartarSeCancelado($livroFoiApagado, $vozFoiRemovida, $livroUuid, $caminhoMp3)
+            || $this->livroAudioBlocoVozRepository->foiReiniciado($blocoVozUuid)) {
             return;
         }
 

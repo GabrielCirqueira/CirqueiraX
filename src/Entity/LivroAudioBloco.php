@@ -182,6 +182,13 @@ class LivroAudioBloco
         return $this;
     }
 
+    public function redefinirTexto(string $texto): self
+    {
+        $this->texto = $texto;
+
+        return $this->reiniciarGeracao();
+    }
+
     public function reiniciarGeracao(): self
     {
         $this->caminhoAudio = null;

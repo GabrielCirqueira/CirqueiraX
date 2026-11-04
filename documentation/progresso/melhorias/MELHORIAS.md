@@ -124,3 +124,4 @@
 | M106 | Destaque Preciso, com Transição e por Palavra ou Frase | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-106--destaque-preciso-com-transição-e-por-palavra-ou-frase) |
 | M107 | Escolher e Trocar a Voz do Narrador | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-107--escolher-e-trocar-a-voz-do-narrador) |
 | M108 | Destaque que Não se Perde e Play a Partir da Página Aberta | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-108--destaque-que-não-se-perde-e-play-a-partir-da-página-aberta) |
+| M109 | Narração Mais Limpa e Recursos de Escuta | 🟡 Publicado, falta validar | 04/11/2026 | [ver](MELHORIAS_6.md#melhoria-109--narração-mais-limpa-e-recursos-de-escuta) |

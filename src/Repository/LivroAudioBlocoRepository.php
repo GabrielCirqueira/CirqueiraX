@@ -51,6 +51,14 @@ class LivroAudioBlocoRepository extends ServiceEntityRepository
         return $this->find(Uuid::fromString($uuid));
     }
 
+    public function foiReiniciado(string $uuid): bool
+    {
+        return StatusLivroAudioBloco::PENDENTE->value === $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT status FROM livro_audio_bloco WHERE uuid = ?',
+            [Uuid::fromString($uuid)->toBinary()],
+        );
+    }
+
     public function buscarPorLivroENumero(LivroAudio $livro, int $numeroBloco): ?LivroAudioBloco
     {
         return $this->findOneBy([

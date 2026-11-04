@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\IdiomaLivroAudio;
+use App\Enum\ModoNotasLivroAudio;
 use App\Enum\StatusLivroAudio;
 use App\Repository\LivroAudioRepository;
 use DateTimeImmutable;
@@ -20,6 +21,8 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Index(name: 'IDX_LIVRO_AUDIO_STATUS', fields: ['status'])]
 class LivroAudio
 {
+    public const int VERSAO_NARRACAO_ATUAL = 2;
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
@@ -61,6 +64,16 @@ class LivroAudio
     #[ORM\Column(type: 'string', length: 5, nullable: true, enumType: IdiomaLivroAudio::class)]
     private ?IdiomaLivroAudio $idioma = null;
 
+    #[ORM\Column(type: 'string', length: 20, enumType: ModoNotasLivroAudio::class, options: ['default' => 'normal'])]
+    private ModoNotasLivroAudio $modoNotas;
+
+    /** @var list<array{de: string, para: string}>|null */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $pronuncias = null;
+
+    #[ORM\Column(type: 'smallint', options: ['default' => 1])]
+    private int $versaoNarracao;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
@@ -86,6 +99,8 @@ class LivroAudio
         $this->totalPaginas = max(0, $totalPaginas);
         $this->tamanhoBytes = $tamanhoBytes;
         $this->status = StatusLivroAudio::ENVIADO;
+        $this->modoNotas = ModoNotasLivroAudio::FIM_CAPITULO;
+        $this->versaoNarracao = self::VERSAO_NARRACAO_ATUAL;
         $this->blocos = new ArrayCollection();
         $this->criadoEm = new DateTimeImmutable();
         $this->atualizadoEm = $this->criadoEm;
@@ -252,6 +267,37 @@ class LivroAudio
     public function definirIdioma(IdiomaLivroAudio $idioma): self
     {
         $this->idioma = $idioma;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function modoNotas(): ModoNotasLivroAudio
+    {
+        return $this->modoNotas;
+    }
+
+    /**
+     * @return list<array{de: string, para: string}>
+     */
+    public function pronuncias(): array
+    {
+        return $this->pronuncias ?? [];
+    }
+
+    public function narracaoDesatualizada(): bool
+    {
+        return $this->versaoNarracao < self::VERSAO_NARRACAO_ATUAL;
+    }
+
+    /**
+     * @param list<array{de: string, para: string}> $pronuncias
+     */
+    public function configurarNarracao(ModoNotasLivroAudio $modoNotas, array $pronuncias): self
+    {
+        $this->modoNotas = $modoNotas;
+        $this->pronuncias = [] !== $pronuncias ? $pronuncias : null;
+        $this->versaoNarracao = self::VERSAO_NARRACAO_ATUAL;
         $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;

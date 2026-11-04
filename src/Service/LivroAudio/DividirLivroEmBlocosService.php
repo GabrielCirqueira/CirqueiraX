@@ -6,8 +6,6 @@ namespace App\Service\LivroAudio;
 
 use App\Entity\LivroAudio;
 use App\Entity\LivroAudioBloco;
-use App\Exception\Pdf\ExtratorPdfException;
-use App\Interface\ExtratorTextoPdfInterface;
 use App\Repository\LivroAudioBlocoRepository;
 use App\Repository\LivroAudioRepository;
 
@@ -17,8 +15,7 @@ final readonly class DividirLivroEmBlocosService
     private const int LIMITE_CARACTERES_BLOCO = 3500;
 
     public function __construct(
-        private ExtratorTextoPdfInterface $extratorTexto,
-        private LimpezaTextoPdfService $limpezaTexto,
+        private ExtrairTextoNarracaoLivroService $extrairTextoNarracao,
         private LivroAudioBlocoRepository $livroAudioBlocoRepository,
         private LivroAudioRepository $livroAudioRepository,
         private DefinirIdiomaLivroAudioService $definirIdiomaLivro,
@@ -29,12 +26,6 @@ final readonly class DividirLivroEmBlocosService
      */
     public function executar(LivroAudio $livro): array
     {
-        $caminhoPdf = $livro->caminhoPdf();
-
-        if (null === $caminhoPdf || !file_exists($caminhoPdf)) {
-            throw ExtratorPdfException::arquivoNaoEncontrado($caminhoPdf ?? '');
-        }
-
         $totalPaginas = $livro->totalPaginas();
 
         if ($totalPaginas <= 0) {
@@ -44,20 +35,15 @@ final readonly class DividirLivroEmBlocosService
         $livro->iniciarExtracao();
         $this->livroAudioRepository->salvar($livro, true);
 
+        $textos = $this->extrairTextoNarracao->executar($livro);
+
         $blocosCriados = [];
         $numeroBloco = 1;
         $paginaInicioBloco = 1;
-        $textosPaginas = [];
         $caracteresAcumulados = 0;
 
         for ($pagina = 1; $pagina <= $totalPaginas; ++$pagina) {
-            $textoCru = $this->extratorTexto->extrairTextoDaPagina($caminhoPdf, $pagina);
-            $textoLimpo = $this->limpezaTexto->limparTexto($textoCru);
-
-            if ('' !== $textoLimpo) {
-                $textosPaginas[] = $textoLimpo;
-                $caracteresAcumulados += mb_strlen($textoLimpo);
-            }
+            $caracteresAcumulados += mb_strlen($textos[$pagina] ?? '');
 
             $quantidadePaginas = ($pagina - $paginaInicioBloco) + 1;
             $atingiuLimitePaginas = $quantidadePaginas >= self::PAGINAS_POR_BLOCO_PADRAO;
@@ -65,14 +51,12 @@ final readonly class DividirLivroEmBlocosService
             $ehUltimaPagina = $pagina === $totalPaginas;
 
             if ($ehUltimaPagina || $atingiuLimitePaginas || $atingiuLimiteCaracteres) {
-                $textoFinalBloco = trim(implode("\n\n", $textosPaginas));
-
                 $bloco = new LivroAudioBloco(
                     livro: $livro,
                     numeroBloco: $numeroBloco,
                     paginaInicio: $paginaInicioBloco,
                     paginaFim: $pagina,
-                    texto: '' !== $textoFinalBloco ? $textoFinalBloco : sprintf('Páginas %d a %d.', $paginaInicioBloco, $pagina),
+                    texto: $this->extrairTextoNarracao->textoDoIntervalo($textos, $paginaInicioBloco, $pagina),
                 );
 
                 $this->livroAudioBlocoRepository->salvar($bloco, false);
@@ -80,7 +64,6 @@ final readonly class DividirLivroEmBlocosService
 
                 ++$numeroBloco;
                 $paginaInicioBloco = $pagina + 1;
-                $textosPaginas = [];
                 $caracteresAcumulados = 0;
             }
         }

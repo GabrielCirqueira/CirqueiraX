@@ -14,8 +14,9 @@ A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livr
              Salva arquivo original em var/livros/{uuid}/original.pdf
                                    │
                                    ▼
-          Extração de texto por página (pdftotext / Ghostscript)
-          e divisão inteligente em blocos sem quebrar frases
+          Extração do texto com posição (pdftotext -bbox-layout):
+          tira cabeçalhos e rodapés, trata notas e lê colunas em ordem,
+          e divide em blocos sem quebrar frases
                                    │
                                    ▼
         Criação dos blocos LivroAudioBloco (pendente)
@@ -55,6 +56,21 @@ A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livr
 ```
 
 A voz usada no upload é a **principal** e fica em `livro_audio_bloco`. As outras ficam em `livro_audio_bloco_voz`, uma linha por bloco e voz.
+
+### Limpeza do texto narrado
+
+`ExtrairTextoNarracaoLivroService` roda `pdftotext -bbox-layout` no PDF inteiro e `MontarTextoNarracaoLivroService` monta o texto de cada página:
+
+- **Ordem de leitura:** segue os blocos do Poppler, que separam colunas.
+- **Cabeçalhos e rodapés:** linhas nos 10% de cima ou 8% de baixo da página que se repetem em 3 páginas ou mais (comparando só as letras), e as que só têm número, são descartadas.
+- **Títulos:** linhas com fonte maior que o texto ganham ponto final; um título quebrado em duas linhas vira um só.
+- **Notas** (`modoNotas` do livro):
+  - `fim_capitulo` (padrão em livros novos): tira marcadores "(5)", "[5]" e números sobrescritos; notas de rodapé (linhas menores no pé da página) são lidas antes do próximo título, como "Nota 5. …".
+  - `pular`: além dos marcadores e das notas de rodapé, pula seções com título "Notas", "Notas e comentários" etc. até o próximo capítulo.
+  - `normal`: lê tudo como está.
+- **Pronúncia:** o dicionário do livro (`pronuncias`) troca palavras inteiras, sem diferenciar maiúsculas, logo antes de enviar o texto à voz (`AplicarPronunciasService`).
+
+Se o `-bbox-layout` falhar, a extração volta para `pdftotext -layout` por página. Mudar os ajustes refaz a narração: o texto é extraído de novo com as mesmas partes, e a voz principal e as vozes extras são geradas de novo, começando pela parte que está sendo ouvida. Livros narrados antes dessa limpeza (`versaoNarracao` 1) mostram um aviso para refazer.
 
 ### Sincronização com o PDF
 
@@ -165,6 +181,11 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
      - **Vozes:** o botão com o nome da voz abre o painel `PainelVozes` para ouvir amostras, gerar o livro em outra voz e trocar na hora. A troca continua da mesma frase. A voz escolhida fica salva no navegador, por livro.
      - O player mostra a página e o trecho lido. Partes sem tempo por palavra (geradas antes da M106) usam uma estimativa pelo tempo decorrido.
      - **Folhear livre:** permite folhear páginas do PDF sem interromper a reprodução do áudio atual. O play continua de onde parou.
+     - **Ajustes da narração** (botão de controles): modo das notas e dicionário de pronúncia, com o botão para refazer o áudio.
+     - **Timer de sono:** 15, 30, 45 ou 60 minutos (conta só enquanto toca) ou "no fim desta parte", com o volume baixando no final.
+     - **Tempo do livro:** barra do livro inteiro com o percentual e quanto falta na velocidade atual; clicar nela leva para aquele ponto.
+     - **Recuo ao retomar:** depois de uma pausa de 30 s ou mais, e ao reabrir o livro, o áudio volta 5 s.
+     - **Próxima parte pré-carregada:** o áudio e as frases da parte seguinte são baixados enquanto a atual toca. O stream com `?v=` fica em cache no navegador por 7 dias.
      - Navegação por clique na página do PDF pula a reprodução para o bloco correspondente.
 
 ---
@@ -179,6 +200,7 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
 | `GET` | `/api/v1/livros-audio/{uuid}/blocos` | Lista todos os blocos e capítulos de áudio |
 | `PUT` | `/api/v1/livros-audio/{uuid}/posicao` | Atualiza o marcador de leitura (página/bloco/segundos) |
 | `DELETE` | `/api/v1/livros-audio/{uuid}` | Apaga o livro, metadados e arquivos de áudio |
+| `PUT` | `/api/v1/livros-audio/{uuid}/narracao` | Salva o modo das notas e o dicionário de pronúncia e refaz a narração (`{"modoNotas": "pular", "pronuncias": [{"de": "Dr.", "para": "Doutor"}]}`) |
 | `GET` | `/api/v1/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
 | `GET` | `/api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/trechos` | Frases da parte com início e fim em segundos e as palavras de cada uma (`?voz=` para outra voz) |
 | `GET` | `/api/v1/livros-audio/{uuid}/vozes` | Vozes do livro com status e partes prontas |

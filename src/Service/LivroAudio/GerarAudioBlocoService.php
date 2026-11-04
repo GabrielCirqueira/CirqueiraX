@@ -21,6 +21,7 @@ final readonly class GerarAudioBlocoService
         private SintetizadorVozInterface $sintetizadorVoz,
         private DefinirIdiomaLivroAudioService $definirIdiomaLivro,
         private PrepararTextoNarracaoService $prepararTextoNarracao,
+        private AplicarPronunciasService $aplicarPronuncias,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
         private LoggerInterface $logger,
     ) {}
@@ -68,7 +69,7 @@ final readonly class GerarAudioBlocoService
 
         try {
             $resultado = $this->sintetizadorVoz->sintetizar(
-                $this->prepararTextoNarracao->preparar($bloco->texto()),
+                $this->aplicarPronuncias->aplicar($this->prepararTextoNarracao->preparar($bloco->texto()), $livro->pronuncias()),
                 $caminhoMp3,
                 $voz,
                 $livroFoiApagado,
@@ -77,6 +78,10 @@ final readonly class GerarAudioBlocoService
             if ($livroFoiApagado()) {
                 $this->armazenamentoLivro->removerLivro($livroUuid);
 
+                return;
+            }
+
+            if ($this->livroAudioBlocoRepository->foiReiniciado($blocoUuid)) {
                 return;
             }
 
@@ -95,6 +100,10 @@ final readonly class GerarAudioBlocoService
             if ($livroFoiApagado()) {
                 $this->armazenamentoLivro->removerLivro($livroUuid);
 
+                return;
+            }
+
+            if ($this->livroAudioBlocoRepository->foiReiniciado($blocoUuid)) {
                 return;
             }
 

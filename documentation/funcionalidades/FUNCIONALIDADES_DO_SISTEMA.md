@@ -102,6 +102,9 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 - A frase lida fica destacada no PDF. Você escolhe se o destaque segue a frase inteira ou cada palavra.
 - Se você abrir outra página e der play, a leitura começa nessa página.
 - Escolha entre nove vozes: ouça uma amostra, gere o livro na voz que preferir e troque a qualquer momento, continuando da mesma frase.
+- A voz não lê cabeçalhos, rodapés nem números de página, e lê textos em colunas na ordem certa.
+- Escolha se as notas do livro são lidas no fim do capítulo, puladas ou lidas normalmente, e ensine a pronúncia de siglas e abreviações.
+- Timer de sono, tempo restante do livro inteiro, recuo de 5 segundos ao retomar e passagem para a próxima parte sem espera.
 
 ### Prints & Capturas
 

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import {
   apagarLivroAudio,
+  configurarNarracaoLivro,
   fazerUploadLivroAudio,
   listarBlocosLivroAudio,
   listarLivrosAudio,
@@ -13,7 +14,12 @@ import {
   salvarPosicaoLivroAudio,
   solicitarVozLivro,
 } from '../api'
-import type { LivroAudioBloco, SalvarPosicaoLivro, UploadLivroAudioPayload } from '../types'
+import type {
+  ConfigurarNarracaoPayload,
+  LivroAudioBloco,
+  SalvarPosicaoLivro,
+  UploadLivroAudioPayload,
+} from '../types'
 
 export const LIVROS_AUDIO_QUERY_KEY = ['livros-audio'] as const
 
@@ -71,7 +77,7 @@ export function useTrechosBloco(
   const numeroBloco = bloco?.numeroBloco ?? 0
 
   return useQuery({
-    queryKey: chaveTrechosBloco(uuid, numeroBloco, voz, voz ? undefined : bloco?.atualizadoEm),
+    queryKey: chaveTrechosBloco(uuid, numeroBloco, voz, bloco?.atualizadoEm),
     queryFn: () => listarTrechosBloco(uuid, numeroBloco, voz),
     enabled: Boolean(uuid && bloco?.isPronto && (voz || bloco.possuiTrechos)),
     staleTime: Number.POSITIVE_INFINITY,
@@ -117,6 +123,32 @@ export function useRemoverVozLivro(uuid: string) {
     onError: (erro) => {
       addToast({
         title: 'Não foi possível remover a voz',
+        description: extrairMensagemErro(erro, 'Tente novamente em instantes.'),
+        type: 'error',
+      })
+    },
+  })
+}
+
+export function useConfigurarNarracaoLivro(uuid: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: ConfigurarNarracaoPayload) => configurarNarracaoLivro(uuid, payload),
+    onSuccess: (livroAtualizado) => {
+      queryClient.setQueryData([...LIVROS_AUDIO_QUERY_KEY, uuid], livroAtualizado)
+      queryClient.invalidateQueries({ queryKey: [...LIVROS_AUDIO_QUERY_KEY, uuid, 'blocos'] })
+      queryClient.invalidateQueries({ queryKey: [...LIVROS_AUDIO_QUERY_KEY, uuid, 'vozes'] })
+      queryClient.invalidateQueries({ queryKey: LIVROS_AUDIO_QUERY_KEY, exact: true })
+      addToast({
+        title: 'Refazendo a narração',
+        description: 'O áudio está sendo gerado de novo, a partir da parte que você está ouvindo.',
+        type: 'success',
+      })
+    },
+    onError: (erro) => {
+      addToast({
+        title: 'Não foi possível ajustar a narração',
         description: extrairMensagemErro(erro, 'Tente novamente em instantes.'),
         type: 'error',
       })

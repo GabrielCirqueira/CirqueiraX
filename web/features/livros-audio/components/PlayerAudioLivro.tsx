@@ -8,19 +8,22 @@ import {
   Download,
   ListMusic,
   Mic,
+  Moon,
   Pause,
   Play,
   RotateCcw,
   RotateCw,
+  SlidersHorizontal,
   Volume1,
   Volume2,
   VolumeX,
   X,
 } from 'lucide-react'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type MouseEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { listarTrechosBloco, obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
 import {
   chaveTrechosBloco,
+  useConfigurarNarracaoLivro,
   useRemoverVozLivro,
   useSolicitarVozLivro,
   useVozesLivro,
@@ -36,6 +39,7 @@ import type {
 import { encontrarIndiceTrecho } from '../utils/localizacaoNarracao'
 import type { PDFDocumentProxy } from '../utils/pdf'
 import { encontrarBlocoPorPagina, formatarTempoAudio } from '../utils/sincronizacao'
+import { PainelNarracao } from './PainelNarracao'
 import { PainelVozes } from './PainelVozes'
 
 interface PlayerAudioLivroProps {
@@ -60,6 +64,42 @@ interface PlayerAudioLivroProps {
 }
 
 const VELOCIDADES = [0.75, 1.0, 1.25, 1.5, 2.0]
+const PAUSA_LONGA_MS = 30_000
+const RECUO_AO_RETOMAR_SEGUNDOS = 5
+const FADE_TIMER_MS = 15_000
+const FADE_FIM_PARTE_SEGUNDOS = 10
+const OPCOES_TIMER_MINUTOS = [15, 30, 45, 60]
+
+type TimerSono = { tipo: 'minutos'; restanteMs: number } | { tipo: 'fim_parte' } | null
+
+function formatarDuracaoCurta(segundosTotais: number): string {
+  const total = Math.max(0, Math.round(segundosTotais / 60))
+  const horas = Math.floor(total / 60)
+  const minutos = total % 60
+  if (horas === 0) return `${minutos} min`
+  return `${horas}h${minutos.toString().padStart(2, '0')}`
+}
+
+function duracaoEstimadaDosBlocos(blocos: LivroAudioBloco[]): Map<number, number> {
+  let segundosConhecidos = 0
+  let paginasConhecidas = 0
+  for (const bloco of blocos) {
+    if (bloco.duracaoSegundos && bloco.duracaoSegundos > 0) {
+      segundosConhecidos += bloco.duracaoSegundos
+      paginasConhecidas += bloco.paginaFim - bloco.paginaInicio + 1
+    }
+  }
+  const segundosPorPagina = paginasConhecidas > 0 ? segundosConhecidos / paginasConhecidas : 0
+
+  return new Map(
+    blocos.map((bloco) => [
+      bloco.numeroBloco,
+      bloco.duracaoSegundos && bloco.duracaoSegundos > 0
+        ? bloco.duracaoSegundos
+        : (bloco.paginaFim - bloco.paginaInicio + 1) * segundosPorPagina,
+    ])
+  )
+}
 
 function chaveVozLivro(livroUuid: string): string {
   return `livros-audio:voz:${livroUuid}`
@@ -132,6 +172,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const [indiceVelocidade, setIndiceVelocidade] = useState(1)
   const [mostrarSumario, setMostrarSumario] = useState(false)
   const [mostrarVozes, setMostrarVozes] = useState(false)
+  const [mostrarAjustes, setMostrarAjustes] = useState(false)
+  const [mostrarTimer, setMostrarTimer] = useState(false)
+  const [timerSono, setTimerSono] = useState<TimerSono>(null)
+  const pausadoEmRef = useRef<number | null>(null)
+  const configurarNarracaoMutation = useConfigurarNarracaoLivro(livro.uuid)
   const [vozEscolhida, setVozEscolhida] = useState<string | null>(() => lerVozSalva(livro.uuid))
   const [vozEmAcao, setVozEmAcao] = useState<string | null>(null)
   const retomarEmRef = useRef<{ segundos: number; tocar: boolean } | null>(null)
@@ -151,13 +196,20 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     return blocos.find((item) => item.isPronto) ?? blocos[0] ?? null
   }, [blocos, livro.blocoAtual, livro.paginaAtual])
 
-  const [blocoAtivo, setBlocoAtivo] = useState<LivroAudioBloco | null>(blocoInicial ?? null)
+  const [blocoSelecionado, setBlocoAtivo] = useState<LivroAudioBloco | null>(blocoInicial ?? null)
+  const blocoAtivo = useMemo(
+    () =>
+      (blocoSelecionado &&
+        blocos.find((bloco) => bloco.numeroBloco === blocoSelecionado.numeroBloco)) ??
+      blocoSelecionado,
+    [blocos, blocoSelecionado]
+  )
 
   useEffect(() => {
-    if (!blocoAtivo && blocoInicial) {
+    if (!blocoSelecionado && blocoInicial) {
       setBlocoAtivo(blocoInicial)
     }
-  }, [blocoAtivo, blocoInicial])
+  }, [blocoSelecionado, blocoInicial])
 
   const vozPrincipal = vozes.find((voz) => voz.principal) ?? null
   const vozSelecionada =
@@ -176,9 +228,9 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const [vozCarregada, setVozCarregada] = useState<{ bloco: number; voz: string | null } | null>(
     null
   )
-  const vozDoBloco =
-    blocoAtivo && vozCarregada?.bloco === blocoAtivo.numeroBloco ? vozCarregada.voz : null
-  const vozDoBlocoPronta = Boolean(blocoAtivo && vozCarregada?.bloco === blocoAtivo.numeroBloco)
+  const blocoJaCarregado = Boolean(blocoAtivo && vozCarregada?.bloco === blocoAtivo.numeroBloco)
+  const vozDoBloco = blocoJaCarregado ? (vozCarregada?.voz ?? null) : vozDesejada
+  const vozDoBlocoPronta = Boolean(blocoAtivo) && (blocoJaCarregado || !carregandoVozes)
 
   useEffect(() => {
     if (carregandoVozes || !blocoAtivo) return
@@ -200,12 +252,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
 
     const buscarTrechos = (voz: string | null) =>
       queryClient.fetchQuery({
-        queryKey: chaveTrechosBloco(
-          livro.uuid,
-          numeroBloco,
-          voz,
-          voz ? undefined : blocoAtivo.atualizadoEm
-        ),
+        queryKey: chaveTrechosBloco(livro.uuid, numeroBloco, voz, blocoAtivo.atualizadoEm),
         queryFn: () => listarTrechosBloco(livro.uuid, numeroBloco, voz),
         staleTime: Number.POSITIVE_INFINITY,
       })
@@ -234,8 +281,101 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
 
   const audioUrl = useMemo(() => {
     if (!blocoAtivo || !blocoAtivo.isPronto || !vozDoBlocoPronta) return ''
-    return obterUrlStreamBloco(livro.uuid, blocoAtivo.numeroBloco, vozDoBloco)
+    return obterUrlStreamBloco(
+      livro.uuid,
+      blocoAtivo.numeroBloco,
+      vozDoBloco,
+      blocoAtivo.atualizadoEm
+    )
   }, [livro.uuid, blocoAtivo, vozDoBloco, vozDoBlocoPronta])
+
+  const proximoBlocoPronto = blocoAtivo
+    ? (blocos.find((b) => b.numeroBloco === blocoAtivo.numeroBloco + 1 && b.isPronto) ?? null)
+    : null
+  const vozProximoBloco = proximoBlocoPronto
+    ? vozDoBlocoPara(proximoBlocoPronto.numeroBloco, vozEscolhida)
+    : null
+  const urlProximoBloco = proximoBlocoPronto
+    ? obterUrlStreamBloco(
+        livro.uuid,
+        proximoBlocoPronto.numeroBloco,
+        vozProximoBloco,
+        proximoBlocoPronto.atualizadoEm
+      )
+    : ''
+
+  useEffect(() => {
+    if (!tocando || !proximoBlocoPronto) return
+    if (!vozProximoBloco && !proximoBlocoPronto.possuiTrechos) return
+    const numero = proximoBlocoPronto.numeroBloco
+    queryClient.prefetchQuery({
+      queryKey: chaveTrechosBloco(
+        livro.uuid,
+        numero,
+        vozProximoBloco,
+        proximoBlocoPronto.atualizadoEm
+      ),
+      queryFn: () => listarTrechosBloco(livro.uuid, numero, vozProximoBloco),
+      staleTime: Number.POSITIVE_INFINITY,
+    })
+  }, [tocando, proximoBlocoPronto, vozProximoBloco, queryClient, livro.uuid])
+
+  useEffect(() => {
+    if (!audioUrl) setTocando(false)
+  }, [audioUrl])
+
+  const duracoesBlocos = useMemo(() => duracaoEstimadaDosBlocos(blocos), [blocos])
+  const duracaoLivro = useMemo(
+    () => [...duracoesBlocos.values()].reduce((total, segundos) => total + segundos, 0),
+    [duracoesBlocos]
+  )
+  const inicioBlocoNoLivro = useMemo(() => {
+    if (!blocoAtivo) return 0
+    let total = 0
+    for (const bloco of blocos) {
+      if (bloco.numeroBloco >= blocoAtivo.numeroBloco) break
+      total += duracoesBlocos.get(bloco.numeroBloco) ?? 0
+    }
+    return total
+  }, [blocos, blocoAtivo, duracoesBlocos])
+  const duracaoBlocoNoLivro = blocoAtivo ? (duracoesBlocos.get(blocoAtivo.numeroBloco) ?? 0) : 0
+  const fracaoNoBloco = duracao > 0 ? Math.min(1, tempoAtual / duracao) : 0
+  const decorridoLivro = inicioBlocoNoLivro + fracaoNoBloco * duracaoBlocoNoLivro
+  const fracaoLivro = duracaoLivro > 0 ? Math.min(1, decorridoLivro / duracaoLivro) : 0
+  const velocidadeAtual = VELOCIDADES[indiceVelocidade] ?? 1
+  const restanteLivro = Math.max(0, duracaoLivro - decorridoLivro) / velocidadeAtual
+
+  const fatorVolumeTimer = useMemo(() => {
+    if (!timerSono) return 1
+    if (timerSono.tipo === 'minutos') return Math.min(1, timerSono.restanteMs / FADE_TIMER_MS)
+    if (duracao <= 0) return 1
+    return Math.min(1, Math.max(0, (duracao - tempoAtual) / FADE_FIM_PARTE_SEGUNDOS))
+  }, [timerSono, duracao, tempoAtual])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (audio) audio.volume = Math.max(0, Math.min(1, (mutado ? 0 : volume) * fatorVolumeTimer))
+  }, [volume, mutado, fatorVolumeTimer, audioUrl])
+
+  useEffect(() => {
+    if (timerSono?.tipo !== 'minutos' || !tocando) return
+    let ultimo = Date.now()
+    const intervalo = window.setInterval(() => {
+      const agora = Date.now()
+      const passou = agora - ultimo
+      ultimo = agora
+      setTimerSono((atual) => {
+        if (atual?.tipo !== 'minutos') return atual
+        const restanteMs = atual.restanteMs - passou
+        if (restanteMs <= 0) {
+          audioRef.current?.pause()
+          return null
+        }
+        return { tipo: 'minutos', restanteMs }
+      })
+    }, 250)
+    return () => window.clearInterval(intervalo)
+  }, [timerSono?.tipo, tocando])
 
   const obterTempoAtual = useCallback(() => audioRef.current?.currentTime ?? null, [])
   const narracao = useNarracaoAtual({
@@ -303,7 +443,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     })
 
     navigator.mediaSession.setActionHandler('play', () => {
-      audioRef.current?.play()
+      const audio = audioRef.current
+      if (!audio) return
+      recuarAposPausaLonga(audio)
+      audio.play()
     })
     navigator.mediaSession.setActionHandler('pause', () => {
       audioRef.current?.pause()
@@ -337,12 +480,12 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     }
   }, [])
 
-  function irParaPaginaVisivel(audio: HTMLAudioElement) {
-    if (!acompanharAudio || !narracao || !blocoAtivo) return
+  function irParaPaginaVisivel(audio: HTMLAudioElement): boolean {
+    if (!acompanharAudio || !narracao || !blocoAtivo) return false
     const visivel =
       narracao.pagina === paginaAtualLeitor ||
       (modoDuplo && narracao.pagina === paginaAtualLeitor + 1)
-    if (visivel) return
+    if (visivel) return false
 
     const paginas = modoDuplo ? [paginaAtualLeitor, paginaAtualLeitor + 1] : [paginaAtualLeitor]
     for (const pagina of paginas) {
@@ -351,9 +494,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
       if (inicio !== null) {
         audio.currentTime = inicio
         setTempoAtual(inicio)
-        return
+        return true
       }
     }
+    return false
   }
 
   function alternarPlayPause() {
@@ -362,8 +506,58 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     if (tocando) {
       audio.pause()
     } else {
-      irParaPaginaVisivel(audio)
+      if (irParaPaginaVisivel(audio)) {
+        pausadoEmRef.current = null
+      } else {
+        recuarAposPausaLonga(audio)
+      }
       audio.play().catch(() => {})
+    }
+  }
+
+  function recuarAposPausaLonga(audio: HTMLAudioElement) {
+    const pausadoEm = pausadoEmRef.current
+    pausadoEmRef.current = null
+    if (pausadoEm === null || Date.now() - pausadoEm < PAUSA_LONGA_MS) return
+    const destino = Math.max(0, audio.currentTime - RECUO_AO_RETOMAR_SEGUNDOS)
+    audio.currentTime = destino
+    setTempoAtual(destino)
+  }
+
+  function escolherTimer(minutos: number | 'fim_parte' | null) {
+    setMostrarTimer(false)
+    if (minutos === null) {
+      setTimerSono(null)
+    } else if (minutos === 'fim_parte') {
+      setTimerSono({ tipo: 'fim_parte' })
+    } else {
+      setTimerSono({ tipo: 'minutos', restanteMs: minutos * 60_000 })
+    }
+  }
+
+  function irParaPosicaoDoLivro(fracao: number) {
+    if (!blocoAtivo || duracaoLivro <= 0) return
+    const alvo = Math.min(1, Math.max(0, fracao)) * duracaoLivro
+    let acumulado = 0
+    for (const bloco of blocos) {
+      const segundos = duracoesBlocos.get(bloco.numeroBloco) ?? 0
+      if (alvo < acumulado + segundos || bloco === blocos[blocos.length - 1]) {
+        if (!bloco.isPronto) return
+        const fracaoBloco = segundos > 0 ? (alvo - acumulado) / segundos : 0
+        if (bloco.numeroBloco === blocoAtivo.numeroBloco) {
+          const audio = audioRef.current
+          if (!audio || duracao <= 0) return
+          audio.currentTime = fracaoBloco * duracao
+          setTempoAtual(audio.currentTime)
+        } else {
+          const tocar = tocando
+          selecionarBloco(bloco)
+          deveTocarAoCarregarRef.current = false
+          retomarEmRef.current = { segundos: fracaoBloco * (bloco.duracaoSegundos ?? 0), tocar }
+        }
+        return
+      }
+      acumulado += segundos
     }
   }
 
@@ -386,19 +580,14 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   function mudarVolume(novoVol: number) {
     setVolume(novoVol)
     setMutado(novoVol === 0)
-    if (audioRef.current) {
-      audioRef.current.volume = novoVol
-    }
   }
 
   function alternarMudo() {
     if (mutado) {
       setMutado(false)
-      const vol = volume > 0 ? volume : 1
-      if (audioRef.current) audioRef.current.volume = vol
+      if (volume <= 0) setVolume(1)
     } else {
       setMutado(true)
-      if (audioRef.current) audioRef.current.volume = 0
     }
   }
 
@@ -488,7 +677,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         <audio
           ref={audioRef}
           src={audioUrl}
-          preload="metadata"
+          preload="auto"
           onPlay={() => {
             audioFoiUsadoRef.current = true
             setTocando(true)
@@ -496,6 +685,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           }}
           onPause={() => {
             setTocando(false)
+            if (audioRef.current && !audioRef.current.ended) pausadoEmRef.current = Date.now()
             if (audioRef.current) salvarProgresso(audioRef.current.currentTime)
             if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused'
           }}
@@ -514,8 +704,9 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               if (!posicaoRetomadaRef.current) {
                 posicaoRetomadaRef.current = true
                 if (blocoAtivo?.numeroBloco === livro.blocoAtual && livro.segundosNoBloco > 0) {
-                  audioRef.current.currentTime = livro.segundosNoBloco
-                  setTempoAtual(livro.segundosNoBloco)
+                  const retomada = Math.max(0, livro.segundosNoBloco - RECUO_AO_RETOMAR_SEGUNDOS)
+                  audioRef.current.currentTime = retomada
+                  setTempoAtual(retomada)
                 }
               }
               if (deveTocarAoCarregarRef.current) {
@@ -541,6 +732,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           }}
           onEnded={() => {
             setTocando(false)
+            if (timerSono?.tipo === 'fim_parte') {
+              setTimerSono(null)
+              return
+            }
             if (temProximo) {
               avancarBloco()
             }
@@ -548,6 +743,92 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         >
           <track kind="captions" />
         </audio>
+      )}
+
+      {urlProximoBloco && audioFoiUsadoRef.current && (
+        <audio src={urlProximoBloco} preload="auto" muted style={{ display: 'none' }}>
+          <track kind="captions" />
+        </audio>
+      )}
+
+      {mostrarAjustes && (
+        <PainelNarracao
+          livro={livro}
+          salvando={configurarNarracaoMutation.isPending}
+          onSalvar={(payload) =>
+            configurarNarracaoMutation.mutate(payload, {
+              onSuccess: () => setMostrarAjustes(false),
+            })
+          }
+          onFechar={() => setMostrarAjustes(false)}
+        />
+      )}
+
+      {mostrarTimer && (
+        <Box
+          position="absolute"
+          bottom="calc(100% + 8px)"
+          right={{ base: 4, md: 24 }}
+          w="220px"
+          bg="cirqueira.grey.900"
+          border="1px solid"
+          borderColor="cirqueira.grey.800"
+          borderRadius="2xl"
+          p={2.5}
+          boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
+          zIndex={60}
+        >
+          <HStack justify="space-between" mb={1.5} px={1}>
+            <HStack gap={2} color="cirqueira.brand.400">
+              <Moon size={14} />
+              <Text fontSize="xs" fontWeight="bold" color="white">
+                Timer de sono
+              </Text>
+            </HStack>
+            <IconButton
+              size="2xs"
+              variant="ghost"
+              color="cirqueira.grey.400"
+              _hover={{ color: 'white' }}
+              onClick={() => setMostrarTimer(false)}
+              aria-label="Fechar timer"
+            >
+              <X size={12} />
+            </IconButton>
+          </HStack>
+          <Flex direction="column" gap={1}>
+            {OPCOES_TIMER_MINUTOS.map((minutos) => (
+              <Button
+                key={minutos}
+                size="xs"
+                variant="subtle"
+                justifyContent="flex-start"
+                onClick={() => escolherTimer(minutos)}
+              >
+                {minutos} minutos
+              </Button>
+            ))}
+            <Button
+              size="xs"
+              variant="subtle"
+              justifyContent="flex-start"
+              onClick={() => escolherTimer('fim_parte')}
+            >
+              No fim desta parte
+            </Button>
+            {timerSono && (
+              <Button
+                size="xs"
+                variant="ghost"
+                colorPalette="red"
+                justifyContent="flex-start"
+                onClick={() => escolherTimer(null)}
+              >
+                Desligar timer
+              </Button>
+            )}
+          </Flex>
+        </Box>
       )}
 
       {mostrarVozes && (
@@ -789,6 +1070,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           gap={1}
           flex={1}
           maxW={{ base: 'full', lg: '560px' }}
+          minW={{ lg: '340px' }}
           w="full"
         >
           <HStack w="full" gap={2} align="center">
@@ -859,6 +1141,44 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               {formatarTempoAudio(tempoAtual)} / {formatarTempoAudio(duracao)}
             </Text>
           </HStack>
+
+          {duracaoLivro > 0 && (
+            <HStack w="full" gap={2} px={7} align="center">
+              <Box
+                as="button"
+                flex={1}
+                h="10px"
+                display="flex"
+                alignItems="center"
+                cursor="pointer"
+                aria-label="Posição no livro inteiro"
+                title="Clique para ir a outro ponto do livro"
+                onClick={(evento: MouseEvent<HTMLElement>) => {
+                  const area = evento.currentTarget.getBoundingClientRect()
+                  irParaPosicaoDoLivro((evento.clientX - area.left) / area.width)
+                }}
+              >
+                <Box w="full" h="3px" bg="rgba(255, 255, 255, 0.08)" borderRadius="full">
+                  <Box
+                    h="full"
+                    w={`${fracaoLivro * 100}%`}
+                    bg="cirqueira.brand.500/60"
+                    borderRadius="full"
+                  />
+                </Box>
+              </Box>
+              <Text
+                fontSize="10px"
+                color="cirqueira.grey.400"
+                fontVariantNumeric="tabular-nums"
+                whiteSpace="nowrap"
+                title={`Livro inteiro: ${formatarDuracaoCurta(duracaoLivro)} em 1x`}
+              >
+                Livro {Math.round(fracaoLivro * 100)}% · restam{' '}
+                {formatarDuracaoCurta(restanteLivro)}
+              </Text>
+            </HStack>
+          )}
         </Flex>
 
         <HStack
@@ -900,6 +1220,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
             onClick={() => {
               setMostrarVozes(false)
+              setMostrarAjustes(false)
+              setMostrarTimer(false)
               setMostrarSumario((prev) => !prev)
             }}
             fontSize="xs"
@@ -922,6 +1244,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
             onClick={() => {
               setMostrarSumario(false)
+              setMostrarAjustes(false)
+              setMostrarTimer(false)
               setMostrarVozes((prev) => !prev)
             }}
             fontSize="xs"
@@ -931,6 +1255,67 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             <Mic size={14} style={{ marginRight: '5px' }} />
             {vozSelecionada ? vozSelecionada.nome : 'Voz'}
           </Button>
+
+          <Button
+            size="xs"
+            variant="ghost"
+            borderRadius="lg"
+            px={2.5}
+            h="28px"
+            color={timerSono ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            bg={timerSono || mostrarTimer ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
+            border="1px solid"
+            borderColor={
+              timerSono || mostrarTimer ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'
+            }
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+            onClick={() => {
+              setMostrarSumario(false)
+              setMostrarVozes(false)
+              setMostrarAjustes(false)
+              setMostrarTimer((prev) => !prev)
+            }}
+            fontSize="xs"
+            fontWeight="semibold"
+            fontVariantNumeric="tabular-nums"
+            title="Timer de sono"
+          >
+            <Moon size={14} style={{ marginRight: timerSono ? '5px' : 0 }} />
+            {timerSono?.tipo === 'minutos'
+              ? formatarTempoAudio(Math.ceil(timerSono.restanteMs / 1000))
+              : timerSono?.tipo === 'fim_parte'
+                ? 'Fim da parte'
+                : null}
+          </Button>
+
+          <IconButton
+            size="xs"
+            variant="ghost"
+            borderRadius="lg"
+            h="28px"
+            minW="28px"
+            color={mostrarAjustes ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            bg={mostrarAjustes ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
+            border="1px solid"
+            borderColor={
+              mostrarAjustes
+                ? 'cirqueira.brand.500/40'
+                : livro.narracaoDesatualizada
+                  ? 'cirqueira.brand.500/50'
+                  : 'cirqueira.grey.800'
+            }
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+            onClick={() => {
+              setMostrarSumario(false)
+              setMostrarVozes(false)
+              setMostrarTimer(false)
+              setMostrarAjustes((prev) => !prev)
+            }}
+            aria-label="Ajustes da narração"
+            title="Ajustes da narração: notas, pronúncia e limpeza do texto"
+          >
+            <SlidersHorizontal size={14} />
+          </IconButton>
 
           <HStack
             gap={1}
