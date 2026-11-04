@@ -98,7 +98,7 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
      - Menu de capítulos/blocos com indicação visual de status (pronto, gerando, erro).
      - Integração com **Media Session API** para controle de áudio na tela de bloqueio e central de mídia do celular ou desktop.
    - **Sincronização Bidirecional:**
-     - **Seguir áudio:** a página vira para onde está a frase lida. O `bin/sintetizar-voz.py` (biblioteca `edge_tts`) grava o tempo de cada palavra, agrupadas em frases (`livro_audio_bloco.trechos`). O leitor localiza frase e palavras no texto do PDF e destaca na página, com transição. O botão "Por frase / Por palavra" escolhe o destaque.
+     - **Seguir áudio:** a página vira para onde está a frase lida. O `bin/sintetizar-voz.py` (biblioteca `edge_tts`) grava o tempo de cada palavra, agrupadas em frases (`livro_audio_bloco.trechos`). O leitor alinha as palavras da narração com as do PDF e destaca frase e palavra na página, com transição. Com "Seguir áudio", o play começa na página aberta. O botão "Por frase / Por palavra" escolhe o destaque.
      - **Vozes:** o botão com o nome da voz abre o painel para ouvir amostras, gerar o livro em outra voz (Antonio, Francisca, Thalita, Duarte, Raquel, Andrew, Brian, Ava, Emma) e trocar na hora, continuando da mesma frase. Cada voz adicional fica em `livro_audio_bloco_voz`. O player mostra a página e o trecho lido. Partes sem essas marcações usam uma estimativa pelo tempo decorrido.
      - **Folhear livre:** permite folhear páginas do PDF sem interromper a reprodução do áudio atual.
      - Navegação por clique na página do PDF pula a reprodução para o bloco correspondente.

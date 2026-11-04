@@ -143,3 +143,19 @@
   - `src/Controller/LivroAudio/LivroAudioController.php`, `src/Entity/LivroAudioBloco.php`, `src/Exception/LivroAudio/LivroAudioException.php`, `config/services.yaml`
   - `web/features/livros-audio/components/PainelVozes.tsx` (novo), `components/PlayerAudioLivro.tsx`
   - `web/features/livros-audio/api.ts`, `types.ts`, `hooks/useLivrosAudio.ts`, `hooks/useNarracaoAtual.ts`
+
+---
+
+### 🟡 Melhoria 108 — Destaque que Não se Perde e Play a Partir da Página Aberta
+
+- **Status**: Publicada em produção em 03/11/2026, falta validar no uso
+- **Data**: 03 de novembro de 2026
+- **Problema**: em um livro com resumo em duas colunas e frases repetidas, o leitor encaixava "O direito reside na força." numa repetição da página 3. A busca de cada frase andava só para frente, então todas as frases seguintes deixavam de ser encontradas. O resultado era a página virando sozinha, o "lendo agora" no lugar errado e o destaque sumindo. Além disso, ao pular para uma página e dar play, o áudio começava do início da parte, e não da página aberta.
+- **Solução**:
+  - **Alinhamento por palavras**: `localizarTrechos` alinha a sequência inteira de palavras da narração com a do PDF (programação dinâmica ponderada pelo tamanho das palavras), em vez de procurar frase por frase. Aceita palavra com hífen de fim de linha ("con-" + "duz" no PDF e "conduz" na narração) e o inverso. Uma repetição solta não arrasta mais o resto da parte.
+  - **Segunda passada**: frases que ficaram incompletas (resumo em duas colunas, que o PDF guarda coluna a coluna e a narração lê linha a linha) são procuradas inteiras entre as páginas das frases vizinhas.
+  - **Play na página aberta**: com "Seguir áudio" ativo, se a página aberta não é a que está sendo lida, o play começa na primeira frase dessa página (no modo livro, a da esquerda ou a da direita).
+- **Testado** fora de produção com o PDF enviado (parte 1, páginas 1 a 3): 57 de 57 frases localizadas na página certa e 689 de 705 palavras (as que faltam são frases que a extração do texto misturou entre as duas colunas). O "MANUAL DO ALUNO PBL" continua com 100% das frases e palavras.
+- **Arquivos**:
+  - `web/features/livros-audio/utils/localizacaoNarracao.ts`
+  - `web/features/livros-audio/hooks/useNarracaoAtual.ts`, `components/PlayerAudioLivro.tsx`

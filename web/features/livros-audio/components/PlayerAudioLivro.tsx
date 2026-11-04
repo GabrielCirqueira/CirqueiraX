@@ -337,12 +337,33 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     }
   }, [])
 
+  function irParaPaginaVisivel(audio: HTMLAudioElement) {
+    if (!acompanharAudio || !narracao || !blocoAtivo) return
+    const visivel =
+      narracao.pagina === paginaAtualLeitor ||
+      (modoDuplo && narracao.pagina === paginaAtualLeitor + 1)
+    if (visivel) return
+
+    const paginas = modoDuplo ? [paginaAtualLeitor, paginaAtualLeitor + 1] : [paginaAtualLeitor]
+    for (const pagina of paginas) {
+      if (pagina < blocoAtivo.paginaInicio || pagina > blocoAtivo.paginaFim) continue
+      const inicio = narracao.inicioDaPagina(pagina)
+      if (inicio !== null) {
+        audio.currentTime = inicio
+        setTempoAtual(inicio)
+        return
+      }
+    }
+  }
+
   function alternarPlayPause() {
-    if (!audioRef.current || !audioUrl) return
+    const audio = audioRef.current
+    if (!audio || !audioUrl) return
     if (tocando) {
-      audioRef.current.pause()
+      audio.pause()
     } else {
-      audioRef.current.play().catch(() => {})
+      irParaPaginaVisivel(audio)
+      audio.play().catch(() => {})
     }
   }
 

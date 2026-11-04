@@ -17,6 +17,7 @@ export interface NarracaoAtual {
   pagina: number
   localizacao: LocalizacaoTrecho | null
   localizacaoPalavra: LocalizacaoTrecho | null
+  inicioDaPagina: (pagina: number) => number | null
 }
 
 interface OpcoesNarracaoAtual {
@@ -114,6 +115,15 @@ export function useNarracaoAtual({
 
   const paginaEstimada = bloco ? calcularPaginaPorTempoBloco(bloco, segundos) : null
 
+  const inicioDaPagina = useCallback(
+    (pagina: number): number | null => {
+      if (!localizacoes) return null
+      const indice = localizacoes.findIndex((localizacao) => localizacao?.pagina === pagina)
+      return indice >= 0 ? (trechos[indice]?.inicio ?? null) : null
+    },
+    [localizacoes, trechos]
+  )
+
   return useMemo(() => {
     if (!bloco || paginaEstimada === null) return null
 
@@ -125,6 +135,7 @@ export function useNarracaoAtual({
         pagina: paginaEstimada,
         localizacao: null,
         localizacaoPalavra: null,
+        inicioDaPagina,
       }
     }
 
@@ -136,6 +147,7 @@ export function useNarracaoAtual({
       pagina: encontrarPaginaLocalizada(localizacoes, indice) ?? paginaEstimada,
       localizacao,
       localizacaoPalavra: localizacao?.palavras?.[posicao.palavra] ?? null,
+      inicioDaPagina,
     }
-  }, [bloco, posicao, trechos, localizacoes, paginaEstimada])
+  }, [bloco, posicao, trechos, localizacoes, paginaEstimada, inicioDaPagina])
 }
