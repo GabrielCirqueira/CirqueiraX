@@ -65,7 +65,7 @@ final readonly class EnriquecerImagensSpotifyService
         foreach ($dadosPorChave as $chave => $dados) {
             if (isset($imagensExistentes[$chave])) {
                 $imagem = $imagensExistentes[$chave];
-                if ($imagem->isEncontrada()) {
+                if ($imagem->isEncontrada() && null !== $imagem->primeiraImagemUrl()) {
                     $url = $imagem->primeiraImagemUrl();
                     if (null !== $url) {
                         $imagensPorChave[$chave] = $url;
@@ -73,10 +73,7 @@ final readonly class EnriquecerImagensSpotifyService
                     if (null !== $imagem->urlSpotify()) {
                         $urlsSpotifyPorChave[$chave] = $imagem->urlSpotify();
                     }
-                } elseif ($imagem->tipo()->isArtista()
-                    && null !== $imagem->motivoFalha()
-                    && str_contains($imagem->motivoFalha(), 'requer código')
-                ) {
+                } elseif ($imagem->tipo()->isArtista() && null === $imagem->primeiraImagemUrl()) {
                     $this->messageBus->dispatch(new BuscarImagemSpotifyMessage(
                         usuarioId: (int) $usuario->getId(),
                         tipo: TipoImagemSpotify::Artista,

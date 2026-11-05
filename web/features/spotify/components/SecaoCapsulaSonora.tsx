@@ -71,7 +71,9 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
   const { data: mesesDisponiveis, isLoading: carregandoMeses } = useCapsulasSpotify(conectada)
   const { anoSelecionado, mesSelecionado, selecionarMes } = useMesCapsulaUrl()
 
-  const [modalDetalhe, setModalDetalhe] = useState<'musicas' | 'artistas' | 'tempo' | null>(null)
+  const [modalDetalhe, setModalDetalhe] = useState<
+    'musicas' | 'artistas' | 'tempo' | 'variedade' | null
+  >(null)
 
   const mesAtivo = useMemo(() => {
     if (!mesesDisponiveis || mesesDisponiveis.length === 0) return null
@@ -558,6 +560,14 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             bg="cirqueira.spotify.cartao"
             border="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"
+            _hover={{
+              bg: 'cirqueira.spotify.cartaoElevado',
+              borderColor: 'cirqueira.spotify.verde',
+            }}
+            cursor="pointer"
+            onClick={() => setModalDetalhe('variedade')}
+            transition="all 0.15s ease"
+            position="relative"
             display="flex"
             flexDirection="column"
             justifyContent="space-between"
@@ -594,37 +604,55 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
               </Text>
             </VStack>
 
-            <HStack gap={1} pt={3} wrap="wrap">
-              {capsula.topMusicas.slice(0, 4).map((m) => {
-                const chavePreview = gerarChaveFaixa(m.codigoFaixa, m.artistaPrincipal, m.nomeFaixa)
-                const fotoPreview = m.imagemUrl || mapaImagensConsultadas?.[chavePreview]?.imagemUrl
+            <VStack align="stretch" gap={3} pt={3}>
+              <HStack gap={1} wrap="wrap">
+                {capsula.topMusicas.slice(0, 4).map((m) => {
+                  const chavePreview = gerarChaveFaixa(
+                    m.codigoFaixa,
+                    m.artistaPrincipal,
+                    m.nomeFaixa
+                  )
+                  const fotoPreview =
+                    m.imagemUrl || mapaImagensConsultadas?.[chavePreview]?.imagemUrl
 
-                return (
-                  <Box
-                    key={m.nomeFaixa}
-                    boxSize={7}
-                    borderRadius="4px"
-                    overflow="hidden"
-                    bg="cirqueira.spotify.cartaoElevado"
-                  >
-                    {fotoPreview ? (
-                      <Box
-                        as="img"
-                        src={fotoPreview}
-                        alt={m.nomeFaixa}
-                        w="full"
-                        h="full"
-                        objectFit="cover"
-                      />
-                    ) : (
-                      <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
-                        <Music2 size={12} />
-                      </Center>
-                    )}
-                  </Box>
-                )
-              })}
-            </HStack>
+                  return (
+                    <Box
+                      key={m.nomeFaixa}
+                      boxSize={7}
+                      borderRadius="4px"
+                      overflow="hidden"
+                      bg="cirqueira.spotify.cartaoElevado"
+                    >
+                      {fotoPreview ? (
+                        <Box
+                          as="img"
+                          src={fotoPreview}
+                          alt={m.nomeFaixa}
+                          w="full"
+                          h="full"
+                          objectFit="cover"
+                        />
+                      ) : (
+                        <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
+                          <Music2 size={12} />
+                        </Center>
+                      )}
+                    </Box>
+                  )
+                })}
+              </HStack>
+
+              <HStack
+                justify="space-between"
+                align="center"
+                pt={1}
+                color="cirqueira.spotify.textoSecundario"
+                fontSize="xs"
+              >
+                <Text as="span">Ver detalhes da variedade</Text>
+                <ChevronRight size={16} />
+              </HStack>
+            </VStack>
           </Box>
         </SimpleGrid>
       )}
@@ -644,7 +672,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
 })
 
 interface ModalDetalheCapsulaProps {
-  tipo: 'musicas' | 'artistas' | 'tempo'
+  tipo: 'musicas' | 'artistas' | 'tempo' | 'variedade'
   capsula: CapsulaMensal
   aberto: boolean
   onFechar: () => void
@@ -666,9 +694,9 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
   imagemUrlResolvida,
 }: LinhaArtistaRankingCapsulaProps) {
   const [expandido, setExpandido] = useState(false)
-  const [erroFoto, setErroFoto] = useState(false)
+  const [urlComErro, setUrlComErro] = useState<string | null>(null)
   const foto = artista.imagemUrl || imagemUrlResolvida
-  const temFoto = Boolean(foto) && !erroFoto
+  const temFoto = Boolean(foto) && urlComErro !== foto
 
   return (
     <Collapsible.Root open={expandido} unmountOnExit>
@@ -721,7 +749,9 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
                   w="full"
                   h="full"
                   objectFit="cover"
-                  onError={() => setErroFoto(true)}
+                  onError={() => {
+                    if (foto) setUrlComErro(foto)
+                  }}
                 />
               ) : (
                 <Avatar.Root size="md" shape="full">
@@ -843,14 +873,18 @@ function ModalDetalheCapsula({
       ? 'Músicas Mais Ouvidas'
       : tipo === 'artistas'
         ? 'Artistas Mais Ouvidos'
-        : 'Tempo Ouvindo por Dia'
+        : tipo === 'tempo'
+          ? 'Tempo Ouvindo por Dia'
+          : 'Variedade Musical'
 
   const subtitulo =
     tipo === 'musicas'
       ? `Você ouviu ${capsula.faixasDistintas.toLocaleString('pt-BR')} músicas diferentes este mês`
       : tipo === 'artistas'
         ? `${capsula.topArtistas.length} artistas no ranking principal`
-        : `Total de ${formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} distribuídos ao longo do mês`
+        : tipo === 'tempo'
+          ? `Total de ${formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} distribuídos ao longo do mês`
+          : `Exploração do catálogo no período de ${capsula.rotulo}`
 
   const renderConteudo = () => (
     <VStack gap={4} align="stretch" w="full">
@@ -1047,6 +1081,246 @@ function ModalDetalheCapsula({
               </BarChart>
             </ResponsiveContainer>
           </Box>
+        </VStack>
+      )}
+
+      {tipo === 'variedade' && (
+        <VStack gap={4} align="stretch">
+          <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
+            <Box
+              p={3}
+              borderRadius="8px"
+              bg="cirqueira.spotify.cartaoElevado"
+              border="1px solid"
+              borderColor="rgba(255, 255, 255, 0.08)"
+            >
+              <Text
+                fontSize="2xs"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                fontWeight="bold"
+              >
+                Faixas Distintas
+              </Text>
+              <Text
+                fontSize="2xl"
+                fontWeight="black"
+                color="cirqueira.spotify.textoPrincipal"
+                mt={1}
+              >
+                {capsula.faixasDistintas.toLocaleString('pt-BR')}
+              </Text>
+              {capsula.variacaoFaixasDistintasPercentual !== null && (
+                <HStack gap={1} mt={1} fontSize="xs">
+                  {capsula.variacaoFaixasDistintasPercentual > 0 ? (
+                    <HStack gap={0.5} color="cirqueira.spotify.verde">
+                      <ArrowUp size={12} />
+                      <Text as="span">
+                        +{capsula.variacaoFaixasDistintasPercentual.toFixed(1)}%
+                      </Text>
+                    </HStack>
+                  ) : capsula.variacaoFaixasDistintasPercentual < 0 ? (
+                    <HStack gap={0.5} color="red.400">
+                      <ArrowDown size={12} />
+                      <Text as="span">{capsula.variacaoFaixasDistintasPercentual.toFixed(1)}%</Text>
+                    </HStack>
+                  ) : (
+                    <Text as="span" color="cirqueira.spotify.textoSecundario">
+                      0% vs mês anterior
+                    </Text>
+                  )}
+                </HStack>
+              )}
+            </Box>
+
+            <Box
+              p={3}
+              borderRadius="8px"
+              bg="cirqueira.spotify.cartaoElevado"
+              border="1px solid"
+              borderColor="rgba(255, 255, 255, 0.08)"
+            >
+              <Text
+                fontSize="2xs"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                fontWeight="bold"
+              >
+                Total de Streams
+              </Text>
+              <Text
+                fontSize="2xl"
+                fontWeight="black"
+                color="cirqueira.spotify.textoPrincipal"
+                mt={1}
+              >
+                {capsula.totalStreams.toLocaleString('pt-BR')}
+              </Text>
+              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" mt={1}>
+                {formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} ouvidos
+              </Text>
+            </Box>
+
+            <Box
+              p={3}
+              borderRadius="8px"
+              bg="cirqueira.spotify.cartaoElevado"
+              border="1px solid"
+              borderColor="rgba(255, 255, 255, 0.08)"
+            >
+              <Text
+                fontSize="2xs"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                fontWeight="bold"
+              >
+                Média por Faixa
+              </Text>
+              <Text
+                fontSize="2xl"
+                fontWeight="black"
+                color="cirqueira.spotify.textoPrincipal"
+                mt={1}
+              >
+                {(capsula.totalStreams / Math.max(1, capsula.faixasDistintas)).toFixed(1)}x
+              </Text>
+              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" mt={1}>
+                reproduções por música
+              </Text>
+            </Box>
+
+            <Box
+              p={3}
+              borderRadius="8px"
+              bg="cirqueira.spotify.cartaoElevado"
+              border="1px solid"
+              borderColor="rgba(255, 255, 255, 0.08)"
+            >
+              <Text
+                fontSize="2xs"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                fontWeight="bold"
+              >
+                Índice de Variedade
+              </Text>
+              <Text fontSize="2xl" fontWeight="black" color="cirqueira.spotify.verde" mt={1}>
+                {Math.min(
+                  100,
+                  Math.round((capsula.faixasDistintas / Math.max(1, capsula.totalStreams)) * 100)
+                )}
+                %
+              </Text>
+              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" mt={1}>
+                faixas únicas ouvidas
+              </Text>
+            </Box>
+          </SimpleGrid>
+
+          <Text
+            fontSize="xs"
+            fontWeight="bold"
+            color="cirqueira.spotify.textoSecundario"
+            textTransform="uppercase"
+            mt={2}
+          >
+            Músicas exploradas no mês ({capsula.topMusicas.length})
+          </Text>
+
+          <VStack gap={2} align="stretch">
+            {capsula.topMusicas.map((m) => {
+              const chaveMusica = gerarChaveFaixa(m.codigoFaixa, m.artistaPrincipal, m.nomeFaixa)
+              const fotoMusica = m.imagemUrl || mapaImagens?.[chaveMusica]?.imagemUrl
+
+              return (
+                <Flex
+                  key={`variedade-${m.posicao}-${m.nomeFaixa}`}
+                  align="center"
+                  justify="space-between"
+                  p={3}
+                  borderRadius="8px"
+                  bg="cirqueira.spotify.cartaoElevado"
+                  gap={3}
+                >
+                  <HStack gap={3} flex={1} minW={0} align="center">
+                    <Center
+                      boxSize={8}
+                      borderRadius="md"
+                      fontWeight="bold"
+                      fontSize="sm"
+                      color="cirqueira.spotify.amarelo"
+                      flexShrink={0}
+                    >
+                      {m.posicao}
+                    </Center>
+
+                    <Box
+                      boxSize={12}
+                      borderRadius="4px"
+                      overflow="hidden"
+                      bg="cirqueira.spotify.cartao"
+                      flexShrink={0}
+                    >
+                      {fotoMusica ? (
+                        <Box
+                          as="img"
+                          src={fotoMusica}
+                          alt={m.nomeFaixa}
+                          w="full"
+                          h="full"
+                          objectFit="cover"
+                        />
+                      ) : (
+                        <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
+                          <Music2 size={20} />
+                        </Center>
+                      )}
+                    </Box>
+
+                    <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                      <HStack gap={2} maxW="full">
+                        <Text
+                          fontSize="sm"
+                          fontWeight="bold"
+                          color="cirqueira.spotify.textoPrincipal"
+                          truncate
+                        >
+                          {m.nomeFaixa}
+                        </Text>
+                        {m.urlSpotify && (
+                          <Box
+                            as="a"
+                            href={m.urlSpotify}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            color="cirqueira.spotify.textoSecundario"
+                            _hover={{ color: 'cirqueira.spotify.verde' }}
+                            display="inline-flex"
+                            alignItems="center"
+                            flexShrink={0}
+                          >
+                            <ExternalLink size={12} />
+                          </Box>
+                        )}
+                      </HStack>
+                      <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
+                        {m.artistaPrincipal} • {m.album}
+                      </Text>
+                    </VStack>
+                  </HStack>
+
+                  <HStack gap={2} flexShrink={0}>
+                    <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                      {m.totalStreams} {m.totalStreams === 1 ? 'stream' : 'streams'}
+                    </Text>
+                    <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+                      {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
+                    </Text>
+                  </HStack>
+                </Flex>
+              )
+            })}
+          </VStack>
         </VStack>
       )}
     </VStack>

@@ -13,6 +13,7 @@ use App\Message\BuscarImagemSpotifyMessage;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\ImagemSpotifyRepository;
 use App\Repository\UsuarioRepository;
+use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class ResolverImagemSpotifyService
@@ -26,6 +27,7 @@ final readonly class ResolverImagemSpotifyService
         private ContaSpotifyRepository $contaSpotifyRepository,
         private ObterTokenValidoSpotifyService $obterTokenValidoService,
         private SpotifyInterface $spotifyClient,
+        private ClientInterface $httpClient,
         private LoggerInterface $logger,
     ) {
     }
@@ -33,14 +35,12 @@ final readonly class ResolverImagemSpotifyService
     public function executar(BuscarImagemSpotifyMessage $message): void
     {
         $imagem = $this->obterOuCriarImagem($message);
-        if ($imagem->isEncontrada()) {
+        if ($imagem->isEncontrada() && null !== $imagem->primeiraImagemUrl()) {
             return;
         }
 
         if ($imagem->isNaoEncontrada()) {
-            $podeRetentar = $message->tipo->isArtista()
-                && null !== $imagem->motivoFalha()
-                && str_contains($imagem->motivoFalha(), 'requer código');
+            $podeRetentar = $message->tipo->isArtista() && null === $imagem->primeiraImagemUrl();
 
             if (!$podeRetentar) {
                 return;
@@ -65,33 +65,41 @@ final readonly class ResolverImagemSpotifyService
         if (null === $accessToken || '' === trim($accessToken)) {
             try {
                 $accessToken = $this->spotifyClient->obterTokenClientCredentials();
-            } catch (\Throwable $e) {
-                $this->logger->warning('Não foi possível obter token para resolver imagem do Spotify.', [
-                    'usuario' => $message->usuarioId,
-                    'erro' => $e->getMessage(),
-                ]);
-
-                return;
+            } catch (\Throwable) {
+                $accessToken = null;
             }
         }
 
         $imagem->incrementarTentativas();
 
-        try {
-            if ($message->tipo->isFaixa()) {
-                $this->resolverFaixa($imagem, $accessToken, $message);
-            } else {
-                $this->resolverArtista($imagem, $accessToken, $message);
-            }
+        if (null !== $accessToken && '' !== trim($accessToken)) {
+            try {
+                if ($message->tipo->isFaixa()) {
+                    $this->resolverFaixa($imagem, $accessToken, $message);
+                } else {
+                    $this->resolverArtista($imagem, $accessToken, $message);
+                }
 
-            usleep(self::PAUSA_ENTRE_REQUISICOES_MICROSEGUNDOS);
-        } catch (SpotifyException $e) {
-            $imagem->marcarNaoEncontrada($e->getMessage());
-            $this->logger->warning('Falha na API ao buscar imagem do Spotify.', [
-                'chave' => $imagem->chaveBusca(),
-                'codigo' => $e->getCode(),
-                'erro' => $e->getMessage(),
-            ]);
+                usleep(self::PAUSA_ENTRE_REQUISICOES_MICROSEGUNDOS);
+            } catch (SpotifyException $e) {
+                $this->logger->warning('Falha na API ao buscar imagem do Spotify.', [
+                    'chave' => $imagem->chaveBusca(),
+                    'codigo' => $e->getCode(),
+                    'erro' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        if (null === $imagem->primeiraImagemUrl()) {
+            if ($message->tipo->isArtista()) {
+                $this->resolverArtistaViaDeezer($imagem, $message->nome);
+            } else {
+                $this->resolverFaixaViaPublico($imagem, $message);
+            }
+        }
+
+        if (null === $imagem->primeiraImagemUrl() && !$imagem->isEncontrada()) {
+            $imagem->marcarNaoEncontrada('Não foi possível obter imagem.');
         }
 
         $this->imagemRepository->salvar($imagem);
@@ -153,8 +161,6 @@ final readonly class ResolverImagemSpotifyService
         }
 
         if (empty($busca->faixas)) {
-            $imagem->marcarNaoEncontrada('Nenhum resultado retornado pela busca no Spotify.');
-
             return;
         }
 
@@ -183,11 +189,7 @@ final readonly class ResolverImagemSpotifyService
                 $melhorCandidato->urlCapaPequena,
                 $melhorCandidato->urlSpotify,
             );
-
-            return;
         }
-
-        $imagem->marcarNaoEncontrada('Nenhum resultado com correspondência suficiente na busca.');
     }
 
     private function resolverArtista(
@@ -210,8 +212,6 @@ final readonly class ResolverImagemSpotifyService
 
         $artistasBuscados = $this->spotifyClient->buscarArtistas($accessToken, $message->nome, limite: 5);
         if (empty($artistasBuscados)) {
-            $imagem->marcarNaoEncontrada('Artista não encontrado na busca do Spotify.');
-
             return;
         }
 
@@ -253,11 +253,150 @@ final readonly class ResolverImagemSpotifyService
                 null,
                 $melhorCandidato->urlSpotify,
             );
+        }
+    }
 
-            return;
+    private function resolverArtistaViaDeezer(ImagemSpotify $imagem, string $nomeArtista): bool
+    {
+        try {
+            $resposta = $this->httpClient->request('GET', 'https://api.deezer.com/search/artist', [
+                'query' => ['q' => $nomeArtista],
+                'timeout' => 5,
+            ]);
+
+            /** @var array{data?: array<int, array<string, mixed>>} $corpo */
+            $corpo = json_decode($resposta->getBody()->getContents(), true);
+            if (!is_array($corpo) || empty($corpo['data']) || !is_array($corpo['data'])) {
+                return false;
+            }
+
+            $nomeEsperadoNorm = $this->normalizarTexto($nomeArtista);
+            $melhorCandidato = null;
+            $maiorSimilaridade = 0.0;
+
+            foreach ($corpo['data'] as $candidato) {
+                if (!is_array($candidato) || empty($candidato['name'])) {
+                    continue;
+                }
+                $nomeCandNorm = $this->normalizarTexto((string) $candidato['name']);
+                if ($nomeCandNorm === $nomeEsperadoNorm) {
+                    $melhorCandidato = $candidato;
+                    break;
+                }
+
+                similar_text($nomeEsperadoNorm, $nomeCandNorm, $porcentagem);
+                if ($porcentagem > $maiorSimilaridade) {
+                    $maiorSimilaridade = $porcentagem;
+                    $melhorCandidato = $candidato;
+                }
+            }
+
+            if (null === $melhorCandidato) {
+                return false;
+            }
+
+            $grande = isset($melhorCandidato['picture_xl']) && is_string($melhorCandidato['picture_xl'])
+                ? $melhorCandidato['picture_xl']
+                : (isset($melhorCandidato['picture_big']) && is_string($melhorCandidato['picture_big']) ? $melhorCandidato['picture_big'] : null);
+
+            $media = isset($melhorCandidato['picture_medium']) && is_string($melhorCandidato['picture_medium'])
+                ? $melhorCandidato['picture_medium']
+                : null;
+
+            $pequena = isset($melhorCandidato['picture_small']) && is_string($melhorCandidato['picture_small'])
+                ? $melhorCandidato['picture_small']
+                : null;
+
+            if (null === $grande && null === $media) {
+                return false;
+            }
+
+            $urlSpotify = $imagem->urlSpotify() ?? ImagemSpotify::gerarUrlSpotifyArtista($imagem->codigoSpotify(), $nomeArtista);
+
+            $imagem->marcarEncontrada(
+                $imagem->codigoSpotify(),
+                $grande,
+                $media ?? $grande,
+                $pequena ?? $media ?? $grande,
+                $urlSpotify,
+            );
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->logger->warning('Falha ao resolver imagem de artista via Deezer.', [
+                'artista' => $nomeArtista,
+                'erro' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    private function resolverFaixaViaPublico(ImagemSpotify $imagem, BuscarImagemSpotifyMessage $message): bool
+    {
+        if ($message->codigoSpotify !== null && '' !== trim($message->codigoSpotify)) {
+            try {
+                $resposta = $this->httpClient->request('GET', 'https://open.spotify.com/oembed', [
+                    'query' => ['url' => 'https://open.spotify.com/track/' . trim($message->codigoSpotify)],
+                    'timeout' => 5,
+                ]);
+
+                /** @var array{thumbnail_url?: string} $corpo */
+                $corpo = json_decode($resposta->getBody()->getContents(), true);
+                if (is_array($corpo) && !empty($corpo['thumbnail_url']) && is_string($corpo['thumbnail_url'])) {
+                    $url = $corpo['thumbnail_url'];
+                    $urlSpotify = 'https://open.spotify.com/track/' . trim($message->codigoSpotify);
+                    $imagem->marcarEncontrada(
+                        trim($message->codigoSpotify),
+                        $url,
+                        $url,
+                        $url,
+                        $urlSpotify,
+                    );
+
+                    return true;
+                }
+            } catch (\Throwable) {
+            }
         }
 
-        $imagem->marcarNaoEncontrada('Nenhum artista correspondente encontrado no Spotify.');
+        try {
+            $termo = trim(($message->artista ?? '') . ' ' . $message->nome);
+            $resposta = $this->httpClient->request('GET', 'https://api.deezer.com/search', [
+                'query' => ['q' => $termo, 'limit' => 5],
+                'timeout' => 5,
+            ]);
+
+            /** @var array{data?: array<int, array<string, mixed>>} $corpo */
+            $corpo = json_decode($resposta->getBody()->getContents(), true);
+            if (is_array($corpo) && !empty($corpo['data']) && is_array($corpo['data'])) {
+                $primeiro = $corpo['data'][0];
+                if (is_array($primeiro) && isset($primeiro['album']) && is_array($primeiro['album'])) {
+                    $album = $primeiro['album'];
+                    $grande = isset($album['cover_big']) && is_string($album['cover_big'])
+                        ? $album['cover_big']
+                        : (isset($album['cover_xl']) && is_string($album['cover_xl']) ? $album['cover_xl'] : null);
+                    $media = isset($album['cover_medium']) && is_string($album['cover_medium']) ? $album['cover_medium'] : null;
+                    $pequena = isset($album['cover_small']) && is_string($album['cover_small']) ? $album['cover_small'] : null;
+
+                    if ($grande !== null || $media !== null) {
+                        $urlSpotify = $imagem->urlSpotify() ?? ImagemSpotify::gerarUrlSpotifyFaixa($message->codigoSpotify, $message->artista ?? '', $message->nome);
+                        $imagem->marcarEncontrada(
+                            $message->codigoSpotify,
+                            $grande,
+                            $media ?? $grande,
+                            $pequena ?? $media ?? $grande,
+                            $urlSpotify,
+                        );
+
+                        return true;
+                    }
+                }
+            }
+        } catch (\Throwable) {
+        }
+
+        return false;
     }
 
     private function avaliarCorrespondencia(

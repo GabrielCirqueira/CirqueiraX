@@ -118,9 +118,9 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
   imagemUrlResolvida,
 }: ItemRankingArtistaProps) {
   const [expandido, setExpandido] = useState(false)
-  const [erroFoto, setErroFoto] = useState(false)
+  const [urlComErro, setUrlComErro] = useState<string | null>(null)
   const foto = item.imagemUrl || imagemUrlResolvida
-  const temFoto = Boolean(foto) && !erroFoto
+  const temFoto = Boolean(foto) && urlComErro !== foto
 
   return (
     <Collapsible.Root open={expandido} unmountOnExit>
@@ -173,7 +173,9 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                   w="full"
                   h="full"
                   objectFit="cover"
-                  onError={() => setErroFoto(true)}
+                  onError={() => {
+                    if (foto) setUrlComErro(foto)
+                  }}
                 />
               ) : (
                 <Avatar.Root size="md" shape="full">

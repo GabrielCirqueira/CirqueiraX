@@ -36,13 +36,13 @@ final readonly class ObterResumoHojeSemanaCuriosidadesService
             usuario: $usuario,
             inicioUtc: $hojeInicioUtc,
             fimUtc: $hojeFimUtc,
-            limite: 5,
+            limite: 50,
         );
         $topArtistasHoje = $this->reproducaoRepository->obterRankingArtistasIntervalo(
             usuario: $usuario,
             inicioUtc: $hojeInicioUtc,
             fimUtc: $hojeFimUtc,
-            limite: 5,
+            limite: 50,
         );
 
         $resumoHoje = new ResumoIntervaloSpotifyDTO(
@@ -82,13 +82,13 @@ final readonly class ObterResumoHojeSemanaCuriosidadesService
             usuario: $usuario,
             inicioUtc: $semanaInicioUtc,
             fimUtc: $semanaFimUtc,
-            limite: 5,
+            limite: 50,
         );
         $topArtistasSemana = $this->reproducaoRepository->obterRankingArtistasIntervalo(
             usuario: $usuario,
             inicioUtc: $semanaInicioUtc,
             fimUtc: $semanaFimUtc,
-            limite: 5,
+            limite: 50,
         );
 
         $resumoSemana = new ResumoIntervaloSpotifyDTO(

@@ -9,7 +9,10 @@ use App\DataObject\Spotify\ConcluirAutorizacaoSpotifyDTO;
 use App\DataObject\Spotify\ConsultarImagensSpotifyDTO;
 use App\DataObject\Spotify\ItemTopMusicaArtistaDTO;
 use App\DataObject\Spotify\UploadImportacaoSpotifyDTO;
+use App\Entity\ImagemSpotify;
 use App\Entity\Usuario;
+use App\Enum\TipoImagemSpotify;
+use App\Message\BuscarImagemSpotifyMessage;
 use App\Repository\ImagemSpotifyRepository;
 use App\Serializer\ContaSpotifySerializer;
 use App\Serializer\ImportacaoSpotifySerializer;
@@ -25,7 +28,9 @@ use App\Service\Spotify\ObterDetalheCapsulaService;
 use App\Service\Spotify\ObterResumoHojeSemanaCuriosidadesService;
 use App\Service\Spotify\ObterStatusSpotifyService;
 use App\Service\Spotify\ObterTopMusicasArtistaService;
+use App\Service\Spotify\ResolverImagemSpotifyService;
 use App\Service\Spotify\SincronizarAgoraSpotifyService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -47,11 +52,13 @@ final class SpotifyController extends DefaultController
         private readonly ObterResumoHojeSemanaCuriosidadesService $obterResumoService,
         private readonly ObterTopMusicasArtistaService $obterTopMusicasArtistaService,
         private readonly SincronizarAgoraSpotifyService $sincronizarAgoraService,
+        private readonly ResolverImagemSpotifyService $resolverImagemService,
         private readonly ImagemSpotifyRepository $imagemRepository,
         private readonly ContaSpotifySerializer $contaSpotifySerializer,
         private readonly ImportacaoSpotifySerializer $importacaoSpotifySerializer,
         private readonly SpotifyCapsulaSerializer $capsulaSerializer,
         private readonly SpotifyResumoSerializer $resumoSerializer,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -179,9 +186,28 @@ final class SpotifyController extends DefaultController
     ): Response {
         $imagens = $this->imagemRepository->buscarMapeamentoPorChaves($dto->chaves);
         $resultado = [];
+        $resolvidasNestaRequisicao = 0;
+        $maximoParaResolver = 20;
 
         foreach ($dto->chaves as $chave) {
             $imagem = $imagens[$chave] ?? null;
+
+            if (($imagem === null || $imagem->primeiraImagemUrl() === null) && $resolvidasNestaRequisicao < $maximoParaResolver) {
+                $mensagem = $this->criarMensagemAPartirDaChave($usuario, $chave, $imagem);
+                if (null !== $mensagem) {
+                    try {
+                        $this->resolverImagemService->executar($mensagem);
+                        $imagem = $this->imagemRepository->buscarPorChaveBusca($chave);
+                        $resolvidasNestaRequisicao++;
+                    } catch (\Throwable $e) {
+                        $this->logger->warning('Falha ao resolver imagem sob demanda.', [
+                            'chave' => $chave,
+                            'erro' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+
             $resultado[$chave] = [
                 'chave' => $chave,
                 'status' => $imagem?->status()->value ?? 'nao_cadastrada',
@@ -191,5 +217,74 @@ final class SpotifyController extends DefaultController
         }
 
         return $this->success($resultado);
+    }
+
+    private function criarMensagemAPartirDaChave(
+        Usuario $usuario,
+        string $chave,
+        ?ImagemSpotify $imagem,
+    ): ?BuscarImagemSpotifyMessage {
+        if (null !== $imagem) {
+            return new BuscarImagemSpotifyMessage(
+                usuarioId: (int) $usuario->getId(),
+                tipo: $imagem->tipo(),
+                nome: $imagem->nome(),
+                artista: $imagem->artista(),
+                codigoSpotify: $imagem->codigoSpotify(),
+                duracaoMs: $imagem->duracaoMs(),
+            );
+        }
+
+        if (str_starts_with($chave, 'artista:codigo:')) {
+            $codigo = substr($chave, strlen('artista:codigo:'));
+
+            return new BuscarImagemSpotifyMessage(
+                usuarioId: (int) $usuario->getId(),
+                tipo: TipoImagemSpotify::Artista,
+                nome: $codigo,
+                artista: null,
+                codigoSpotify: $codigo,
+            );
+        }
+
+        if (str_starts_with($chave, 'artista:nome:')) {
+            $nome = substr($chave, strlen('artista:nome:'));
+
+            return new BuscarImagemSpotifyMessage(
+                usuarioId: (int) $usuario->getId(),
+                tipo: TipoImagemSpotify::Artista,
+                nome: $nome,
+                artista: null,
+                codigoSpotify: null,
+            );
+        }
+
+        if (str_starts_with($chave, 'faixa:codigo:')) {
+            $codigo = substr($chave, strlen('faixa:codigo:'));
+
+            return new BuscarImagemSpotifyMessage(
+                usuarioId: (int) $usuario->getId(),
+                tipo: TipoImagemSpotify::Faixa,
+                nome: $codigo,
+                artista: null,
+                codigoSpotify: $codigo,
+            );
+        }
+
+        if (str_starts_with($chave, 'faixa:nome:')) {
+            $partes = explode('|', substr($chave, strlen('faixa:nome:')), 2);
+            $artista = $partes[0] ?? '';
+            $nome = $partes[1] ?? '';
+
+            return new BuscarImagemSpotifyMessage(
+                usuarioId: (int) $usuario->getId(),
+                tipo: TipoImagemSpotify::Faixa,
+                nome: $nome,
+                artista: $artista,
+                codigoSpotify: null,
+            );
+        }
+
+        return null;
     }
 }
