@@ -209,3 +209,15 @@ export type ItemConsultaImagem = z.infer<typeof ItemConsultaImagemSchema>
 export const RespostaConsultaImagensSchema = z.record(z.string(), ItemConsultaImagemSchema)
 
 export type RespostaConsultaImagens = z.infer<typeof RespostaConsultaImagensSchema>
+
+export const ItemTopMusicaArtistaSchema = z.object({
+  nomeFaixa: z.string(),
+  codigoFaixa: z.string().nullable(),
+  album: z.string(),
+  totalStreams: z.number(),
+  totalMinutos: z.number(),
+  urlSpotify: z.string().nullable().optional(),
+  imagemUrl: z.string().nullable().optional(),
+})
+
+export type ItemTopMusicaArtista = z.infer<typeof ItemTopMusicaArtistaSchema>

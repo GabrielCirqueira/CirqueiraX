@@ -30,5 +30,7 @@ interface SpotifyInterface
 
     public function obterArtista(string $accessToken, string $idArtista): ArtistaSpotifyDTO;
 
+    public function buscarArtistas(string $accessToken, string $nome, int $limite = 5): array;
+
     public function buscarFaixas(string $accessToken, string $texto, int $limite = 10): BuscaFaixasSpotifyDTO;
 }

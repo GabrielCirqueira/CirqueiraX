@@ -470,3 +470,34 @@
 - **Arquivos**:
   - Backend: `src/Controller/Dashboard/DashboardController.php`, `src/Controller/Spotify/SpotifyController.php`, `src/Service/Spotify/EstadoAutorizacaoSpotifyService.php` e `SincronizarAgoraSpotifyService.php` (novos), `GerarUrlAutorizacaoSpotifyService.php`, `ConcluirAutorizacaoSpotifyService.php`
   - Frontend: `web/features/spotify/Spotify.tsx`, `api.ts`, `types.ts`, `components/SpotifyCallback.tsx`, `components/ModalUploadHistoricoSpotify.tsx`, `components/PainelConexaoSpotify.tsx`, `hooks/useSincronizarSpotify.ts` (novo)
+
+---
+
+### ✅ Melhoria 114 — Foto de Artistas Mais Ouvidos e Top 5 Músicas com Animação Expansível no Spotify
+
+- **Status**: Concluída
+- **Data**: 05 de novembro de 2026
+- **Problema**:
+  - No ranking de artistas mais ouvidos (tanto na Cápsula Sonora quanto na aba Hoje/Semana), as fotos de perfil dos artistas não eram exibidas, caindo sempre nas iniciais do fallback. O resolvedor de imagens exigia código do Spotify e marcava artistas importados sem código como `nao_encontrada`, e as chaves de busca geradas no frontend (`artista_busca:...`) divergiam do padrão do backend (`artista:nome:...`).
+  - Não havia como visualizar as músicas mais ouvidas de um artista específico diretamente no ranking.
+- **Solução**:
+  - **Resolução de fotos de artistas**: Adicionada busca de artistas por nome via API do Spotify (`/search?type=artist`) no `SpotifyClient` com validação de similaridade de strings. Corrigida a compatibilidade de chaves no frontend com `gerarChaveArtista` e `gerarChaveFaixa`. O cache em tempo real do frontend enriquece imediatamente os avatares quando as imagens são resolvidas em segundo plano.
+  - **Músicas mais ouvidas do artista**: Nova consulta SQL agregada no `ReproducaoSpotifyRepository` e use case `ObterTopMusicasArtistaService`, exposto no endpoint `GET /api/v1/spotify/artistas/top-musicas?artista=...&ano=...&mes=...`.
+  - **Linha expansível e animação suave**: Criado o componente `ListaTopMusicasArtista` com Chakra UI v3 `Collapsible`, exibindo até 5 músicas mais ouvidas do artista (com miniatura, título, álbum, link externo, quantidade de reproduções/streams e minutos escutados formatados), acionado ao clicar sobre o artista.
+- **Arquivos**:
+  - Backend:
+    - `src/Interface/SpotifyInterface.php`, `src/Infra/Spotify/SpotifyClient.php`
+    - `src/Repository/ReproducaoSpotifyRepository.php`
+    - `src/Service/Spotify/ResolverImagemSpotifyService.php`, `src/Service/Spotify/EnriquecerImagensSpotifyService.php`
+    - `src/Service/Spotify/ObterTopMusicasArtistaService.php` (novo)
+    - `src/DataObject/Spotify/ItemTopMusicaArtistaDTO.php` (novo)
+    - `src/Controller/Spotify/SpotifyController.php`
+  - Frontend:
+    - `web/features/spotify/utils/chavesSpotify.ts` (novo), `web/features/spotify/utils/index.ts`
+    - `web/features/spotify/types.ts`, `web/features/spotify/api.ts`
+    - `web/features/spotify/hooks/chavesQuerySpotify.ts`, `web/features/spotify/hooks/useTopMusicasArtista.ts` (novo), `web/features/spotify/hooks/index.ts`
+    - `web/features/spotify/components/ListaTopMusicasArtista.tsx` (novo)
+    - `web/features/spotify/components/ItensRankingSpotify.tsx`
+    - `web/features/spotify/components/SecaoCapsulaSonora.tsx`
+    - `web/features/spotify/components/SecaoHojeSemana.tsx`
+    - `web/features/spotify/Spotify.tsx`

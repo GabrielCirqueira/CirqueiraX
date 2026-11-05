@@ -33,8 +33,18 @@ final readonly class ResolverImagemSpotifyService
     public function executar(BuscarImagemSpotifyMessage $message): void
     {
         $imagem = $this->obterOuCriarImagem($message);
-        if ($imagem->isEncontrada() || $imagem->isNaoEncontrada()) {
+        if ($imagem->isEncontrada()) {
             return;
+        }
+
+        if ($imagem->isNaoEncontrada()) {
+            $podeRetentar = $message->tipo->isArtista()
+                && null !== $imagem->motivoFalha()
+                && str_contains($imagem->motivoFalha(), 'requer código');
+
+            if (!$podeRetentar) {
+                return;
+            }
         }
 
         $usuario = $this->usuarioRepository->find($message->usuarioId);
@@ -191,7 +201,56 @@ final readonly class ResolverImagemSpotifyService
             return;
         }
 
-        $imagem->marcarNaoEncontrada('Consulta de artista requer código do Spotify.');
+        $artistasBuscados = $this->spotifyClient->buscarArtistas($accessToken, $message->nome, limite: 5);
+        if (empty($artistasBuscados)) {
+            $imagem->marcarNaoEncontrada('Artista não encontrado na busca do Spotify.');
+
+            return;
+        }
+
+        $nomeEsperadoNorm = $this->normalizarTexto($message->nome);
+        $melhorCandidato = null;
+        $maiorSimilaridade = 0.0;
+
+        foreach ($artistasBuscados as $candidato) {
+            $nomeCandidatoNorm = $this->normalizarTexto($candidato->nome);
+            if ($nomeCandidatoNorm === $nomeEsperadoNorm) {
+                $melhorCandidato = $candidato;
+                break;
+            }
+
+            similar_text($nomeEsperadoNorm, $nomeCandidatoNorm, $porcentagem);
+            if ($porcentagem > $maiorSimilaridade) {
+                $maiorSimilaridade = $porcentagem;
+                $melhorCandidato = $candidato;
+            }
+        }
+
+        if (null !== $melhorCandidato && ($melhorCandidato->urlFoto !== null || $melhorCandidato->urlFotoMedia !== null)) {
+            $imagem->marcarEncontrada(
+                $melhorCandidato->codigoArtista,
+                $melhorCandidato->urlFoto,
+                $melhorCandidato->urlFotoMedia,
+                $melhorCandidato->urlFotoPequena,
+                $melhorCandidato->urlSpotify,
+            );
+
+            return;
+        }
+
+        if (null !== $melhorCandidato) {
+            $imagem->marcarEncontrada(
+                $melhorCandidato->codigoArtista,
+                null,
+                null,
+                null,
+                $melhorCandidato->urlSpotify,
+            );
+
+            return;
+        }
+
+        $imagem->marcarNaoEncontrada('Nenhum artista correspondente encontrado no Spotify.');
     }
 
     private function avaliarCorrespondencia(

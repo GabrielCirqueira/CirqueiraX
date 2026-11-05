@@ -278,6 +278,67 @@ final class SpotifyClient extends Client implements SpotifyInterface
         );
     }
 
+    /**
+     * @return array<int, ArtistaSpotifyDTO>
+     */
+    public function buscarArtistas(string $accessToken, string $nome, int $limite = 5): array
+    {
+        $limiteSanitizado = max(1, min($limite, self::LIMITE_MAXIMO_BUSCA));
+
+        $dados = $this->executarComRetry(function () use ($accessToken, $nome, $limiteSanitizado) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'GET',
+                $this->resolverUrl('/search'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                    ],
+                    'query' => [
+                        'type' => 'artist',
+                        'q' => $nome,
+                        'limit' => $limiteSanitizado,
+                    ],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+
+            return $resposta;
+        });
+
+        $artists = isset($dados['artists']) && is_array($dados['artists']) ? $dados['artists'] : [];
+        $itensBrutos = isset($artists['items']) && is_array($artists['items']) ? $artists['items'] : [];
+        $artistas = [];
+
+        foreach ($itensBrutos as $itemBruto) {
+            if (!is_array($itemBruto)) {
+                continue;
+            }
+
+            $codigo = $this->extrairString($itemBruto['id'] ?? null);
+            $nomeArtista = $this->extrairString($itemBruto['name'] ?? null);
+            $imagens = $this->extrairTresImagens($itemBruto['images'] ?? []);
+            $generos = isset($itemBruto['genres']) && is_array($itemBruto['genres'])
+                ? array_values(array_map('strval', $itemBruto['genres']))
+                : [];
+            $urlSpotify = $this->extrairUrlSpotify($itemBruto['external_urls'] ?? null, 'artist', $codigo);
+
+            $artistas[] = new ArtistaSpotifyDTO(
+                codigoArtista: $codigo,
+                nome: $nomeArtista,
+                urlFoto: $imagens['grande'],
+                generos: $generos,
+                urlFotoMedia: $imagens['media'],
+                urlFotoPequena: $imagens['pequena'],
+                urlSpotify: $urlSpotify,
+            );
+        }
+
+        return $artistas;
+    }
+
     public function buscarFaixas(string $accessToken, string $texto, int $limite = 10): BuscaFaixasSpotifyDTO
     {
         $limiteSanitizado = max(1, min($limite, self::LIMITE_MAXIMO_BUSCA));

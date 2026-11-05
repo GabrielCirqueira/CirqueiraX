@@ -2,18 +2,25 @@ import { Box, Button, HStack, Heading, Skeleton, Tabs, Text, VStack } from '@cha
 import { Calendar, Disc3, Music2, TrendingUp, Users } from 'lucide-react'
 import { memo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import type { ResumoGeralSpotify } from '../types'
-import { formatarMinutosParaHorasEMinutos, formatarPercentualVariacao } from '../utils'
+import type { RespostaConsultaImagens, ResumoGeralSpotify } from '../types'
+import {
+  formatarMinutosParaHorasEMinutos,
+  formatarPercentualVariacao,
+  gerarChaveArtista,
+  gerarChaveFaixa,
+} from '../utils'
 import { ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingSpotify'
 
 export interface SecaoHojeSemanaProps {
   resumo?: ResumoGeralSpotify
   carregando?: boolean
+  mapaImagens?: RespostaConsultaImagens
 }
 
 export const SecaoHojeSemana = memo(function SecaoHojeSemana({
   resumo,
   carregando = false,
+  mapaImagens,
 }: SecaoHojeSemanaProps) {
   const [periodo, setPeriodo] = useState<'hoje' | 'semana'>('hoje')
   const [aba, setAba] = useState<'musicas' | 'artistas'>('musicas')
@@ -201,12 +208,20 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               </Box>
             ) : (
               <VStack gap={2} align="stretch">
-                {topMusicas.map((musica) => (
-                  <ItemRankingFaixa
-                    key={`${musica.nomeFaixa}-${musica.artistaPrincipal}`}
-                    item={musica}
-                  />
-                ))}
+                {topMusicas.map((musica) => {
+                  const chave = gerarChaveFaixa(
+                    musica.codigoFaixa,
+                    musica.artistaPrincipal,
+                    musica.nomeFaixa
+                  )
+                  return (
+                    <ItemRankingFaixa
+                      key={`${musica.nomeFaixa}-${musica.artistaPrincipal}`}
+                      item={musica}
+                      imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
+                    />
+                  )
+                })}
               </VStack>
             )
           ) : topArtistas.length === 0 ? (
@@ -215,9 +230,16 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             </Box>
           ) : (
             <VStack gap={2} align="stretch">
-              {topArtistas.map((artista) => (
-                <ItemRankingArtistaLinha key={artista.nomeArtista} item={artista} />
-              ))}
+              {topArtistas.map((artista) => {
+                const chave = gerarChaveArtista(artista.codigoArtista, artista.nomeArtista)
+                return (
+                  <ItemRankingArtistaLinha
+                    key={artista.nomeArtista}
+                    item={artista}
+                    imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
+                  />
+                )
+              })}
             </VStack>
           )}
         </VStack>

@@ -73,6 +73,19 @@ final readonly class EnriquecerImagensSpotifyService
                     if (null !== $imagem->urlSpotify()) {
                         $urlsSpotifyPorChave[$chave] = $imagem->urlSpotify();
                     }
+                } elseif ($imagem->tipo()->isArtista()
+                    && null !== $imagem->motivoFalha()
+                    && str_contains($imagem->motivoFalha(), 'requer código')
+                ) {
+                    $this->messageBus->dispatch(new BuscarImagemSpotifyMessage(
+                        usuarioId: (int) $usuario->getId(),
+                        tipo: TipoImagemSpotify::Artista,
+                        nome: (string) $dados['nome'],
+                        artista: null,
+                        codigoSpotify: $dados['codigo'],
+                        duracaoMs: null,
+                        prioridade: $prioridade,
+                    ));
                 }
                 continue;
             }

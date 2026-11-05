@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Center,
+  Collapsible,
   Dialog,
   Drawer,
   Flex,
@@ -40,7 +41,12 @@ import {
   useImagensSpotify,
   useMesCapsulaUrl,
 } from '../hooks'
-import type { CapsulaMensal, ItemRankingArtistaCapsula, ItemRankingMusicaCapsula } from '../types'
+import type {
+  CapsulaMensal,
+  ItemRankingArtistaCapsula,
+  ItemRankingMusicaCapsula,
+  RespostaConsultaImagens,
+} from '../types'
 import {
   baixarArquivoCsv,
   exportarResumoCapsulaParaCsv,
@@ -49,7 +55,10 @@ import {
   formatarNomeMes,
   formatarPercentualVariacao,
   formatarRotuloMesAno,
+  gerarChaveArtista,
+  gerarChaveFaixa,
 } from '../utils'
+import { ListaTopMusicasArtista } from './ListaTopMusicasArtista'
 
 export interface SecaoCapsulaSonoraProps {
   conectada: boolean
@@ -86,20 +95,39 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
     const chaves: string[] = []
     capsula.topMusicas.forEach((m) => {
       if (!m.imagemUrl) {
-        if (m.codigoFaixa) chaves.push(`faixa:${m.codigoFaixa}`)
-        else chaves.push(`faixa_busca:${m.artistaPrincipal}:${m.nomeFaixa}`)
+        chaves.push(gerarChaveFaixa(m.codigoFaixa, m.artistaPrincipal, m.nomeFaixa))
       }
     })
     capsula.topArtistas.forEach((a) => {
       if (!a.imagemUrl) {
-        if (a.codigoArtista) chaves.push(`artista:${a.codigoArtista}`)
-        else chaves.push(`artista_busca:${a.nomeArtista}`)
+        chaves.push(gerarChaveArtista(a.codigoArtista, a.nomeArtista))
       }
     })
     return chaves
   }, [capsula])
 
-  useImagensSpotify(chavesFaltantes)
+  const { data: mapaImagensConsultadas } = useImagensSpotify(chavesFaltantes)
+
+  const chaveArtistaMaisOuvido = capsula?.artistaMaisOuvido
+    ? gerarChaveArtista(
+        capsula.artistaMaisOuvido.codigoArtista,
+        capsula.artistaMaisOuvido.nomeArtista
+      )
+    : null
+  const fotoArtistaMaisOuvido =
+    capsula?.artistaMaisOuvido?.imagemUrl ||
+    (chaveArtistaMaisOuvido ? mapaImagensConsultadas?.[chaveArtistaMaisOuvido]?.imagemUrl : null)
+
+  const chaveMusicaMaisOuvida = capsula?.musicaMaisOuvida
+    ? gerarChaveFaixa(
+        capsula.musicaMaisOuvida.codigoFaixa,
+        capsula.musicaMaisOuvida.artistaPrincipal,
+        capsula.musicaMaisOuvida.nomeFaixa
+      )
+    : null
+  const fotoMusicaMaisOuvida =
+    capsula?.musicaMaisOuvida?.imagemUrl ||
+    (chaveMusicaMaisOuvida ? mapaImagensConsultadas?.[chaveMusicaMaisOuvida]?.imagemUrl : null)
 
   function handleExportarCsv() {
     if (!capsula) return
@@ -367,9 +395,9 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                     border="2px solid"
                     borderColor="cirqueira.spotify.azul"
                   >
-                    {capsula.artistaMaisOuvido.imagemUrl && (
+                    {fotoArtistaMaisOuvido && (
                       <Avatar.Image
-                        src={capsula.artistaMaisOuvido.imagemUrl}
+                        src={fotoArtistaMaisOuvido}
                         alt={capsula.artistaMaisOuvido.nomeArtista}
                       />
                     )}
@@ -455,10 +483,10 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                     alignItems="center"
                     justifyContent="center"
                   >
-                    {capsula.musicaMaisOuvida.imagemUrl ? (
+                    {fotoMusicaMaisOuvida ? (
                       <Box
                         as="img"
-                        src={capsula.musicaMaisOuvida.imagemUrl}
+                        src={fotoMusicaMaisOuvida}
                         alt={capsula.musicaMaisOuvida.nomeFaixa}
                         w="full"
                         h="full"
@@ -554,30 +582,35 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             </VStack>
 
             <HStack gap={1} pt={3} wrap="wrap">
-              {capsula.topMusicas.slice(0, 4).map((m) => (
-                <Box
-                  key={m.nomeFaixa}
-                  boxSize={7}
-                  borderRadius="4px"
-                  overflow="hidden"
-                  bg="cirqueira.spotify.cartaoElevado"
-                >
-                  {m.imagemUrl ? (
-                    <Box
-                      as="img"
-                      src={m.imagemUrl}
-                      alt={m.nomeFaixa}
-                      w="full"
-                      h="full"
-                      objectFit="cover"
-                    />
-                  ) : (
-                    <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
-                      <Music2 size={12} />
-                    </Center>
-                  )}
-                </Box>
-              ))}
+              {capsula.topMusicas.slice(0, 4).map((m) => {
+                const chavePreview = gerarChaveFaixa(m.codigoFaixa, m.artistaPrincipal, m.nomeFaixa)
+                const fotoPreview = m.imagemUrl || mapaImagensConsultadas?.[chavePreview]?.imagemUrl
+
+                return (
+                  <Box
+                    key={m.nomeFaixa}
+                    boxSize={7}
+                    borderRadius="4px"
+                    overflow="hidden"
+                    bg="cirqueira.spotify.cartaoElevado"
+                  >
+                    {fotoPreview ? (
+                      <Box
+                        as="img"
+                        src={fotoPreview}
+                        alt={m.nomeFaixa}
+                        w="full"
+                        h="full"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
+                        <Music2 size={12} />
+                      </Center>
+                    )}
+                  </Box>
+                )
+              })}
             </HStack>
           </Box>
         </SimpleGrid>
@@ -590,6 +623,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
           aberto={Boolean(modalDetalhe)}
           onFechar={() => setModalDetalhe(null)}
           isDesktop={isDesktop}
+          mapaImagens={mapaImagensConsultadas}
         />
       )}
     </VStack>
@@ -602,7 +636,166 @@ interface ModalDetalheCapsulaProps {
   aberto: boolean
   onFechar: () => void
   isDesktop: boolean
+  mapaImagens?: RespostaConsultaImagens
 }
+
+interface LinhaArtistaRankingCapsulaProps {
+  artista: ItemRankingArtistaCapsula
+  ano: number
+  mes: number
+  imagemUrlResolvida?: string | null
+}
+
+const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
+  artista,
+  ano,
+  mes,
+  imagemUrlResolvida,
+}: LinhaArtistaRankingCapsulaProps) {
+  const [expandido, setExpandido] = useState(false)
+  const foto = artista.imagemUrl || imagemUrlResolvida
+
+  return (
+    <Collapsible.Root open={expandido} unmountOnExit>
+      <Box
+        borderRadius="8px"
+        bg="cirqueira.spotify.cartaoElevado"
+        border="1px solid"
+        borderColor={expandido ? 'cirqueira.spotify.azul' : 'transparent'}
+        transition="border-color 0.15s ease, background-color 0.15s ease"
+        overflow="hidden"
+      >
+        <Flex
+          align="center"
+          justify="space-between"
+          p={3}
+          cursor="pointer"
+          _hover={{ bg: 'rgba(255, 255, 255, 0.05)' }}
+          onClick={() => setExpandido((prev) => !prev)}
+          gap={3}
+        >
+          <HStack gap={3} flex={1} minW={0} align="center">
+            <Center
+              boxSize={8}
+              borderRadius="md"
+              fontWeight="bold"
+              fontSize="sm"
+              color="cirqueira.spotify.azul"
+              flexShrink={0}
+            >
+              {artista.posicao}
+            </Center>
+
+            <Avatar.Root
+              size="md"
+              shape="full"
+              border="1px solid"
+              borderColor="cirqueira.spotify.azul"
+              flexShrink={0}
+            >
+              {foto && <Avatar.Image src={foto} alt={artista.nomeArtista} />}
+              <Avatar.Fallback
+                name={artista.nomeArtista}
+                bg="cirqueira.spotify.cartao"
+                color="cirqueira.spotify.azul"
+              />
+            </Avatar.Root>
+
+            <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+              <HStack gap={2} maxW="full">
+                <Text
+                  fontSize="sm"
+                  fontWeight="bold"
+                  color="cirqueira.spotify.textoPrincipal"
+                  truncate
+                >
+                  {artista.nomeArtista}
+                </Text>
+                {artista.urlSpotify && (
+                  <Box
+                    as="a"
+                    href={artista.urlSpotify}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="cirqueira.spotify.textoSecundario"
+                    _hover={{ color: 'cirqueira.spotify.verde' }}
+                    flexShrink={0}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink size={12} />
+                  </Box>
+                )}
+              </HStack>
+              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                {artista.totalStreams} reproduções
+              </Text>
+            </VStack>
+          </HStack>
+
+          <HStack gap={3} flexShrink={0} align="center">
+            {artista.movimento !== null && (
+              <HStack gap={1} fontSize="xs">
+                {artista.movimento > 0 ? (
+                  <HStack gap={0.5} color="cirqueira.spotify.verde">
+                    <ArrowUp size={14} />
+                    <Text as="span">{artista.movimento}</Text>
+                  </HStack>
+                ) : artista.movimento < 0 ? (
+                  <HStack gap={0.5} color="red.400">
+                    <ArrowDown size={14} />
+                    <Text as="span">{Math.abs(artista.movimento)}</Text>
+                  </HStack>
+                ) : (
+                  <Minus
+                    size={14}
+                    color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)"
+                  />
+                )}
+              </HStack>
+            )}
+
+            {artista.isEstreia && (
+              <Box
+                px={1.5}
+                py={0.5}
+                borderRadius="md"
+                bg="rgba(83, 157, 245, 0.15)"
+                color="cirqueira.spotify.azul"
+                fontSize="2xs"
+                fontWeight="bold"
+              >
+                Estreia
+              </Box>
+            )}
+
+            <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+              {formatarMinutosParaHorasEMinutos(artista.totalMinutos)}
+            </Text>
+
+            <Box
+              color="cirqueira.spotify.textoSecundario"
+              transition="transform 0.2s ease"
+              transform={expandido ? 'rotate(180deg)' : 'none'}
+            >
+              <ChevronDown size={16} />
+            </Box>
+          </HStack>
+        </Flex>
+
+        <Collapsible.Content>
+          <Box px={3} pb={3} pt={1} borderTop="1px solid" borderColor="rgba(255, 255, 255, 0.08)">
+            <ListaTopMusicasArtista
+              artista={artista.nomeArtista}
+              ano={ano}
+              mes={mes}
+              aberto={expandido}
+            />
+          </Box>
+        </Collapsible.Content>
+      </Box>
+    </Collapsible.Root>
+  )
+})
 
 function ModalDetalheCapsula({
   tipo,
@@ -610,6 +803,7 @@ function ModalDetalheCapsula({
   aberto,
   onFechar,
   isDesktop,
+  mapaImagens,
 }: ModalDetalheCapsulaProps) {
   const titulo =
     tipo === 'musicas'
@@ -629,247 +823,157 @@ function ModalDetalheCapsula({
     <VStack gap={4} align="stretch" w="full">
       {tipo === 'musicas' && (
         <VStack gap={2} align="stretch">
-          {capsula.topMusicas.map((m) => (
-            <Flex
-              key={`${m.posicao}-${m.nomeFaixa}`}
-              align="center"
-              justify="space-between"
-              p={3}
-              borderRadius="8px"
-              bg="cirqueira.spotify.cartaoElevado"
-              gap={3}
-            >
-              <HStack gap={3} flex={1} minW={0} align="center">
-                <Center
-                  boxSize={8}
-                  borderRadius="md"
-                  fontWeight="bold"
-                  fontSize="sm"
-                  color="cirqueira.spotify.amarelo"
-                  flexShrink={0}
-                >
-                  {m.posicao}
-                </Center>
+          {capsula.topMusicas.map((m) => {
+            const chaveMusica = gerarChaveFaixa(m.codigoFaixa, m.artistaPrincipal, m.nomeFaixa)
+            const fotoMusica = m.imagemUrl || mapaImagens?.[chaveMusica]?.imagemUrl
 
-                <Box
-                  boxSize={12}
-                  borderRadius="4px"
-                  overflow="hidden"
-                  bg="cirqueira.spotify.cartao"
-                  flexShrink={0}
-                >
-                  {m.imagemUrl ? (
-                    <Box
-                      as="img"
-                      src={m.imagemUrl}
-                      alt={m.nomeFaixa}
-                      w="full"
-                      h="full"
-                      objectFit="cover"
-                    />
-                  ) : (
-                    <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
-                      <Music2 size={20} />
-                    </Center>
-                  )}
-                </Box>
-
-                <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-                  <HStack gap={2} maxW="full">
-                    <Text
-                      fontSize="sm"
-                      fontWeight="bold"
-                      color="cirqueira.spotify.textoPrincipal"
-                      truncate
-                    >
-                      {m.nomeFaixa}
-                    </Text>
-                    {m.urlSpotify && (
-                      <Box
-                        as="a"
-                        href={m.urlSpotify}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        color="cirqueira.spotify.textoSecundario"
-                        _hover={{ color: 'cirqueira.spotify.verde' }}
-                        flexShrink={0}
-                      >
-                        <ExternalLink size={12} />
-                      </Box>
-                    )}
-                  </HStack>
-                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
-                    {m.artistaPrincipal} • {m.album}
-                  </Text>
-                </VStack>
-              </HStack>
-
-              <HStack gap={4} flexShrink={0}>
-                {m.movimento !== null && (
-                  <HStack gap={1} fontSize="xs">
-                    {m.movimento > 0 ? (
-                      <HStack gap={0.5} color="cirqueira.spotify.verde">
-                        <ArrowUp size={14} />
-                        <Text as="span">{m.movimento}</Text>
-                      </HStack>
-                    ) : m.movimento < 0 ? (
-                      <HStack gap={0.5} color="red.400">
-                        <ArrowDown size={14} />
-                        <Text as="span">{Math.abs(m.movimento)}</Text>
-                      </HStack>
-                    ) : (
-                      <Minus
-                        size={14}
-                        color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)"
-                      />
-                    )}
-                  </HStack>
-                )}
-
-                {m.isEstreia && (
-                  <Box
-                    px={1.5}
-                    py={0.5}
+            return (
+              <Flex
+                key={`${m.posicao}-${m.nomeFaixa}`}
+                align="center"
+                justify="space-between"
+                p={3}
+                borderRadius="8px"
+                bg="cirqueira.spotify.cartaoElevado"
+                gap={3}
+              >
+                <HStack gap={3} flex={1} minW={0} align="center">
+                  <Center
+                    boxSize={8}
                     borderRadius="md"
-                    bg="rgba(254, 228, 79, 0.15)"
-                    color="cirqueira.spotify.amarelo"
-                    fontSize="2xs"
                     fontWeight="bold"
+                    fontSize="sm"
+                    color="cirqueira.spotify.amarelo"
+                    flexShrink={0}
                   >
-                    Estreia
+                    {m.posicao}
+                  </Center>
+
+                  <Box
+                    boxSize={12}
+                    borderRadius="4px"
+                    overflow="hidden"
+                    bg="cirqueira.spotify.cartao"
+                    flexShrink={0}
+                  >
+                    {fotoMusica ? (
+                      <Box
+                        as="img"
+                        src={fotoMusica}
+                        alt={m.nomeFaixa}
+                        w="full"
+                        h="full"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
+                        <Music2 size={20} />
+                      </Center>
+                    )}
                   </Box>
-                )}
 
-                {m.mesesNoTop5 > 1 && (
-                  <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
-                    {m.mesesNoTop5} meses no top 5
-                  </Text>
-                )}
+                  <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                    <HStack gap={2} maxW="full">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="bold"
+                        color="cirqueira.spotify.textoPrincipal"
+                        truncate
+                      >
+                        {m.nomeFaixa}
+                      </Text>
+                      {m.urlSpotify && (
+                        <Box
+                          as="a"
+                          href={m.urlSpotify}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          color="cirqueira.spotify.textoSecundario"
+                          _hover={{ color: 'cirqueira.spotify.verde' }}
+                          flexShrink={0}
+                        >
+                          <ExternalLink size={12} />
+                        </Box>
+                      )}
+                    </HStack>
+                    <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
+                      {m.artistaPrincipal} • {m.album}
+                    </Text>
+                  </VStack>
+                </HStack>
 
-                <VStack align="flex-end" gap={0}>
-                  <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.amarelo">
-                    {m.totalStreams} streams
-                  </Text>
-                  <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
-                    {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
-                  </Text>
-                </VStack>
-              </HStack>
-            </Flex>
-          ))}
+                <HStack gap={4} flexShrink={0}>
+                  {m.movimento !== null && (
+                    <HStack gap={1} fontSize="xs">
+                      {m.movimento > 0 ? (
+                        <HStack gap={0.5} color="cirqueira.spotify.verde">
+                          <ArrowUp size={14} />
+                          <Text as="span">{m.movimento}</Text>
+                        </HStack>
+                      ) : m.movimento < 0 ? (
+                        <HStack gap={0.5} color="red.400">
+                          <ArrowDown size={14} />
+                          <Text as="span">{Math.abs(m.movimento)}</Text>
+                        </HStack>
+                      ) : (
+                        <Minus
+                          size={14}
+                          color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)"
+                        />
+                      )}
+                    </HStack>
+                  )}
+
+                  {m.isEstreia && (
+                    <Box
+                      px={1.5}
+                      py={0.5}
+                      borderRadius="md"
+                      bg="rgba(254, 228, 79, 0.15)"
+                      color="cirqueira.spotify.amarelo"
+                      fontSize="2xs"
+                      fontWeight="bold"
+                    >
+                      Estreia
+                    </Box>
+                  )}
+
+                  {m.mesesNoTop5 > 1 && (
+                    <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                      {m.mesesNoTop5} meses no top 5
+                    </Text>
+                  )}
+
+                  <VStack align="flex-end" gap={0}>
+                    <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.amarelo">
+                      {m.totalStreams} streams
+                    </Text>
+                    <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                      {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Flex>
+            )
+          })}
         </VStack>
       )}
 
       {tipo === 'artistas' && (
         <VStack gap={2} align="stretch">
-          {capsula.topArtistas.map((a) => (
-            <Flex
-              key={`${a.posicao}-${a.nomeArtista}`}
-              align="center"
-              justify="space-between"
-              p={3}
-              borderRadius="8px"
-              bg="cirqueira.spotify.cartaoElevado"
-              gap={3}
-            >
-              <HStack gap={3} flex={1} minW={0} align="center">
-                <Center
-                  boxSize={8}
-                  borderRadius="md"
-                  fontWeight="bold"
-                  fontSize="sm"
-                  color="cirqueira.spotify.azul"
-                  flexShrink={0}
-                >
-                  {a.posicao}
-                </Center>
-
-                <Avatar.Root
-                  size="md"
-                  shape="full"
-                  border="1px solid"
-                  borderColor="cirqueira.spotify.azul"
-                >
-                  {a.imagemUrl && <Avatar.Image src={a.imagemUrl} alt={a.nomeArtista} />}
-                  <Avatar.Fallback
-                    name={a.nomeArtista}
-                    bg="cirqueira.spotify.cartao"
-                    color="cirqueira.spotify.azul"
-                  />
-                </Avatar.Root>
-
-                <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-                  <HStack gap={2} maxW="full">
-                    <Text
-                      fontSize="sm"
-                      fontWeight="bold"
-                      color="cirqueira.spotify.textoPrincipal"
-                      truncate
-                    >
-                      {a.nomeArtista}
-                    </Text>
-                    {a.urlSpotify && (
-                      <Box
-                        as="a"
-                        href={a.urlSpotify}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        color="cirqueira.spotify.textoSecundario"
-                        _hover={{ color: 'cirqueira.spotify.verde' }}
-                        flexShrink={0}
-                      >
-                        <ExternalLink size={12} />
-                      </Box>
-                    )}
-                  </HStack>
-                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
-                    {a.totalStreams} reproduções
-                  </Text>
-                </VStack>
-              </HStack>
-
-              <HStack gap={3} flexShrink={0}>
-                {a.movimento !== null && (
-                  <HStack gap={1} fontSize="xs">
-                    {a.movimento > 0 ? (
-                      <HStack gap={0.5} color="cirqueira.spotify.verde">
-                        <ArrowUp size={14} />
-                        <Text as="span">{a.movimento}</Text>
-                      </HStack>
-                    ) : a.movimento < 0 ? (
-                      <HStack gap={0.5} color="red.400">
-                        <ArrowDown size={14} />
-                        <Text as="span">{Math.abs(a.movimento)}</Text>
-                      </HStack>
-                    ) : (
-                      <Minus
-                        size={14}
-                        color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)"
-                      />
-                    )}
-                  </HStack>
-                )}
-
-                {a.isEstreia && (
-                  <Box
-                    px={1.5}
-                    py={0.5}
-                    borderRadius="md"
-                    bg="rgba(83, 157, 245, 0.15)"
-                    color="cirqueira.spotify.azul"
-                    fontSize="2xs"
-                    fontWeight="bold"
-                  >
-                    Estreia
-                  </Box>
-                )}
-
-                <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
-                  {formatarMinutosParaHorasEMinutos(a.totalMinutos)}
-                </Text>
-              </HStack>
-            </Flex>
-          ))}
+          {capsula.topArtistas.map((a) => {
+            const chave = gerarChaveArtista(a.codigoArtista, a.nomeArtista)
+            const imagemUrl = a.imagemUrl || mapaImagens?.[chave]?.imagemUrl
+            return (
+              <LinhaArtistaRankingCapsula
+                key={`${a.posicao}-${a.nomeArtista}`}
+                artista={a}
+                ano={capsula.ano}
+                mes={capsula.mes}
+                imagemUrlResolvida={imagemUrl}
+              />
+            )
+          })}
         </VStack>
       )}
 

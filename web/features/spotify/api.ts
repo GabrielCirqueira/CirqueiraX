@@ -9,6 +9,8 @@ import {
   DesconectarSpotifySchema,
   type ImportacaoSpotify,
   ImportacaoSpotifySchema,
+  type ItemTopMusicaArtista,
+  ItemTopMusicaArtistaSchema,
   type RespostaConsultaImagens,
   RespostaConsultaImagensSchema,
   type ResultadoSincronizacaoSpotify,
@@ -87,4 +89,19 @@ export async function consultarImagensSpotify(chaves: string[]): Promise<Respost
     chaves,
   })
   return RespostaConsultaImagensSchema.parse(data.data)
+}
+
+export async function obterTopMusicasArtista(
+  artista: string,
+  ano?: number | null,
+  mes?: number | null
+): Promise<ItemTopMusicaArtista[]> {
+  const params: Record<string, string | number> = { artista }
+  if (ano !== undefined && ano !== null) params.ano = ano
+  if (mes !== undefined && mes !== null) params.mes = mes
+
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/artistas/top-musicas', {
+    params,
+  })
+  return z.array(ItemTopMusicaArtistaSchema).parse(data.data)
 }

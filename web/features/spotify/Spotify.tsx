@@ -14,6 +14,7 @@ import {
   TemaSpotify,
 } from './components'
 import { useImagensSpotify, useResumoSpotify, useStatusSpotify } from './hooks'
+import { gerarChaveArtista, gerarChaveFaixa } from './utils'
 
 export function Spotify() {
   useSEO({
@@ -39,13 +40,11 @@ export function Spotify() {
     todos.forEach((item) => {
       if ('nomeFaixa' in item) {
         if (!item.imagemUrl) {
-          if (item.codigoFaixa) chaves.push(`faixa:${item.codigoFaixa}`)
-          else chaves.push(`faixa_busca:${item.artistaPrincipal}:${item.nomeFaixa}`)
+          chaves.push(gerarChaveFaixa(item.codigoFaixa, item.artistaPrincipal, item.nomeFaixa))
         }
       } else if ('nomeArtista' in item) {
         if (!item.imagemUrl) {
-          if (item.codigoArtista) chaves.push(`artista:${item.codigoArtista}`)
-          else chaves.push(`artista_busca:${item.nomeArtista}`)
+          chaves.push(gerarChaveArtista(item.codigoArtista, item.nomeArtista))
         }
       }
     })
@@ -53,7 +52,7 @@ export function Spotify() {
     return chaves
   }, [resumo])
 
-  useImagensSpotify(chavesFaltantesResumo)
+  const { data: mapaImagensResumo } = useImagensSpotify(chavesFaltantesResumo)
 
   const temDados =
     Boolean(resumo) &&
@@ -77,7 +76,11 @@ export function Spotify() {
               />
             ) : (
               <>
-                <SecaoHojeSemana resumo={resumo} carregando={carregandoResumo} />
+                <SecaoHojeSemana
+                  resumo={resumo}
+                  mapaImagens={mapaImagensResumo}
+                  carregando={carregandoResumo}
+                />
 
                 <SecaoCuriosidades curiosidades={resumo?.curiosidades} />
 

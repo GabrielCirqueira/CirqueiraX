@@ -7,6 +7,7 @@ namespace App\Controller\Spotify;
 use App\Controller\Common\DefaultController;
 use App\DataObject\Spotify\ConcluirAutorizacaoSpotifyDTO;
 use App\DataObject\Spotify\ConsultarImagensSpotifyDTO;
+use App\DataObject\Spotify\ItemTopMusicaArtistaDTO;
 use App\DataObject\Spotify\UploadImportacaoSpotifyDTO;
 use App\Entity\Usuario;
 use App\Repository\ImagemSpotifyRepository;
@@ -22,8 +23,9 @@ use App\Service\Spotify\IniciarImportacaoSpotifyService;
 use App\Service\Spotify\ListarMesesCapsulaService;
 use App\Service\Spotify\ObterDetalheCapsulaService;
 use App\Service\Spotify\ObterResumoHojeSemanaCuriosidadesService;
-use App\Service\Spotify\SincronizarAgoraSpotifyService;
 use App\Service\Spotify\ObterStatusSpotifyService;
+use App\Service\Spotify\ObterTopMusicasArtistaService;
+use App\Service\Spotify\SincronizarAgoraSpotifyService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -43,6 +45,7 @@ final class SpotifyController extends DefaultController
         private readonly ListarMesesCapsulaService $listarMesesCapsulaService,
         private readonly ObterDetalheCapsulaService $obterDetalheCapsulaService,
         private readonly ObterResumoHojeSemanaCuriosidadesService $obterResumoService,
+        private readonly ObterTopMusicasArtistaService $obterTopMusicasArtistaService,
         private readonly SincronizarAgoraSpotifyService $sincronizarAgoraService,
         private readonly ImagemSpotifyRepository $imagemRepository,
         private readonly ContaSpotifySerializer $contaSpotifySerializer,
@@ -145,6 +148,27 @@ final class SpotifyController extends DefaultController
         return $this->success($this->resumoSerializer->serializarResumo(
             $resumoComImagens->resumo(),
             $resumoComImagens->mapaImagens(),
+        ));
+    }
+
+    #[Route('/artistas/top-musicas', name: 'obter_top_musicas_artista', methods: ['GET'])]
+    public function obterTopMusicasArtista(
+        Request $request,
+        #[CurrentUser] Usuario $usuario,
+    ): Response {
+        $artista = (string) $request->query->get('artista', '');
+        if ('' === trim($artista)) {
+            return $this->error('O parâmetro "artista" é obrigatório.');
+        }
+
+        $ano = $request->query->has('ano') ? $request->query->getInt('ano') : null;
+        $mes = $request->query->has('mes') ? $request->query->getInt('mes') : null;
+
+        $topMusicas = $this->obterTopMusicasArtistaService->executar($usuario, trim($artista), $ano, $mes);
+
+        return $this->success(array_map(
+            static fn (ItemTopMusicaArtistaDTO $item): array => $item->toArray(),
+            $topMusicas,
         ));
     }
 

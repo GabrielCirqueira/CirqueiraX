@@ -302,6 +302,68 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         return $itens;
     }
 
+    /**
+     * @return array<int, array{nomeFaixa: string, codigoFaixa: ?string, album: string, streams: int, totalMinutos: int}>
+     */
+    public function obterMusicasMaisOuvidasDoArtista(
+        Usuario $usuario,
+        string $nomeArtista,
+        ?PeriodoMesSpotifyDTO $periodo = null,
+        int $limite = 5,
+        int $corteStreamMs = 30000,
+    ): array {
+        $conn = $this->getEntityManager()->getConnection();
+
+        $wherePeriodo = '';
+        $params = [
+            'usuarioId' => $usuario->getId(),
+            'artista' => $nomeArtista,
+            'corteStreamMs' => $corteStreamMs,
+            'limite' => $limite,
+        ];
+
+        if (null !== $periodo) {
+            $wherePeriodo = 'AND r.tocada_em >= :inicioUtc AND r.tocada_em < :fimUtc';
+            $params['inicioUtc'] = $periodo->inicioUtc()->format('Y-m-d H:i:s');
+            $params['fimUtc'] = $periodo->fimUtc()->format('Y-m-d H:i:s');
+        }
+
+        $sql = "
+            SELECT 
+                r.nome_faixa,
+                MAX(r.codigo_faixa) as codigo_faixa,
+                MAX(r.album) as album,
+                COUNT(*) as total_streams,
+                SUM(r.ms_reproduzidos) as total_ms
+            FROM reproducao_spotify r
+            WHERE r.usuario_id = :usuarioId
+              AND r.artista_principal = :artista
+              {$wherePeriodo}
+              AND r.ms_reproduzidos >= :corteStreamMs
+            GROUP BY r.nome_faixa
+            ORDER BY total_streams DESC, total_ms DESC
+            LIMIT :limite
+        ";
+
+        /** @var array<int, array{nome_faixa: string, codigo_faixa: ?string, album: ?string, total_streams: int|string, total_ms: int|string}> $linhas */
+        $linhas = $conn->executeQuery($sql, $params, [
+            'limite' => PDO::PARAM_INT,
+        ])->fetchAllAssociative();
+
+        $resultado = [];
+        foreach ($linhas as $linha) {
+            $ms = (int) $linha['total_ms'];
+            $resultado[] = [
+                'nomeFaixa' => $linha['nome_faixa'],
+                'codigoFaixa' => $linha['codigo_faixa'] !== null && '' !== trim($linha['codigo_faixa']) ? trim($linha['codigo_faixa']) : null,
+                'album' => $linha['album'] ?? 'Desconhecido',
+                'streams' => (int) $linha['total_streams'],
+                'totalMinutos' => (int) round($ms / 60000),
+            ];
+        }
+
+        return $resultado;
+    }
 
     /**
      * @return array<int, ItemRankingArtistaDTO>
