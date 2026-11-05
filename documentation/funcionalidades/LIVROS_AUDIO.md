@@ -217,8 +217,10 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
      - Aviso de disco quando está em "atenção" ou "crítico".
 
 2. **Leitor & Player Imersivo (`/livros-audio/:uuid`):**
+   - **Modo texto** (padrão no celular): mostra o texto da parte em letra grande, com a frase ou a palavra destacada e a rolagem automática. Tocar numa frase toca dali, e A−/A+ ajustam a letra. É o modo usado quando o PDF não abre.
+   - **Sem internet:** o sistema é um PWA instalável (`public/sw.js`). O app e as últimas respostas dos livros ficam guardados, e a faixa "Sem internet" avisa. A posição e o tempo ouvidos vão para uma fila e são enviados quando a conexão volta. Upload, gerar voz e apagar ficam desligados.
    - **Visualizador PDF:**
-     - Renderização página a página com zoom, paginação direta e atalhos de teclado (setas esquerda e direita).
+     - Renderização página a página com zoom, paginação direta e atalhos de teclado (setas esquerda e direita). No celular a página se ajusta à largura e vira arrastando com o dedo.
      - Animação curta ao virar a página (só `transform`/`opacity`), desligada com "reduzir movimento".
      - **Tema da página:** claro, sépia ou escuro, aplicado como filtro no canvas. A escolha fica salva no navegador.
      - **Clicar numa frase** abre o menu com "Ouvir daqui", "Destacar" e "Nota" (`MenuFrase`).
@@ -228,7 +230,8 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
      - Controles de reprodução: Play/Pause, barra de busca interativa e botões de pular -15s / +15s.
      - Velocidade de 0,5x a 3x em passos de 0,1, guardada por livro no navegador.
      - Sumário com duas abas: "Capítulos", que vem do sumário do PDF ou dos títulos achados nas páginas e toca a partir do capítulo, e "Partes do áudio", com o status e o ícone das partes guardadas offline.
-     - **Ouvir offline:** baixa as próximas 3, 5 ou 10 partes, ou todas que faltam, para a Cache API do navegador (áudio e frases). As partes guardadas tocam do arquivo local.
+     - **Ouvir offline** (`PainelOffline`, também no card da biblioteca): baixa as próximas 1, 2 ou 5 horas ou o livro todo, com duração e tamanho, para a Cache API (áudio, frases e, se quiser, o PDF). Mostra as partes refeitas para atualizar. O download inteligente mantém as próximas horas, apaga as já ouvidas e pode baixar só no Wi-Fi.
+     - **No celular:** o mini-player tem play, ±15 s e o tempo, e o botão "Mais" abre a gaveta com os outros controles.
      - **Marcar:** guarda um marcador no ponto exato que está sendo lido.
      - Integração com **Media Session API** para controle de áudio na tela de bloqueio e central de mídia do celular ou desktop.
    - **Sincronização Bidirecional:**

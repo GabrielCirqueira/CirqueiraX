@@ -56,6 +56,10 @@ export async function listarTrechosBloco(
   numeroBloco: number,
   voz: string | null = null
 ): Promise<TrechoNarracao[]> {
+  if (!navigator.onLine) {
+    const guardados = await obterTrechosOffline(uuid, numeroBloco, voz)
+    if (guardados) return z.array(trechoNarracaoSchema).parse(guardados)
+  }
   try {
     return await listarTrechosBlocoDaRede(uuid, numeroBloco, voz)
   } catch (erro) {
@@ -87,6 +91,20 @@ export async function baixarAudioBloco(
     params: voz ? { voz } : undefined,
     responseType: 'blob',
     headers: { Accept: 'audio/mpeg' },
+    onDownloadProgress: (evento) => {
+      if (onProgresso && evento.total) onProgresso(evento.loaded / evento.total)
+    },
+  })
+  return data
+}
+
+export async function baixarPdfLivro(
+  uuid: string,
+  onProgresso?: (fracao: number) => void
+): Promise<Blob> {
+  const { data } = await api.get<Blob>(`${URL_LIVROS_AUDIO}/${uuid}/pdf`, {
+    responseType: 'blob',
+    headers: { Accept: 'application/pdf' },
     onDownloadProgress: (evento) => {
       if (onProgresso && evento.total) onProgresso(evento.loaded / evento.total)
     },

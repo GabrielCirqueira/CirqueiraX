@@ -1,6 +1,7 @@
 import { Box, Button, Center, SimpleGrid, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { BookOpen, Plus } from 'lucide-react'
 import { memo } from 'react'
+import { useLivrosComOffline } from '../hooks/useOfflineLivro'
 import type { FilaGeracao, LivroAudio } from '../types'
 import { contarPartesNaFrente } from '../utils/livros'
 import { CardLivroAudio } from './CardLivroAudio'
@@ -22,6 +23,8 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
   onNovoLivro,
   onApagarLivro,
 }: GradeLivrosAudioProps) {
+  const { data: partesOffline } = useLivrosComOffline()
+
   if (carregando) {
     return (
       <SimpleGrid columns={{ base: 1, sm: 2, lg: 3, xl: 4 }} gap={5} w="full">
@@ -106,6 +109,7 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
           partesNaFrente={contarPartesNaFrente(livro, livros)}
           itemFila={fila?.livros.find((item) => item.uuid === livro.uuid)}
           apagando={apagandoUuid === livro.uuid}
+          partesOffline={partesOffline?.get(livro.uuid) ?? 0}
           onApagar={onApagarLivro}
         />
       ))}

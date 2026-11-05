@@ -4,19 +4,34 @@ import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl
 
+const BASE_RECURSOS_PDFJS = import.meta.env.PROD
+  ? `${import.meta.env.BASE_URL}pdfjs/`
+  : `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/`
+
 export interface TarefaRenderizacaoPagina {
   promise: Promise<void>
   cancelar: () => void
 }
 
-export async function carregarDocumentoPdf(url: string): Promise<PDFDocumentProxy> {
+export async function carregarDocumentoPdf(
+  origem: string | ArrayBuffer
+): Promise<PDFDocumentProxy> {
   const token = localStorage.getItem('token')
+  const fonte =
+    typeof origem === 'string'
+      ? {
+          url: origem,
+          withCredentials: false,
+          httpHeaders: token ? { Authorization: `Bearer ${token}` } : undefined,
+        }
+      : { data: new Uint8Array(origem) }
   const loadingTask = pdfjsLib.getDocument({
-    url,
-    withCredentials: false,
-    httpHeaders: token ? { Authorization: `Bearer ${token}` } : undefined,
-    cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
+    ...fonte,
+    cMapUrl: `${BASE_RECURSOS_PDFJS}cmaps/`,
     cMapPacked: true,
+    standardFontDataUrl: `${BASE_RECURSOS_PDFJS}standard_fonts/`,
+    wasmUrl: `${BASE_RECURSOS_PDFJS}wasm/`,
+    iccUrl: `${BASE_RECURSOS_PDFJS}iccs/`,
   })
 
   return loadingTask.promise

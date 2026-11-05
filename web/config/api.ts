@@ -1,5 +1,6 @@
 import type { RespostaRefresh } from '@/features/auth/types'
-import { useAuthStore } from '@/stores'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { useConexaoStore } from '@/stores/useConexaoStore'
 import axios from 'axios'
 
 /**
@@ -40,10 +41,20 @@ function drainQueue(error: unknown, token: string | null) {
   failedQueue = []
 }
 
+function falhaDeRede(erro: unknown): boolean {
+  return axios.isAxiosError(erro) && !erro.response && erro.code !== 'ERR_CANCELED'
+}
+
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    useConexaoStore
+      .getState()
+      .registrarRespostaDaRede(response.headers?.['x-cirqueirax-offline'] === '1')
+    return response
+  },
   async (error: unknown) => {
     if (!axios.isAxiosError(error)) return Promise.reject(error)
+    if (falhaDeRede(error)) useConexaoStore.getState().registrarFalhaDeRede()
 
     const originalRequest = error.config as typeof error.config & { _retry?: boolean }
     if (!originalRequest) return Promise.reject(error)
@@ -93,7 +104,13 @@ api.interceptors.response.use(
     } catch (refreshError) {
       drainQueue(refreshError, null)
 
-      if (axios.isAxiosError(refreshError) && refreshError.response?.status === 429) {
+      if (
+        !axios.isAxiosError(refreshError) ||
+        !refreshError.response ||
+        refreshError.response.status === 429 ||
+        refreshError.response.status >= 500
+      ) {
+        if (falhaDeRede(refreshError)) useConexaoStore.getState().registrarFalhaDeRede()
         return Promise.reject(refreshError)
       }
 

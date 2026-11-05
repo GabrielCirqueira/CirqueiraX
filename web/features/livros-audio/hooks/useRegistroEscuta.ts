@@ -1,9 +1,22 @@
 import { useEffect, useRef } from 'react'
 import { obterUrlRegistroEscuta, registrarEscutaLivro } from '../api'
+import { somarEscutaPendente } from '../utils/pendenciasOffline'
 
 const INTERVALO_ENVIO_SEGUNDOS = 30
 
+function enviar(uuid: string, segundos: number) {
+  if (!navigator.onLine) {
+    somarEscutaPendente(uuid, segundos)
+    return
+  }
+  registrarEscutaLivro(uuid, segundos).catch(() => somarEscutaPendente(uuid, segundos))
+}
+
 function enviarAoSair(uuid: string, segundos: number) {
+  if (!navigator.onLine) {
+    somarEscutaPendente(uuid, segundos)
+    return
+  }
   const token = localStorage.getItem('token')
   fetch(obterUrlRegistroEscuta(uuid), {
     method: 'POST',
@@ -31,9 +44,7 @@ export function useRegistroEscuta(livroUuid: string, tocando: boolean) {
       if (acumuladoRef.current >= INTERVALO_ENVIO_SEGUNDOS) {
         const segundos = Math.round(acumuladoRef.current)
         acumuladoRef.current = 0
-        registrarEscutaLivro(uuidRef.current, segundos).catch(() => {
-          acumuladoRef.current += segundos
-        })
+        enviar(uuidRef.current, segundos)
       }
     }, 1000)
     return () => {
@@ -42,7 +53,7 @@ export function useRegistroEscuta(livroUuid: string, tocando: boolean) {
       const segundos = Math.round(acumuladoRef.current)
       if (segundos >= 1) {
         acumuladoRef.current = 0
-        registrarEscutaLivro(uuidRef.current, segundos).catch(() => {})
+        enviar(uuidRef.current, segundos)
       }
     }
   }, [tocando])

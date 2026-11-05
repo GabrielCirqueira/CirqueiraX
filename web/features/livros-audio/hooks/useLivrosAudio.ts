@@ -19,10 +19,13 @@ import {
 } from '../api'
 import type {
   ConfigurarNarracaoPayload,
+  LivroAudio,
   LivroAudioBloco,
   SalvarPosicaoLivro,
   UploadLivroAudioPayload,
 } from '../types'
+
+import { guardarPosicaoPendente, removerPosicaoPendente } from '../utils/pendenciasOffline'
 
 export const LIVROS_AUDIO_QUERY_KEY = ['livros-audio'] as const
 
@@ -186,9 +189,26 @@ export function useSalvarPosicaoLivroAudio() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ uuid, posicao }: { uuid: string; posicao: SalvarPosicaoLivro }) =>
-      salvarPosicaoLivroAudio(uuid, posicao),
+    networkMode: 'always',
+    mutationFn: async ({
+      uuid,
+      posicao,
+    }: { uuid: string; posicao: SalvarPosicaoLivro }): Promise<LivroAudio | null> => {
+      guardarPosicaoPendente(uuid, posicao)
+      try {
+        const livro = await salvarPosicaoLivroAudio(uuid, posicao)
+        removerPosicaoPendente(uuid, posicao.registradaEm)
+        return livro
+      } catch (erro) {
+        if (axios.isAxiosError(erro) && (!erro.response || erro.response.status >= 500)) {
+          return null
+        }
+        removerPosicaoPendente(uuid, posicao.registradaEm)
+        throw erro
+      }
+    },
     onSuccess: (livroAtualizado) => {
+      if (!livroAtualizado) return
       queryClient.invalidateQueries({ queryKey: LIVROS_AUDIO_QUERY_KEY, exact: true })
       queryClient.setQueryData([...LIVROS_AUDIO_QUERY_KEY, livroAtualizado.uuid], livroAtualizado)
     },

@@ -104,6 +104,14 @@ A Sidebar leva às nove telas principais e tem a troca de tema e o logout. `Main
 - **Global:** Zustand, em `stores/` ou dentro da feature, como `useFilaDownloadsStore`.
 - **Preferências locais:** `localStorageService` e `useLocalStorageState`, com namespace `cirqueirax:` e chaves em `CHAVES_STORAGE`.
 - **Filtros na URL:** `useFiltrosUrl`.
+- **Conexão:** `useConexaoStore` (`useSemConexao()`) diz se o app está sem rede ou usando cópia guardada. As queries usam `networkMode: 'offlineFirst'` e as mutations `'always'`.
+
+### Offline (PWA)
+
+- `public/sw.js` é registrado em `web/shared/pwa/serviceWorker.ts`, só no build de produção.
+- A página e `/build/` ficam no cache `cirqueirax-app-v1`. As consultas dos livros em áudio ficam em `cirqueirax-api-v1` e são servidas com o cabeçalho `X-Cirqueirax-Offline: 1` quando não há rede.
+- O plugin `recursosOffline` do Vite gera `build/sw-assets.json` e copia os recursos do pdf.js para `build/pdfjs/`.
+- O Nginx serve `/sw.js` e `/site.webmanifest` com `Cache-Control: no-cache`.
 
 ### Polling
 

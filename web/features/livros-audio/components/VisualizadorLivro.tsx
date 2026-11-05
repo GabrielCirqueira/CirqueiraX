@@ -1,12 +1,14 @@
 import { Box, Center, HStack, IconButton, Text } from '@chakra-ui/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { type KeyboardEvent, memo, useEffect, useRef } from 'react'
+import { type KeyboardEvent, type TouchEvent, memo, useEffect, useRef } from 'react'
 import type { MarcacaoLivro, TemaPagina } from '../types'
 import type { LocalizacaoTrecho } from '../utils/localizacaoNarracao'
 import type { PDFDocumentProxy, SegmentoDestaque } from '../utils/pdf'
 import { type CliqueTextoPagina, FUNDO_TEMA_PAGINA, PaginaPdf } from './PaginaPdf'
 
 const DURACAO_VIRADA_MS = 380
+const DISTANCIA_MINIMA_DESLIZE = 60
+const TEMPO_MAXIMO_DESLIZE_MS = 700
 
 function animarVirada(elemento: HTMLElement | null, avancando: boolean) {
   if (!elemento || typeof elemento.animate !== 'function') return
@@ -63,6 +65,32 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
   const paginasRef = useRef<HTMLDivElement | null>(null)
   const paginaAnteriorRef = useRef(paginaAtual)
   const fundoPagina = FUNDO_TEMA_PAGINA[tema]
+  const toqueRef = useRef<{ x: number; y: number; momento: number } | null>(null)
+
+  function iniciarToque(evento: TouchEvent<HTMLDivElement>) {
+    const toque = evento.touches[0]
+    toqueRef.current =
+      evento.touches.length === 1 && toque
+        ? { x: toque.clientX, y: toque.clientY, momento: Date.now() }
+        : null
+  }
+
+  function terminarToque(evento: TouchEvent<HTMLDivElement>) {
+    const inicio = toqueRef.current
+    toqueRef.current = null
+    const toque = evento.changedTouches[0]
+    if (!inicio || !toque || Date.now() - inicio.momento > TEMPO_MAXIMO_DESLIZE_MS) return
+    const dx = toque.clientX - inicio.x
+    const dy = toque.clientY - inicio.y
+    if (Math.abs(dx) < DISTANCIA_MINIMA_DESLIZE || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    const area = containerRef.current
+    if (area && area.scrollWidth > area.clientWidth + 4) {
+      if (dx < 0 && area.scrollLeft + area.clientWidth < area.scrollWidth - 4) return
+      if (dx > 0 && area.scrollLeft > 4) return
+    }
+    if (dx < 0) onAvancar()
+    else onVoltar()
+  }
 
   useEffect(() => {
     const anterior = paginaAnteriorRef.current
@@ -88,6 +116,8 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
       ref={containerRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onTouchStart={iniciarToque}
+      onTouchEnd={terminarToque}
       outline="none"
       position="relative"
       flex={1}
@@ -97,12 +127,13 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
       alignItems="center"
       justifyContent="center"
       overflow="auto"
-      p={{ base: 3, md: 8 }}
-      pb={{ base: 24, md: 28 }}
+      p={{ base: 2, md: 8 }}
+      pb={{ base: '180px', md: 28 }}
       bg="cirqueira.grey.950"
       userSelect="none"
     >
       <IconButton
+        display={{ base: 'none', md: 'inline-flex' }}
         position="fixed"
         left={{ base: 3, md: 6, lg: 8 }}
         top="50%"
@@ -320,6 +351,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
       </Center>
 
       <IconButton
+        display={{ base: 'none', md: 'inline-flex' }}
         position="fixed"
         right={{ base: 3, md: 6, lg: 8 }}
         top="50%"

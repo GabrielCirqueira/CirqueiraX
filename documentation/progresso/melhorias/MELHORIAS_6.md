@@ -380,3 +380,64 @@
     - Alterados:
       - Livros em áudio: `LivrosAudio.tsx`, `LeitorLivroAudio.tsx`, `components/PlayerAudioLivro.tsx`, `components/PainelVozes.tsx`, `components/CardLivroAudio.tsx`, `components/GradeLivrosAudio.tsx`, `components/LeitorSemPdf.tsx`, `components/CabecalhoLivrosAudio.tsx`, `hooks/useLivrosAudio.ts`, `utils/pdf.ts`, `utils/livros.ts`, `api.ts`, `types.ts`
       - Dashboard: `Dashboard.tsx`, `api.ts`, `hooks/useDashboard.ts`, `types.ts`
+
+---
+
+### 🟡 Melhoria 112 — Ouvir Sem Internet Dentro do Sistema e Leitor Pensado para o Celular
+
+- **Status**: Publicada em produção em 05/11/2026, falta validar no uso
+- **Data**: 05 de novembro de 2026
+- **Problema**:
+  - Sem sinal (no ônibus, por exemplo) o sistema não abria. A sessão caía quando a renovação do token falhava por falta de rede.
+  - O download offline da M110 só existia dentro do player, por número de partes, sem tamanho, sem atualizar partes refeitas e sem liberar espaço sozinho.
+  - O PDF e os recursos do pdf.js (cMaps, fontes) vinham de CDN, então o leitor não abria offline.
+  - A posição e o tempo ouvidos sem internet se perdiam.
+  - No celular o player ocupava a tela toda, a página do PDF ficava pequena e não havia leitura em texto com letra grande.
+- **Solução**:
+  - **App instalável e offline (PWA)**:
+    - Service worker `public/sw.js`. A página usa rede primeiro, com 5 s de limite, e cai na cópia guardada do app. Os arquivos de `/build/` são guardados de vez. As consultas dos livros (lista, livro, partes, vozes, marcações e frases) usam rede primeiro, com 7 s de limite, e caem na última resposta guardada.
+    - O build gera `build/sw-assets.json` com a lista de arquivos, e o service worker guarda tudo depois do primeiro acesso. Os recursos do pdf.js vão para `build/pdfjs/` e não dependem mais de CDN.
+    - Botão "Instalar app" na biblioteca, quando o navegador oferece. O manifest ganhou `id`, `scope`, atalho e ícone `maskable`, e abre direto nos livros.
+    - A sessão não cai mais por falha de rede, 429 ou erro 5xx na renovação do token. Só uma recusa real desloga. Ao sair, a cópia das respostas da API é apagada.
+    - Faixa amarela "Sem internet" na biblioteca e no leitor, com quantas alterações esperam a conexão. Sem internet, ficam desligados: enviar livro, atualizar, apagar, pausar e priorizar na fila, gerar e apagar voz e abrir o PDF original.
+  - **Baixar para ouvir offline** (no card da biblioteca e no player):
+    - Opções: próximas 1, 2 ou 5 horas ou o livro todo, com a duração e o tamanho de cada uma. Mostra o progresso e tem "Parar".
+    - Cada parte guarda o áudio e as frases com os tempos. Opcionalmente guarda também o PDF original.
+    - As partes refeitas no servidor aparecem como desatualizadas, com o botão "Atualizar".
+    - **Download inteligente** (por livro): mantém sempre baixadas as próximas 1, 2 ou 5 horas, pode apagar as partes já ouvidas e pode baixar só no Wi-Fi. Roda enquanto o livro está aberto com internet.
+    - O card mostra quantas partes estão no aparelho. O painel mostra o total guardado e tem "Apagar".
+  - **Sincronizar depois**:
+    - A posição e os segundos ouvidos vão para uma fila no navegador quando não há rede. Eles são enviados quando a conexão volta ou a cada 60 s, com a escuta em pedaços de até 120 s. O servidor ignora a posição mais antiga pelo `registradaEm`.
+    - Ao abrir o livro, a posição pendente no aparelho vale mais que a do servidor.
+  - **Leitor no celular**:
+    - **Modo texto**: o texto da parte em letra grande (serifada), nos três temas, com a frase atual destacada (ou a palavra) e rolagem automática. Tocar numa frase toca dali. Botões A−/A+ ajustam a letra. No celular ele é o padrão, e a escolha fica salva.
+    - **Modo página**: a página se ajusta à largura da tela e vira com o dedo, arrastando para os lados.
+    - **Player em duas camadas**: o mini-player tem play, ±15 s e o tempo. O botão "Mais" abre uma gaveta com velocidade, sumário, voz, timer, offline, marcar, seguir áudio, frase/palavra, ajustes e a navegação das páginas.
+    - Barra superior enxuta no celular. Respeita a área segura (notch) e usa `100dvh`.
+    - Tela de bloqueio com capa, avançar/voltar e a barra de posição (Media Session `seekto` e `setPositionState`).
+    - Quando o PDF não abre, o leitor mostra o modo texto em vez de só o player.
+- **Testes**:
+  - `tsc` sem erros novos e Biome limpo.
+  - No navegador, com tela de 390×844 e API simulada:
+    - Nenhuma rolagem horizontal na biblioteca, no modo texto e no modo página.
+    - "Próximas 1 h" guardou 14 partes (1h02). O card passou a mostrar o selo.
+    - O leitor abriu em modo texto e destacou a frase tocada. A troca para a página do PDF funcionou.
+    - Com a rede cortada, apareceu a faixa. Tocar numa frase tocou do arquivo guardado, e as posições ficaram pendentes.
+    - Quando a rede voltou, a posição e a escuta foram enviadas e a fila ficou vazia.
+- **Limites**:
+  - O service worker só funciona em HTTPS e só depois de abrir o sistema uma vez com internet.
+  - No iPhone, o Safari pode apagar os arquivos guardados se o site não estiver na Tela de Início e ficar dias sem abrir.
+  - O download inteligente só roda com o livro aberto. Não há download em segundo plano.
+  - Partes narradas antes de o texto ser guardado (antes da M106) não têm modo texto.
+- **Arquivos**:
+  - Novos:
+    - `public/sw.js`, `web/shared/pwa/serviceWorker.ts`
+    - Stores: `web/stores/useConexaoStore.ts`, `web/stores/useInstalacaoAppStore.ts`
+    - Componentes: `components/LeitorTexto.tsx`, `components/PainelOffline.tsx`, `components/ModalOfflineLivro.tsx`, `components/FaixaConexao.tsx`
+    - Hooks: `hooks/useSincronizacaoOffline.ts`, `hooks/usePreferenciasLeitura.ts`
+    - Utils: `utils/gerenciadorOffline.ts`, `utils/downloadAutomatico.ts`, `utils/pendenciasOffline.ts`, `utils/vozSalva.ts`
+  - Alterados:
+    - Configuração e app: `.tooling/frontend/vite.config.js`, `devops/php/nginx-internal.conf`, `public/site.webmanifest`, `templates/base.html.twig`, `web/main.tsx`, `web/config/api.ts`, `web/stores/useAuthStore.ts`, `web/stores/index.ts`, `web/layouts/MainLayout.tsx`
+    - Livros em áudio (`web/features/livros-audio/`): `LeitorLivroAudio.tsx`, `LivrosAudio.tsx`, `api.ts`
+    - Componentes: `PlayerAudioLivro`, `BarraSuperiorLeitor`, `VisualizadorLivro`, `LeitorSemPdf`, `CardLivroAudio`, `GradeLivrosAudio`, `CabecalhoLivrosAudio`, `PainelVozes`
+    - Hooks e utils: `hooks/useDocumentoPdf.ts`, `useLeitorLivro.ts`, `useLivrosAudio.ts`, `useNarracaoAtual.ts`, `useOfflineLivro.ts`, `useRegistroEscuta.ts`, `utils/offline.ts`, `utils/pdf.ts`

@@ -1,4 +1,5 @@
 import { addToast } from '@/shared/components/ui/toaster'
+import { useSemConexao } from '@/stores/useConexaoStore'
 import { Badge, Box, Button, Flex, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -7,8 +8,11 @@ import {
   ChevronLeft,
   ChevronRight,
   CloudDownload,
+  Crosshair,
   Download,
+  Ellipsis,
   Gauge,
+  Highlighter,
   ListMusic,
   LoaderCircle,
   Mic,
@@ -20,7 +24,6 @@ import {
   RotateCcw,
   RotateCw,
   SlidersHorizontal,
-  Trash2,
   Volume1,
   Volume2,
   VolumeX,
@@ -49,11 +52,18 @@ import type {
   VozLivroAudio,
 } from '../types'
 import { obterIndiceLivro } from '../utils/capitulos'
+import {
+  estaEmRedeMovel,
+  lerAjustesDownloadAutomatico,
+  selecionarPartesPorHoras,
+} from '../utils/downloadAutomatico'
 import { encontrarIndiceTrecho } from '../utils/localizacaoNarracao'
 import { chaveParteOffline, obterUrlAudioOffline } from '../utils/offline'
 import type { PDFDocumentProxy } from '../utils/pdf'
 import { encontrarBlocoPorPagina, formatarTempoAudio } from '../utils/sincronizacao'
+import { lerVozSalva, salvarVozEscolhida } from '../utils/vozSalva'
 import { PainelNarracao } from './PainelNarracao'
+import { PainelOffline } from './PainelOffline'
 import { PainelVozes } from './PainelVozes'
 
 interface PlayerAudioLivroProps {
@@ -62,6 +72,7 @@ interface PlayerAudioLivroProps {
   documento?: PDFDocumentProxy | null
   modoDuplo?: boolean
   onNarracaoAtual?: (narracao: NarracaoAtual | null) => void
+  onNarracaoTexto?: (narracao: NarracaoAtual | null) => void
   paginaAtualLeitor: number
   totalPaginas: number
   marcadorSalvo?: number
@@ -76,6 +87,7 @@ interface PlayerAudioLivroProps {
   onSalvarPosicao: (pagina: number, bloco?: number | null, segundos?: number) => void
   onSalvarMarcador?: () => void
   alvoReproducao?: AlvoReproducao | null
+  modoTexto?: boolean
 }
 
 const VELOCIDADE_MINIMA = 0.5
@@ -147,28 +159,6 @@ function salvarVelocidade(livroUuid: string, velocidade: number) {
   } catch {}
 }
 
-function chaveVozLivro(livroUuid: string): string {
-  return `livros-audio:voz:${livroUuid}`
-}
-
-function lerVozSalva(livroUuid: string): string | null {
-  try {
-    return localStorage.getItem(chaveVozLivro(livroUuid))
-  } catch {
-    return null
-  }
-}
-
-function salvarVozEscolhida(livroUuid: string, voz: string | null) {
-  try {
-    if (voz) {
-      localStorage.setItem(chaveVozLivro(livroUuid), voz)
-    } else {
-      localStorage.removeItem(chaveVozLivro(livroUuid))
-    }
-  } catch {}
-}
-
 function calcularTempoEquivalente(
   trechosAtuais: TrechoNarracao[],
   trechosNovos: TrechoNarracao[],
@@ -190,6 +180,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   documento = null,
   modoDuplo = false,
   onNarracaoAtual,
+  onNarracaoTexto,
   paginaAtualLeitor,
   totalPaginas,
   marcadorSalvo,
@@ -204,6 +195,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   onSalvarPosicao,
   onSalvarMarcador,
   alvoReproducao = null,
+  modoTexto = false,
 }: PlayerAudioLivroProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const ultimoSalvamentoRef = useRef<number>(0)
@@ -231,6 +223,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const [mostrarVozes, setMostrarVozes] = useState(false)
   const [mostrarAjustes, setMostrarAjustes] = useState(false)
   const [mostrarTimer, setMostrarTimer] = useState(false)
+  const [mostrarMais, setMostrarMais] = useState(false)
+  const semConexao = useSemConexao()
   const [timerSono, setTimerSono] = useState<TimerSono>(null)
   const pausadoEmRef = useRef<number | null>(null)
   const configurarNarracaoMutation = useConfigurarNarracaoLivro(livro.uuid)
@@ -554,8 +548,12 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const paginaLeitorRef = useRef({ pagina: paginaAtualLeitor, modoDuplo, onMudarPaginaLeitor })
   paginaLeitorRef.current = { pagina: paginaAtualLeitor, modoDuplo, onMudarPaginaLeitor }
 
+  const onNarracaoTextoRef = useRef(onNarracaoTexto)
+  onNarracaoTextoRef.current = onNarracaoTexto
+
   useEffect(() => {
     onNarracaoAtualRef.current?.(audioFoiUsadoRef.current ? narracao : null)
+    onNarracaoTextoRef.current?.(narracao)
   }, [narracao])
 
   useEffect(() => {
@@ -597,9 +595,21 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: livro.titulo,
-      artist: `Capítulo ${blocoAtivo.numeroBloco} (Págs. ${blocoAtivo.paginaInicio}-${blocoAtivo.paginaFim})`,
+      artist: `Parte ${blocoAtivo.numeroBloco} · páginas ${blocoAtivo.paginaInicio} a ${blocoAtivo.paginaFim}`,
       album: 'CirqueiraX Livros',
+      artwork: [
+        { src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
     })
+    try {
+      navigator.mediaSession.setActionHandler('seekto', (detalhes) => {
+        const audio = audioRef.current
+        if (!audio || detalhes.seekTime === undefined) return
+        audio.currentTime = detalhes.seekTime
+        setTempoAtual(detalhes.seekTime)
+      })
+    } catch {}
 
     navigator.mediaSession.setActionHandler('play', () => {
       const audio = audioRef.current
@@ -625,6 +635,20 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
       avancarBloco()
     })
   }, [blocoAtivo, livro.titulo, duracao])
+
+  const segundoInteiro = Math.floor(tempoAtual / 5)
+  useEffect(() => {
+    if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return
+    const audio = audioRef.current
+    if (!audio || !Number.isFinite(duracao) || duracao <= 0 || segundoInteiro < 0) return
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: duracao,
+        playbackRate: velocidade,
+        position: Math.min(duracao, Math.max(0, audio.currentTime)),
+      })
+    } catch {}
+  }, [duracao, velocidade, segundoInteiro])
 
   useEffect(() => {
     function salvarAoSair() {
@@ -845,31 +869,51 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     if (audioRef.current) audioRef.current.playbackRate = nova
   }
 
-  const partesParaBaixar = blocoAtivo
-    ? blocos.filter(
-        (bloco) =>
-          bloco.isPronto &&
-          bloco.numeroBloco >= blocoAtivo.numeroBloco &&
-          !offline.chaves.has(
-            chaveParteOffline(
-              bloco.numeroBloco,
-              vozDoBlocoPara(bloco.numeroBloco, vozEscolhida),
-              bloco.atualizadoEm
-            )
-          )
-      )
-    : []
   const partesGuardadas = blocos.filter((bloco) => offline.numeros.has(bloco.numeroBloco)).length
+  const offlineRef = useRef(offline)
+  offlineRef.current = offline
+  const vozDoBlocoParaRef = useRef(vozDoBlocoPara)
+  vozDoBlocoParaRef.current = vozDoBlocoPara
+  const numeroBlocoAtivo = blocoAtivo?.numeroBloco ?? null
+  const baixandoOffline = Boolean(offline.progresso)
 
-  function baixarParaOffline(quantidade: number | null) {
-    const escolhidas =
-      quantidade === null ? partesParaBaixar : partesParaBaixar.slice(0, quantidade)
-    offline.baixar(escolhidas, (numeroBloco) => vozDoBlocoPara(numeroBloco, vozEscolhida))
-  }
+  useEffect(() => {
+    if (numeroBlocoAtivo === null || semConexao || !offline.carregado || baixandoOffline) return
+    const ajustes = lerAjustesDownloadAutomatico(livro.uuid)
+    if (!ajustes.ativo || (ajustes.soWifi && estaEmRedeMovel())) return
+    const temporizador = window.setTimeout(() => {
+      const atual = offlineRef.current
+      if (ajustes.liberarOuvidas) {
+        const ouvidas = [...atual.numeros].filter((numero) => numero < numeroBlocoAtivo - 1)
+        if (ouvidas.length > 0) atual.removerPartes(ouvidas)
+      }
+      atual.baixar(
+        selecionarPartesPorHoras(blocos, numeroBlocoAtivo, ajustes.horas),
+        (numero) => vozDoBlocoParaRef.current(numero, vozEscolhida),
+        { silencioso: true }
+      )
+    }, 4000)
+    return () => window.clearTimeout(temporizador)
+  }, [
+    numeroBlocoAtivo,
+    semConexao,
+    offline.carregado,
+    baixandoOffline,
+    livro.uuid,
+    blocos,
+    vozEscolhida,
+  ])
 
-  async function apagarOffline() {
-    if (!window.confirm('Apagar deste aparelho as partes guardadas para ouvir offline?')) return
-    await offline.remover()
+  function abrirSomente(
+    painel: 'velocidade' | 'sumario' | 'vozes' | 'timer' | 'offline' | 'ajustes' | null
+  ) {
+    setMostrarMais(false)
+    setMostrarVelocidade((atual) => painel === 'velocidade' && !atual)
+    setMostrarSumario((atual) => painel === 'sumario' && !atual)
+    setMostrarVozes((atual) => painel === 'vozes' && !atual)
+    setMostrarTimer((atual) => painel === 'timer' && !atual)
+    setMostrarOffline((atual) => painel === 'offline' && !atual)
+    setMostrarAjustes((atual) => painel === 'ajustes' && !atual)
   }
 
   function mudarVolume(novoVol: number) {
@@ -969,7 +1013,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
       borderColor="cirqueira.grey.900"
       boxShadow="0 -10px 40px rgba(0, 0, 0, 0.7)"
       px={{ base: 3, md: 6 }}
-      py={2.5}
+      pt={2.5}
+      pb="calc(10px + env(safe-area-inset-bottom, 0px))"
       zIndex={45}
     >
       {audioUrl && (
@@ -1073,100 +1118,25 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         <Box
           position="absolute"
           bottom="calc(100% + 8px)"
-          right={{ base: 4, md: 24 }}
-          w={{ base: 'calc(100vw - 32px)', sm: '320px' }}
+          right={{ base: 2, md: 24 }}
+          w={{ base: 'calc(100vw - 16px)', sm: '380px' }}
+          maxH="70dvh"
+          overflowY="auto"
           bg="cirqueira.grey.900"
           border="1px solid"
           borderColor="cirqueira.grey.800"
           borderRadius="2xl"
-          p={3}
+          p={3.5}
           boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
           zIndex={60}
         >
-          <HStack justify="space-between" mb={1.5}>
-            <HStack gap={2} color="cirqueira.brand.400">
-              <CloudDownload size={14} />
-              <Text fontSize="xs" fontWeight="bold" color="white">
-                Ouvir offline
-              </Text>
-            </HStack>
-            <IconButton
-              size="2xs"
-              variant="ghost"
-              color="cirqueira.grey.400"
-              _hover={{ color: 'white' }}
-              onClick={() => setMostrarOffline(false)}
-              aria-label="Fechar ouvir offline"
-            >
-              <X size={12} />
-            </IconButton>
-          </HStack>
-          {!offline.suportado ? (
-            <Text fontSize="11px" color="cirqueira.grey.300">
-              Este navegador não deixa guardar áudio. Abra o site pelo Safari ou Chrome atualizado.
-            </Text>
-          ) : (
-            <>
-              <Text fontSize="11px" color="cirqueira.grey.400" mb={2.5}>
-                Guarda as próximas partes neste aparelho, na voz escolhida, para ouvir sem internet
-                com o livro aberto.
-              </Text>
-              {offline.progresso ? (
-                <Box mb={2}>
-                  <Text fontSize="11px" color="cirqueira.grey.200" mb={1}>
-                    Baixando parte {offline.progresso.atual} de {offline.progresso.total}…
-                  </Text>
-                  <Box h="4px" bg="rgba(255,255,255,0.08)" borderRadius="full">
-                    <Box
-                      h="full"
-                      borderRadius="full"
-                      bg="cirqueira.brand.500"
-                      w={`${
-                        ((offline.progresso.atual - 1 + offline.progresso.fracaoParte) /
-                          offline.progresso.total) *
-                        100
-                      }%`}
-                    />
-                  </Box>
-                </Box>
-              ) : (
-                <Flex gap={1} flexWrap="wrap" mb={2.5}>
-                  {[3, 5, 10].map((quantidade) => (
-                    <Button
-                      key={quantidade}
-                      size="xs"
-                      variant="subtle"
-                      disabled={partesParaBaixar.length === 0}
-                      onClick={() => baixarParaOffline(quantidade)}
-                    >
-                      Próximas {quantidade}
-                    </Button>
-                  ))}
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    disabled={partesParaBaixar.length === 0}
-                    onClick={() => baixarParaOffline(null)}
-                  >
-                    Todas que faltam ({partesParaBaixar.length})
-                  </Button>
-                </Flex>
-              )}
-              <HStack justify="space-between">
-                <Text fontSize="11px" color="cirqueira.grey.300">
-                  {partesGuardadas > 0
-                    ? `${partesGuardadas} parte(s) guardada(s) · ${(offline.tamanho / 1_048_576).toFixed(0)} MB`
-                    : 'Nada guardado ainda'}
-                </Text>
-                {partesGuardadas > 0 && !offline.progresso && (
-                  <Button size="2xs" variant="ghost" colorPalette="red" onClick={apagarOffline}>
-                    <Trash2 size={11} />
-                    Apagar
-                  </Button>
-                )}
-              </HStack>
-            </>
-          )}
+          <PainelOffline
+            livro={livro}
+            blocos={blocos}
+            numeroInicial={blocoAtivo?.numeroBloco ?? 1}
+            vozDoBloco={(numero) => vozDoBlocoPara(numero, vozEscolhida)}
+            onFechar={() => setMostrarOffline(false)}
+          />
         </Box>
       )}
 
@@ -1525,7 +1495,179 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         </Box>
       )}
 
-      {narracao && (audioFoiUsadoRef.current || tocando) && (
+      {mostrarMais && (
+        <>
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            position="fixed"
+            inset={0}
+            bg="blackAlpha.600"
+            zIndex={58}
+            onClick={() => setMostrarMais(false)}
+          />
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            position="absolute"
+            left={0}
+            right={0}
+            bottom="calc(100% - 1px)"
+            bg="cirqueira.grey.900"
+            borderTopRadius="2xl"
+            borderTop="1px solid"
+            borderColor="cirqueira.grey.800"
+            px={4}
+            pt={2}
+            pb={4}
+            zIndex={59}
+            boxShadow="0 -20px 50px rgba(0, 0, 0, 0.7)"
+          >
+            <Box w="40px" h="4px" bg="cirqueira.grey.700" borderRadius="full" mx="auto" mb={3} />
+            <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2}>
+              {[
+                {
+                  rotulo: formatarVelocidade(velocidade),
+                  icone: <Gauge size={18} />,
+                  ativo: false,
+                  acao: () => abrirSomente('velocidade'),
+                },
+                {
+                  rotulo: 'Sumário',
+                  icone: <ListMusic size={18} />,
+                  ativo: false,
+                  acao: () => abrirSomente('sumario'),
+                },
+                {
+                  rotulo: vozSelecionada ? vozSelecionada.nome : 'Voz',
+                  icone: <Mic size={18} />,
+                  ativo: false,
+                  acao: () => abrirSomente('vozes'),
+                },
+                {
+                  rotulo:
+                    timerSono?.tipo === 'minutos'
+                      ? formatarTempoAudio(Math.ceil(timerSono.restanteMs / 1000))
+                      : timerSono?.tipo === 'fim_parte'
+                        ? 'Fim da parte'
+                        : 'Timer',
+                  icone: <Moon size={18} />,
+                  ativo: Boolean(timerSono),
+                  acao: () => abrirSomente('timer'),
+                },
+                {
+                  rotulo: partesGuardadas > 0 ? `Offline (${partesGuardadas})` : 'Offline',
+                  icone: offline.progresso ? (
+                    <Box as="span" display="inline-flex" animation="spin 1s linear infinite">
+                      <LoaderCircle size={18} />
+                    </Box>
+                  ) : (
+                    <CloudDownload size={18} />
+                  ),
+                  ativo: partesGuardadas > 0,
+                  acao: () => abrirSomente('offline'),
+                },
+                {
+                  rotulo: 'Marcar',
+                  icone: isPosicaoSalva ? <BookmarkCheck size={18} /> : <Bookmark size={18} />,
+                  ativo: isPosicaoSalva,
+                  acao: () => {
+                    setMostrarMais(false)
+                    marcarAqui()
+                  },
+                },
+                {
+                  rotulo: acompanharAudio ? 'Seguir áudio' : 'Folhear livre',
+                  icone: <Crosshair size={18} />,
+                  ativo: acompanharAudio,
+                  acao: onAlternarAcompanharAudio,
+                },
+                ...(onAlternarModoDestaque
+                  ? [
+                      {
+                        rotulo: modoDestaque === 'palavra' ? 'Por palavra' : 'Por frase',
+                        icone: <Highlighter size={18} />,
+                        ativo: modoDestaque === 'palavra',
+                        acao: onAlternarModoDestaque,
+                      },
+                    ]
+                  : []),
+                {
+                  rotulo: 'Ajustes',
+                  icone: <SlidersHorizontal size={18} />,
+                  ativo: livro.narracaoDesatualizada,
+                  acao: () => abrirSomente('ajustes'),
+                },
+              ].map((item) => (
+                <Button
+                  key={item.rotulo}
+                  variant="ghost"
+                  h="64px"
+                  flexDirection="column"
+                  gap={1}
+                  borderRadius="xl"
+                  bg={item.ativo ? 'cirqueira.brand.500/15' : 'cirqueira.grey.950'}
+                  border="1px solid"
+                  borderColor={item.ativo ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'}
+                  color={item.ativo ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+                  onClick={item.acao}
+                >
+                  {item.icone}
+                  <Text fontSize="11px" fontWeight="semibold" truncate maxW="full">
+                    {item.rotulo}
+                  </Text>
+                </Button>
+              ))}
+            </Box>
+            {(onVoltarPaginaLeitor || onAvancarPaginaLeitor) && (
+              <HStack mt={3} justify="space-between">
+                <Button
+                  variant="subtle"
+                  h="44px"
+                  flex={1}
+                  disabled={paginaAtualLeitor <= 1}
+                  onClick={onVoltarPaginaLeitor}
+                >
+                  <ChevronLeft size={18} />
+                  Página
+                </Button>
+                <Text
+                  fontSize="sm"
+                  color="white"
+                  fontWeight="bold"
+                  px={3}
+                  fontVariantNumeric="tabular-nums"
+                >
+                  {paginaAtualLeitor} / {totalPaginas}
+                </Text>
+                <Button
+                  variant="subtle"
+                  h="44px"
+                  flex={1}
+                  disabled={paginaAtualLeitor >= totalPaginas}
+                  onClick={onAvancarPaginaLeitor}
+                >
+                  Página
+                  <ChevronRight size={18} />
+                </Button>
+              </HStack>
+            )}
+            {!semConexao && (
+              <Button
+                variant="ghost"
+                size="sm"
+                w="full"
+                mt={2}
+                color="cirqueira.grey.400"
+                onClick={baixarPdf}
+              >
+                <Download size={14} />
+                Baixar o PDF original
+              </Button>
+            )}
+          </Box>
+        </>
+      )}
+
+      {narracao && !modoTexto && (audioFoiUsadoRef.current || tocando) && (
         <HStack
           as="button"
           maxW="1600px"
@@ -1575,8 +1717,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           <HStack gap={3} align="center">
             <IconButton
               aria-label={tocando ? 'Pausar áudio' : 'Reproduzir áudio'}
-              w="44px"
-              h="44px"
+              w={{ base: '52px', md: '44px' }}
+              h={{ base: '52px', md: '44px' }}
               borderRadius="full"
               bg="cirqueira.brand.500"
               color="white"
@@ -1590,10 +1732,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               disabled={!audioUrl}
               onClick={alternarPlayPause}
             >
-              {tocando ? <Pause size={20} /> : <Play size={20} style={{ marginLeft: '2px' }} />}
+              {tocando ? <Pause size={22} /> : <Play size={22} style={{ marginLeft: '2px' }} />}
             </IconButton>
 
-            <Box minW={0} maxW="190px">
+            <Box minW={0} maxW={{ base: '58vw', md: '190px' }}>
               <Text fontSize="xs" fontWeight="bold" color="white" truncate>
                 {tocando ? 'Ouvindo áudio' : 'Reproduzir áudio'}
               </Text>
@@ -1603,7 +1745,28 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             </Box>
           </HStack>
 
+          <IconButton
+            display={{ base: 'inline-flex', md: 'none' }}
+            variant="ghost"
+            w="44px"
+            h="44px"
+            borderRadius="full"
+            color={mostrarMais ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            bg={mostrarMais ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
+            border="1px solid"
+            borderColor="cirqueira.grey.800"
+            onClick={() => {
+              abrirSomente(null)
+              setMostrarMais((atual) => !atual)
+            }}
+            aria-label="Mais controles"
+            aria-expanded={mostrarMais}
+          >
+            <Ellipsis size={20} />
+          </IconButton>
+
           <HStack
+            display={{ base: 'none', md: 'flex' }}
             gap={1}
             align="center"
             position="relative"
@@ -1662,7 +1825,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         >
           <HStack w="full" gap={2} align="center">
             <IconButton
-              size="xs"
+              size={{ base: 'md', md: 'xs' }}
               variant="ghost"
               color="cirqueira.grey.400"
               _hover={{ color: 'white' }}
@@ -1705,7 +1868,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             </Slider.Root>
 
             <IconButton
-              size="xs"
+              size={{ base: 'md', md: 'xs' }}
               variant="ghost"
               color="cirqueira.grey.400"
               _hover={{ color: 'white' }}
@@ -1769,6 +1932,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
         </Flex>
 
         <HStack
+          display={{ base: 'none', md: 'flex' }}
           gap={2}
           align="center"
           justify={{ base: 'center', lg: 'flex-end' }}

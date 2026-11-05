@@ -1,11 +1,15 @@
-import { Button, Center, Flex, Text, VStack } from '@chakra-ui/react'
-import { ArrowLeft, Headphones } from 'lucide-react'
-import { memo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Flex } from '@chakra-ui/react'
+import { memo, useMemo, useState } from 'react'
 import { useBlocosLivroAudio, useSalvarPosicaoLivroAudio } from '../hooks/useLivrosAudio'
-import type { LivroAudio } from '../types'
+import type { NarracaoAtual } from '../hooks/useNarracaoAtual'
+import { usePreferenciasLeitura } from '../hooks/usePreferenciasLeitura'
+import type { AlvoReproducao, LivroAudio } from '../types'
 import { carimbarPosicao } from '../utils/posicao'
+import { encontrarBlocoPorPagina } from '../utils/sincronizacao'
 import { AvisoProgressoAudio } from './AvisoProgressoAudio'
+import { BarraSuperiorLeitor } from './BarraSuperiorLeitor'
+import { FaixaConexao } from './FaixaConexao'
+import { LeitorTexto } from './LeitorTexto'
 import { PlayerAudioLivro } from './PlayerAudioLivro'
 
 interface LeitorSemPdfProps {
@@ -13,17 +17,30 @@ interface LeitorSemPdfProps {
 }
 
 export const LeitorSemPdf = memo(function LeitorSemPdf({ livro }: LeitorSemPdfProps) {
-  const navigate = useNavigate()
   const salvarPosicaoMutation = useSalvarPosicaoLivroAudio()
   const { data: blocos = [] } = useBlocosLivroAudio(livro.uuid)
   const [pagina, setPagina] = useState(livro.paginaAtual)
+  const [narracao, setNarracao] = useState<NarracaoAtual | null>(null)
+  const [seguir, setSeguir] = useState(true)
+  const [alvoReproducao, setAlvoReproducao] = useState<AlvoReproducao | null>(null)
+  const { tema, alternarTema, tamanhoFonte, aumentarFonte, diminuirFonte } =
+    usePreferenciasLeitura()
+  const totalPaginas = livro.totalPaginas ?? 1
 
-  function salvarPosicao(paginaAtual: number, bloco?: number | null, segundos?: number) {
+  const bloco = useMemo(
+    () =>
+      blocos.find((item) => item.numeroBloco === narracao?.numeroBloco) ??
+      encontrarBlocoPorPagina(blocos, pagina) ??
+      null,
+    [blocos, narracao?.numeroBloco, pagina]
+  )
+
+  function salvarPosicao(paginaAtual: number, numeroBloco?: number | null, segundos?: number) {
     salvarPosicaoMutation.mutate({
       uuid: livro.uuid,
       posicao: carimbarPosicao(livro.uuid, {
         paginaAtual,
-        blocoAtual: bloco ?? livro.blocoAtual,
+        blocoAtual: numeroBloco ?? livro.blocoAtual,
         segundosNoBloco: segundos ?? 0,
       }),
     })
@@ -38,37 +55,48 @@ export const LeitorSemPdf = memo(function LeitorSemPdf({ livro }: LeitorSemPdfPr
       position="fixed"
       inset={0}
       zIndex={50}
+      overflow="hidden"
     >
-      <Center flex={1} p={6}>
-        <VStack gap={3} maxW="md" textAlign="center">
-          <Center
-            boxSize={14}
-            borderRadius="2xl"
-            bg="cirqueira.brand.500/15"
-            color="cirqueira.brand.400"
-          >
-            <Headphones size={28} />
-          </Center>
-          <Text fontSize="lg" fontWeight="bold" color="cirqueira.grey.0">
-            {livro.titulo}
-          </Text>
-          <Text fontSize="xs" color="cirqueira.grey.400">
-            As páginas não puderam ser exibidas neste navegador. O áudio continua disponível aqui
-            embaixo.
-          </Text>
-          <Button
-            size="sm"
-            borderRadius="lg"
-            bg="cirqueira.grey.800"
-            _hover={{ bg: 'cirqueira.grey.700' }}
-            color="cirqueira.grey.0"
-            onClick={() => navigate('/livros-audio')}
-          >
-            <ArrowLeft size={16} style={{ marginRight: '6px' }} />
-            Voltar para a biblioteca
-          </Button>
-        </VStack>
-      </Center>
+      <BarraSuperiorLeitor
+        titulo={livro.titulo}
+        paginaAtual={pagina}
+        totalPaginas={totalPaginas}
+        modoDuplo={false}
+        escala={1}
+        telaCheia={false}
+        onAumentarZoom={() => {}}
+        onDiminuirZoom={() => {}}
+        onResetarZoom={() => {}}
+        onAlternarModoDuplo={() => {}}
+        onAlternarTelaCheia={() => {}}
+        tema={tema}
+        onAlternarTema={alternarTema}
+        modoTexto
+        onAumentarFonte={aumentarFonte}
+        onDiminuirFonte={diminuirFonte}
+      />
+
+      <FaixaConexao compacta />
+
+      <LeitorTexto
+        narracao={narracao}
+        bloco={bloco}
+        tema={tema}
+        tamanhoFonte={tamanhoFonte}
+        seguir={seguir}
+        destacarPalavra={false}
+        onOuvirTrecho={(numeroBloco, indiceTrecho, texto) => {
+          const alvo = blocos.find((item) => item.numeroBloco === numeroBloco)
+          setSeguir(true)
+          setAlvoReproducao({
+            id: Date.now(),
+            numeroBloco,
+            pagina: alvo?.paginaInicio ?? pagina,
+            indiceTrecho,
+            texto,
+          })
+        }}
+      />
 
       <AvisoProgressoAudio livro={livro} />
 
@@ -77,11 +105,14 @@ export const LeitorSemPdf = memo(function LeitorSemPdf({ livro }: LeitorSemPdfPr
           livro={livro}
           blocos={blocos}
           paginaAtualLeitor={pagina}
-          totalPaginas={livro.totalPaginas ?? 1}
-          acompanharAudio={false}
-          onAlternarAcompanharAudio={() => {}}
+          totalPaginas={totalPaginas}
+          acompanharAudio={seguir}
+          onAlternarAcompanharAudio={() => setSeguir((atual) => !atual)}
           onMudarPaginaLeitor={setPagina}
           onSalvarPosicao={salvarPosicao}
+          onNarracaoTexto={setNarracao}
+          modoTexto
+          alvoReproducao={alvoReproducao}
         />
       )}
     </Flex>

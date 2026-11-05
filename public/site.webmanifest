@@ -1,9 +1,13 @@
 {
+  "id": "/",
   "name": "CirqueiraX",
   "short_name": "CirqueiraX",
   "description": "Central Inteligente de Mídias, Automação de Downloads e Sincronização em Nuvem",
-  "start_url": "/",
+  "lang": "pt-BR",
+  "start_url": "/livros-audio",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0c1110",
   "theme_color": "#00ba9c",
   "icons": [
@@ -36,6 +40,26 @@
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Livros em Áudio",
+      "short_name": "Livros",
+      "url": "/livros-audio",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }

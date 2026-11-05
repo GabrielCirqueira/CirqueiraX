@@ -1,4 +1,5 @@
 import { addToast } from '@/shared/components/ui/toaster'
+import { useSemConexao } from '@/stores/useConexaoStore'
 import {
   Badge,
   Box,
@@ -13,6 +14,8 @@ import {
 import {
   ArrowUpToLine,
   BookOpen,
+  CloudCheck,
+  CloudDownload,
   Download,
   FileText,
   Headphones,
@@ -20,7 +23,7 @@ import {
   Play,
   Trash2,
 } from 'lucide-react'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { abrirPdfEmNovaAba } from '../api'
 import { useAlterarFilaLivro } from '../hooks/useLivrosAudio'
@@ -32,12 +35,15 @@ import {
   obterAparenciaStatusLivro,
   obterProgressoAudio,
 } from '../utils/livros'
+import { offlineDisponivel } from '../utils/offline'
+import { ModalOfflineLivro } from './ModalOfflineLivro'
 
 interface CardLivroAudioProps {
   livro: LivroAudio
   partesNaFrente?: number
   itemFila?: ItemFilaGeracao
   apagando?: boolean
+  partesOffline?: number
   onApagar: (uuid: string) => void
 }
 
@@ -46,9 +52,12 @@ export const CardLivroAudio = memo(function CardLivroAudio({
   partesNaFrente = 0,
   itemFila,
   apagando = false,
+  partesOffline = 0,
   onApagar,
 }: CardLivroAudioProps) {
   const navigate = useNavigate()
+  const semConexao = useSemConexao()
+  const [offlineAberto, setOfflineAberto] = useState(false)
   const alterarFilaMutation = useAlterarFilaLivro()
   const naFila = Boolean(itemFila)
   const alterandoFila = alterarFilaMutation.isPending
@@ -121,6 +130,14 @@ export const CardLivroAudio = memo(function CardLivroAudio({
                 {formatarTamanhoLivro(livro.tamanhoTotalBytes ?? livro.tamanhoBytes)}
                 {livro.idiomaDescricao ? ` · Voz em ${livro.idiomaDescricao.toLowerCase()}` : ''}
               </Text>
+              {partesOffline > 0 && (
+                <HStack gap={1} color="cirqueira.brand.300">
+                  <CloudCheck size={12} />
+                  <Text fontSize="10px" fontWeight="semibold">
+                    {partesOffline} parte(s) neste aparelho
+                  </Text>
+                </HStack>
+              )}
             </VStack>
           </HStack>
 
@@ -219,10 +236,26 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
             aria-label="Baixar PDF original"
             title="Baixar PDF original"
+            disabled={semConexao}
             onClick={handleBaixarPdf}
           >
             <Download size={14} />
           </IconButton>
+
+          {livro.temAudioParaOuvir && offlineDisponivel() && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              borderRadius="lg"
+              color={partesOffline > 0 ? 'cirqueira.brand.400' : 'cirqueira.grey.400'}
+              _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
+              aria-label="Baixar para ouvir sem internet"
+              title="Baixar para ouvir sem internet"
+              onClick={() => setOfflineAberto(true)}
+            >
+              <CloudDownload size={14} />
+            </IconButton>
+          )}
 
           {naFila && (
             <IconButton
@@ -233,7 +266,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               aria-label={livro.filaPausada ? 'Retomar geração' : 'Pausar geração'}
               title={livro.filaPausada ? 'Retomar a geração do áudio' : 'Pausar a geração do áudio'}
-              disabled={alterandoFila}
+              disabled={alterandoFila || semConexao}
               onClick={() =>
                 alterarFilaMutation.mutate({
                   uuid: livro.uuid,
@@ -254,7 +287,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               aria-label="Gerar este livro primeiro"
               title="Gerar este livro primeiro"
-              disabled={alterandoFila}
+              disabled={alterandoFila || semConexao}
               onClick={() => alterarFilaMutation.mutate({ uuid: livro.uuid, acao: 'priorizar' })}
             >
               <ArrowUpToLine size={14} />
@@ -269,7 +302,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
             aria-label="Apagar livro"
             title="Apagar livro"
-            disabled={apagando}
+            disabled={apagando || semConexao}
             onClick={handleApagar}
           >
             <Trash2 size={14} />
@@ -294,6 +327,14 @@ export const CardLivroAudio = memo(function CardLivroAudio({
           {livro.temAudioParaOuvir ? 'Ouvir agora' : 'Ler PDF'}
         </Button>
       </HStack>
+
+      {offlineAberto && (
+        <ModalOfflineLivro
+          livro={livro}
+          aberto={offlineAberto}
+          onFechar={() => setOfflineAberto(false)}
+        />
+      )}
     </Box>
   )
 })

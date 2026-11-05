@@ -1,4 +1,5 @@
 import { ModalAuth } from '@/features/auth/ModalAuth'
+import { useSincronizacaoOffline } from '@/features/livros-audio/hooks/useSincronizacaoOffline'
 import { Box, Flex } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
@@ -15,6 +16,7 @@ export interface MainLayoutContext {
 
 export function MainLayout() {
   const [modalAberto, setModalAberto] = useState(false)
+  useSincronizacaoOffline()
   const [mobileMenuAberto, setMobileMenuAberto] = useState(false)
 
   const abrirModal = useCallback(() => setModalAberto(true), [])

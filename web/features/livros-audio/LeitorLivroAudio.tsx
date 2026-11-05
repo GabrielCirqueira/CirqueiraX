@@ -2,12 +2,13 @@ import { useSEO } from '@/shared/hooks'
 import { Button, Center, Flex, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, BookOpen, TriangleAlert } from 'lucide-react'
-import { memo, useCallback, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { obterUrlPdfLivro } from './api'
 import { AvisoProgressoAudio } from './components/AvisoProgressoAudio'
 import { BarraSuperiorLeitor } from './components/BarraSuperiorLeitor'
+import { FaixaConexao } from './components/FaixaConexao'
 import { LeitorSemPdf } from './components/LeitorSemPdf'
+import { LeitorTexto } from './components/LeitorTexto'
 import { type FraseSelecionada, MenuFrase } from './components/MenuFrase'
 import type { CliqueTextoPagina } from './components/PaginaPdf'
 import { PainelBusca } from './components/PainelBusca'
@@ -29,13 +30,8 @@ import {
   useRemoverMarcacao,
 } from './hooks/useMarcacoesLivro'
 import type { NarracaoAtual } from './hooks/useNarracaoAtual'
-import type {
-  AlvoReproducao,
-  LivroAudio,
-  MarcacaoLivro,
-  ModoDestaqueNarracao,
-  TemaPagina,
-} from './types'
+import { usePreferenciasLeitura } from './hooks/usePreferenciasLeitura'
+import type { AlvoReproducao, LivroAudio, MarcacaoLivro, ModoDestaqueNarracao } from './types'
 import type { ResultadoBusca } from './utils/buscaLivro'
 import { encontrarTrechoNaPosicao } from './utils/localizacaoNarracao'
 import {
@@ -43,6 +39,7 @@ import {
   type SegmentoDestaque,
   calcularRetangulosDosSegmentos,
 } from './utils/pdf'
+import { aplicarPosicaoPendente } from './utils/pendenciasOffline'
 import { carimbarPosicao } from './utils/posicao'
 import { encontrarBlocoPorPagina } from './utils/sincronizacao'
 
@@ -67,24 +64,6 @@ function salvarModoDestaque(modo: ModoDestaqueNarracao) {
   } catch {}
 }
 
-const CHAVE_TEMA_PAGINA = 'livros-audio:tema-pagina'
-const ORDEM_TEMAS: TemaPagina[] = ['claro', 'sepia', 'escuro']
-
-function lerTemaPagina(): TemaPagina {
-  try {
-    const salvo = localStorage.getItem(CHAVE_TEMA_PAGINA)
-    return ORDEM_TEMAS.includes(salvo as TemaPagina) ? (salvo as TemaPagina) : 'claro'
-  } catch {
-    return 'claro'
-  }
-}
-
-function salvarTemaPagina(tema: TemaPagina) {
-  try {
-    localStorage.setItem(CHAVE_TEMA_PAGINA, tema)
-  } catch {}
-}
-
 const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: ConteudoLeitorProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const salvarPosicaoMutation = useSalvarPosicaoLivroAudio()
@@ -92,7 +71,16 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
   const [acompanharAudio, setAcompanharAudio] = useState(true)
   const [narracao, setNarracao] = useState<NarracaoAtual | null>(null)
   const [modoDestaque, setModoDestaque] = useState<ModoDestaqueNarracao>(lerModoDestaque)
-  const [tema, setTema] = useState<TemaPagina>(lerTemaPagina)
+  const [narracaoTexto, setNarracaoTexto] = useState<NarracaoAtual | null>(null)
+  const {
+    tema,
+    alternarTema,
+    modoTexto,
+    alternarModoTexto,
+    tamanhoFonte,
+    aumentarFonte,
+    diminuirFonte,
+  } = usePreferenciasLeitura()
   const [buscaAberta, setBuscaAberta] = useState(false)
   const [marcacoesAbertas, setMarcacoesAbertas] = useState(false)
   const [resultadoBusca, setResultadoBusca] = useState<ResultadoBusca | null>(null)
@@ -130,14 +118,6 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
     })
   }
 
-  function alternarTema() {
-    setTema((atual) => {
-      const novo = ORDEM_TEMAS[(ORDEM_TEMAS.indexOf(atual) + 1) % ORDEM_TEMAS.length] ?? 'claro'
-      salvarTemaPagina(novo)
-      return novo
-    })
-  }
-
   const {
     paginaAtual,
     escala,
@@ -157,6 +137,30 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
     totalPaginas,
     onSalvarPosicao: salvarPosicao,
   })
+
+  useEffect(() => {
+    if (window.innerWidth >= 768) return
+    let cancelado = false
+    documento
+      .getPage(Math.max(1, Math.min(livro.paginaAtual, documento.numPages)))
+      .then((pagina) => {
+        if (cancelado) return
+        const largura = pagina.getViewport({ scale: 1 }).width
+        if (largura > 0) definirEscala((window.innerWidth - 12) / largura)
+      })
+      .catch(() => {})
+    return () => {
+      cancelado = true
+    }
+  }, [documento, definirEscala, livro.paginaAtual])
+
+  const blocoTexto = useMemo(
+    () =>
+      blocos.find((bloco) => bloco.numeroBloco === narracaoTexto?.numeroBloco) ??
+      encontrarBlocoPorPagina(blocos, paginaAtual) ??
+      null,
+    [blocos, narracaoTexto?.numeroBloco, paginaAtual]
+  )
 
   function pedirReproducao(
     dados: Omit<AlvoReproducao, 'id' | 'numeroBloco'> & { numeroBloco?: number | null }
@@ -306,7 +310,7 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
       ref={containerRef}
       direction="column"
       w="full"
-      h="100vh"
+      h="100dvh"
       bg="cirqueira.grey.950"
       overflow="hidden"
       position="fixed"
@@ -343,7 +347,13 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         }}
         tema={tema}
         onAlternarTema={alternarTema}
+        modoTexto={modoTexto}
+        onAlternarModoTexto={alternarModoTexto}
+        onAumentarFonte={aumentarFonte}
+        onDiminuirFonte={diminuirFonte}
       />
+
+      <FaixaConexao compacta />
 
       {buscaAberta && (
         <PainelBusca
@@ -404,22 +414,45 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         />
       )}
 
-      <VisualizadorLivro
-        documento={documento}
-        paginaAtual={paginaAtual}
-        totalPaginas={totalPaginas}
-        escala={escala}
-        modoDuplo={modoDuplo}
-        destaque={narracao?.localizacao ?? null}
-        destaquePalavra={modoDestaque === 'palavra' ? (narracao?.localizacaoPalavra ?? null) : null}
-        seguirDestaque={acompanharAudio}
-        tema={tema}
-        marcacoes={marcacoesNaPagina}
-        destaqueBusca={resultadoBusca?.segmentos}
-        onClicarTexto={tratarCliqueTexto}
-        onAvancar={avancarPagina}
-        onVoltar={voltarPagina}
-      />
+      {modoTexto ? (
+        <LeitorTexto
+          narracao={narracaoTexto}
+          bloco={blocoTexto}
+          tema={tema}
+          tamanhoFonte={tamanhoFonte}
+          seguir={acompanharAudio}
+          destacarPalavra={modoDestaque === 'palavra'}
+          onOuvirTrecho={(numeroBloco, indiceTrecho, texto) => {
+            const bloco = blocos.find((item) => item.numeroBloco === numeroBloco)
+            pedirReproducao({
+              numeroBloco,
+              pagina: narracaoTexto?.pagina ?? bloco?.paginaInicio ?? paginaAtual,
+              indiceTrecho,
+              texto,
+            })
+          }}
+          onVerPagina={alternarModoTexto}
+        />
+      ) : (
+        <VisualizadorLivro
+          documento={documento}
+          paginaAtual={paginaAtual}
+          totalPaginas={totalPaginas}
+          escala={escala}
+          modoDuplo={modoDuplo}
+          destaque={narracao?.localizacao ?? null}
+          destaquePalavra={
+            modoDestaque === 'palavra' ? (narracao?.localizacaoPalavra ?? null) : null
+          }
+          seguirDestaque={acompanharAudio}
+          tema={tema}
+          marcacoes={marcacoesNaPagina}
+          destaqueBusca={resultadoBusca?.segmentos}
+          onClicarTexto={tratarCliqueTexto}
+          onAvancar={avancarPagina}
+          onVoltar={voltarPagina}
+        />
+      )}
 
       <AvisoProgressoAudio livro={livro} />
 
@@ -429,6 +462,8 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
         documento={documento}
         modoDuplo={modoDuplo}
         onNarracaoAtual={setNarracao}
+        onNarracaoTexto={setNarracaoTexto}
+        modoTexto={modoTexto}
         paginaAtualLeitor={paginaAtual}
         totalPaginas={totalPaginas}
         marcadorSalvo={livro.paginaAtual}
@@ -452,15 +487,22 @@ export function Component() {
   const { uuid = '' } = useParams<{ uuid: string }>()
   const navigate = useNavigate()
 
-  const { data: livro, isLoading: carregandoLivro, isError: erroLivro } = useLivroAudio(uuid)
+  const {
+    data: livroServidor,
+    isLoading: carregandoLivro,
+    isError: erroLivro,
+  } = useLivroAudio(uuid)
+  const livro = useMemo(
+    () => (livroServidor ? aplicarPosicaoPendente(livroServidor) : undefined),
+    [livroServidor]
+  )
 
   useSEO({
     title: livro ? `${livro.titulo} — Leitor` : 'Leitor de Livros em Áudio',
     description: 'Visualizador de livros em formato de livro com sincronização de leitura.',
   })
 
-  const urlPdf = livro ? obterUrlPdfLivro(livro.uuid) : null
-  const { data: documento, isLoading: carregandoPdf } = useDocumentoPdf(urlPdf)
+  const { data: documento, isLoading: carregandoPdf } = useDocumentoPdf(livro?.uuid)
 
   if (carregandoLivro || carregandoPdf) {
     return (

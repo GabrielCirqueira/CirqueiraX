@@ -6,6 +6,8 @@ import { ThemeProvider } from './contexts'
 import { Provider } from './shared/components/ui/provider'
 import { Toaster } from './shared/components/ui/toaster'
 import './index.css'
+import { registrarServiceWorker } from './shared/pwa/serviceWorker'
+import './stores/useInstalacaoAppStore'
 
 import '@fontsource/poppins/400.css'
 import '@fontsource/poppins/600.css'
@@ -15,9 +17,16 @@ import '@fontsource/lato/400.css'
 import '@fontsource/lato/700.css'
 
 window.addEventListener('vite:preloadError', (event) => {
+  if (!navigator.onLine) return
+  const chave = 'cirqueirax:recarregou-por-erro'
+  const ultima = Number(sessionStorage.getItem(chave) ?? 0)
+  if (Date.now() - ultima < 30_000) return
+  sessionStorage.setItem(chave, String(Date.now()))
   console.warn('Vite preload error detected, reloading page...', event)
   window.location.reload()
 })
+
+registrarServiceWorker()
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +36,10 @@ const queryClient = new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
+      networkMode: 'offlineFirst',
+    },
+    mutations: {
+      networkMode: 'always',
     },
   },
 })

@@ -1,3 +1,4 @@
+import { useSemConexao } from '@/stores/useConexaoStore'
 import {
   Badge,
   Box,
@@ -67,6 +68,7 @@ export function PainelVozes({
   onRemover,
   onFechar,
 }: PainelVozesProps) {
+  const semConexao = useSemConexao()
   const { data: linksAmostras = [] } = useQuery({
     queryKey: [...LIVROS_AUDIO_QUERY_KEY, 'amostras'],
     queryFn: listarLinksAmostras,
@@ -266,7 +268,7 @@ export function PainelVozes({
                     px={2}
                     fontSize="10px"
                     loading={emAcao}
-                    disabled={disco?.nivel === 'critico'}
+                    disabled={disco?.nivel === 'critico' || semConexao}
                     onClick={() => onGerar(voz)}
                   >
                     {voz.status === 'nao_gerada' ? 'Gerar' : 'Tentar de novo'}
@@ -294,7 +296,7 @@ export function PainelVozes({
                     variant="ghost"
                     color="cirqueira.grey.500"
                     _hover={{ color: 'cirqueira.red.400', bg: 'cirqueira.grey.800' }}
-                    disabled={emAcao}
+                    disabled={emAcao || semConexao}
                     onClick={() => onRemover(voz)}
                     aria-label={`Remover a voz ${voz.nome}`}
                     title="Apagar o áudio desta voz"

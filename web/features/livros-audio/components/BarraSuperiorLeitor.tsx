@@ -1,15 +1,19 @@
 import { Badge, Box, Button, HStack, IconButton, Text } from '@chakra-ui/react'
 import {
+  AArrowDown,
+  AArrowUp,
   BookOpen,
   Bookmark,
   ChevronRight,
   Coffee,
   Columns2,
+  FileText,
   Maximize,
   Minimize,
   Moon,
   Search,
   Sun,
+  TextQuote,
   ZoomIn,
 } from 'lucide-react'
 import { memo } from 'react'
@@ -43,6 +47,10 @@ interface BarraSuperiorLeitorProps {
   onAlternarMarcacoes?: () => void
   tema?: TemaPagina
   onAlternarTema?: () => void
+  modoTexto?: boolean
+  onAlternarModoTexto?: () => void
+  onAumentarFonte?: () => void
+  onDiminuirFonte?: () => void
 }
 
 const NIVEIS_ZOOM = [0.8, 1.0, 1.25, 1.5, 2.0]
@@ -65,6 +73,10 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
   onAlternarMarcacoes,
   tema = 'claro',
   onAlternarTema,
+  modoTexto = false,
+  onAlternarModoTexto,
+  onAumentarFonte,
+  onDiminuirFonte,
 }: BarraSuperiorLeitorProps) {
   const navigate = useNavigate()
   const IconeTema = ICONE_TEMA[tema]
@@ -82,8 +94,9 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
   return (
     <Box
       w="full"
-      h={14}
-      px={{ base: 3, md: 6 }}
+      minH={14}
+      pt="env(safe-area-inset-top, 0px)"
+      px={{ base: 2, md: 6 }}
       bg="cirqueira.grey.950"
       borderBottom="1px solid"
       borderColor="cirqueira.grey.900"
@@ -92,7 +105,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
       justifyContent="space-between"
       zIndex={40}
     >
-      <HStack gap={3} minW={0} flex={1}>
+      <HStack gap={{ base: 2, md: 3 }} minW={0} flex={1}>
         <Box
           as="button"
           p="7px"
@@ -112,6 +125,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
 
         <HStack gap={2} minW={0} align="center">
           <Button
+            display={{ base: 'none', md: 'inline-flex' }}
             size="xs"
             variant="ghost"
             p={0}
@@ -125,7 +139,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
             Biblioteca
           </Button>
 
-          <Box color="cirqueira.grey.500" display="inline-flex">
+          <Box color="cirqueira.grey.500" display={{ base: 'none', md: 'inline-flex' }}>
             <ChevronRight size={14} />
           </Box>
 
@@ -134,13 +148,14 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
             fontWeight="bold"
             color="white"
             truncate
-            maxW={{ base: '140px', sm: '260px', md: '450px' }}
+            maxW={{ base: '30vw', sm: '260px', md: '450px' }}
             title={titulo}
           >
             {titulo}
           </Text>
 
           <Badge
+            display={{ base: modoTexto ? 'none' : 'inline-flex', md: 'inline-flex' }}
             size="sm"
             variant="solid"
             bg="cirqueira.brand.500/20"
@@ -159,38 +174,88 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
         </HStack>
       </HStack>
 
-      <HStack gap={2} align="center">
-        <IconButton
-          size="sm"
-          variant="ghost"
-          borderRadius="lg"
-          color={buscaAberta ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
-          bg={buscaAberta ? 'cirqueira.brand.500/20' : undefined}
-          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
-          onClick={onAlternarBusca}
-          aria-label="Buscar no livro"
-          title="Buscar no livro"
-        >
-          <Search size={16} />
-        </IconButton>
+      <HStack gap={{ base: 0.5, md: 2 }} align="center">
+        {onAlternarModoTexto && (
+          <Button
+            size="sm"
+            variant="ghost"
+            borderRadius="lg"
+            px={2}
+            h="36px"
+            color={modoTexto ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            bg={modoTexto ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
+            border="1px solid"
+            borderColor={modoTexto ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'}
+            onClick={onAlternarModoTexto}
+            aria-label={modoTexto ? 'Ver as páginas do PDF' : 'Ler em modo texto'}
+            title={modoTexto ? 'Ver as páginas do PDF' : 'Ler em modo texto, com letra grande'}
+            fontSize="xs"
+          >
+            {modoTexto ? <FileText size={16} /> : <TextQuote size={16} />}
+            <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+              {modoTexto ? 'Página' : 'Texto'}
+            </Text>
+          </Button>
+        )}
 
-        <Button
-          size="sm"
-          variant="ghost"
-          borderRadius="lg"
-          px={2}
-          h="32px"
-          color={marcacoesAbertas ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
-          bg={marcacoesAbertas ? 'cirqueira.brand.500/20' : undefined}
-          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
-          onClick={onAlternarMarcacoes}
-          aria-label="Marcadores, destaques e notas"
-          title="Marcadores, destaques e notas"
-          fontSize="xs"
-        >
-          <Bookmark size={16} />
-          {totalMarcacoes > 0 && totalMarcacoes}
-        </Button>
+        {modoTexto && onDiminuirFonte && onAumentarFonte && (
+          <>
+            <IconButton
+              size="sm"
+              variant="ghost"
+              color="cirqueira.grey.300"
+              onClick={onDiminuirFonte}
+              aria-label="Diminuir a letra"
+            >
+              <AArrowDown size={17} />
+            </IconButton>
+            <IconButton
+              size="sm"
+              variant="ghost"
+              color="cirqueira.grey.300"
+              onClick={onAumentarFonte}
+              aria-label="Aumentar a letra"
+            >
+              <AArrowUp size={17} />
+            </IconButton>
+          </>
+        )}
+
+        {onAlternarBusca && (
+          <IconButton
+            size="sm"
+            variant="ghost"
+            borderRadius="lg"
+            color={buscaAberta ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
+            bg={buscaAberta ? 'cirqueira.brand.500/20' : undefined}
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+            onClick={onAlternarBusca}
+            aria-label="Buscar no livro"
+            title="Buscar no livro"
+          >
+            <Search size={16} />
+          </IconButton>
+        )}
+
+        {onAlternarMarcacoes && (
+          <Button
+            size="sm"
+            variant="ghost"
+            borderRadius="lg"
+            px={2}
+            h="32px"
+            color={marcacoesAbertas ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
+            bg={marcacoesAbertas ? 'cirqueira.brand.500/20' : undefined}
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+            onClick={onAlternarMarcacoes}
+            aria-label="Marcadores, destaques e notas"
+            title="Marcadores, destaques e notas"
+            fontSize="xs"
+          >
+            <Bookmark size={16} />
+            {totalMarcacoes > 0 && totalMarcacoes}
+          </Button>
+        )}
 
         <IconButton
           size="sm"
@@ -206,6 +271,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
         </IconButton>
 
         <Button
+          display={modoTexto ? 'none' : { base: 'none', sm: 'inline-flex' }}
           size="sm"
           variant="ghost"
           borderRadius="lg"
@@ -226,6 +292,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
         </Button>
 
         <IconButton
+          display={modoTexto ? 'none' : { base: 'none', lg: 'inline-flex' }}
           size="sm"
           variant="ghost"
           borderRadius="lg"
@@ -244,6 +311,7 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
         </IconButton>
 
         <IconButton
+          display={{ base: 'none', md: 'inline-flex' }}
           size="sm"
           variant="ghost"
           borderRadius="lg"

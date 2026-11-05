@@ -146,3 +146,59 @@ export async function pedirArmazenamentoPersistente(): Promise<void> {
     await navigator.storage?.persist?.()
   } catch {}
 }
+
+function urlPdf(livroUuid: string): string {
+  return `${location.origin}${PREFIXO}/${livroUuid}/pdf`
+}
+
+export async function salvarPdfOffline(livroUuid: string, pdf: Blob): Promise<void> {
+  const cache = await abrirCache()
+  if (!cache) throw new Error('Este navegador não permite guardar arquivos para usar offline.')
+  await cache.put(
+    urlPdf(livroUuid),
+    new Response(pdf, { headers: { 'Content-Type': 'application/pdf' } })
+  )
+}
+
+export async function obterPdfOffline(livroUuid: string): Promise<ArrayBuffer | null> {
+  const cache = await abrirCache()
+  const resposta = await cache?.match(urlPdf(livroUuid))
+  return resposta ? resposta.arrayBuffer() : null
+}
+
+export async function temPdfOffline(livroUuid: string): Promise<boolean> {
+  const cache = await abrirCache()
+  return Boolean(await cache?.match(urlPdf(livroUuid)))
+}
+
+export async function removerPdfOffline(livroUuid: string): Promise<void> {
+  const cache = await abrirCache()
+  await cache?.delete(urlPdf(livroUuid))
+}
+
+export async function removerPartesOffline(livroUuid: string, numeros: number[]): Promise<void> {
+  const cache = await abrirCache()
+  if (!cache || numeros.length === 0) return
+
+  const alvo = new Set(numeros)
+  const prefixo = `${location.origin}${PREFIXO}/${livroUuid}/`
+  for (const requisicao of await cache.keys()) {
+    if (!requisicao.url.startsWith(prefixo)) continue
+    const numero = Number(requisicao.url.slice(prefixo.length).split('/')[0])
+    if (alvo.has(numero)) await cache.delete(requisicao)
+  }
+}
+
+export async function listarLivrosComOffline(): Promise<Map<string, number>> {
+  const cache = await abrirCache()
+  const partesPorLivro = new Map<string, number>()
+  if (!cache) return partesPorLivro
+
+  const prefixo = `${location.origin}${PREFIXO}/`
+  for (const requisicao of await cache.keys()) {
+    if (!requisicao.url.startsWith(prefixo) || !requisicao.url.endsWith('/audio')) continue
+    const uuid = requisicao.url.slice(prefixo.length).split('/')[0]
+    if (uuid) partesPorLivro.set(uuid, (partesPorLivro.get(uuid) ?? 0) + 1)
+  }
+  return partesPorLivro
+}

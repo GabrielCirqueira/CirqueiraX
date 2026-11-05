@@ -2,6 +2,7 @@ import { useSEO } from '@/shared/hooks'
 import { Box, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { CabecalhoLivrosAudio } from './components/CabecalhoLivrosAudio'
+import { FaixaConexao } from './components/FaixaConexao'
 import { GradeLivrosAudio } from './components/GradeLivrosAudio'
 import { ModalUploadLivro } from './components/ModalUploadLivro'
 import { PainelFilaGeracao } from './components/PainelFilaGeracao'
@@ -35,6 +36,8 @@ export function Component() {
   return (
     <Box w="full" maxW="1680px" mx="auto" py={{ base: 4, md: 6 }} px={{ base: 3, md: 6 }}>
       <VStack align="stretch" gap={6} w="full">
+        <FaixaConexao />
+
         <CabecalhoLivrosAudio
           contagem={contagem}
           atualizando={isFetching}

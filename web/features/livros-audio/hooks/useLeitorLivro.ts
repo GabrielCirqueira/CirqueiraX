@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 
-const ESCALA_MINIMA = 0.8
+const ESCALA_MINIMA = 0.4
 const ESCALA_MAXIMA = 2.5
 const PASSO_ESCALA = 0.2
 const ESCALA_PADRAO = 1.2

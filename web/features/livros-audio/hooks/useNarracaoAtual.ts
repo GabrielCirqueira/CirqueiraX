@@ -13,6 +13,10 @@ import { calcularLocalizacaoBloco, chaveLocalizacaoBloco } from './localizacaoBl
 import { useTrechosBloco } from './useLivrosAudio'
 
 export interface NarracaoAtual {
+  numeroBloco: number
+  trechos: TrechoNarracao[]
+  carregandoTrechos: boolean
+  indicePalavra: number
   indice: number
   texto: string | null
   pagina: number
@@ -53,7 +57,11 @@ export function useNarracaoAtual({
   tocando,
   obterTempoAtual,
 }: OpcoesNarracaoAtual): NarracaoAtual | null {
-  const { data: trechosCarregados } = useTrechosBloco(livroUuid, bloco, voz)
+  const { data: trechosCarregados, isLoading: carregandoTrechos } = useTrechosBloco(
+    livroUuid,
+    bloco,
+    voz
+  )
   const trechos = useMemo(() => trechosCarregados ?? [], [trechosCarregados])
   const [posicao, setPosicao] = useState<PosicaoNarracao>({ frase: -1, palavra: -1 })
 
@@ -162,9 +170,16 @@ export function useNarracaoAtual({
   return useMemo(() => {
     if (!bloco || paginaEstimada === null) return null
 
+    const base = {
+      numeroBloco: bloco.numeroBloco,
+      trechos,
+      carregandoTrechos,
+    }
     const indice = posicao.frase
     if (indice < 0 || indice >= trechos.length) {
       return {
+        ...base,
+        indicePalavra: -1,
         indice: -1,
         texto: null,
         pagina: paginaEstimada,
@@ -178,6 +193,8 @@ export function useNarracaoAtual({
     const localizacao = localizacoes?.[indice] ?? null
 
     return {
+      ...base,
+      indicePalavra: posicao.palavra,
       indice,
       texto: trechos[indice]?.texto ?? null,
       pagina: encontrarPaginaLocalizada(localizacoes, indice) ?? paginaEstimada,
@@ -186,5 +203,14 @@ export function useNarracaoAtual({
       inicioDaPagina,
       resolverAlvo,
     }
-  }, [bloco, posicao, trechos, localizacoes, paginaEstimada, inicioDaPagina, resolverAlvo])
+  }, [
+    bloco,
+    posicao,
+    trechos,
+    carregandoTrechos,
+    localizacoes,
+    paginaEstimada,
+    inicioDaPagina,
+    resolverAlvo,
+  ])
 }

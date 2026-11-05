@@ -69,7 +69,7 @@ O interceptor em `web/config/api.ts`:
 2. Chama `POST /api/v1/token/refresh`.
 3. Atualiza o token.
 4. Refaz as requisições pendentes.
-5. Se o refresh falhar, limpa a sessão e volta para o login.
+5. Se o refresh for recusado (4xx), limpa a sessão e volta para o login. Falha de rede, 429 ou 5xx mantêm a sessão, para o app continuar funcionando sem internet.
 
 O estado fica em `useAuthStore`, com Zustand persistido. Como o token também é usado em URLs de mídia, ele aparece nessas requisições e pode constar em logs de acesso.
 

@@ -1,3 +1,5 @@
+import { useSemConexao } from '@/stores/useConexaoStore'
+import { instalarApp, useInstalacaoAppStore } from '@/stores/useInstalacaoAppStore'
 import {
   Badge,
   Box,
@@ -9,7 +11,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { BookOpen, Plus, RefreshCw } from 'lucide-react'
+import { BookOpen, MonitorDown, Plus, RefreshCw } from 'lucide-react'
 import { memo } from 'react'
 import type { ContagemStatusLivros } from '../utils/livros'
 
@@ -26,6 +28,11 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
   onAtualizar,
   onNovoLivro,
 }: CabecalhoLivrosAudioProps) {
+  const semConexao = useSemConexao()
+  const podeInstalar = useInstalacaoAppStore(
+    (estado) => Boolean(estado.evento) && !estado.instalado
+  )
+
   return (
     <Box
       w="full"
@@ -81,11 +88,27 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
             aria-label="Atualizar biblioteca"
             title="Atualizar biblioteca"
-            disabled={atualizando}
+            disabled={atualizando || semConexao}
             onClick={onAtualizar}
           >
             <RefreshCw size={15} className={atualizando ? 'animate-spin' : ''} />
           </IconButton>
+
+          {podeInstalar && (
+            <Button
+              size="sm"
+              variant="outline"
+              borderRadius="lg"
+              borderColor="cirqueira.brand.500/40"
+              color="cirqueira.brand.300"
+              _hover={{ bg: 'cirqueira.brand.500/10' }}
+              onClick={() => instalarApp()}
+              title="Instalar na tela inicial para abrir sem internet"
+            >
+              <MonitorDown size={15} />
+              Instalar app
+            </Button>
+          )}
 
           <Button
             size="sm"
@@ -94,6 +117,8 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
             _hover={{ bg: 'cirqueira.brand.600' }}
             color="cirqueira.grey.0"
             px={4}
+            disabled={semConexao}
+            title={semConexao ? 'Enviar livro precisa de internet' : undefined}
             onClick={onNovoLivro}
           >
             <Plus size={16} style={{ marginRight: '4px' }} />

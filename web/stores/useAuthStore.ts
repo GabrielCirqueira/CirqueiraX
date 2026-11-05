@@ -1,3 +1,4 @@
+import { limparDadosOffline } from '@/shared/pwa/serviceWorker'
 import type { Usuario } from '@/shared/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -40,6 +41,7 @@ export const useAuthStore = create<AuthStore>()(
 
       limpar: () => {
         localStorage.removeItem('token')
+        limparDadosOffline()
         set({ usuario: null, token: null, refreshToken: null, autenticado: false })
       },
     }),
