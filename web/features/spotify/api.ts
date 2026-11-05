@@ -27,14 +27,14 @@ export async function obterStatusSpotify(): Promise<StatusContaSpotify> {
 }
 
 export async function obterUrlAutorizacaoSpotify(): Promise<UrlAutorizacaoSpotify> {
-  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/autorizar')
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/oauth/url')
   return UrlAutorizacaoSpotifySchema.parse(data.data)
 }
 
 export async function concluirAutorizacaoSpotify(
   payload: ConcluirAutorizacaoSpotifyPayload
 ): Promise<StatusContaSpotify> {
-  const { data } = await api.post<RespostaApi<unknown>>('/api/v1/spotify/callback', payload)
+  const { data } = await api.post<RespostaApi<unknown>>('/api/v1/spotify/oauth/concluir', payload)
   return StatusContaSpotifySchema.parse(data.data)
 }
 
@@ -61,7 +61,7 @@ export async function consultarImportacaoSpotify(uuid: string): Promise<Importac
 }
 
 export async function listarCapsulasSpotify(): Promise<ResumoMesCapsula[]> {
-  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/capsula/meses')
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/capsula')
   return z.array(ResumoMesCapsulaSchema).parse(data.data)
 }
 

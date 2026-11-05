@@ -48,7 +48,7 @@ export const ImportacaoSpotifySchema = z.object({
   totalNovos: z.number(),
   totalIgnorados: z.number(),
   totalSubstituidos: z.number(),
-  motivoErro: z.string().nullable(),
+  erroMotivo: z.string().nullable(),
   criadoEm: z.string(),
   iniciadoEm: z.string().nullable(),
   concluidoEm: z.string().nullable(),

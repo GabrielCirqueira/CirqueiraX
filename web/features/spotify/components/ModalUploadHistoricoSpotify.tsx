@@ -389,7 +389,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 Falha no processamento
               </Heading>
               <Text fontSize="xs" color="red.300">
-                {importacao.motivoErro ?? 'Ocorreu um erro ao processar o arquivo enviado.'}
+                {importacao.erroMotivo ?? 'Ocorreu um erro ao processar o arquivo enviado.'}
               </Text>
             </VStack>
           </HStack>
