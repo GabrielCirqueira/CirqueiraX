@@ -167,4 +167,6 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
   )
 })
 
+export const Component = SpotifyCallback
+
 export default SpotifyCallback

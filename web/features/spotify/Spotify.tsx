@@ -17,8 +17,8 @@ import { useImagensSpotify, useResumoSpotify, useStatusSpotify } from './hooks'
 
 export function Spotify() {
   useSEO({
-    titulo: 'Spotify & Cápsula Sonora',
-    descricao:
+    title: 'Spotify & Cápsula Sonora',
+    description:
       'Acompanhe seu tempo ouvido no Spotify, estatísticas diárias e sua Cápsula Sonora mensal.',
   })
 
@@ -97,5 +97,7 @@ export function Spotify() {
     </TemaSpotify>
   )
 }
+
+export const Component = Spotify
 
 export default Spotify
