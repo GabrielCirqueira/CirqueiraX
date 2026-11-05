@@ -100,6 +100,19 @@ export const ResumoIntervaloSchema = z.object({
 
 export type ResumoIntervalo = z.infer<typeof ResumoIntervaloSchema>
 
+export const RankingIntervaloSchema = z.object({
+  totalMinutos: z.number(),
+  totalStreams: z.number(),
+  variacaoMinutosPercentual: z.number().nullable(),
+  topMusicas: z.array(ItemRankingMusicaSchema),
+  topArtistas: z.array(ItemRankingArtistaSchema),
+  rotuloPeriodo: z.string(),
+  dataInicio: z.string(),
+  dataFim: z.string(),
+})
+
+export type RankingIntervalo = z.infer<typeof RankingIntervaloSchema>
+
 export const CuriosidadesSpotifySchema = z.object({
   horarioPico: z.string().nullable(),
   minutosHorarioPico: z.number(),

@@ -11,6 +11,8 @@ import {
   ImportacaoSpotifySchema,
   type ItemTopMusicaArtista,
   ItemTopMusicaArtistaSchema,
+  type RankingIntervalo,
+  RankingIntervaloSchema,
   type RespostaConsultaImagens,
   RespostaConsultaImagensSchema,
   type ResultadoSincronizacaoSpotify,
@@ -104,4 +106,33 @@ export async function obterTopMusicasArtista(
     params,
   })
   return z.array(ItemTopMusicaArtistaSchema).parse(data.data)
+}
+
+export interface FiltroIntervaloRankingParams {
+  tipo: 'dias' | 'mes' | 'ano' | 'personalizado'
+  dias?: number
+  ano?: number
+  mes?: number
+  inicio?: string
+  fim?: string
+  limite?: number
+}
+
+export async function obterRankingIntervaloSpotify(
+  params: FiltroIntervaloRankingParams
+): Promise<RankingIntervalo> {
+  const queryParams: Record<string, string | number> = {
+    tipo: params.tipo,
+  }
+  if (params.dias !== undefined) queryParams.dias = params.dias
+  if (params.ano !== undefined) queryParams.ano = params.ano
+  if (params.mes !== undefined) queryParams.mes = params.mes
+  if (params.inicio) queryParams.inicio = params.inicio
+  if (params.fim) queryParams.fim = params.fim
+  if (params.limite !== undefined) queryParams.limite = params.limite
+
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/ranking', {
+    params: queryParams,
+  })
+  return RankingIntervaloSchema.parse(data.data)
 }

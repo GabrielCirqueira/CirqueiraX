@@ -26,6 +26,7 @@ use App\Service\Spotify\IniciarImportacaoSpotifyService;
 use App\Service\Spotify\ListarMesesCapsulaService;
 use App\Service\Spotify\ObterDetalheCapsulaService;
 use App\Service\Spotify\ObterResumoHojeSemanaCuriosidadesService;
+use App\Service\Spotify\ObterResumoIntervaloPersonalizadoService;
 use App\Service\Spotify\ObterStatusSpotifyService;
 use App\Service\Spotify\ObterTopMusicasArtistaService;
 use App\Service\Spotify\ResolverImagemSpotifyService;
@@ -50,6 +51,7 @@ final class SpotifyController extends DefaultController
         private readonly ListarMesesCapsulaService $listarMesesCapsulaService,
         private readonly ObterDetalheCapsulaService $obterDetalheCapsulaService,
         private readonly ObterResumoHojeSemanaCuriosidadesService $obterResumoService,
+        private readonly ObterResumoIntervaloPersonalizadoService $obterResumoIntervaloService,
         private readonly ObterTopMusicasArtistaService $obterTopMusicasArtistaService,
         private readonly SincronizarAgoraSpotifyService $sincronizarAgoraService,
         private readonly ResolverImagemSpotifyService $resolverImagemService,
@@ -155,6 +157,39 @@ final class SpotifyController extends DefaultController
         return $this->success($this->resumoSerializer->serializarResumo(
             $resumoComImagens->resumo(),
             $resumoComImagens->mapaImagens(),
+        ));
+    }
+
+    #[Route('/ranking', name: 'obter_ranking_intervalo', methods: ['GET'])]
+    public function obterRankingIntervalo(
+        Request $request,
+        #[CurrentUser] Usuario $usuario,
+    ): Response {
+        $tipo = (string) $request->query->get('tipo', 'dias');
+        $dias = $request->query->has('dias') ? $request->query->getInt('dias') : null;
+        $ano = $request->query->has('ano') ? $request->query->getInt('ano') : null;
+        $mes = $request->query->has('mes') ? $request->query->getInt('mes') : null;
+        $inicio = $request->query->has('inicio') ? (string) $request->query->get('inicio') : null;
+        $fim = $request->query->has('fim') ? (string) $request->query->get('fim') : null;
+        $limite = $request->query->getInt('limite', 50);
+
+        $resultado = $this->obterResumoIntervaloService->executar(
+            usuario: $usuario,
+            tipo: $tipo,
+            dias: $dias,
+            ano: $ano,
+            mes: $mes,
+            inicio: $inicio,
+            fim: $fim,
+            limite: $limite,
+        );
+
+        return $this->success($this->resumoSerializer->serializarIntervaloComPeriodo(
+            intervalo: $resultado->intervalo(),
+            rotuloPeriodo: $resultado->rotuloPeriodo(),
+            dataInicio: $resultado->dataInicio(),
+            dataFim: $resultado->dataFim(),
+            mapaImagens: $resultado->mapaImagens(),
         ));
     }
 

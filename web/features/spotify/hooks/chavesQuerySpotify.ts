@@ -8,4 +8,6 @@ export const SPOTIFY_QUERY_KEYS = {
   imagens: ['spotify', 'imagens'] as const,
   topMusicasArtista: (artista: string, ano?: number | null, mes?: number | null) =>
     ['spotify', 'artistas', artista, 'top-musicas', ano ?? 'todos', mes ?? 'todos'] as const,
+  rankingIntervalo: (params: Record<string, unknown>) =>
+    ['spotify', 'ranking-intervalo', params] as const,
 }

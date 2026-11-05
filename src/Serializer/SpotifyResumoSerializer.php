@@ -31,7 +31,25 @@ final readonly class SpotifyResumoSerializer
     /**
      * @return array<string, mixed>
      */
-    private function serializarIntervalo(
+    public function serializarIntervaloComPeriodo(
+        ResumoIntervaloSpotifyDTO $intervalo,
+        string $rotuloPeriodo,
+        string $dataInicio,
+        string $dataFim,
+        ?MapaImagensSpotifyDTO $mapaImagens = null,
+    ): array {
+        $dados = $this->serializarIntervalo($intervalo, $mapaImagens);
+        $dados['rotuloPeriodo'] = $rotuloPeriodo;
+        $dados['dataInicio'] = $dataInicio;
+        $dados['dataFim'] = $dataFim;
+
+        return $dados;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function serializarIntervalo(
         ResumoIntervaloSpotifyDTO $intervalo,
         ?MapaImagensSpotifyDTO $mapaImagens = null,
     ): array {
