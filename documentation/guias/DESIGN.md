@@ -69,6 +69,31 @@ Para neutros estruturais, utilize os tokens semânticos do tema:
 - Body: `<Text fontSize="sm">` ou `<Text fontSize="base">`
 - Subtítulos / Muted: `<Text fontSize="xs" color="fg.subtle">`
 
+### 2.4 Exceção Documentada: Escopo Temático da Página Spotify (`/spotify`)
+
+A página `/spotify` reproduz a experiência visual autêntica da antiga Cápsula Sonora do Spotify. Para garantir fidelidade sem espalhar valores hexadecimais soltos pelos componentes nem poluir a identidade global do restante do SaaS, o tema é isolado via escala gerada (`cirqueira.spotify.*`) e aplicado exclusivamente através do wrapper `<TemaSpotify>`.
+
+- **Paleta Gerada no Tema**:
+  - `cirqueira.spotify.fundo`: `#121212` (superfície base da página)
+  - `cirqueira.spotify.cartao`: `#1F1F1F` (fundo padrão de cards e painéis)
+  - `cirqueira.spotify.cartaoElevado`: `#252525` (cards elevados e hover de cards)
+  - `cirqueira.spotify.textoPrincipal`: `#FFFFFF` (texto de alto contraste, títulos e valores)
+  - `cirqueira.spotify.textoSecundario`: `#B3B3B3` (subtítulos, metadados e legendas, ratio > 5:1)
+  - `cirqueira.spotify.textoDesabilitado`: `#6A6A6A` (apenas para estados inativos)
+  - `cirqueira.spotify.verde`: `#1ED760` (números de minutos ouvidos, botões de ação e status conectados)
+  - `cirqueira.spotify.azul`: `#539DF5` (destaque para "Artista mais ouvido")
+  - `cirqueira.spotify.amarelo`: `#FEE44F` (destaque para "Música mais ouvida", títulos de ranking e posições)
+
+- **Regras Estruturais e Exceções Formais**:
+  - **Dark Nativo Obrigatório**: A área interna do wrapper é sempre escura (`colorScheme: dark`), independente do tema global ativo no sistema. Header e Sidebar permanecem inalterados com o tema global do SaaS.
+  - **Tipografia**: Utiliza a fonte `Inter` (`fontFamily="inter"`), carregada especificamente para a feature.
+  - **Arredondamentos Excepcionais**:
+    - Botões de ação em formato de pílula (`borderRadius="full"`).
+    - Cartões e painéis de dados com 8px (`borderRadius="md"`).
+    - Capas de álbuns quadradas com 4px (`borderRadius="4px"`) e 8px em telas grandes (`borderRadius={{ base: '4px', md: 'md' }}`).
+    - Fotos de artista estritamente circulares (`borderRadius="full"`).
+  - **Interações**: Hover de cartões transiciona suavemente de `cirqueira.spotify.cartao` para `cirqueira.spotify.cartaoElevado` com foco visível acessível.
+
 ---
 
 ## 4. Sistema de Arredondamento Padronizado (`borderRadius`)

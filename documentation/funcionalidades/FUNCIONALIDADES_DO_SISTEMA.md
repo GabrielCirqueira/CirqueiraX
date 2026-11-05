@@ -90,6 +90,10 @@ Transforma vídeos em música para você ouvir ou baixar.
 
 > **Importante:** os arquivos MP3 ficam disponíveis por **7 dias**. Depois disso o arquivo é removido, mas você pode baixar de novo. Se quiser guardar uma música para sempre, baixe para o seu dispositivo.
 
+### Spotify & Cápsula Sonora
+
+Conecte sua conta do Spotify e reviva a antiga **Cápsula Sonora** com o resumo de cada mês: minutos ouvidos, músicas e artistas mais tocados, variedade musical comparada com o mês anterior e histórico diário. Acompanhe também o resumo de hoje e dos últimos 7 dias com curiosidades musicais e exportação em planilha CSV.
+
 ### Livros em Áudio
 
 Transforma seus livros em formato PDF em audiolivros interativos com narração por voz neural no idioma do livro (português, inglês, espanhol, francês, italiano ou alemão).

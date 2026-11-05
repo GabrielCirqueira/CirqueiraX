@@ -1,7 +1,7 @@
 # CirqueiraX — Visão Geral Técnica
 
 **Última atualização:** 02/11/2026
-**Situação:** 160 tópicos de roadmap e 95 melhorias concluídos ([progresso](../progresso/README.md))
+**Situação:** 185 tópicos de roadmap e 95 melhorias concluídos ([progresso](../progresso/README.md))
 **Produção:** https://x.cirqueira.com
 
 Para uma visão voltada ao usuário final, veja [FUNCIONALIDADES_DO_SISTEMA.md](FUNCIONALIDADES_DO_SISTEMA.md).
@@ -45,7 +45,8 @@ Classificação (OrigemRegra ou decisão manual)
 Rotinas diárias: limpeza de vídeos e expiração de áudios
 Módulos isolados: 
 ├── Downloads MP3 (entidade Audio)
-└── Livros em Áudio (entidades LivroAudio, LivroAudioBloco, LivroAudioBlocoVoz, MarcacaoLivroAudio e EscutaLivroAudioDia)
+├── Livros em Áudio (entidades LivroAudio, LivroAudioBloco, LivroAudioBlocoVoz, MarcacaoLivroAudio e EscutaLivroAudioDia)
+└── Spotify & Cápsula Sonora (entidades ContaSpotify, ReproducaoSpotify, ImagemSpotify e ImportacaoSpotify)
 ```
 
 ### Stack

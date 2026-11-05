@@ -26,22 +26,22 @@ API Symfony do CirqueiraX. Controllers ficam leves, regras de negócio vivem em 
 src/
 ├── Command/        Comandos de console
 ├── Controller/     Audio, Auth, Categoria, Common, Dashboard, GoogleFotos,
-│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Sistema, Sync e Video
+│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Sistema, Spotify, Sync e Video
 ├── DataObject/     DTOs de entrada
-├── Entity/         Entidades Doctrine
-├── Enum/           Enums de domínio
+├── Entity/         Entidades Doctrine (ContaSpotify, ImagemSpotify, ImportacaoSpotify, ReproducaoSpotify...)
+├── Enum/           Enums de domínio (FonteReproducaoSpotify, StatusContaSpotify, StatusImagemSpotify, StatusImportacaoSpotify, TipoImagemSpotify...)
 ├── EventListener/  Listeners
-├── Exception/      Exceções por domínio (LivroAudio, Storage, Video...)
+├── Exception/      Exceções por domínio (LivroAudio, Spotify, Storage, Video...)
 ├── Infra/          Audio (Edge TTS, Piper e roteador), GoogleFotos, GoogleOAuth,
-│                   Imagem, Storage, Syncthing e YtDlp
+│                   Imagem, Spotify, Storage, Syncthing e YtDlp
 ├── Interface/      Contratos
-├── Message/        Mensagens do Messenger
+├── Message/        Mensagens do Messenger (BuscarImagemSpotifyMessage, ImportarHistoricoSpotifyMessage, SincronizarHistoricoSpotifyMessage...)
 ├── MessageHandler/ Handlers
-├── Repository/     Consultas
+├── Repository/     Consultas (ContaSpotifyRepository, ImagemSpotifyRepository, ImportacaoSpotifyRepository, ReproducaoSpotifyRepository...)
 ├── Security/       TokenAgenteAuthenticator
-├── Serializer/     Contratos JSON de saída
+├── Serializer/     Contratos JSON de saída (ContaSpotifySerializer, ImportacaoSpotifySerializer, SpotifyCapsulaSerializer, SpotifyResumoSerializer...)
 ├── Service/        Audio, Categoria, Dashboard, Distribuicao, GoogleFotos,
-│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Seguranca, Usuario e Video
+│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Seguranca, Spotify, Usuario e Video
 ├── Support/        Utilitários, como MetadataKeys
 ├── Schedule.php    Rotinas do Scheduler
 └── Kernel.php

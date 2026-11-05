@@ -13,6 +13,7 @@ O CirqueiraX usa autenticação sem sessão no servidor, com mecanismos diferent
 | Agente de prints | Token de agente | `X-Agent-Token: cx_ag_...` | `POST /api/v1/ingestao/print` |
 | Administração | JWT master | Gerado por `app:jwt:master` | Uso em linha de comando |
 | Google Fotos | OAuth 2.0 | Tokens em `ContaGoogleFotos` | Backup e álbuns |
+| Spotify | OAuth 2.0 PKCE | Tokens em `ContaSpotify` | Histórico de reproduções e perfil |
 
 ---
 

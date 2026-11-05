@@ -197,6 +197,9 @@ Variáveis prefixadas com `VITE_` são expostas ao bundle via `import.meta.env`.
 | `MEDIA_STORAGE_PATH` | `/var/syncthing/cirqueirax` | Pasta do host montada em `var/storage` e sincronizada pelo Syncthing. |
 | `GOOGLE_CLIENT_ID` | `...apps.googleusercontent.com` | Cliente OAuth do Google. |
 | `GOOGLE_CLIENT_SECRET` | `<segredo>` | Segredo do cliente OAuth. |
+| `SPOTIFY_CLIENT_ID` | `<client_id>` | Client ID do Spotify Developer Dashboard. |
+| `SPOTIFY_CLIENT_SECRET` | `<segredo>` | Client Secret do aplicativo Spotify. |
+| `SPOTIFY_REDIRECT_URI` | `https://x.cirqueira.com/spotify/callback` | URI de redirecionamento autorizada para OAuth 2.0 PKCE. |
 | `SYNCTHING_API_URL` | `http://localhost:8384` | REST API do Syncthing. |
 | `SYNCTHING_API_KEY` | `<chave>` | Chave da REST API do Syncthing. |
 

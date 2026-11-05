@@ -1,0 +1,71 @@
+# Spotify & Cápsula Sonora
+
+Este documento descreve a funcionalidade do Spotify no CirqueiraX, incluindo a sincronização com a Spotify Web API, a importação retroativa do histórico completo de reproduções, as regras de agregação da Cápsula Sonora e os procedimentos de uso e calibração.
+
+---
+
+## 1. Visão Geral
+
+A funcionalidade do Spotify traz de volta para o usuário a experiência autêntica da antiga **Cápsula Sonora** do aplicativo móvel do Spotify (descontinuada na versão oficial), permitindo reviver mensalmente:
+1. **Tempo Total Ouvido** em minutos e reproduções.
+2. **Top Artistas** com contagem de reproduções, tempo, foto circular e movimento em relação ao mês anterior (subida, descida, permanência ou estreia).
+3. **Top Músicas** com contagem de streams, tempo, capa oficial, álbum e movimento de ranking.
+4. **Variedade Musical**: número de músicas distintas ouvidas e comparação percentual com o mês anterior.
+5. **Histórico Diário**: gráfico de distribuição de minutos ouvidos por cada dia do mês.
+6. **Métricas de Hoje e Últimos 7 Dias** com alternância de períodos e abas de faixas/artistas.
+7. **Curiosidades**: horário de pico, dia mais frequente, dia mais longo, faixa mais repetida em um único dia e novos artistas descobertos.
+
+---
+
+## 2. Fontes de Dados e Sincronização
+
+O sistema opera com duas origens de dados que se complementam e se deduplicam automaticamente:
+
+| Origem | Mecanismo | Frequência / Prazo | Granularidade |
+| :--- | :--- | :--- | :--- |
+| **Coleta Periódica (API)** | OAuth 2.0 PKCE (`user-read-recently-played`) | A cada 30 minutos via Symfony Scheduler | Últimas 50 faixas tocadas (estimativa de minutos por duração da faixa) |
+| **Importação de Arquivo** | Upload de `.json` ou `.zip` (`StreamingHistory*.json` / `Audio_*.json`) | Manual / sob demanda | Histórico exato em milissegundos (`msPlayed`) de até toda a conta |
+
+### Regra de Deduplicação e Refinamento
+- Quando um registro importado de arquivo bate no mesmo minuto de uma reprodução coletada via API, o sistema **substitui** a estimativa da API pelo tempo exato registrado pelo arquivo do Spotify (`msPlayed`), marcando a fonte como `arquivo_estendido` ou `arquivo_basico`.
+- Reimportar o mesmo arquivo ou arquivos de períodos sobrepostos é totalmente seguro: registros repetidos são identificados e ignorados sem duplicação.
+
+---
+
+## 3. Regras de Negócio da Cápsula Sonora
+
+1. **Corte Mínimo de Stream**: reproduções com duração inferior a 30 segundos (`30.000 ms`) são descartadas e não contam como stream nem pontuam nos rankings, respeitando o padrão oficial da indústria fonográfica e do Spotify.
+2. **Fuso Horário Oficial**: todas as agregações de início e fim de mês e dias são truncadas e calculadas no fuso horário de Brasília (`America/Sao_Paulo`).
+3. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
+4. **Comparação com o Mês Anterior**:
+   - Variação percentual de músicas distintas: `((músicas_mês_atual - músicas_mês_anterior) / músicas_mês_anterior) * 100`.
+   - Variação de ranking (`movimento`): diferença de posições no top 5 em relação ao mês imediatamente anterior.
+   - Flag de estreia (`isEstreia`): sinaliza se o artista ou música entrou no top 5 pela primeira vez no histórico recente.
+5. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
+
+---
+
+## 4. Como Solicitar os Arquivos no Spotify
+
+Caso deseje carregar seus meses passados para a Cápsula:
+1. Acesse sua conta em [spotify.com/account/privacy](https://www.spotify.com/account/privacy).
+2. Na seção **Baixar seus dados**:
+   - **Dados da conta**: inclui o histórico do último ano (cerca de 5 dias úteis para entrega por e-mail).
+   - **Histórico ampliado de streams**: histórico completo desde a criação da conta (até 30 dias para preparação).
+3. Baixe o arquivo ZIP recebido por e-mail e envie diretamente na página `/spotify` pelo botão **Importar histórico**.
+
+---
+
+## 5. Resolução Automática de Capas e Fotos
+
+- O sistema cataloga e armazena em cache as capas e fotos de perfil de artistas na entidade `ImagemSpotify`.
+- Quando um registro do histórico antigo traz apenas os nomes de texto (sem código Spotify), um processo em segundo plano via Symfony Messenger (`BuscarImagemSpotifyMessage`) busca a capa na API com conferência de similaridade de strings (threshold 70) e tolerância de duração, evitando capas incorretas.
+- A interface exibe placeholders neutros e atualiza dinamicamente as capas via polling reativo sem necessidade de recarregar a tela.
+
+---
+
+## 6. Diretrizes de Marca e Conformidade
+
+- O logotipo do Spotify é exibido no rodapé e no painel de conexão em estrita conformidade com as diretrizes de marca (área de respiro, cores oficiais e links diretos para abertura no aplicativo com `Abrir no Spotify`).
+- Nenhuma alteração, recorte ou sobreposição de texto é aplicada às capas de álbuns originais.
+

@@ -13,6 +13,8 @@
 > - **Tópicos 101+** → [PROGRESSO_ROADMAP_6.md](PROGRESSO_ROADMAP_6.md)
 > - **Tópicos 121+** → [PROGRESSO_ROADMAP_7.md](PROGRESSO_ROADMAP_7.md)
 > - **Tópicos 141+** → [PROGRESSO_ROADMAP_8.md](PROGRESSO_ROADMAP_8.md)
+> - **Tópicos 161+** → [PROGRESSO_ROADMAP_9.md](PROGRESSO_ROADMAP_9.md)
+> - **Tópicos 181+** → [PROGRESSO_ROADMAP_10.md](PROGRESSO_ROADMAP_10.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -176,3 +178,28 @@
 | 158 | Frontend — player de áudio com capítulos e configurações | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 159 | Sincronização entre páginas do livro e o áudio | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
 | 160 | Teste end-to-end do fluxo completo e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_8.md) |
+| 161 | Preparação do app no painel do Spotify e variáveis de ambiente | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 162 | Infra — SpotifyClient com tratamento de limite de requisições | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 163 | Entidade ContaSpotify, enum de status e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 164 | Serviço de tokens — troca do code e renovação com lock | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 165 | Endpoints de conexão — url, concluir, status e desconectar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 166 | Entidade ReproducaoSpotify, enum de fonte e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 167 | Coleta do histórico recente com cursor e deduplicação | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 168 | Rotina de coleta no Scheduler a cada 30 minutos | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 169 | Spotify no status das integrações e alerta de coleta parada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 170 | Importação do histórico — leitura dos arquivos básico e estendido | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 171 | Importação — deduplicação com tolerância e prioridade sobre a API | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 172 | Endpoint e processamento assíncrono da importação | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 173 | Agregações por mês no Repository | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 174 | Regras da Cápsula — streams, fuso de Brasília e comparação com o mês anterior | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 175 | Endpoints da Cápsula Sonora e Serializer | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 176 | Endpoints de Hoje, Semana e Curiosidades | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 177 | Catálogo de capas e fotos — entidade e busca por código | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 178 | Busca de capa por nome e preenchimento em segundo plano | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 179 | Frontend — estrutura da feature spotify (types, api, hooks) | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 180 | Frontend — paleta spotify, tokens e wrapper da página | ✅ Concluído | [ver](PROGRESSO_ROADMAP_9.md) |
+| 181 | Frontend — vincular, retornar do Spotify, reconectar e desconectar | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 182 | Frontend — importação do arquivo de histórico | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 183 | Frontend — página /spotify com Hoje, Semana e Curiosidades | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 184 | Frontend — seção Cápsula Sonora com seletor de mês | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 185 | Calibração com os prints, teste end-to-end e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |

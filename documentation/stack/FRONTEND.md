@@ -47,6 +47,7 @@ web/
 │   ├── livros-audio/
 │   ├── not-found/
 │   ├── prints/
+│   ├── spotify/
 │   └── upload-manual/
 ├── layouts/                MainLayout, AuthLayout, AppContainer, Sidebar, Header e Footer
 ├── pages/                  Pontos de entrada de DownloadsVideo e UploadManual
@@ -76,6 +77,8 @@ web/
 | `/google-fotos` | Google Fotos | Protegida |
 | `/livros-audio` | Livros em Áudio | Protegida |
 | `/livros-audio/:uuid` | Leitor de Livro em Áudio | Protegida |
+| `/spotify` | Spotify & Cápsula Sonora | Protegida |
+| `/spotify/callback` | Retorno OAuth do Spotify | Protegida |
 | `*` | NotFound | Pública |
 
 A Sidebar leva às nove telas principais e tem a troca de tema e o logout. `MainLayout` abre `ModalAuth` quando necessário.
@@ -95,6 +98,7 @@ A Sidebar leva às nove telas principais e tem a troca de tema e o logout. `Main
 | `editor-imagem` | [EDITOR_IMAGEM.md](../funcionalidades/EDITOR_IMAGEM.md) |
 | `upload-manual` | [UPLOAD_MANUAL.md](../funcionalidades/UPLOAD_MANUAL.md) |
 | `google-fotos` | [GOOGLE_FOTOS.md](../funcionalidades/GOOGLE_FOTOS.md) |
+| `spotify` | [SPOTIFY.md](../funcionalidades/SPOTIFY.md) |
 
 ---
 
