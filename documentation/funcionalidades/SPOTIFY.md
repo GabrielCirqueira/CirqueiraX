@@ -26,6 +26,12 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 | **Coleta Periódica (API)** | OAuth 2.0 PKCE (`user-read-recently-played`) | A cada 30 minutos via Symfony Scheduler | Últimas 50 faixas tocadas (estimativa de minutos por duração da faixa) |
 | **Importação de Arquivo** | Upload de `.json` ou `.zip` (`StreamingHistory*.json` / `Audio_*.json`) | Manual / sob demanda | Histórico exato em milissegundos (`msPlayed`) de até toda a conta |
 
+### Conexão da conta (OAuth)
+- `GET /api/v1/spotify/oauth/url` gera a URL de login do Spotify. `POST /api/v1/spotify/oauth/concluir` recebe `code` e `state` na volta (`/spotify/callback`).
+- O `state` é assinado com HMAC-SHA256 usando o `APP_SECRET` (`EstadoAutorizacaoSpotifyService`). Ele leva o id do usuário e a validade de 15 minutos, então não depende de cache no servidor.
+- A tela de retorno envia cada `code` uma vez só e mostra a mensagem de erro que veio da API.
+- Variáveis no `.env`: `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` e `SPOTIFY_REDIRECT_URI` (em produção, `https://x.cirqueira.com/spotify/callback`). Com o app em modo de desenvolvimento, só as contas em "User Management" no painel do Spotify podem autorizar.
+
 ### Regra de Deduplicação e Refinamento
 - Quando um registro importado de arquivo bate no mesmo minuto de uma reprodução coletada via API, o sistema **substitui** a estimativa da API pelo tempo exato registrado pelo arquivo do Spotify (`msPlayed`), marcando a fonte como `arquivo_estendido` ou `arquivo_basico`.
 - Reimportar o mesmo arquivo ou arquivos de períodos sobrepostos é totalmente seguro: registros repetidos são identificados e ignorados sem duplicação.

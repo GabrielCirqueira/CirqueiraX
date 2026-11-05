@@ -15,7 +15,10 @@ import { AlertTriangle, CheckCircle2, Music2, RefreshCw } from 'lucide-react'
 import { memo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useConcluirAutorizacaoSpotify, useObterUrlAutorizacaoSpotify } from '../hooks'
+import { extrairMensagemErroApi } from '../utils'
 import { TemaSpotify } from './TemaSpotify'
+
+const codigosEnviados = new Set<string>()
 
 export const SpotifyCallback = memo(function SpotifyCallback() {
   const [params] = useSearchParams()
@@ -29,7 +32,8 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
   const obterUrlMutation = useObterUrlAutorizacaoSpotify()
 
   useMountEffect(() => {
-    if (code && state && !erroParam) {
+    if (code && state && !erroParam && !codigosEnviados.has(code)) {
+      codigosEnviados.add(code)
       concluirMutation.mutate(
         { code, state },
         {
@@ -72,8 +76,10 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
   } else if (concluirMutation.isError) {
     tipoErro = 'falha'
     titulo = 'Falha na conexão com o Spotify'
-    descricao =
+    descricao = extrairMensagemErroApi(
+      concluirMutation.error,
       'Não foi possível concluir a validação. Certifique-se de que sua conta está incluída na lista de usuários autorizados no modo de desenvolvimento do Spotify Dashboard.'
+    )
   }
 
   const isCarregando = concluirMutation.isPending && !tipoErro

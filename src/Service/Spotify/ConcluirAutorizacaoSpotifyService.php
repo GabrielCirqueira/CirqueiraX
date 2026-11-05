@@ -11,25 +11,22 @@ use App\Interface\CriptografiaInterface;
 use App\Interface\SpotifyInterface;
 use App\Message\SincronizarHistoricoSpotifyMessage;
 use App\Repository\ContaSpotifyRepository;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class ConcluirAutorizacaoSpotifyService
 {
-    private const string PREFIXO_CACHE_STATE = 'spotify_state_';
-
     public function __construct(
         private SpotifyInterface $spotifyClient,
         private CriptografiaInterface $criptografia,
         private ContaSpotifyRepository $contaSpotifyRepository,
-        private CacheItemPoolInterface $cache,
+        private EstadoAutorizacaoSpotifyService $estadoAutorizacao,
         private MessageBusInterface $messageBus,
     ) {
     }
 
     public function executar(Usuario $usuario, string $code, string $state): ContaSpotify
     {
-        $this->validarState($usuario, $state);
+        $this->estadoAutorizacao->validar($usuario, $state);
 
         $tokens = $this->spotifyClient->trocarCodigoPorTokens($code);
         $perfil = $this->spotifyClient->buscarPerfil($tokens->accessToken);
@@ -60,24 +57,6 @@ final readonly class ConcluirAutorizacaoSpotifyService
         $this->messageBus->dispatch(new SincronizarHistoricoSpotifyMessage($conta->uuid()->toRfc4122()));
 
         return $conta;
-    }
-
-    private function validarState(Usuario $usuario, string $state): void
-    {
-        $chaveCache = self::PREFIXO_CACHE_STATE.$state;
-        $item = $this->cache->getItem($chaveCache);
-
-        if (!$item->isHit()) {
-            throw SpotifyException::stateInvalidoOuExpirado();
-        }
-
-        $valorGuardado = $item->get();
-        $usuarioIdGuardado = is_string($valorGuardado) ? $valorGuardado : (is_scalar($valorGuardado) ? (string) $valorGuardado : '');
-        $this->cache->deleteItem($chaveCache);
-
-        if ($usuarioIdGuardado !== (string) $usuario->getId()) {
-            throw SpotifyException::stateInvalidoOuExpirado();
-        }
     }
 
     private function validarConflitoConta(Usuario $usuario, string $spotifyId): void

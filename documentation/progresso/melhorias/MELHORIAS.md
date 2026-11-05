@@ -128,3 +128,4 @@
 | M110 | Ler e Ouvir do Seu Jeito: Velocidade, Offline, Busca, Marcações e Capítulos | 🟡 Publicado, falta validar | 04/11/2026 | [ver](MELHORIAS_6.md#melhoria-110--ler-e-ouvir-do-seu-jeito-velocidade-offline-busca-marcações-e-capítulos) |
 | M111 | Fila Inteligente, Estatísticas de Escuta, Voz Piper, Links Assinados e Painel de Livros | 🟡 Publicado, falta validar | 05/11/2026 | [ver](MELHORIAS_6.md#melhoria-111--fila-inteligente-estatísticas-de-escuta-voz-piper-links-assinados-e-painel-de-livros) |
 | M112 | Ouvir Sem Internet Dentro do Sistema e Leitor Pensado para o Celular | 🟡 Publicado, falta validar | 05/11/2026 | [ver](MELHORIAS_6.md#melhoria-112--ouvir-sem-internet-dentro-do-sistema-e-leitor-pensado-para-o-celular) |
+| M113 | Spotify Funcionando em Produção | 🟡 Publicado, falta validar | 05/11/2026 | [ver](MELHORIAS_6.md#melhoria-113--spotify-funcionando-em-produção) |

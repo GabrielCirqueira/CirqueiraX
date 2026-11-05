@@ -441,3 +441,31 @@
     - Livros em áudio (`web/features/livros-audio/`): `LeitorLivroAudio.tsx`, `LivrosAudio.tsx`, `api.ts`
     - Componentes: `PlayerAudioLivro`, `BarraSuperiorLeitor`, `VisualizadorLivro`, `LeitorSemPdf`, `CardLivroAudio`, `GradeLivrosAudio`, `CabecalhoLivrosAudio`, `PainelVozes`
     - Hooks e utils: `hooks/useDocumentoPdf.ts`, `useLeitorLivro.ts`, `useLivrosAudio.ts`, `useNarracaoAtual.ts`, `useOfflineLivro.ts`, `useRegistroEscuta.ts`, `utils/offline.ts`, `utils/pdf.ts`
+
+---
+
+### 🟡 Melhoria 113 — Spotify Funcionando em Produção
+
+- **Status**: Publicada em produção em 05/11/2026, falta validar no uso
+- **Data**: 05 de novembro de 2026
+- **Problema**:
+  - Ao subir a integração com o Spotify, o sistema não iniciava. O `DashboardController` tinha o `use App\Entity\Usuario` repetido.
+  - A tela `/spotify` ficava em branco. As rotas usam o `lazy` do React Router, que precisa do export `Component`, e `Spotify.tsx` e `SpotifyCallback.tsx` não o tinham.
+  - "Vincular ao Spotify" dava erro: o front chamava `/spotify/autorizar`, `/spotify/callback` e `/spotify/capsula/meses`, que não existem no backend. A resposta era a página HTML do app.
+  - A importação do histórico esperava `motivoErro`, mas o backend devolve `erroMotivo`.
+  - Na volta do login do Spotify dava "state inválido ou expirado". O state ficava no cache em arquivo do servidor e não era encontrado na volta.
+- **Solução**:
+  - Removido o `use` repetido.
+  - Adicionado o export `Component` nas duas páginas. O `useSEO` passou a usar `title` e `description`.
+  - O front passou a usar `/spotify/oauth/url`, `/spotify/oauth/concluir` e `/spotify/capsula`. O campo da importação virou `erroMotivo`.
+  - Novo `EstadoAutorizacaoSpotifyService`: o state é assinado com HMAC usando o `APP_SECRET`, com o id do usuário e 15 minutos de validade. Não usa mais cache.
+  - A tela de retorno envia o `code` uma vez só e mostra a mensagem real da API.
+  - Credenciais do Spotify adicionadas ao `.env` de produção.
+- **Testes**:
+  - O kernel de produção sobe e o `lint:container` passa.
+  - O state válido é aceito. O de outro usuário, o adulterado e o inválido são recusados.
+  - A página `/spotify` renderiza no navegador (API simulada).
+  - O Spotify aceitou o Client ID e o Redirect URI.
+- **Arquivos**:
+  - Backend: `src/Controller/Dashboard/DashboardController.php`, `src/Service/Spotify/EstadoAutorizacaoSpotifyService.php` (novo), `GerarUrlAutorizacaoSpotifyService.php`, `ConcluirAutorizacaoSpotifyService.php`
+  - Frontend: `web/features/spotify/Spotify.tsx`, `api.ts`, `types.ts`, `components/SpotifyCallback.tsx`, `components/ModalUploadHistoricoSpotify.tsx`
