@@ -4,18 +4,23 @@ declare(strict_types=1);
 
 namespace App\Service\Dashboard;
 
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
 use App\Enum\StatusMediaItem;
 use App\Repository\CategoriaRepository;
+use App\Repository\ContaSpotifyRepository;
 use App\Repository\MediaItemRepository;
 use App\Serializer\MediaItemSerializer;
 
 final readonly class DashboardService
 {
+    public const int LIMITE_ALERTA_COLETA_PARADA_SEGUNDOS = 10800;
+
     public function __construct(
         private MediaItemRepository $mediaItemRepository,
         private CategoriaRepository $categoriaRepository,
         private MediaItemSerializer $mediaItemSerializer,
+        private ContaSpotifyRepository $contaSpotifyRepository,
     ) {}
 
     /**
@@ -40,10 +45,19 @@ final readonly class DashboardService
      *         tamanhoPermanecemFormatado: string,
      *         espacoLiberadoBytes: int,
      *         espacoLiberadoFormatado: string
+     *     },
+     *     spotify: array{
+     *         conectado: bool,
+     *         status: string,
+     *         nomeExibicao: string|null,
+     *         conectadoEm: string|null,
+     *         ultimaColetaEm: string|null,
+     *         coletaParada: bool,
+     *         motivoErro: string|null
      *     }
      * }
      */
-    public function obterResumo(): array
+    public function obterResumo(?Usuario $usuario = null): array
     {
         $totaisStatus = $this->mediaItemRepository->contarAgrupadoPorStatus();
         $totaisOrigem = $this->mediaItemRepository->contarAgrupadoPorOrigem();
@@ -76,6 +90,32 @@ final readonly class DashboardService
             'espacoLiberadoFormatado' => self::formatarBytes($metricasVideosRaw['espacoLiberadoBytes']),
         ];
 
+        $contaSpotify = null !== $usuario ? $this->contaSpotifyRepository->buscarDoUsuario($usuario) : null;
+        if (null === $contaSpotify && null === $usuario) {
+            $contasConectadas = $this->contaSpotifyRepository->listarConectadas();
+            $contaSpotify = $contasConectadas[0] ?? null;
+        }
+
+        $agora = new \DateTimeImmutable();
+        $isColetaParada = false;
+        if (null !== $contaSpotify && $contaSpotify->isConectada()) {
+            $referencia = $contaSpotify->ultimaColetaEm() ?? $contaSpotify->conectadoEm();
+            if (null !== $referencia) {
+                $segundosSemColeta = $agora->getTimestamp() - $referencia->getTimestamp();
+                $isColetaParada = $segundosSemColeta > self::LIMITE_ALERTA_COLETA_PARADA_SEGUNDOS;
+            }
+        }
+
+        $resumoSpotify = [
+            'conectado' => $contaSpotify?->isConectada() ?? false,
+            'status' => $contaSpotify?->status()->value ?? 'desconectada',
+            'nomeExibicao' => $contaSpotify?->nomeExibicao(),
+            'conectadoEm' => $contaSpotify?->conectadoEm()?->format(\DateTimeInterface::ATOM),
+            'ultimaColetaEm' => $contaSpotify?->ultimaColetaEm()?->format(\DateTimeInterface::ATOM),
+            'coletaParada' => $isColetaParada,
+            'motivoErro' => $contaSpotify?->erroMotivo(),
+        ];
+
         return [
             'totalGeral' => $totalGeral,
             'totalErros' => $totalErros,
@@ -89,6 +129,7 @@ final readonly class DashboardService
             'porOrigemEspaco' => $origemEspaco,
             'ultimasMidias' => $this->mediaItemSerializer->normalizarLista($ultimosItens),
             'metricasVideos' => $metricasVideos,
+            'spotify' => $resumoSpotify,
         ];
     }
 

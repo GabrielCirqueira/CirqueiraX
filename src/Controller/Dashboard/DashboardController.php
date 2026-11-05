@@ -6,6 +6,7 @@ namespace App\Controller\Dashboard;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\PaginacaoDTO;
+use App\Entity\Usuario;
 use App\Serializer\MediaItemSerializer;
 use App\Entity\Usuario;
 use App\Service\Dashboard\DashboardService;
@@ -37,7 +38,9 @@ final class DashboardController extends DefaultController
     #[Route('/resumo', name: 'resumo', methods: ['GET'])]
     public function resumo(): Response
     {
-        return $this->success($this->dashboardService->obterResumo());
+        $usuario = $this->getUser();
+
+        return $this->success($this->dashboardService->obterResumo($usuario instanceof Usuario ? $usuario : null));
     }
 
     #[Route('/categorias', name: 'categorias', methods: ['GET'])]
