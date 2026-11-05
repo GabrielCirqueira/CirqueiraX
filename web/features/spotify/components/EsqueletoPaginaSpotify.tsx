@@ -14,4 +14,3 @@ export const EsqueletoPaginaSpotify = memo(function EsqueletoPaginaSpotify() {
     </VStack>
   )
 })
-

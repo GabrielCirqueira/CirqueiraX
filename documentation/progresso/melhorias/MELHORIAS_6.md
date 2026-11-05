@@ -461,11 +461,12 @@
   - Novo `EstadoAutorizacaoSpotifyService`: o state é assinado com HMAC usando o `APP_SECRET`, com o id do usuário e 15 minutos de validade. Não usa mais cache.
   - A tela de retorno envia o `code` uma vez só e mostra a mensagem real da API.
   - Credenciais do Spotify adicionadas ao `.env` de produção.
+  - Botão discreto "Sincronizar agora" no painel de conexão. Ele chama `POST /api/v1/spotify/sincronizar` (`SincronizarAgoraSpotifyService`), que faz a mesma coleta da rotina de 30 minutos para a conta do usuário e mostra quantas músicas eram novas.
 - **Testes**:
   - O kernel de produção sobe e o `lint:container` passa.
   - O state válido é aceito. O de outro usuário, o adulterado e o inválido são recusados.
   - A página `/spotify` renderiza no navegador (API simulada).
   - O Spotify aceitou o Client ID e o Redirect URI.
 - **Arquivos**:
-  - Backend: `src/Controller/Dashboard/DashboardController.php`, `src/Service/Spotify/EstadoAutorizacaoSpotifyService.php` (novo), `GerarUrlAutorizacaoSpotifyService.php`, `ConcluirAutorizacaoSpotifyService.php`
-  - Frontend: `web/features/spotify/Spotify.tsx`, `api.ts`, `types.ts`, `components/SpotifyCallback.tsx`, `components/ModalUploadHistoricoSpotify.tsx`
+  - Backend: `src/Controller/Dashboard/DashboardController.php`, `src/Controller/Spotify/SpotifyController.php`, `src/Service/Spotify/EstadoAutorizacaoSpotifyService.php` e `SincronizarAgoraSpotifyService.php` (novos), `GerarUrlAutorizacaoSpotifyService.php`, `ConcluirAutorizacaoSpotifyService.php`
+  - Frontend: `web/features/spotify/Spotify.tsx`, `api.ts`, `types.ts`, `components/SpotifyCallback.tsx`, `components/ModalUploadHistoricoSpotify.tsx`, `components/PainelConexaoSpotify.tsx`, `hooks/useSincronizarSpotify.ts` (novo)

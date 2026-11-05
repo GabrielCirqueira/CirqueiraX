@@ -35,6 +35,14 @@ export const DesconectarSpotifySchema = z.object({
 
 export type DesconectarSpotify = z.infer<typeof DesconectarSpotifySchema>
 
+export const ResultadoSincronizacaoSpotifySchema = z.object({
+  totalColetadas: z.number(),
+  totalNovas: z.number(),
+  totalDuplicadas: z.number(),
+})
+
+export type ResultadoSincronizacaoSpotify = z.infer<typeof ResultadoSincronizacaoSpotifySchema>
+
 export const StatusImportacaoSpotifyEnum = z.enum(['enviada', 'processando', 'concluida', 'erro'])
 
 export type TipoStatusImportacaoSpotify = z.infer<typeof StatusImportacaoSpotifyEnum>

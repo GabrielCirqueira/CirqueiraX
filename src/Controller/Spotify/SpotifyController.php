@@ -22,6 +22,7 @@ use App\Service\Spotify\IniciarImportacaoSpotifyService;
 use App\Service\Spotify\ListarMesesCapsulaService;
 use App\Service\Spotify\ObterDetalheCapsulaService;
 use App\Service\Spotify\ObterResumoHojeSemanaCuriosidadesService;
+use App\Service\Spotify\SincronizarAgoraSpotifyService;
 use App\Service\Spotify\ObterStatusSpotifyService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +43,7 @@ final class SpotifyController extends DefaultController
         private readonly ListarMesesCapsulaService $listarMesesCapsulaService,
         private readonly ObterDetalheCapsulaService $obterDetalheCapsulaService,
         private readonly ObterResumoHojeSemanaCuriosidadesService $obterResumoService,
+        private readonly SincronizarAgoraSpotifyService $sincronizarAgoraService,
         private readonly ImagemSpotifyRepository $imagemRepository,
         private readonly ContaSpotifySerializer $contaSpotifySerializer,
         private readonly ImportacaoSpotifySerializer $importacaoSpotifySerializer,
@@ -74,6 +76,18 @@ final class SpotifyController extends DefaultController
         $conta = $this->obterStatusService->executar($usuario);
 
         return $this->success($this->contaSpotifySerializer->serializar($conta));
+    }
+
+    #[Route('/sincronizar', name: 'sincronizar', methods: ['POST'])]
+    public function sincronizar(#[CurrentUser] Usuario $usuario): Response
+    {
+        $resultado = $this->sincronizarAgoraService->executar($usuario);
+
+        return $this->success([
+            'totalColetadas' => $resultado->totalColetadas,
+            'totalNovas' => $resultado->totalNovas,
+            'totalDuplicadas' => $resultado->totalDuplicadas,
+        ]);
     }
 
     #[Route('/desconectar', name: 'desconectar', methods: ['POST'])]

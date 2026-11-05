@@ -6,13 +6,19 @@ import {
   Flex,
   HStack,
   Heading,
+  IconButton,
   Spinner,
   Text,
   VStack,
 } from '@chakra-ui/react'
 import { AlertCircle, CheckCircle2, LogOut, Music, RefreshCw, Upload } from 'lucide-react'
 import { memo, useState } from 'react'
-import { useDesconectarSpotify, useObterUrlAutorizacaoSpotify, useStatusSpotify } from '../hooks'
+import {
+  useDesconectarSpotify,
+  useObterUrlAutorizacaoSpotify,
+  useSincronizarSpotify,
+  useStatusSpotify,
+} from '../hooks'
 import { formatarDataHoraPtBr } from '../utils'
 import { ModalConfirmarDesconexao } from './ModalConfirmarDesconexao'
 
@@ -26,6 +32,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
   const { data: status, isLoading } = useStatusSpotify()
   const obterUrlMutation = useObterUrlAutorizacaoSpotify()
   const desconectarMutation = useDesconectarSpotify()
+  const sincronizarMutation = useSincronizarSpotify()
   const [modalDesconectarAberto, setModalDesconectarAberto] = useState(false)
 
   function handleVincularOuReconectar() {
@@ -203,6 +210,29 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                   <Text as="span">Importar histórico</Text>
                 </HStack>
               </Button>
+            )}
+
+            {isConectada && (
+              <IconButton
+                variant="ghost"
+                size="sm"
+                borderRadius="full"
+                color="cirqueira.spotify.textoSecundario"
+                _hover={{ color: 'cirqueira.spotify.verde', bg: 'cirqueira.spotify.cartaoElevado' }}
+                onClick={() => sincronizarMutation.mutate()}
+                disabled={sincronizarMutation.isPending}
+                aria-label="Sincronizar agora"
+                title="Sincronizar agora (faz a mesma coleta que roda a cada 30 minutos)"
+                h="38px"
+                w="38px"
+              >
+                <Box
+                  display="flex"
+                  animation={sincronizarMutation.isPending ? 'spin 1s linear infinite' : undefined}
+                >
+                  <RefreshCw size={15} />
+                </Box>
+              </IconButton>
             )}
 
             {isConectada ? (

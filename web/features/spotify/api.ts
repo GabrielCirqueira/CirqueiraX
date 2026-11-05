@@ -11,6 +11,8 @@ import {
   ImportacaoSpotifySchema,
   type RespostaConsultaImagens,
   RespostaConsultaImagensSchema,
+  type ResultadoSincronizacaoSpotify,
+  ResultadoSincronizacaoSpotifySchema,
   type ResumoGeralSpotify,
   ResumoGeralSpotifySchema,
   type ResumoMesCapsula,
@@ -41,6 +43,11 @@ export async function concluirAutorizacaoSpotify(
 export async function desconectarSpotify(): Promise<DesconectarSpotify> {
   const { data } = await api.post<RespostaApi<unknown>>('/api/v1/spotify/desconectar')
   return DesconectarSpotifySchema.parse(data.data)
+}
+
+export async function sincronizarSpotifyAgora(): Promise<ResultadoSincronizacaoSpotify> {
+  const { data } = await api.post<RespostaApi<unknown>>('/api/v1/spotify/sincronizar')
+  return ResultadoSincronizacaoSpotifySchema.parse(data.data)
 }
 
 export async function iniciarImportacaoSpotify(arquivo: File): Promise<ImportacaoSpotify> {
