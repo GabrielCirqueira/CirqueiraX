@@ -8,7 +8,6 @@ use App\Controller\Common\DefaultController;
 use App\DataObject\PaginacaoDTO;
 use App\Entity\Usuario;
 use App\Serializer\MediaItemSerializer;
-use App\Entity\Usuario;
 use App\Service\Dashboard\DashboardService;
 use App\Service\LivroAudio\PainelSistemaLivrosAudioService;
 use App\Service\MediaItem\MediaItemService;
