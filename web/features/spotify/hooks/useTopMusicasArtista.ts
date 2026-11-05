@@ -17,4 +17,3 @@ export function useTopMusicasArtista(
     staleTime: 60_000,
   })
 }
-

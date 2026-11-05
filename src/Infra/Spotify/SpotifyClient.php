@@ -28,6 +28,9 @@ final class SpotifyClient extends Client implements SpotifyInterface
     private const int LIMITE_PADRAO_RECENTES = 50;
     private const int LIMITE_MAXIMO_BUSCA = 10;
 
+    private ?string $tokenClientCredentialsCache = null;
+    private ?int $tokenClientCredentialsExpiraEm = null;
+
     public function __construct(
         ClientInterface $client,
         private readonly string $clientId,
@@ -135,6 +138,46 @@ final class SpotifyClient extends Client implements SpotifyInterface
         $escopos = $this->extrairString($dados['scope'] ?? null);
 
         return new TokensSpotifyDTO($accessToken, $novoRefreshToken, $expiraEm, $escopos);
+    }
+
+    public function obterTokenClientCredentials(): string
+    {
+        if (null !== $this->tokenClientCredentialsCache && time() < ($this->tokenClientCredentialsExpiraEm ?? 0) - 60) {
+            return $this->tokenClientCredentialsCache;
+        }
+
+        $this->validarCredenciaisConfiguradas();
+
+        $autorizacaoBasic = base64_encode($this->clientId.':'.$this->clientSecret);
+
+        $dados = $this->executarComRetry(function () use ($autorizacaoBasic) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'POST',
+                $this->urlToken,
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Basic '.$autorizacaoBasic,
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                    ],
+                    'form_params' => [
+                        'grant_type' => 'client_credentials',
+                    ],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+
+            return $resposta;
+        }, SpotifyException::falhaNaTrocaDeCodigoPorTokens());
+
+        Assert::keyExists($dados, 'access_token');
+
+        $this->tokenClientCredentialsCache = $this->extrairString($dados['access_token'] ?? null);
+        $expiraEm = $this->extrairInt($dados['expires_in'] ?? null, 3600);
+        $this->tokenClientCredentialsExpiraEm = time() + $expiraEm;
+
+        return $this->tokenClientCredentialsCache;
     }
 
     public function buscarPerfil(string $accessToken): PerfilSpotifyDTO

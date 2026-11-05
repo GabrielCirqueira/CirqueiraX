@@ -389,24 +389,37 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
 
               {capsula.artistaMaisOuvido ? (
                 <HStack gap={3} align="center">
-                  <Avatar.Root
-                    size="lg"
-                    shape="full"
+                  <Box
+                    boxSize={14}
+                    borderRadius="full"
+                    overflow="hidden"
                     border="2px solid"
                     borderColor="cirqueira.spotify.azul"
+                    bg="cirqueira.spotify.cartaoElevado"
+                    flexShrink={0}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    {fotoArtistaMaisOuvido && (
-                      <Avatar.Image
+                    {fotoArtistaMaisOuvido ? (
+                      <Box
+                        as="img"
                         src={fotoArtistaMaisOuvido}
                         alt={capsula.artistaMaisOuvido.nomeArtista}
+                        w="full"
+                        h="full"
+                        objectFit="cover"
                       />
+                    ) : (
+                      <Avatar.Root size="lg" shape="full">
+                        <Avatar.Fallback
+                          name={capsula.artistaMaisOuvido.nomeArtista}
+                          bg="cirqueira.spotify.cartaoElevado"
+                          color="cirqueira.spotify.azul"
+                        />
+                      </Avatar.Root>
                     )}
-                    <Avatar.Fallback
-                      name={capsula.artistaMaisOuvido.nomeArtista}
-                      bg="cirqueira.spotify.cartaoElevado"
-                      color="cirqueira.spotify.azul"
-                    />
-                  </Avatar.Root>
+                  </Box>
 
                   <VStack align="flex-start" gap={0.5}>
                     <Text
@@ -653,7 +666,9 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
   imagemUrlResolvida,
 }: LinhaArtistaRankingCapsulaProps) {
   const [expandido, setExpandido] = useState(false)
+  const [erroFoto, setErroFoto] = useState(false)
   const foto = artista.imagemUrl || imagemUrlResolvida
+  const temFoto = Boolean(foto) && !erroFoto
 
   return (
     <Collapsible.Root open={expandido} unmountOnExit>
@@ -686,20 +701,38 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
               {artista.posicao}
             </Center>
 
-            <Avatar.Root
-              size="md"
-              shape="full"
+            <Box
+              boxSize={10}
+              borderRadius="full"
+              overflow="hidden"
               border="1px solid"
               borderColor="cirqueira.spotify.azul"
+              bg="cirqueira.spotify.cartao"
               flexShrink={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
             >
-              {foto && <Avatar.Image src={foto} alt={artista.nomeArtista} />}
-              <Avatar.Fallback
-                name={artista.nomeArtista}
-                bg="cirqueira.spotify.cartao"
-                color="cirqueira.spotify.azul"
-              />
-            </Avatar.Root>
+              {temFoto ? (
+                <Box
+                  as="img"
+                  src={foto as string}
+                  alt={artista.nomeArtista}
+                  w="full"
+                  h="full"
+                  objectFit="cover"
+                  onError={() => setErroFoto(true)}
+                />
+              ) : (
+                <Avatar.Root size="md" shape="full">
+                  <Avatar.Fallback
+                    name={artista.nomeArtista}
+                    bg="cirqueira.spotify.cartao"
+                    color="cirqueira.spotify.azul"
+                  />
+                </Avatar.Root>
+              )}
+            </Box>
 
             <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
               <HStack gap={2} maxW="full">

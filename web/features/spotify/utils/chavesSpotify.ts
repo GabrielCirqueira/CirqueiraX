@@ -18,4 +18,3 @@ export function gerarChaveArtista(
   }
   return `artista:nome:${nomeArtista.trim().toLowerCase()}`
 }
-

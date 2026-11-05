@@ -22,6 +22,8 @@ interface SpotifyInterface
 
     public function renovarToken(string $refreshToken): TokensSpotifyDTO;
 
+    public function obterTokenClientCredentials(): string;
+
     public function buscarPerfil(string $accessToken): PerfilSpotifyDTO;
 
     public function listarReproducoesRecentes(string $accessToken, ?int $depoisDe = null, int $limite = 50): ListaReproducoesRecentesSpotifyDTO;

@@ -118,7 +118,9 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
   imagemUrlResolvida,
 }: ItemRankingArtistaProps) {
   const [expandido, setExpandido] = useState(false)
+  const [erroFoto, setErroFoto] = useState(false)
   const foto = item.imagemUrl || imagemUrlResolvida
+  const temFoto = Boolean(foto) && !erroFoto
 
   return (
     <Collapsible.Root open={expandido} unmountOnExit>
@@ -151,20 +153,38 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
               {item.posicao}
             </Center>
 
-            <Avatar.Root
-              size="md"
-              shape="full"
+            <Box
+              boxSize={10}
+              borderRadius="full"
+              overflow="hidden"
               flexShrink={0}
               border="1px solid"
               borderColor="cirqueira.spotify.cartaoElevado"
+              bg="cirqueira.spotify.cartaoElevado"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
             >
-              {foto && <Avatar.Image src={foto} alt={item.nomeArtista} />}
-              <Avatar.Fallback
-                name={item.nomeArtista}
-                bg="cirqueira.spotify.cartaoElevado"
-                color="cirqueira.spotify.azul"
-              />
-            </Avatar.Root>
+              {temFoto ? (
+                <Box
+                  as="img"
+                  src={foto as string}
+                  alt={item.nomeArtista}
+                  w="full"
+                  h="full"
+                  objectFit="cover"
+                  onError={() => setErroFoto(true)}
+                />
+              ) : (
+                <Avatar.Root size="md" shape="full">
+                  <Avatar.Fallback
+                    name={item.nomeArtista}
+                    bg="cirqueira.spotify.cartaoElevado"
+                    color="cirqueira.spotify.azul"
+                  />
+                </Avatar.Root>
+              )}
+            </Box>
 
             <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
               <HStack gap={2} maxW="full">

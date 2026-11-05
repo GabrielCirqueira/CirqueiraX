@@ -47,25 +47,32 @@ final readonly class ResolverImagemSpotifyService
             }
         }
 
-        $usuario = $this->usuarioRepository->find($message->usuarioId);
-        if (null === $usuario) {
-            return;
+        $accessToken = null;
+        if (null !== $message->usuarioId) {
+            $usuario = $this->usuarioRepository->find($message->usuarioId);
+            if (null !== $usuario) {
+                $conta = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
+                if (null !== $conta && $conta->status()->isConectada()) {
+                    try {
+                        $accessToken = $this->obterTokenValidoService->executar($conta);
+                    } catch (SpotifyException) {
+                        $accessToken = null;
+                    }
+                }
+            }
         }
 
-        $conta = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
-        if (null === $conta || !$conta->status()->isConectada()) {
-            return;
-        }
+        if (null === $accessToken || '' === trim($accessToken)) {
+            try {
+                $accessToken = $this->spotifyClient->obterTokenClientCredentials();
+            } catch (\Throwable $e) {
+                $this->logger->warning('Não foi possível obter token para resolver imagem do Spotify.', [
+                    'usuario' => $message->usuarioId,
+                    'erro' => $e->getMessage(),
+                ]);
 
-        try {
-            $accessToken = $this->obterTokenValidoService->executar($conta);
-        } catch (SpotifyException $e) {
-            $this->logger->warning('Não foi possível obter token para resolver imagem do Spotify.', [
-                'usuario' => $message->usuarioId,
-                'erro' => $e->getMessage(),
-            ]);
-
-            return;
+                return;
+            }
         }
 
         $imagem->incrementarTentativas();
