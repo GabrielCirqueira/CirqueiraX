@@ -17,6 +17,6 @@ final readonly class GerarAudioBlocoMessageHandler
 
     public function __invoke(GerarAudioBlocoMessage $message): void
     {
-        $this->gerarAudioBlocoService->executar($message->blocoUuid());
+        $this->gerarAudioBlocoService->executar();
     }
 }

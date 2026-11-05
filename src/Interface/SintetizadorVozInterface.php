@@ -11,5 +11,5 @@ interface SintetizadorVozInterface
     /**
      * @param (callable(): bool)|null $deveCancelar
      */
-    public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null, ?callable $deveCancelar = null): ResultadoSinteseVozDTO;
+    public function sintetizar(string $texto, string $caminhoDestinoMp3, ?string $voz = null, ?callable $deveCancelar = null, bool $permitirMotorAlternativo = false): ResultadoSinteseVozDTO;
 }

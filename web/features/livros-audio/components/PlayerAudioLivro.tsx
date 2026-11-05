@@ -1,6 +1,6 @@
 import { addToast } from '@/shared/components/ui/toaster'
 import { Badge, Box, Button, Flex, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Bookmark,
   BookmarkCheck,
@@ -27,7 +27,7 @@ import {
   X,
 } from 'lucide-react'
 import { type MouseEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { listarTrechosBloco, obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
+import { abrirPdfEmNovaAba, listarLinksBlocos, listarTrechosBloco } from '../api'
 import {
   LIVROS_AUDIO_QUERY_KEY,
   chaveTrechosBloco,
@@ -39,6 +39,7 @@ import {
 import { useCriarMarcacao } from '../hooks/useMarcacoesLivro'
 import { type NarracaoAtual, useNarracaoAtual } from '../hooks/useNarracaoAtual'
 import { useOfflineLivro } from '../hooks/useOfflineLivro'
+import { useRegistroEscuta } from '../hooks/useRegistroEscuta'
 import type {
   AlvoReproducao,
   LivroAudio,
@@ -81,6 +82,7 @@ const VELOCIDADE_MINIMA = 0.5
 const VELOCIDADE_MAXIMA = 3
 const ATALHOS_VELOCIDADE = [0.8, 1, 1.2, 1.5, 1.8, 2, 2.5]
 const PAUSA_LONGA_MS = 30_000
+const INTERVALO_RENOVACAO_LINKS = 5 * 60_000
 const RECUO_AO_RETOMAR_SEGUNDOS = 5
 const FADE_TIMER_MS = 15_000
 const FADE_FIM_PARTE_SEGUNDOS = 10
@@ -209,6 +211,9 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const posicaoRetomadaRef = useRef(false)
   const deveTocarAoCarregarRef = useRef(false)
   const [tocando, setTocando] = useState(false)
+  const tocandoRef = useRef(false)
+  tocandoRef.current = tocando
+  useRegistroEscuta(livro.uuid, tocando)
   const alvoPendenteRef = useRef<{ alvo: AlvoReproducao; criadoEm: number } | null>(null)
   const [versaoAlvo, setVersaoAlvo] = useState(0)
   const [metadadosCarregados, setMetadadosCarregados] = useState(0)
@@ -370,17 +375,68 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     return () => URL.revokeObjectURL(url)
   }, [fonteOffline?.url])
 
+  const totalPartesProntas = blocos.filter((bloco) => bloco.isPronto).length
+  const totalPartesVozesExtras = vozes.reduce(
+    (total, voz) => (voz.principal ? total : total + voz.blocosProntos.length),
+    0
+  )
+  const chaveLinks = [
+    ...LIVROS_AUDIO_QUERY_KEY,
+    livro.uuid,
+    'links',
+    totalPartesProntas,
+    totalPartesVozesExtras,
+  ]
+  const { data: linksBlocos } = useQuery({
+    queryKey: chaveLinks,
+    queryFn: () => listarLinksBlocos(livro.uuid),
+    enabled: totalPartesProntas > 0,
+    staleTime: INTERVALO_RENOVACAO_LINKS,
+    refetchInterval: INTERVALO_RENOVACAO_LINKS,
+    refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
+  })
+  const urlAtivaRef = useRef<{ chave: string; url: string } | null>(null)
+  const [versaoLinkAtivo, setVersaoLinkAtivo] = useState(0)
+  const ultimaRenovacaoRef = useRef(0)
+
+  const urlDaRede = useCallback(
+    (numeroBloco: number, voz: string | null) =>
+      linksBlocos?.find((link) => link.numeroBloco === numeroBloco && link.voz === voz)?.url ?? '',
+    [linksBlocos]
+  )
+
   const audioUrl = useMemo(() => {
-    if (!blocoAtivo || !blocoAtivo.isPronto || !vozDoBlocoPronta) return ''
+    if (!blocoAtivo || !blocoAtivo.isPronto || !vozDoBlocoPronta || versaoLinkAtivo < 0) return ''
     if (!chaveOfflineAtiva || fonteOffline?.chave !== chaveOfflineAtiva) return ''
     if (fonteOffline.url) return fonteOffline.url
-    return obterUrlStreamBloco(
-      livro.uuid,
-      blocoAtivo.numeroBloco,
-      vozDoBloco,
-      blocoAtivo.atualizadoEm
-    )
-  }, [livro.uuid, blocoAtivo, vozDoBloco, vozDoBlocoPronta, chaveOfflineAtiva, fonteOffline])
+    const chave = `${blocoAtivo.numeroBloco}|${vozDoBloco ?? ''}|${blocoAtivo.atualizadoEm}`
+    if (urlAtivaRef.current?.chave === chave) return urlAtivaRef.current.url
+    const url = urlDaRede(blocoAtivo.numeroBloco, vozDoBloco)
+    if (url) urlAtivaRef.current = { chave, url }
+    return url
+  }, [
+    blocoAtivo,
+    vozDoBloco,
+    vozDoBlocoPronta,
+    chaveOfflineAtiva,
+    fonteOffline,
+    urlDaRede,
+    versaoLinkAtivo,
+  ])
+
+  function renovarLinkAposErro() {
+    const audio = audioRef.current
+    if (!audio || !audioUrl || audioUrl.startsWith('blob:')) return
+    const agora = Date.now()
+    if (agora - ultimaRenovacaoRef.current < 15000) return
+    ultimaRenovacaoRef.current = agora
+    retomarEmRef.current = { segundos: ultimoTempoRef.current, tocar: tocandoRef.current }
+    urlAtivaRef.current = null
+    queryClient
+      .refetchQueries({ queryKey: [...LIVROS_AUDIO_QUERY_KEY, livro.uuid, 'links'] })
+      .finally(() => setVersaoLinkAtivo((versao) => versao + 1))
+  }
 
   const proximoBlocoPronto = blocoAtivo
     ? (blocos.find((b) => b.numeroBloco === blocoAtivo.numeroBloco + 1 && b.isPronto) ?? null)
@@ -400,12 +456,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   )
   const urlProximoBloco =
     proximoBlocoPronto && !proximoEstaOffline
-      ? obterUrlStreamBloco(
-          livro.uuid,
-          proximoBlocoPronto.numeroBloco,
-          vozProximoBloco,
-          proximoBlocoPronto.atualizadoEm
-        )
+      ? urlDaRede(proximoBlocoPronto.numeroBloco, vozProximoBloco)
       : ''
 
   useEffect(() => {
@@ -900,7 +951,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   )
 
   const isPosicaoSalva = marcadorSalvo !== undefined && paginaAtualLeitor === marcadorSalvo
-  const urlDownloadPdf = obterUrlPdfLivro(livro.uuid)
+  function baixarPdf() {
+    abrirPdfEmNovaAba(livro.uuid).catch(() =>
+      addToast({ title: 'Não foi possível abrir o PDF', type: 'error' })
+    )
+  }
 
   return (
     <Box
@@ -979,6 +1034,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           onSeeked={() => {
             audioFoiUsadoRef.current = true
           }}
+          onError={renovarLinkAposErro}
           onEnded={() => {
             setTocando(false)
             if (timerSono?.tipo === 'fim_parte') {
@@ -1945,27 +2001,22 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             </IconButton>
           </HStack>
 
-          <a
-            href={urlDownloadPdf}
-            download={`${livro.titulo}.pdf`}
-            style={{ textDecoration: 'none' }}
+          <Button
+            size="xs"
+            variant="ghost"
+            borderRadius="lg"
+            px={2.5}
+            h="28px"
+            color="cirqueira.grey.300"
+            _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
+            fontSize="xs"
+            title="Baixar o arquivo PDF original"
+            display={{ base: 'none', xl: 'inline-flex' }}
+            onClick={baixarPdf}
           >
-            <Button
-              size="xs"
-              variant="ghost"
-              borderRadius="lg"
-              px={2.5}
-              h="28px"
-              color="cirqueira.grey.300"
-              _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
-              fontSize="xs"
-              title="Baixar o arquivo PDF original"
-              display={{ base: 'none', xl: 'inline-flex' }}
-            >
-              <Download size={13} style={{ marginRight: '4px' }} />
-              PDF
-            </Button>
-          </a>
+            <Download size={13} style={{ marginRight: '4px' }} />
+            PDF
+          </Button>
 
           <Button
             size="xs"

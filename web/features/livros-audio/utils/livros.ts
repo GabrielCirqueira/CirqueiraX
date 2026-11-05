@@ -1,4 +1,4 @@
-import type { LivroAudio, StatusLivroAudio } from '../types'
+import type { ItemFilaGeracao, LivroAudio, StatusLivroAudio } from '../types'
 
 export interface AparenciaStatusLivro {
   rotulo: string
@@ -29,7 +29,17 @@ export function formatarTamanhoLivro(bytes: number): string {
   const kb = bytes / 1024
   if (kb < 1024) return `${kb.toFixed(0)} KB`
   const mb = kb / 1024
-  return `${mb.toFixed(1)} MB`
+  if (mb < 1024) return `${mb.toFixed(1).replace('.', ',')} MB`
+  return `${(mb / 1024).toFixed(1).replace('.', ',')} GB`
+}
+
+export function formatarTempoRestante(segundos: number): string {
+  if (segundos < 60) return 'menos de 1 min'
+  const minutos = Math.round(segundos / 60)
+  if (minutos < 60) return `${minutos} min`
+  const horas = Math.floor(minutos / 60)
+  const resto = minutos % 60
+  return resto > 0 ? `${horas} h ${resto} min` : `${horas} h`
 }
 
 export function formatarDataRelativa(dataIso: string | null): string {
@@ -97,7 +107,11 @@ function descreverTempoEstimado(partes: number): string {
   return formatarDuracaoResumida(partes * MINUTOS_POR_PARTE * 60)
 }
 
-export function obterProgressoAudio(livro: LivroAudio, partesNaFrente = 0): ProgressoAudioLivro {
+export function obterProgressoAudio(
+  livro: LivroAudio,
+  partesNaFrente = 0,
+  itemFila?: ItemFilaGeracao
+): ProgressoAudioLivro {
   const { totalBlocos, blocosProntos, blocosComErro, segundosAudioProntos } = livro
   const percentual = totalBlocos > 0 ? Math.floor((blocosProntos / totalBlocos) * 100) : 0
   const audioPronto = formatarDuracaoResumida(segundosAudioProntos)
@@ -132,8 +146,13 @@ export function obterProgressoAudio(livro: LivroAudio, partesNaFrente = 0): Prog
   const titulo = `${blocosProntos} de ${totalBlocos} partes prontas`
   const falhas = blocosComErro > 0 ? ` ${blocosComErro} com erro.` : ''
   const restantes = contarPartesRestantes(livro)
-  const previsao =
-    restantes > 0 ? ` Faltam cerca de ${descreverTempoEstimado(restantes + partesNaFrente)}.` : ''
+  const previsao = livro.filaPausada
+    ? ' Geração pausada.'
+    : itemFila?.segundosParaTerminar
+      ? ` Termina em cerca de ${formatarTempoRestante(itemFila.segundosParaTerminar)}.`
+      : restantes > 0
+        ? ` Faltam cerca de ${descreverTempoEstimado(restantes + partesNaFrente)}.`
+        : ''
 
   if (blocosProntos === 0) {
     return {

@@ -40,6 +40,8 @@ final readonly class LivroAudioSerializer
             'criadoEm' => $livro->criadoEm()->format(DateTimeInterface::ATOM),
             'atualizadoEm' => $livro->atualizadoEm()->format(DateTimeInterface::ATOM),
             'ultimaEscutaEm' => $livro->ultimaEscutaEm()?->format(DateTimeInterface::ATOM),
+            'filaPausada' => $livro->isFilaPausada(),
+            'prioridadeFila' => $livro->prioridadeFila(),
             'isEnviado' => $livro->isEnviado(),
             'isExtraindo' => $livro->isExtraindo(),
             'isGerandoAudio' => $livro->isGerandoAudio(),

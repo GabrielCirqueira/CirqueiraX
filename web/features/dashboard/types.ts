@@ -112,3 +112,64 @@ export interface ResultadoSincronizacao {
   pastaId: string
   mensagem: string
 }
+
+export interface LivroParaContinuar {
+  uuid: string
+  titulo: string
+  paginaAtual: number
+  totalPaginas: number
+  progresso: number
+  blocoAtual: number | null
+  ultimaEscutaEm: string | null
+  status: string
+}
+
+export interface EstatisticasEscutaLivros {
+  metaMinutos: number
+  hojeSegundos: number
+  semanaSegundos: number
+  totalSegundos: number
+  sequenciaDias: number
+  dias: { dia: string; segundos: number }[]
+  continuar: LivroParaContinuar[]
+}
+
+export interface PainelSistemaLivros {
+  disco: {
+    livreBytes: number
+    totalBytes: number
+    usadoBytes: number
+    nivel: 'ok' | 'atencao' | 'critico'
+    bytesParaFila: number
+    mensagem: string | null
+  }
+  memoria: {
+    containerUsadoBytes: number | null
+    containerLimiteBytes: number | null
+    servidorTotalBytes: number | null
+    servidorDisponivelBytes: number | null
+    workerBytes: number | null
+    workerAtivo: boolean
+  }
+  livros: { total: number; porStatus: Record<string, number>; pdfs: number; bytesPdfs: number }
+  audios: {
+    partes: number
+    partesProntas: number
+    bytes: number
+    segundos: number
+    bytesPorParte: number
+  }
+  vozesExtras: {
+    partes: number
+    bytes: number
+    porVoz: { voz: string; nome: string; partes: number; bytes: number; segundos: number }[]
+  }
+  bytesNoBanco: number
+  bytesNaPasta: number | null
+  fila: {
+    partesNaFila: number
+    segundosRestantes: number
+    segundosPorParte: number
+    livros: number
+  }
+}

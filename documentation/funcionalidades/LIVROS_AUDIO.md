@@ -1,6 +1,6 @@
 # Funcionalidade: Livros em Áudio
 
-A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livros digitais em formato PDF em audiolivros interativos com narração em voz neural (Edge TTS) no idioma detectado do livro: português, inglês, espanhol, francês, italiano ou alemão. O leitor integrado sincroniza o áudio com as páginas do livro, salvando o progresso da leitura para retomada contínua em qualquer dispositivo.
+A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livros digitais em formato PDF em audiolivros interativos com narração em voz neural (Edge TTS, com o Piper local como segundo motor) no idioma detectado do livro: português, inglês, espanhol, francês, italiano ou alemão. O leitor integrado sincroniza o áudio com as páginas do livro, salvando o progresso da leitura para retomada contínua em qualquer dispositivo.
 
 ---
 
@@ -26,7 +26,9 @@ A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livr
                    GerarAudioBlocoMessage (async)
                                    │
                                    ▼
-             Worker (fila livro_audio): bin/sintetizar-voz.py
+             Worker (fila livro_audio) reserva a melhor parte pendente
+             (ver "Ordem da fila") e roda bin/sintetizar-voz.py
+             (ou bin/sintetizar-voz-piper.py)
              grava o mp3 e o tempo de cada palavra
              Salva áudio em var/livros/{uuid}/blocos/bloco_{n}.mp3
              e as frases com palavras em livro_audio_bloco.trechos
@@ -56,6 +58,39 @@ A funcionalidade **Livros em Áudio** (`/livros-audio`) permite transformar livr
 ```
 
 A voz usada no upload é a **principal** e fica em `livro_audio_bloco`. As outras ficam em `livro_audio_bloco_voz`, uma linha por bloco e voz.
+
+### Ordem da fila
+
+A mensagem `GerarAudioBlocoMessage` não aponta para uma parte. Ao ser consumida, o worker reserva a melhor parte pendente (`FilaGeracaoLivrosAudioService`), nesta ordem:
+
+1. Livros priorizados (`prioridade_fila`, maior primeiro).
+2. Livro ouvido nos últimos 30 minutos.
+3. Livro mais antigo.
+4. Partes a partir da página atual antes das que ficaram para trás.
+5. Número da parte.
+
+- **Reserva atômica:** `UPDATE ... WHERE status = 'pendente'`, então duas mensagens nunca pegam a mesma parte.
+- **Livros pausados** (`fila_pausada`) são pulados, inclusive nas vozes extras.
+- **Partes presas** em `gerando` por mais de 10 minutos voltam a `pendente`.
+- **Reabastecimento:** ao terminar uma parte, se a fila do Messenger estiver vazia e houver partes pendentes, entra uma nova mensagem.
+- **Previsão de término:** usa a média das últimas gerações (55 s por parte quando ainda não há histórico).
+
+### Motores de voz
+
+- `SintetizadorVozRoteador` escolhe o motor:
+  - Vozes `piper-*` vão para o Piper (`PiperTtsClient`, modelos em `PIPER_MODELOS_DIR`, padrão `/opt/piper/vozes`).
+  - As demais vão para o Edge TTS.
+- **Reserva na narração principal:** o Edge é tentado 2 vezes, com 5 s de pausa. Se falhar nas duas, a parte é gerada com o Piper do mesmo idioma (Faber em português, Lessac nos outros), e a voz usada fica gravada na parte.
+- Vozes extras não trocam de motor.
+- O Piper gera frase por frase. O tempo de cada frase é exato, o de cada palavra é estimado.
+
+### Links assinados
+
+- **Arquivos dos livros:** o áudio das partes, o PDF baixado e as amostras de voz são servidos em `/api/v1/livros-audio-arquivos/...`. Essa rota é pública no firewall, mas só responde com assinatura válida do `UriSigner` (`_expiration` + `_hash`).
+- **Validade:** de 20 a 30 minutos. A expiração é arredondada em janelas de 10 minutos, então a URL não muda dentro da janela e o cache do navegador funciona.
+- **Player:** pega todos os links do livro em `GET /{uuid}/links`, fixa o link da parte que está tocando e pede links novos quando o `<audio>` dá erro.
+- **PDF no leitor:** é carregado com o cabeçalho `Authorization`.
+- As rotas antigas com `?token=` continuam ativas para compatibilidade.
 
 ### Limpeza do texto narrado
 
@@ -102,7 +137,14 @@ Se o `-bbox-layout` falhar, a extração volta para `pdftotext -layout` por pág
   - Se o livro foi apagado ou a voz removida durante a geração, o worker cancela o bloco.
   - Amostras de voz são geradas na primeira vez que alguém ouve e ficam em `var/livros/amostras/{voz}.mp3`, compartilhadas entre livros.
   - Partes que ainda não foram geradas na voz escolhida tocam na voz principal.
+- **Disco:**
+  - "Atenção" com menos de 5 GB ou 10% livres, e "crítico" com menos de 1 GB, contando o que a fila ainda vai ocupar (partes pendentes × tamanho médio de uma parte).
+  - Pedir uma voz extra que deixaria o disco crítico devolve 409.
+- **Tempo ouvido:**
+  - O player envia os segundos tocados a cada 30 s, ao pausar e ao sair. O servidor aceita no máximo 120 s por envio e soma por livro e por dia em `escuta_livro_audio_dia`.
+  - A meta diária fica em `usuario.meta_escuta_minutos` (padrão 30, de 5 a 600).
 - **Marcador de leitura e retomada:**
+  - Cada gravação leva `registradaEm` (ms). Uma gravação mais antiga que a guardada em `posicao_registrada_em` é ignorada, então uma aba antiga não desfaz a posição nova.
   - O sistema mantém o registro de última página lida, bloco de áudio e segundo exato da reprodução (`PUT /api/v1/livros-audio/{uuid}/posicao`).
   - O endpoint conta com rate limiting configurado (60 requisições/minuto) e debounce no frontend para salvar o progresso periodicamente sem sobrecarregar o servidor.
 
@@ -155,6 +197,8 @@ Os blocos de vozes adicionais (`LivroAudioBlocoVoz`) usam os mesmos status.
 | Brian | `en-US-BrianMultilingualNeural` | Multilíngue |
 | Ava | `en-US-AvaMultilingualNeural` | Multilíngue |
 | Emma | `en-US-EmmaMultilingualNeural` | Multilíngue |
+| Faber (Piper) | `piper-pt_BR-faber-medium` | Português (Brasil), roda no servidor |
+| Lessac (Piper) | `piper-en_US-lessac-medium` | Inglês, roda no servidor |
 
 ---
 
@@ -167,6 +211,10 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
    - Indicador de progresso de áudio (blocos concluídos vs pendentes) e barra de progresso da última leitura.
    - Modal de upload com suporte a arrastar-e-soltar, seleção de arquivo e validação de tamanho.
    - Ação de exclusão com confirmação.
+   - **Fila de geração** (`PainelFilaGeracao`):
+     - Mostra a posição de cada livro, as partes que faltam e a previsão de término.
+     - Botões para pausar, retomar e passar o livro para o começo da fila (também nos cards).
+     - Aviso de disco quando está em "atenção" ou "crítico".
 
 2. **Leitor & Player Imersivo (`/livros-audio/:uuid`):**
    - **Visualizador PDF:**
@@ -186,14 +234,14 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
    - **Sincronização Bidirecional:**
      - **Seguir áudio:** a página vira para onde está a frase lida, que fica destacada no PDF com transição suave. Se você abrir outra página e der play, o áudio começa na primeira frase da página aberta (no modo livro, a da esquerda).
      - **Por frase / Por palavra:** o botão no player escolhe se o destaque acompanha a frase inteira ou cada palavra (com a frase num tom mais claro). A escolha fica salva no navegador.
-     - **Vozes:** o botão com o nome da voz abre o painel `PainelVozes` para ouvir amostras, gerar o livro em outra voz e trocar na hora. A troca continua da mesma frase. A voz escolhida fica salva no navegador, por livro.
+     - **Vozes:** o botão com o nome da voz abre o painel `PainelVozes` para ouvir amostras, gerar o livro em outra voz e trocar na hora. O painel mostra o tamanho de cada voz (ou a estimativa), o selo Piper e o aviso de disco. A troca continua da mesma frase. A voz escolhida fica salva no navegador, por livro.
      - O player mostra a página e o trecho lido. Partes sem tempo por palavra (geradas antes da M106) usam uma estimativa pelo tempo decorrido.
      - **Folhear livre:** permite folhear páginas do PDF sem interromper a reprodução do áudio atual. O play continua de onde parou.
      - **Ajustes da narração** (botão de controles): modo das notas e dicionário de pronúncia, com o botão para refazer o áudio.
      - **Timer de sono:** 15, 30, 45 ou 60 minutos (conta só enquanto toca) ou "no fim desta parte", com o volume baixando no final.
      - **Tempo do livro:** barra do livro inteiro com o percentual e quanto falta na velocidade atual; clicar nela leva para aquele ponto.
      - **Recuo ao retomar:** depois de uma pausa de 30 s ou mais, e ao reabrir o livro, o áudio volta 5 s.
-     - **Próxima parte pré-carregada:** o áudio e as frases da parte seguinte são baixados enquanto a atual toca. O stream com `?v=` fica em cache no navegador por 7 dias.
+     - **Próxima parte pré-carregada:** o áudio e as frases da parte seguinte são baixados enquanto a atual toca. O link assinado com `?v=` fica em cache no navegador enquanto vale.
      - Navegação por clique na página do PDF pula a reprodução para o bloco correspondente.
 
 ---
@@ -220,3 +268,18 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
 | `DELETE` | `/api/v1/livros-audio/{uuid}/vozes/{voz}` | Apaga o áudio de uma voz adicional |
 | `GET` | `/api/v1/livros-audio/vozes/{voz}/amostra` | Amostra curta da voz |
 | `GET` | `/api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/stream` | Stream HTTP do bloco de áudio (suporte a cabeçalho `Range`; `?voz=` para outra voz) |
+| `GET` | `/api/v1/livros-audio/{uuid}/links` | Links assinados de todas as partes prontas, em todas as vozes |
+| `GET` | `/api/v1/livros-audio/{uuid}/pdf/link` | Link assinado para baixar o PDF |
+| `GET` | `/api/v1/livros-audio/vozes/amostras` | Links assinados das amostras de voz |
+| `GET` | `/api/v1/livros-audio-arquivos/{uuid}/blocos/{n}/stream` | Áudio da parte por link assinado (`?voz=`, `?v=`) |
+| `GET` | `/api/v1/livros-audio-arquivos/{uuid}/pdf` | PDF por link assinado |
+| `GET` | `/api/v1/livros-audio-arquivos/vozes/{voz}/amostra` | Amostra por link assinado |
+| `GET` | `/api/v1/livros-audio/fila` | Fila de geração com posição, partes que faltam e previsão |
+| `POST` | `/api/v1/livros-audio/{uuid}/fila/pausar` | Pausa a geração do livro |
+| `POST` | `/api/v1/livros-audio/{uuid}/fila/retomar` | Retoma a geração |
+| `POST` | `/api/v1/livros-audio/{uuid}/fila/priorizar` | Passa o livro para o começo da fila |
+| `POST` | `/api/v1/livros-audio/{uuid}/escuta` | Soma segundos ouvidos (`{"segundos": 30}`, máximo 120) |
+| `GET` | `/api/v1/livros-audio/estatisticas` | Meta, tempo de hoje, semana, total, sequência, 14 dias e "continuar ouvindo" |
+| `PUT` | `/api/v1/livros-audio/meta` | Altera a meta diária (`{"minutos": 45}`) |
+| `GET` | `/api/v1/livros-audio/disco` | Espaço livre e nível do alerta |
+| `GET` | `/api/v1/dashboard/livros` | Painel de armazenamento, memória e fila para o Dashboard |

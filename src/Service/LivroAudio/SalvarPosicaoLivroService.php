@@ -20,10 +20,15 @@ final readonly class SalvarPosicaoLivroService
     {
         $livro = $this->consultarLivrosAudioService->obterDoUsuario($uuid, $usuario);
 
+        if (!$livro->aceitaPosicaoRegistradaEm($dto->registradaEm())) {
+            return $livro;
+        }
+
         $livro->atualizarPosicao(
             $dto->paginaAtual(),
             $dto->blocoAtual(),
             $dto->segundosNoBloco(),
+            $dto->registradaEm(),
         );
 
         $this->livroAudioRepository->salvar($livro, true);

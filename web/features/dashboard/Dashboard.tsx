@@ -7,6 +7,7 @@ import { AtividadesRecentes } from './components/AtividadesRecentes'
 import { BarraAcoesRapidas } from './components/BarraAcoesRapidas'
 import { CardsResumo } from './components/CardsResumo'
 import { CardsVideosMetricas } from './components/CardsVideosMetricas'
+import { SecaoLivrosDashboard } from './components/SecaoLivrosDashboard'
 import { StatusIntegracoes } from './components/StatusIntegracoes'
 import {
   DASHBOARD_QUERY_KEYS,
@@ -63,6 +64,8 @@ const DashboardView = memo(function DashboardView() {
       queryClient.invalidateQueries({ queryKey: ['dashboard', 'erros'] }),
       queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.syncPastas }),
       queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.syncStatus }),
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.livros }),
+      queryClient.invalidateQueries({ queryKey: DASHBOARD_QUERY_KEYS.escuta }),
     ]).finally(() => {
       setTimeout(() => setAtualizandoManual(false), 600)
     })
@@ -116,6 +119,8 @@ const DashboardView = memo(function DashboardView() {
         <CardsResumo resumo={resumo} carregando={carregandoResumo} onSelecionarAba={setAbaAtiva} />
 
         <CardsVideosMetricas metricas={resumo?.metricasVideos} carregando={carregandoResumo} />
+
+        <SecaoLivrosDashboard />
 
         <Tabs.Root
           value={abaAtiva}

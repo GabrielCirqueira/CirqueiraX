@@ -4,6 +4,7 @@ import { memo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBlocosLivroAudio, useSalvarPosicaoLivroAudio } from '../hooks/useLivrosAudio'
 import type { LivroAudio } from '../types'
+import { carimbarPosicao } from '../utils/posicao'
 import { AvisoProgressoAudio } from './AvisoProgressoAudio'
 import { PlayerAudioLivro } from './PlayerAudioLivro'
 
@@ -20,11 +21,11 @@ export const LeitorSemPdf = memo(function LeitorSemPdf({ livro }: LeitorSemPdfPr
   function salvarPosicao(paginaAtual: number, bloco?: number | null, segundos?: number) {
     salvarPosicaoMutation.mutate({
       uuid: livro.uuid,
-      posicao: {
+      posicao: carimbarPosicao(livro.uuid, {
         paginaAtual,
         blocoAtual: bloco ?? livro.blocoAtual,
         segundosNoBloco: segundos ?? 0,
-      },
+      }),
     })
   }
 

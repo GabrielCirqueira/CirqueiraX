@@ -55,6 +55,15 @@ class LivroAudio
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $ultimaEscutaEm = null;
 
+    #[ORM\Column(type: 'bigint', nullable: true)]
+    private ?int $posicaoRegistradaEm = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $filaPausada = false;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $prioridadeFila = 0;
+
     #[ORM\Column(type: 'string', enumType: StatusLivroAudio::class)]
     private StatusLivroAudio $status;
 
@@ -335,12 +344,55 @@ class LivroAudio
         return $this->blocosProntos() > 0;
     }
 
-    public function atualizarPosicao(int $paginaAtual, ?int $blocoAtual = null, int $segundosNoBloco = 0): self
+    public function aceitaPosicaoRegistradaEm(?int $registradaEm): bool
     {
+        return null === $registradaEm || null === $this->posicaoRegistradaEm || $registradaEm >= $this->posicaoRegistradaEm;
+    }
+
+    public function atualizarPosicao(int $paginaAtual, ?int $blocoAtual = null, int $segundosNoBloco = 0, ?int $registradaEm = null): self
+    {
+        if (null !== $registradaEm) {
+            $this->posicaoRegistradaEm = $registradaEm;
+        }
         $this->paginaAtual = max(1, $paginaAtual);
         $this->blocoAtual = null !== $blocoAtual ? max(0, $blocoAtual) : null;
         $this->segundosNoBloco = max(0, $segundosNoBloco);
         $this->ultimaEscutaEm = new DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function isFilaPausada(): bool
+    {
+        return $this->filaPausada;
+    }
+
+    public function prioridadeFila(): int
+    {
+        return $this->prioridadeFila;
+    }
+
+    public function pausarFila(): self
+    {
+        $this->filaPausada = true;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function retomarFila(): self
+    {
+        $this->filaPausada = false;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function priorizarFila(int $prioridade): self
+    {
+        $this->prioridadeFila = $prioridade;
+        $this->filaPausada = false;
         $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;

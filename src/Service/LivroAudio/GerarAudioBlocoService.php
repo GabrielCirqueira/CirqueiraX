@@ -24,9 +24,24 @@ final readonly class GerarAudioBlocoService
         private AplicarPronunciasService $aplicarPronuncias,
         private ArmazenamentoLivroInterface $armazenamentoLivro,
         private LoggerInterface $logger,
+        private FilaGeracaoLivrosAudioService $filaGeracao,
     ) {}
 
-    public function executar(string $blocoUuid): void
+    public function executar(): void
+    {
+        $blocoUuid = $this->filaGeracao->reservarProximoBloco();
+        if (null === $blocoUuid) {
+            return;
+        }
+
+        try {
+            $this->gerar($blocoUuid);
+        } finally {
+            $this->filaGeracao->reabastecer();
+        }
+    }
+
+    private function gerar(string $blocoUuid): void
     {
         $bloco = $this->livroAudioBlocoRepository->buscarPorUuid($blocoUuid);
         if (null === $bloco) {
@@ -73,6 +88,7 @@ final readonly class GerarAudioBlocoService
                 $caminhoMp3,
                 $voz,
                 $livroFoiApagado,
+                true,
             );
 
             if ($livroFoiApagado()) {
@@ -89,7 +105,7 @@ final readonly class GerarAudioBlocoService
                 caminhoAudio: $resultado->caminhoAudio(),
                 duracaoSegundos: $resultado->duracaoSegundos(),
                 tamanhoBytes: $resultado->tamanhoBytes(),
-                voz: $voz,
+                voz: $resultado->vozUsada() ?? $voz,
                 trechos: array_map(
                     static fn(TrechoNarracaoDTO $trecho): array => $trecho->paraArray(),
                     $resultado->trechos(),

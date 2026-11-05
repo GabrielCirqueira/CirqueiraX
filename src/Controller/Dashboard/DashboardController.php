@@ -7,12 +7,15 @@ namespace App\Controller\Dashboard;
 use App\Controller\Common\DefaultController;
 use App\DataObject\PaginacaoDTO;
 use App\Serializer\MediaItemSerializer;
+use App\Entity\Usuario;
 use App\Service\Dashboard\DashboardService;
+use App\Service\LivroAudio\PainelSistemaLivrosAudioService;
 use App\Service\MediaItem\MediaItemService;
 use App\Service\MediaItem\RetentarMediaItemService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[Route('/api/v1/dashboard', name: 'api_dashboard_')]
 final class DashboardController extends DefaultController
@@ -22,7 +25,14 @@ final class DashboardController extends DefaultController
         private readonly MediaItemService $mediaItemService,
         private readonly RetentarMediaItemService $retentarMediaItemService,
         private readonly MediaItemSerializer $mediaItemSerializer,
+        private readonly PainelSistemaLivrosAudioService $painelSistemaLivros,
     ) {}
+
+    #[Route('/livros', name: 'livros', methods: ['GET'])]
+    public function livros(#[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->painelSistemaLivros->obter($usuario));
+    }
 
     #[Route('/resumo', name: 'resumo', methods: ['GET'])]
     public function resumo(): Response

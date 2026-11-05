@@ -31,11 +31,12 @@ final readonly class GerenciarVozesLivroAudioService
         private ResolverVozLivroAudioService $resolverVoz,
         private SintetizadorVozInterface $sintetizadorVoz,
         private MessageBusInterface $messageBus,
+        private PainelSistemaLivrosAudioService $painelSistema,
         private string $diretorioBaseLivros,
     ) {}
 
     /**
-     * @return list<array{id: string, nome: string, descricao: string, principal: bool, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int}>
+     * @return list<array{id: string, nome: string, descricao: string, principal: bool, motor: string, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int, tamanhoBytes: int, tamanhoEstimadoBytes: int}>
      */
     public function listar(string $uuid, Usuario $usuario): array
     {
@@ -45,12 +46,13 @@ final readonly class GerenciarVozesLivroAudioService
     }
 
     /**
-     * @return list<array{id: string, nome: string, descricao: string, principal: bool, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int}>
+     * @return list<array{id: string, nome: string, descricao: string, principal: bool, motor: string, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int, tamanhoBytes: int, tamanhoEstimadoBytes: int}>
      */
     public function solicitar(string $uuid, string $voz, Usuario $usuario): array
     {
         $livro = $this->consultarLivrosAudio->obterDoUsuario($uuid, $usuario);
         $this->validarVozAdicional($livro, $voz);
+        $this->validarEspacoParaVoz($livro);
 
         $paraGerar = [];
         foreach ($this->livroAudioBlocoRepository->listarPorLivro($livro) as $bloco) {
@@ -78,7 +80,7 @@ final readonly class GerenciarVozesLivroAudioService
     }
 
     /**
-     * @return list<array{id: string, nome: string, descricao: string, principal: bool, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int}>
+     * @return list<array{id: string, nome: string, descricao: string, principal: bool, motor: string, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int, tamanhoBytes: int, tamanhoEstimadoBytes: int}>
      */
     public function remover(string $uuid, string $voz, Usuario $usuario): array
     {
@@ -140,6 +142,25 @@ final readonly class GerenciarVozesLivroAudioService
         );
     }
 
+    private function validarEspacoParaVoz(LivroAudio $livro): void
+    {
+        $necessario = $this->tamanhoVozPrincipal($livro);
+        $disco = $this->painelSistema->disco($necessario);
+        if ('critico' === $disco['nivel']) {
+            throw LivroAudioException::espacoInsuficienteParaVoz($necessario, $disco['livreBytes']);
+        }
+    }
+
+    private function tamanhoVozPrincipal(LivroAudio $livro): int
+    {
+        $total = 0;
+        foreach ($this->livroAudioBlocoRepository->listarPorLivro($livro) as $bloco) {
+            $total += $bloco->tamanhoBytes() ?? 0;
+        }
+
+        return $total;
+    }
+
     private function validarVozAdicional(LivroAudio $livro, string $voz): void
     {
         $vozCatalogada = VozNarracao::tryFrom($voz);
@@ -151,7 +172,7 @@ final readonly class GerenciarVozesLivroAudioService
     }
 
     /**
-     * @return list<array{id: string, nome: string, descricao: string, principal: bool, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int}>
+     * @return list<array{id: string, nome: string, descricao: string, principal: bool, motor: string, status: string, totalBlocos: int, blocosProntos: list<int>, blocosComErro: int, tamanhoBytes: int, tamanhoEstimadoBytes: int}>
      */
     private function montarLista(LivroAudio $livro): array
     {
@@ -161,9 +182,14 @@ final readonly class GerenciarVozesLivroAudioService
         $idioma = $livro->idioma() ?? IdiomaLivroAudio::PT;
 
         $statusPorVoz = [$vozPrincipal => []];
+        $bytesPorVoz = [$vozPrincipal => 0];
         foreach ($blocos as $bloco) {
             $statusPorVoz[$vozPrincipal][$bloco->numeroBloco()] = $bloco->status();
+            $bytesPorVoz[$vozPrincipal] += $bloco->tamanhoBytes() ?? 0;
         }
+        $estimativaPorParte = $totalBlocos > 0 && count(array_filter($statusPorVoz[$vozPrincipal], static fn(StatusLivroAudioBloco $status): bool => $status->isPronto())) > 0
+            ? $bytesPorVoz[$vozPrincipal] / count(array_filter($statusPorVoz[$vozPrincipal], static fn(StatusLivroAudioBloco $status): bool => $status->isPronto()))
+            : 0;
 
         foreach (VozNarracao::disponiveisPara($idioma) as $vozCatalogada) {
             $statusPorVoz[$vozCatalogada->value] ??= [];
@@ -175,6 +201,7 @@ final readonly class GerenciarVozesLivroAudioService
             }
 
             $statusPorVoz[$blocoVoz->voz()][$blocoVoz->bloco()->numeroBloco()] = $blocoVoz->status();
+            $bytesPorVoz[$blocoVoz->voz()] = ($bytesPorVoz[$blocoVoz->voz()] ?? 0) + ($blocoVoz->tamanhoBytes() ?? 0);
         }
 
         $lista = [];
@@ -188,10 +215,13 @@ final readonly class GerenciarVozesLivroAudioService
                 'nome' => VozNarracao::nomeDe($voz),
                 'descricao' => VozNarracao::tryFrom($voz)?->descricao() ?? 'Voz padrão do idioma do livro',
                 'principal' => $voz === $vozPrincipal,
+                'motor' => VozNarracao::motorDe($voz),
                 'status' => $this->resumirStatus($statusBlocos, $totalBlocos),
                 'totalBlocos' => $totalBlocos,
                 'blocosProntos' => array_values(array_map('intval', $prontos)),
                 'blocosComErro' => $erros,
+                'tamanhoBytes' => $bytesPorVoz[$voz] ?? 0,
+                'tamanhoEstimadoBytes' => (int) round($estimativaPorParte * $totalBlocos),
             ];
         }
 

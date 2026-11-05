@@ -45,7 +45,7 @@ Classificação (OrigemRegra ou decisão manual)
 Rotinas diárias: limpeza de vídeos e expiração de áudios
 Módulos isolados: 
 ├── Downloads MP3 (entidade Audio)
-└── Livros em Áudio (entidades LivroAudio, LivroAudioBloco, LivroAudioBlocoVoz e MarcacaoLivroAudio)
+└── Livros em Áudio (entidades LivroAudio, LivroAudioBloco, LivroAudioBlocoVoz, MarcacaoLivroAudio e EscutaLivroAudioDia)
 ```
 
 ### Stack
@@ -134,10 +134,11 @@ As mudanças de status ficam em `historicoStatus`, com data e hora.
 | `TokenAgente` | Credencial de cada agente |
 | `Usuario` | Usuários do sistema |
 | `RefreshToken` | Renovação de sessão |
-| `LivroAudio` | Livro em PDF enviado para narração |
+| `LivroAudio` | Livro em PDF enviado para narração, com posição (e quando foi gravada), pausa e prioridade na fila |
 | `LivroAudioBloco` | Parte do livro na voz principal, com áudio e tempos das frases e palavras |
 | `LivroAudioBlocoVoz` | A mesma parte gerada em outra voz |
 | `MarcacaoLivroAudio` | Marcador, destaque ou nota do usuário num livro (página, parte, frase, nota e retângulos) |
+| `EscutaLivroAudioDia` | Segundos ouvidos de um livro num dia |
 
 ### Campos principais de `MediaItem`
 

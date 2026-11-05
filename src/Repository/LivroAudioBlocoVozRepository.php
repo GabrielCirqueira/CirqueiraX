@@ -96,4 +96,22 @@ class LivroAudioBlocoVozRepository extends ServiceEntityRepository
 
         return $vozes;
     }
+
+    /**
+     * @return list<array{voz: string, partes: int, bytes: int, segundos: int}>
+     */
+    public function resumoPorVoz(): array
+    {
+        $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT voz, COUNT(*) AS partes, COALESCE(SUM(tamanho_bytes), 0) AS bytes, COALESCE(SUM(duracao_segundos), 0) AS segundos FROM livro_audio_bloco_voz WHERE status = ? GROUP BY voz ORDER BY bytes DESC',
+            [StatusLivroAudioBloco::PRONTO->value],
+        );
+
+        return array_map(static fn(array $linha): array => [
+            'voz' => (string) $linha['voz'],
+            'partes' => (int) $linha['partes'],
+            'bytes' => (int) $linha['bytes'],
+            'segundos' => (int) $linha['segundos'],
+        ], $linhas);
+    }
 }

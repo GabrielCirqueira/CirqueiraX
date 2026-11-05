@@ -254,3 +254,129 @@
     - Hooks novos: `hooks/useMarcacoesLivro.ts`, `hooks/useOfflineLivro.ts`, `hooks/localizacaoBloco.ts`
     - Utilitários novos: `utils/offline.ts`, `utils/capitulos.ts`, `utils/buscaLivro.ts`, `utils/exportarMarcacoes.ts`
     - Alterados: `LeitorLivroAudio.tsx`, `components/PlayerAudioLivro.tsx`, `components/VisualizadorLivro.tsx`, `components/PaginaPdf.tsx`, `components/BarraSuperiorLeitor.tsx`, `hooks/useNarracaoAtual.ts`, `utils/pdf.ts`, `utils/localizacaoNarracao.ts`, `api.ts`, `types.ts`
+
+---
+
+### 🟡 Melhoria 111 — Fila Inteligente, Estatísticas de Escuta, Voz Piper, Links Assinados e Painel de Livros
+
+- **Status**: Publicada em produção em 05/11/2026, falta validar no uso
+- **Data**: 05 de novembro de 2026
+- **Problema**:
+  - A fila gerava as partes na ordem do livro, mesmo quando a pessoa já estava ouvindo lá na frente.
+  - Não dava para pausar a geração de um livro nem passar um livro na frente dos outros.
+  - O Dashboard não mostrava nada dos livros: quanto foi ouvido, o que continuar, quanto disco e memória eles ocupam.
+  - Quando o Edge TTS caía, a parte ficava com erro e não havia outra voz.
+  - O áudio e o PDF eram pedidos com `?token=<JWT>` na URL. O token ficava no log do Nginx e no histórico.
+  - Uma gravação de posição atrasada (de outro aparelho ou de uma aba antiga) podia sobrescrever uma mais nova.
+  - O aviso de disco só aparecia quando já estava quase cheio, e o painel de vozes não mostrava quanto cada voz ocupava.
+- **Solução**:
+  - **Gerar à frente de onde você está**:
+    - Cada mensagem da fila não aponta mais para uma parte fixa. O worker escolhe a melhor parte pendente na hora, nesta ordem:
+      1. livros priorizados;
+      2. livro ouvido nos últimos 30 minutos;
+      3. livro mais antigo;
+      4. partes a partir da página atual antes das que ficaram para trás;
+      5. número da parte.
+    - A reserva é um `UPDATE ... WHERE status = 'pendente'` atômico, então duas mensagens nunca pegam a mesma parte.
+    - Partes presas em "gerando" por mais de 10 minutos voltam para a fila.
+    - Ao terminar uma parte, o worker coloca uma nova mensagem na fila se ainda houver partes pendentes e a fila estiver vazia.
+  - **Pausar e priorizar**:
+    - Cada livro pode ser pausado, retomado ou passado para o começo da fila, pelos botões no card ou pelo painel "Fila de geração" da biblioteca.
+    - O painel mostra a posição de cada livro, quantas partes faltam e a previsão de término, calculada pela média real das últimas gerações.
+    - Livros pausados também não geram vozes extras.
+    - Retomar volta a enfileirar as partes pendentes.
+    - Reprocessar um livro limpa antes as partes com erro.
+  - **Continuar ouvindo e estatísticas** (nova seção "Livros em áudio" no Dashboard):
+    - O player conta o tempo real tocando e envia a cada 30 s, ao pausar, ao sair e no `pagehide` (com `keepalive`).
+    - O servidor aceita no máximo 120 s por envio e soma por livro e por dia, na nova tabela `escuta_livro_audio_dia`.
+    - O Dashboard mostra hoje, a semana, o total e a sequência de dias batendo a meta. Há um gráfico dos últimos 14 dias com a linha da meta.
+    - A meta diária é editável (padrão 30 min, de 5 a 600), guardada em `usuario.meta_escuta_minutos`.
+    - "Continuar ouvindo" lista os 3 livros ouvidos por último que têm áudio, com o progresso, e leva direto ao leitor.
+  - **Segundo motor de voz (Piper)**:
+    - Piper 1.8.0 roda localmente no container, com as vozes `pt_BR-faber-medium` e `en_US-lessac-medium` em `/opt/piper/vozes`.
+    - O script `bin/sintetizar-voz-piper.py` gera frase por frase, com o tempo exato de cada frase e o de cada palavra estimado, e converte para MP3 com ffmpeg.
+    - As vozes "Faber" e "Lessac" aparecem no painel de vozes com o selo Piper.
+    - Na narração principal, o Edge TTS é tentado 2 vezes. Se falhar nas duas, a parte é gerada com o Piper do mesmo idioma, e a parte registra a voz usada.
+    - Vozes extras não trocam de motor.
+    - O `espeakbridge` do Piper é compilado na imagem, porque o pacote pip não traz a versão para Alpine (musl).
+  - **Links curtos e assinados**:
+    - O áudio das partes, o PDF baixado e as amostras de voz agora usam `/api/v1/livros-audio-arquivos/...`, assinados com o `UriSigner` do Symfony. Não há mais JWT na URL.
+    - O link vale de 20 a 30 minutos. A expiração é arredondada em janelas de 10 minutos, então a URL não muda dentro da janela e o cache do navegador funciona.
+    - O player pede de uma vez os links de todas as partes prontas (`GET /{uuid}/links`), fixa o link da parte que está tocando e renova sozinho quando o link expira (erro no `<audio>`).
+    - O PDF do leitor é carregado pelo pdf.js com o cabeçalho `Authorization`.
+    - As respostas têm `Referrer-Policy: no-referrer`.
+  - **Marcador que ignora gravação antiga**:
+    - Cada gravação de posição leva `registradaEm` (ms do aparelho).
+    - O servidor ignora uma gravação com marca mais antiga que a guardada (`livro_audio.posicao_registrada_em`).
+    - Clientes antigos sem a marca continuam funcionando.
+  - **Alerta de disco mais cedo**:
+    - "Atenção" com menos de 5 GB ou 10% livres, e "crítico" com menos de 1 GB. O cálculo conta o que a fila ainda vai ocupar: partes pendentes × tamanho médio de uma parte.
+    - A biblioteca e o painel de vozes mostram o aviso.
+    - Pedir uma voz extra que deixaria o disco crítico é recusado (409).
+    - O painel de vozes mostra o tamanho de cada voz, ou a estimativa antes de gerar.
+    - O `/health` ganhou `alerta` e `alerta_mb` (5 GB) por disco.
+  - **Painel de armazenamento dos livros** no Dashboard:
+    - Livros por status, quantidade e tamanho dos PDFs.
+    - Partes de áudio prontas, horas e tamanho, e vozes extras com o tamanho por voz.
+    - Tamanho no banco comparado ao tamanho real da pasta.
+    - Disco livre com a barra de uso.
+    - Memória do container (cgroup), do servidor e do worker de áudio (RSS do processo `messenger:consume livro_audio`).
+    - Situação da fila.
+- **API**:
+  - `GET /api/v1/livros-audio/fila`, `POST /api/v1/livros-audio/{uuid}/fila/pausar|retomar|priorizar`
+  - `GET /api/v1/livros-audio/estatisticas`, `PUT /api/v1/livros-audio/meta`, `POST /api/v1/livros-audio/{uuid}/escuta`
+  - `GET /api/v1/livros-audio/disco`, `GET /api/v1/dashboard/livros`
+  - `GET /api/v1/livros-audio/{uuid}/links`, `GET /api/v1/livros-audio/{uuid}/pdf/link`, `GET /api/v1/livros-audio/vozes/amostras`
+  - Públicas, só com assinatura válida:
+    - `GET /api/v1/livros-audio-arquivos/{uuid}/blocos/{n}/stream`
+    - `GET /api/v1/livros-audio-arquivos/{uuid}/pdf`
+    - `GET /api/v1/livros-audio-arquivos/vozes/{voz}/amostra`
+- **Banco** (`Version20261105120000`):
+  - `livro_audio` ganha `posicao_registrada_em`, `fila_pausada` e `prioridade_fila`.
+  - `usuario` ganha `meta_escuta_minutos`.
+  - Nova tabela `escuta_livro_audio_dia`, com chave única (livro, dia).
+- **Testado** fora de produção, com MySQL descartável e o código real dos serviços. 32 de 33 verificações passaram; a que não passou era um empate de horário no próprio teste. Cobertas:
+  - A fila pula para a página 65 quando o livro é aberto lá. O livro ouvido agora e o priorizado passam na frente, o pausado é pulado.
+  - Partes presas voltam para a fila, e o reabastecimento não duplica mensagens.
+  - A posição antiga é ignorada, a nova é aceita, e o cliente sem marca continua funcionando.
+  - A soma de escuta respeita o limite de 120 s, e a sequência de dias está certa.
+  - O link assinado é aceito. O alterado e o vencido são recusados. A validade fica entre 20 e 30 min, e a URL fica estável na janela.
+  - O Piper gerou 17,9 s de MP3 com os tempos de 44 palavras.
+  - No navegador (API simulada):
+    - O link vencido foi renovado sozinho e o áudio tocou.
+    - Nenhuma URL tinha token, e o PDF foi pedido com `Authorization`.
+    - A escuta foi registrada ao pausar, e todas as posições levaram `registradaEm`.
+    - O painel de vozes mostrou tamanhos, o selo Piper e o aviso de disco.
+    - Na fila, os botões de pausar, retomar e priorizar enviaram as ações.
+    - A meta do Dashboard foi salva.
+    - Biblioteca e Dashboard sem rolagem horizontal no celular. O cabeçalho da biblioteca passou a empilhar no celular.
+- **Limites**:
+  - Prints, Central de Mídias e Downloads ainda usam `?token=`; a troca ficou só nos livros.
+  - O Piper existe só na imagem de produção (`Dockerfile.prod`).
+  - O tempo de cada palavra no Piper é estimado dentro da frase, então o destaque por palavra é menos preciso que no Edge.
+  - A geração continua com um único worker; o Piper é mais lento que o Edge (cerca de 1× tempo real no servidor).
+- **Arquivos**:
+  - Backend novos:
+    - Serviços: `src/Service/LivroAudio/FilaGeracaoLivrosAudioService.php`, `EstatisticasEscutaLivrosAudioService.php`, `PainelSistemaLivrosAudioService.php`, `LinkAssinadoLivroAudioService.php`
+    - Entidade e repositório: `src/Entity/EscutaLivroAudioDia.php`, `src/Repository/EscutaLivroAudioDiaRepository.php`
+    - Controller: `src/Controller/LivroAudio/ArquivoLivroAudioController.php`
+    - Voz: `src/Infra/Audio/SintetizadorVozPorProcesso.php`, `PiperTtsClient.php`, `SintetizadorVozRoteador.php`, `bin/sintetizar-voz-piper.py`
+    - Migração: `migrations/Version20261105120000.php`
+  - Backend alterados:
+    - Entidades: `LivroAudio`, `LivroAudioBlocoVoz`, `Usuario`
+    - Repositórios: `LivroAudioRepository`, `LivroAudioBlocoRepository`, `LivroAudioBlocoVozRepository`
+    - Serviços: `GerarAudioBlocoService`, `GerarAudioBlocoVozService`, `GerenciarVozesLivroAudioService`, `ProcessarLivroAudioService`, `ResolverVozLivroAudioService`, `SalvarPosicaoLivroService`
+    - Message handlers dos dois tipos de geração
+    - Voz: `EdgeTtsClient`, `VozNarracao`, `SintetizadorVozInterface`, `ResultadoSinteseVozDTO`, `SinteseVozException`
+    - Controllers: `LivroAudioController`, `DashboardController`, `HealthController`
+    - Outros: `LivroAudioSerializer`, `LivroAudioException`, `SalvarPosicaoLivroDTO`
+    - Configuração: `config/services.yaml`, `config/packages/security.yaml`, `devops/php/Dockerfile.prod`
+  - Frontend:
+    - Novos:
+      - `web/features/livros-audio/components/PainelFilaGeracao.tsx`
+      - `web/features/livros-audio/hooks/useRegistroEscuta.ts`
+      - `web/features/livros-audio/utils/posicao.ts`
+      - `web/features/dashboard/components/SecaoLivrosDashboard.tsx`
+    - Alterados:
+      - Livros em áudio: `LivrosAudio.tsx`, `LeitorLivroAudio.tsx`, `components/PlayerAudioLivro.tsx`, `components/PainelVozes.tsx`, `components/CardLivroAudio.tsx`, `components/GradeLivrosAudio.tsx`, `components/LeitorSemPdf.tsx`, `components/CabecalhoLivrosAudio.tsx`, `hooks/useLivrosAudio.ts`, `utils/pdf.ts`, `utils/livros.ts`, `api.ts`, `types.ts`
+      - Dashboard: `Dashboard.tsx`, `api.ts`, `hooks/useDashboard.ts`, `types.ts`

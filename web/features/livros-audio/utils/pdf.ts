@@ -10,9 +10,11 @@ export interface TarefaRenderizacaoPagina {
 }
 
 export async function carregarDocumentoPdf(url: string): Promise<PDFDocumentProxy> {
+  const token = localStorage.getItem('token')
   const loadingTask = pdfjsLib.getDocument({
     url,
     withCredentials: false,
+    httpHeaders: token ? { Authorization: `Bearer ${token}` } : undefined,
     cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/cmaps/`,
     cMapPacked: true,
   })

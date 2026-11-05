@@ -1,7 +1,7 @@
 import { Box, Button, Center, SimpleGrid, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { BookOpen, Plus } from 'lucide-react'
 import { memo } from 'react'
-import type { LivroAudio } from '../types'
+import type { FilaGeracao, LivroAudio } from '../types'
 import { contarPartesNaFrente } from '../utils/livros'
 import { CardLivroAudio } from './CardLivroAudio'
 
@@ -9,6 +9,7 @@ interface GradeLivrosAudioProps {
   livros: LivroAudio[] | undefined
   carregando: boolean
   apagandoUuid: string | null
+  fila?: FilaGeracao
   onNovoLivro: () => void
   onApagarLivro: (uuid: string) => void
 }
@@ -17,6 +18,7 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
   livros,
   carregando,
   apagandoUuid,
+  fila,
   onNovoLivro,
   onApagarLivro,
 }: GradeLivrosAudioProps) {
@@ -102,6 +104,7 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
           key={livro.uuid}
           livro={livro}
           partesNaFrente={contarPartesNaFrente(livro, livros)}
+          itemFila={fila?.livros.find((item) => item.uuid === livro.uuid)}
           apagando={apagandoUuid === livro.uuid}
           onApagar={onApagarLivro}
         />

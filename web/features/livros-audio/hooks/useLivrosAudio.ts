@@ -2,6 +2,7 @@ import { addToast } from '@/shared/components/ui/toaster'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
 import {
+  alterarFilaLivro,
   apagarLivroAudio,
   configurarNarracaoLivro,
   fazerUploadLivroAudio,
@@ -9,6 +10,8 @@ import {
   listarLivrosAudio,
   listarTrechosBloco,
   listarVozesLivro,
+  obterEstadoDisco,
+  obterFilaGeracao,
   obterLivroAudio,
   removerVozLivro,
   salvarPosicaoLivroAudio,
@@ -186,7 +189,7 @@ export function useSalvarPosicaoLivroAudio() {
     mutationFn: ({ uuid, posicao }: { uuid: string; posicao: SalvarPosicaoLivro }) =>
       salvarPosicaoLivroAudio(uuid, posicao),
     onSuccess: (livroAtualizado) => {
-      queryClient.invalidateQueries({ queryKey: LIVROS_AUDIO_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: LIVROS_AUDIO_QUERY_KEY, exact: true })
       queryClient.setQueryData([...LIVROS_AUDIO_QUERY_KEY, livroAtualizado.uuid], livroAtualizado)
     },
     onError: (erro) => {
@@ -215,6 +218,50 @@ export function useApagarLivroAudio() {
     onError: (erro) => {
       addToast({
         title: 'Não foi possível excluir',
+        description: extrairMensagemErro(erro, 'Tente novamente em instantes.'),
+        type: 'error',
+      })
+    },
+  })
+}
+
+export function useFilaGeracao(ativa: boolean) {
+  return useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, 'fila'],
+    queryFn: obterFilaGeracao,
+    refetchInterval: ativa ? 10000 : false,
+    refetchIntervalInBackground: false,
+  })
+}
+
+export function useEstadoDisco() {
+  return useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, 'disco'],
+    queryFn: obterEstadoDisco,
+    staleTime: 60000,
+    refetchInterval: 5 * 60000,
+  })
+}
+
+const MENSAGEM_ACAO_FILA = {
+  pausar: 'Geração pausada',
+  retomar: 'Geração retomada',
+  priorizar: 'Livro passou para o começo da fila',
+} as const
+
+export function useAlterarFilaLivro() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ uuid, acao }: { uuid: string; acao: 'pausar' | 'retomar' | 'priorizar' }) =>
+      alterarFilaLivro(uuid, acao),
+    onSuccess: (_livro, { acao }) => {
+      queryClient.invalidateQueries({ queryKey: LIVROS_AUDIO_QUERY_KEY })
+      addToast({ title: MENSAGEM_ACAO_FILA[acao], type: 'success' })
+    },
+    onError: (erro) => {
+      addToast({
+        title: 'Não foi possível mudar a fila',
         description: extrairMensagemErro(erro, 'Tente novamente em instantes.'),
         type: 'error',
       })

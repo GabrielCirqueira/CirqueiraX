@@ -8,6 +8,27 @@ use DomainException;
 
 final class LivroAudioException extends DomainException
 {
+    public static function espacoInsuficienteParaVoz(int $necessarioBytes, int $livreBytes): self
+    {
+        return new self(sprintf(
+            'Não há espaço em disco para gerar outra voz deste livro: ela ocupa cerca de %s e restam %s livres.',
+            self::formatarBytes($necessarioBytes),
+            self::formatarBytes($livreBytes),
+        ), 409);
+    }
+
+    public static function linkInvalido(): self
+    {
+        return new self('O link deste arquivo expirou ou é inválido. Abra o livro de novo.', 403);
+    }
+
+    private static function formatarBytes(int $bytes): string
+    {
+        return $bytes >= 1024 ** 3
+            ? sprintf('%.1f GB', $bytes / 1024 ** 3)
+            : sprintf('%d MB', (int) round($bytes / 1024 ** 2));
+    }
+
     public static function livroNaoEncontrado(string $uuid): self
     {
         return new self(sprintf('O livro em áudio com identificador "%s" não foi encontrado.', $uuid), 404);

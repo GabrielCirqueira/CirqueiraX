@@ -14,7 +14,13 @@ final readonly class ResultadoSinteseVozDTO
         public int $duracaoSegundos,
         public int $tamanhoBytes,
         public array $trechos = [],
+        public ?string $vozUsada = null,
     ) {}
+
+    public function vozUsada(): ?string
+    {
+        return $this->vozUsada;
+    }
 
     public function caminhoAudio(): string
     {

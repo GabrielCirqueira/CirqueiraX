@@ -2,7 +2,9 @@ import { api } from '@/config/api'
 import type { RespostaApi, RespostaPaginada } from '@/shared/types/api'
 import type {
   CategoriaMetrica,
+  EstatisticasEscutaLivros,
   ItemFilaErro,
+  PainelSistemaLivros,
   PastaSync,
   ResultadoSincronizacao,
   ResumoDashboard,
@@ -96,6 +98,26 @@ export async function reclassificarMediaItem(
     {
       categoriaId,
     }
+  )
+  return data.data
+}
+
+export async function obterPainelLivros(): Promise<PainelSistemaLivros> {
+  const { data } = await api.get<RespostaApi<PainelSistemaLivros>>('/api/v1/dashboard/livros')
+  return data.data
+}
+
+export async function obterEstatisticasEscuta(): Promise<EstatisticasEscutaLivros> {
+  const { data } = await api.get<RespostaApi<EstatisticasEscutaLivros>>(
+    '/api/v1/livros-audio/estatisticas'
+  )
+  return data.data
+}
+
+export async function definirMetaEscuta(minutos: number): Promise<EstatisticasEscutaLivros> {
+  const { data } = await api.put<RespostaApi<EstatisticasEscutaLivros>>(
+    '/api/v1/livros-audio/meta',
+    { minutos }
   )
   return data.data
 }

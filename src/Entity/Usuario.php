@@ -42,6 +42,9 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $atualizadoEm;
 
+    #[ORM\Column(type: 'smallint', options: ['default' => 30])]
+    private int $metaEscutaMinutos = 30;
+
     public function __construct(string $nomeCompleto, string $username, string $email)
     {
         $this->nomeCompleto = $nomeCompleto;
@@ -137,6 +140,19 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function getCriadoEm(): \DateTimeImmutable
     {
         return $this->criadoEm;
+    }
+
+    public function getMetaEscutaMinutos(): int
+    {
+        return $this->metaEscutaMinutos;
+    }
+
+    public function definirMetaEscutaMinutos(int $minutos): static
+    {
+        $this->metaEscutaMinutos = max(5, min(600, $minutos));
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
     }
 
     public function getAtualizadoEm(): \DateTimeImmutable

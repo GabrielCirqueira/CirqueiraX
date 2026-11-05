@@ -32,7 +32,8 @@ src/
 ├── Enum/           Enums de domínio
 ├── EventListener/  Listeners
 ├── Exception/      Exceções por domínio (LivroAudio, Storage, Video...)
-├── Infra/          GoogleFotos, GoogleOAuth, Imagem, Storage, Syncthing e YtDlp
+├── Infra/          Audio (Edge TTS, Piper e roteador), GoogleFotos, GoogleOAuth,
+│                   Imagem, Storage, Syncthing e YtDlp
 ├── Interface/      Contratos
 ├── Message/        Mensagens do Messenger
 ├── MessageHandler/ Handlers
@@ -129,6 +130,16 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `POST` | `/livros-audio/{uuid}/vozes` | Gera o livro em outra voz |
 | `DELETE` | `/livros-audio/{uuid}/vozes/{voz}` | Apaga uma voz adicional |
 | `GET` | `/livros-audio/vozes/{voz}/amostra` | Amostra curta da voz |
+| `GET` | `/livros-audio/{uuid}/links` | Links assinados das partes prontas |
+| `GET` | `/livros-audio/{uuid}/pdf/link` | Link assinado do PDF |
+| `GET` | `/livros-audio/vozes/amostras` | Links assinados das amostras |
+| `GET` | `/livros-audio-arquivos/...` | Áudio, PDF e amostras por link assinado (público, valida `UriSigner`) |
+| `GET` | `/livros-audio/fila` | Fila de geração com previsão |
+| `POST` | `/livros-audio/{uuid}/fila/pausar\|retomar\|priorizar` | Controla a fila do livro |
+| `POST` | `/livros-audio/{uuid}/escuta` | Soma segundos ouvidos |
+| `GET` | `/livros-audio/estatisticas` | Tempo ouvido, meta e "continuar ouvindo" |
+| `PUT` | `/livros-audio/meta` | Altera a meta diária |
+| `GET` | `/livros-audio/disco` | Espaço livre e nível do alerta |
 
 ### Categorias e regras
 
@@ -147,6 +158,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `GET` | `/dashboard/resumo` | Métricas gerais |
 | `GET` | `/dashboard/categorias` | Métricas por categoria |
 | `GET` | `/dashboard/erros` | Fila de erros |
+| `GET` | `/dashboard/livros` | Armazenamento, memória e fila dos livros em áudio |
 | `POST` | `/dashboard/erros/retentar` | Retenta os erros |
 | `GET` | `/sync/pastas` | Estado do Syncthing |
 | `POST` | `/sync/pastas/{id}/sincronizar` | Dispara o rescan |
@@ -166,7 +178,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 
 ## Entidades e enums
 
-Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBloco`, `LivroAudioBlocoVoz`, `MarcacaoLivroAudio`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
+Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBloco`, `LivroAudioBlocoVoz`, `MarcacaoLivroAudio`, `EscutaLivroAudioDia`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
 
 | Enum | Valores |
 | :--- | :--- |

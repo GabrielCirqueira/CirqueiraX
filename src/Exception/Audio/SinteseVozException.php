@@ -23,6 +23,11 @@ final class SinteseVozException extends DomainException
         return new self(sprintf('Falha ao executar síntese de voz pelo sintetizador: %s', $motivo), 500);
     }
 
+    public function foiCancelada(): bool
+    {
+        return 409 === $this->getCode();
+    }
+
     public static function cancelada(): self
     {
         return new self('A síntese de voz foi cancelada.', 409);

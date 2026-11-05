@@ -40,6 +40,9 @@ final readonly class GerarAudioBlocoVozService
 
         $bloco = $blocoVoz->bloco();
         $livro = $bloco->livro();
+        if ($livro->isFilaPausada()) {
+            return;
+        }
         $livroUuid = $livro->uuidTexto();
         $diretorio = $this->resolverVoz->diretorioVoz($livro, $blocoVoz->voz());
 

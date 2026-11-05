@@ -46,6 +46,25 @@ RUN apk add --no-cache \
     && pip install --break-system-packages edge-tts \
     && mkdir -p /run/nginx /var/log/supervisor
 
+ARG PIPER_VERSAO=1.8.0
+ARG PIPER_ESPEAKBRIDGE_COMMIT=e34f0399ba81e4306508e4507d5315481186014c
+RUN apk add --no-cache py3-onnxruntime espeak-ng \
+    && apk add --no-cache --virtual .piper-build build-base python3-dev espeak-ng-dev \
+    && pip install --break-system-packages "piper-tts==${PIPER_VERSAO}" \
+    && curl -fsSL -o /tmp/espeakbridge.c "https://raw.githubusercontent.com/OHF-Voice/piper1-gpl/${PIPER_ESPEAKBRIDGE_COMMIT}/src/piper/espeakbridge.c" \
+    && PIPER_DIR="$(python3 -c 'import os, piper; print(os.path.dirname(piper.__file__))')" \
+    && gcc -shared -fPIC -O2 $(python3-config --includes) /tmp/espeakbridge.c -lespeak-ng -o "${PIPER_DIR}/espeakbridge$(python3-config --extension-suffix)" \
+    && rm -f /tmp/espeakbridge.c \
+    && apk del .piper-build \
+    && mkdir -p /opt/piper/vozes \
+    && for voz in pt/pt_BR/faber/medium/pt_BR-faber-medium en/en_US/lessac/medium/en_US-lessac-medium; do \
+         nome="$(basename "$voz")"; \
+         curl -fsSL -o "/opt/piper/vozes/${nome}.onnx" "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/${voz}.onnx" \
+         && curl -fsSL -o "/opt/piper/vozes/${nome}.onnx.json" "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/${voz}.onnx.json" \
+         || exit 1; \
+       done \
+    && python3 -c "from piper import espeakbridge"
+
 WORKDIR /var/www/html
 
 # Configurações PHP de produção

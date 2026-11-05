@@ -13,6 +13,7 @@ Sempre visíveis no topo:
 | `BarraAcoesRapidas` | Atalhos: Baixar vídeo, Prints e Upload manual |
 | `CardsResumo` | Total de mídias, Concluídas, Em processamento e Erros |
 | `CardsVideosMetricas` | Baixados, No disco, Apagados hoje e Espaço liberado |
+| `SecaoLivrosDashboard` | Livros em áudio: "Continuar ouvindo" (3 últimos), tempo ouvido hoje, na semana e no total, sequência de dias, gráfico de 14 dias com a meta diária editável, e armazenamento (livros por status, PDFs, partes de áudio, vozes extras por voz, disco, memória do container, do servidor e do worker, e fila) |
 
 ### Aba Visão geral
 
@@ -41,6 +42,9 @@ Sempre visíveis no topo:
 | `GET` | `/api/v1/dashboard/resumo` | Métricas por status e origem |
 | `GET` | `/api/v1/dashboard/categorias` | Métricas por categoria |
 | `GET` | `/api/v1/dashboard/erros` | Fila paginada de erros |
+| `GET` | `/api/v1/dashboard/livros` | Armazenamento, memória e fila dos livros em áudio |
+| `GET` | `/api/v1/livros-audio/estatisticas` | Tempo ouvido, meta, sequência e "continuar ouvindo" |
+| `PUT` | `/api/v1/livros-audio/meta` | Altera a meta diária de escuta |
 | `POST` | `/api/v1/dashboard/erros/retentar` | Retenta todas as mídias com erro |
 | `GET` | `/api/v1/sync/pastas` | Estado das pastas no Syncthing |
 | `POST` | `/api/v1/sync/pastas/{id}/sincronizar` | Dispara a sincronização de uma pasta |

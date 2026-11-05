@@ -137,6 +137,11 @@ class LivroAudioBlocoVoz
         return $this->status;
     }
 
+    public function isPendente(): bool
+    {
+        return $this->status->isPendente();
+    }
+
     public function isPronto(): bool
     {
         return $this->status->isPronto();

@@ -10,6 +10,7 @@ parameters:
     env(SYNCTHING_API_URL): 'http://localhost:8384'
     env(SYNCTHING_API_KEY): ''
     env(YTDLP_COOKIES_PATH): ''
+    env(PIPER_MODELOS_DIR): '/opt/piper/vozes'
 
 services:
     # default configuration for services in *this* file
@@ -54,17 +55,26 @@ services:
     App\Interface\MetadataImagemInterface: '@App\Infra\Imagem\MetadataImagemClient'
     App\Interface\ArmazenamentoLivroInterface: '@App\Infra\Storage\ArmazenamentoLivroClient'
     App\Interface\ExtratorTextoPdfInterface: '@App\Infra\Pdf\ExtratorTextoPdfClient'
-    App\Interface\SintetizadorVozInterface: '@App\Infra\Audio\EdgeTtsClient'
+    App\Interface\SintetizadorVozInterface: '@App\Infra\Audio\SintetizadorVozRoteador'
 
     App\Infra\Audio\EdgeTtsClient:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Infra\Audio\PiperTtsClient:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $diretorioModelos: '%env(PIPER_MODELOS_DIR)%'
 
     App\Service\LivroAudio\GerenciarVozesLivroAudioService:
         arguments:
             $diretorioBaseLivros: '%kernel.project_dir%/var/livros'
 
     App\Infra\Storage\ArmazenamentoLivroClient:
+        arguments:
+            $diretorioBaseLivros: '%kernel.project_dir%/var/livros'
+
+    App\Service\LivroAudio\PainelSistemaLivrosAudioService:
         arguments:
             $diretorioBaseLivros: '%kernel.project_dir%/var/livros'
 

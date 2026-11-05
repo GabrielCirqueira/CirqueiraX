@@ -16,6 +16,8 @@ final readonly class SalvarPosicaoLivroDTO
         public ?int $blocoAtual = null,
         #[Assert\PositiveOrZero(message: 'Os segundos no bloco devem ser maiores ou iguais a zero.')]
         public int $segundosNoBloco = 0,
+        #[Assert\Positive(message: 'O momento da posição deve ser positivo.')]
+        public ?int $registradaEm = null,
     ) {}
 
     public function paginaAtual(): int
@@ -31,5 +33,10 @@ final readonly class SalvarPosicaoLivroDTO
     public function segundosNoBloco(): int
     {
         return $this->segundosNoBloco;
+    }
+
+    public function registradaEm(): ?int
+    {
+        return $this->registradaEm;
     }
 }

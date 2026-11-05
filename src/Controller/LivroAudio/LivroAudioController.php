@@ -18,8 +18,12 @@ use App\Serializer\MarcacaoLivroAudioSerializer;
 use App\Service\LivroAudio\ApagarLivroAudioService;
 use App\Service\LivroAudio\ConfigurarNarracaoLivroAudioService;
 use App\Service\LivroAudio\ConsultarLivrosAudioService;
+use App\Service\LivroAudio\EstatisticasEscutaLivrosAudioService;
+use App\Service\LivroAudio\FilaGeracaoLivrosAudioService;
 use App\Service\LivroAudio\GerenciarMarcacoesLivroAudioService;
 use App\Service\LivroAudio\GerenciarVozesLivroAudioService;
+use App\Service\LivroAudio\LinkAssinadoLivroAudioService;
+use App\Service\LivroAudio\PainelSistemaLivrosAudioService;
 use App\Service\LivroAudio\SalvarPosicaoLivroService;
 use App\Service\LivroAudio\UploadLivroAudioService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -49,7 +53,83 @@ final class LivroAudioController extends DefaultController
         private readonly LivroAudioSerializer $livroAudioSerializer,
         private readonly LivroAudioBlocoSerializer $livroAudioBlocoSerializer,
         private readonly RateLimiterFactory $marcadorPosicaoLimiter,
+        private readonly FilaGeracaoLivrosAudioService $filaGeracao,
+        private readonly LinkAssinadoLivroAudioService $linkAssinado,
+        private readonly EstatisticasEscutaLivrosAudioService $estatisticasEscuta,
+        private readonly PainelSistemaLivrosAudioService $painelSistema,
     ) {}
+
+    #[Route('/fila', name: 'fila', methods: ['GET'], priority: 10)]
+    public function fila(#[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->filaGeracao->resumo($usuario));
+    }
+
+    #[Route('/disco', name: 'disco', methods: ['GET'], priority: 10)]
+    public function disco(#[CurrentUser] Usuario $usuario): Response
+    {
+        $fila = $this->filaGeracao->resumo($usuario);
+
+        return $this->success($this->painelSistema->disco($fila['partesNaFila'] * $this->painelSistema->bytesPorParte()));
+    }
+
+    #[Route('/estatisticas', name: 'estatisticas', methods: ['GET'], priority: 10)]
+    public function estatisticas(#[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->estatisticasEscuta->resumo($usuario));
+    }
+
+    #[Route('/meta', name: 'meta', methods: ['PUT'], priority: 10)]
+    public function definirMeta(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $minutos = (int) ($request->toArray()['minutos'] ?? 0);
+
+        return $this->success($this->estatisticasEscuta->definirMeta($minutos, $usuario));
+    }
+
+    #[Route('/vozes/amostras', name: 'links_amostras', methods: ['GET'], priority: 10)]
+    public function linksAmostras(): Response
+    {
+        return $this->success($this->linkAssinado->linksAmostras());
+    }
+
+    #[Route('/{uuid}/escuta', name: 'registrar_escuta', methods: ['POST'])]
+    public function registrarEscuta(string $uuid, Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $this->estatisticasEscuta->registrar($uuid, (int) ($request->toArray()['segundos'] ?? 0), $usuario);
+
+        return $this->noContent();
+    }
+
+    #[Route('/{uuid}/fila/pausar', name: 'pausar_fila', methods: ['POST'])]
+    public function pausarFila(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->livroAudioSerializer->normalizar($this->filaGeracao->pausar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/fila/retomar', name: 'retomar_fila', methods: ['POST'])]
+    public function retomarFila(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->livroAudioSerializer->normalizar($this->filaGeracao->retomar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/fila/priorizar', name: 'priorizar_fila', methods: ['POST'])]
+    public function priorizarFila(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->livroAudioSerializer->normalizar($this->filaGeracao->priorizar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/pdf/link', name: 'link_pdf', methods: ['GET'])]
+    public function linkPdf(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->linkAssinado->linkPdf($uuid, $usuario));
+    }
+
+    #[Route('/{uuid}/links', name: 'links_blocos', methods: ['GET'])]
+    public function linksBlocos(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->linkAssinado->linksDoLivro($uuid, $usuario));
+    }
 
     #[Route('', name: 'listar', methods: ['GET'])]
     public function listar(#[CurrentUser] Usuario $usuario): Response

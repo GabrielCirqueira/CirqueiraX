@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Sistema;
 
 use App\Controller\Common\DefaultController;
+use App\Service\LivroAudio\PainelSistemaLivrosAudioService;
 use DateTime;
 use DateTimeInterface;
 use Doctrine\DBAL\Connection;
@@ -56,7 +57,7 @@ final class HealthController extends DefaultController
     }
 
     /**
-     * @return array{status: string, free_mb: float, threshold_mb: int}
+     * @return array{status: string, free_mb: float, threshold_mb: int, alerta: bool, alerta_mb: int}
      */
     private function checkDisk(string $caminho = '/'): array
     {
@@ -68,6 +69,8 @@ final class HealthController extends DefaultController
             'status' => $freeSpace > $threshold ? 'ok' : 'critical',
             'free_mb' => round($freeSpace / 1024 / 1024, 2),
             'threshold_mb' => 100,
+            'alerta' => $freeSpace < PainelSistemaLivrosAudioService::BYTES_ATENCAO,
+            'alerta_mb' => (int) (PainelSistemaLivrosAudioService::BYTES_ATENCAO / 1024 / 1024),
         ];
     }
 }

@@ -43,6 +43,7 @@ import {
   type SegmentoDestaque,
   calcularRetangulosDosSegmentos,
 } from './utils/pdf'
+import { carimbarPosicao } from './utils/posicao'
 import { encontrarBlocoPorPagina } from './utils/sincronizacao'
 
 interface ConteudoLeitorProps {
@@ -113,11 +114,11 @@ const ConteudoLeitor = memo(function ConteudoLeitor({ livro, documento }: Conteu
   function salvarPosicao(pagina: number, bloco?: number | null, segundos?: number) {
     salvarPosicaoMutation.mutate({
       uuid: livro.uuid,
-      posicao: {
+      posicao: carimbarPosicao(livro.uuid, {
         paginaAtual: pagina,
         blocoAtual: bloco !== undefined ? bloco : livro.blocoAtual,
         segundosNoBloco: segundos ?? 0,
-      },
+      }),
     })
   }
 

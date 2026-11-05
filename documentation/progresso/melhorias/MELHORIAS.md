@@ -126,3 +126,4 @@
 | M108 | Destaque que Não se Perde e Play a Partir da Página Aberta | 🟡 Publicado, falta validar | 03/11/2026 | [ver](MELHORIAS_6.md#melhoria-108--destaque-que-não-se-perde-e-play-a-partir-da-página-aberta) |
 | M109 | Narração Mais Limpa e Recursos de Escuta | 🟡 Publicado, falta validar | 04/11/2026 | [ver](MELHORIAS_6.md#melhoria-109--narração-mais-limpa-e-recursos-de-escuta) |
 | M110 | Ler e Ouvir do Seu Jeito: Velocidade, Offline, Busca, Marcações e Capítulos | 🟡 Publicado, falta validar | 04/11/2026 | [ver](MELHORIAS_6.md#melhoria-110--ler-e-ouvir-do-seu-jeito-velocidade-offline-busca-marcações-e-capítulos) |
+| M111 | Fila Inteligente, Estatísticas de Escuta, Voz Piper, Links Assinados e Painel de Livros | 🟡 Publicado, falta validar | 05/11/2026 | [ver](MELHORIAS_6.md#melhoria-111--fila-inteligente-estatísticas-de-escuta-voz-piper-links-assinados-e-painel-de-livros) |

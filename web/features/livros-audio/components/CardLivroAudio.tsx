@@ -1,3 +1,4 @@
+import { addToast } from '@/shared/components/ui/toaster'
 import {
   Badge,
   Box,
@@ -9,11 +10,21 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { BookOpen, Download, FileText, Headphones, Play, Trash2 } from 'lucide-react'
+import {
+  ArrowUpToLine,
+  BookOpen,
+  Download,
+  FileText,
+  Headphones,
+  Pause,
+  Play,
+  Trash2,
+} from 'lucide-react'
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { obterUrlPdfLivro } from '../api'
-import type { LivroAudio } from '../types'
+import { abrirPdfEmNovaAba } from '../api'
+import { useAlterarFilaLivro } from '../hooks/useLivrosAudio'
+import type { ItemFilaGeracao, LivroAudio } from '../types'
 import {
   calcularProgressoLeitura,
   formatarDataRelativa,
@@ -25,6 +36,7 @@ import {
 interface CardLivroAudioProps {
   livro: LivroAudio
   partesNaFrente?: number
+  itemFila?: ItemFilaGeracao
   apagando?: boolean
   onApagar: (uuid: string) => void
 }
@@ -32,14 +44,23 @@ interface CardLivroAudioProps {
 export const CardLivroAudio = memo(function CardLivroAudio({
   livro,
   partesNaFrente = 0,
+  itemFila,
   apagando = false,
   onApagar,
 }: CardLivroAudioProps) {
   const navigate = useNavigate()
+  const alterarFilaMutation = useAlterarFilaLivro()
+  const naFila = Boolean(itemFila)
+  const alterandoFila = alterarFilaMutation.isPending
   const aparencia = obterAparenciaStatusLivro(livro.status)
   const progresso = calcularProgressoLeitura(livro.paginaAtual, livro.totalPaginas)
-  const urlDownloadPdf = obterUrlPdfLivro(livro.uuid)
-  const progressoAudio = obterProgressoAudio(livro, partesNaFrente)
+  const progressoAudio = obterProgressoAudio(livro, partesNaFrente, itemFila)
+
+  function handleBaixarPdf() {
+    abrirPdfEmNovaAba(livro.uuid).catch(() =>
+      addToast({ title: 'Não foi possível abrir o PDF', type: 'error' })
+    )
+  }
 
   function handleAbrirLeitor() {
     navigate(`/livros-audio/${livro.uuid}`)
@@ -121,9 +142,24 @@ export const CardLivroAudio = memo(function CardLivroAudio({
         <Box bg="cirqueira.grey.900/50" borderRadius="lg" p={3}>
           <HStack gap={1.5} align="center" mb={1.5}>
             <Headphones size={13} color="var(--chakra-colors-cirqueira-brand-400)" />
-            <Text fontSize="xs" fontWeight="bold" color="cirqueira.grey.100">
+            <Text fontSize="xs" fontWeight="bold" color="cirqueira.grey.100" flex={1} minW={0}>
               {progressoAudio.titulo}
             </Text>
+            {itemFila && (
+              <Badge
+                size="xs"
+                variant="subtle"
+                colorPalette={itemFila.pausado ? 'gray' : 'brand'}
+                fontSize="9px"
+                flexShrink={0}
+              >
+                {itemFila.pausado
+                  ? 'Pausado'
+                  : itemFila.gerandoAgora
+                    ? 'Gerando agora'
+                    : `${itemFila.posicao}º na fila`}
+              </Badge>
+            )}
           </HStack>
           <Progress.Root value={progressoAudio.percentual} size="xs" colorPalette="brand">
             <Progress.Track bg="cirqueira.grey.900" borderRadius="full">
@@ -176,7 +212,6 @@ export const CardLivroAudio = memo(function CardLivroAudio({
       >
         <HStack gap={1}>
           <IconButton
-            asChild
             size="xs"
             variant="ghost"
             borderRadius="lg"
@@ -184,11 +219,47 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
             aria-label="Baixar PDF original"
             title="Baixar PDF original"
+            onClick={handleBaixarPdf}
           >
-            <a href={urlDownloadPdf} download={`${livro.titulo}.pdf`}>
-              <Download size={14} />
-            </a>
+            <Download size={14} />
           </IconButton>
+
+          {naFila && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              borderRadius="lg"
+              color="cirqueira.grey.400"
+              _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
+              aria-label={livro.filaPausada ? 'Retomar geração' : 'Pausar geração'}
+              title={livro.filaPausada ? 'Retomar a geração do áudio' : 'Pausar a geração do áudio'}
+              disabled={alterandoFila}
+              onClick={() =>
+                alterarFilaMutation.mutate({
+                  uuid: livro.uuid,
+                  acao: livro.filaPausada ? 'retomar' : 'pausar',
+                })
+              }
+            >
+              {livro.filaPausada ? <Play size={14} /> : <Pause size={14} />}
+            </IconButton>
+          )}
+
+          {naFila && itemFila?.posicao !== 1 && (
+            <IconButton
+              size="xs"
+              variant="ghost"
+              borderRadius="lg"
+              color="cirqueira.grey.400"
+              _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
+              aria-label="Gerar este livro primeiro"
+              title="Gerar este livro primeiro"
+              disabled={alterandoFila}
+              onClick={() => alterarFilaMutation.mutate({ uuid: livro.uuid, acao: 'priorizar' })}
+            >
+              <ArrowUpToLine size={14} />
+            </IconButton>
+          )}
 
           <IconButton
             size="xs"

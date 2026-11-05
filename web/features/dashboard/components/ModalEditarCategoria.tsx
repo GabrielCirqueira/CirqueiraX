@@ -192,61 +192,64 @@ export function ModalEditarCategoria({
     <Dialog.Root
       lazyMount
       unmountOnExit
-      open={aberto} onOpenChange={(e) => !e.open && onFechar()} placement="center">
+      open={aberto}
+      onOpenChange={(e) => !e.open && onFechar()}
+      placement="center"
+    >
       <Portal>
         <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
-        <Dialog.Content
-          bg="bg.panel"
-          borderWidth="1px"
-          borderColor="border.subtle"
-          color="fg"
-          borderRadius="xl"
-          p={0}
-          maxW="md"
-          w="full"
-        >
-          <Dialog.Header
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="space-between"
-            p={4}
-            borderBottomWidth="1px"
+          <Dialog.Content
+            bg="bg.panel"
+            borderWidth="1px"
             borderColor="border.subtle"
+            color="fg"
+            borderRadius="xl"
+            p={0}
+            maxW="md"
+            w="full"
           >
-            <HStack gap={2.5}>
-              <Box
-                p={2}
-                borderRadius="lg"
-                bg="cirqueira.purple.500/10"
-                color="cirqueira.purple.500"
-              >
-                <FolderCheck size={20} />
-              </Box>
-              <VStack gap={0.5} alignItems="flex-start">
-                <Dialog.Title fontSize="base" fontWeight="semibold" color="fg">
-                  Editar Categoria
-                </Dialog.Title>
-                <Text fontSize="xs" color="fg.subtle">
-                  Ajuste o nome e a pasta local de destino
-                </Text>
-              </VStack>
-            </HStack>
-            <IconButton size="sm" variant="ghost" onClick={onFechar} aria-label="Fechar modal">
-              <X size={16} />
-            </IconButton>
-          </Dialog.Header>
+            <Dialog.Header
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              p={4}
+              borderBottomWidth="1px"
+              borderColor="border.subtle"
+            >
+              <HStack gap={2.5}>
+                <Box
+                  p={2}
+                  borderRadius="lg"
+                  bg="cirqueira.purple.500/10"
+                  color="cirqueira.purple.500"
+                >
+                  <FolderCheck size={20} />
+                </Box>
+                <VStack gap={0.5} alignItems="flex-start">
+                  <Dialog.Title fontSize="base" fontWeight="semibold" color="fg">
+                    Editar Categoria
+                  </Dialog.Title>
+                  <Text fontSize="xs" color="fg.subtle">
+                    Ajuste o nome e a pasta local de destino
+                  </Text>
+                </VStack>
+              </HStack>
+              <IconButton size="sm" variant="ghost" onClick={onFechar} aria-label="Fechar modal">
+                <X size={16} />
+              </IconButton>
+            </Dialog.Header>
 
-          <FormularioEditarCategoria
-            key={categoria.uuid}
-            categoria={categoria}
-            onFechar={onFechar}
-            onSucesso={onSucesso}
-          />
-        </Dialog.Content>
-      </Dialog.Positioner>
-    </Portal>
-  </Dialog.Root>
+            <FormularioEditarCategoria
+              key={categoria.uuid}
+              categoria={categoria}
+              onFechar={onFechar}
+              onSucesso={onSucesso}
+            />
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

@@ -67,6 +67,42 @@ class LivroAudioRepository extends ServiceEntityRepository
         );
     }
 
+    public function contarMensagensNaFila(): int
+    {
+        return (int) $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT COUNT(*) FROM messenger_messages WHERE queue_name = ? AND delivered_at IS NULL',
+            [self::FILA_GERACAO],
+        );
+    }
+
+    public function maiorPrioridadeFila(Usuario $usuario): int
+    {
+        return (int) $this->createQueryBuilder('l')
+            ->select('COALESCE(MAX(l.prioridadeFila), 0)')
+            ->andWhere('l.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return array{livros: int, pdfs: int, bytesPdfs: int, porStatus: array<string, int>}
+     */
+    public function resumoArmazenamento(): array
+    {
+        $conexao = $this->getEntityManager()->getConnection();
+        $totais = $conexao->fetchAssociative(
+            'SELECT COUNT(*) AS livros, COALESCE(SUM(caminho_pdf IS NOT NULL), 0) AS pdfs, COALESCE(SUM(tamanho_bytes), 0) AS bytes_pdfs FROM livro_audio',
+        ) ?: [];
+
+        return [
+            'livros' => (int) ($totais['livros'] ?? 0),
+            'pdfs' => (int) ($totais['pdfs'] ?? 0),
+            'bytesPdfs' => (int) ($totais['bytes_pdfs'] ?? 0),
+            'porStatus' => array_map('intval', $conexao->fetchAllKeyValue('SELECT status, COUNT(*) FROM livro_audio GROUP BY status')),
+        ];
+    }
+
     public function buscarPorUuid(string $uuid): ?LivroAudio
     {
         if (!Uuid::isValid($uuid)) {

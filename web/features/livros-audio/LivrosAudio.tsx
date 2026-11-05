@@ -4,7 +4,13 @@ import { useState } from 'react'
 import { CabecalhoLivrosAudio } from './components/CabecalhoLivrosAudio'
 import { GradeLivrosAudio } from './components/GradeLivrosAudio'
 import { ModalUploadLivro } from './components/ModalUploadLivro'
-import { useApagarLivroAudio, useLivrosAudio } from './hooks/useLivrosAudio'
+import { PainelFilaGeracao } from './components/PainelFilaGeracao'
+import {
+  useApagarLivroAudio,
+  useEstadoDisco,
+  useFilaGeracao,
+  useLivrosAudio,
+} from './hooks/useLivrosAudio'
 import { contarLivrosPorStatus } from './utils/livros'
 
 export function Component() {
@@ -19,6 +25,8 @@ export function Component() {
   const { data: livros, isLoading, isFetching, refetch } = useLivrosAudio()
   const apagarMutation = useApagarLivroAudio()
   const contagem = contarLivrosPorStatus(livros)
+  const { data: fila } = useFilaGeracao(contagem.emProcessamento > 0)
+  const { data: disco } = useEstadoDisco()
 
   function handleApagarLivro(uuid: string) {
     apagarMutation.mutate(uuid)
@@ -34,8 +42,11 @@ export function Component() {
           onNovoLivro={() => setModalUploadAberto(true)}
         />
 
+        <PainelFilaGeracao fila={fila} disco={disco} />
+
         <GradeLivrosAudio
           livros={livros}
+          fila={fila}
           carregando={isLoading}
           apagandoUuid={apagarMutation.isPending ? (apagarMutation.variables ?? null) : null}
           onNovoLivro={() => setModalUploadAberto(true)}

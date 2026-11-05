@@ -9,10 +9,13 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Check, Mic, Pause, Play, Trash2, X } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { AlertTriangle, Check, Mic, Pause, Play, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { obterUrlAmostraVoz } from '../api'
+import { listarLinksAmostras, obterEstadoDisco } from '../api'
+import { LIVROS_AUDIO_QUERY_KEY } from '../hooks/useLivrosAudio'
 import type { VozLivroAudio } from '../types'
+import { formatarTamanhoLivro } from '../utils/livros'
 
 interface PainelVozesProps {
   vozes: VozLivroAudio[]
@@ -24,6 +27,13 @@ interface PainelVozesProps {
   onGerar: (voz: VozLivroAudio) => void
   onRemover: (voz: VozLivroAudio) => void
   onFechar: () => void
+}
+
+function descreverTamanho(voz: VozLivroAudio): string | null {
+  if (voz.tamanhoBytes > 0) return formatarTamanhoLivro(voz.tamanhoBytes)
+  if (voz.status === 'nao_gerada' && voz.tamanhoEstimadoBytes > 0)
+    return `cerca de ${formatarTamanhoLivro(voz.tamanhoEstimadoBytes)}`
+  return null
 }
 
 function descreverStatus(voz: VozLivroAudio): { texto: string; cor: string } {
@@ -57,6 +67,17 @@ export function PainelVozes({
   onRemover,
   onFechar,
 }: PainelVozesProps) {
+  const { data: linksAmostras = [] } = useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, 'amostras'],
+    queryFn: listarLinksAmostras,
+    staleTime: 1000 * 60 * 10,
+    refetchInterval: 1000 * 60 * 10,
+  })
+  const { data: disco } = useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, 'disco'],
+    queryFn: obterEstadoDisco,
+    staleTime: 1000 * 60,
+  })
   const amostraRef = useRef<HTMLAudioElement | null>(null)
   const [amostraTocando, setAmostraTocando] = useState<string | null>(null)
   const [amostraCarregando, setAmostraCarregando] = useState<string | null>(null)
@@ -76,7 +97,9 @@ export function PainelVozes({
     }
 
     atual?.pause()
-    const audio = new Audio(obterUrlAmostraVoz(voz))
+    const link = linksAmostras.find((item) => item.voz === voz)
+    if (!link) return
+    const audio = new Audio(link.url)
     amostraRef.current = audio
     setAmostraCarregando(voz)
     setAmostraTocando(null)
@@ -137,8 +160,28 @@ export function PainelVozes({
 
       <Text fontSize="11px" color="cirqueira.grey.400" mb={2.5}>
         Ouça a amostra, gere a voz que quiser e troque a qualquer momento. A troca continua da mesma
-        frase.
+        frase. Cada voz extra ocupa mais ou menos o mesmo espaço da principal.
       </Text>
+
+      {disco && disco.nivel !== 'ok' && (
+        <HStack
+          gap={2}
+          align="start"
+          mb={2.5}
+          px={2.5}
+          py={2}
+          borderRadius="lg"
+          bg={disco.nivel === 'critico' ? 'cirqueira.red.500/15' : 'cirqueira.yellow.500/10'}
+          color={disco.nivel === 'critico' ? 'cirqueira.red.300' : 'cirqueira.yellow.300'}
+        >
+          <Box flexShrink={0} mt="1px">
+            <AlertTriangle size={13} />
+          </Box>
+          <Text fontSize="11px">
+            {disco.mensagem} Livre: {formatarTamanhoLivro(disco.livreBytes)}.
+          </Text>
+        </HStack>
+      )}
 
       {carregando ? (
         <Flex justify="center" py={6}>
@@ -196,6 +239,16 @@ export function PainelVozes({
                     <Badge size="xs" variant="subtle" colorPalette={status.cor} fontSize="9px">
                       {status.texto}
                     </Badge>
+                    {voz.motor === 'piper' && (
+                      <Badge size="xs" variant="outline" colorPalette="gray" fontSize="9px">
+                        Piper
+                      </Badge>
+                    )}
+                    {descreverTamanho(voz) && (
+                      <Text fontSize="10px" color="cirqueira.grey.500" whiteSpace="nowrap">
+                        {descreverTamanho(voz)}
+                      </Text>
+                    )}
                   </HStack>
                   <Text fontSize="10px" color="cirqueira.grey.400" truncate maxW="full">
                     {selecionada && !parteAtualPronta
@@ -213,6 +266,7 @@ export function PainelVozes({
                     px={2}
                     fontSize="10px"
                     loading={emAcao}
+                    disabled={disco?.nivel === 'critico'}
                     onClick={() => onGerar(voz)}
                   >
                     {voz.status === 'nao_gerada' ? 'Gerar' : 'Tentar de novo'}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\LivroAudio;
 
 use App\Entity\LivroAudio;
+use App\Enum\VozNarracao;
 use App\Infra\Audio\EdgeTtsClient;
 use App\Repository\LivroAudioBlocoRepository;
 
@@ -16,11 +17,22 @@ final readonly class ResolverVozLivroAudioService
 
     public function vozPrincipal(LivroAudio $livro): string
     {
+        $vozAlternativa = null;
         foreach ($this->livroAudioBlocoRepository->listarPorLivro($livro) as $bloco) {
             $voz = $bloco->voz();
-            if (null !== $voz) {
+            if (null === $voz) {
+                continue;
+            }
+
+            if ('edge' === VozNarracao::motorDe($voz)) {
                 return $voz;
             }
+
+            $vozAlternativa ??= $voz;
+        }
+
+        if (null !== $vozAlternativa) {
+            return $vozAlternativa;
         }
 
         return $livro->idioma()?->voz() ?? EdgeTtsClient::VOZ_PADRAO;

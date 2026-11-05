@@ -41,6 +41,8 @@ export const livroAudioSchema = z.object({
   criadoEm: z.string(),
   atualizadoEm: z.string(),
   ultimaEscutaEm: z.string().nullable(),
+  filaPausada: z.boolean().default(false),
+  prioridadeFila: z.number().int().default(0),
   isEnviado: z.boolean(),
   isExtraindo: z.boolean(),
   isGerandoAudio: z.boolean(),
@@ -55,6 +57,7 @@ export const salvarPosicaoLivroSchema = z.object({
   paginaAtual: z.number().int().min(1),
   blocoAtual: z.number().int().min(0).nullable().optional(),
   segundosNoBloco: z.number().int().min(0).default(0),
+  registradaEm: z.number().int().positive().optional(),
 })
 
 export const statusLivroAudioBlocoSchema = z.enum(['pendente', 'gerando', 'pronto', 'erro'])
@@ -97,13 +100,66 @@ export const vozLivroAudioSchema = z.object({
   nome: z.string(),
   descricao: z.string(),
   principal: z.boolean(),
+  motor: z.enum(['edge', 'piper']).default('edge'),
   status: z.enum(['pronta', 'gerando', 'parcial', 'erro', 'nao_gerada']),
   totalBlocos: z.number(),
   blocosProntos: z.array(z.number()),
   blocosComErro: z.number(),
+  tamanhoBytes: z.number().default(0),
+  tamanhoEstimadoBytes: z.number().default(0),
 })
 
 export type VozLivroAudio = z.infer<typeof vozLivroAudioSchema>
+
+export const linkArquivoSchema = z.object({
+  url: z.string(),
+  expiraEm: z.number().int(),
+})
+
+export const linkAmostraSchema = linkArquivoSchema.extend({ voz: z.string() })
+
+export const linkBlocoSchema = linkArquivoSchema.extend({
+  numeroBloco: z.number().int(),
+  voz: z.string().nullable(),
+})
+
+export const itemFilaGeracaoSchema = z.object({
+  uuid: z.string(),
+  titulo: z.string(),
+  posicao: z.number().int(),
+  pausado: z.boolean(),
+  priorizado: z.boolean(),
+  ouvindoAgora: z.boolean(),
+  paginaAtual: z.number().int(),
+  totalPartes: z.number().int(),
+  partesProntas: z.number().int(),
+  partesRestantes: z.number().int(),
+  gerandoAgora: z.boolean(),
+  segundosParaTerminar: z.number().int().nullable(),
+})
+
+export const filaGeracaoSchema = z.object({
+  segundosPorParte: z.number().int(),
+  partesNaFila: z.number().int(),
+  segundosRestantes: z.number().int(),
+  livros: z.array(itemFilaGeracaoSchema),
+})
+
+export const estadoDiscoSchema = z.object({
+  livreBytes: z.number(),
+  totalBytes: z.number(),
+  usadoBytes: z.number(),
+  nivel: z.enum(['ok', 'atencao', 'critico']),
+  bytesParaFila: z.number(),
+  mensagem: z.string().nullable(),
+})
+
+export type LinkArquivo = z.infer<typeof linkArquivoSchema>
+export type LinkAmostra = z.infer<typeof linkAmostraSchema>
+export type LinkBloco = z.infer<typeof linkBlocoSchema>
+export type ItemFilaGeracao = z.infer<typeof itemFilaGeracaoSchema>
+export type FilaGeracao = z.infer<typeof filaGeracaoSchema>
+export type EstadoDisco = z.infer<typeof estadoDiscoSchema>
 
 export const tipoMarcacaoSchema = z.enum(['marcador', 'destaque', 'nota'])
 

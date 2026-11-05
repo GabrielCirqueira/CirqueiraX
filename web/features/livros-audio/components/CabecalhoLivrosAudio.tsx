@@ -1,4 +1,14 @@
-import { Badge, Box, Button, Center, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import {
+  Badge,
+  Box,
+  Button,
+  Center,
+  HStack,
+  IconButton,
+  Stack,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { BookOpen, Plus, RefreshCw } from 'lucide-react'
 import { memo } from 'react'
 import type { ContagemStatusLivros } from '../utils/livros'
@@ -25,7 +35,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
       borderColor="cirqueira.grey.900"
       borderRadius="2xl"
     >
-      <HStack
+      <Stack
         justify="space-between"
         align={{ base: 'flex-start', sm: 'center' }}
         direction={{ base: 'column', sm: 'row' }}
@@ -90,7 +100,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
             Novo Livro
           </Button>
         </HStack>
-      </HStack>
+      </Stack>
 
       <HStack
         gap={2}

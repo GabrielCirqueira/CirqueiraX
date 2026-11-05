@@ -107,6 +107,10 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 - Timer de sono, tempo restante do livro inteiro, recuo de 5 segundos ao retomar e passagem para a próxima parte sem espera.
 - Clique numa frase para ouvir dali, destacar ou escrever uma nota. Vários marcadores, destaques e notas por livro, com exportação em Markdown.
 - Busca no texto do livro com "ouvir a partir do resultado", sumário com os capítulos reais do livro e tema da página claro, sépia ou escuro.
+- A geração começa pelas partes à frente de onde você está ouvindo. Pause um livro ou passe ele na frente da fila.
+- Se a voz principal falhar, a parte é gerada com uma voz local (Piper), e há duas vozes Piper para escolher.
+- Áudio e PDF por links assinados de curta duração, sem o login na URL.
+- No Dashboard: continuar ouvindo, tempo ouvido por dia com meta diária e sequência, e quanto os livros ocupam de disco e memória.
 - Baixe as próximas partes para ouvir sem internet.
 
 ### Prints & Capturas

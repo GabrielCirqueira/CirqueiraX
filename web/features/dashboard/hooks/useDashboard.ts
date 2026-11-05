@@ -2,8 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   atualizarMapeamentoCategoria,
   criarCategoria,
+  definirMetaEscuta,
   obterCategoriasMetricas,
+  obterEstatisticasEscuta,
   obterFilaErros,
+  obterPainelLivros,
   obterPastasSync,
   obterResumoDashboard,
   obterStatusSync,
@@ -19,6 +22,36 @@ export const DASHBOARD_QUERY_KEYS = {
   erros: (pagina: number, limite: number) => ['dashboard', 'erros', pagina, limite] as const,
   syncPastas: ['sync', 'pastas'] as const,
   syncStatus: ['sync', 'status'] as const,
+  livros: ['dashboard', 'livros'] as const,
+  escuta: ['dashboard', 'escuta'] as const,
+}
+
+export function usePainelLivros() {
+  return useQuery({
+    queryKey: DASHBOARD_QUERY_KEYS.livros,
+    queryFn: obterPainelLivros,
+    staleTime: 1000 * 30,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+  })
+}
+
+export function useEstatisticasEscuta() {
+  return useQuery({
+    queryKey: DASHBOARD_QUERY_KEYS.escuta,
+    queryFn: obterEstatisticasEscuta,
+    staleTime: 1000 * 30,
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
+  })
+}
+
+export function useDefinirMetaEscuta() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: definirMetaEscuta,
+    onSuccess: (dados) => queryClient.setQueryData(DASHBOARD_QUERY_KEYS.escuta, dados),
+  })
 }
 
 export function useResumoDashboard() {

@@ -43,6 +43,13 @@ final readonly class ProcessarLivroAudioService
             }
         } else {
             $blocos = $this->livroAudioBlocoRepository->listarNaoProntosDoLivro($livro);
+            foreach ($blocos as $bloco) {
+                if ($bloco->isErro()) {
+                    $bloco->reiniciarGeracao();
+                    $this->livroAudioBlocoRepository->salvar($bloco, false);
+                }
+            }
+            $this->livroAudioBlocoRepository->flush();
         }
 
         if (empty($blocos)) {

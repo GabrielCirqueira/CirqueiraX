@@ -4,6 +4,11 @@ import { z } from 'zod'
 import {
   type ConfigurarNarracaoPayload,
   type CriarMarcacaoPayload,
+  type EstadoDisco,
+  type FilaGeracao,
+  type LinkAmostra,
+  type LinkArquivo,
+  type LinkBloco,
   type LivroAudio,
   type LivroAudioBloco,
   type MarcacaoLivro,
@@ -11,6 +16,11 @@ import {
   type TrechoNarracao,
   type UploadLivroAudioPayload,
   type VozLivroAudio,
+  estadoDiscoSchema,
+  filaGeracaoSchema,
+  linkAmostraSchema,
+  linkArquivoSchema,
+  linkBlocoSchema,
   livroAudioBlocoSchema,
   livroAudioSchema,
   marcacaoLivroSchema,
@@ -22,9 +32,8 @@ import { obterTrechosOffline } from './utils/offline'
 
 const URL_LIVROS_AUDIO = '/api/v1/livros-audio'
 
-function comToken(caminho: string): string {
-  const token = localStorage.getItem('token')
-  return token ? `${caminho}?token=${encodeURIComponent(token)}` : caminho
+function comBase<T extends { url: string }>(link: T): T {
+  return { ...link, url: `${api.defaults.baseURL ?? ''}${link.url}` }
 }
 
 export async function listarLivrosAudio(): Promise<LivroAudio[]> {
@@ -147,8 +156,57 @@ export async function configurarNarracaoLivro(
   return livroAudioSchema.parse(data.data)
 }
 
-export function obterUrlAmostraVoz(voz: string): string {
-  return comToken(`${URL_LIVROS_AUDIO}/vozes/${encodeURIComponent(voz)}/amostra`)
+export async function listarLinksAmostras(): Promise<LinkAmostra[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/vozes/amostras`)
+  return z.array(linkAmostraSchema).parse(data.data).map(comBase)
+}
+
+export async function listarLinksBlocos(uuid: string): Promise<LinkBloco[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/links`)
+  return z.array(linkBlocoSchema).parse(data.data).map(comBase)
+}
+
+export async function obterLinkPdf(uuid: string): Promise<LinkArquivo> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/pdf/link`)
+  return comBase(linkArquivoSchema.parse(data.data))
+}
+
+export async function abrirPdfEmNovaAba(uuid: string): Promise<void> {
+  const janela = window.open('', '_blank')
+  try {
+    const { url } = await obterLinkPdf(uuid)
+    if (janela) {
+      janela.opener = null
+      janela.location.href = url
+    } else {
+      window.location.href = url
+    }
+  } catch (erro) {
+    janela?.close()
+    throw erro
+  }
+}
+
+export async function registrarEscutaLivro(uuid: string, segundos: number): Promise<void> {
+  await api.post(`${URL_LIVROS_AUDIO}/${uuid}/escuta`, { segundos })
+}
+
+export async function obterFilaGeracao(): Promise<FilaGeracao> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/fila`)
+  return filaGeracaoSchema.parse(data.data)
+}
+
+export async function obterEstadoDisco(): Promise<EstadoDisco> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/disco`)
+  return estadoDiscoSchema.parse(data.data)
+}
+
+export async function alterarFilaLivro(
+  uuid: string,
+  acao: 'pausar' | 'retomar' | 'priorizar'
+): Promise<LivroAudio> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${URL_LIVROS_AUDIO}/${uuid}/fila/${acao}`)
+  return livroAudioSchema.parse(data.data)
 }
 
 export async function fazerUploadLivroAudio(payload: UploadLivroAudioPayload): Promise<LivroAudio> {
@@ -183,22 +241,9 @@ export async function apagarLivroAudio(uuid: string): Promise<void> {
 }
 
 export function obterUrlPdfLivro(uuid: string): string {
-  return comToken(`${URL_LIVROS_AUDIO}/${uuid}/pdf`)
+  return `${api.defaults.baseURL ?? ''}${URL_LIVROS_AUDIO}/${uuid}/pdf`
 }
 
-export function obterUrlStreamBloco(
-  uuid: string,
-  numeroBloco: number,
-  voz: string | null = null,
-  versao?: string,
-  tokenSobrescrever?: string
-): string {
-  const token = tokenSobrescrever ?? localStorage.getItem('token')
-  const parametros = new URLSearchParams()
-  if (voz) parametros.set('voz', voz)
-  if (versao) parametros.set('v', String(Date.parse(versao) || versao))
-  if (token) parametros.set('token', token)
-  const consulta = parametros.toString()
-  const baseUrl = `${URL_LIVROS_AUDIO}/${uuid}/blocos/${numeroBloco}/stream`
-  return consulta ? `${baseUrl}?${consulta}` : baseUrl
+export function obterUrlRegistroEscuta(uuid: string): string {
+  return `${api.defaults.baseURL ?? ''}${URL_LIVROS_AUDIO}/${uuid}/escuta`
 }
