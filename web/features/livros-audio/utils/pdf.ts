@@ -216,3 +216,85 @@ export function calcularRetangulosDestaque(
 }
 
 export type { PDFDocumentProxy, PDFPageProxy }
+
+export interface PosicaoNoTexto {
+  item: number
+  caractere: number
+}
+
+export function localizarPosicaoNoTexto(
+  pagina: PDFPageProxy,
+  itens: ItemTextoPdf[],
+  xPercentual: number,
+  yPercentual: number
+): PosicaoNoTexto | null {
+  const viewport = pagina.getViewport({ scale: 1 })
+  const x = (xPercentual / 100) * viewport.width
+  const y = (yPercentual / 100) * viewport.height
+  let melhor: { indice: number; esquerda: number; largura: number; alturaFonte: number } | null =
+    null
+  let menorDistancia = Number.POSITIVE_INFINITY
+
+  itens.forEach((item, indice) => {
+    if (item.texto.trim().length === 0) return
+    const posicao = pdfjsLib.Util.transform(viewport.transform, item.transform)
+    const alturaFonte = Math.hypot(posicao[2] ?? 0, posicao[3] ?? 0)
+    const largura = item.largura * viewport.scale
+    if (alturaFonte <= 0 || largura <= 0) return
+
+    const esquerda = posicao[4] ?? 0
+    const topo = (posicao[5] ?? 0) - alturaFonte * item.ascendente
+    const base = (posicao[5] ?? 0) - alturaFonte * item.descendente
+    const distanciaX =
+      x < esquerda ? esquerda - x : x > esquerda + largura ? x - esquerda - largura : 0
+    const distanciaY = y < topo ? topo - y : y > base ? y - base : 0
+    const distancia = distanciaY * 3 + distanciaX
+
+    if (distancia < menorDistancia) {
+      menorDistancia = distancia
+      melhor = { indice, esquerda, largura, alturaFonte }
+    }
+  })
+
+  const encontrado = melhor as {
+    indice: number
+    esquerda: number
+    largura: number
+    alturaFonte: number
+  } | null
+  if (!encontrado || menorDistancia > encontrado.alturaFonte * 2) return null
+
+  const item = itens[encontrado.indice]
+  if (!item) return null
+  const fracao = Math.min(1, Math.max(0, (x - encontrado.esquerda) / encontrado.largura))
+  const medir = criarMedidorItem(item)
+  let caractere = 0
+  while (caractere < item.texto.length - 1 && medir(caractere + 1) <= fracao) caractere++
+
+  return { item: encontrado.indice, caractere }
+}
+
+export interface RetanguloNaPagina extends RetanguloDestaque {
+  pagina: number
+}
+
+export async function calcularRetangulosDosSegmentos(
+  documento: PDFDocumentProxy,
+  segmentos: SegmentoDestaque[]
+): Promise<RetanguloNaPagina[]> {
+  const paginas = [...new Set(segmentos.map((segmento) => segmento.pagina))]
+  const resultado: RetanguloNaPagina[] = []
+
+  for (const numero of paginas) {
+    const [pagina, itens] = await Promise.all([
+      documento.getPage(numero),
+      obterItensTextoPagina(documento, numero),
+    ])
+    const daPagina = segmentos.filter((segmento) => segmento.pagina === numero)
+    for (const retangulo of calcularRetangulosDestaque(pagina, itens, daPagina)) {
+      resultado.push({ pagina: numero, ...retangulo })
+    }
+  }
+
+  return resultado
+}

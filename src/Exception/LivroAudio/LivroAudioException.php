@@ -53,6 +53,21 @@ final class LivroAudioException extends DomainException
         return new self(sprintf('A voz "%s" não está disponível para este livro.', $voz), 422);
     }
 
+    public static function marcacaoNaoEncontrada(string $uuid): self
+    {
+        return new self(sprintf('A marcação "%s" não foi encontrada.', $uuid), 404);
+    }
+
+    public static function notaVazia(): self
+    {
+        return new self('Escreva o texto da nota.', 422);
+    }
+
+    public static function limiteMarcacoes(int $limite): self
+    {
+        return new self(sprintf('O livro já tem %d marcações. Apague algumas para criar novas.', $limite), 422);
+    }
+
     public static function narracaoEmPreparo(): self
     {
         return new self('O texto do livro ainda está sendo extraído. Aguarde para ajustar a narração.', 409);

@@ -193,3 +193,64 @@
   - `src/Enum/ModoNotasLivroAudio.php`, `src/DataObject/ConfigurarNarracaoLivroDTO.php` (novos), `src/Entity/LivroAudio.php`, `src/Entity/LivroAudioBloco.php`, `migrations/Version20261104120000.php`
   - `src/Repository/LivroAudioBlocoRepository.php`, `LivroAudioBlocoVozRepository.php`, `src/Serializer/LivroAudioSerializer.php`, `src/Controller/LivroAudio/LivroAudioController.php`, `src/Exception/LivroAudio/LivroAudioException.php`
   - `web/features/livros-audio/components/PainelNarracao.tsx` (novo), `components/PlayerAudioLivro.tsx`, `api.ts`, `types.ts`, `hooks/useLivrosAudio.ts`
+
+### 🟡 Melhoria 110 — Ler e Ouvir do Seu Jeito: Velocidade, Offline, Busca, Marcações e Capítulos
+
+- **Status**: Publicada em produção em 04/11/2026, falta validar no uso
+- **Data**: 04 de novembro de 2026
+- **Problema**:
+  - A velocidade só alternava entre 5 valores fixos e voltava para 1x ao reabrir.
+  - Não dava para ouvir sem internet.
+  - Não dava para começar a ouvir de uma frase escolhida na página.
+  - A página era sempre branca.
+  - O sumário listava só as partes do áudio, não os capítulos do livro.
+  - Havia um único marcador por livro, sem destaques nem notas.
+  - A lupa da barra de cima não fazia nada.
+  - A troca de página era seca.
+- **Solução**:
+  - **Velocidade fina**: painel com controle de 0,5x a 3x em passos de 0,1, botões −/+ e atalhos (0,8x a 2,5x). Fica guardada por livro neste aparelho (`localStorage` `livros-audio:velocidade:{uuid}`). O tempo que falta do livro considera a velocidade.
+  - **Ouvir offline** (botão de nuvem no player):
+    - Baixa as próximas 3, 5 ou 10 partes, ou todas que faltam, na voz escolhida. Para cada parte guarda o MP3 e as frases (com tempos) na Cache API do navegador (`livros-audio-offline-v1`) e pede armazenamento persistente.
+    - Ao tocar uma parte guardada, o player usa o arquivo local em vez do stream. As frases também vêm de lá quando a rede falha.
+    - Quando a parte é refeita (nova versão), a cópia antiga é substituída no próximo download.
+    - O painel mostra quantas partes e quantos MB estão guardados e permite apagar. No sumário, as partes guardadas têm um ícone.
+  - **Clicar numa frase**: abre um menu com "Ouvir daqui" (toca da palavra clicada), "Destacar" e "Nota". Se a frase já tiver destaque, aparecem "Editar nota" e "Tirar destaque".
+  - **Tema da página**: claro, sépia ou escuro (botão de sol/café/lua na barra de cima), aplicado com `filter` no canvas. O destaque da narração continua visível nos três. A escolha fica guardada no aparelho.
+  - **Sumário com capítulos reais**: aba "Capítulos" lê o sumário embutido no PDF (`getOutline`, até 2 níveis). Sem sumário, usa os títulos com fonte bem maior que o texto. Clicar num capítulo leva até a página e toca a partir dela. A aba "Partes do áudio" mantém a lista antiga.
+  - **Marcadores, destaques e notas**:
+    - Nova tabela `marcacao_livro_audio`, com limite de 2000 por livro. Cada marcação guarda página, parte, frase, segundo, texto, nota e os retângulos do destaque.
+    - O botão "Marcar" do player guarda o ponto exato que está sendo lido (ou a página aberta se o áudio não foi usado), além de salvar a posição como antes.
+    - Destaques aparecem em amarelo e notas em laranja sublinhado.
+    - O painel (ícone de marcador na barra de cima) filtra por tipo, leva à página, toca dali, edita e apaga notas, e exporta tudo em Markdown.
+  - **Busca no texto**: a lupa abre a busca em todas as páginas, sem diferenciar acentos e maiúsculas. O resultado aparece com o termo marcado e a página rola até ele. "Ouvir" toca a partir da frase do resultado, inclusive quando ela começa na página anterior.
+  - **Virar a página**: animação curta (380 ms) só com `transform` e `opacity` (giro de 9° e deslocamento de 2,5%), feita com a Web Animations API. Não roda com "reduzir movimento" ligado no sistema.
+- **API**:
+  - `GET /api/v1/livros-audio/{uuid}/marcacoes`
+  - `POST /api/v1/livros-audio/{uuid}/marcacoes`
+  - `PATCH /api/v1/livros-audio/{uuid}/marcacoes/{marcacao}`: só a nota.
+  - `DELETE /api/v1/livros-audio/{uuid}/marcacoes/{marcacao}`
+- **Limites no iPhone**: o Safari libera a Cache API e dá cota a cada site conforme o espaço livre do aparelho. Uma parte tem em média 1,5 a 2 MB.
+  - O Safari pode apagar os dados de um site que fica 7 dias sem ser aberto, a não ser que o site esteja adicionado à Tela de Início.
+  - Se a cota acaba no meio, o download para e avisa. O que já baixou continua guardado.
+  - O app em si ainda precisa estar aberto: a página do leitor não funciona offline do zero.
+- **Testado** fora de produção, no Chromium, com o leitor inteiro, o PDF dos Protocolos e o áudio e as frases reais da parte 1 (API simulada):
+  - Velocidade 1,5x → 1,6x aplicada e guardada.
+  - Clique na página 3 abriu a frase certa. Destaque salvo com 4 retângulos e desenhado. O segundo clique ofereceu "Tirar destaque". A nota foi salva via PATCH.
+  - "Ouvir daqui" tocou a frase clicada.
+  - Busca por "ditador": 2 resultados. "Ouvir" tocou a frase do termo, que começa na página 2.
+  - "Marcar" guardou a parte 1, a frase 37 e o segundo 119. A exportação em Markdown saiu com marcadores e notas.
+  - Os três temas aplicaram o filtro.
+  - Sumário: 25 títulos achados (o PDF não tem sumário embutido). Clicar em "CAPÍTULO III" (p. 12) tocou a parte 4 perto da página 12.
+  - Animação em toda virada e nenhuma com "reduzir movimento".
+  - Offline: 3 partes guardadas (5 MB). Com a rede desligada, a parte 6 tocou do arquivo local, sem nenhum pedido ao servidor.
+- **Arquivos**:
+  - Backend:
+    - `src/Entity/MarcacaoLivroAudio.php`, `src/Enum/TipoMarcacaoLivroAudio.php`, `src/Repository/MarcacaoLivroAudioRepository.php` (novos)
+    - `src/DataObject/CriarMarcacaoLivroDTO.php`, `src/DataObject/AtualizarMarcacaoLivroDTO.php`, `src/Serializer/MarcacaoLivroAudioSerializer.php` (novos)
+    - `src/Service/LivroAudio/GerenciarMarcacoesLivroAudioService.php`, `migrations/Version20261104180000.php` (novos)
+    - `src/Controller/LivroAudio/LivroAudioController.php`, `src/Exception/LivroAudio/LivroAudioException.php`
+  - Frontend (`web/features/livros-audio/`):
+    - Componentes novos: `components/MenuFrase.tsx`, `components/PainelBusca.tsx`, `components/PainelMarcacoes.tsx`
+    - Hooks novos: `hooks/useMarcacoesLivro.ts`, `hooks/useOfflineLivro.ts`, `hooks/localizacaoBloco.ts`
+    - Utilitários novos: `utils/offline.ts`, `utils/capitulos.ts`, `utils/buscaLivro.ts`, `utils/exportarMarcacoes.ts`
+    - Alterados: `LeitorLivroAudio.tsx`, `components/PlayerAudioLivro.tsx`, `components/VisualizadorLivro.tsx`, `components/PaginaPdf.tsx`, `components/BarraSuperiorLeitor.tsx`, `hooks/useNarracaoAtual.ts`, `utils/pdf.ts`, `utils/localizacaoNarracao.ts`, `api.ts`, `types.ts`

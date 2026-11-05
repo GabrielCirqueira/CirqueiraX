@@ -1,9 +1,30 @@
 import { Box, Center, HStack, IconButton, Text } from '@chakra-ui/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { type KeyboardEvent, memo, useRef } from 'react'
+import { type KeyboardEvent, memo, useEffect, useRef } from 'react'
+import type { MarcacaoLivro, TemaPagina } from '../types'
 import type { LocalizacaoTrecho } from '../utils/localizacaoNarracao'
-import type { PDFDocumentProxy } from '../utils/pdf'
-import { PaginaPdf } from './PaginaPdf'
+import type { PDFDocumentProxy, SegmentoDestaque } from '../utils/pdf'
+import { type CliqueTextoPagina, FUNDO_TEMA_PAGINA, PaginaPdf } from './PaginaPdf'
+
+const DURACAO_VIRADA_MS = 380
+
+function animarVirada(elemento: HTMLElement | null, avancando: boolean) {
+  if (!elemento || typeof elemento.animate !== 'function') return
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+  const angulo = avancando ? -9 : 9
+  const deslocamento = avancando ? '2.5%' : '-2.5%'
+  elemento.style.transformOrigin = avancando ? 'left center' : 'right center'
+  elemento.animate(
+    [
+      {
+        transform: `perspective(1800px) translateX(${deslocamento}) rotateY(${angulo}deg)`,
+        opacity: 0.35,
+      },
+      { transform: 'perspective(1800px) translateX(0) rotateY(0deg)', opacity: 1 },
+    ],
+    { duration: DURACAO_VIRADA_MS, easing: 'cubic-bezier(0.2, 0.7, 0.2, 1)' }
+  )
+}
 
 interface VisualizadorLivroProps {
   documento: PDFDocumentProxy
@@ -14,6 +35,10 @@ interface VisualizadorLivroProps {
   destaque?: LocalizacaoTrecho | null
   destaquePalavra?: LocalizacaoTrecho | null
   seguirDestaque?: boolean
+  tema?: TemaPagina
+  marcacoes?: MarcacaoLivro[]
+  destaqueBusca?: SegmentoDestaque[]
+  onClicarTexto?: (clique: CliqueTextoPagina) => void
   onAvancar: () => void
   onVoltar: () => void
 }
@@ -27,10 +52,23 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
   destaque = null,
   destaquePalavra = null,
   seguirDestaque = false,
+  tema = 'claro',
+  marcacoes,
+  destaqueBusca,
+  onClicarTexto,
   onAvancar,
   onVoltar,
 }: VisualizadorLivroProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const paginasRef = useRef<HTMLDivElement | null>(null)
+  const paginaAnteriorRef = useRef(paginaAtual)
+  const fundoPagina = FUNDO_TEMA_PAGINA[tema]
+
+  useEffect(() => {
+    const anterior = paginaAnteriorRef.current
+    paginaAnteriorRef.current = paginaAtual
+    if (anterior !== paginaAtual) animarVirada(paginasRef.current, paginaAtual > anterior)
+  }, [paginaAtual])
 
   const paginaEsquerda = paginaAtual
   const paginaDireita = modoDuplo && paginaAtual + 1 <= totalPaginas ? paginaAtual + 1 : null
@@ -94,7 +132,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
         <ChevronLeft size={26} />
       </IconButton>
 
-      <Center minH="full" w="full" py={2}>
+      <Center ref={paginasRef} minH="full" w="full" py={2}>
         {modoDuplo ? (
           <Box position="relative">
             <Box
@@ -124,7 +162,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
             <HStack position="relative" align="flex-start" justify="center" gap={0} zIndex={2}>
               <Box
                 position="relative"
-                bg="white"
+                bg={fundoPagina}
                 borderTopLeftRadius="18px"
                 borderBottomLeftRadius="18px"
                 borderTopRightRadius={0}
@@ -139,6 +177,10 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                   destaque={destaque}
                   destaquePalavra={destaquePalavra}
                   seguirDestaque={seguirDestaque}
+                  tema={tema}
+                  marcacoes={marcacoes}
+                  destaqueBusca={destaqueBusca}
+                  onClicarTexto={onClicarTexto}
                 />
 
                 <Box
@@ -174,7 +216,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
 
               <Box
                 position="relative"
-                bg="white"
+                bg={fundoPagina}
                 borderTopRightRadius="18px"
                 borderBottomRightRadius="18px"
                 borderTopLeftRadius={0}
@@ -191,6 +233,10 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
                       destaque={destaque}
                       destaquePalavra={destaquePalavra}
                       seguirDestaque={seguirDestaque}
+                      tema={tema}
+                      marcacoes={marcacoes}
+                      destaqueBusca={destaqueBusca}
+                      onClicarTexto={onClicarTexto}
                     />
 
                     <Box
@@ -241,7 +287,7 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
         ) : (
           <Box
             position="relative"
-            bg="white"
+            bg={fundoPagina}
             borderRadius="18px"
             overflow="hidden"
             boxShadow="0 4px 0 rgba(0, 0, 0, 0.1), 0 8px 0 rgba(0, 0, 0, 0.08), 0 12px 0 rgba(0, 0, 0, 0.05), 0 25px 60px rgba(0, 0, 0, 0.75)"
@@ -253,6 +299,10 @@ export const VisualizadorLivro = memo(function VisualizadorLivro({
               destaque={destaque}
               destaquePalavra={destaquePalavra}
               seguirDestaque={seguirDestaque}
+              tema={tema}
+              marcacoes={marcacoes}
+              destaqueBusca={destaqueBusca}
+              onClicarTexto={onClicarTexto}
             />
 
             <Box position="absolute" bottom="12px" right="20px" pointerEvents="none" zIndex={4}>

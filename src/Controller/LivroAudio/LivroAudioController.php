@@ -6,15 +6,19 @@ namespace App\Controller\LivroAudio;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\ArquivoMidiaDTO;
+use App\DataObject\AtualizarMarcacaoLivroDTO;
 use App\DataObject\ConfigurarNarracaoLivroDTO;
+use App\DataObject\CriarMarcacaoLivroDTO;
 use App\DataObject\SalvarPosicaoLivroDTO;
 use App\DataObject\UploadLivroAudioDTO;
 use App\Entity\Usuario;
 use App\Serializer\LivroAudioBlocoSerializer;
 use App\Serializer\LivroAudioSerializer;
+use App\Serializer\MarcacaoLivroAudioSerializer;
 use App\Service\LivroAudio\ApagarLivroAudioService;
 use App\Service\LivroAudio\ConfigurarNarracaoLivroAudioService;
 use App\Service\LivroAudio\ConsultarLivrosAudioService;
+use App\Service\LivroAudio\GerenciarMarcacoesLivroAudioService;
 use App\Service\LivroAudio\GerenciarVozesLivroAudioService;
 use App\Service\LivroAudio\SalvarPosicaoLivroService;
 use App\Service\LivroAudio\UploadLivroAudioService;
@@ -40,6 +44,8 @@ final class LivroAudioController extends DefaultController
         private readonly SalvarPosicaoLivroService $salvarPosicaoLivroService,
         private readonly GerenciarVozesLivroAudioService $gerenciarVozesLivroAudioService,
         private readonly ConfigurarNarracaoLivroAudioService $configurarNarracaoLivroAudioService,
+        private readonly GerenciarMarcacoesLivroAudioService $gerenciarMarcacoesLivroAudioService,
+        private readonly MarcacaoLivroAudioSerializer $marcacaoLivroAudioSerializer,
         private readonly LivroAudioSerializer $livroAudioSerializer,
         private readonly LivroAudioBlocoSerializer $livroAudioBlocoSerializer,
         private readonly RateLimiterFactory $marcadorPosicaoLimiter,
@@ -113,6 +119,43 @@ final class LivroAudioController extends DefaultController
         $livro = $this->configurarNarracaoLivroAudioService->executar($uuid, $dto, $usuario);
 
         return $this->success($this->livroAudioSerializer->normalizar($livro));
+    }
+
+    #[Route('/{uuid}/marcacoes', name: 'listar_marcacoes', methods: ['GET'])]
+    public function listarMarcacoes(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->marcacaoLivroAudioSerializer->normalizarLista($this->gerenciarMarcacoesLivroAudioService->listar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/marcacoes', name: 'criar_marcacao', methods: ['POST'])]
+    public function criarMarcacao(
+        string $uuid,
+        #[MapRequestPayload]
+        CriarMarcacaoLivroDTO $dto,
+        #[CurrentUser]
+        Usuario $usuario,
+    ): Response {
+        return $this->created($this->marcacaoLivroAudioSerializer->normalizar($this->gerenciarMarcacoesLivroAudioService->criar($uuid, $dto, $usuario)));
+    }
+
+    #[Route('/{uuid}/marcacoes/{marcacao}', name: 'atualizar_marcacao', methods: ['PATCH'])]
+    public function atualizarMarcacao(
+        string $uuid,
+        string $marcacao,
+        #[MapRequestPayload]
+        AtualizarMarcacaoLivroDTO $dto,
+        #[CurrentUser]
+        Usuario $usuario,
+    ): Response {
+        return $this->success($this->marcacaoLivroAudioSerializer->normalizar($this->gerenciarMarcacoesLivroAudioService->atualizar($uuid, $marcacao, $dto, $usuario)));
+    }
+
+    #[Route('/{uuid}/marcacoes/{marcacao}', name: 'remover_marcacao', methods: ['DELETE'])]
+    public function removerMarcacao(string $uuid, string $marcacao, #[CurrentUser] Usuario $usuario): Response
+    {
+        $this->gerenciarMarcacoesLivroAudioService->remover($uuid, $marcacao, $usuario);
+
+        return $this->noContent();
     }
 
     #[Route('/{uuid}', name: 'apagar', methods: ['DELETE'])]

@@ -117,6 +117,10 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `PUT` | `/livros-audio/{uuid}/posicao` | Salva o marcador de leitura (página/bloco/segundos) |
 | `DELETE` | `/livros-audio/{uuid}` | Apaga o livro e arquivos |
 | `PUT` | `/livros-audio/{uuid}/narracao` | Salva notas e pronúncia e refaz a narração |
+| `GET` | `/livros-audio/{uuid}/marcacoes` | Lista marcadores, destaques e notas |
+| `POST` | `/livros-audio/{uuid}/marcacoes` | Cria marcador, destaque ou nota |
+| `PATCH` | `/livros-audio/{uuid}/marcacoes/{marcacao}` | Altera a nota |
+| `DELETE` | `/livros-audio/{uuid}/marcacoes/{marcacao}` | Apaga a marcação |
 | `GET` | `/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
 | `GET` | `/livros-audio/{uuid}/blocos` | Lista os blocos e capítulos de áudio gerados |
 | `GET` | `/livros-audio/{uuid}/blocos/{numeroBloco}/stream` | Reproduz o bloco de áudio (suporta Range; `?voz=` para outra voz) |
@@ -162,7 +166,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 
 ## Entidades e enums
 
-Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBloco`, `LivroAudioBlocoVoz`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
+Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBloco`, `LivroAudioBlocoVoz`, `MarcacaoLivroAudio`, `MediaItem`, `OrigemRegra`, `RefreshToken`, `RegistroEnvioGoogleFotos`, `TokenAgente` e `Usuario`. O modelo está em [CIRQUEIRAX.md](../funcionalidades/CIRQUEIRAX.md#5-modelo-de-dados).
 
 | Enum | Valores |
 | :--- | :--- |
@@ -172,6 +176,7 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `StatusLivroAudio` | `enviado`, `extraindo`, `gerando_audio`, `parcial`, `pronto`, `erro` |
 | `StatusLivroAudioBloco` | `pendente`, `gerando`, `pronto`, `erro` |
 | `ModoNotasLivroAudio` | `normal`, `fim_capitulo`, `pular` |
+| `TipoMarcacaoLivroAudio` | `marcador`, `destaque`, `nota` |
 | `VozNarracao` | `pt-BR-AntonioNeural`, `pt-BR-FranciscaNeural`, `pt-BR-ThalitaMultilingualNeural`, `pt-PT-DuarteNeural`, `pt-PT-RaquelNeural`, `en-US-AndrewMultilingualNeural`, `en-US-BrianMultilingualNeural`, `en-US-AvaMultilingualNeural`, `en-US-EmmaMultilingualNeural` |
 | `StatusEnvioGoogleFotos` | `enviado`, `reaproveitado`, `falha` |
 | `OrigemEnvioGoogleFotos` | `automatico`, `retentativa`, `reenvio_manual`, `forcado` |

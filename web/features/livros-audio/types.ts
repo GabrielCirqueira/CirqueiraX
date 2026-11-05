@@ -105,6 +105,59 @@ export const vozLivroAudioSchema = z.object({
 
 export type VozLivroAudio = z.infer<typeof vozLivroAudioSchema>
 
+export const tipoMarcacaoSchema = z.enum(['marcador', 'destaque', 'nota'])
+
+export const retanguloMarcacaoSchema = z.object({
+  pagina: z.number().int(),
+  esquerda: z.number(),
+  topo: z.number(),
+  largura: z.number(),
+  altura: z.number(),
+})
+
+export const marcacaoLivroSchema = z.object({
+  uuid: z.string(),
+  tipo: tipoMarcacaoSchema,
+  tipoDescricao: z.string(),
+  pagina: z.number().int(),
+  numeroBloco: z.number().int().nullable(),
+  indiceTrecho: z.number().int().nullable(),
+  segundos: z.number().nullable(),
+  texto: z.string().nullable(),
+  nota: z.string().nullable(),
+  retangulos: z.array(retanguloMarcacaoSchema).default([]),
+  criadoEm: z.string(),
+  atualizadoEm: z.string(),
+})
+
+export type TipoMarcacao = z.infer<typeof tipoMarcacaoSchema>
+export type RetanguloMarcacao = z.infer<typeof retanguloMarcacaoSchema>
+export type MarcacaoLivro = z.infer<typeof marcacaoLivroSchema>
+
+export interface CriarMarcacaoPayload {
+  tipo: TipoMarcacao
+  pagina: number
+  numeroBloco?: number | null
+  indiceTrecho?: number | null
+  segundos?: number | null
+  texto?: string | null
+  nota?: string | null
+  retangulos?: RetanguloMarcacao[]
+}
+
+export interface AlvoReproducao {
+  id: number
+  numeroBloco: number
+  pagina: number
+  indiceTrecho?: number | null
+  indicePalavra?: number | null
+  texto?: string | null
+  busca?: string | null
+  segundos?: number | null
+}
+
+export type TemaPagina = 'claro' | 'sepia' | 'escuro'
+
 export type StatusLivroAudio = z.infer<typeof statusLivroAudioSchema>
 export type LivroAudio = z.infer<typeof livroAudioSchema>
 export type StatusLivroAudioBloco = z.infer<typeof statusLivroAudioBlocoSchema>

@@ -369,3 +369,61 @@ export function encontrarPaginaLocalizada(
 
   return null
 }
+
+function valorPosicao(item: number, caractere: number): number {
+  return item * 1_000_000 + caractere
+}
+
+function segmentoContem(
+  segmento: SegmentoDestaque,
+  pagina: number,
+  item: number,
+  caractere: number
+): boolean {
+  if (segmento.pagina !== pagina) return false
+  const posicao = valorPosicao(item, caractere)
+  return (
+    posicao >= valorPosicao(segmento.itemInicio, segmento.caractereInicio) &&
+    posicao <
+      valorPosicao(segmento.itemFim, Math.max(segmento.caractereFim, segmento.caractereInicio + 1))
+  )
+}
+
+export function encontrarTrechoNaPosicao(
+  localizacoes: (LocalizacaoTrecho | null)[],
+  pagina: number,
+  item: number,
+  caractere: number
+): { trecho: number; palavra: number | null } | null {
+  const posicao = valorPosicao(item, caractere)
+  let contem = -1
+  let anterior = -1
+  let inicioAnterior = -1
+  let primeiroDaPagina = -1
+
+  localizacoes.forEach((localizacao, indice) => {
+    if (!localizacao) return
+    for (const segmento of localizacao.segmentos) {
+      if (segmento.pagina !== pagina) continue
+      if (primeiroDaPagina < 0) primeiroDaPagina = indice
+      if (contem < 0 && segmentoContem(segmento, pagina, item, caractere)) contem = indice
+      const inicio = valorPosicao(segmento.itemInicio, segmento.caractereInicio)
+      if (inicio <= posicao && inicio >= inicioAnterior) {
+        inicioAnterior = inicio
+        anterior = indice
+      }
+    }
+  })
+
+  const trecho = contem >= 0 ? contem : anterior >= 0 ? anterior : primeiroDaPagina
+  if (trecho < 0) return null
+
+  const palavras = localizacoes[trecho]?.palavras ?? []
+  const palavra = palavras.findIndex((localizacaoPalavra) =>
+    localizacaoPalavra?.segmentos.some((segmento) =>
+      segmentoContem(segmento, pagina, item, caractere)
+    )
+  )
+
+  return { trecho, palavra: palavra >= 0 ? palavra : null }
+}

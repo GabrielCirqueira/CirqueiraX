@@ -169,11 +169,19 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
    - Ação de exclusão com confirmação.
 
 2. **Leitor & Player Imersivo (`/livros-audio/:uuid`):**
-   - **Visualizador PDF:** renderização página a página com suporte a zoom, paginação direta e atalhos de teclado (Setas Esquerda/Direita).
+   - **Visualizador PDF:**
+     - Renderização página a página com zoom, paginação direta e atalhos de teclado (setas esquerda e direita).
+     - Animação curta ao virar a página (só `transform`/`opacity`), desligada com "reduzir movimento".
+     - **Tema da página:** claro, sépia ou escuro, aplicado como filtro no canvas. A escolha fica salva no navegador.
+     - **Clicar numa frase** abre o menu com "Ouvir daqui", "Destacar" e "Nota" (`MenuFrase`).
+     - **Busca** (lupa): procura em todas as páginas sem diferenciar acentos, marca o termo, rola até ele e tem "Ouvir" a partir do resultado (`PainelBusca`).
+     - **Marcações** (ícone de marcador): lista marcadores, destaques e notas, toca de cada um, edita e apaga notas e exporta em Markdown (`PainelMarcacoes`). Destaques em amarelo e notas em laranja ficam desenhados na página.
    - **Player de Áudio Fixo:**
      - Controles de reprodução: Play/Pause, barra de busca interativa e botões de pular -15s / +15s.
-     - Velocidades de áudio ajustáveis: `0.75x`, `1.0x`, `1.25x`, `1.5x`, `2.0x`.
-     - Menu de capítulos/blocos com indicação visual de status (pronto, gerando, erro).
+     - Velocidade de 0,5x a 3x em passos de 0,1, guardada por livro no navegador.
+     - Sumário com duas abas: "Capítulos", que vem do sumário do PDF ou dos títulos achados nas páginas e toca a partir do capítulo, e "Partes do áudio", com o status e o ícone das partes guardadas offline.
+     - **Ouvir offline:** baixa as próximas 3, 5 ou 10 partes, ou todas que faltam, para a Cache API do navegador (áudio e frases). As partes guardadas tocam do arquivo local.
+     - **Marcar:** guarda um marcador no ponto exato que está sendo lido.
      - Integração com **Media Session API** para controle de áudio na tela de bloqueio e central de mídia do celular ou desktop.
    - **Sincronização Bidirecional:**
      - **Seguir áudio:** a página vira para onde está a frase lida, que fica destacada no PDF com transição suave. Se você abrir outra página e der play, o áudio começa na primeira frase da página aberta (no modo livro, a da esquerda).
@@ -201,6 +209,10 @@ O módulo é composto por duas páginas principais em `web/features/livros-audio
 | `PUT` | `/api/v1/livros-audio/{uuid}/posicao` | Atualiza o marcador de leitura (página/bloco/segundos) |
 | `DELETE` | `/api/v1/livros-audio/{uuid}` | Apaga o livro, metadados e arquivos de áudio |
 | `PUT` | `/api/v1/livros-audio/{uuid}/narracao` | Salva o modo das notas e o dicionário de pronúncia e refaz a narração (`{"modoNotas": "pular", "pronuncias": [{"de": "Dr.", "para": "Doutor"}]}`) |
+| `GET` | `/api/v1/livros-audio/{uuid}/marcacoes` | Marcadores, destaques e notas do livro, por página |
+| `POST` | `/api/v1/livros-audio/{uuid}/marcacoes` | Cria uma marcação (`{"tipo": "destaque", "pagina": 3, "numeroBloco": 1, "indiceTrecho": 46, "texto": "...", "retangulos": [...]}`). Limite de 2000 por livro |
+| `PATCH` | `/api/v1/livros-audio/{uuid}/marcacoes/{marcacao}` | Altera a nota (`{"nota": "..."}`). Um destaque com nota passa a ser nota |
+| `DELETE` | `/api/v1/livros-audio/{uuid}/marcacoes/{marcacao}` | Apaga a marcação |
 | `GET` | `/api/v1/livros-audio/{uuid}/pdf` | Serve o arquivo PDF original |
 | `GET` | `/api/v1/livros-audio/{uuid}/blocos/{numeroBloco}/trechos` | Frases da parte com início e fim em segundos e as palavras de cada uma (`?voz=` para outra voz) |
 | `GET` | `/api/v1/livros-audio/{uuid}/vozes` | Vozes do livro com status e partes prontas |

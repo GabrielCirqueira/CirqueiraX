@@ -97,7 +97,7 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 - Envie arquivos PDF de livros com facilidade pelo seletor ou arrastando para a tela.
 - O sistema extrai os textos e sintetiza a leitura com voz neural de alta naturalidade dividida em blocos e capítulos.
 - Leitor de PDF integrado com virada de página automática sincronizada com o áudio ("Seguir áudio") ou navegação livre ("Folhear livre").
-- Player com controle de velocidade (0.75x a 2.0x), avanço/retrocesso de 15 segundos e integração com a central de mídia/tela de bloqueio do celular ou computador.
+- Player com velocidade de 0,5x a 3x (guardada por livro), avanço/retrocesso de 15 segundos e integração com a central de mídia/tela de bloqueio do celular ou computador.
 - Marcador de leitura automático que salva onde você parou para continuar de qualquer lugar.
 - A frase lida fica destacada no PDF. Você escolhe se o destaque segue a frase inteira ou cada palavra.
 - Se você abrir outra página e der play, a leitura começa nessa página.
@@ -105,6 +105,9 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 - A voz não lê cabeçalhos, rodapés nem números de página, e lê textos em colunas na ordem certa.
 - Escolha se as notas do livro são lidas no fim do capítulo, puladas ou lidas normalmente, e ensine a pronúncia de siglas e abreviações.
 - Timer de sono, tempo restante do livro inteiro, recuo de 5 segundos ao retomar e passagem para a próxima parte sem espera.
+- Clique numa frase para ouvir dali, destacar ou escrever uma nota. Vários marcadores, destaques e notas por livro, com exportação em Markdown.
+- Busca no texto do livro com "ouvir a partir do resultado", sumário com os capítulos reais do livro e tema da página claro, sépia ou escuro.
+- Baixe as próximas partes para ouvir sem internet.
 
 ### Prints & Capturas
 

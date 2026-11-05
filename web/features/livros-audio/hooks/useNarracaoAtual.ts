@@ -1,14 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { LivroAudioBloco, TrechoNarracao } from '../types'
+import type { AlvoReproducao, LivroAudioBloco, TrechoNarracao } from '../types'
 import {
   type LocalizacaoTrecho,
   encontrarIndiceTrecho,
   encontrarPaginaLocalizada,
-  localizarTrechos,
+  normalizarTextoNarracao,
 } from '../utils/localizacaoNarracao'
-import { type PDFDocumentProxy, obterItensTextoPagina } from '../utils/pdf'
+import type { PDFDocumentProxy } from '../utils/pdf'
 import { calcularPaginaPorTempoBloco } from '../utils/sincronizacao'
+import { calcularLocalizacaoBloco, chaveLocalizacaoBloco } from './localizacaoBloco'
 import { useTrechosBloco } from './useLivrosAudio'
 
 export interface NarracaoAtual {
@@ -18,6 +19,7 @@ export interface NarracaoAtual {
   localizacao: LocalizacaoTrecho | null
   localizacaoPalavra: LocalizacaoTrecho | null
   inicioDaPagina: (pagina: number) => number | null
+  resolverAlvo: (alvo: AlvoReproducao) => number | null | undefined
 }
 
 interface OpcoesNarracaoAtual {
@@ -51,35 +53,15 @@ export function useNarracaoAtual({
   tocando,
   obterTempoAtual,
 }: OpcoesNarracaoAtual): NarracaoAtual | null {
-  const { data: trechos = [] } = useTrechosBloco(livroUuid, bloco, voz)
+  const { data: trechosCarregados } = useTrechosBloco(livroUuid, bloco, voz)
+  const trechos = useMemo(() => trechosCarregados ?? [], [trechosCarregados])
   const [posicao, setPosicao] = useState<PosicaoNarracao>({ frase: -1, palavra: -1 })
 
   const { data: localizacoes } = useQuery({
-    queryKey: [
-      'localizacao-trechos',
-      livroUuid,
-      bloco?.numeroBloco,
-      bloco?.atualizadoEm,
-      voz,
-      trechos.length,
-    ],
+    queryKey: chaveLocalizacaoBloco(livroUuid, bloco, voz, trechos.length),
     queryFn: async () => {
       if (!documento || !bloco) return []
-
-      const ultimaPagina = Math.min(bloco.paginaFim, documento.numPages)
-      const numeros: number[] = []
-      for (let numero = bloco.paginaInicio; numero <= ultimaPagina; numero++) {
-        numeros.push(numero)
-      }
-
-      const paginas = await Promise.all(
-        numeros.map(async (numero) => ({
-          numero,
-          itens: await obterItensTextoPagina(documento, numero),
-        }))
-      )
-
-      return localizarTrechos(paginas, trechos)
+      return calcularLocalizacaoBloco(documento, bloco, trechos)
     },
     enabled: Boolean(documento && bloco && trechos.length > 0),
     staleTime: Number.POSITIVE_INFINITY,
@@ -124,6 +106,59 @@ export function useNarracaoAtual({
     [localizacoes, trechos]
   )
 
+  const resolverAlvo = useCallback(
+    (alvo: AlvoReproducao): number | null | undefined => {
+      if (!bloco || alvo.numeroBloco !== bloco.numeroBloco) return undefined
+      const temTrechos = Boolean(voz) || bloco.possuiTrechos
+      if (!temTrechos) return null
+      if (!trechosCarregados) return undefined
+      if (trechos.length === 0) return null
+
+      if (alvo.indiceTrecho !== null && alvo.indiceTrecho !== undefined) {
+        let indice = Math.min(Math.max(0, alvo.indiceTrecho), trechos.length - 1)
+        if (alvo.texto && trechos[indice]?.texto !== alvo.texto) {
+          let melhor = -1
+          trechos.forEach((trecho, posicao) => {
+            if (
+              trecho.texto === alvo.texto &&
+              (melhor < 0 || Math.abs(posicao - indice) < Math.abs(melhor - indice))
+            ) {
+              melhor = posicao
+            }
+          })
+          if (melhor >= 0) indice = melhor
+        }
+        const trecho = trechos[indice]
+        if (!trecho) return null
+        const palavra =
+          alvo.indicePalavra !== null && alvo.indicePalavra !== undefined
+            ? trecho.palavras[alvo.indicePalavra]
+            : undefined
+        return palavra?.inicio ?? trecho.inicio
+      }
+
+      if (alvo.segundos !== null && alvo.segundos !== undefined) return alvo.segundos
+
+      if (!localizacoes) return undefined
+
+      if (alvo.busca) {
+        const consulta = normalizarTextoNarracao(alvo.busca)
+        const indice = trechos.findIndex(
+          (trecho, posicao) =>
+            (localizacoes[posicao]?.pagina === alvo.pagina ||
+              localizacoes[posicao]?.segmentos.some(
+                (segmento) => segmento.pagina === alvo.pagina
+              )) &&
+            normalizarTextoNarracao(trecho.texto).includes(consulta)
+        )
+        if (indice >= 0) return trechos[indice]?.inicio ?? null
+      }
+
+      return inicioDaPagina(alvo.pagina)
+    },
+    [bloco, voz, trechosCarregados, trechos, localizacoes, inicioDaPagina]
+  )
+
   return useMemo(() => {
     if (!bloco || paginaEstimada === null) return null
 
@@ -136,6 +171,7 @@ export function useNarracaoAtual({
         localizacao: null,
         localizacaoPalavra: null,
         inicioDaPagina,
+        resolverAlvo,
       }
     }
 
@@ -148,6 +184,7 @@ export function useNarracaoAtual({
       localizacao,
       localizacaoPalavra: localizacao?.palavras?.[posicao.palavra] ?? null,
       inicioDaPagina,
+      resolverAlvo,
     }
-  }, [bloco, posicao, trechos, localizacoes, paginaEstimada, inicioDaPagina])
+  }, [bloco, posicao, trechos, localizacoes, paginaEstimada, inicioDaPagina, resolverAlvo])
 }

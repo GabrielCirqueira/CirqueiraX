@@ -1,7 +1,27 @@
 import { Badge, Box, Button, HStack, IconButton, Text } from '@chakra-ui/react'
-import { BookOpen, ChevronRight, Columns2, Maximize, Minimize, Search, ZoomIn } from 'lucide-react'
+import {
+  BookOpen,
+  Bookmark,
+  ChevronRight,
+  Coffee,
+  Columns2,
+  Maximize,
+  Minimize,
+  Moon,
+  Search,
+  Sun,
+  ZoomIn,
+} from 'lucide-react'
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { TemaPagina } from '../types'
+
+const ROTULO_TEMA: Record<TemaPagina, string> = {
+  claro: 'Página clara',
+  sepia: 'Página sépia',
+  escuro: 'Página escura',
+}
+const ICONE_TEMA = { claro: Sun, sepia: Coffee, escuro: Moon }
 
 interface BarraSuperiorLeitorProps {
   titulo: string
@@ -16,6 +36,13 @@ interface BarraSuperiorLeitorProps {
   onDefinirEscala?: (escala: number) => void
   onAlternarModoDuplo: () => void
   onAlternarTelaCheia: () => void
+  buscaAberta?: boolean
+  onAlternarBusca?: () => void
+  marcacoesAbertas?: boolean
+  totalMarcacoes?: number
+  onAlternarMarcacoes?: () => void
+  tema?: TemaPagina
+  onAlternarTema?: () => void
 }
 
 const NIVEIS_ZOOM = [0.8, 1.0, 1.25, 1.5, 2.0]
@@ -31,8 +58,16 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
   onDefinirEscala,
   onAlternarModoDuplo,
   onAlternarTelaCheia,
+  buscaAberta = false,
+  onAlternarBusca,
+  marcacoesAbertas = false,
+  totalMarcacoes = 0,
+  onAlternarMarcacoes,
+  tema = 'claro',
+  onAlternarTema,
 }: BarraSuperiorLeitorProps) {
   const navigate = useNavigate()
+  const IconeTema = ICONE_TEMA[tema]
 
   function alternarProximoZoom() {
     if (onDefinirEscala) {
@@ -129,12 +164,45 @@ export const BarraSuperiorLeitor = memo(function BarraSuperiorLeitor({
           size="sm"
           variant="ghost"
           borderRadius="lg"
-          color="cirqueira.grey.300"
+          color={buscaAberta ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
+          bg={buscaAberta ? 'cirqueira.brand.500/20' : undefined}
           _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+          onClick={onAlternarBusca}
           aria-label="Buscar no livro"
           title="Buscar no livro"
         >
           <Search size={16} />
+        </IconButton>
+
+        <Button
+          size="sm"
+          variant="ghost"
+          borderRadius="lg"
+          px={2}
+          h="32px"
+          color={marcacoesAbertas ? 'cirqueira.brand.300' : 'cirqueira.grey.300'}
+          bg={marcacoesAbertas ? 'cirqueira.brand.500/20' : undefined}
+          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+          onClick={onAlternarMarcacoes}
+          aria-label="Marcadores, destaques e notas"
+          title="Marcadores, destaques e notas"
+          fontSize="xs"
+        >
+          <Bookmark size={16} />
+          {totalMarcacoes > 0 && totalMarcacoes}
+        </Button>
+
+        <IconButton
+          size="sm"
+          variant="ghost"
+          borderRadius="lg"
+          color="cirqueira.grey.300"
+          _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+          onClick={onAlternarTema}
+          aria-label={`${ROTULO_TEMA[tema]}. Clique para trocar`}
+          title={`${ROTULO_TEMA[tema]} (clique para trocar)`}
+        >
+          <IconeTema size={16} />
         </IconButton>
 
         <Button

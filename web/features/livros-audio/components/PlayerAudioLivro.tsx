@@ -1,19 +1,26 @@
+import { addToast } from '@/shared/components/ui/toaster'
 import { Badge, Box, Button, Flex, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Bookmark,
   BookmarkCheck,
   ChevronLeft,
   ChevronRight,
+  CloudDownload,
   Download,
+  Gauge,
   ListMusic,
+  LoaderCircle,
   Mic,
+  Minus,
   Moon,
   Pause,
   Play,
+  Plus,
   RotateCcw,
   RotateCw,
   SlidersHorizontal,
+  Trash2,
   Volume1,
   Volume2,
   VolumeX,
@@ -22,21 +29,27 @@ import {
 import { type MouseEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { listarTrechosBloco, obterUrlPdfLivro, obterUrlStreamBloco } from '../api'
 import {
+  LIVROS_AUDIO_QUERY_KEY,
   chaveTrechosBloco,
   useConfigurarNarracaoLivro,
   useRemoverVozLivro,
   useSolicitarVozLivro,
   useVozesLivro,
 } from '../hooks/useLivrosAudio'
+import { useCriarMarcacao } from '../hooks/useMarcacoesLivro'
 import { type NarracaoAtual, useNarracaoAtual } from '../hooks/useNarracaoAtual'
+import { useOfflineLivro } from '../hooks/useOfflineLivro'
 import type {
+  AlvoReproducao,
   LivroAudio,
   LivroAudioBloco,
   ModoDestaqueNarracao,
   TrechoNarracao,
   VozLivroAudio,
 } from '../types'
+import { obterIndiceLivro } from '../utils/capitulos'
 import { encontrarIndiceTrecho } from '../utils/localizacaoNarracao'
+import { chaveParteOffline, obterUrlAudioOffline } from '../utils/offline'
 import type { PDFDocumentProxy } from '../utils/pdf'
 import { encontrarBlocoPorPagina, formatarTempoAudio } from '../utils/sincronizacao'
 import { PainelNarracao } from './PainelNarracao'
@@ -61,9 +74,12 @@ interface PlayerAudioLivroProps {
   onVoltarPaginaLeitor?: () => void
   onSalvarPosicao: (pagina: number, bloco?: number | null, segundos?: number) => void
   onSalvarMarcador?: () => void
+  alvoReproducao?: AlvoReproducao | null
 }
 
-const VELOCIDADES = [0.75, 1.0, 1.25, 1.5, 2.0]
+const VELOCIDADE_MINIMA = 0.5
+const VELOCIDADE_MAXIMA = 3
+const ATALHOS_VELOCIDADE = [0.8, 1, 1.2, 1.5, 1.8, 2, 2.5]
 const PAUSA_LONGA_MS = 30_000
 const RECUO_AO_RETOMAR_SEGUNDOS = 5
 const FADE_TIMER_MS = 15_000
@@ -99,6 +115,34 @@ function duracaoEstimadaDosBlocos(blocos: LivroAudioBloco[]): Map<number, number
         : (bloco.paginaFim - bloco.paginaInicio + 1) * segundosPorPagina,
     ])
   )
+}
+
+function ajustarVelocidade(valor: number): number {
+  const limitada = Math.min(VELOCIDADE_MAXIMA, Math.max(VELOCIDADE_MINIMA, valor))
+  return Math.round(limitada * 10) / 10
+}
+
+function formatarVelocidade(valor: number): string {
+  return `${valor.toFixed(1).replace('.', ',')}x`
+}
+
+function chaveVelocidadeLivro(livroUuid: string): string {
+  return `livros-audio:velocidade:${livroUuid}`
+}
+
+function lerVelocidadeSalva(livroUuid: string): number {
+  try {
+    const salva = Number(localStorage.getItem(chaveVelocidadeLivro(livroUuid)))
+    return Number.isFinite(salva) && salva > 0 ? ajustarVelocidade(salva) : 1
+  } catch {
+    return 1
+  }
+}
+
+function salvarVelocidade(livroUuid: string, velocidade: number) {
+  try {
+    localStorage.setItem(chaveVelocidadeLivro(livroUuid), String(velocidade))
+  } catch {}
 }
 
 function chaveVozLivro(livroUuid: string): string {
@@ -157,6 +201,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   onVoltarPaginaLeitor,
   onSalvarPosicao,
   onSalvarMarcador,
+  alvoReproducao = null,
 }: PlayerAudioLivroProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const ultimoSalvamentoRef = useRef<number>(0)
@@ -164,12 +209,19 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const posicaoRetomadaRef = useRef(false)
   const deveTocarAoCarregarRef = useRef(false)
   const [tocando, setTocando] = useState(false)
+  const alvoPendenteRef = useRef<{ alvo: AlvoReproducao; criadoEm: number } | null>(null)
+  const [versaoAlvo, setVersaoAlvo] = useState(0)
+  const [metadadosCarregados, setMetadadosCarregados] = useState(0)
+  const criarMarcacaoMutation = useCriarMarcacao(livro.uuid)
   const [tempoAtual, setTempoAtual] = useState(0)
   const [duracao, setDuracao] = useState(0)
   const [volume, setVolume] = useState(1)
   const [mutado, setMutado] = useState(false)
   const [mostrarVolume, setMostrarVolume] = useState(false)
-  const [indiceVelocidade, setIndiceVelocidade] = useState(1)
+  const [velocidade, setVelocidade] = useState(() => lerVelocidadeSalva(livro.uuid))
+  const [mostrarVelocidade, setMostrarVelocidade] = useState(false)
+  const [mostrarOffline, setMostrarOffline] = useState(false)
+  const [abaSumario, setAbaSumario] = useState<'capitulos' | 'partes' | null>(null)
   const [mostrarSumario, setMostrarSumario] = useState(false)
   const [mostrarVozes, setMostrarVozes] = useState(false)
   const [mostrarAjustes, setMostrarAjustes] = useState(false)
@@ -279,15 +331,56 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     }
   }, [carregandoVozes, blocoAtivo, vozDesejada, vozCarregada, queryClient, livro.uuid])
 
+  const offline = useOfflineLivro(livro.uuid)
+  const chavesOfflineRef = useRef(offline.chaves)
+  chavesOfflineRef.current = offline.chaves
+  const chaveOfflineAtiva =
+    blocoAtivo?.isPronto && vozDoBlocoPronta
+      ? chaveParteOffline(blocoAtivo.numeroBloco, vozDoBloco, blocoAtivo.atualizadoEm)
+      : null
+  const [fonteOffline, setFonteOffline] = useState<{ chave: string; url: string | null } | null>(
+    null
+  )
+
+  useEffect(() => {
+    if (!chaveOfflineAtiva || !offline.carregado || !blocoAtivo) return
+    if (fonteOffline?.chave === chaveOfflineAtiva) return
+    if (!chavesOfflineRef.current.has(chaveOfflineAtiva)) {
+      setFonteOffline({ chave: chaveOfflineAtiva, url: null })
+      return
+    }
+    let cancelado = false
+    obterUrlAudioOffline(livro.uuid, blocoAtivo.numeroBloco, vozDoBloco, blocoAtivo.atualizadoEm)
+      .catch(() => null)
+      .then((url) => {
+        if (cancelado) {
+          if (url) URL.revokeObjectURL(url)
+          return
+        }
+        setFonteOffline({ chave: chaveOfflineAtiva, url })
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [chaveOfflineAtiva, offline.carregado, fonteOffline, blocoAtivo, vozDoBloco, livro.uuid])
+
+  useEffect(() => {
+    const url = fonteOffline?.url
+    if (!url) return
+    return () => URL.revokeObjectURL(url)
+  }, [fonteOffline?.url])
+
   const audioUrl = useMemo(() => {
     if (!blocoAtivo || !blocoAtivo.isPronto || !vozDoBlocoPronta) return ''
+    if (!chaveOfflineAtiva || fonteOffline?.chave !== chaveOfflineAtiva) return ''
+    if (fonteOffline.url) return fonteOffline.url
     return obterUrlStreamBloco(
       livro.uuid,
       blocoAtivo.numeroBloco,
       vozDoBloco,
       blocoAtivo.atualizadoEm
     )
-  }, [livro.uuid, blocoAtivo, vozDoBloco, vozDoBlocoPronta])
+  }, [livro.uuid, blocoAtivo, vozDoBloco, vozDoBlocoPronta, chaveOfflineAtiva, fonteOffline])
 
   const proximoBlocoPronto = blocoAtivo
     ? (blocos.find((b) => b.numeroBloco === blocoAtivo.numeroBloco + 1 && b.isPronto) ?? null)
@@ -295,14 +388,25 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const vozProximoBloco = proximoBlocoPronto
     ? vozDoBlocoPara(proximoBlocoPronto.numeroBloco, vozEscolhida)
     : null
-  const urlProximoBloco = proximoBlocoPronto
-    ? obterUrlStreamBloco(
-        livro.uuid,
-        proximoBlocoPronto.numeroBloco,
-        vozProximoBloco,
-        proximoBlocoPronto.atualizadoEm
+  const proximoEstaOffline = Boolean(
+    proximoBlocoPronto &&
+      offline.chaves.has(
+        chaveParteOffline(
+          proximoBlocoPronto.numeroBloco,
+          vozProximoBloco,
+          proximoBlocoPronto.atualizadoEm
+        )
       )
-    : ''
+  )
+  const urlProximoBloco =
+    proximoBlocoPronto && !proximoEstaOffline
+      ? obterUrlStreamBloco(
+          livro.uuid,
+          proximoBlocoPronto.numeroBloco,
+          vozProximoBloco,
+          proximoBlocoPronto.atualizadoEm
+        )
+      : ''
 
   useEffect(() => {
     if (!tocando || !proximoBlocoPronto) return
@@ -342,8 +446,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   const fracaoNoBloco = duracao > 0 ? Math.min(1, tempoAtual / duracao) : 0
   const decorridoLivro = inicioBlocoNoLivro + fracaoNoBloco * duracaoBlocoNoLivro
   const fracaoLivro = duracaoLivro > 0 ? Math.min(1, decorridoLivro / duracaoLivro) : 0
-  const velocidadeAtual = VELOCIDADES[indiceVelocidade] ?? 1
-  const restanteLivro = Math.max(0, duracaoLivro - decorridoLivro) / velocidadeAtual
+  const restanteLivro = Math.max(0, duracaoLivro - decorridoLivro) / velocidade
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.playbackRate = velocidade
+  }, [velocidade, audioUrl])
 
   const fatorVolumeTimer = useMemo(() => {
     if (!timerSono) return 1
@@ -403,6 +510,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   useEffect(() => {
     if (!acompanharAudio || paginaNarrada === null || (!tocando && !audioFoiUsadoRef.current))
       return
+    if (alvoPendenteRef.current) return
     const leitor = paginaLeitorRef.current
     const visivel =
       paginaNarrada === leitor.pagina || (leitor.modoDuplo && paginaNarrada === leitor.pagina + 1)
@@ -424,7 +532,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
   salvarProgressoRef.current = salvarProgresso
 
   useEffect(() => {
-    if (!acompanharAudio || !blocoAtivo) return
+    if (!acompanharAudio || !blocoAtivo || alvoPendenteRef.current) return
     const blocoDaPagina = encontrarBlocoPorPagina(blocos, paginaAtualLeitor)
     if (blocoDaPagina?.isPronto && blocoDaPagina.numeroBloco !== blocoAtivo.numeroBloco) {
       deveTocarAoCarregarRef.current = tocando
@@ -500,6 +608,117 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     return false
   }
 
+  const iniciarAlvo = useCallback(
+    (alvo: AlvoReproducao) => {
+      const bloco = blocos.find((item) => item.numeroBloco === alvo.numeroBloco)
+      if (!bloco?.isPronto) {
+        addToast({
+          title: 'Essa parte ainda não tem áudio',
+          description: 'Espere a narração dessa parte ficar pronta.',
+          type: 'info',
+        })
+        return
+      }
+      alvoPendenteRef.current = { alvo, criadoEm: Date.now() }
+      posicaoRetomadaRef.current = true
+      if (blocoAtivo?.numeroBloco !== bloco.numeroBloco) {
+        if (audioRef.current && blocoAtivo) salvarProgressoRef.current(audioRef.current.currentTime)
+        audioRef.current?.pause()
+        deveTocarAoCarregarRef.current = false
+        retomarEmRef.current = null
+        ultimoTempoRef.current = 0
+        setBlocoAtivo(bloco)
+        setTempoAtual(0)
+      }
+      setVersaoAlvo((versao) => versao + 1)
+      window.setTimeout(() => setVersaoAlvo((versao) => versao + 1), 4000)
+    },
+    [blocos, blocoAtivo]
+  )
+
+  const iniciarAlvoRef = useRef(iniciarAlvo)
+  iniciarAlvoRef.current = iniciarAlvo
+
+  useEffect(() => {
+    if (alvoReproducao) iniciarAlvoRef.current(alvoReproducao)
+  }, [alvoReproducao])
+
+  useEffect(() => {
+    const pendente = alvoPendenteRef.current
+    const audio = audioRef.current
+    if (!pendente || !audio || !blocoAtivo || versaoAlvo < 0 || metadadosCarregados < 0) return
+    if (blocoAtivo.numeroBloco !== pendente.alvo.numeroBloco) return
+    if (audio.readyState < 1 || !Number.isFinite(audio.duration) || audio.duration <= 0) return
+
+    let segundos = narracao ? narracao.resolverAlvo(pendente.alvo) : null
+    if (segundos === undefined) {
+      if (Date.now() - pendente.criadoEm < 3500) return
+      segundos = null
+    }
+    if (segundos === null) {
+      const paginas = blocoAtivo.paginaFim - blocoAtivo.paginaInicio + 1
+      const fracao = Math.min(
+        1,
+        Math.max(0, (pendente.alvo.pagina - blocoAtivo.paginaInicio) / Math.max(1, paginas))
+      )
+      segundos = fracao * audio.duration
+    }
+
+    alvoPendenteRef.current = null
+    const destino = Math.min(Math.max(0, segundos), Math.max(0, audio.duration - 0.25))
+    audio.currentTime = destino
+    setTempoAtual(destino)
+    pausadoEmRef.current = null
+    audioFoiUsadoRef.current = true
+    audio.play().catch(() => {})
+  }, [versaoAlvo, metadadosCarregados, narracao, blocoAtivo])
+
+  const { data: indiceLivro, isLoading: carregandoIndice } = useQuery({
+    queryKey: [...LIVROS_AUDIO_QUERY_KEY, livro.uuid, 'indice', documento?.fingerprints?.[0] ?? ''],
+    queryFn: () => (documento ? obterIndiceLivro(documento) : null),
+    enabled: Boolean(documento) && mostrarSumario,
+    staleTime: Number.POSITIVE_INFINITY,
+  })
+  const capitulos = indiceLivro?.capitulos ?? []
+  const aba = abaSumario ?? (capitulos.length > 0 || carregandoIndice ? 'capitulos' : 'partes')
+  const indiceCapituloAtual = (() => {
+    const referencia = paginaNarrada ?? paginaAtualLeitor
+    let atual = -1
+    capitulos.forEach((capitulo, indice) => {
+      if (capitulo.pagina <= referencia) atual = indice
+    })
+    return atual
+  })()
+
+  function ouvirCapitulo(pagina: number) {
+    const bloco = encontrarBlocoPorPagina(blocos, pagina)
+    setMostrarSumario(false)
+    onMudarPaginaLeitor(pagina)
+    if (bloco) iniciarAlvo({ id: Date.now(), numeroBloco: bloco.numeroBloco, pagina })
+  }
+
+  function marcarAqui() {
+    const audio = audioRef.current
+    if (narracao && blocoAtivo && audio && audioFoiUsadoRef.current) {
+      criarMarcacaoMutation.mutate({
+        tipo: 'marcador',
+        pagina: narracao.pagina,
+        numeroBloco: blocoAtivo.numeroBloco,
+        indiceTrecho: narracao.indice >= 0 ? narracao.indice : null,
+        segundos: Math.floor(audio.currentTime),
+        texto: narracao.texto,
+      })
+    } else {
+      const bloco = encontrarBlocoPorPagina(blocos, paginaAtualLeitor)
+      criarMarcacaoMutation.mutate({
+        tipo: 'marcador',
+        pagina: paginaAtualLeitor,
+        numeroBloco: bloco?.numeroBloco ?? null,
+      })
+    }
+    onSalvarMarcador?.()
+  }
+
   function alternarPlayPause() {
     const audio = audioRef.current
     if (!audio || !audioUrl) return
@@ -568,13 +787,38 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
     setTempoAtual(novoTempo)
   }
 
-  function alternarVelocidade() {
-    const proximoIndice = (indiceVelocidade + 1) % VELOCIDADES.length
-    setIndiceVelocidade(proximoIndice)
-    const vel = VELOCIDADES[proximoIndice] ?? 1.0
-    if (audioRef.current) {
-      audioRef.current.playbackRate = vel
-    }
+  function mudarVelocidade(valor: number) {
+    const nova = ajustarVelocidade(valor)
+    setVelocidade(nova)
+    salvarVelocidade(livro.uuid, nova)
+    if (audioRef.current) audioRef.current.playbackRate = nova
+  }
+
+  const partesParaBaixar = blocoAtivo
+    ? blocos.filter(
+        (bloco) =>
+          bloco.isPronto &&
+          bloco.numeroBloco >= blocoAtivo.numeroBloco &&
+          !offline.chaves.has(
+            chaveParteOffline(
+              bloco.numeroBloco,
+              vozDoBlocoPara(bloco.numeroBloco, vozEscolhida),
+              bloco.atualizadoEm
+            )
+          )
+      )
+    : []
+  const partesGuardadas = blocos.filter((bloco) => offline.numeros.has(bloco.numeroBloco)).length
+
+  function baixarParaOffline(quantidade: number | null) {
+    const escolhidas =
+      quantidade === null ? partesParaBaixar : partesParaBaixar.slice(0, quantidade)
+    offline.baixar(escolhidas, (numeroBloco) => vozDoBlocoPara(numeroBloco, vozEscolhida))
+  }
+
+  async function apagarOffline() {
+    if (!window.confirm('Apagar deste aparelho as partes guardadas para ouvir offline?')) return
+    await offline.remover()
   }
 
   function mudarVolume(novoVol: number) {
@@ -692,7 +936,12 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           onLoadedMetadata={() => {
             if (audioRef.current) {
               setDuracao(audioRef.current.duration || 0)
-              audioRef.current.playbackRate = VELOCIDADES[indiceVelocidade] ?? 1.0
+              setMetadadosCarregados((total) => total + 1)
+              if (alvoPendenteRef.current) {
+                retomarEmRef.current = null
+                deveTocarAoCarregarRef.current = false
+              }
+              audioRef.current.playbackRate = velocidade
               const retomarEm = retomarEmRef.current
               if (retomarEm) {
                 retomarEmRef.current = null
@@ -762,6 +1011,207 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           }
           onFechar={() => setMostrarAjustes(false)}
         />
+      )}
+
+      {mostrarOffline && (
+        <Box
+          position="absolute"
+          bottom="calc(100% + 8px)"
+          right={{ base: 4, md: 24 }}
+          w={{ base: 'calc(100vw - 32px)', sm: '320px' }}
+          bg="cirqueira.grey.900"
+          border="1px solid"
+          borderColor="cirqueira.grey.800"
+          borderRadius="2xl"
+          p={3}
+          boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
+          zIndex={60}
+        >
+          <HStack justify="space-between" mb={1.5}>
+            <HStack gap={2} color="cirqueira.brand.400">
+              <CloudDownload size={14} />
+              <Text fontSize="xs" fontWeight="bold" color="white">
+                Ouvir offline
+              </Text>
+            </HStack>
+            <IconButton
+              size="2xs"
+              variant="ghost"
+              color="cirqueira.grey.400"
+              _hover={{ color: 'white' }}
+              onClick={() => setMostrarOffline(false)}
+              aria-label="Fechar ouvir offline"
+            >
+              <X size={12} />
+            </IconButton>
+          </HStack>
+          {!offline.suportado ? (
+            <Text fontSize="11px" color="cirqueira.grey.300">
+              Este navegador não deixa guardar áudio. Abra o site pelo Safari ou Chrome atualizado.
+            </Text>
+          ) : (
+            <>
+              <Text fontSize="11px" color="cirqueira.grey.400" mb={2.5}>
+                Guarda as próximas partes neste aparelho, na voz escolhida, para ouvir sem internet
+                com o livro aberto.
+              </Text>
+              {offline.progresso ? (
+                <Box mb={2}>
+                  <Text fontSize="11px" color="cirqueira.grey.200" mb={1}>
+                    Baixando parte {offline.progresso.atual} de {offline.progresso.total}…
+                  </Text>
+                  <Box h="4px" bg="rgba(255,255,255,0.08)" borderRadius="full">
+                    <Box
+                      h="full"
+                      borderRadius="full"
+                      bg="cirqueira.brand.500"
+                      w={`${
+                        ((offline.progresso.atual - 1 + offline.progresso.fracaoParte) /
+                          offline.progresso.total) *
+                        100
+                      }%`}
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                <Flex gap={1} flexWrap="wrap" mb={2.5}>
+                  {[3, 5, 10].map((quantidade) => (
+                    <Button
+                      key={quantidade}
+                      size="xs"
+                      variant="subtle"
+                      disabled={partesParaBaixar.length === 0}
+                      onClick={() => baixarParaOffline(quantidade)}
+                    >
+                      Próximas {quantidade}
+                    </Button>
+                  ))}
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    disabled={partesParaBaixar.length === 0}
+                    onClick={() => baixarParaOffline(null)}
+                  >
+                    Todas que faltam ({partesParaBaixar.length})
+                  </Button>
+                </Flex>
+              )}
+              <HStack justify="space-between">
+                <Text fontSize="11px" color="cirqueira.grey.300">
+                  {partesGuardadas > 0
+                    ? `${partesGuardadas} parte(s) guardada(s) · ${(offline.tamanho / 1_048_576).toFixed(0)} MB`
+                    : 'Nada guardado ainda'}
+                </Text>
+                {partesGuardadas > 0 && !offline.progresso && (
+                  <Button size="2xs" variant="ghost" colorPalette="red" onClick={apagarOffline}>
+                    <Trash2 size={11} />
+                    Apagar
+                  </Button>
+                )}
+              </HStack>
+            </>
+          )}
+        </Box>
+      )}
+
+      {mostrarVelocidade && (
+        <Box
+          position="absolute"
+          bottom="calc(100% + 8px)"
+          right={{ base: 4, md: 24 }}
+          w={{ base: 'calc(100vw - 32px)', sm: '300px' }}
+          bg="cirqueira.grey.900"
+          border="1px solid"
+          borderColor="cirqueira.grey.800"
+          borderRadius="2xl"
+          p={3}
+          boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
+          zIndex={60}
+        >
+          <HStack justify="space-between" mb={2}>
+            <HStack gap={2} color="cirqueira.brand.400">
+              <Gauge size={14} />
+              <Text fontSize="xs" fontWeight="bold" color="white">
+                Velocidade
+              </Text>
+            </HStack>
+            <IconButton
+              size="2xs"
+              variant="ghost"
+              color="cirqueira.grey.400"
+              _hover={{ color: 'white' }}
+              onClick={() => setMostrarVelocidade(false)}
+              aria-label="Fechar velocidade"
+            >
+              <X size={12} />
+            </IconButton>
+          </HStack>
+          <HStack gap={2} mb={2.5}>
+            <IconButton
+              size="xs"
+              variant="subtle"
+              disabled={velocidade <= VELOCIDADE_MINIMA}
+              onClick={() => mudarVelocidade(velocidade - 0.1)}
+              aria-label="Diminuir velocidade"
+            >
+              <Minus size={13} />
+            </IconButton>
+            <Slider.Root
+              size="sm"
+              colorPalette="brand"
+              value={[velocidade]}
+              min={VELOCIDADE_MINIMA}
+              max={VELOCIDADE_MAXIMA}
+              step={0.1}
+              onValueChange={(detalhes) => mudarVelocidade(detalhes.value[0] ?? 1)}
+              flex={1}
+              aria-label={['Velocidade da narração']}
+            >
+              <Slider.Control>
+                <Slider.Track bg="rgba(255,255,255,0.1)">
+                  <Slider.Range bg="cirqueira.brand.500" />
+                </Slider.Track>
+                <Slider.Thumb index={0} />
+              </Slider.Control>
+            </Slider.Root>
+            <IconButton
+              size="xs"
+              variant="subtle"
+              disabled={velocidade >= VELOCIDADE_MAXIMA}
+              onClick={() => mudarVelocidade(velocidade + 0.1)}
+              aria-label="Aumentar velocidade"
+            >
+              <Plus size={13} />
+            </IconButton>
+            <Text
+              fontSize="sm"
+              fontWeight="bold"
+              color="white"
+              minW="42px"
+              textAlign="right"
+              fontVariantNumeric="tabular-nums"
+            >
+              {formatarVelocidade(velocidade)}
+            </Text>
+          </HStack>
+          <Flex gap={1} flexWrap="wrap">
+            {ATALHOS_VELOCIDADE.map((valor) => (
+              <Button
+                key={valor}
+                size="2xs"
+                variant={velocidade === valor ? 'solid' : 'subtle'}
+                colorPalette={velocidade === valor ? 'brand' : 'gray'}
+                onClick={() => mudarVelocidade(valor)}
+                fontVariantNumeric="tabular-nums"
+              >
+                {formatarVelocidade(valor)}
+              </Button>
+            ))}
+          </Flex>
+          <Text fontSize="10px" color="cirqueira.grey.500" mt={2}>
+            Fica guardada para este livro neste aparelho.
+          </Text>
+        </Box>
       )}
 
       {mostrarTimer && (
@@ -851,7 +1301,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
           bottom="calc(100% + 8px)"
           right={{ base: 4, md: 24 }}
           w={{ base: 'calc(100vw - 32px)', sm: '380px' }}
-          maxH="340px"
+          maxH="min(460px, calc(100vh - 150px))"
           bg="cirqueira.grey.900"
           border="1px solid"
           borderColor="cirqueira.grey.800"
@@ -871,7 +1321,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             <HStack gap={2} color="cirqueira.brand.400">
               <ListMusic size={16} />
               <Text fontSize="xs" fontWeight="bold" color="white">
-                Sumário e Capítulos
+                Sumário
               </Text>
             </HStack>
             <IconButton
@@ -886,55 +1336,136 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             </IconButton>
           </HStack>
 
-          <Flex direction="column" gap={1.5}>
-            {blocos.map((bloco) => {
-              const isAtivo = blocoAtivo?.numeroBloco === bloco.numeroBloco
-              return (
-                <Button
-                  key={bloco.uuid}
-                  size="sm"
-                  variant={isAtivo ? 'solid' : 'subtle'}
-                  colorPalette={isAtivo ? 'brand' : 'gray'}
-                  justifyContent="space-between"
-                  disabled={!bloco.isPronto}
-                  onClick={() => selecionarBloco(bloco)}
-                  fontSize="xs"
-                  h="38px"
-                  px={3}
-                  borderRadius="xl"
-                  bg={isAtivo ? 'cirqueira.brand.500' : 'rgba(255, 255, 255, 0.04)'}
-                  _hover={{ bg: isAtivo ? 'cirqueira.brand.600' : 'rgba(255, 255, 255, 0.08)' }}
-                >
-                  <HStack gap={2}>
-                    <Text fontWeight="bold" color={isAtivo ? 'white' : 'cirqueira.grey.200'}>
-                      Capítulo {bloco.numeroBloco}
+          <HStack gap={1} mb={2.5}>
+            {(['capitulos', 'partes'] as const).map((opcao) => (
+              <Button
+                key={opcao}
+                size="2xs"
+                variant={aba === opcao ? 'solid' : 'subtle'}
+                colorPalette={aba === opcao ? 'brand' : 'gray'}
+                onClick={() => setAbaSumario(opcao)}
+              >
+                {opcao === 'capitulos' ? 'Capítulos' : 'Partes do áudio'}
+              </Button>
+            ))}
+          </HStack>
+
+          {aba === 'capitulos' ? (
+            <Flex direction="column" gap={0.5}>
+              {carregandoIndice && (
+                <Text fontSize="xs" color="cirqueira.grey.400" py={2}>
+                  Lendo o sumário do livro…
+                </Text>
+              )}
+              {!carregandoIndice && capitulos.length === 0 && (
+                <Text fontSize="xs" color="cirqueira.grey.400" py={2}>
+                  Este PDF não tem sumário nem títulos que dê para reconhecer. Use as partes do
+                  áudio.
+                </Text>
+              )}
+              {indiceLivro?.origem === 'titulos' && capitulos.length > 0 && (
+                <Text fontSize="10px" color="cirqueira.grey.500" mb={1}>
+                  O PDF não tem sumário próprio. Estes são os títulos achados nas páginas.
+                </Text>
+              )}
+              {capitulos.map((capitulo, indice) => {
+                const atual = indice === indiceCapituloAtual
+                return (
+                  <HStack
+                    key={`${capitulo.pagina}-${indice}`}
+                    as="button"
+                    textAlign="left"
+                    gap={2}
+                    pl={2 + capitulo.nivel * 3}
+                    pr={2}
+                    py={1.5}
+                    borderRadius="lg"
+                    bg={atual ? 'cirqueira.brand.500/15' : 'transparent'}
+                    _hover={{ bg: 'rgba(255, 255, 255, 0.06)' }}
+                    onClick={() => ouvirCapitulo(capitulo.pagina)}
+                    title={`Ouvir a partir da página ${capitulo.pagina}`}
+                  >
+                    <Text
+                      flex={1}
+                      minW={0}
+                      fontSize="xs"
+                      fontWeight={capitulo.nivel === 0 ? 'semibold' : 'normal'}
+                      color={atual ? 'cirqueira.brand.200' : 'cirqueira.grey.200'}
+                      lineClamp={2}
+                    >
+                      {capitulo.titulo}
                     </Text>
                     <Text
-                      color={isAtivo ? 'rgba(255,255,255,0.7)' : 'cirqueira.grey.400'}
-                      fontSize="11px"
+                      fontSize="10px"
+                      color="cirqueira.grey.500"
+                      fontVariantNumeric="tabular-nums"
+                      flexShrink={0}
                     >
-                      (Págs. {bloco.paginaInicio}-{bloco.paginaFim})
+                      p. {capitulo.pagina}
                     </Text>
                   </HStack>
-                  <HStack gap={2}>
-                    {bloco.duracaoSegundos ? (
-                      <Text color={isAtivo ? 'white' : 'cirqueira.grey.300'} fontSize="11px">
-                        {formatarTempoAudio(bloco.duracaoSegundos)}
+                )
+              })}
+            </Flex>
+          ) : (
+            <Flex direction="column" gap={1.5}>
+              {blocos.map((bloco) => {
+                const isAtivo = blocoAtivo?.numeroBloco === bloco.numeroBloco
+                return (
+                  <Button
+                    key={bloco.uuid}
+                    size="sm"
+                    variant={isAtivo ? 'solid' : 'subtle'}
+                    colorPalette={isAtivo ? 'brand' : 'gray'}
+                    justifyContent="space-between"
+                    disabled={!bloco.isPronto}
+                    onClick={() => selecionarBloco(bloco)}
+                    fontSize="xs"
+                    h="38px"
+                    px={3}
+                    borderRadius="xl"
+                    bg={isAtivo ? 'cirqueira.brand.500' : 'rgba(255, 255, 255, 0.04)'}
+                    _hover={{ bg: isAtivo ? 'cirqueira.brand.600' : 'rgba(255, 255, 255, 0.08)' }}
+                  >
+                    <HStack gap={2}>
+                      <Text fontWeight="bold" color={isAtivo ? 'white' : 'cirqueira.grey.200'}>
+                        Parte {bloco.numeroBloco}
                       </Text>
-                    ) : null}
-                    <Badge
-                      size="sm"
-                      variant="outline"
-                      colorPalette={bloco.isPronto ? 'green' : bloco.isErro ? 'red' : 'yellow'}
-                      fontSize="10px"
-                    >
-                      {bloco.statusDescricao}
-                    </Badge>
-                  </HStack>
-                </Button>
-              )
-            })}
-          </Flex>
+                      <Text
+                        color={isAtivo ? 'rgba(255,255,255,0.7)' : 'cirqueira.grey.400'}
+                        fontSize="11px"
+                      >
+                        (Págs. {bloco.paginaInicio}-{bloco.paginaFim})
+                      </Text>
+                    </HStack>
+                    <HStack gap={2}>
+                      {offline.numeros.has(bloco.numeroBloco) && (
+                        <Box
+                          color={isAtivo ? 'white' : 'cirqueira.brand.300'}
+                          title="Guardada para ouvir offline"
+                        >
+                          <CloudDownload size={12} />
+                        </Box>
+                      )}
+                      {bloco.duracaoSegundos ? (
+                        <Text color={isAtivo ? 'white' : 'cirqueira.grey.300'} fontSize="11px">
+                          {formatarTempoAudio(bloco.duracaoSegundos)}
+                        </Text>
+                      ) : null}
+                      <Badge
+                        size="sm"
+                        variant="outline"
+                        colorPalette={bloco.isPronto ? 'green' : bloco.isErro ? 'red' : 'yellow'}
+                        fontSize="10px"
+                      >
+                        {bloco.statusDescricao}
+                      </Badge>
+                    </HStack>
+                  </Button>
+                )
+              })}
+            </Flex>
+          )}
         </Box>
       )}
 
@@ -1194,17 +1725,26 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             borderRadius="lg"
             px={2.5}
             h="28px"
-            color="cirqueira.grey.200"
             bg="cirqueira.grey.900"
             border="1px solid"
             borderColor="cirqueira.grey.800"
             _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
-            onClick={alternarVelocidade}
+            color={mostrarVelocidade ? 'cirqueira.brand.300' : 'cirqueira.grey.200'}
+            onClick={() => {
+              setMostrarSumario(false)
+              setMostrarVozes(false)
+              setMostrarAjustes(false)
+              setMostrarTimer(false)
+              setMostrarOffline(false)
+              setMostrarVelocidade((prev) => !prev)
+            }}
             fontSize="xs"
             fontWeight="semibold"
+            fontVariantNumeric="tabular-nums"
             title="Alterar velocidade da narração"
           >
-            Velocidade: {VELOCIDADES[indiceVelocidade]}x
+            <Gauge size={14} style={{ marginRight: '5px' }} />
+            {formatarVelocidade(velocidade)}
           </Button>
 
           <Button
@@ -1222,6 +1762,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               setMostrarVozes(false)
               setMostrarAjustes(false)
               setMostrarTimer(false)
+              setMostrarVelocidade(false)
+              setMostrarOffline(false)
               setMostrarSumario((prev) => !prev)
             }}
             fontSize="xs"
@@ -1246,6 +1788,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               setMostrarSumario(false)
               setMostrarAjustes(false)
               setMostrarTimer(false)
+              setMostrarVelocidade(false)
+              setMostrarOffline(false)
               setMostrarVozes((prev) => !prev)
             }}
             fontSize="xs"
@@ -1273,6 +1817,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               setMostrarSumario(false)
               setMostrarVozes(false)
               setMostrarAjustes(false)
+              setMostrarVelocidade(false)
+              setMostrarOffline(false)
               setMostrarTimer((prev) => !prev)
             }}
             fontSize="xs"
@@ -1287,6 +1833,39 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
                 ? 'Fim da parte'
                 : null}
           </Button>
+
+          <IconButton
+            size="xs"
+            variant="ghost"
+            borderRadius="lg"
+            h="28px"
+            minW="28px"
+            color={
+              mostrarOffline || partesGuardadas > 0 ? 'cirqueira.brand.300' : 'cirqueira.grey.200'
+            }
+            bg={mostrarOffline ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900'}
+            border="1px solid"
+            borderColor={mostrarOffline ? 'cirqueira.brand.500/40' : 'cirqueira.grey.800'}
+            _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
+            onClick={() => {
+              setMostrarSumario(false)
+              setMostrarVozes(false)
+              setMostrarAjustes(false)
+              setMostrarTimer(false)
+              setMostrarVelocidade(false)
+              setMostrarOffline((prev) => !prev)
+            }}
+            aria-label="Ouvir offline"
+            title="Baixar partes para ouvir sem internet"
+          >
+            {offline.progresso ? (
+              <Box as="span" display="inline-flex" animation="spin 1s linear infinite">
+                <LoaderCircle size={14} />
+              </Box>
+            ) : (
+              <CloudDownload size={14} />
+            )}
+          </IconButton>
 
           <IconButton
             size="xs"
@@ -1309,6 +1888,8 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               setMostrarSumario(false)
               setMostrarVozes(false)
               setMostrarTimer(false)
+              setMostrarVelocidade(false)
+              setMostrarOffline(false)
               setMostrarAjustes((prev) => !prev)
             }}
             aria-label="Ajustes da narração"
@@ -1378,11 +1959,11 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               color="cirqueira.grey.300"
               _hover={{ color: 'white', bg: 'rgba(255, 255, 255, 0.08)' }}
               fontSize="xs"
-              title="Baixar PDF original"
+              title="Baixar o arquivo PDF original"
               display={{ base: 'none', xl: 'inline-flex' }}
             >
               <Download size={13} style={{ marginRight: '4px' }} />
-              Baixar
+              PDF
             </Button>
           </a>
 
@@ -1397,10 +1978,10 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
             border="1px solid"
             borderColor={isPosicaoSalva ? 'cirqueira.brand.500/35' : 'transparent'}
             _hover={{ color: 'white', bg: 'cirqueira.grey.800' }}
-            disabled={salvandoMarcador}
-            onClick={onSalvarMarcador}
+            disabled={salvandoMarcador || criarMarcacaoMutation.isPending}
+            onClick={marcarAqui}
             fontSize="xs"
-            title={isPosicaoSalva ? 'Marcador salvo nesta página' : 'Salvar marcador nesta página'}
+            title="Guardar um marcador no ponto que está sendo lido, ou nesta página"
           >
             {isPosicaoSalva ? (
               <BookmarkCheck size={14} style={{ marginRight: '4px' }} />
@@ -1408,7 +1989,7 @@ export const PlayerAudioLivro = memo(function PlayerAudioLivro({
               <Bookmark size={14} style={{ marginRight: '4px' }} />
             )}
             <Text as="span" display={{ base: 'none', sm: 'inline' }}>
-              {isPosicaoSalva ? 'Marcado' : 'Favoritar'}
+              Marcar
             </Text>
           </Button>
 
