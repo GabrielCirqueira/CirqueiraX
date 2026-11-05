@@ -11,6 +11,9 @@ parameters:
     env(SYNCTHING_API_KEY): ''
     env(YTDLP_COOKIES_PATH): ''
     env(PIPER_MODELOS_DIR): '/opt/piper/vozes'
+    env(SPOTIFY_CLIENT_ID): ''
+    env(SPOTIFY_CLIENT_SECRET): ''
+    env(SPOTIFY_REDIRECT_URI): 'http://127.0.0.1:4012/spotify/callback'
 
 services:
     # default configuration for services in *this* file
@@ -134,4 +137,26 @@ services:
             $client: '@guzzle.default'
             $apiUrl: '%env(SYNCTHING_API_URL)%'
             $apiKey: '%env(SYNCTHING_API_KEY)%'
+
+    App\Interface\SpotifyInterface: '@App\Infra\Spotify\SpotifyClient'
+    App\Interface\LeitorArquivoHistoricoSpotifyInterface: '@App\Infra\Spotify\LeitorArquivoHistoricoSpotify'
+    App\Interface\ArmazenamentoImportacaoSpotifyInterface: '@App\Infra\Spotify\ArmazenamentoImportacaoSpotifyClient'
+
+    App\Infra\Spotify\ArmazenamentoImportacaoSpotifyClient:
+        arguments:
+            $diretorioTemporario: '%kernel.project_dir%/var/tmp/spotify_importacoes'
+
+    guzzle.spotify:
+        class: GuzzleHttp\Client
+        arguments:
+            - { timeout: 15.0 }
+
+    App\Infra\Spotify\SpotifyClient:
+        arguments:
+            $client: '@guzzle.spotify'
+            $clientId: '%env(SPOTIFY_CLIENT_ID)%'
+            $clientSecret: '%env(SPOTIFY_CLIENT_SECRET)%'
+            $redirectUri: '%env(SPOTIFY_REDIRECT_URI)%'
+            $baseUrl: 'https://api.spotify.com/v1'
+
 
