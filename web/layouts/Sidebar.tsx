@@ -13,6 +13,7 @@ import {
   Moon,
   Music,
   PenLine,
+  Radio,
   Sun,
   UploadCloud,
   User,
@@ -28,6 +29,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/spotify', label: 'Spotify', icon: Radio },
   { href: '/central-midias', label: 'Central de Mídias', icon: Layers },
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
   { href: '/downloads-mp3', label: 'Downloads MP3', icon: Music },

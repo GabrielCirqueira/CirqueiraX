@@ -1,0 +1,1034 @@
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+import {
+  Avatar,
+  Box,
+  Button,
+  Center,
+  Dialog,
+  Drawer,
+  Flex,
+  HStack,
+  Heading,
+  Portal,
+  SimpleGrid,
+  Skeleton,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  BarChart3,
+  Calendar,
+  ChevronDown,
+  ChevronRight,
+  Download,
+  ExternalLink,
+  Flame,
+  Minus,
+  Music2,
+  Sparkles,
+  Users,
+  X,
+} from 'lucide-react'
+import { memo, useMemo, useState } from 'react'
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  useCapsulasSpotify,
+  useDetalheCapsulaSpotify,
+  useImagensSpotify,
+  useMesCapsulaUrl,
+} from '../hooks'
+import type { CapsulaMensal, ItemRankingArtistaCapsula, ItemRankingMusicaCapsula } from '../types'
+import {
+  baixarArquivoCsv,
+  exportarResumoCapsulaParaCsv,
+  formatarDataPtBr,
+  formatarMinutosParaHorasEMinutos,
+  formatarNomeMes,
+  formatarPercentualVariacao,
+  formatarRotuloMesAno,
+} from '../utils'
+
+export interface SecaoCapsulaSonoraProps {
+  conectada: boolean
+}
+
+export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
+  conectada,
+}: SecaoCapsulaSonoraProps) {
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+  const { data: mesesDisponiveis, isLoading: carregandoMeses } = useCapsulasSpotify(conectada)
+  const { anoSelecionado, mesSelecionado, selecionarMes } = useMesCapsulaUrl()
+
+  const [modalDetalhe, setModalDetalhe] = useState<'musicas' | 'artistas' | 'tempo' | null>(null)
+
+  const mesAtivo = useMemo(() => {
+    if (!mesesDisponiveis || mesesDisponiveis.length === 0) return null
+    if (anoSelecionado && mesSelecionado) {
+      const encontrado = mesesDisponiveis.find(
+        (m) => m.ano === anoSelecionado && m.mes === mesSelecionado
+      )
+      if (encontrado) return encontrado
+    }
+    return mesesDisponiveis[0]
+  }, [mesesDisponiveis, anoSelecionado, mesSelecionado])
+
+  const { data: capsula, isLoading: carregandoCapsula } = useDetalheCapsulaSpotify(
+    mesAtivo?.ano ?? null,
+    mesAtivo?.mes ?? null,
+    conectada && Boolean(mesAtivo)
+  )
+
+  const chavesFaltantes = useMemo(() => {
+    if (!capsula) return []
+    const chaves: string[] = []
+    capsula.topMusicas.forEach((m) => {
+      if (!m.imagemUrl) {
+        if (m.codigoFaixa) chaves.push(`faixa:${m.codigoFaixa}`)
+        else chaves.push(`faixa_busca:${m.artistaPrincipal}:${m.nomeFaixa}`)
+      }
+    })
+    capsula.topArtistas.forEach((a) => {
+      if (!a.imagemUrl) {
+        if (a.codigoArtista) chaves.push(`artista:${a.codigoArtista}`)
+        else chaves.push(`artista_busca:${a.nomeArtista}`)
+      }
+    })
+    return chaves
+  }, [capsula])
+
+  useImagensSpotify(chavesFaltantes)
+
+  function handleExportarCsv() {
+    if (!capsula) return
+    const csv = exportarResumoCapsulaParaCsv(capsula)
+    const nomeArquivo = `capsula-spotify-${capsula.ano}-${String(capsula.mes).padStart(2, '0')}.csv`
+    baixarArquivoCsv(csv, nomeArquivo)
+  }
+
+  if (carregandoMeses) {
+    return (
+      <VStack gap={4} align="stretch" w="full">
+        <Skeleton h="32px" w="260px" borderRadius="md" />
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
+          <Skeleton h="180px" borderRadius="8px" />
+          <Skeleton h="180px" borderRadius="8px" />
+          <Skeleton h="180px" borderRadius="8px" />
+          <Skeleton h="180px" borderRadius="8px" />
+        </SimpleGrid>
+      </VStack>
+    )
+  }
+
+  if (!mesesDisponiveis || mesesDisponiveis.length === 0) {
+    return (
+      <Box
+        p={8}
+        borderRadius="8px"
+        bg="cirqueira.spotify.cartao"
+        border="1px solid"
+        borderColor="cirqueira.spotify.cartaoElevado"
+        textAlign="center"
+      >
+        <VStack gap={2}>
+          <Heading as="h3" fontSize="md" fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
+            Nenhuma Cápsula Sonora encontrada
+          </Heading>
+          <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+            Importe seu histórico de reproduções ou aguarde a sincronização periódica para gerar sua
+            Cápsula.
+          </Text>
+        </VStack>
+      </Box>
+    )
+  }
+
+  return (
+    <VStack gap={5} align="stretch" w="full">
+      <Flex
+        direction={{ base: 'column', sm: 'row' }}
+        align={{ base: 'flex-start', sm: 'center' }}
+        justify="space-between"
+        gap={4}
+      >
+        <VStack align="flex-start" gap={0.5}>
+          <HStack gap={2} align="baseline">
+            <Heading
+              as="h2"
+              fontSize={{ base: 'xl', md: '2xl' }}
+              fontWeight="black"
+              color="cirqueira.spotify.textoPrincipal"
+            >
+              Sua Cápsula sonora
+            </Heading>
+            {mesAtivo && (
+              <HStack gap={1.5} align="baseline">
+                <Text
+                  as="span"
+                  fontSize={{ base: 'xl', md: '2xl' }}
+                  fontWeight="black"
+                  color="cirqueira.spotify.verde"
+                >
+                  {formatarNomeMes(mesAtivo.mes).toLowerCase()}
+                </Text>
+                <Text
+                  as="span"
+                  fontSize={{ base: 'lg', md: 'xl' }}
+                  fontWeight="normal"
+                  color="cirqueira.spotify.textoSecundario"
+                >
+                  {mesAtivo.ano}
+                </Text>
+              </HStack>
+            )}
+          </HStack>
+
+          {mesAtivo?.isEmAndamento && (
+            <HStack gap={1.5}>
+              <Box boxSize={2} borderRadius="full" bg="cirqueira.spotify.verde" />
+              <Text
+                fontSize="2xs"
+                color="cirqueira.spotify.verde"
+                fontWeight="bold"
+                textTransform="uppercase"
+              >
+                Mês em andamento
+              </Text>
+            </HStack>
+          )}
+        </VStack>
+
+        <HStack gap={3} wrap="wrap">
+          <Box position="relative">
+            <Box
+              as="select"
+              value={mesAtivo ? `${mesAtivo.ano}-${mesAtivo.mes}` : ''}
+              onChange={(e) => {
+                const [ano, mes] = e.target.value.split('-').map(Number)
+                selecionarMes(ano, mes)
+              }}
+              bg="cirqueira.spotify.cartaoElevado"
+              color="cirqueira.spotify.textoPrincipal"
+              fontSize="xs"
+              fontWeight="semibold"
+              py={2}
+              pl={3}
+              pr={8}
+              borderRadius="full"
+              border="1px solid"
+              borderColor="cirqueira.spotify.cartaoElevado"
+              cursor="pointer"
+              outline="none"
+              _hover={{ borderColor: 'cirqueira.spotify.textoSecundario' }}
+            >
+              {mesesDisponiveis.map((m) => (
+                <Box
+                  as="option"
+                  key={`${m.ano}-${m.mes}`}
+                  value={`${m.ano}-${m.mes}`}
+                  bg="#1F1F1F"
+                  color="#FFFFFF"
+                >
+                  {formatarRotuloMesAno(m.ano, m.mes)} {m.isEmAndamento ? '(em andamento)' : ''}
+                </Box>
+              ))}
+            </Box>
+            <Box
+              position="absolute"
+              right={3}
+              top="50%"
+              transform="translateY(-50%)"
+              pointerEvents="none"
+              color="cirqueira.spotify.textoSecundario"
+            >
+              <ChevronDown size={14} />
+            </Box>
+          </Box>
+
+          <Button
+            size="sm"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.spotify.cartaoElevado"
+            color="cirqueira.spotify.textoPrincipal"
+            _hover={{
+              bg: 'cirqueira.spotify.cartaoElevado',
+              borderColor: 'cirqueira.spotify.textoSecundario',
+            }}
+            onClick={handleExportarCsv}
+            disabled={!capsula}
+            h="36px"
+            px={3}
+          >
+            <HStack gap={1.5}>
+              <Download size={14} />
+              <Text as="span" fontSize="xs">
+                Exportar CSV
+              </Text>
+            </HStack>
+          </Button>
+        </HStack>
+      </Flex>
+
+      {carregandoCapsula || !capsula ? (
+        <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>
+          <Skeleton h="180px" borderRadius="8px" />
+          <Skeleton h="180px" borderRadius="8px" />
+          <Skeleton h="180px" borderRadius="8px" />
+          <Skeleton h="180px" borderRadius="8px" />
+        </SimpleGrid>
+      ) : (
+        <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>
+          <Box
+            p={5}
+            borderRadius="8px"
+            bg="cirqueira.spotify.cartao"
+            border="1px solid"
+            borderColor="cirqueira.spotify.cartaoElevado"
+            _hover={{
+              bg: 'cirqueira.spotify.cartaoElevado',
+              borderColor: 'cirqueira.spotify.verde',
+            }}
+            cursor="pointer"
+            onClick={() => setModalDetalhe('tempo')}
+            transition="all 0.15s ease"
+            position="relative"
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+          >
+            <VStack align="flex-start" gap={2}>
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
+                Tempo ouvindo
+              </Text>
+              <Text fontSize="2xl" fontWeight="black" color="cirqueira.spotify.verde">
+                {capsula.totalMinutos.toLocaleString('pt-BR')} minutos
+              </Text>
+              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                {formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} ouvidos em{' '}
+                {capsula.totalStreams} reproduções
+              </Text>
+            </VStack>
+
+            <HStack
+              justify="space-between"
+              align="center"
+              pt={4}
+              color="cirqueira.spotify.textoSecundario"
+              fontSize="xs"
+            >
+              <Text as="span">Ver gráfico diário</Text>
+              <ChevronRight size={16} />
+            </HStack>
+          </Box>
+
+          <Box
+            p={5}
+            borderRadius="8px"
+            bg="cirqueira.spotify.cartao"
+            border="1px solid"
+            borderColor="cirqueira.spotify.cartaoElevado"
+            _hover={{
+              bg: 'cirqueira.spotify.cartaoElevado',
+              borderColor: 'cirqueira.spotify.azul',
+            }}
+            cursor="pointer"
+            onClick={() => setModalDetalhe('artistas')}
+            transition="all 0.15s ease"
+            position="relative"
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+          >
+            <VStack align="flex-start" gap={3}>
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
+                Artista mais ouvido
+              </Text>
+
+              {capsula.artistaMaisOuvido ? (
+                <HStack gap={3} align="center">
+                  <Avatar.Root
+                    size="lg"
+                    shape="full"
+                    border="2px solid"
+                    borderColor="cirqueira.spotify.azul"
+                  >
+                    {capsula.artistaMaisOuvido.imagemUrl && (
+                      <Avatar.Image
+                        src={capsula.artistaMaisOuvido.imagemUrl}
+                        alt={capsula.artistaMaisOuvido.nomeArtista}
+                      />
+                    )}
+                    <Avatar.Fallback
+                      name={capsula.artistaMaisOuvido.nomeArtista}
+                      bg="cirqueira.spotify.cartaoElevado"
+                      color="cirqueira.spotify.azul"
+                    />
+                  </Avatar.Root>
+
+                  <VStack align="flex-start" gap={0.5}>
+                    <Text
+                      fontSize="lg"
+                      fontWeight="black"
+                      color="cirqueira.spotify.azul"
+                      truncate
+                      maxW="150px"
+                    >
+                      {capsula.artistaMaisOuvido.nomeArtista}
+                    </Text>
+                    <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                      {capsula.artistaMaisOuvido.totalStreams} reproduções
+                    </Text>
+                  </VStack>
+                </HStack>
+              ) : (
+                <Text fontSize="sm" color="cirqueira.spotify.textoSecundario">
+                  Nenhum artista registrado
+                </Text>
+              )}
+            </VStack>
+
+            <HStack
+              justify="space-between"
+              align="center"
+              pt={4}
+              color="cirqueira.spotify.textoSecundario"
+              fontSize="xs"
+            >
+              <Text as="span">Ver top artistas</Text>
+              <ChevronRight size={16} />
+            </HStack>
+          </Box>
+
+          <Box
+            p={5}
+            borderRadius="8px"
+            bg="cirqueira.spotify.cartao"
+            border="1px solid"
+            borderColor="cirqueira.spotify.cartaoElevado"
+            _hover={{
+              bg: 'cirqueira.spotify.cartaoElevado',
+              borderColor: 'cirqueira.spotify.amarelo',
+            }}
+            cursor="pointer"
+            onClick={() => setModalDetalhe('musicas')}
+            transition="all 0.15s ease"
+            position="relative"
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+          >
+            <VStack align="flex-start" gap={3}>
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
+                Música mais ouvida
+              </Text>
+
+              {capsula.musicaMaisOuvida ? (
+                <HStack gap={3} align="center">
+                  <Box
+                    boxSize={14}
+                    borderRadius="4px"
+                    overflow="hidden"
+                    bg="cirqueira.spotify.cartaoElevado"
+                    flexShrink={0}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {capsula.musicaMaisOuvida.imagemUrl ? (
+                      <Box
+                        as="img"
+                        src={capsula.musicaMaisOuvida.imagemUrl}
+                        alt={capsula.musicaMaisOuvida.nomeFaixa}
+                        w="full"
+                        h="full"
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Music2 size={24} color="var(--chakra-colors-cirqueira-spotify-amarelo)" />
+                    )}
+                  </Box>
+
+                  <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="bold"
+                      color="cirqueira.spotify.amarelo"
+                      truncate
+                      maxW="full"
+                    >
+                      {capsula.musicaMaisOuvida.nomeFaixa}
+                    </Text>
+                    <Text
+                      fontSize="xs"
+                      color="cirqueira.spotify.textoSecundario"
+                      truncate
+                      maxW="full"
+                    >
+                      {capsula.musicaMaisOuvida.artistaPrincipal}
+                    </Text>
+                    <Text fontSize="2xs" color="cirqueira.spotify.verde" fontWeight="bold">
+                      {capsula.musicaMaisOuvida.totalStreams} streams
+                    </Text>
+                  </VStack>
+                </HStack>
+              ) : (
+                <Text fontSize="sm" color="cirqueira.spotify.textoSecundario">
+                  Nenhuma música registrada
+                </Text>
+              )}
+            </VStack>
+
+            <HStack
+              justify="space-between"
+              align="center"
+              pt={4}
+              color="cirqueira.spotify.textoSecundario"
+              fontSize="xs"
+            >
+              <Text as="span">Ver ranking completo</Text>
+              <ChevronRight size={16} />
+            </HStack>
+          </Box>
+
+          <Box
+            p={5}
+            borderRadius="8px"
+            bg="cirqueira.spotify.cartao"
+            border="1px solid"
+            borderColor="cirqueira.spotify.cartaoElevado"
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+          >
+            <VStack align="flex-start" gap={2}>
+              <Text
+                fontSize="xs"
+                fontWeight="bold"
+                color="cirqueira.spotify.textoSecundario"
+                textTransform="uppercase"
+                letterSpacing="wider"
+              >
+                Variedade musical
+              </Text>
+              <Text fontSize="2xl" fontWeight="black" color="cirqueira.spotify.textoPrincipal">
+                {capsula.faixasDistintas.toLocaleString('pt-BR')} músicas
+              </Text>
+              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" lineHeight="tall">
+                Você explorou {capsula.faixasDistintas} faixas diferentes neste mês
+                {capsula.variacaoFaixasDistintasPercentual !== null && (
+                  <Text
+                    as="span"
+                    color={
+                      capsula.variacaoFaixasDistintasPercentual >= 0
+                        ? 'cirqueira.spotify.verde'
+                        : 'red.400'
+                    }
+                    fontWeight="bold"
+                    ml={1}
+                  >
+                    ({formatarPercentualVariacao(capsula.variacaoFaixasDistintasPercentual)})
+                  </Text>
+                )}
+              </Text>
+            </VStack>
+
+            <HStack gap={1} pt={3} wrap="wrap">
+              {capsula.topMusicas.slice(0, 4).map((m) => (
+                <Box
+                  key={m.nomeFaixa}
+                  boxSize={7}
+                  borderRadius="4px"
+                  overflow="hidden"
+                  bg="cirqueira.spotify.cartaoElevado"
+                >
+                  {m.imagemUrl ? (
+                    <Box
+                      as="img"
+                      src={m.imagemUrl}
+                      alt={m.nomeFaixa}
+                      w="full"
+                      h="full"
+                      objectFit="cover"
+                    />
+                  ) : (
+                    <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
+                      <Music2 size={12} />
+                    </Center>
+                  )}
+                </Box>
+              ))}
+            </HStack>
+          </Box>
+        </SimpleGrid>
+      )}
+
+      {modalDetalhe && capsula && (
+        <ModalDetalheCapsula
+          tipo={modalDetalhe}
+          capsula={capsula}
+          aberto={Boolean(modalDetalhe)}
+          onFechar={() => setModalDetalhe(null)}
+          isDesktop={isDesktop}
+        />
+      )}
+    </VStack>
+  )
+})
+
+interface ModalDetalheCapsulaProps {
+  tipo: 'musicas' | 'artistas' | 'tempo'
+  capsula: CapsulaMensal
+  aberto: boolean
+  onFechar: () => void
+  isDesktop: boolean
+}
+
+function ModalDetalheCapsula({
+  tipo,
+  capsula,
+  aberto,
+  onFechar,
+  isDesktop,
+}: ModalDetalheCapsulaProps) {
+  const titulo =
+    tipo === 'musicas'
+      ? 'Músicas Mais Ouvidas'
+      : tipo === 'artistas'
+        ? 'Artistas Mais Ouvidos'
+        : 'Tempo Ouvindo por Dia'
+
+  const subtitulo =
+    tipo === 'musicas'
+      ? `Você ouviu ${capsula.faixasDistintas.toLocaleString('pt-BR')} músicas diferentes este mês`
+      : tipo === 'artistas'
+        ? `${capsula.topArtistas.length} artistas no ranking principal`
+        : `Total de ${formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} distribuídos ao longo do mês`
+
+  const renderConteudo = () => (
+    <VStack gap={4} align="stretch" w="full">
+      {tipo === 'musicas' && (
+        <VStack gap={2} align="stretch">
+          {capsula.topMusicas.map((m) => (
+            <Flex
+              key={`${m.posicao}-${m.nomeFaixa}`}
+              align="center"
+              justify="space-between"
+              p={3}
+              borderRadius="8px"
+              bg="cirqueira.spotify.cartaoElevado"
+              gap={3}
+            >
+              <HStack gap={3} flex={1} minW={0} align="center">
+                <Center
+                  boxSize={8}
+                  borderRadius="md"
+                  fontWeight="bold"
+                  fontSize="sm"
+                  color="cirqueira.spotify.amarelo"
+                  flexShrink={0}
+                >
+                  {m.posicao}
+                </Center>
+
+                <Box
+                  boxSize={12}
+                  borderRadius="4px"
+                  overflow="hidden"
+                  bg="cirqueira.spotify.cartao"
+                  flexShrink={0}
+                >
+                  {m.imagemUrl ? (
+                    <Box
+                      as="img"
+                      src={m.imagemUrl}
+                      alt={m.nomeFaixa}
+                      w="full"
+                      h="full"
+                      objectFit="cover"
+                    />
+                  ) : (
+                    <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
+                      <Music2 size={20} />
+                    </Center>
+                  )}
+                </Box>
+
+                <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                  <HStack gap={2} maxW="full">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="bold"
+                      color="cirqueira.spotify.textoPrincipal"
+                      truncate
+                    >
+                      {m.nomeFaixa}
+                    </Text>
+                    {m.urlSpotify && (
+                      <Box
+                        as="a"
+                        href={m.urlSpotify}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="cirqueira.spotify.textoSecundario"
+                        _hover={{ color: 'cirqueira.spotify.verde' }}
+                        flexShrink={0}
+                      >
+                        <ExternalLink size={12} />
+                      </Box>
+                    )}
+                  </HStack>
+                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
+                    {m.artistaPrincipal} • {m.album}
+                  </Text>
+                </VStack>
+              </HStack>
+
+              <HStack gap={4} flexShrink={0}>
+                {m.movimento !== null && (
+                  <HStack gap={1} fontSize="xs">
+                    {m.movimento > 0 ? (
+                      <HStack gap={0.5} color="cirqueira.spotify.verde">
+                        <ArrowUp size={14} />
+                        <Text as="span">{m.movimento}</Text>
+                      </HStack>
+                    ) : m.movimento < 0 ? (
+                      <HStack gap={0.5} color="red.400">
+                        <ArrowDown size={14} />
+                        <Text as="span">{Math.abs(m.movimento)}</Text>
+                      </HStack>
+                    ) : (
+                      <Minus
+                        size={14}
+                        color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)"
+                      />
+                    )}
+                  </HStack>
+                )}
+
+                {m.isEstreia && (
+                  <Box
+                    px={1.5}
+                    py={0.5}
+                    borderRadius="md"
+                    bg="rgba(254, 228, 79, 0.15)"
+                    color="cirqueira.spotify.amarelo"
+                    fontSize="2xs"
+                    fontWeight="bold"
+                  >
+                    Estreia
+                  </Box>
+                )}
+
+                {m.mesesNoTop5 > 1 && (
+                  <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                    {m.mesesNoTop5} meses no top 5
+                  </Text>
+                )}
+
+                <VStack align="flex-end" gap={0}>
+                  <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.amarelo">
+                    {m.totalStreams} streams
+                  </Text>
+                  <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                    {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
+                  </Text>
+                </VStack>
+              </HStack>
+            </Flex>
+          ))}
+        </VStack>
+      )}
+
+      {tipo === 'artistas' && (
+        <VStack gap={2} align="stretch">
+          {capsula.topArtistas.map((a) => (
+            <Flex
+              key={`${a.posicao}-${a.nomeArtista}`}
+              align="center"
+              justify="space-between"
+              p={3}
+              borderRadius="8px"
+              bg="cirqueira.spotify.cartaoElevado"
+              gap={3}
+            >
+              <HStack gap={3} flex={1} minW={0} align="center">
+                <Center
+                  boxSize={8}
+                  borderRadius="md"
+                  fontWeight="bold"
+                  fontSize="sm"
+                  color="cirqueira.spotify.azul"
+                  flexShrink={0}
+                >
+                  {a.posicao}
+                </Center>
+
+                <Avatar.Root
+                  size="md"
+                  shape="full"
+                  border="1px solid"
+                  borderColor="cirqueira.spotify.azul"
+                >
+                  {a.imagemUrl && <Avatar.Image src={a.imagemUrl} alt={a.nomeArtista} />}
+                  <Avatar.Fallback
+                    name={a.nomeArtista}
+                    bg="cirqueira.spotify.cartao"
+                    color="cirqueira.spotify.azul"
+                  />
+                </Avatar.Root>
+
+                <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+                  <HStack gap={2} maxW="full">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="bold"
+                      color="cirqueira.spotify.textoPrincipal"
+                      truncate
+                    >
+                      {a.nomeArtista}
+                    </Text>
+                    {a.urlSpotify && (
+                      <Box
+                        as="a"
+                        href={a.urlSpotify}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        color="cirqueira.spotify.textoSecundario"
+                        _hover={{ color: 'cirqueira.spotify.verde' }}
+                        flexShrink={0}
+                      >
+                        <ExternalLink size={12} />
+                      </Box>
+                    )}
+                  </HStack>
+                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                    {a.totalStreams} reproduções
+                  </Text>
+                </VStack>
+              </HStack>
+
+              <HStack gap={3} flexShrink={0}>
+                {a.movimento !== null && (
+                  <HStack gap={1} fontSize="xs">
+                    {a.movimento > 0 ? (
+                      <HStack gap={0.5} color="cirqueira.spotify.verde">
+                        <ArrowUp size={14} />
+                        <Text as="span">{a.movimento}</Text>
+                      </HStack>
+                    ) : a.movimento < 0 ? (
+                      <HStack gap={0.5} color="red.400">
+                        <ArrowDown size={14} />
+                        <Text as="span">{Math.abs(a.movimento)}</Text>
+                      </HStack>
+                    ) : (
+                      <Minus
+                        size={14}
+                        color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)"
+                      />
+                    )}
+                  </HStack>
+                )}
+
+                {a.isEstreia && (
+                  <Box
+                    px={1.5}
+                    py={0.5}
+                    borderRadius="md"
+                    bg="rgba(83, 157, 245, 0.15)"
+                    color="cirqueira.spotify.azul"
+                    fontSize="2xs"
+                    fontWeight="bold"
+                  >
+                    Estreia
+                  </Box>
+                )}
+
+                <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+                  {formatarMinutosParaHorasEMinutos(a.totalMinutos)}
+                </Text>
+              </HStack>
+            </Flex>
+          ))}
+        </VStack>
+      )}
+
+      {tipo === 'tempo' && (
+        <VStack gap={4} align="stretch">
+          <Box h="280px" w="full" pt={4}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={capsula.minutosPorDia}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#252525" vertical={false} />
+                <XAxis dataKey="dia" stroke="#B3B3B3" fontSize={11} tickLine={false} />
+                <YAxis stroke="#B3B3B3" fontSize={11} tickLine={false} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null
+                    const dado = payload[0].payload
+                    return (
+                      <Box
+                        bg="#1F1F1F"
+                        border="1px solid #252525"
+                        p={2}
+                        borderRadius="6px"
+                        fontSize="xs"
+                      >
+                        <Text fontWeight="bold" color="#FFFFFF">
+                          Dia {dado.dia}
+                        </Text>
+                        <Text color="#1ED760">
+                          {formatarMinutosParaHorasEMinutos(dado.minutos)}
+                        </Text>
+                      </Box>
+                    )
+                  }}
+                />
+                <Bar dataKey="minutos" fill="#1ED760" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </Box>
+        </VStack>
+      )}
+    </VStack>
+  )
+
+  if (!isDesktop) {
+    return (
+      <Drawer.Root
+        open={aberto}
+        onOpenChange={(detalhes) => !detalhes.open && onFechar()}
+        placement="bottom"
+      >
+        <Portal>
+          <Drawer.Backdrop bg="rgba(0, 0, 0, 0.85)" backdropFilter="blur(4px)" />
+          <Drawer.Positioner>
+            <Drawer.Content
+              bg="cirqueira.spotify.cartao"
+              borderTop="1px solid"
+              borderColor="cirqueira.spotify.cartaoElevado"
+              borderTopRadius="16px"
+              p={5}
+              maxH="85vh"
+              overflowY="auto"
+              color="cirqueira.spotify.textoPrincipal"
+            >
+              <Drawer.Header
+                p={0}
+                mb={4}
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <VStack align="flex-start" gap={0.5}>
+                  <Drawer.Title fontSize="md" fontWeight="bold">
+                    {titulo}
+                  </Drawer.Title>
+                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                    {subtitulo}
+                  </Text>
+                </VStack>
+
+                <Drawer.CloseTrigger asChild>
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    borderRadius="full"
+                    color="cirqueira.spotify.textoSecundario"
+                    _hover={{
+                      color: 'cirqueira.spotify.textoPrincipal',
+                      bg: 'cirqueira.spotify.cartaoElevado',
+                    }}
+                    onClick={onFechar}
+                  >
+                    <X size={16} />
+                  </Button>
+                </Drawer.CloseTrigger>
+              </Drawer.Header>
+
+              <Drawer.Body p={0}>{renderConteudo()}</Drawer.Body>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
+    )
+  }
+
+  return (
+    <Dialog.Root open={aberto} onOpenChange={(detalhes) => !detalhes.open && onFechar()}>
+      <Portal>
+        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.85)" backdropFilter="blur(4px)" />
+        <Dialog.Positioner>
+          <Dialog.Content
+            bg="cirqueira.spotify.cartao"
+            border="1px solid"
+            borderColor="cirqueira.spotify.cartaoElevado"
+            borderRadius="8px"
+            p={6}
+            maxW="2xl"
+            w="full"
+            color="cirqueira.spotify.textoPrincipal"
+            boxShadow="0 20px 40px rgba(0, 0, 0, 0.7)"
+          >
+            <Dialog.Header
+              p={0}
+              mb={4}
+              display="flex"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <VStack align="flex-start" gap={0.5}>
+                <Dialog.Title fontSize="lg" fontWeight="bold">
+                  {titulo}
+                </Dialog.Title>
+                <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                  {subtitulo}
+                </Text>
+              </VStack>
+
+              <Dialog.CloseTrigger asChild>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  borderRadius="full"
+                  color="cirqueira.spotify.textoSecundario"
+                  _hover={{
+                    color: 'cirqueira.spotify.textoPrincipal',
+                    bg: 'cirqueira.spotify.cartaoElevado',
+                  }}
+                  onClick={onFechar}
+                >
+                  <X size={16} />
+                </Button>
+              </Dialog.CloseTrigger>
+            </Dialog.Header>
+
+            <Dialog.Body p={0}>{renderConteudo()}</Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+  )
+}
