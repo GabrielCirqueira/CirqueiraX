@@ -1,6 +1,7 @@
 import { useStatusGoogleFotos } from '@/features/google-fotos'
 import { Box, HStack, Text, VStack } from '@chakra-ui/react'
 import { memo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { ResumoDashboard, StatusSyncthing } from '../types'
 import {
   type TomMetrica,
@@ -27,6 +28,7 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
   resumo,
   totalCategorias = 0,
 }: StatusIntegracoesProps) {
+  const navigate = useNavigate()
   const { data: statusGoogleFotos } = useStatusGoogleFotos()
 
   const servicos = montarServicosIntegracao({
@@ -37,6 +39,7 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
     googleFotosEmail: statusGoogleFotos?.email ?? null,
     totalCategorias,
     tamanhoTotal: resumo?.tamanhoTotalFormatado ?? '0 B',
+    spotify: resumo?.spotify,
   })
 
   return (
@@ -52,6 +55,9 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
             borderBottomWidth="1px"
             borderColor="border.subtle"
             _last={{ borderBottomWidth: 0 }}
+            cursor={servico.rota ? 'pointer' : 'default'}
+            _hover={servico.rota ? { bg: 'bg.muted' } : undefined}
+            onClick={servico.rota ? () => navigate(servico.rota!) : undefined}
           >
             <VStack align="flex-start" gap={0.5} minW={0}>
               <Text fontSize="sm" color="fg">

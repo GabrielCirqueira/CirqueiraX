@@ -4,6 +4,7 @@ import type {
   MidiaRecenteDashboard,
   OrigemMedia,
   ResumoDashboard,
+  ResumoSpotifyDashboard,
   StatusMediaItem,
 } from '../types'
 
@@ -223,6 +224,7 @@ export interface LinhaServico {
   detalhe: string
   estado: string
   tom: TomMetrica
+  rota?: string
 }
 
 export interface EstadoServicos {
@@ -233,10 +235,11 @@ export interface EstadoServicos {
   googleFotosEmail: string | null
   totalCategorias: number
   tamanhoTotal: string
+  spotify?: ResumoSpotifyDashboard | null
 }
 
 export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[] {
-  return [
+  const servicos: LinhaServico[] = [
     {
       nome: 'Syncthing',
       detalhe: pluralizar(estado.totalPastas, 'pasta monitorada', 'pastas monitoradas'),
@@ -254,6 +257,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: estado.googleFotosEmail ?? 'Backup e álbuns na nuvem',
       estado: estado.googleFotosConectado ? 'Conectado' : 'Desconectado',
       tom: estado.googleFotosConectado ? 'sucesso' : 'erro',
+      rota: '/google-fotos',
     },
     {
       nome: 'Armazenamento',
@@ -262,6 +266,37 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       tom: 'neutro',
     },
   ]
+
+  const spotify = estado.spotify
+  if (spotify?.status === 'reconectar') {
+    servicos.push({
+      nome: 'Spotify',
+      detalhe: spotify.motivoErro ?? 'Autorização expirada. Clique para reconectar.',
+      estado: 'Reconectar',
+      tom: 'erro',
+      rota: '/spotify',
+    })
+  } else if (spotify?.conectado) {
+    servicos.push({
+      nome: 'Spotify',
+      detalhe: spotify.coletaParada
+        ? (spotify.ultimaColetaEm ? `Coleta atrasada · última ${tempoRelativoCurto(spotify.ultimaColetaEm)}` : 'Coleta atrasada')
+        : (spotify.nomeExibicao ? `${spotify.nomeExibicao} · última ${tempoRelativoCurto(spotify.ultimaColetaEm)}` : 'Histórico ativo'),
+      estado: spotify.coletaParada ? 'Atrasado' : 'Conectado',
+      tom: spotify.coletaParada ? 'alerta' : 'sucesso',
+      rota: '/spotify',
+    })
+  } else {
+    servicos.push({
+      nome: 'Spotify',
+      detalhe: 'Vincule sua conta para a Cápsula Sonora',
+      estado: 'Desconectado',
+      tom: 'neutro',
+      rota: '/spotify',
+    })
+  }
+
+  return servicos
 }
 
 export function filtrarCategorias(

@@ -442,16 +442,39 @@ const config = defineConfig({
       fonts: {
         heading: { value: 'Poppins, ui-sans-serif, system-ui, sans-serif' },
         body: { value: 'Lato, ui-sans-serif, system-ui, sans-serif' },
+        inter: { value: 'Inter, ui-sans-serif, system-ui, sans-serif' },
       },
       colors: {
         ${ns}: {
-${colors}
+${colors},
+          spotify: {
+            fundo: { value: '#121212' },
+            cartao: { value: '#1F1F1F' },
+            cartaoElevado: { value: '#252525' },
+            textoPrincipal: { value: '#FFFFFF' },
+            textoSecundario: { value: '#B3B3B3' },
+            textoDesabilitado: { value: '#6A6A6A' },
+            verde: { value: '#1ED760' },
+            azul: { value: '#539DF5' },
+            amarelo: { value: '#FEE44F' },
+          },
         },
       },
     },
     semanticTokens: {
       colors: {
-${semantics}
+${semantics},
+        spotify: {
+          fundo: { value: '{colors.${ns}.spotify.fundo}' },
+          cartao: { value: '{colors.${ns}.spotify.cartao}' },
+          cartaoElevado: { value: '{colors.${ns}.spotify.cartaoElevado}' },
+          textoPrincipal: { value: '{colors.${ns}.spotify.textoPrincipal}' },
+          textoSecundario: { value: '{colors.${ns}.spotify.textoSecundario}' },
+          textoDesabilitado: { value: '{colors.${ns}.spotify.textoDesabilitado}' },
+          verde: { value: '{colors.${ns}.spotify.verde}' },
+          azul: { value: '{colors.${ns}.spotify.azul}' },
+          amarelo: { value: '{colors.${ns}.spotify.amarelo}' },
+        },
       },
     },
   },

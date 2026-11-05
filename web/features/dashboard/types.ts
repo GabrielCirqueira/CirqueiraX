@@ -48,6 +48,16 @@ export interface MetricasVideosDashboard {
   espacoLiberadoFormatado: string
 }
 
+export interface ResumoSpotifyDashboard {
+  conectado: boolean
+  status: 'conectada' | 'reconectar' | 'desconectada'
+  nomeExibicao: string | null
+  conectadoEm: string | null
+  ultimaColetaEm: string | null
+  coletaParada: boolean
+  motivoErro: string | null
+}
+
 export interface ResumoDashboard {
   status?: Record<StatusMediaItem, number>
   porStatus?: Record<StatusMediaItem, number>
@@ -61,6 +71,7 @@ export interface ResumoDashboard {
   porOrigemEspaco?: Record<OrigemMedia, DetalheOrigemEspaco>
   ultimasMidias?: MidiaRecenteDashboard[]
   metricasVideos?: MetricasVideosDashboard
+  spotify?: ResumoSpotifyDashboard
 }
 
 export interface CategoriaMetrica {

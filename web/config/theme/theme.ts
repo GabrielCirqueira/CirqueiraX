@@ -12,6 +12,7 @@ const config = defineConfig({
       fonts: {
         heading: { value: 'Poppins, ui-sans-serif, system-ui, sans-serif' },
         body: { value: 'Lato, ui-sans-serif, system-ui, sans-serif' },
+        inter: { value: 'Inter, ui-sans-serif, system-ui, sans-serif' },
       },
       colors: {
         cirqueira: {
@@ -263,6 +264,17 @@ const config = defineConfig({
             800: { value: '#2d3667' },
             900: { value: '#1e2649' },
             950: { value: '#121833' },
+          },
+          spotify: {
+            fundo: { value: '#121212' },
+            cartao: { value: '#1F1F1F' },
+            cartaoElevado: { value: '#252525' },
+            textoPrincipal: { value: '#FFFFFF' },
+            textoSecundario: { value: '#B3B3B3' },
+            textoDesabilitado: { value: '#6A6A6A' },
+            verde: { value: '#1ED760' },
+            azul: { value: '#539DF5' },
+            amarelo: { value: '#FEE44F' },
           },
         },
       },
@@ -741,6 +753,17 @@ const config = defineConfig({
             },
           },
           focusRing: { value: '{colors.cirqueira.violet.500}' },
+        },
+        spotify: {
+          fundo: { value: '{colors.cirqueira.spotify.fundo}' },
+          cartao: { value: '{colors.cirqueira.spotify.cartao}' },
+          cartaoElevado: { value: '{colors.cirqueira.spotify.cartaoElevado}' },
+          textoPrincipal: { value: '{colors.cirqueira.spotify.textoPrincipal}' },
+          textoSecundario: { value: '{colors.cirqueira.spotify.textoSecundario}' },
+          textoDesabilitado: { value: '{colors.cirqueira.spotify.textoDesabilitado}' },
+          verde: { value: '{colors.cirqueira.spotify.verde}' },
+          azul: { value: '{colors.cirqueira.spotify.azul}' },
+          amarelo: { value: '{colors.cirqueira.spotify.amarelo}' },
         },
       },
     },
