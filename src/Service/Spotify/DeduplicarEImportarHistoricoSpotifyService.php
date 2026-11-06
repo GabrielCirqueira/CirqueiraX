@@ -21,6 +21,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
     public function __construct(
         private LeitorArquivoHistoricoSpotifyInterface $leitorArquivo,
         private ReproducaoSpotifyRepository $reproducaoRepository,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {}
 
     public function executar(string $caminhoArquivo, Usuario $usuario): ResultadoImportacaoHistoricoSpotifyDTO
@@ -114,6 +115,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
             }
 
             if (null !== $candidatoEncontrado) {
+                $candidatoEncontrado->registrarComportamento($item->pulada, $item->aleatorio);
                 if ($candidatoEncontrado->podeSerSubstituidaPor($item->fonte())) {
                     $candidatoEncontrado->atualizarDeImportacao(
                         msReproduzidos: $item->msReproduzidos(),
@@ -155,6 +157,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
                 tocadaEm: $item->tocadaEm(),
                 fonte: $item->fonte(),
             );
+            $novaReproducao->registrarComportamento($item->pulada, $item->aleatorio);
 
             $this->reproducaoRepository->salvar($novaReproducao, flush: false);
             $existentes[] = $novaReproducao;
@@ -164,5 +167,6 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
 
         $this->reproducaoRepository->flush();
         $this->reproducaoRepository->limparCache();
+        $this->cacheAnalise->invalidar($usuario);
     }
 }

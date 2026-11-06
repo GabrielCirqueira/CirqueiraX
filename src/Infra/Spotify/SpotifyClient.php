@@ -10,6 +10,7 @@ use App\DataObject\Spotify\FaixaSpotifyDTO;
 use App\DataObject\Spotify\ItemReproducaoRecenteDTO;
 use App\DataObject\Spotify\ListaReproducoesRecentesSpotifyDTO;
 use App\DataObject\Spotify\PerfilSpotifyDTO;
+use App\DataObject\Spotify\TocandoAgoraSpotifyDTO;
 use App\DataObject\Spotify\TokensSpotifyDTO;
 use App\Exception\Spotify\SpotifyException;
 use App\Infra\Client;
@@ -259,6 +260,70 @@ final class SpotifyClient extends Client implements SpotifyInterface
         $cursorAfterMs = isset($cursors['after']) && is_numeric($cursors['after']) ? (int) $cursors['after'] : null;
 
         return new ListaReproducoesRecentesSpotifyDTO($itensMapeados, $cursorAfterMs);
+    }
+
+    public function obterTocandoAgora(string $accessToken): TocandoAgoraSpotifyDTO
+    {
+        $dados = $this->executarComRetry(function () use ($accessToken) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'GET',
+                $this->resolverUrl('/me/player/currently-playing?additional_types=track,episode'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                    ],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+
+            return $resposta;
+        });
+
+        if ([] === $dados) {
+            return TocandoAgoraSpotifyDTO::nada();
+        }
+
+        $item = is_array($dados['item'] ?? null) ? $dados['item'] : null;
+        $tipo = $this->extrairString($dados['currently_playing_type'] ?? null, 'unknown');
+        $emReproducao = true === ($dados['is_playing'] ?? false);
+
+        if (null === $item) {
+            return new TocandoAgoraSpotifyDTO(false, $emReproducao, $tipo);
+        }
+
+        $codigo = $this->extrairString($item['id'] ?? null);
+        $artistasBrutos = is_array($item['artists'] ?? null) ? $item['artists'] : [];
+        $artistas = [];
+        $codigoArtista = null;
+
+        foreach ($artistasBrutos as $artista) {
+            if (is_array($artista) && is_string($artista['name'] ?? null)) {
+                $artistas[] = $artista['name'];
+                $codigoArtista ??= is_string($artista['id'] ?? null) ? $artista['id'] : null;
+            }
+        }
+
+        $album = is_array($item['album'] ?? null) ? $item['album'] : [];
+        $show = is_array($item['show'] ?? null) ? $item['show'] : [];
+        $imagens = $this->extrairTresImagens($album['images'] ?? ($item['images'] ?? []));
+
+        return new TocandoAgoraSpotifyDTO(
+            temItem: true,
+            emReproducao: $emReproducao,
+            tipo: $tipo,
+            codigoFaixa: '' === $codigo ? null : $codigo,
+            nome: $this->extrairString($item['name'] ?? null),
+            artistas: [] === $artistas && is_string($show['name'] ?? null) ? [$show['name']] : $artistas,
+            codigoArtista: $codigoArtista,
+            album: $this->extrairString($album['name'] ?? ($show['name'] ?? null)),
+            capaUrl: $imagens['grande'],
+            duracaoMs: $this->extrairInt($item['duration_ms'] ?? null),
+            progressoMs: $this->extrairInt($dados['progress_ms'] ?? null),
+            urlSpotify: $this->extrairUrlSpotify($item['external_urls'] ?? null, 'track', $codigo),
+        );
     }
 
     public function obterFaixa(string $accessToken, string $idFaixa): FaixaSpotifyDTO

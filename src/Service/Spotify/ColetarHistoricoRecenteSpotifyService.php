@@ -26,6 +26,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         private ObterTokenValidoSpotifyService $obterTokenValidoSpotifyService,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
         private EstimarTempoReproduzidoSpotifyService $estimarTempoReproduzidoService,
+        private CacheAnaliseSpotifyService $cacheAnalise,
         private LoggerInterface $logger,
     ) {
     }
@@ -161,6 +162,10 @@ final readonly class ColetarHistoricoRecenteSpotifyService
 
         $this->reproducaoSpotifyRepository->flush();
         $this->contaSpotifyRepository->flush();
+
+        if ($totalNovas > 0) {
+            $this->cacheAnalise->invalidar($conta->usuario());
+        }
 
         return new ResultadoColetaHistoricoSpotifyDTO(
             count($lista->itens),

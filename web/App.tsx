@@ -70,6 +70,14 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/google-fotos/GoogleFotos'))}
           />
           <Route
+            path="spotify/artista"
+            lazy={() => lazyWithRetry(() => import('@/features/spotify/DetalheArtistaSpotify'))}
+          />
+          <Route
+            path="spotify/musica"
+            lazy={() => lazyWithRetry(() => import('@/features/spotify/DetalheMusicaSpotify'))}
+          />
+          <Route
             path="spotify/callback"
             lazy={() =>
               lazyWithRetry(() => import('@/features/spotify/components/SpotifyCallback'))

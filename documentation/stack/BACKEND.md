@@ -154,6 +154,22 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `DELETE` | `/transcricoes/{uuid}` | Apaga a transcrição e o áudio |
 | `GET` | `/transcricoes/{uuid}/audio` | Áudio original (aceita `?token=`) |
 
+### Spotify: análises
+
+Períodos aceitos por `habitos` e `descobertas`: `periodo` = `todos`, `ano` (`ano`), `mes` (`ano`, `mes`), `dias` (`dias`) ou `intervalo`. Resultados ficam em cache por usuário (`CacheAnaliseSpotifyService`, tag `spotify_analise_{id}`), invalidado em coleta, importação e desconexão.
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/spotify/artistas/detalhe?artista=` | Detalhe do artista (404 sem reproduções) |
+| `GET` | `/spotify/musicas/detalhe?nome=&artista=` | Detalhe da música (404 sem reproduções) |
+| `GET` | `/spotify/habitos` | Mapa dia × hora, concentração, pulos e aleatório |
+| `GET` | `/spotify/recordes` | Sequências, recordes e totais de todos os tempos |
+| `GET` | `/spotify/evolucao?meses=` | Minutos e streams por mês (12, 24 ou 60) e comparação com o mesmo mês |
+| `GET` | `/spotify/descobertas` | Artistas e músicas novos, redescobertas e obsessões |
+| `GET` | `/spotify/retrospectiva/{ano}` | Resumo do ano |
+| `GET` | `/spotify/tocando-agora` | Faixa atual (sem cache) |
+| `GET` | `/spotify/ranking?tipo=todos` | Ranking de todos os tempos; a resposta traz também `topAlbuns` |
+
 ### Categorias e regras
 
 | Método | Rota | Descrição |

@@ -1,8 +1,20 @@
-import { Avatar, Box, Center, Collapsible, Flex, HStack, Text, VStack } from '@chakra-ui/react'
+import {
+  Avatar,
+  Box,
+  Center,
+  Collapsible,
+  Flex,
+  HStack,
+  Link,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { ChevronDown, ExternalLink, Music2 } from 'lucide-react'
 import { memo, useState } from 'react'
-import type { ItemRankingArtista, ItemRankingMusica } from '../types'
-import { formatarMinutosParaHorasEMinutos } from '../utils'
+import { Link as LinkRouter } from 'react-router-dom'
+import type { AlbumAnalise, ItemRankingArtista, ItemRankingMusica } from '../types'
+import { formatarMinutosParaHorasEMinutos, gerarRotaArtista, gerarRotaMusica } from '../utils'
+import { CapaSpotify } from './CapaSpotify'
 import { ListaTopMusicasArtista } from './ListaTopMusicasArtista'
 
 export interface ItemRankingFaixaProps {
@@ -64,14 +76,19 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
 
         <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
           <HStack gap={1.5} maxW="full">
-            <Text
+            <Link
+              asChild
               fontSize={{ base: 'xs', sm: 'sm' }}
               fontWeight="semibold"
               color="cirqueira.spotify.textoPrincipal"
               truncate
+              display="block"
+              _hover={{ textDecoration: 'underline' }}
             >
-              {item.nomeFaixa}
-            </Text>
+              <LinkRouter to={gerarRotaMusica(item.nomeFaixa, item.artistaPrincipal)}>
+                {item.nomeFaixa}
+              </LinkRouter>
+            </Link>
             {item.urlSpotify && (
               <Box
                 as="a"
@@ -198,14 +215,20 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
 
             <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
               <HStack gap={1.5} maxW="full">
-                <Text
+                <Link
+                  asChild
                   fontSize={{ base: 'xs', sm: 'sm' }}
                   fontWeight="semibold"
                   color="cirqueira.spotify.textoPrincipal"
                   truncate
+                  display="block"
+                  _hover={{ textDecoration: 'underline' }}
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  {item.nomeArtista}
-                </Text>
+                  <LinkRouter to={gerarRotaArtista(item.nomeArtista)}>
+                    {item.nomeArtista}
+                  </LinkRouter>
+                </Link>
                 {item.urlSpotify && (
                   <Box
                     as="a"
@@ -267,5 +290,80 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
         </Collapsible.Content>
       </Box>
     </Collapsible.Root>
+  )
+})
+
+export interface ItemRankingAlbumProps {
+  item: AlbumAnalise
+  posicao: number
+  imagemUrl: string | null
+}
+
+export const ItemRankingAlbum = memo(function ItemRankingAlbum({
+  item,
+  posicao,
+  imagemUrl,
+}: ItemRankingAlbumProps) {
+  return (
+    <Flex
+      align="center"
+      justify="space-between"
+      p={{ base: 2, sm: 3 }}
+      borderRadius="8px"
+      bg="cirqueira.spotify.cartao"
+      border="1px solid"
+      borderColor="cirqueira.spotify.cartaoElevado"
+      _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
+      transition="background-color 0.15s ease"
+      gap={{ base: 2, sm: 3 }}
+      w="full"
+      minW={0}
+    >
+      <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
+        <Center
+          boxSize={{ base: 6, sm: 8 }}
+          fontWeight="bold"
+          fontSize={{ base: 'xs', sm: 'sm' }}
+          color="cirqueira.spotify.verde"
+          flexShrink={0}
+        >
+          {posicao}
+        </Center>
+        <CapaSpotify url={imagemUrl} alt={item.album} tipo="album" boxSize={{ base: 10, sm: 12 }} />
+        <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+          <Text
+            fontSize={{ base: 'xs', sm: 'sm' }}
+            fontWeight="semibold"
+            color="cirqueira.spotify.textoPrincipal"
+            truncate
+            maxW="full"
+          >
+            {item.album}
+          </Text>
+          <Link
+            asChild
+            fontSize="2xs"
+            color="cirqueira.spotify.textoSecundario"
+            truncate
+            display="block"
+            maxW="full"
+            _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
+          >
+            <LinkRouter to={gerarRotaArtista(item.artista)}>
+              {item.artista} • {item.faixasDistintas}{' '}
+              {item.faixasDistintas === 1 ? 'faixa' : 'faixas'}
+            </LinkRouter>
+          </Link>
+        </VStack>
+      </HStack>
+      <VStack align="flex-end" gap={0} flexShrink={0}>
+        <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="bold" color="cirqueira.spotify.verde">
+          {formatarMinutosParaHorasEMinutos(item.minutos)}
+        </Text>
+        <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+          {item.streams} {item.streams === 1 ? 'stream' : 'streams'}
+        </Text>
+      </VStack>
+    </Flex>
   )
 })

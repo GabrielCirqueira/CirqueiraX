@@ -3,6 +3,7 @@ import { useSEO } from '@/shared/hooks'
 import { Box, Container, VStack } from '@chakra-ui/react'
 import { memo, useMemo, useState } from 'react'
 import {
+  CartaoTocandoAgora,
   EsqueletoPaginaSpotify,
   EstadoVazioSpotify,
   ModalUploadHistoricoSpotify,
@@ -10,7 +11,12 @@ import {
   RodapeSpotify,
   SecaoCapsulaSonora,
   SecaoCuriosidades,
+  SecaoDescobertas,
+  SecaoEvolucaoMensal,
+  SecaoHabitos,
   SecaoHojeSemana,
+  SecaoRecordes,
+  SecaoRetrospectiva,
   TemaSpotify,
 } from './components'
 import { useImagensSpotify, useResumoSpotify, useStatusSpotify } from './hooks'
@@ -76,15 +82,27 @@ export function Spotify() {
               />
             ) : (
               <>
+                <CartaoTocandoAgora conectada={conectada} />
+
                 <SecaoHojeSemana
                   resumo={resumo}
                   mapaImagens={mapaImagensResumo}
                   carregando={carregandoResumo}
                 />
 
+                <SecaoRecordes habilitado={conectada || temDados} />
+
+                <SecaoEvolucaoMensal habilitado={conectada || temDados} />
+
+                <SecaoHabitos habilitado={conectada || temDados} />
+
+                <SecaoDescobertas habilitado={conectada || temDados} />
+
                 <SecaoCuriosidades curiosidades={resumo?.curiosidades} />
 
                 <SecaoCapsulaSonora conectada={conectada || temDados} />
+
+                <SecaoRetrospectiva habilitado={conectada || temDados} />
               </>
             )}
 

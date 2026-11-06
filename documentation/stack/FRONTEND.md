@@ -80,6 +80,8 @@ web/
 | `/livros-audio/:uuid` | Leitor de Livro em Áudio | Protegida |
 | `/spotify` | Spotify & Cápsula Sonora | Protegida |
 | `/transcricoes` | Transcrições de Áudio | Protegida |
+| `/spotify/artista?nome=` | Detalhe de artista do Spotify | Protegida |
+| `/spotify/musica?nome=&artista=` | Detalhe de música do Spotify | Protegida |
 | `/spotify/callback` | Retorno OAuth do Spotify | Protegida |
 | `*` | NotFound | Pública |
 

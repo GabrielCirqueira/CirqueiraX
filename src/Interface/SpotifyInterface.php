@@ -9,6 +9,7 @@ use App\DataObject\Spotify\BuscaFaixasSpotifyDTO;
 use App\DataObject\Spotify\FaixaSpotifyDTO;
 use App\DataObject\Spotify\ListaReproducoesRecentesSpotifyDTO;
 use App\DataObject\Spotify\PerfilSpotifyDTO;
+use App\DataObject\Spotify\TocandoAgoraSpotifyDTO;
 use App\DataObject\Spotify\TokensSpotifyDTO;
 
 interface SpotifyInterface
@@ -27,6 +28,8 @@ interface SpotifyInterface
     public function buscarPerfil(string $accessToken): PerfilSpotifyDTO;
 
     public function listarReproducoesRecentes(string $accessToken, ?int $depoisDe = null, int $limite = 50): ListaReproducoesRecentesSpotifyDTO;
+
+    public function obterTocandoAgora(string $accessToken): TocandoAgoraSpotifyDTO;
 
     public function obterFaixa(string $accessToken, string $idFaixa): FaixaSpotifyDTO;
 

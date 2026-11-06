@@ -5,14 +5,27 @@ import {
   type CapsulaMensal,
   CapsulaMensalSchema,
   type ConcluirAutorizacaoSpotifyPayload,
+  type DescobertasSpotify,
+  DescobertasSpotifySchema,
   type DesconectarSpotify,
   DesconectarSpotifySchema,
+  type DetalheArtista,
+  DetalheArtistaSchema,
+  type DetalheMusica,
+  DetalheMusicaSchema,
+  type EvolucaoMensal,
+  EvolucaoMensalSchema,
+  type FiltroPeriodoAnalise,
+  type HabitosSpotify,
+  HabitosSpotifySchema,
   type ImportacaoSpotify,
   ImportacaoSpotifySchema,
   type ItemTopMusicaArtista,
   ItemTopMusicaArtistaSchema,
   type RankingIntervalo,
   RankingIntervaloSchema,
+  type RecordesSpotify,
+  RecordesSpotifySchema,
   type RespostaConsultaImagens,
   RespostaConsultaImagensSchema,
   type ResultadoSincronizacaoSpotify,
@@ -21,8 +34,12 @@ import {
   ResumoGeralSpotifySchema,
   type ResumoMesCapsula,
   ResumoMesCapsulaSchema,
+  type RetrospectivaAnual,
+  RetrospectivaAnualSchema,
   type StatusContaSpotify,
   StatusContaSpotifySchema,
+  type TocandoAgora,
+  TocandoAgoraSchema,
   type UrlAutorizacaoSpotify,
   UrlAutorizacaoSpotifySchema,
 } from './types'
@@ -109,7 +126,7 @@ export async function obterTopMusicasArtista(
 }
 
 export interface FiltroIntervaloRankingParams {
-  tipo: 'dias' | 'mes' | 'ano' | 'personalizado'
+  tipo: 'dias' | 'mes' | 'ano' | 'personalizado' | 'todos'
   dias?: number
   ano?: number
   mes?: number
@@ -135,4 +152,59 @@ export async function obterRankingIntervaloSpotify(
     params: queryParams,
   })
   return RankingIntervaloSchema.parse(data.data)
+}
+
+export async function obterDetalheArtistaSpotify(artista: string): Promise<DetalheArtista> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/artistas/detalhe', {
+    params: { artista },
+  })
+  return DetalheArtistaSchema.parse(data.data)
+}
+
+export async function obterDetalheMusicaSpotify(
+  nome: string,
+  artista: string
+): Promise<DetalheMusica> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/musicas/detalhe', {
+    params: { nome, artista },
+  })
+  return DetalheMusicaSchema.parse(data.data)
+}
+
+export async function obterHabitosSpotify(filtro: FiltroPeriodoAnalise): Promise<HabitosSpotify> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/habitos', {
+    params: filtro,
+  })
+  return HabitosSpotifySchema.parse(data.data)
+}
+
+export async function obterRecordesSpotify(): Promise<RecordesSpotify> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/recordes')
+  return RecordesSpotifySchema.parse(data.data)
+}
+
+export async function obterEvolucaoMensalSpotify(meses: number): Promise<EvolucaoMensal> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/evolucao', {
+    params: { meses },
+  })
+  return EvolucaoMensalSchema.parse(data.data)
+}
+
+export async function obterDescobertasSpotify(
+  filtro: FiltroPeriodoAnalise
+): Promise<DescobertasSpotify> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/descobertas', {
+    params: filtro,
+  })
+  return DescobertasSpotifySchema.parse(data.data)
+}
+
+export async function obterRetrospectivaSpotify(ano: number): Promise<RetrospectivaAnual> {
+  const { data } = await api.get<RespostaApi<unknown>>(`/api/v1/spotify/retrospectiva/${ano}`)
+  return RetrospectivaAnualSchema.parse(data.data)
+}
+
+export async function obterTocandoAgoraSpotify(): Promise<TocandoAgora> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/tocando-agora')
+  return { ...TocandoAgoraSchema.parse(data.data), consultadoEm: Date.now() }
 }

@@ -94,6 +94,8 @@ Transforma vídeos em música para você ouvir ou baixar.
 
 Conecte sua conta do Spotify e reviva a antiga **Cápsula Sonora** com o resumo de cada mês: minutos ouvidos, músicas e artistas mais tocados, variedade musical comparada com o mês anterior e histórico diário. Acompanhe também o resumo de hoje e dos últimos 7 dias com curiosidades musicais e exportação em planilha CSV.
 
+A página também mostra a música tocando agora, recordes e sequências de dias, a evolução mês a mês, o mapa de horários, a concentração do gosto, taxa de pulos e de aleatório, descobertas, redescobertas e obsessões, rankings de todos os tempos com álbuns e o resumo do ano. Cada artista e música tem página própria, e a Cápsula do mês pode virar uma imagem para compartilhar.
+
 ### Livros em Áudio
 
 Transforma seus livros em formato PDF em audiolivros interativos com narração por voz neural no idioma do livro (português, inglês, espanhol, francês, italiano ou alemão).

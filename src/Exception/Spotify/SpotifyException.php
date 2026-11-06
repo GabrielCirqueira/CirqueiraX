@@ -127,4 +127,14 @@ final class SpotifyException extends \DomainException
     {
         return new self('Ocorreu uma falha ao salvar o arquivo de importação no armazenamento temporário.', 500);
     }
+
+    public static function artistaSemReproducoes(string $artista): self
+    {
+        return new self(sprintf('Nenhuma reprodução de "%s" foi encontrada no seu histórico.', $artista), 404);
+    }
+
+    public static function musicaSemReproducoes(string $musica): self
+    {
+        return new self(sprintf('Nenhuma reprodução de "%s" foi encontrada no seu histórico.', $musica), 404);
+    }
 }

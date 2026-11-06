@@ -19,7 +19,9 @@ import {
   Calendar,
   CalendarDays,
   ChevronRight,
+  Disc3,
   Filter,
+  Infinity as IconeInfinito,
   Music2,
   SlidersHorizontal,
   Users,
@@ -27,8 +29,14 @@ import {
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import type { FiltroIntervaloRankingParams } from '../api'
-import { useCapsulasSpotify, useImagensSpotify, useRankingIntervaloSpotify } from '../hooks'
+import {
+  useCapsulasSpotify,
+  useImagensItensSpotify,
+  useImagensSpotify,
+  useRankingIntervaloSpotify,
+} from '../hooks'
 import type {
+  AlbumAnalise,
   ItemRankingArtista,
   ItemRankingMusica,
   RespostaConsultaImagens,
@@ -40,7 +48,7 @@ import {
   gerarChaveArtista,
   gerarChaveFaixa,
 } from '../utils'
-import { ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingSpotify'
+import { ItemRankingAlbum, ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingSpotify'
 
 export interface SecaoHojeSemanaProps {
   resumo?: ResumoGeralSpotify
@@ -48,7 +56,17 @@ export interface SecaoHojeSemanaProps {
   mapaImagens?: RespostaConsultaImagens
 }
 
-type TipoFiltroSecao = 'dias' | 'mes' | 'ano' | 'personalizado'
+type TipoFiltroSecao = 'dias' | 'mes' | 'ano' | 'todos' | 'personalizado'
+
+type AbaRanking = 'musicas' | 'artistas' | 'albuns'
+
+const TITULOS_ABA: Record<AbaRanking, string> = {
+  musicas: 'Músicas Mais Ouvidas',
+  artistas: 'Artistas Mais Ouvidos',
+  albuns: 'Álbuns Mais Ouvidos',
+}
+
+const SEM_ALBUNS: AlbumAnalise[] = []
 
 const OPCOES_DIAS = [
   { rotulo: 'Hoje', dias: 1 },
@@ -91,7 +109,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
     return new Date().toISOString().slice(0, 10)
   })
 
-  const [aba, setAba] = useState<'musicas' | 'artistas'>('musicas')
+  const [aba, setAba] = useState<AbaRanking>('musicas')
   const [modalRankingAberto, setModalRankingAberto] = useState(false)
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
@@ -118,6 +136,9 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
     }
     if (tipoFiltro === 'ano') {
       return { tipo: 'ano', ano: anoSelecionado, limite: 50 }
+    }
+    if (tipoFiltro === 'todos') {
+      return { tipo: 'todos', limite: 50 }
     }
     return {
       tipo: 'personalizado',
@@ -194,6 +215,9 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
 
   const { data: mapaImagensRanking } = useImagensSpotify(chavesFaltantesRanking)
 
+  const topAlbuns = dadosRankingRemoto?.topAlbuns ?? SEM_ALBUNS
+  const imagemAlbum = useImagensItensSpotify(topAlbuns)
+
   const mapaImagensCompleto = useMemo(() => {
     return {
       ...(mapaImagens ?? {}),
@@ -231,7 +255,16 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
         ? `${NOMES_MESES.find((m) => m.valor === mesSelecionado)?.rotulo} de ${anoSelecionado}`
         : tipoFiltro === 'ano'
           ? `Ano de ${anoSelecionado}`
-          : 'Personalizado')
+          : tipoFiltro === 'todos'
+            ? 'Desde sempre'
+            : 'Personalizado')
+
+  const totalAba =
+    aba === 'musicas'
+      ? topMusicas.length
+      : aba === 'artistas'
+        ? topArtistas.length
+        : topAlbuns.length
 
   return (
     <VStack gap={4} align="stretch" w="full" maxW="100%">
@@ -337,6 +370,29 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 <HStack gap={1.5}>
                   <CalendarDays size={13} />
                   <Text as="span">Ano</Text>
+                </HStack>
+              </Button>
+
+              <Button
+                size="xs"
+                borderRadius="full"
+                px={{ base: 3, sm: 3.5 }}
+                h={{ base: '28px', sm: '32px' }}
+                fontSize="xs"
+                fontWeight="bold"
+                bg={tipoFiltro === 'todos' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
+                color={
+                  tipoFiltro === 'todos'
+                    ? 'cirqueira.spotify.verde'
+                    : 'cirqueira.spotify.textoSecundario'
+                }
+                _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
+                onClick={() => setTipoFiltro('todos')}
+                flexShrink={0}
+              >
+                <HStack gap={1.5}>
+                  <IconeInfinito size={13} />
+                  <Text as="span">Sempre</Text>
                 </HStack>
               </Button>
 
@@ -607,7 +663,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 textTransform="uppercase"
                 letterSpacing="wider"
               >
-                {aba === 'musicas' ? 'Músicas Mais Ouvidas' : 'Artistas Mais Ouvidos'}
+                {TITULOS_ABA[aba]}
               </Heading>
               <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" truncate maxW="full">
                 Exibindo ranking de {rotuloAtivo}
@@ -662,6 +718,24 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   <Text as="span">Artistas</Text>
                 </HStack>
               </Button>
+              <Button
+                size="xs"
+                borderRadius="full"
+                px={3}
+                flex={{ base: 1, sm: 'initial' }}
+                fontSize="2xs"
+                fontWeight="semibold"
+                bg={aba === 'albuns' ? 'cirqueira.spotify.cartao' : 'transparent'}
+                color={
+                  aba === 'albuns' ? 'cirqueira.spotify.verde' : 'cirqueira.spotify.textoSecundario'
+                }
+                onClick={() => setAba('albuns')}
+              >
+                <HStack gap={1.5} justify="center">
+                  <Disc3 size={12} />
+                  <Text as="span">Álbuns</Text>
+                </HStack>
+              </Button>
             </HStack>
           </Flex>
 
@@ -699,6 +773,30 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 })}
               </VStack>
             )
+          ) : aba === 'albuns' ? (
+            topAlbuns.length === 0 ? (
+              <Box
+                py={8}
+                textAlign="center"
+                color="cirqueira.spotify.textoSecundario"
+                fontSize="xs"
+              >
+                {dadosRankingRemoto
+                  ? `Nenhum álbum registrado para o período selecionado (${rotuloAtivo}).`
+                  : 'Carregando álbuns...'}
+              </Box>
+            ) : (
+              <VStack gap={2} align="stretch">
+                {topAlbuns.slice(0, 5).map((album, indice) => (
+                  <ItemRankingAlbum
+                    key={`${album.album}-${album.artista}`}
+                    item={album}
+                    posicao={indice + 1}
+                    imagemUrl={imagemAlbum(album)}
+                  />
+                ))}
+              </VStack>
+            )
           ) : topArtistas.length === 0 ? (
             <Box py={8} textAlign="center" color="cirqueira.spotify.textoSecundario" fontSize="xs">
               Nenhum artista registrado para o período selecionado ({rotuloAtivo}).
@@ -720,8 +818,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             </VStack>
           )}
 
-          {((aba === 'musicas' && topMusicas.length > 0) ||
-            (aba === 'artistas' && topArtistas.length > 0)) && (
+          {totalAba > 0 && (
             <Button
               variant="ghost"
               size="sm"
@@ -739,9 +836,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               onClick={() => setModalRankingAberto(true)}
             >
               <Text as="span" fontSize="xs" fontWeight="semibold">
-                {aba === 'musicas'
-                  ? `Ver ranking completo (Top ${Math.min(topMusicas.length, 50)} músicas)`
-                  : `Ver ranking completo (Top ${Math.min(topArtistas.length, 50)} artistas)`}
+                {`Ver ranking completo (Top ${Math.min(totalAba, 50)} ${aba === 'musicas' ? 'músicas' : aba === 'artistas' ? 'artistas' : 'álbuns'})`}
               </Text>
               <ChevronRight size={16} />
             </Button>
@@ -759,6 +854,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
           mes={tipoFiltro === 'mes' ? mesSelecionado : null}
           topMusicas={topMusicas}
           topArtistas={topArtistas}
+          topAlbuns={topAlbuns}
+          imagemAlbum={imagemAlbum}
           mapaImagens={mapaImagensCompleto}
           isDesktop={isDesktop}
         />
@@ -770,12 +867,14 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
 interface ModalRankingHojeSemanaProps {
   aberto: boolean
   onFechar: () => void
-  tipo: 'musicas' | 'artistas'
+  tipo: AbaRanking
   rotuloPeriodo: string
   ano?: number | null
   mes?: number | null
   topMusicas: ItemRankingMusica[]
   topArtistas: ItemRankingArtista[]
+  topAlbuns: AlbumAnalise[]
+  imagemAlbum: (item: AlbumAnalise) => string | null
   mapaImagens?: RespostaConsultaImagens
   isDesktop: boolean
 }
@@ -789,12 +888,19 @@ function ModalRankingHojeSemana({
   mes,
   topMusicas,
   topArtistas,
+  topAlbuns,
+  imagemAlbum,
   mapaImagens,
   isDesktop,
 }: ModalRankingHojeSemanaProps) {
-  const titulo = tipo === 'musicas' ? 'Top 50 Músicas Mais Ouvidas' : 'Top 50 Artistas Mais Ouvidos'
+  const titulo = `Top 50 ${TITULOS_ABA[tipo]}`
 
-  const total = tipo === 'musicas' ? topMusicas.length : topArtistas.length
+  const total =
+    tipo === 'musicas'
+      ? topMusicas.length
+      : tipo === 'artistas'
+        ? topArtistas.length
+        : topAlbuns.length
   const subtitulo = `${rotuloPeriodo} • Mostrando ${Math.min(total, 50)} no ranking`
 
   const renderConteudo = () => (
@@ -806,33 +912,45 @@ function ModalRankingHojeSemana({
       overflowY={isDesktop ? 'auto' : 'visible'}
       pr={1}
     >
-      {tipo === 'musicas'
-        ? topMusicas.slice(0, 50).map((musica) => {
-            const chave = gerarChaveFaixa(
-              musica.codigoFaixa,
-              musica.artistaPrincipal,
-              musica.nomeFaixa
-            )
-            return (
-              <ItemRankingFaixa
-                key={`${musica.posicao}-${musica.nomeFaixa}-${musica.artistaPrincipal}`}
-                item={musica}
-                imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
-              />
-            )
-          })
-        : topArtistas.slice(0, 50).map((artista) => {
-            const chave = gerarChaveArtista(artista.codigoArtista, artista.nomeArtista)
-            return (
-              <ItemRankingArtistaLinha
-                key={`${artista.posicao}-${artista.nomeArtista}`}
-                item={artista}
-                ano={ano}
-                mes={mes}
-                imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
-              />
-            )
-          })}
+      {tipo === 'albuns' &&
+        topAlbuns
+          .slice(0, 50)
+          .map((album, indice) => (
+            <ItemRankingAlbum
+              key={`${album.album}-${album.artista}`}
+              item={album}
+              posicao={indice + 1}
+              imagemUrl={imagemAlbum(album)}
+            />
+          ))}
+      {tipo === 'musicas' &&
+        topMusicas.slice(0, 50).map((musica) => {
+          const chave = gerarChaveFaixa(
+            musica.codigoFaixa,
+            musica.artistaPrincipal,
+            musica.nomeFaixa
+          )
+          return (
+            <ItemRankingFaixa
+              key={`${musica.posicao}-${musica.nomeFaixa}-${musica.artistaPrincipal}`}
+              item={musica}
+              imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
+            />
+          )
+        })}
+      {tipo === 'artistas' &&
+        topArtistas.slice(0, 50).map((artista) => {
+          const chave = gerarChaveArtista(artista.codigoArtista, artista.nomeArtista)
+          return (
+            <ItemRankingArtistaLinha
+              key={`${artista.posicao}-${artista.nomeArtista}`}
+              item={artista}
+              ano={ano}
+              mes={mes}
+              imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
+            />
+          )
+        })}
     </VStack>
   )
 

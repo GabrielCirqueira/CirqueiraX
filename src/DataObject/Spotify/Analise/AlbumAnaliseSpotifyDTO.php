@@ -1,0 +1,92 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\DataObject\Spotify\Analise;
+
+use App\DataObject\Spotify\MapaImagensSpotifyDTO;
+use App\Entity\ImagemSpotify;
+
+final readonly class AlbumAnaliseSpotifyDTO
+{
+    public function __construct(
+        public string $album,
+        public string $artista,
+        public int $streams,
+        public int $minutos,
+        public int $faixasDistintas,
+        public string $faixaReferencia,
+        public ?string $codigoFaixaReferencia,
+        public ?string $imagemUrl = null,
+        public ?string $urlSpotify = null,
+    ) {}
+
+    /**
+     * @param array<string, mixed> $linha
+     */
+    public static function daLinha(array $linha): self
+    {
+        $codigo = is_string($linha['codigo_faixa'] ?? null) && '' !== trim($linha['codigo_faixa']) ? trim($linha['codigo_faixa']) : null;
+
+        return new self(
+            (string) $linha['album'],
+            (string) $linha['artista'],
+            (int) ($linha['total_streams'] ?? 0),
+            (int) round(((int) ($linha['total_ms'] ?? 0)) / 60000),
+            (int) ($linha['faixas_distintas'] ?? 0),
+            (string) $linha['nome_faixa'],
+            $codigo,
+        );
+    }
+
+    public function chaveImagem(): string
+    {
+        return ImagemSpotify::gerarChaveFaixa($this->codigoFaixaReferencia, $this->artista, $this->faixaReferencia);
+    }
+
+    /**
+     * @return array{codigo: ?string, nome: string, artista: string}
+     */
+    public function paraEnriquecimento(): array
+    {
+        return ['codigo' => $this->codigoFaixaReferencia, 'nome' => $this->faixaReferencia, 'artista' => $this->artista];
+    }
+
+    public function comImagem(MapaImagensSpotifyDTO $mapa): self
+    {
+        $chave = $this->chaveImagem();
+
+        return new self(
+            $this->album,
+            $this->artista,
+            $this->streams,
+            $this->minutos,
+            $this->faixasDistintas,
+            $this->faixaReferencia,
+            $this->codigoFaixaReferencia,
+            $mapa->obterImagem($chave),
+            $mapa->obterUrlSpotify(
+                $chave,
+                ImagemSpotify::gerarUrlSpotifyFaixa($this->codigoFaixaReferencia, $this->artista, $this->faixaReferencia),
+            ),
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function paraArray(): array
+    {
+        return [
+            'album' => $this->album,
+            'artista' => $this->artista,
+            'streams' => $this->streams,
+            'minutos' => $this->minutos,
+            'faixasDistintas' => $this->faixasDistintas,
+            'faixaReferencia' => $this->faixaReferencia,
+            'codigoFaixaReferencia' => $this->codigoFaixaReferencia,
+            'imagemUrl' => $this->imagemUrl,
+            'urlSpotify' => $this->urlSpotify,
+        ];
+    }
+}
