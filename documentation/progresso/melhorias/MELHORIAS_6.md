@@ -521,3 +521,23 @@
   - `src/Repository/ReproducaoSpotifyRepository.php` (`buscarUltimaTocadaAntesDe`)
   - `migrations/Version20261106120000.php` (novo)
   - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### 🟡 Melhoria 116 — Página de Transcrição de Áudios
+
+- **Status**: Publicado, falta validar
+- **Data**: 06 de novembro de 2026
+- **Objetivo**:
+  - Enviar vários áudios de uma vez e ver cada um sendo transcrito em tempo real, com o texto salvo na conta e o áudio apagado 7 dias depois.
+- **Solução**:
+  - Nova página `/transcricoes` (menu "Transcrições"): envio múltiplo com arrastar e soltar, fila com progresso e tempo restante, texto aparecendo ao vivo, toasts de conclusão, estatísticas da conta, busca no texto, filtros e favoritas.
+  - Painel da transcrição: player sincronizado com destaque do trecho falado, trechos clicáveis, visão em trechos ou texto corrido, procurar no texto, copiar, exportar `.txt`, `.md`, `.srt` e `.vtt`, renomear, transcrever de novo em outro idioma e apagar.
+  - Motor local `whisper.cpp` (modelo `ggml-small-q5_1`) compilado na imagem de produção; nada sai do servidor. Fila Messenger própria (`transcricao`, 1 worker).
+  - Rotina horária apaga os áudios com mais de 7 dias e marca como erro transcrições presas há mais de 6 h. O texto fica no banco.
+  - `bootstrap.sh` passa a ajustar o dono de `var/` antes do cache warmup, o que corrige o reinício do container no primeiro boot depois de migrations.
+- **Arquivos**:
+  - Backend: `src/Entity/Transcricao.php`, `src/Repository/TranscricaoRepository.php`, `src/Controller/Transcricao/`, `src/Service/Transcricao/`, `src/DataObject/Transcricao/`, `src/Exception/Transcricao/`, `src/Enum/StatusTranscricao.php`, `src/Enum/IdiomaTranscricao.php`, `src/Enum/FiltroListagemTranscricao.php`, `src/Interface/TranscritorAudioInterface.php`, `src/Interface/ArmazenamentoTranscricaoInterface.php`, `src/Infra/Transcricao/`, `src/Infra/Storage/ArmazenamentoTranscricaoClient.php`, `src/Message/TranscreverAudioMessage.php`, `src/Message/ExpirarAudiosTranscricaoMessage.php`, `src/MessageHandler/` (2 novos), `src/Serializer/TranscricaoSerializer.php`, `src/Schedule.php`, `migrations/Version20261106213627.php`
+  - Config e infra: `config/services.yaml`, `config/packages/messenger.yaml`, `devops/php/Dockerfile.prod`, `devops/docker-compose.prod.yaml`, `devops/php/supervisord-prod.conf`, `devops/supervisord.conf`, `devops/bootstrap.sh`
+  - Frontend: `web/features/transcricoes/`, `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
+  - Documentação: `documentation/funcionalidades/TRANSCRICOES.md` (novo)

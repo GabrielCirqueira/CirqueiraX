@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Service\Spotify;
 
+use DateTimeImmutable;
+
 final readonly class EstimarTempoReproduzidoSpotifyService
 {
     public function estimar(
         int $duracaoMs,
-        ?\DateTimeImmutable $fimReproducaoAnterior,
-        \DateTimeImmutable $fimReproducaoAtual,
+        ?DateTimeImmutable $fimReproducaoAnterior,
+        DateTimeImmutable $fimReproducaoAtual,
     ): int {
         if ($duracaoMs <= 0) {
             return 0;

@@ -56,6 +56,8 @@ ClassificarMediaItemService ◄─┘
 | `EnviarGoogleFotosMessage` | Classificação, retentativa, reenvio | Envia ou reaproveita a mídia no álbum |
 | `BaixarAudioMessage` | `POST /api/v1/audios` | Gera o MP3 |
 | `GerarAudioBlocoMessage` | Processamento de Livro | Sintetiza voz neural Edge TTS e grava em `var/livros/{uuid}/blocos/{numero}.mp3` |
+| `TranscreverAudioMessage` | `POST /api/v1/transcricoes` e reprocessar | Transcreve com whisper.cpp na fila `transcricao` (1 worker), gravando progresso e trechos parciais |
+| `ExpirarAudiosTranscricaoMessage` | Scheduler (1 hora) | Apaga áudios de transcrição com mais de 7 dias e encerra transcrições presas |
 | `SincronizarHistoricoSpotifyMessage` | Scheduler (30 min) | Coleta últimas 50 faixas via API do Spotify |
 | `ImportarHistoricoSpotifyMessage` | Upload de arquivo | Processa assincronamente arquivo ZIP ou JSON de histórico do Spotify |
 | `BuscarImagemSpotifyMessage` | Visualização / enriquecimento | Busca capa ou foto de artista na API do Spotify em segundo plano |
@@ -74,6 +76,7 @@ ClassificarMediaItemService ◄─┘
 RecurringMessage::every('30 minutes', new SincronizarHistoricoSpotifyMessage()),
 RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7)),
 RecurringMessage::every('1 day', new ExpirarAudiosAntigosMessage()),
+RecurringMessage::every('1 hour', new ExpirarAudiosTranscricaoMessage()),
 ```
 
 O schedule é `stateful` e usa `processOnlyLastMissedRun(true)`. Veja [RETENCAO_E_LIMPEZA.md](../funcionalidades/RETENCAO_E_LIMPEZA.md).

@@ -131,3 +131,4 @@
 | M113 | Spotify Funcionando em Produção | 🟡 Publicado, falta validar | 05/11/2026 | [ver](MELHORIAS_6.md#melhoria-113--spotify-funcionando-em-produção) |
 | M114 | Foto de Artistas Mais Ouvidos e Top 5 Músicas com Animação Expansível no Spotify | ✅ Concluído | 05/11/2026 | [ver](MELHORIAS_6.md#melhoria-114--foto-de-artistas-mais-ouvidos-e-top-5-músicas-com-animação-expansível-no-spotify) |
 | M115 | Minutos Reais nas Músicas Coletadas pela API do Spotify | 🟡 Publicado, falta validar | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-115--minutos-reais-nas-músicas-coletadas-pela-api-do-spotify) |
+| M116 | Página de Transcrição de Áudios | 🟡 Publicado, falta validar | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-116--página-de-transcrição-de-áudios) |

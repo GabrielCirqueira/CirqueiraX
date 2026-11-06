@@ -34,6 +34,21 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 RUN npm run build
 
+# --- Whisper builder: compila o whisper.cpp e baixa o modelo de transcrição ---
+FROM php:8.4-fpm-alpine AS whisper-builder
+
+ARG WHISPER_VERSAO=v1.7.6
+ARG WHISPER_MODELO=ggml-small-q5_1.bin
+
+RUN apk add --no-cache build-base cmake git curl \
+    && git clone --depth 1 --branch "${WHISPER_VERSAO}" https://github.com/ggml-org/whisper.cpp /src/whisper \
+    && cmake -S /src/whisper -B /src/whisper/build -DBUILD_SHARED_LIBS=OFF -DWHISPER_BUILD_TESTS=OFF \
+         -DWHISPER_BUILD_SERVER=OFF -DGGML_NATIVE=ON -DCMAKE_BUILD_TYPE=Release \
+    && cmake --build /src/whisper/build -j"$(nproc)" --target whisper-cli \
+    && mkdir -p /opt/whisper/modelos \
+    && cp /src/whisper/build/bin/whisper-cli /opt/whisper/whisper-cli \
+    && curl -fsSL -o "/opt/whisper/modelos/${WHISPER_MODELO}" "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/${WHISPER_MODELO}"
+
 # --- Imagem final de produção ---
 FROM php:8.4-fpm-alpine
 
@@ -64,6 +79,9 @@ RUN apk add --no-cache py3-onnxruntime espeak-ng \
          || exit 1; \
        done \
     && python3 -c "from piper import espeakbridge"
+
+RUN apk add --no-cache libstdc++ libgomp
+COPY --from=whisper-builder /opt/whisper /opt/whisper
 
 WORKDIR /var/www/html
 

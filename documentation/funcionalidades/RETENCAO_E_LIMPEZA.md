@@ -36,6 +36,10 @@ A rotina também apaga de `var/downloads` arquivos de vídeo (`mp4`, `mkv`, `web
 
 `ExpirarAudiosAntigosMessage` remove MP3 com mais de 7 dias e marca os registros como `expirado`. A mesma rotina transforma em `erro` os áudios presos há mais de 1 hora. Veja [DOWNLOADS_AUDIO.md](DOWNLOADS_AUDIO.md).
 
+### Áudios das transcrições
+
+`ExpirarAudiosTranscricaoMessage` apaga de `var/transcricoes/` os áudios enviados há mais de 7 dias e marca `audioExpiradoEm`. O texto e os trechos continuam no banco. A mesma rotina marca como `erro` as transcrições presas em `transcrevendo` há mais de 6 horas. Veja [TRANSCRICOES.md](TRANSCRICOES.md).
+
 ---
 
 ## 3. Quando as rotinas rodam
@@ -46,6 +50,7 @@ O agendamento de produção é o Symfony Scheduler, em `src/Schedule.php`, consu
 | :--- | :--- |
 | `LimparVideosAntigosMessage(7)` | A cada 1 dia |
 | `ExpirarAudiosAntigosMessage` | A cada 1 dia |
+| `ExpirarAudiosTranscricaoMessage` | A cada 1 hora |
 
 O schedule é `stateful` e usa `processOnlyLastMissedRun(true)`: depois de um período parado, executa apenas uma vez a rodada perdida.
 

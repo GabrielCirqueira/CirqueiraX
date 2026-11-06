@@ -141,6 +141,19 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `PUT` | `/livros-audio/meta` | Altera a meta diária |
 | `GET` | `/livros-audio/disco` | Espaço livre e nível do alerta |
 
+### Transcrições
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/transcricoes` | Lista paginada (`busca`, `filtro`, `pagina`, `limite`) |
+| `GET` | `/transcricoes/resumo` | Números da conta e previsão da fila |
+| `POST` | `/transcricoes` | Envia um áudio (multipart `arquivo`, `idioma`) |
+| `GET` | `/transcricoes/{uuid}` | Detalhe com texto e trechos |
+| `PATCH` | `/transcricoes/{uuid}` | Renomeia e favorita |
+| `POST` | `/transcricoes/{uuid}/reprocessar` | Transcreve de novo (`idioma` opcional) |
+| `DELETE` | `/transcricoes/{uuid}` | Apaga a transcrição e o áudio |
+| `GET` | `/transcricoes/{uuid}/audio` | Áudio original (aceita `?token=`) |
+
 ### Categorias e regras
 
 | Método | Rota | Descrição |

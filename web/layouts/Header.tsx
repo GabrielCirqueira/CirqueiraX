@@ -16,6 +16,7 @@ function getTituloRota(pathname: string): string {
     return 'Central de Mídias'
   if (pathname.startsWith('/downloads-mp3')) return 'Downloads MP3'
   if (pathname.startsWith('/livros-audio')) return 'Livros em Áudio'
+  if (pathname.startsWith('/transcricoes')) return 'Transcrições'
   if (pathname.startsWith('/downloads')) return 'Downloads de Vídeo'
   if (pathname.startsWith('/prints')) return 'Prints & Capturas'
   if (pathname.startsWith('/editor-imagem')) return 'Editor de Imagem'

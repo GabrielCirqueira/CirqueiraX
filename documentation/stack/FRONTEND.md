@@ -48,6 +48,7 @@ web/
 │   ├── not-found/
 │   ├── prints/
 │   ├── spotify/
+│   ├── transcricoes/
 │   └── upload-manual/
 ├── layouts/                MainLayout, AuthLayout, AppContainer, Sidebar, Header e Footer
 ├── pages/                  Pontos de entrada de DownloadsVideo e UploadManual
@@ -78,10 +79,11 @@ web/
 | `/livros-audio` | Livros em Áudio | Protegida |
 | `/livros-audio/:uuid` | Leitor de Livro em Áudio | Protegida |
 | `/spotify` | Spotify & Cápsula Sonora | Protegida |
+| `/transcricoes` | Transcrições de Áudio | Protegida |
 | `/spotify/callback` | Retorno OAuth do Spotify | Protegida |
 | `*` | NotFound | Pública |
 
-A Sidebar leva às nove telas principais e tem a troca de tema e o logout. `MainLayout` abre `ModalAuth` quando necessário.
+A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainLayout` abre `ModalAuth` quando necessário.
 
 ---
 
@@ -94,6 +96,7 @@ A Sidebar leva às nove telas principais e tem a troca de tema e o logout. `Main
 | `downloads-video` | [DOWNLOADS_VIDEOS.md](../funcionalidades/DOWNLOADS_VIDEOS.md) |
 | `downloads-audio` | [DOWNLOADS_AUDIO.md](../funcionalidades/DOWNLOADS_AUDIO.md) |
 | `livros-audio` | [LIVROS_AUDIO.md](../funcionalidades/LIVROS_AUDIO.md) |
+| `transcricoes` | [TRANSCRICOES.md](../funcionalidades/TRANSCRICOES.md) |
 | `prints` | [PRINTS.md](../funcionalidades/PRINTS.md) |
 | `editor-imagem` | [EDITOR_IMAGEM.md](../funcionalidades/EDITOR_IMAGEM.md) |
 | `upload-manual` | [UPLOAD_MANUAL.md](../funcionalidades/UPLOAD_MANUAL.md) |

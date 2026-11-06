@@ -2,6 +2,7 @@ import { useTheme } from '@/contexts'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Badge, Box, Center, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
+  AudioLines,
   BookOpen,
   Camera,
   Code2,
@@ -34,6 +35,7 @@ const navItems = [
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
   { href: '/downloads-mp3', label: 'Downloads MP3', icon: Music },
   { href: '/livros-audio', label: 'Livros em Áudio', icon: BookOpen },
+  { href: '/transcricoes', label: 'Transcrições', icon: AudioLines },
   { href: '/prints', label: 'Prints & Capturas', icon: Camera },
   { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine },
   { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud },
