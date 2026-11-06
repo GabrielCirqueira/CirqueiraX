@@ -22,21 +22,23 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
     <Flex
       align="center"
       justify="space-between"
-      p={3}
+      p={{ base: 2, sm: 3 }}
       borderRadius="8px"
       bg="cirqueira.spotify.cartao"
       border="1px solid"
       borderColor="cirqueira.spotify.cartaoElevado"
       _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
       transition="background-color 0.15s ease"
-      gap={3}
+      gap={{ base: 2, sm: 3 }}
+      w="full"
+      minW={0}
     >
-      <HStack gap={3} flex={1} minW={0} align="center">
+      <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
         <Center
-          boxSize={8}
+          boxSize={{ base: 6, sm: 8 }}
           borderRadius="md"
           fontWeight="bold"
-          fontSize="sm"
+          fontSize={{ base: 'xs', sm: 'sm' }}
           color={corPosicao}
           flexShrink={0}
         >
@@ -44,7 +46,7 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
         </Center>
 
         <Box
-          boxSize={12}
+          boxSize={{ base: 10, sm: 12 }}
           borderRadius="4px"
           overflow="hidden"
           bg="cirqueira.spotify.cartaoElevado"
@@ -56,14 +58,14 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
           {foto ? (
             <Box as="img" src={foto} alt={item.nomeFaixa} w="full" h="full" objectFit="cover" />
           ) : (
-            <Music2 size={20} color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)" />
+            <Music2 size={16} color="var(--chakra-colors-cirqueira-spotify-textoDesabilitado)" />
           )}
         </Box>
 
         <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-          <HStack gap={2} maxW="full">
+          <HStack gap={1.5} maxW="full">
             <Text
-              fontSize="sm"
+              fontSize={{ base: 'xs', sm: 'sm' }}
               fontWeight="semibold"
               color="cirqueira.spotify.textoPrincipal"
               truncate
@@ -79,19 +81,21 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
                 color="cirqueira.spotify.textoSecundario"
                 _hover={{ color: 'cirqueira.spotify.verde' }}
                 flexShrink={0}
+                display="inline-flex"
+                alignItems="center"
               >
                 <ExternalLink size={12} />
               </Box>
             )}
           </HStack>
-          <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
+          <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" truncate maxW="full">
             {item.artistaPrincipal} • {item.album}
           </Text>
         </VStack>
       </HStack>
 
       <VStack align="flex-end" gap={0} flexShrink={0}>
-        <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+        <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="bold" color="cirqueira.spotify.verde">
           {formatarMinutosParaHorasEMinutos(item.totalMinutos)}
         </Text>
         <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
@@ -131,22 +135,26 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
         borderColor={expandido ? 'cirqueira.spotify.azul' : 'cirqueira.spotify.cartaoElevado'}
         transition="border-color 0.15s ease, background-color 0.15s ease"
         overflow="hidden"
+        w="full"
+        minW={0}
       >
         <Flex
           align="center"
           justify="space-between"
-          p={3}
+          p={{ base: 2, sm: 3 }}
           cursor="pointer"
           _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
           onClick={() => setExpandido((prev) => !prev)}
-          gap={3}
+          gap={{ base: 2, sm: 3 }}
+          w="full"
+          minW={0}
         >
-          <HStack gap={3} flex={1} minW={0} align="center">
+          <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
             <Center
-              boxSize={8}
+              boxSize={{ base: 6, sm: 8 }}
               borderRadius="md"
               fontWeight="bold"
-              fontSize="sm"
+              fontSize={{ base: 'xs', sm: 'sm' }}
               color={corPosicao}
               flexShrink={0}
             >
@@ -154,7 +162,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
             </Center>
 
             <Box
-              boxSize={10}
+              boxSize={{ base: 9, sm: 10 }}
               borderRadius="full"
               overflow="hidden"
               flexShrink={0}
@@ -189,9 +197,9 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
             </Box>
 
             <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-              <HStack gap={2} maxW="full">
+              <HStack gap={1.5} maxW="full">
                 <Text
-                  fontSize="sm"
+                  fontSize={{ base: 'xs', sm: 'sm' }}
                   fontWeight="semibold"
                   color="cirqueira.spotify.textoPrincipal"
                   truncate
@@ -208,20 +216,26 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                     _hover={{ color: 'cirqueira.spotify.verde' }}
                     flexShrink={0}
                     onClick={(e) => e.stopPropagation()}
+                    display="inline-flex"
+                    alignItems="center"
                   >
                     <ExternalLink size={12} />
                   </Box>
                 )}
               </HStack>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
                 {item.totalStreams} reproduções
               </Text>
             </VStack>
           </HStack>
 
-          <HStack gap={2} flexShrink={0} align="center">
+          <HStack gap={{ base: 1.5, sm: 2 }} flexShrink={0} align="center">
             <VStack align="flex-end" gap={0}>
-              <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+              <Text
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="bold"
+                color="cirqueira.spotify.verde"
+              >
                 {formatarMinutosParaHorasEMinutos(item.totalMinutos)}
               </Text>
             </VStack>
@@ -237,8 +251,8 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
 
         <Collapsible.Content>
           <Box
-            px={3}
-            pb={3}
+            px={{ base: 2, sm: 3 }}
+            pb={{ base: 2, sm: 3 }}
             pt={1}
             borderTop="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"

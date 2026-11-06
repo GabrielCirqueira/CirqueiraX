@@ -234,136 +234,162 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
           : 'Personalizado')
 
   return (
-    <VStack gap={4} align="stretch" w="full">
-      <VStack gap={3} align="stretch" w="full">
+    <VStack gap={4} align="stretch" w="full" maxW="100%">
+      <VStack gap={2.5} align="stretch" w="full" maxW="100%">
         <Flex
           direction={{ base: 'column', md: 'row' }}
           justify="space-between"
           align={{ base: 'stretch', md: 'center' }}
-          gap={3}
-          wrap="wrap"
+          gap={2.5}
+          w="full"
+          maxW="100%"
         >
-          <HStack
-            gap={1}
-            bg="cirqueira.spotify.cartao"
-            p={1}
-            borderRadius="full"
-            border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+          <Box
+            w={{ base: 'full', md: 'auto' }}
+            maxW="100%"
             overflowX="auto"
-            maxW="full"
+            py={0.5}
+            css={{
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+              WebkitOverflowScrolling: 'touch',
+            }}
           >
-            {OPCOES_DIAS.map((opcao) => {
-              const ativo = tipoFiltro === 'dias' && diasSelecionados === opcao.dias
-              return (
-                <Button
-                  key={opcao.rotulo}
-                  size="sm"
-                  borderRadius="full"
-                  px={3.5}
-                  h="32px"
-                  fontSize="xs"
-                  fontWeight="bold"
-                  bg={ativo ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
-                  color={
-                    ativo ? 'cirqueira.spotify.textoPrincipal' : 'cirqueira.spotify.textoSecundario'
-                  }
-                  _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
-                  onClick={() => {
-                    setTipoFiltro('dias')
-                    setDiasSelecionados(opcao.dias)
-                  }}
-                  flexShrink={0}
-                >
-                  {opcao.rotulo}
-                </Button>
-              )
-            })}
-
-            <Button
-              size="sm"
+            <HStack
+              gap={1}
+              bg="cirqueira.spotify.cartao"
+              p={1}
               borderRadius="full"
-              px={3.5}
-              h="32px"
-              fontSize="xs"
-              fontWeight="bold"
-              bg={tipoFiltro === 'mes' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
-              color={
-                tipoFiltro === 'mes'
-                  ? 'cirqueira.spotify.verde'
-                  : 'cirqueira.spotify.textoSecundario'
-              }
-              _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
-              onClick={() => setTipoFiltro('mes')}
-              flexShrink={0}
+              border="1px solid"
+              borderColor="cirqueira.spotify.cartaoElevado"
+              w="max-content"
+              minW="min-content"
             >
-              <HStack gap={1.5}>
-                <Calendar size={13} />
-                <Text as="span">Mês</Text>
-              </HStack>
-            </Button>
+              {OPCOES_DIAS.map((opcao) => {
+                const ativo = tipoFiltro === 'dias' && diasSelecionados === opcao.dias
+                return (
+                  <Button
+                    key={opcao.rotulo}
+                    size="xs"
+                    borderRadius="full"
+                    px={{ base: 3, sm: 3.5 }}
+                    h={{ base: '28px', sm: '32px' }}
+                    fontSize="xs"
+                    fontWeight="bold"
+                    bg={ativo ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
+                    color={
+                      ativo
+                        ? 'cirqueira.spotify.textoPrincipal'
+                        : 'cirqueira.spotify.textoSecundario'
+                    }
+                    _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
+                    onClick={() => {
+                      setTipoFiltro('dias')
+                      setDiasSelecionados(opcao.dias)
+                    }}
+                    flexShrink={0}
+                  >
+                    {opcao.rotulo}
+                  </Button>
+                )
+              })}
 
-            <Button
-              size="sm"
-              borderRadius="full"
-              px={3.5}
-              h="32px"
-              fontSize="xs"
-              fontWeight="bold"
-              bg={tipoFiltro === 'ano' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
-              color={
-                tipoFiltro === 'ano'
-                  ? 'cirqueira.spotify.amarelo'
-                  : 'cirqueira.spotify.textoSecundario'
-              }
-              _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
-              onClick={() => setTipoFiltro('ano')}
-              flexShrink={0}
-            >
-              <HStack gap={1.5}>
-                <CalendarDays size={13} />
-                <Text as="span">Ano</Text>
-              </HStack>
-            </Button>
+              <Button
+                size="xs"
+                borderRadius="full"
+                px={{ base: 3, sm: 3.5 }}
+                h={{ base: '28px', sm: '32px' }}
+                fontSize="xs"
+                fontWeight="bold"
+                bg={tipoFiltro === 'mes' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
+                color={
+                  tipoFiltro === 'mes'
+                    ? 'cirqueira.spotify.verde'
+                    : 'cirqueira.spotify.textoSecundario'
+                }
+                _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
+                onClick={() => setTipoFiltro('mes')}
+                flexShrink={0}
+              >
+                <HStack gap={1.5}>
+                  <Calendar size={13} />
+                  <Text as="span">Mês</Text>
+                </HStack>
+              </Button>
 
-            <Button
-              size="sm"
-              borderRadius="full"
-              px={3.5}
-              h="32px"
-              fontSize="xs"
-              fontWeight="bold"
-              bg={
-                tipoFiltro === 'personalizado' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'
-              }
-              color={
-                tipoFiltro === 'personalizado'
-                  ? 'cirqueira.spotify.azul'
-                  : 'cirqueira.spotify.textoSecundario'
-              }
-              _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
-              onClick={() => setTipoFiltro('personalizado')}
-              flexShrink={0}
-            >
-              <HStack gap={1.5}>
-                <SlidersHorizontal size={13} />
-                <Text as="span">Personalizado</Text>
-              </HStack>
-            </Button>
-          </HStack>
+              <Button
+                size="xs"
+                borderRadius="full"
+                px={{ base: 3, sm: 3.5 }}
+                h={{ base: '28px', sm: '32px' }}
+                fontSize="xs"
+                fontWeight="bold"
+                bg={tipoFiltro === 'ano' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'}
+                color={
+                  tipoFiltro === 'ano'
+                    ? 'cirqueira.spotify.amarelo'
+                    : 'cirqueira.spotify.textoSecundario'
+                }
+                _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
+                onClick={() => setTipoFiltro('ano')}
+                flexShrink={0}
+              >
+                <HStack gap={1.5}>
+                  <CalendarDays size={13} />
+                  <Text as="span">Ano</Text>
+                </HStack>
+              </Button>
 
-          <HStack gap={4} justify={{ base: 'space-between', md: 'flex-end' }}>
-            <HStack gap={1.5}>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+              <Button
+                size="xs"
+                borderRadius="full"
+                px={{ base: 3, sm: 3.5 }}
+                h={{ base: '28px', sm: '32px' }}
+                fontSize="xs"
+                fontWeight="bold"
+                bg={
+                  tipoFiltro === 'personalizado' ? 'cirqueira.spotify.cartaoElevado' : 'transparent'
+                }
+                color={
+                  tipoFiltro === 'personalizado'
+                    ? 'cirqueira.spotify.azul'
+                    : 'cirqueira.spotify.textoSecundario'
+                }
+                _hover={{ color: 'cirqueira.spotify.textoPrincipal' }}
+                onClick={() => setTipoFiltro('personalizado')}
+                flexShrink={0}
+              >
+                <HStack gap={1.5}>
+                  <SlidersHorizontal size={13} />
+                  <Text as="span">Personalizado</Text>
+                </HStack>
+              </Button>
+            </HStack>
+          </Box>
+
+          <Flex
+            justify={{ base: 'space-between', md: 'flex-end' }}
+            align="center"
+            gap={{ base: 3, md: 4 }}
+            w={{ base: 'full', md: 'auto' }}
+            px={{ base: 1, md: 0 }}
+            flexShrink={0}
+          >
+            <HStack gap={1.5} align="center">
+              <Text fontSize={{ base: '2xs', sm: 'xs' }} color="cirqueira.spotify.textoSecundario">
                 Tempo ouvido:
               </Text>
-              <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+              <Text
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="bold"
+                color="cirqueira.spotify.verde"
+              >
                 {formatarMinutosParaHorasEMinutos(totalMinutos)}
               </Text>
               {variacao !== null && (
                 <Box
                   px={1.5}
-                  py={0.5}
+                  py={0.2}
                   borderRadius="md"
                   bg={variacao >= 0 ? 'rgba(30, 215, 96, 0.15)' : 'rgba(239, 68, 68, 0.15)'}
                   color={variacao >= 0 ? 'cirqueira.spotify.verde' : 'red.400'}
@@ -374,27 +400,32 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 </Box>
               )}
             </HStack>
-            <HStack gap={1.5}>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+            <HStack gap={1.5} align="center">
+              <Text fontSize={{ base: '2xs', sm: 'xs' }} color="cirqueira.spotify.textoSecundario">
                 Streams:
               </Text>
-              <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
+              <Text
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="bold"
+                color="cirqueira.spotify.textoPrincipal"
+              >
                 {totalStreams}
               </Text>
             </HStack>
-          </HStack>
+          </Flex>
         </Flex>
 
         {tipoFiltro === 'mes' && (
           <Flex
-            p={3}
+            p={{ base: 2.5, sm: 3 }}
             bg="cirqueira.spotify.cartao"
             borderRadius="8px"
             border="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"
-            align="center"
-            gap={3}
-            wrap="wrap"
+            align={{ base: 'stretch', sm: 'center' }}
+            direction={{ base: 'column', sm: 'row' }}
+            gap={2.5}
+            w="full"
           >
             <HStack gap={2} align="center">
               <Calendar size={14} color="var(--chakra-colors-cirqueira-spotify-verde)" />
@@ -403,7 +434,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               </Text>
             </HStack>
 
-            <HStack gap={2} wrap="wrap" flex={1}>
+            <Flex gap={2} direction={{ base: 'column', sm: 'row' }} flex={1} w="full">
               <NativeSelect.Root size="xs" w={{ base: 'full', sm: '160px' }}>
                 <NativeSelect.Field
                   value={mesSelecionado}
@@ -441,20 +472,21 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 </NativeSelect.Field>
                 <NativeSelect.Indicator />
               </NativeSelect.Root>
-            </HStack>
+            </Flex>
           </Flex>
         )}
 
         {tipoFiltro === 'ano' && (
           <Flex
-            p={3}
+            p={{ base: 2.5, sm: 3 }}
             bg="cirqueira.spotify.cartao"
             borderRadius="8px"
             border="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"
-            align="center"
-            gap={3}
-            wrap="wrap"
+            align={{ base: 'stretch', sm: 'center' }}
+            direction={{ base: 'column', sm: 'row' }}
+            gap={2.5}
+            w="full"
           >
             <HStack gap={2} align="center">
               <CalendarDays size={14} color="var(--chakra-colors-cirqueira-spotify-amarelo)" />
@@ -486,14 +518,15 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
 
         {tipoFiltro === 'personalizado' && (
           <Flex
-            p={3}
+            p={{ base: 2.5, sm: 3 }}
             bg="cirqueira.spotify.cartao"
             borderRadius="8px"
             border="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"
-            align="center"
-            gap={3}
-            wrap="wrap"
+            align={{ base: 'stretch', sm: 'center' }}
+            direction={{ base: 'column', sm: 'row' }}
+            gap={2.5}
+            w="full"
           >
             <HStack gap={2} align="center">
               <SlidersHorizontal size={14} color="var(--chakra-colors-cirqueira-spotify-azul)" />
@@ -502,15 +535,15 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               </Text>
             </HStack>
 
-            <HStack gap={2} wrap="wrap" flex={1}>
-              <HStack gap={1.5} align="center">
-                <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+            <Flex gap={2} direction={{ base: 'column', sm: 'row' }} flex={1} w="full">
+              <HStack gap={1.5} align="center" flex={1} w="full">
+                <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" minW="22px">
                   De:
                 </Text>
                 <Input
                   type="date"
                   size="xs"
-                  w="140px"
+                  w="full"
                   value={dataInicioPersonalizada}
                   onChange={(e) => setDataInicioPersonalizada(e.target.value)}
                   bg="cirqueira.spotify.cartaoElevado"
@@ -522,14 +555,14 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 />
               </HStack>
 
-              <HStack gap={1.5} align="center">
-                <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+              <HStack gap={1.5} align="center" flex={1} w="full">
+                <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" minW="22px">
                   Até:
                 </Text>
                 <Input
                   type="date"
                   size="xs"
-                  w="140px"
+                  w="full"
                   value={dataFimPersonalizada}
                   onChange={(e) => setDataFimPersonalizada(e.target.value)}
                   bg="cirqueira.spotify.cartaoElevado"
@@ -540,32 +573,35 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   fontSize="xs"
                 />
               </HStack>
-            </HStack>
+            </Flex>
           </Flex>
         )}
       </VStack>
 
       <Box
-        p={5}
+        p={{ base: 3, sm: 5 }}
         bg="cirqueira.spotify.cartao"
         borderRadius="8px"
         border="1px solid"
         borderColor="cirqueira.spotify.cartaoElevado"
+        w="full"
+        maxW="100%"
       >
-        <VStack gap={4} align="stretch">
+        <VStack gap={4} align="stretch" w="full">
           <Flex
             justify="space-between"
-            align={{ base: 'flex-start', sm: 'center' }}
+            align={{ base: 'stretch', sm: 'center' }}
             direction={{ base: 'column', sm: 'row' }}
             borderBottom="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"
             pb={3}
-            gap={2}
+            gap={2.5}
+            w="full"
           >
-            <VStack align="flex-start" gap={0.5}>
+            <VStack align="flex-start" gap={0.5} maxW="full">
               <Heading
                 as="h3"
-                fontSize="sm"
+                fontSize={{ base: 'xs', sm: 'sm' }}
                 fontWeight="bold"
                 color="cirqueira.spotify.amarelo"
                 textTransform="uppercase"
@@ -573,16 +609,24 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               >
                 {aba === 'musicas' ? 'Músicas Mais Ouvidas' : 'Artistas Mais Ouvidos'}
               </Heading>
-              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" truncate maxW="full">
                 Exibindo ranking de {rotuloAtivo}
               </Text>
             </VStack>
 
-            <HStack gap={1} bg="cirqueira.spotify.cartaoElevado" p={0.5} borderRadius="full">
+            <HStack
+              gap={1}
+              bg="cirqueira.spotify.cartaoElevado"
+              p={0.5}
+              borderRadius="full"
+              w={{ base: 'full', sm: 'auto' }}
+              justify="center"
+            >
               <Button
                 size="xs"
                 borderRadius="full"
                 px={3}
+                flex={{ base: 1, sm: 'initial' }}
                 fontSize="2xs"
                 fontWeight="semibold"
                 bg={aba === 'musicas' ? 'cirqueira.spotify.cartao' : 'transparent'}
@@ -593,7 +637,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 }
                 onClick={() => setAba('musicas')}
               >
-                <HStack gap={1.5}>
+                <HStack gap={1.5} justify="center">
                   <Music2 size={12} />
                   <Text as="span">Músicas</Text>
                 </HStack>
@@ -602,6 +646,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 size="xs"
                 borderRadius="full"
                 px={3}
+                flex={{ base: 1, sm: 'initial' }}
                 fontSize="2xs"
                 fontWeight="semibold"
                 bg={aba === 'artistas' ? 'cirqueira.spotify.cartao' : 'transparent'}
@@ -612,7 +657,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 }
                 onClick={() => setAba('artistas')}
               >
-                <HStack gap={1.5}>
+                <HStack gap={1.5} justify="center">
                   <Users size={12} />
                   <Text as="span">Artistas</Text>
                 </HStack>
@@ -753,7 +798,14 @@ function ModalRankingHojeSemana({
   const subtitulo = `${rotuloPeriodo} • Mostrando ${Math.min(total, 50)} no ranking`
 
   const renderConteudo = () => (
-    <VStack gap={2} align="stretch" w="full" maxH="70vh" overflowY="auto" pr={1}>
+    <VStack
+      gap={2}
+      align="stretch"
+      w="full"
+      maxH={isDesktop ? '70vh' : 'auto'}
+      overflowY={isDesktop ? 'auto' : 'visible'}
+      pr={1}
+    >
       {tipo === 'musicas'
         ? topMusicas.slice(0, 50).map((musica) => {
             const chave = gerarChaveFaixa(
@@ -799,23 +851,34 @@ function ModalRankingHojeSemana({
               borderTop="1px solid"
               borderColor="cirqueira.spotify.cartaoElevado"
               borderTopRadius="16px"
-              p={5}
-              maxH="85vh"
-              overflowY="auto"
+              p={{ base: 3.5, sm: 5 }}
+              maxH="90vh"
+              display="flex"
+              flexDirection="column"
               color="cirqueira.spotify.textoPrincipal"
             >
               <Drawer.Header
                 p={0}
-                mb={4}
+                mb={3}
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <VStack align="flex-start" gap={0.5}>
-                  <Drawer.Title fontSize="md" fontWeight="bold">
+                <VStack align="flex-start" gap={0.5} maxW="calc(100% - 36px)">
+                  <Drawer.Title
+                    fontSize={{ base: 'sm', sm: 'md' }}
+                    fontWeight="bold"
+                    truncate
+                    maxW="full"
+                  >
                     {titulo}
                   </Drawer.Title>
-                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                  <Text
+                    fontSize="2xs"
+                    color="cirqueira.spotify.textoSecundario"
+                    truncate
+                    maxW="full"
+                  >
                     {subtitulo}
                   </Text>
                 </VStack>
@@ -837,7 +900,9 @@ function ModalRankingHojeSemana({
                 </Drawer.CloseTrigger>
               </Drawer.Header>
 
-              <Drawer.Body p={0}>{renderConteudo()}</Drawer.Body>
+              <Drawer.Body p={0} overflowY="auto" maxH="75vh">
+                {renderConteudo()}
+              </Drawer.Body>
             </Drawer.Content>
           </Drawer.Positioner>
         </Portal>

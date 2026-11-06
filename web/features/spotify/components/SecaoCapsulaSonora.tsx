@@ -711,18 +711,20 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
         <Flex
           align="center"
           justify="space-between"
-          p={3}
+          p={{ base: 2, sm: 3 }}
           cursor="pointer"
           _hover={{ bg: 'rgba(255, 255, 255, 0.05)' }}
           onClick={() => setExpandido((prev) => !prev)}
-          gap={3}
+          gap={{ base: 2, sm: 3 }}
+          w="full"
+          minW={0}
         >
-          <HStack gap={3} flex={1} minW={0} align="center">
+          <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
             <Center
-              boxSize={8}
+              boxSize={{ base: 6, sm: 8 }}
               borderRadius="md"
               fontWeight="bold"
-              fontSize="sm"
+              fontSize={{ base: 'xs', sm: 'sm' }}
               color="cirqueira.spotify.azul"
               flexShrink={0}
             >
@@ -730,7 +732,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
             </Center>
 
             <Box
-              boxSize={10}
+              boxSize={{ base: 9, sm: 10 }}
               borderRadius="full"
               overflow="hidden"
               border="1px solid"
@@ -765,9 +767,9 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
             </Box>
 
             <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-              <HStack gap={2} maxW="full">
+              <HStack gap={1.5} maxW="full">
                 <Text
-                  fontSize="sm"
+                  fontSize={{ base: 'xs', sm: 'sm' }}
                   fontWeight="bold"
                   color="cirqueira.spotify.textoPrincipal"
                   truncate
@@ -784,18 +786,20 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
                     _hover={{ color: 'cirqueira.spotify.verde' }}
                     flexShrink={0}
                     onClick={(e) => e.stopPropagation()}
+                    display="inline-flex"
+                    alignItems="center"
                   >
                     <ExternalLink size={12} />
                   </Box>
                 )}
               </HStack>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
                 {artista.totalStreams} reproduções
               </Text>
             </VStack>
           </HStack>
 
-          <HStack gap={3} flexShrink={0} align="center">
+          <HStack gap={{ base: 1.5, sm: 3 }} flexShrink={0} align="center">
             {artista.movimento !== null && (
               <HStack gap={1} fontSize="xs">
                 {artista.movimento > 0 ? (
@@ -831,7 +835,11 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
               </Box>
             )}
 
-            <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+            <Text
+              fontSize={{ base: 'xs', sm: 'sm' }}
+              fontWeight="bold"
+              color="cirqueira.spotify.verde"
+            >
               {formatarMinutosParaHorasEMinutos(artista.totalMinutos)}
             </Text>
 
@@ -899,17 +907,19 @@ function ModalDetalheCapsula({
                 key={`${m.posicao}-${m.nomeFaixa}`}
                 align="center"
                 justify="space-between"
-                p={3}
+                p={{ base: 2, sm: 3 }}
                 borderRadius="8px"
                 bg="cirqueira.spotify.cartaoElevado"
-                gap={3}
+                gap={{ base: 2, sm: 3 }}
+                w="full"
+                minW={0}
               >
-                <HStack gap={3} flex={1} minW={0} align="center">
+                <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
                   <Center
-                    boxSize={8}
+                    boxSize={{ base: 6, sm: 8 }}
                     borderRadius="md"
                     fontWeight="bold"
-                    fontSize="sm"
+                    fontSize={{ base: 'xs', sm: 'sm' }}
                     color="cirqueira.spotify.amarelo"
                     flexShrink={0}
                   >
@@ -917,11 +927,14 @@ function ModalDetalheCapsula({
                   </Center>
 
                   <Box
-                    boxSize={12}
+                    boxSize={{ base: 10, sm: 12 }}
                     borderRadius="4px"
                     overflow="hidden"
                     bg="cirqueira.spotify.cartao"
                     flexShrink={0}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
                     {fotoMusica ? (
                       <Box
@@ -934,15 +947,15 @@ function ModalDetalheCapsula({
                       />
                     ) : (
                       <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
-                        <Music2 size={20} />
+                        <Music2 size={16} />
                       </Center>
                     )}
                   </Box>
 
                   <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-                    <HStack gap={2} maxW="full">
+                    <HStack gap={1.5} maxW="full">
                       <Text
-                        fontSize="sm"
+                        fontSize={{ base: 'xs', sm: 'sm' }}
                         fontWeight="bold"
                         color="cirqueira.spotify.textoPrincipal"
                         truncate
@@ -958,20 +971,27 @@ function ModalDetalheCapsula({
                           color="cirqueira.spotify.textoSecundario"
                           _hover={{ color: 'cirqueira.spotify.verde' }}
                           flexShrink={0}
+                          display="inline-flex"
+                          alignItems="center"
                         >
                           <ExternalLink size={12} />
                         </Box>
                       )}
                     </HStack>
-                    <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
+                    <Text
+                      fontSize="2xs"
+                      color="cirqueira.spotify.textoSecundario"
+                      truncate
+                      maxW="full"
+                    >
                       {m.artistaPrincipal} • {m.album}
                     </Text>
                   </VStack>
                 </HStack>
 
-                <HStack gap={4} flexShrink={0}>
+                <HStack gap={{ base: 1.5, sm: 3 }} flexShrink={0} align="center">
                   {m.movimento !== null && (
-                    <HStack gap={1} fontSize="xs">
+                    <HStack gap={1} fontSize="xs" display={{ base: 'none', sm: 'flex' }}>
                       {m.movimento > 0 ? (
                         <HStack gap={0.5} color="cirqueira.spotify.verde">
                           <ArrowUp size={14} />
@@ -1006,13 +1026,21 @@ function ModalDetalheCapsula({
                   )}
 
                   {m.mesesNoTop5 > 1 && (
-                    <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                    <Text
+                      fontSize="2xs"
+                      color="cirqueira.spotify.textoSecundario"
+                      display={{ base: 'none', md: 'block' }}
+                    >
                       {m.mesesNoTop5} meses no top 5
                     </Text>
                   )}
 
                   <VStack align="flex-end" gap={0}>
-                    <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.amarelo">
+                    <Text
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      fontWeight="bold"
+                      color="cirqueira.spotify.amarelo"
+                    >
                       {m.totalStreams} streams
                     </Text>
                     <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
@@ -1085,10 +1113,10 @@ function ModalDetalheCapsula({
       )}
 
       {tipo === 'variedade' && (
-        <VStack gap={4} align="stretch">
-          <SimpleGrid columns={{ base: 2, md: 4 }} gap={3}>
+        <VStack gap={4} align="stretch" w="full">
+          <SimpleGrid columns={{ base: 2, sm: 4 }} gap={{ base: 2, sm: 3 }}>
             <Box
-              p={3}
+              p={{ base: 2.5, sm: 3 }}
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
@@ -1103,7 +1131,7 @@ function ModalDetalheCapsula({
                 Faixas Distintas
               </Text>
               <Text
-                fontSize="2xl"
+                fontSize={{ base: 'lg', sm: '2xl' }}
                 fontWeight="black"
                 color="cirqueira.spotify.textoPrincipal"
                 mt={1}
@@ -1134,7 +1162,7 @@ function ModalDetalheCapsula({
             </Box>
 
             <Box
-              p={3}
+              p={{ base: 2.5, sm: 3 }}
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
@@ -1149,20 +1177,20 @@ function ModalDetalheCapsula({
                 Total de Streams
               </Text>
               <Text
-                fontSize="2xl"
+                fontSize={{ base: 'lg', sm: '2xl' }}
                 fontWeight="black"
                 color="cirqueira.spotify.textoPrincipal"
                 mt={1}
               >
                 {capsula.totalStreams.toLocaleString('pt-BR')}
               </Text>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" mt={1}>
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" mt={1}>
                 {formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} ouvidos
               </Text>
             </Box>
 
             <Box
-              p={3}
+              p={{ base: 2.5, sm: 3 }}
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
@@ -1177,20 +1205,20 @@ function ModalDetalheCapsula({
                 Média por Faixa
               </Text>
               <Text
-                fontSize="2xl"
+                fontSize={{ base: 'lg', sm: '2xl' }}
                 fontWeight="black"
                 color="cirqueira.spotify.textoPrincipal"
                 mt={1}
               >
                 {(capsula.totalStreams / Math.max(1, capsula.faixasDistintas)).toFixed(1)}x
               </Text>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" mt={1}>
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" mt={1}>
                 reproduções por música
               </Text>
             </Box>
 
             <Box
-              p={3}
+              p={{ base: 2.5, sm: 3 }}
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
@@ -1204,14 +1232,19 @@ function ModalDetalheCapsula({
               >
                 Índice de Variedade
               </Text>
-              <Text fontSize="2xl" fontWeight="black" color="cirqueira.spotify.verde" mt={1}>
+              <Text
+                fontSize={{ base: 'lg', sm: '2xl' }}
+                fontWeight="black"
+                color="cirqueira.spotify.verde"
+                mt={1}
+              >
                 {Math.min(
                   100,
                   Math.round((capsula.faixasDistintas / Math.max(1, capsula.totalStreams)) * 100)
                 )}
                 %
               </Text>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" mt={1}>
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" mt={1}>
                 faixas únicas ouvidas
               </Text>
             </Box>
@@ -1237,17 +1270,17 @@ function ModalDetalheCapsula({
                   key={`variedade-${m.posicao}-${m.nomeFaixa}`}
                   align="center"
                   justify="space-between"
-                  p={3}
+                  p={{ base: 2, sm: 3 }}
                   borderRadius="8px"
                   bg="cirqueira.spotify.cartaoElevado"
-                  gap={3}
+                  gap={{ base: 2, sm: 3 }}
                 >
-                  <HStack gap={3} flex={1} minW={0} align="center">
+                  <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
                     <Center
-                      boxSize={8}
+                      boxSize={{ base: 6, sm: 8 }}
                       borderRadius="md"
                       fontWeight="bold"
-                      fontSize="sm"
+                      fontSize={{ base: 'xs', sm: 'sm' }}
                       color="cirqueira.spotify.amarelo"
                       flexShrink={0}
                     >
@@ -1255,7 +1288,7 @@ function ModalDetalheCapsula({
                     </Center>
 
                     <Box
-                      boxSize={12}
+                      boxSize={{ base: 10, sm: 12 }}
                       borderRadius="4px"
                       overflow="hidden"
                       bg="cirqueira.spotify.cartao"
@@ -1272,15 +1305,15 @@ function ModalDetalheCapsula({
                         />
                       ) : (
                         <Center w="full" h="full" color="cirqueira.spotify.textoDesabilitado">
-                          <Music2 size={20} />
+                          <Music2 size={18} />
                         </Center>
                       )}
                     </Box>
 
                     <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-                      <HStack gap={2} maxW="full">
+                      <HStack gap={1.5} maxW="full">
                         <Text
-                          fontSize="sm"
+                          fontSize={{ base: 'xs', sm: 'sm' }}
                           fontWeight="bold"
                           color="cirqueira.spotify.textoPrincipal"
                           truncate
@@ -1303,20 +1336,25 @@ function ModalDetalheCapsula({
                           </Box>
                         )}
                       </HStack>
-                      <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" truncate>
+                      <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" truncate>
                         {m.artistaPrincipal} • {m.album}
                       </Text>
                     </VStack>
                   </HStack>
 
-                  <HStack gap={2} flexShrink={0}>
-                    <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
-                      {m.totalStreams} {m.totalStreams === 1 ? 'stream' : 'streams'}
-                    </Text>
-                    <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.verde">
+                  <VStack align="flex-end" gap={0} flexShrink={0}>
+                    <Text
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      fontWeight="bold"
+                      color="cirqueira.spotify.verde"
+                      lineHeight="short"
+                    >
                       {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
                     </Text>
-                  </HStack>
+                    <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                      {m.totalStreams} {m.totalStreams === 1 ? 'stream' : 'streams'}
+                    </Text>
+                  </VStack>
                 </Flex>
               )
             })}
@@ -1341,23 +1379,24 @@ function ModalDetalheCapsula({
               borderTop="1px solid"
               borderColor="cirqueira.spotify.cartaoElevado"
               borderTopRadius="16px"
-              p={5}
-              maxH="85vh"
-              overflowY="auto"
+              p={{ base: 3.5, sm: 5 }}
+              maxH="90vh"
+              display="flex"
+              flexDirection="column"
               color="cirqueira.spotify.textoPrincipal"
             >
               <Drawer.Header
                 p={0}
-                mb={4}
+                mb={3}
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"
               >
                 <VStack align="flex-start" gap={0.5}>
-                  <Drawer.Title fontSize="md" fontWeight="bold">
+                  <Drawer.Title fontSize={{ base: 'sm', sm: 'md' }} fontWeight="bold">
                     {titulo}
                   </Drawer.Title>
-                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                  <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
                     {subtitulo}
                   </Text>
                 </VStack>
@@ -1379,7 +1418,9 @@ function ModalDetalheCapsula({
                 </Drawer.CloseTrigger>
               </Drawer.Header>
 
-              <Drawer.Body p={0}>{renderConteudo()}</Drawer.Body>
+              <Drawer.Body p={0} overflowY="auto" maxH="75vh">
+                {renderConteudo()}
+              </Drawer.Body>
             </Drawer.Content>
           </Drawer.Positioner>
         </Portal>

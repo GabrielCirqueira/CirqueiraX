@@ -46,14 +46,16 @@ export const ListaTopMusicasArtista = memo(function ListaTopMusicasArtista({
           key={`${musica.nomeFaixa}-${musica.codigoFaixa ?? indice}`}
           align="center"
           justify="space-between"
-          p={2}
+          p={{ base: 1.5, sm: 2 }}
           borderRadius="6px"
           bg="rgba(0, 0, 0, 0.25)"
           border="1px solid"
           borderColor="cirqueira.spotify.cartaoElevado"
-          gap={2.5}
+          gap={{ base: 2, sm: 2.5 }}
+          w="full"
+          minW={0}
         >
-          <HStack gap={2.5} flex={1} minW={0} align="center">
+          <HStack gap={{ base: 2, sm: 2.5 }} flex={1} minW={0} align="center">
             <Center
               boxSize={5}
               fontSize="2xs"
@@ -65,7 +67,7 @@ export const ListaTopMusicasArtista = memo(function ListaTopMusicasArtista({
             </Center>
 
             <Box
-              boxSize={8}
+              boxSize={{ base: 7, sm: 8 }}
               borderRadius="4px"
               overflow="hidden"
               bg="cirqueira.spotify.cartaoElevado"
@@ -110,23 +112,29 @@ export const ListaTopMusicasArtista = memo(function ListaTopMusicasArtista({
                     color="cirqueira.spotify.textoSecundario"
                     _hover={{ color: 'cirqueira.spotify.verde' }}
                     flexShrink={0}
+                    display="inline-flex"
+                    alignItems="center"
                   >
                     <ExternalLink size={10} />
                   </Box>
                 )}
               </HStack>
-              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" truncate>
+              <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" truncate maxW="full">
                 {musica.album}
               </Text>
             </VStack>
           </HStack>
 
           <VStack align="flex-end" gap={0} flexShrink={0}>
-            <Text fontSize="xs" fontWeight="bold" color="cirqueira.spotify.verde">
+            <Text
+              fontSize={{ base: '2xs', sm: 'xs' }}
+              fontWeight="bold"
+              color="cirqueira.spotify.verde"
+            >
               {formatarMinutosParaHorasEMinutos(musica.totalMinutos)}
             </Text>
             <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
-              {musica.totalStreams} {musica.totalStreams === 1 ? 'reprodução' : 'reproduções'}
+              {musica.totalStreams} {musica.totalStreams === 1 ? 'stream' : 'streams'}
             </Text>
           </VStack>
         </Flex>
