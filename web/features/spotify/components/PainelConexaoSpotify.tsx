@@ -115,7 +115,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                   boxSize={5}
                   borderRadius="full"
                   bg="cirqueira.spotify.verde"
-                  color="#000000"
+                  color="cirqueira.grey.950"
                 >
                   <CheckCircle2 size={12} />
                 </Center>
@@ -254,11 +254,11 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
             ) : isReconectar ? (
               <Button
                 bg="cirqueira.spotify.verde"
-                color="#000000"
+                color="cirqueira.grey.950"
                 size="sm"
                 borderRadius="full"
                 fontWeight="bold"
-                _hover={{ bg: '#22e368', transform: 'scale(1.02)' }}
+                _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
                 transition="all 0.15s ease"
                 onClick={handleVincularOuReconectar}
@@ -275,11 +275,11 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
             ) : (
               <Button
                 bg="cirqueira.spotify.verde"
-                color="#000000"
+                color="cirqueira.grey.950"
                 size="sm"
                 borderRadius="full"
                 fontWeight="bold"
-                _hover={{ bg: '#22e368', transform: 'scale(1.02)' }}
+                _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
                 transition="all 0.15s ease"
                 onClick={handleVincularOuReconectar}

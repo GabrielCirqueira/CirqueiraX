@@ -36,7 +36,7 @@ export const GridCentralMidias = memo(function GridCentralMidias({
             className="google-photos-item"
             h={idx % 4 === 0 ? '240px' : idx % 3 === 0 ? '180px' : idx % 2 === 0 ? '290px' : '210px'}
             bg="bg.muted"
-            borderRadius="md"
+            borderRadius="8px"
             animation="pulse 1.5s infinite"
           />
         ))}
@@ -53,7 +53,7 @@ export const GridCentralMidias = memo(function GridCentralMidias({
         py={20}
         px={4}
         textAlign="center"
-        borderRadius="2xl"
+        borderRadius="8px"
         borderWidth="2px"
         borderStyle="dashed"
         borderColor="border.subtle"
@@ -61,7 +61,7 @@ export const GridCentralMidias = memo(function GridCentralMidias({
       >
         <Box
           p={4}
-          borderRadius="2xl"
+          borderRadius="8px"
           bg="cirqueira.brand.500/10"
           color="cirqueira.brand.400"
           mb={2}
@@ -78,7 +78,7 @@ export const GridCentralMidias = memo(function GridCentralMidias({
         </Text>
 
         {temFiltrosAtivos && onLimparFiltros && (
-          <Button size="xs" variant="outline" onClick={onLimparFiltros} borderRadius="lg" mt={2}>
+          <Button size="xs" variant="outline" onClick={onLimparFiltros} borderRadius="full" mt={2}>
             Limpar Todos os Filtros
           </Button>
         )}

@@ -78,7 +78,7 @@ export function MenuFrase({
       bg="cirqueira.grey.900"
       border="1px solid"
       borderColor="cirqueira.grey.700"
-      borderRadius="xl"
+      borderRadius="8px"
       p={2.5}
       boxShadow="0 18px 45px rgba(0, 0, 0, 0.85)"
       zIndex={80}

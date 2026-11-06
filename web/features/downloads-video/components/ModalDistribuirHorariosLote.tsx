@@ -210,492 +210,500 @@ export const ModalDistribuirHorariosLote = memo(function ModalDistribuirHorarios
     <Dialog.Root
       lazyMount
       unmountOnExit
-      open={aberto} onOpenChange={(e) => !e.open && onFechar()} size="xl" placement="center">
+      open={aberto}
+      onOpenChange={(e) => !e.open && onFechar()}
+      size="xl"
+      placement="center"
+    >
       <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
+        <Dialog.Backdrop bg="blackAlpha.800" />
         <Dialog.Positioner>
-        <Dialog.Content
-          bg="bg.panel"
-          borderWidth="1px"
-          borderColor="border.subtle"
-          color="fg"
-          borderRadius="2xl"
-          p={0}
-          maxW="3xl"
-          w="full"
-          overflow="hidden"
-          shadow="2xl"
-        >
-          <Flex
-            align="center"
-            justify="space-between"
-            px={5}
-            py={4}
-            borderBottomWidth="1px"
+          <Dialog.Content
+            bg="bg.panel"
+            borderWidth="1px"
             borderColor="border.subtle"
-            bg="bg.muted/30"
+            color="fg"
+            borderRadius="8px"
+            p={0}
+            maxW="3xl"
+            w="full"
+            overflow="hidden"
+            shadow="2xl"
           >
-            <HStack gap={3}>
-              <Box
-                p={2}
-                borderRadius="lg"
-                bg="cirqueira.brand.500/10"
-                color="cirqueira.brand.400"
-                borderWidth="1px"
-                borderColor="cirqueira.brand.500/20"
-                display="inline-flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CalendarClock size={20} />
-              </Box>
-              <VStack align="start" gap={0}>
-                <HStack gap={2}>
-                  <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
-                    Distribuir Horários em Lote
-                  </Dialog.Title>
-                  <Badge colorPalette="brand" size="xs" borderRadius="md">
-                    {total} {total === 1 ? 'vídeo' : 'vídeos'}
-                  </Badge>
-                </HStack>
-                <Text fontSize="xs" color="fg.subtle">
-                  Espalhe os vídeos baixados ao longo do dia com intervalos inteligentes
-                </Text>
-              </VStack>
-            </HStack>
-
-            <IconButton
-              size="xs"
-              variant="ghost"
-              onClick={onFechar}
-              aria-label="Fechar modal"
-              borderRadius="lg"
+            <Flex
+              align="center"
+              justify="space-between"
+              px={5}
+              py={4}
+              borderBottomWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.muted/30"
             >
-              <X size={16} />
-            </IconButton>
-          </Flex>
-
-          <Dialog.Body p={5} maxH="70vh" overflowY="auto">
-            <VStack gap={5} align="stretch">
-              <Box
-                p={3.5}
-                borderRadius="xl"
-                bg="cirqueira.brand.500/10"
-                borderWidth="1px"
-                borderColor="cirqueira.brand.500/20"
-              >
-                <HStack justify="space-between" align="center" mb={2}>
-                  <HStack gap={1.5} color="cirqueira.brand.400" fontSize="xs" fontWeight="bold">
-                    <Sparkles size={14} />
-                    <Text as="span">Escolha a Estratégia de Distribuição</Text>
-                  </HStack>
-                  <Badge size="xs" variant="subtle" colorPalette="brand">
-                    Automático
-                  </Badge>
-                </HStack>
-
-                <HStack gap={2} flexWrap="wrap">
-                  <Button
-                    size="xs"
-                    variant={modo === 'retroativo' ? 'solid' : 'outline'}
-                    colorPalette={modo === 'retroativo' ? 'brand' : 'gray'}
-                    onClick={() => {
-                      setModo('retroativo')
-                      setAjustesManuais({})
-                    }}
-                    borderRadius="lg"
-                  >
-                    <ArrowDownUp size={13} style={{ marginRight: '4px' }} />
-                    <Text as="span">Retroativo do Download (-2h por vídeo)</Text>
-                  </Button>
-
-                  <Button
-                    size="xs"
-                    variant={modo === 'uniforme' ? 'solid' : 'outline'}
-                    colorPalette={modo === 'uniforme' ? 'brand' : 'gray'}
-                    onClick={() => {
-                      setModo('uniforme')
-                      setAjustesManuais({})
-                    }}
-                    borderRadius="lg"
-                  >
-                    <Clock size={13} style={{ marginRight: '4px' }} />
-                    <Text as="span">Espalhar pelo Dia (08h às 22h)</Text>
-                  </Button>
-
-                  <Button
-                    size="xs"
-                    variant={modo === 'organico' ? 'solid' : 'outline'}
-                    colorPalette={modo === 'organico' ? 'brand' : 'gray'}
-                    onClick={() => {
-                      setModo('organico')
-                      setAjustesManuais({})
-                    }}
-                    borderRadius="lg"
-                  >
-                    <Dices size={13} style={{ marginRight: '4px' }} />
-                    <Text as="span">Orgânico / Turnos Reais</Text>
-                  </Button>
-                </HStack>
-              </Box>
-
-              <Grid templateColumns={{ base: '1fr', md: '1.2fr 2fr' }} gap={3}>
-                <Field.Root>
-                  <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                    Data Base de Aplicação
-                  </Field.Label>
-                  <Input
-                    type="date"
-                    value={dataBase}
-                    onChange={(e) => {
-                      setDataBase(e.target.value)
-                      setAjustesManuais({})
-                    }}
-                    bg="bg.muted"
-                    borderColor="border.subtle"
-                    borderRadius="lg"
-                    fontSize="xs"
-                    h={9}
-                  />
-                </Field.Root>
-
-                {modo === 'retroativo' && (
-                  <Grid templateColumns="1fr 1fr" gap={2}>
-                    <Field.Root>
-                      <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                        Horário Final (Download)
-                      </Field.Label>
-                      <Input
-                        type="time"
-                        value={horaBaseRetroativa}
-                        onChange={(e) => setHoraBaseRetroativa(e.target.value)}
-                        bg="bg.muted"
-                        borderColor="border.subtle"
-                        borderRadius="lg"
-                        fontSize="xs"
-                        h={9}
-                      />
-                    </Field.Root>
-
-                    <Field.Root>
-                      <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                        Passo Retroativo
-                      </Field.Label>
-                      <NativeSelect.Root size="sm">
-                        <NativeSelect.Field
-                          value={passoRetroativoMinutos}
-                          onChange={(e) => setPassoRetroativoMinutos(Number(e.target.value))}
-                          bg="bg.muted"
-                          borderColor="border.subtle"
-                          borderRadius="lg"
-                          fontSize="xs"
-                          h={9}
-                        >
-                          <option value={30}>A cada 30 minutos</option>
-                          <option value={60}>A cada 1 hora</option>
-                          <option value={90}>A cada 1h 30m</option>
-                          <option value={120}>A cada 2 horas (Recomendado)</option>
-                          <option value={180}>A cada 3 horas</option>
-                          <option value={240}>A cada 4 horas</option>
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                      </NativeSelect.Root>
-                    </Field.Root>
-                  </Grid>
-                )}
-
-                {modo === 'uniforme' && (
-                  <Grid templateColumns="1fr 1fr" gap={2}>
-                    <Field.Root>
-                      <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                        Horário Inicial
-                      </Field.Label>
-                      <Input
-                        type="time"
-                        value={horaInicioUniforme}
-                        onChange={(e) => setHoraInicioUniforme(e.target.value)}
-                        bg="bg.muted"
-                        borderColor="border.subtle"
-                        borderRadius="lg"
-                        fontSize="xs"
-                        h={9}
-                      />
-                    </Field.Root>
-
-                    <Field.Root>
-                      <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
-                        Horário Final
-                      </Field.Label>
-                      <Input
-                        type="time"
-                        value={horaFimUniforme}
-                        onChange={(e) => setHoraFimUniforme(e.target.value)}
-                        bg="bg.muted"
-                        borderColor="border.subtle"
-                        borderRadius="lg"
-                        fontSize="xs"
-                        h={9}
-                      />
-                    </Field.Root>
-                  </Grid>
-                )}
-
-                {modo === 'organico' && (
-                  <Flex align="center" gap={2} p={2} bg="bg.muted/20" borderRadius="lg">
-                    <Box as="span" color="cirqueira.brand.400" display="inline-flex">
-                      <Info size={14} color="currentColor" />
-                    </Box>
-                    <Text fontSize="xs" color="fg.subtle">
-                      Distribui entre os picos de maior engajamento (manhã, almoço, tarde, noite)
-                      com minutos variados.
-                    </Text>
-                  </Flex>
-                )}
-              </Grid>
-
-              <Box
-                borderRadius="xl"
-                borderWidth="1px"
-                borderColor="border.subtle"
-                overflow="hidden"
-                bg="bg.panel"
-              >
-                <Flex
-                  justify="space-between"
-                  align="center"
-                  p={3}
-                  px={4}
-                  bg="bg.muted/30"
-                  borderBottomWidth="1px"
-                  borderColor="border.subtle"
-                  flexWrap="wrap"
-                  gap={2}
+              <HStack gap={3}>
+                <Box
+                  p={2}
+                  borderRadius="8px"
+                  bg="cirqueira.brand.500/10"
+                  color="cirqueira.brand.400"
+                  borderWidth="1px"
+                  borderColor="cirqueira.brand.500/20"
+                  display="inline-flex"
+                  alignItems="center"
+                  justifyContent="center"
                 >
+                  <CalendarClock size={20} />
+                </Box>
+                <VStack align="start" gap={0}>
                   <HStack gap={2}>
-                    <Text fontSize="xs" fontWeight="bold" color="fg">
-                      Pré-visualização do Cronograma ({total} itens)
-                    </Text>
-                    {Object.keys(ajustesManuais).length > 0 && (
-                      <Badge size="xs" colorPalette="amber" borderRadius="md">
-                        {Object.keys(ajustesManuais).length} ajustado(s) manualmente
-                      </Badge>
-                    )}
+                    <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
+                      Distribuir Horários em Lote
+                    </Dialog.Title>
+                    <Badge colorPalette="brand" size="xs">
+                      {total} {total === 1 ? 'vídeo' : 'vídeos'}
+                    </Badge>
+                  </HStack>
+                  <Text fontSize="xs" color="fg.subtle">
+                    Espalhe os vídeos baixados ao longo do dia com intervalos inteligentes
+                  </Text>
+                </VStack>
+              </HStack>
+
+              <IconButton
+                size="xs"
+                variant="ghost"
+                onClick={onFechar}
+                aria-label="Fechar modal"
+                borderRadius="full"
+              >
+                <X size={16} />
+              </IconButton>
+            </Flex>
+
+            <Dialog.Body p={5} maxH="70vh" overflowY="auto">
+              <VStack gap={5} align="stretch">
+                <Box
+                  p={3.5}
+                  borderRadius="8px"
+                  bg="cirqueira.brand.500/10"
+                  borderWidth="1px"
+                  borderColor="cirqueira.brand.500/20"
+                >
+                  <HStack justify="space-between" align="center" mb={2}>
+                    <HStack gap={1.5} color="cirqueira.brand.400" fontSize="xs" fontWeight="bold">
+                      <Sparkles size={14} />
+                      <Text as="span">Escolha a Estratégia de Distribuição</Text>
+                    </HStack>
+                    <Badge size="xs" variant="subtle" colorPalette="brand">
+                      Automático
+                    </Badge>
                   </HStack>
 
-                  <HStack gap={2}>
+                  <HStack gap={2} flexWrap="wrap">
                     <Button
-                      size="2xs"
-                      variant="outline"
-                      colorPalette="brand"
-                      onClick={handleInverterOrdem}
-                      title="Inverter a sequência em que os vídeos recebem os horários"
+                      size="xs"
+                      variant={modo === 'retroativo' ? 'solid' : 'outline'}
+                      colorPalette={modo === 'retroativo' ? 'brand' : 'gray'}
+                      onClick={() => {
+                        setModo('retroativo')
+                        setAjustesManuais({})
+                      }}
+                      borderRadius="full"
                     >
-                      <ArrowDownUp size={12} style={{ marginRight: '4px' }} />
-                      <Text as="span">
-                        {ordemInvertida ? 'Ordem: Mais Recente 1º' : 'Ordem: 1º Baixado 1º'}
-                      </Text>
+                      <ArrowDownUp size={13} style={{ marginRight: '4px' }} />
+                      <Text as="span">Retroativo do Download (-2h por vídeo)</Text>
                     </Button>
 
-                    {Object.keys(ajustesManuais).length > 0 && (
+                    <Button
+                      size="xs"
+                      variant={modo === 'uniforme' ? 'solid' : 'outline'}
+                      colorPalette={modo === 'uniforme' ? 'brand' : 'gray'}
+                      onClick={() => {
+                        setModo('uniforme')
+                        setAjustesManuais({})
+                      }}
+                      borderRadius="full"
+                    >
+                      <Clock size={13} style={{ marginRight: '4px' }} />
+                      <Text as="span">Espalhar pelo Dia (08h às 22h)</Text>
+                    </Button>
+
+                    <Button
+                      size="xs"
+                      variant={modo === 'organico' ? 'solid' : 'outline'}
+                      colorPalette={modo === 'organico' ? 'brand' : 'gray'}
+                      onClick={() => {
+                        setModo('organico')
+                        setAjustesManuais({})
+                      }}
+                      borderRadius="full"
+                    >
+                      <Dices size={13} style={{ marginRight: '4px' }} />
+                      <Text as="span">Orgânico / Turnos Reais</Text>
+                    </Button>
+                  </HStack>
+                </Box>
+
+                <Grid templateColumns={{ base: '1fr', md: '1.2fr 2fr' }} gap={3}>
+                  <Field.Root>
+                    <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                      Data Base de Aplicação
+                    </Field.Label>
+                    <Input
+                      type="date"
+                      value={dataBase}
+                      onChange={(e) => {
+                        setDataBase(e.target.value)
+                        setAjustesManuais({})
+                      }}
+                      bg="bg.muted"
+                      borderColor="border.subtle"
+                      borderRadius="8px"
+                      fontSize="xs"
+                      h={9}
+                    />
+                  </Field.Root>
+
+                  {modo === 'retroativo' && (
+                    <Grid templateColumns="1fr 1fr" gap={2}>
+                      <Field.Root>
+                        <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                          Horário Final (Download)
+                        </Field.Label>
+                        <Input
+                          type="time"
+                          value={horaBaseRetroativa}
+                          onChange={(e) => setHoraBaseRetroativa(e.target.value)}
+                          bg="bg.muted"
+                          borderColor="border.subtle"
+                          borderRadius="8px"
+                          fontSize="xs"
+                          h={9}
+                        />
+                      </Field.Root>
+
+                      <Field.Root>
+                        <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                          Passo Retroativo
+                        </Field.Label>
+                        <NativeSelect.Root size="sm">
+                          <NativeSelect.Field
+                            value={passoRetroativoMinutos}
+                            onChange={(e) => setPassoRetroativoMinutos(Number(e.target.value))}
+                            bg="bg.muted"
+                            borderColor="border.subtle"
+                            borderRadius="8px"
+                            fontSize="xs"
+                            h={9}
+                          >
+                            <option value={30}>A cada 30 minutos</option>
+                            <option value={60}>A cada 1 hora</option>
+                            <option value={90}>A cada 1h 30m</option>
+                            <option value={120}>A cada 2 horas (Recomendado)</option>
+                            <option value={180}>A cada 3 horas</option>
+                            <option value={240}>A cada 4 horas</option>
+                          </NativeSelect.Field>
+                          <NativeSelect.Indicator />
+                        </NativeSelect.Root>
+                      </Field.Root>
+                    </Grid>
+                  )}
+
+                  {modo === 'uniforme' && (
+                    <Grid templateColumns="1fr 1fr" gap={2}>
+                      <Field.Root>
+                        <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                          Horário Inicial
+                        </Field.Label>
+                        <Input
+                          type="time"
+                          value={horaInicioUniforme}
+                          onChange={(e) => setHoraInicioUniforme(e.target.value)}
+                          bg="bg.muted"
+                          borderColor="border.subtle"
+                          borderRadius="8px"
+                          fontSize="xs"
+                          h={9}
+                        />
+                      </Field.Root>
+
+                      <Field.Root>
+                        <Field.Label fontSize="xs" fontWeight="semibold" color="fg.subtle">
+                          Horário Final
+                        </Field.Label>
+                        <Input
+                          type="time"
+                          value={horaFimUniforme}
+                          onChange={(e) => setHoraFimUniforme(e.target.value)}
+                          bg="bg.muted"
+                          borderColor="border.subtle"
+                          borderRadius="8px"
+                          fontSize="xs"
+                          h={9}
+                        />
+                      </Field.Root>
+                    </Grid>
+                  )}
+
+                  {modo === 'organico' && (
+                    <Flex align="center" gap={2} p={2} bg="bg.muted/20" borderRadius="8px">
+                      <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                        <Info size={14} color="currentColor" />
+                      </Box>
+                      <Text fontSize="xs" color="fg.subtle">
+                        Distribui entre os picos de maior engajamento (manhã, almoço, tarde, noite)
+                        com minutos variados.
+                      </Text>
+                    </Flex>
+                  )}
+                </Grid>
+
+                <Box
+                  borderRadius="8px"
+                  borderWidth="1px"
+                  borderColor="border.subtle"
+                  overflow="hidden"
+                  bg="bg.panel"
+                >
+                  <Flex
+                    justify="space-between"
+                    align="center"
+                    p={3}
+                    px={4}
+                    bg="bg.muted/30"
+                    borderBottomWidth="1px"
+                    borderColor="border.subtle"
+                    flexWrap="wrap"
+                    gap={2}
+                  >
+                    <HStack gap={2}>
+                      <Text fontSize="xs" fontWeight="bold" color="fg">
+                        Pré-visualização do Cronograma ({total} itens)
+                      </Text>
+                      {Object.keys(ajustesManuais).length > 0 && (
+                        <Badge size="xs" colorPalette="amber">
+                          {Object.keys(ajustesManuais).length} ajustado(s) manualmente
+                        </Badge>
+                      )}
+                    </HStack>
+
+                    <HStack gap={2}>
                       <Button
                         size="2xs"
-                        variant="ghost"
-                        onClick={handleResetarAjustes}
-                        color="fg.subtle"
+                        variant="outline"
+                        colorPalette="brand"
+                        onClick={handleInverterOrdem}
+                        title="Inverter a sequência em que os vídeos recebem os horários"
                       >
-                        <RotateCcw size={12} style={{ marginRight: '4px' }} />
-                        <Text as="span">Restaurar cálculo</Text>
+                        <ArrowDownUp size={12} style={{ marginRight: '4px' }} />
+                        <Text as="span">
+                          {ordemInvertida ? 'Ordem: Mais Recente 1º' : 'Ordem: 1º Baixado 1º'}
+                        </Text>
                       </Button>
-                    )}
-                  </HStack>
-                </Flex>
 
-                <VStack gap={0} align="stretch" maxH="38vh" overflowY="auto">
-                  {listaHorariosCalculados.map((linha, index) => {
-                    const { item, data, hora } = linha
-                    const originalHora = formatarHorarioMidia(item)
-                    const originalData = formatarDataMidia(item.metadata?.data, item.criadoEm)
-                    const titulo = item.metadata?.titulo || `Vídeo ${item.hash.slice(0, 10)}`
+                      {Object.keys(ajustesManuais).length > 0 && (
+                        <Button
+                          size="2xs"
+                          variant="ghost"
+                          onClick={handleResetarAjustes}
+                          color="fg.subtle"
+                        >
+                          <RotateCcw size={12} style={{ marginRight: '4px' }} />
+                          <Text as="span">Restaurar cálculo</Text>
+                        </Button>
+                      )}
+                    </HStack>
+                  </Flex>
 
-                    return (
-                      <Flex
-                        key={item.uuid}
-                        align="center"
-                        justify="space-between"
-                        p={2.5}
-                        px={4}
-                        gap={3}
-                        borderBottomWidth="1px"
-                        borderColor="border.subtle"
-                        _last={{ borderBottomWidth: 0 }}
-                        _hover={{ bg: 'bg.muted/30' }}
-                      >
-                        <HStack gap={2} flex={1} minW={0}>
-                          <HStack gap={0.5} align="center">
-                            <Badge
-                              size="xs"
-                              variant="subtle"
-                              colorPalette="gray"
-                              minW={5}
-                              textAlign="center"
-                            >
-                              #{index + 1}
-                            </Badge>
-                            <VStack gap={0}>
-                              <IconButton
-                                size="2xs"
-                                variant="ghost"
-                                disabled={index === 0}
-                                onClick={() => handleMoverItem(index, 'cima')}
-                                title="Mover para horário anterior (subir)"
-                                aria-label="Subir"
-                                borderRadius="xs"
-                                h="14px"
-                                minW="16px"
-                                p={0}
-                                opacity={index === 0 ? 0.25 : 0.75}
-                                _hover={{ opacity: 1, bg: 'bg.muted' }}
+                  <VStack gap={0} align="stretch" maxH="38vh" overflowY="auto">
+                    {listaHorariosCalculados.map((linha, index) => {
+                      const { item, data, hora } = linha
+                      const originalHora = formatarHorarioMidia(item)
+                      const originalData = formatarDataMidia(item.metadata?.data, item.criadoEm)
+                      const titulo = item.metadata?.titulo || `Vídeo ${item.hash.slice(0, 10)}`
+
+                      return (
+                        <Flex
+                          key={item.uuid}
+                          align="center"
+                          justify="space-between"
+                          p={2.5}
+                          px={4}
+                          gap={3}
+                          borderBottomWidth="1px"
+                          borderColor="border.subtle"
+                          _last={{ borderBottomWidth: 0 }}
+                          _hover={{ bg: 'bg.muted/30' }}
+                        >
+                          <HStack gap={2} flex={1} minW={0}>
+                            <HStack gap={0.5} align="center">
+                              <Badge
+                                size="xs"
+                                variant="subtle"
+                                colorPalette="gray"
+                                minW={5}
+                                textAlign="center"
                               >
-                                <ChevronUp size={12} />
-                              </IconButton>
-                              <IconButton
-                                size="2xs"
-                                variant="ghost"
-                                disabled={index === total - 1}
-                                onClick={() => handleMoverItem(index, 'baixo')}
-                                title="Mover para horário posterior (descer)"
-                                aria-label="Descer"
-                                borderRadius="xs"
-                                h="14px"
-                                minW="16px"
-                                p={0}
-                                opacity={index === total - 1 ? 0.25 : 0.75}
-                                _hover={{ opacity: 1, bg: 'bg.muted' }}
+                                #{index + 1}
+                              </Badge>
+                              <VStack gap={0}>
+                                <IconButton
+                                  size="2xs"
+                                  variant="ghost"
+                                  disabled={index === 0}
+                                  onClick={() => handleMoverItem(index, 'cima')}
+                                  title="Mover para horário anterior (subir)"
+                                  aria-label="Subir"
+                                  borderRadius="xs"
+                                  h="14px"
+                                  minW="16px"
+                                  p={0}
+                                  opacity={index === 0 ? 0.25 : 0.75}
+                                  _hover={{ opacity: 1, bg: 'bg.muted' }}
+                                >
+                                  <ChevronUp size={12} />
+                                </IconButton>
+                                <IconButton
+                                  size="2xs"
+                                  variant="ghost"
+                                  disabled={index === total - 1}
+                                  onClick={() => handleMoverItem(index, 'baixo')}
+                                  title="Mover para horário posterior (descer)"
+                                  aria-label="Descer"
+                                  borderRadius="xs"
+                                  h="14px"
+                                  minW="16px"
+                                  p={0}
+                                  opacity={index === total - 1 ? 0.25 : 0.75}
+                                  _hover={{ opacity: 1, bg: 'bg.muted' }}
+                                >
+                                  <ChevronDown size={12} />
+                                </IconButton>
+                              </VStack>
+                            </HStack>
+
+                            <VStack align="start" gap={0} minW={0} flex={1}>
+                              <Text
+                                fontSize="xs"
+                                fontWeight="medium"
+                                color="fg"
+                                truncate
+                                maxW="260px"
                               >
-                                <ChevronDown size={12} />
-                              </IconButton>
+                                {titulo}
+                              </Text>
+                              <Text fontSize="10px" color="fg.subtle">
+                                Original: {originalData} às {originalHora}
+                              </Text>
                             </VStack>
                           </HStack>
 
-                          <VStack align="start" gap={0} minW={0} flex={1}>
-                            <Text
+                          <HStack gap={2} flexShrink={0}>
+                            <Input
+                              type="date"
+                              size="xs"
+                              w="125px"
+                              value={data}
+                              onChange={(e) =>
+                                handleAlterarLinha(item.uuid, 'data', e.target.value)
+                              }
+                              bg="bg.muted"
+                              borderColor="border.subtle"
+                              borderRadius="8px"
                               fontSize="xs"
-                              fontWeight="medium"
-                              color="fg"
-                              truncate
-                              maxW="260px"
-                            >
-                              {titulo}
-                            </Text>
-                            <Text fontSize="10px" color="fg.subtle">
-                              Original: {originalData} às {originalHora}
-                            </Text>
-                          </VStack>
-                        </HStack>
+                              h={7}
+                            />
 
-                        <HStack gap={2} flexShrink={0}>
-                          <Input
-                            type="date"
-                            size="xs"
-                            w="125px"
-                            value={data}
-                            onChange={(e) => handleAlterarLinha(item.uuid, 'data', e.target.value)}
-                            bg="bg.muted"
-                            borderColor="border.subtle"
-                            borderRadius="md"
-                            fontSize="xs"
-                            h={7}
-                          />
+                            <Input
+                              type="time"
+                              size="xs"
+                              w="90px"
+                              value={hora}
+                              onChange={(e) =>
+                                handleAlterarLinha(item.uuid, 'hora', e.target.value)
+                              }
+                              bg="bg.muted"
+                              borderColor="border.subtle"
+                              borderRadius="8px"
+                              fontSize="xs"
+                              h={7}
+                            />
 
-                          <Input
-                            type="time"
-                            size="xs"
-                            w="90px"
-                            value={hora}
-                            onChange={(e) => handleAlterarLinha(item.uuid, 'hora', e.target.value)}
-                            bg="bg.muted"
-                            borderColor="border.subtle"
-                            borderRadius="md"
-                            fontSize="xs"
-                            h={7}
-                          />
-
-                          <HStack gap={1}>
-                            <IconButton
-                              size="2xs"
-                              variant="ghost"
-                              onClick={() => handleDeslocarLinha(item.uuid, -15)}
-                              title="Subtrair 15 minutos"
-                              borderRadius="md"
-                              fontSize="10px"
-                            >
-                              -15m
-                            </IconButton>
-                            <IconButton
-                              size="2xs"
-                              variant="ghost"
-                              onClick={() => handleDeslocarLinha(item.uuid, 15)}
-                              title="Adicionar 15 minutos"
-                              borderRadius="md"
-                              fontSize="10px"
-                            >
-                              +15m
-                            </IconButton>
+                            <HStack gap={1}>
+                              <IconButton
+                                size="2xs"
+                                variant="ghost"
+                                onClick={() => handleDeslocarLinha(item.uuid, -15)}
+                                title="Subtrair 15 minutos"
+                                borderRadius="full"
+                                fontSize="10px"
+                              >
+                                -15m
+                              </IconButton>
+                              <IconButton
+                                size="2xs"
+                                variant="ghost"
+                                onClick={() => handleDeslocarLinha(item.uuid, 15)}
+                                title="Adicionar 15 minutos"
+                                borderRadius="full"
+                                fontSize="10px"
+                              >
+                                +15m
+                              </IconButton>
+                            </HStack>
                           </HStack>
-                        </HStack>
-                      </Flex>
-                    )
-                  })}
-                </VStack>
-              </Box>
-            </VStack>
-          </Dialog.Body>
+                        </Flex>
+                      )
+                    })}
+                  </VStack>
+                </Box>
+              </VStack>
+            </Dialog.Body>
 
-          <Flex
-            align="center"
-            justify="space-between"
-            px={5}
-            py={3.5}
-            borderTopWidth="1px"
-            borderColor="border.subtle"
-            bg="bg.muted/20"
-          >
-            <HStack gap={2} fontSize="xs" color="fg.subtle">
-              <Box as="span" color="cirqueira.brand.400" display="inline-flex">
-                <Calendar size={13} color="currentColor" />
-              </Box>
-              <Text as="span">
-                {listaHorariosCalculados[0]?.hora} até {listaHorariosCalculados[total - 1]?.hora}
-              </Text>
-            </HStack>
+            <Flex
+              align="center"
+              justify="space-between"
+              px={5}
+              py={3.5}
+              borderTopWidth="1px"
+              borderColor="border.subtle"
+              bg="bg.muted/20"
+            >
+              <HStack gap={2} fontSize="xs" color="fg.subtle">
+                <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                  <Calendar size={13} color="currentColor" />
+                </Box>
+                <Text as="span">
+                  {listaHorariosCalculados[0]?.hora} até {listaHorariosCalculados[total - 1]?.hora}
+                </Text>
+              </HStack>
 
-            <HStack gap={2}>
-              <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="lg">
-                Cancelar
-              </Button>
-              <Button
-                size="sm"
-                bg="cirqueira.brand.500"
-                _hover={{ bg: 'cirqueira.brand.600' }}
-                color="cirqueira.grey.0"
-                disabled={pendente || total === 0}
-                onClick={handleConfirmar}
-                borderRadius="lg"
-                fontWeight="semibold"
-              >
-                {pendente && (
-                  <Loader2
-                    size={14}
-                    style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
-                  />
-                )}
-                <Text as="span">Salvar {total} Horários Distribuídos</Text>
-              </Button>
-            </HStack>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Positioner>
-    </Portal>
-  </Dialog.Root>
+              <HStack gap={2}>
+                <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="full">
+                  Cancelar
+                </Button>
+                <Button
+                  size="sm"
+                  bg="cirqueira.brand.500"
+                  _hover={{ bg: 'cirqueira.brand.600' }}
+                  color="cirqueira.grey.0"
+                  disabled={pendente || total === 0}
+                  onClick={handleConfirmar}
+                  borderRadius="full"
+                  fontWeight="semibold"
+                >
+                  {pendente && (
+                    <Loader2
+                      size={14}
+                      style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                    />
+                  )}
+                  <Text as="span">Salvar {total} Horários Distribuídos</Text>
+                </Button>
+              </HStack>
+            </Flex>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 })

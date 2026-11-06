@@ -56,14 +56,14 @@ export const TabelaEnviosGoogleFotos = memo(function TabelaEnviosGoogleFotos() {
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
-      borderRadius="xl"
+      borderRadius="8px"
       shadow="sm"
     >
       <Card.Body p={0}>
         <VStack align="stretch" gap={4} p={4} borderBottomWidth="1px" borderColor="border.subtle">
           <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={3}>
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="lg" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
+              <Box p={2} borderRadius="8px" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
                 <Icon as={History} boxSize={5} />
               </Box>
               <VStack align="flex-start" gap={0.5}>
@@ -77,17 +77,17 @@ export const TabelaEnviosGoogleFotos = memo(function TabelaEnviosGoogleFotos() {
             </HStack>
 
             <HStack gap={2} flexWrap="wrap">
-              <Badge size="sm" variant="subtle" colorPalette="green" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="green">
                 {resumo?.enviados ?? 0} enviados em 24h
               </Badge>
-              <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="red">
                 {resumo?.falhas ?? 0} falhas em 24h
               </Badge>
-              <Badge size="sm" variant="subtle" colorPalette="teal" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="teal">
                 {resumo?.reaproveitados ?? 0} já existiam
               </Badge>
               {(resumo?.enviando ?? 0) > 0 && (
-                <Badge size="sm" variant="subtle" colorPalette="amber" borderRadius="md">
+                <Badge size="sm" variant="subtle" colorPalette="amber">
                   {resumo?.enviando} enviando
                 </Badge>
               )}
@@ -99,7 +99,7 @@ export const TabelaEnviosGoogleFotos = memo(function TabelaEnviosGoogleFotos() {
               <Button
                 key={filtro.rotulo}
                 size="xs"
-                borderRadius="lg"
+                borderRadius="full"
                 variant={filtroStatus === filtro.valor ? 'solid' : 'ghost'}
                 colorPalette={filtroStatus === filtro.valor ? 'brand' : 'gray'}
                 onClick={() => handleFiltrar(filtro.valor)}
@@ -113,7 +113,7 @@ export const TabelaEnviosGoogleFotos = memo(function TabelaEnviosGoogleFotos() {
         {isLoading && (
           <VStack align="stretch" gap={2} p={4}>
             {LINHAS_CARREGANDO.map((chave) => (
-              <Skeleton key={chave} h={10} borderRadius="md" />
+              <Skeleton key={chave} h={10} borderRadius="8px" />
             ))}
           </VStack>
         )}
@@ -174,7 +174,7 @@ export const TabelaEnviosGoogleFotos = memo(function TabelaEnviosGoogleFotos() {
               <Button
                 size="xs"
                 variant="ghost"
-                borderRadius="lg"
+                borderRadius="full"
                 disabled={pagina <= 1}
                 onClick={() => setPagina((atual) => Math.max(1, atual - 1))}
               >
@@ -184,7 +184,7 @@ export const TabelaEnviosGoogleFotos = memo(function TabelaEnviosGoogleFotos() {
               <Button
                 size="xs"
                 variant="ghost"
-                borderRadius="lg"
+                borderRadius="full"
                 disabled={pagina >= totalPaginas}
                 onClick={() => setPagina((atual) => atual + 1)}
               >

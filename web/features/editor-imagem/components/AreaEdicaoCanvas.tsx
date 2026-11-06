@@ -49,7 +49,7 @@ export function AreaEdicaoCanvas({
   const tamanhoFonteTela = textoEmEdicao ? textoEmEdicao.tamanhoFonte * textoEmEdicao.escalaTela : 0
 
   return (
-    <Box position="relative" lineHeight={0} shadow="lg" borderRadius="sm" maxW="full">
+    <Box position="relative" lineHeight={0} shadow="lg" borderRadius="8px" maxW="full">
       <chakra.canvas
         key={imagem.id}
         ref={registrarCanvasBase}
@@ -58,7 +58,7 @@ export function AreaEdicaoCanvas({
         maxH={{ base: '62dvh', md: 'calc(100dvh - 300px)' }}
         w="auto"
         h="auto"
-        borderRadius="sm"
+        borderRadius="8px"
       />
       <chakra.canvas
         ref={registrarCanvasSobreposicao}
@@ -88,7 +88,7 @@ export function AreaEdicaoCanvas({
           borderWidth="1px"
           borderStyle="dashed"
           borderColor="fg.muted"
-          borderRadius="sm"
+          borderRadius="8px"
           lineHeight={1.2}
           placeholder="Digite..."
           value={textoEmEdicao.valor}

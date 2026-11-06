@@ -263,7 +263,7 @@ const UploadManual = memo(function UploadManual() {
               <HStack gap={2.5} align="center" flexWrap="wrap">
                 <Box
                   p={2}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="cirqueira.brand.500/15"
                   color="cirqueira.brand.400"
                   display="inline-flex"
@@ -276,24 +276,24 @@ const UploadManual = memo(function UploadManual() {
                 </Text>
 
                 <HStack gap={1.5} pl={1} flexWrap="wrap">
-                  <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+                  <Badge size="sm" variant="subtle" colorPalette="brand">
                     {totalTriagem} {totalTriagem === 1 ? 'mídia' : 'mídias'}
                   </Badge>
 
                   {semCategoriaCount > 0 && (
-                    <Badge size="sm" variant="subtle" colorPalette="amber" borderRadius="md">
+                    <Badge size="sm" variant="subtle" colorPalette="amber">
                       {semCategoriaCount} sem categoria
                     </Badge>
                   )}
 
                   {classificadosCount > 0 && (
-                    <Badge size="sm" variant="subtle" colorPalette="green" borderRadius="md">
+                    <Badge size="sm" variant="subtle" colorPalette="green">
                       {classificadosCount} classificadas
                     </Badge>
                   )}
 
                   {errosCount > 0 && (
-                    <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md">
+                    <Badge size="sm" variant="subtle" colorPalette="red">
                       {errosCount} erros
                     </Badge>
                   )}
@@ -312,7 +312,7 @@ const UploadManual = memo(function UploadManual() {
                 borderColor="border.subtle"
                 px={3}
                 py={1.5}
-                borderRadius="lg"
+                borderRadius="8px"
                 fontSize="xs"
                 color="fg.subtle"
                 display={{ base: 'none', md: 'flex' }}
@@ -329,7 +329,7 @@ const UploadManual = memo(function UploadManual() {
                 variant="outline"
                 disabled={isFetching}
                 onClick={() => refetch()}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <RefreshCw
                   size={14}
@@ -372,7 +372,7 @@ const UploadManual = memo(function UploadManual() {
                 <Text as="h2" fontSize="md" fontWeight="bold" color="fg">
                   Triagem de Mídias Recebidas
                 </Text>
-                <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+                <Badge size="xs" variant="subtle" colorPalette="brand">
                   {totalTriagem} total
                 </Badge>
               </HStack>
@@ -388,7 +388,7 @@ const UploadManual = memo(function UploadManual() {
               <Box
                 p={3}
                 px={4}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.amber.500/10"
                 borderWidth="1px"
                 borderColor="cirqueira.amber.500/25"
@@ -400,7 +400,7 @@ const UploadManual = memo(function UploadManual() {
                   gap={2.5}
                 >
                   <HStack gap={2} flexWrap="wrap">
-                    <Badge colorPalette="amber" variant="solid" size="sm" borderRadius="md" fontWeight="bold">
+                    <Badge colorPalette="amber" variant="solid" size="sm" fontWeight="bold">
                       <HStack gap={1}>
                         <Zap size={12} />
                         <Text as="span">{semCategoriaCount} sem categoria</Text>
@@ -420,7 +420,7 @@ const UploadManual = memo(function UploadManual() {
                         colorPalette="amber"
                         disabled={mutationCategorizarLote.isPending}
                         onClick={() => handleCategorizarTodasSemCategoria(cat.uuid)}
-                        borderRadius="md"
+                        borderRadius="full"
                         fontSize="11px"
                         h="26px"
                         fontWeight="semibold"
@@ -432,7 +432,7 @@ const UploadManual = memo(function UploadManual() {
                       size="xs"
                       variant="ghost"
                       onClick={handleSelecionarTodasSemCategoria}
-                      borderRadius="md"
+                      borderRadius="full"
                       fontSize="11px"
                       h="26px"
                       color="fg.subtle"
@@ -508,7 +508,7 @@ const UploadManual = memo(function UploadManual() {
           <Portal>
             <Dialog.Backdrop bg="cirqueira.grey.950/80" />
             <Dialog.Positioner>
-            <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+            <Dialog.Content borderRadius="8px" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
               <Dialog.Header pb={2}>
                 <HStack gap={2} color="cirqueira.red.500">
                   <AlertTriangle size={18} />
@@ -531,7 +531,7 @@ const UploadManual = memo(function UploadManual() {
                   size="sm"
                   variant="ghost"
                   onClick={() => setModalConfirmarApagar(false)}
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   Cancelar
                 </Button>
@@ -540,7 +540,7 @@ const UploadManual = memo(function UploadManual() {
                   colorPalette="red"
                   onClick={handleConfirmarApagar}
                   disabled={mutationApagarLote.isPending}
-                  borderRadius="lg"
+                  borderRadius="full"
                   fontWeight="bold"
                 >
                   {mutationApagarLote.isPending ? 'Apagando...' : 'Sim, Excluir'}

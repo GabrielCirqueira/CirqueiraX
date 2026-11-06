@@ -1,3 +1,5 @@
+import { useLocalStorageState, useSEO } from '@/shared/hooks'
+import { CHAVES_STORAGE } from '@/shared/utils'
 import {
   Badge,
   Box,
@@ -42,9 +44,6 @@ import { ModalRemoverCategoriaLote } from './components/ModalRemoverCategoriaLot
 import { ModalVisualizarMidia } from './components/ModalVisualizarMidia'
 import { PainelFilaDownloads } from './components/PainelFilaDownloads'
 import { TabelaVideos } from './components/TabelaVideos'
-import { useLocalStorageState, useSEO } from '@/shared/hooks'
-import { CHAVES_STORAGE } from '@/shared/utils'
-import { alternarSelecao, aplicarSelecaoIntervalo } from './utils/selecaoIntervalo'
 import {
   useApagarLote,
   useAtualizarMetadata,
@@ -65,6 +64,7 @@ import type {
   ItemDistribuicaoHorario,
   MediaItem,
 } from './types'
+import { alternarSelecao, aplicarSelecaoIntervalo } from './utils/selecaoIntervalo'
 
 type ModoVisualizacaoDownloads = 'grid' | 'compacto' | 'galeria' | 'lista'
 
@@ -81,7 +81,8 @@ const POR_PAGINA_PERMITIDOS = [25, 50, 100] as const
 export default function DownloadsVideo() {
   useSEO({
     title: 'Downloads de Vídeos',
-    description: 'Gerencie e monitore os downloads de vídeos sociais, metadados enriquecidos, categorias e status de sincronização.',
+    description:
+      'Gerencie e monitore os downloads de vídeos sociais, metadados enriquecidos, categorias e status de sincronização.',
     keywords: 'downloads de videos, tiktok, twitter, instagram, youtube, cirqueirax',
   })
 
@@ -437,7 +438,7 @@ export default function DownloadsVideo() {
             <HStack gap={2.5} align="center" flexWrap="wrap">
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="full"
                 bg="cirqueira.brand.500/15"
                 color="cirqueira.brand.400"
                 display="inline-flex"
@@ -448,28 +449,29 @@ export default function DownloadsVideo() {
                 Downloads de Vídeo
               </Text>
               <HStack gap={1.5} pl={1}>
-                <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+                <Badge size="sm" variant="subtle" colorPalette="brand">
                   {total} {total === 1 ? 'mídia' : 'mídias'}
                 </Badge>
                 {concluidosCount > 0 && (
-                  <Badge size="sm" variant="subtle" colorPalette="green" borderRadius="md">
+                  <Badge size="sm" variant="subtle" colorPalette="green">
                     {concluidosCount} prontas
                   </Badge>
                 )}
                 {processandoCount > 0 && (
-                  <Badge size="sm" variant="subtle" colorPalette="blue" borderRadius="md">
+                  <Badge size="sm" variant="subtle" colorPalette="blue">
                     {processandoCount} na fila
                   </Badge>
                 )}
                 {errosCount > 0 && (
-                  <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md">
+                  <Badge size="sm" variant="subtle" colorPalette="red">
                     {errosCount} erros
                   </Badge>
                 )}
               </HStack>
             </HStack>
             <Text fontSize="xs" color="fg.subtle">
-              Downloads inteligentes com extração de metadados, corte e sincronização com Google Fotos
+              Downloads inteligentes com extração de metadados, corte e sincronização com Google
+              Fotos
             </Text>
           </VStack>
 
@@ -480,7 +482,7 @@ export default function DownloadsVideo() {
               borderColor="border.subtle"
               px={3}
               py={1.5}
-              borderRadius="lg"
+              borderRadius="full"
               fontSize="xs"
               color="fg.subtle"
               display={{ base: 'none', md: 'flex' }}
@@ -499,7 +501,7 @@ export default function DownloadsVideo() {
                 variant="subtle"
                 disabled={pendenteRetentarTodos}
                 onClick={() => retentarTodosMutate()}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 {pendenteRetentarTodos ? (
                   <Loader2
@@ -518,7 +520,7 @@ export default function DownloadsVideo() {
               variant="outline"
               disabled={isFetching}
               onClick={() => refetch()}
-              borderRadius="lg"
+              borderRadius="full"
             >
               <RefreshCw
                 size={14}
@@ -545,12 +547,18 @@ export default function DownloadsVideo() {
           gap={3}
           bg="bg.panel"
           p={3}
-          borderRadius="xl"
+          borderRadius="8px"
           borderWidth="1px"
           borderColor="border.subtle"
+          shadow="sm"
         >
           <HStack gap={2} flex={1} flexWrap="wrap">
-            <Box position="relative" flex={1} minW={{ base: 'full', sm: '220px' }} maxW={{ base: 'full', md: '360px' }}>
+            <Box
+              position="relative"
+              flex={1}
+              minW={{ base: 'full', sm: '220px' }}
+              maxW={{ base: 'full', md: '360px' }}
+            >
               <Box
                 position="absolute"
                 left={3}
@@ -575,7 +583,7 @@ export default function DownloadsVideo() {
                 h={9}
                 pl={8}
                 pr={busca ? 7 : 3}
-                borderRadius="lg"
+                borderRadius="full"
               />
               {busca && (
                 <Button
@@ -590,7 +598,7 @@ export default function DownloadsVideo() {
                     setPagina(1)
                   }}
                   p={0.5}
-                  borderRadius="lg"
+                  borderRadius="full"
                   aria-label="Limpar busca"
                 >
                   <X size={13} />
@@ -608,7 +616,7 @@ export default function DownloadsVideo() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={9}
                 >
@@ -639,7 +647,7 @@ export default function DownloadsVideo() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={9}
                 >
@@ -658,7 +666,7 @@ export default function DownloadsVideo() {
                 variant={statusFiltro === '' ? 'solid' : 'ghost'}
                 colorPalette={statusFiltro === '' ? 'brand' : 'gray'}
                 onClick={() => handleFiltrarRapidoStatus('')}
-                borderRadius="md"
+                borderRadius="full"
                 fontSize="xs"
                 h={8}
                 px={3}
@@ -670,7 +678,7 @@ export default function DownloadsVideo() {
                 variant={statusFiltro === 'concluido' ? 'solid' : 'ghost'}
                 colorPalette={statusFiltro === 'concluido' ? 'brand' : 'gray'}
                 onClick={() => handleFiltrarRapidoStatus('concluido')}
-                borderRadius="md"
+                borderRadius="full"
                 fontSize="xs"
                 h={8}
                 px={3}
@@ -682,7 +690,7 @@ export default function DownloadsVideo() {
                 variant={statusFiltro === 'baixando' ? 'solid' : 'ghost'}
                 colorPalette={statusFiltro === 'baixando' ? 'brand' : 'gray'}
                 onClick={() => handleFiltrarRapidoStatus('baixando')}
-                borderRadius="md"
+                borderRadius="full"
                 fontSize="xs"
                 h={8}
                 px={3}
@@ -694,7 +702,7 @@ export default function DownloadsVideo() {
                 variant={statusFiltro === 'erro' ? 'solid' : 'ghost'}
                 colorPalette={statusFiltro === 'erro' ? 'red' : 'gray'}
                 onClick={() => handleFiltrarRapidoStatus('erro')}
-                borderRadius="md"
+                borderRadius="full"
                 fontSize="xs"
                 h={8}
                 px={3}
@@ -703,10 +711,18 @@ export default function DownloadsVideo() {
               </Button>
               <Button
                 size="xs"
-                variant={statusFiltro === 'arquivo_removido' || statusFiltro === 'arquivo_expurgado' ? 'solid' : 'ghost'}
-                colorPalette={statusFiltro === 'arquivo_removido' || statusFiltro === 'arquivo_expurgado' ? 'orange' : 'gray'}
+                variant={
+                  statusFiltro === 'arquivo_removido' || statusFiltro === 'arquivo_expurgado'
+                    ? 'solid'
+                    : 'ghost'
+                }
+                colorPalette={
+                  statusFiltro === 'arquivo_removido' || statusFiltro === 'arquivo_expurgado'
+                    ? 'orange'
+                    : 'gray'
+                }
                 onClick={() => handleFiltrarRapidoStatus('arquivo_removido')}
-                borderRadius="md"
+                borderRadius="full"
                 fontSize="xs"
                 h={8}
                 px={3}
@@ -725,7 +741,7 @@ export default function DownloadsVideo() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={9}
                 >
@@ -746,7 +762,7 @@ export default function DownloadsVideo() {
                 variant="ghost"
                 onClick={handleLimparFiltros}
                 fontSize="xs"
-                borderRadius="lg"
+                borderRadius="full"
                 color="fg.subtle"
                 _hover={{ color: 'fg' }}
                 h={9}
@@ -763,7 +779,7 @@ export default function DownloadsVideo() {
                 gap={0.5}
                 bg="bg.muted"
                 p={1}
-                borderRadius="lg"
+                borderRadius="full"
                 borderWidth="1px"
                 borderColor="border.subtle"
                 display={{ base: 'none', lg: 'flex' }}
@@ -786,7 +802,7 @@ export default function DownloadsVideo() {
                     variant={colunasGrid === qtd ? 'solid' : 'ghost'}
                     colorPalette={colunasGrid === qtd ? 'brand' : 'gray'}
                     onClick={() => setColunasGrid(qtd)}
-                    borderRadius="md"
+                    borderRadius="full"
                     h={6}
                     minW={6}
                     px={1.5}
@@ -805,7 +821,7 @@ export default function DownloadsVideo() {
                 gap={0.5}
                 bg="bg.muted"
                 p={1}
-                borderRadius="lg"
+                borderRadius="full"
                 borderWidth="1px"
                 borderColor="border.subtle"
                 display={{ base: 'none', lg: 'flex' }}
@@ -828,7 +844,7 @@ export default function DownloadsVideo() {
                     variant={colunasCompacto === qtd ? 'solid' : 'ghost'}
                     colorPalette={colunasCompacto === qtd ? 'brand' : 'gray'}
                     onClick={() => setColunasCompacto(qtd)}
-                    borderRadius="md"
+                    borderRadius="full"
                     h={6}
                     minW={6}
                     px={1.5}
@@ -846,7 +862,7 @@ export default function DownloadsVideo() {
               gap={0.5}
               bg="bg.muted"
               p={1}
-              borderRadius="lg"
+              borderRadius="full"
               borderWidth="1px"
               borderColor="border.subtle"
             >
@@ -855,7 +871,7 @@ export default function DownloadsVideo() {
                 variant={modoVisualizacao === 'grid' ? 'solid' : 'ghost'}
                 colorPalette={modoVisualizacao === 'grid' ? 'brand' : 'gray'}
                 onClick={() => setModoVisualizacao('grid')}
-                borderRadius="md"
+                borderRadius="full"
                 h={7}
                 px={2}
                 fontSize="xs"
@@ -874,7 +890,7 @@ export default function DownloadsVideo() {
                 variant={modoVisualizacao === 'compacto' ? 'solid' : 'ghost'}
                 colorPalette={modoVisualizacao === 'compacto' ? 'brand' : 'gray'}
                 onClick={() => setModoVisualizacao('compacto')}
-                borderRadius="md"
+                borderRadius="full"
                 h={7}
                 px={2}
                 fontSize="xs"
@@ -893,7 +909,7 @@ export default function DownloadsVideo() {
                 variant={modoVisualizacao === 'galeria' ? 'solid' : 'ghost'}
                 colorPalette={modoVisualizacao === 'galeria' ? 'brand' : 'gray'}
                 onClick={() => setModoVisualizacao('galeria')}
-                borderRadius="md"
+                borderRadius="full"
                 h={7}
                 px={2}
                 fontSize="xs"
@@ -912,7 +928,7 @@ export default function DownloadsVideo() {
                 variant={modoVisualizacao === 'lista' ? 'solid' : 'ghost'}
                 colorPalette={modoVisualizacao === 'lista' ? 'brand' : 'gray'}
                 onClick={() => setModoVisualizacao('lista')}
-                borderRadius="md"
+                borderRadius="full"
                 h={7}
                 px={2}
                 fontSize="xs"
@@ -929,13 +945,7 @@ export default function DownloadsVideo() {
           </HStack>
         </Flex>
 
-        <Flex
-          align="center"
-          justify="space-between"
-          gap={2}
-          px={1}
-          flexWrap="wrap"
-        >
+        <Flex align="center" justify="space-between" gap={2} px={1} flexWrap="wrap">
           <HStack gap={1.5} flexWrap="wrap" align="center">
             <Text
               fontSize="11px"
@@ -954,7 +964,7 @@ export default function DownloadsVideo() {
                 setCategoriaFiltro('')
                 setPagina(1)
               }}
-              borderRadius="md"
+              borderRadius="full"
               fontSize="xs"
               h={7}
               px={2.5}
@@ -969,7 +979,7 @@ export default function DownloadsVideo() {
                 setCategoriaFiltro((prev) => (prev === 'sem_categoria' ? '' : 'sem_categoria'))
                 setPagina(1)
               }}
-              borderRadius="md"
+              borderRadius="full"
               fontSize="xs"
               h={7}
               px={2.5}
@@ -987,7 +997,7 @@ export default function DownloadsVideo() {
                 setCategoriaFiltro((prev) => (prev === 'com_categoria' ? '' : 'com_categoria'))
                 setPagina(1)
               }}
-              borderRadius="md"
+              borderRadius="full"
               fontSize="xs"
               h={7}
               px={2.5}
@@ -1008,7 +1018,7 @@ export default function DownloadsVideo() {
                   setCategoriaFiltro((prev) => (prev === cat.uuid ? '' : cat.uuid))
                   setPagina(1)
                 }}
-                borderRadius="md"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2.5}
@@ -1098,7 +1108,7 @@ export default function DownloadsVideo() {
                       setPorPagina(qtd)
                       setPagina(1)
                     }}
-                    borderRadius="md"
+                    borderRadius="full"
                     h={6}
                     px={2}
                     fontSize="xs"
@@ -1115,7 +1125,7 @@ export default function DownloadsVideo() {
                 variant="outline"
                 disabled={pagina <= 1 || isFetching}
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <ChevronLeft size={16} style={{ marginRight: '4px' }} />
                 <Text as="span">Anterior</Text>
@@ -1126,7 +1136,7 @@ export default function DownloadsVideo() {
                 variant="outline"
                 disabled={pagina >= totalPaginas || isFetching}
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <Text as="span">Próxima</Text>
                 <ChevronRight size={16} style={{ marginLeft: '4px' }} />
@@ -1179,254 +1189,255 @@ export default function DownloadsVideo() {
           size="md"
         >
           <Portal>
-            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
+            <Dialog.Backdrop bg="blackAlpha.800" />
             <Dialog.Positioner p={4}>
-            <Dialog.Content
-              bg="bg.panel"
-              borderWidth="1px"
-              borderColor="cirqueira.brand.500/30"
-              color="fg"
-              borderRadius="2xl"
-              shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 186, 156, 0.2)"
-              maxW="lg"
-              overflow="hidden"
-            >
-              <Flex
-                align="center"
-                justify="space-between"
-                p={4}
-                px={5}
-                borderBottomWidth="1px"
-                borderColor="border.subtle"
-                bg="bg.muted/30"
+              <Dialog.Content
+                bg="bg.panel"
+                borderWidth="1px"
+                borderColor="cirqueira.brand.500/30"
+                color="fg"
+                borderRadius="8px"
+                shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 186, 156, 0.2)"
+                maxW="lg"
+                overflow="hidden"
               >
-                <HStack gap={3}>
-                  <Box
-                    p={2.5}
-                    borderRadius="xl"
-                    bg="cirqueira.purple.500/15"
-                    color="cirqueira.purple.400"
-                    borderWidth="1px"
-                    borderColor="cirqueira.purple.500/30"
-                    display="inline-flex"
-                  >
-                    <FolderPlus size={20} />
-                  </Box>
-                  <VStack align="start" gap={0.5}>
-                    <Dialog.Title fontSize="md" fontWeight="bold">
-                      {categoriaAlvoUuid
-                        ? 'Categorizar Vídeo'
-                        : `Categorizar ${selecionados.length} Vídeos`}
-                    </Dialog.Title>
-                    <HStack gap={1.5}>
-                      <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
-                        {categoriaAlvoUuid ? '1 selecionado' : `${selecionados.length} selecionados`}
-                      </Badge>
-                      <Text fontSize="11px" color="fg.subtle">
-                        Selecione a categoria de destino
-                      </Text>
-                    </HStack>
-                  </VStack>
-                </HStack>
-
-                <IconButton
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setModalCategorizarAberto(false)}
-                  aria-label="Fechar"
-                  borderRadius="lg"
-                  color="fg.subtle"
-                  _hover={{ color: 'fg', bg: 'whiteAlpha.100' }}
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  p={4}
+                  px={5}
+                  borderBottomWidth="1px"
+                  borderColor="border.subtle"
+                  bg="bg.muted/30"
                 >
-                  <X size={16} />
-                </IconButton>
-              </Flex>
-
-              <Dialog.Body p={5}>
-                <VStack gap={3} alignItems="stretch">
-                  <Text
-                    fontSize="xs"
-                    fontWeight="semibold"
-                    color="fg.subtle"
-                    textTransform="uppercase"
-                    letterSpacing="wider"
-                  >
-                    Categorias Disponíveis
-                  </Text>
-
-                  {categorias.length === 0 ? (
+                  <HStack gap={3}>
                     <Box
-                      p={6}
-                      textAlign="center"
-                      borderRadius="xl"
-                      bg="bg.muted/30"
+                      p={2.5}
+                      borderRadius="full"
+                      bg="cirqueira.purple.500/15"
+                      color="cirqueira.purple.400"
                       borderWidth="1px"
-                      borderColor="border.subtle"
+                      borderColor="cirqueira.purple.500/30"
+                      display="inline-flex"
                     >
-                      <Text fontSize="sm" color="fg.subtle">
-                        Nenhuma categoria cadastrada ainda.
-                      </Text>
+                      <FolderPlus size={20} />
                     </Box>
-                  ) : (
-                    <VStack gap={2} maxH="280px" overflowY="auto" pr={1} alignItems="stretch">
-                      {categorias.map((cat) => {
-                        const selecionada = categoriaSelecionadaId === cat.uuid
-                        return (
-                          <Box
-                            key={cat.uuid}
-                            as="button"
-                            onClick={() => setCategoriaSelecionadaId(cat.uuid)}
-                            onDoubleClick={() => {
-                              setCategoriaSelecionadaId(cat.uuid)
-                              handleConfirmarCategorizar()
-                            }}
-                            p={3}
-                            px={3.5}
-                            borderRadius="xl"
-                            borderWidth="1.5px"
-                            borderColor={selecionada ? 'cirqueira.brand.500' : 'border.subtle'}
-                            bg={selecionada ? 'cirqueira.brand.500/10' : 'bg.muted/40'}
-                            _hover={{
-                              borderColor: selecionada
-                                ? 'cirqueira.brand.500'
-                                : 'border.emphasized',
-                              bg: selecionada ? 'cirqueira.brand.500/15' : 'bg.muted/80',
-                            }}
-                            transition="all 0.15s ease"
-                            textAlign="left"
-                            w="full"
-                            outline="none"
-                          >
-                            <Flex align="center" justify="space-between" gap={3}>
-                              <HStack gap={3}>
-                                <Box
-                                  p={2}
-                                  borderRadius="lg"
-                                  bg={selecionada ? 'cirqueira.brand.500/20' : 'bg.panel'}
-                                  color={selecionada ? 'cirqueira.brand.400' : 'fg.subtle'}
-                                  borderWidth="1px"
-                                  borderColor={
-                                    selecionada ? 'cirqueira.brand.500/30' : 'border.subtle'
-                                  }
-                                >
-                                  {cat.googlePhotosAlbumId ? (
-                                    <Cloud size={16} />
-                                  ) : (
-                                    <Folder size={16} />
-                                  )}
-                                </Box>
-                                <VStack align="start" gap={0.5}>
-                                  <Text
-                                    fontSize="sm"
-                                    fontWeight="bold"
-                                    color={selecionada ? 'fg' : 'fg.muted'}
-                                  >
-                                    {cat.nome}
-                                  </Text>
-                                  <HStack gap={1.5}>
-                                    {cat.googlePhotosAlbumId ? (
-                                      <Badge
-                                        size="xs"
-                                        variant="subtle"
-                                        colorPalette="cyan"
-                                        borderRadius="md"
-                                        fontSize="10px"
-                                      >
-                                        Google Fotos + Local
-                                      </Badge>
-                                    ) : (
-                                      <Badge
-                                        size="xs"
-                                        variant="subtle"
-                                        colorPalette="gray"
-                                        borderRadius="md"
-                                        fontSize="10px"
-                                      >
-                                        Armazenamento Local
-                                      </Badge>
-                                    )}
-                                  </HStack>
-                                </VStack>
-                              </HStack>
-
-                              {selecionada ? (
-                                <Box color="cirqueira.brand.400" display="inline-flex">
-                                  <CheckCircle2 size={20} />
-                                </Box>
-                              ) : (
-                                <Box
-                                  w={5}
-                                  h={5}
-                                  borderRadius="full"
-                                  borderWidth="1.5px"
-                                  borderColor="border.subtle"
-                                />
-                              )}
-                            </Flex>
-                          </Box>
-                        )
-                      })}
+                    <VStack align="start" gap={0.5}>
+                      <Dialog.Title fontSize="md" fontWeight="bold">
+                        {categoriaAlvoUuid
+                          ? 'Categorizar Vídeo'
+                          : `Categorizar ${selecionados.length} Vídeos`}
+                      </Dialog.Title>
+                      <HStack gap={1.5}>
+                        <Badge size="xs" variant="subtle" colorPalette="brand">
+                          {categoriaAlvoUuid
+                            ? '1 selecionado'
+                            : `${selecionados.length} selecionados`}
+                        </Badge>
+                        <Text fontSize="11px" color="fg.subtle">
+                          Selecione a categoria de destino
+                        </Text>
+                      </HStack>
                     </VStack>
-                  )}
-                </VStack>
-              </Dialog.Body>
-
-              <Dialog.Footer
-                p={4}
-                px={5}
-                borderTopWidth="1px"
-                borderColor="border.subtle"
-                bg="bg.muted/20"
-              >
-                <HStack justify="space-between" w="full">
-                  <Text
-                    fontSize="11px"
-                    color="fg.subtle"
-                    display={{ base: 'none', sm: 'inline' }}
-                  >
-                    Dica: clique duplo para aplicar direto
-                  </Text>
-                  <HStack gap={2}>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setModalCategorizarAberto(false)}
-                      borderRadius="lg"
-                      fontSize="xs"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorPalette="brand"
-                      disabled={
-                        !categoriaSelecionadaId ||
-                        pendenteCategorizarLote ||
-                        pendenteClassificarIndividual
-                      }
-                      onClick={handleConfirmarCategorizar}
-                      fontWeight="bold"
-                      borderRadius="lg"
-                      fontSize="xs"
-                      px={4}
-                    >
-                      {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
-                        <Loader2
-                          size={14}
-                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
-                        />
-                      )}
-                      <Text as="span">
-                        Confirmar ({categoriaAlvoUuid ? '1 vídeo' : `${selecionados.length} vídeos`})
-                      </Text>
-                    </Button>
                   </HStack>
-                </HStack>
-              </Dialog.Footer>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+
+                  <IconButton
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setModalCategorizarAberto(false)}
+                    aria-label="Fechar"
+                    borderRadius="full"
+                    color="fg.subtle"
+                    _hover={{ color: 'fg', bg: 'whiteAlpha.100' }}
+                  >
+                    <X size={16} />
+                  </IconButton>
+                </Flex>
+
+                <Dialog.Body p={5}>
+                  <VStack gap={3} alignItems="stretch">
+                    <Text
+                      fontSize="xs"
+                      fontWeight="semibold"
+                      color="fg.subtle"
+                      textTransform="uppercase"
+                      letterSpacing="wider"
+                    >
+                      Categorias Disponíveis
+                    </Text>
+
+                    {categorias.length === 0 ? (
+                      <Box
+                        p={6}
+                        textAlign="center"
+                        borderRadius="8px"
+                        bg="bg.muted/30"
+                        borderWidth="1px"
+                        borderColor="border.subtle"
+                      >
+                        <Text fontSize="sm" color="fg.subtle">
+                          Nenhuma categoria cadastrada ainda.
+                        </Text>
+                      </Box>
+                    ) : (
+                      <VStack gap={2} maxH="280px" overflowY="auto" pr={1} alignItems="stretch">
+                        {categorias.map((cat) => {
+                          const selecionada = categoriaSelecionadaId === cat.uuid
+                          return (
+                            <Box
+                              key={cat.uuid}
+                              as="button"
+                              onClick={() => setCategoriaSelecionadaId(cat.uuid)}
+                              onDoubleClick={() => {
+                                setCategoriaSelecionadaId(cat.uuid)
+                                handleConfirmarCategorizar()
+                              }}
+                              p={3}
+                              px={3.5}
+                              borderRadius="8px"
+                              borderWidth="1.5px"
+                              borderColor={selecionada ? 'cirqueira.brand.500' : 'border.subtle'}
+                              bg={selecionada ? 'cirqueira.brand.500/10' : 'bg.muted/40'}
+                              _hover={{
+                                borderColor: selecionada
+                                  ? 'cirqueira.brand.500'
+                                  : 'border.emphasized',
+                                bg: selecionada ? 'cirqueira.brand.500/15' : 'bg.muted/80',
+                              }}
+                              transition="all 0.15s ease"
+                              textAlign="left"
+                              w="full"
+                              outline="none"
+                            >
+                              <Flex align="center" justify="space-between" gap={3}>
+                                <HStack gap={3}>
+                                  <Box
+                                    p={2}
+                                    borderRadius="8px"
+                                    bg={selecionada ? 'cirqueira.brand.500/20' : 'bg.panel'}
+                                    color={selecionada ? 'cirqueira.brand.400' : 'fg.subtle'}
+                                    borderWidth="1px"
+                                    borderColor={
+                                      selecionada ? 'cirqueira.brand.500/30' : 'border.subtle'
+                                    }
+                                  >
+                                    {cat.googlePhotosAlbumId ? (
+                                      <Cloud size={16} />
+                                    ) : (
+                                      <Folder size={16} />
+                                    )}
+                                  </Box>
+                                  <VStack align="start" gap={0.5}>
+                                    <Text
+                                      fontSize="sm"
+                                      fontWeight="bold"
+                                      color={selecionada ? 'fg' : 'fg.muted'}
+                                    >
+                                      {cat.nome}
+                                    </Text>
+                                    <HStack gap={1.5}>
+                                      {cat.googlePhotosAlbumId ? (
+                                        <Badge
+                                          size="xs"
+                                          variant="subtle"
+                                          colorPalette="cyan"
+                                          fontSize="10px"
+                                        >
+                                          Google Fotos + Local
+                                        </Badge>
+                                      ) : (
+                                        <Badge
+                                          size="xs"
+                                          variant="subtle"
+                                          colorPalette="gray"
+                                          fontSize="10px"
+                                        >
+                                          Armazenamento Local
+                                        </Badge>
+                                      )}
+                                    </HStack>
+                                  </VStack>
+                                </HStack>
+
+                                {selecionada ? (
+                                  <Box color="cirqueira.brand.400" display="inline-flex">
+                                    <CheckCircle2 size={20} />
+                                  </Box>
+                                ) : (
+                                  <Box
+                                    w={5}
+                                    h={5}
+                                    borderRadius="full"
+                                    borderWidth="1.5px"
+                                    borderColor="border.subtle"
+                                  />
+                                )}
+                              </Flex>
+                            </Box>
+                          )
+                        })}
+                      </VStack>
+                    )}
+                  </VStack>
+                </Dialog.Body>
+
+                <Dialog.Footer
+                  p={4}
+                  px={5}
+                  borderTopWidth="1px"
+                  borderColor="border.subtle"
+                  bg="bg.muted/20"
+                >
+                  <HStack justify="space-between" w="full">
+                    <Text
+                      fontSize="11px"
+                      color="fg.subtle"
+                      display={{ base: 'none', sm: 'inline' }}
+                    >
+                      Dica: clique duplo para aplicar direto
+                    </Text>
+                    <HStack gap={2}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setModalCategorizarAberto(false)}
+                        borderRadius="full"
+                        fontSize="xs"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorPalette="brand"
+                        disabled={
+                          !categoriaSelecionadaId ||
+                          pendenteCategorizarLote ||
+                          pendenteClassificarIndividual
+                        }
+                        onClick={handleConfirmarCategorizar}
+                        fontWeight="bold"
+                        borderRadius="full"
+                        fontSize="xs"
+                        px={4}
+                      >
+                        {(pendenteCategorizarLote || pendenteClassificarIndividual) && (
+                          <Loader2
+                            size={14}
+                            style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                          />
+                        )}
+                        <Text as="span">
+                          Confirmar (
+                          {categoriaAlvoUuid ? '1 vídeo' : `${selecionados.length} vídeos`})
+                        </Text>
+                      </Button>
+                    </HStack>
+                  </HStack>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
 
         <Dialog.Root
           lazyMount
@@ -1437,74 +1448,74 @@ export default function DownloadsVideo() {
           size="md"
         >
           <Portal>
-            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
+            <Dialog.Backdrop bg="blackAlpha.800" />
             <Dialog.Positioner p={4}>
-            <Dialog.Content
-              bg="bg.panel"
-              borderWidth="1px"
-              borderColor="red.500/30"
-              color="fg"
-              borderRadius="2xl"
-              p={5}
-              maxW="md"
-              shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(239, 68, 68, 0.15)"
-            >
-              <Dialog.Header p={0} mb={3}>
-                <Dialog.Title fontSize="md" fontWeight="bold">
-                  Confirmar Exclusão
-                </Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body p={0} py={2}>
-                <VStack gap={4} alignItems="stretch">
-                  <Text fontSize="xs" color="fg.subtle">
-                    Tem certeza que deseja apagar{' '}
-                    <Text as="strong" color="fg">
-                      {itemApagarAlvo
-                        ? 'este arquivo'
-                        : `${selecionados.length} arquivos selecionados`}
+              <Dialog.Content
+                bg="bg.panel"
+                borderWidth="1px"
+                borderColor="red.500/30"
+                color="fg"
+                borderRadius="8px"
+                p={5}
+                maxW="md"
+                shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(239, 68, 68, 0.15)"
+              >
+                <Dialog.Header p={0} mb={3}>
+                  <Dialog.Title fontSize="md" fontWeight="bold">
+                    Confirmar Exclusão
+                  </Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Body p={0} py={2}>
+                  <VStack gap={4} alignItems="stretch">
+                    <Text fontSize="xs" color="fg.subtle">
+                      Tem certeza que deseja apagar{' '}
+                      <Text as="strong" color="fg">
+                        {itemApagarAlvo
+                          ? 'este arquivo'
+                          : `${selecionados.length} arquivos selecionados`}
+                      </Text>
+                      ? Esta ação removerá o arquivo físico e o registro do banco.
                     </Text>
-                    ? Esta ação removerá o arquivo físico e o registro do banco.
-                  </Text>
 
-                  <HStack
-                    justify="flex-end"
-                    gap={2}
-                    pt={3}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
-                  >
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setModalConfirmarApagar(false)}
-                      borderRadius="lg"
+                    <HStack
+                      justify="flex-end"
+                      gap={2}
+                      pt={3}
+                      borderTopWidth="1px"
+                      borderColor="border.subtle"
                     >
-                      Cancelar
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorPalette="red"
-                      disabled={pendenteApagar}
-                      onClick={handleConfirmarApagar}
-                      fontWeight="semibold"
-                      borderRadius="lg"
-                    >
-                      {pendenteApagar && (
-                        <Loader2
-                          size={14}
-                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
-                        />
-                      )}
-                      <Text as="span">Sim, Apagar</Text>
-                    </Button>
-                  </HStack>
-                </VStack>
-              </Dialog.Body>
-              <Dialog.CloseTrigger />
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setModalConfirmarApagar(false)}
+                        borderRadius="full"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorPalette="red"
+                        disabled={pendenteApagar}
+                        onClick={handleConfirmarApagar}
+                        fontWeight="semibold"
+                        borderRadius="full"
+                      >
+                        {pendenteApagar && (
+                          <Loader2
+                            size={14}
+                            style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                          />
+                        )}
+                        <Text as="span">Sim, Apagar</Text>
+                      </Button>
+                    </HStack>
+                  </VStack>
+                </Dialog.Body>
+                <Dialog.CloseTrigger />
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
 
         <Dialog.Root
           lazyMount
@@ -1515,68 +1526,72 @@ export default function DownloadsVideo() {
           size="md"
         >
           <Portal>
-            <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
+            <Dialog.Backdrop bg="blackAlpha.800" />
             <Dialog.Positioner p={4}>
-            <Dialog.Content
-              bg="bg.panel"
-              borderWidth="1px"
-              borderColor="blue.500/30"
-              color="fg"
-              borderRadius="2xl"
-              p={5}
-              maxW="md"
-              shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(59, 130, 246, 0.15)"
-            >
-              <Dialog.Header p={0} mb={3}>
-                <Dialog.Title fontSize="md" fontWeight="bold">
-                  Rebaixar Vídeo(s)
-                </Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body p={0} py={2}>
-                <VStack gap={4} alignItems="stretch">
-                  <Text fontSize="xs" color="fg.subtle">
-                    O vídeo será baixado novamente a partir da URL original gravada nos metadados. Com um vídeo só, o download acontece na hora e você acompanha pelo aviso e pelo status do card; com vários, eles entram na fila. Todas as datas alteradas, categorias e metadados existentes serão rigorosamente preservados, sem reenviar para o Google Fotos se já sincronizado.
-                  </Text>
+              <Dialog.Content
+                bg="bg.panel"
+                borderWidth="1px"
+                borderColor="blue.500/30"
+                color="fg"
+                borderRadius="8px"
+                p={5}
+                maxW="md"
+                shadow="0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(59, 130, 246, 0.15)"
+              >
+                <Dialog.Header p={0} mb={3}>
+                  <Dialog.Title fontSize="md" fontWeight="bold">
+                    Rebaixar Vídeo(s)
+                  </Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Body p={0} py={2}>
+                  <VStack gap={4} alignItems="stretch">
+                    <Text fontSize="xs" color="fg.subtle">
+                      O vídeo será baixado novamente a partir da URL original gravada nos metadados.
+                      Com um vídeo só, o download acontece na hora e você acompanha pelo aviso e
+                      pelo status do card; com vários, eles entram na fila. Todas as datas
+                      alteradas, categorias e metadados existentes serão rigorosamente preservados,
+                      sem reenviar para o Google Fotos se já sincronizado.
+                    </Text>
 
-                  <HStack
-                    justify="flex-end"
-                    gap={2}
-                    pt={3}
-                    borderTopWidth="1px"
-                    borderColor="border.subtle"
-                  >
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setModalConfirmarRebaixar(false)}
-                      borderRadius="lg"
+                    <HStack
+                      justify="flex-end"
+                      gap={2}
+                      pt={3}
+                      borderTopWidth="1px"
+                      borderColor="border.subtle"
                     >
-                      Cancelar
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorPalette="blue"
-                      disabled={pendenteRebaixar}
-                      onClick={handleConfirmarRebaixar}
-                      fontWeight="semibold"
-                      borderRadius="lg"
-                    >
-                      {pendenteRebaixar && (
-                        <Loader2
-                          size={14}
-                          style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
-                        />
-                      )}
-                      <Text as="span">Confirmar Rebaixamento</Text>
-                    </Button>
-                  </HStack>
-                </VStack>
-              </Dialog.Body>
-              <Dialog.CloseTrigger />
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setModalConfirmarRebaixar(false)}
+                        borderRadius="full"
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        size="sm"
+                        colorPalette="blue"
+                        disabled={pendenteRebaixar}
+                        onClick={handleConfirmarRebaixar}
+                        fontWeight="semibold"
+                        borderRadius="full"
+                      >
+                        {pendenteRebaixar && (
+                          <Loader2
+                            size={14}
+                            style={{ animation: 'spin 1s linear infinite', marginRight: '6px' }}
+                          />
+                        )}
+                        <Text as="span">Confirmar Rebaixamento</Text>
+                      </Button>
+                    </HStack>
+                  </VStack>
+                </Dialog.Body>
+                <Dialog.CloseTrigger />
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
 
         <ModalRemoverCategoriaLote
           aberto={modalRemoverCategoriaAberto}

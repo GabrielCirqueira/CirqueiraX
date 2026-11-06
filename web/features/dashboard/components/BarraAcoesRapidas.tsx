@@ -58,9 +58,12 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
             key={acao.rota}
             size="sm"
             variant="outline"
-            borderRadius="lg"
-            fontWeight="medium"
+            borderRadius="full"
+            bg="bg.panel"
+            borderColor="border.subtle"
+            fontWeight="semibold"
             color="fg.muted"
+            _hover={{ bg: 'bg.muted', color: 'fg' }}
             onClick={() => navigate(acao.rota)}
           >
             <acao.icone size={14} />
@@ -71,9 +74,12 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
         <Button
           size="sm"
           variant="outline"
-          borderRadius="lg"
-          fontWeight="medium"
+          borderRadius="full"
+          bg="bg.panel"
+          borderColor="border.subtle"
+          fontWeight="semibold"
           color="fg.muted"
+          _hover={{ bg: 'bg.muted', color: 'fg' }}
           onClick={() => setModalCategoriaAberto(true)}
         >
           <FolderPlus size={14} />
@@ -83,9 +89,12 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
         <Button
           size="sm"
           variant="outline"
-          borderRadius="lg"
-          fontWeight="medium"
+          borderRadius="full"
+          bg="bg.panel"
+          borderColor="border.subtle"
+          fontWeight="semibold"
           color="fg.muted"
+          _hover={{ bg: 'bg.muted', color: 'fg' }}
           disabled={sincronizandoTudo || atualizando}
           onClick={handleSyncAll}
         >

@@ -96,9 +96,12 @@ const DashboardView = memo(function DashboardView() {
 
           <Button
             size="sm"
-            variant="ghost"
-            borderRadius="lg"
+            variant="outline"
+            borderRadius="full"
+            bg="bg.panel"
+            borderColor="border.subtle"
             color="fg.muted"
+            _hover={{ bg: 'bg.muted', color: 'fg' }}
             disabled={atualizandoManual}
             onClick={handleAtualizarTudo}
           >
@@ -136,7 +139,7 @@ const DashboardView = memo(function DashboardView() {
             <Tabs.Trigger value="erros">
               Erros
               {totalErros > 0 && (
-                <Badge size="xs" variant="subtle" colorPalette="red" borderRadius="md">
+                <Badge size="xs" variant="subtle" colorPalette="red" borderRadius="full">
                   {totalErros}
                 </Badge>
               )}
@@ -144,7 +147,7 @@ const DashboardView = memo(function DashboardView() {
           </Tabs.List>
         </Tabs.Root>
 
-        <Suspense fallback={<Skeleton h="260px" borderRadius="xl" />}>
+        <Suspense fallback={<Skeleton h="260px" borderRadius="8px" />}>
           {abaAtiva === 'visao-geral' && (
             <VStack gap={4} w="full" alignItems="stretch">
               <GraficosDashboard

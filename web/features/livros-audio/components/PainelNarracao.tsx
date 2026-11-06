@@ -80,7 +80,7 @@ export function PainelNarracao({ livro, salvando, onSalvar, onFechar }: PainelNa
       bg="cirqueira.grey.900"
       border="1px solid"
       borderColor="cirqueira.grey.800"
-      borderRadius="2xl"
+      borderRadius="8px"
       p={3.5}
       overflowY="auto"
       boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
@@ -117,7 +117,7 @@ export function PainelNarracao({ livro, salvando, onSalvar, onFechar }: PainelNa
           gap={2}
           mb={3}
           p={2.5}
-          borderRadius="xl"
+          borderRadius="8px"
           bg="cirqueira.brand.500/10"
           border="1px solid"
           borderColor="cirqueira.brand.500/30"
@@ -145,7 +145,7 @@ export function PainelNarracao({ livro, salvando, onSalvar, onFechar }: PainelNa
               textAlign="left"
               px={2.5}
               py={2}
-              borderRadius="xl"
+              borderRadius="8px"
               bg={selecionada ? 'cirqueira.brand.500/15' : 'rgba(255, 255, 255, 0.03)'}
               border="1px solid"
               borderColor={selecionada ? 'cirqueira.brand.500/40' : 'transparent'}
@@ -216,7 +216,7 @@ export function PainelNarracao({ livro, salvando, onSalvar, onFechar }: PainelNa
               gap={2}
               px={2.5}
               py={1}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="rgba(255, 255, 255, 0.03)"
             >
               <Text fontSize="xs" color="white" truncate flex={1} minW={0}>

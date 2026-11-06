@@ -510,7 +510,7 @@ export function Component() {
         <VStack gap={4}>
           <Center
             boxSize={14}
-            borderRadius="2xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/15"
             color="cirqueira.brand.400"
           >
@@ -536,7 +536,7 @@ export function Component() {
         <VStack gap={4} maxW="md" textAlign="center" p={6}>
           <Center
             boxSize={14}
-            borderRadius="2xl"
+            borderRadius="8px"
             bg="cirqueira.red.500/15"
             color="cirqueira.red.400"
           >
@@ -552,7 +552,7 @@ export function Component() {
           </VStack>
           <Button
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             bg="cirqueira.grey.800"
             _hover={{ bg: 'cirqueira.grey.700' }}
             color="cirqueira.grey.0"

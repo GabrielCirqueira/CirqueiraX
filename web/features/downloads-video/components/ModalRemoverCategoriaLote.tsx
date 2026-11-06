@@ -40,7 +40,7 @@ export const ModalRemoverCategoriaLote = memo(function ModalRemoverCategoriaLote
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"
-            borderRadius="xl"
+            borderRadius="8px"
             p={5}
             maxW="md"
           >
@@ -67,13 +67,13 @@ export const ModalRemoverCategoriaLote = memo(function ModalRemoverCategoriaLote
                   borderTopWidth="1px"
                   borderColor="border.subtle"
                 >
-                  <Button size="sm" variant="ghost" borderRadius="lg" onClick={onFechar}>
+                  <Button size="sm" variant="ghost" borderRadius="full" onClick={onFechar}>
                     Cancelar
                   </Button>
                   <Button
                     size="sm"
                     colorPalette="amber"
-                    borderRadius="lg"
+                    borderRadius="full"
                     disabled={processando}
                     onClick={onConfirmar}
                   >

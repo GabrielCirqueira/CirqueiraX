@@ -43,14 +43,14 @@ export const GradeAudios = memo(function GradeAudios({
             gap={0}
             borderWidth="1px"
             borderColor="border.subtle"
-            borderRadius="2xl"
+            borderRadius="8px"
             overflow="hidden"
           >
             <Skeleton aspectRatio="16/10" w="full" borderRadius="0" />
             <VStack align="stretch" gap={2} p={3}>
               <Skeleton h={4} w="85%" />
               <Skeleton h={3} w="50%" />
-              <Skeleton h={8} w="full" borderRadius="lg" />
+              <Skeleton h={8} w="full" borderRadius="8px" />
             </VStack>
           </VStack>
         ))}
@@ -68,7 +68,7 @@ export const GradeAudios = memo(function GradeAudios({
         borderWidth="1px"
         borderStyle="dashed"
         borderColor="border.emphasized"
-        borderRadius="2xl"
+        borderRadius="8px"
         textAlign="center"
       >
         <Box p={4} borderRadius="full" bg="cirqueira.brand.500/10" color="cirqueira.brand.400">
@@ -111,7 +111,7 @@ export const GradeAudios = memo(function GradeAudios({
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
-          borderRadius="xl"
+          borderRadius="8px"
           px={4}
           py={2}
         >
@@ -122,7 +122,7 @@ export const GradeAudios = memo(function GradeAudios({
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               aria-label="Página anterior"
               disabled={pagina.pagina <= 1}
               onClick={() => onMudarPagina(pagina.pagina - 1)}
@@ -132,7 +132,7 @@ export const GradeAudios = memo(function GradeAudios({
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               aria-label="Próxima página"
               disabled={pagina.pagina >= paginas}
               onClick={() => onMudarPagina(pagina.pagina + 1)}

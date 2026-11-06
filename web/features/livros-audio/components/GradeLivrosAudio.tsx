@@ -34,15 +34,15 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
             bg="cirqueira.grey.950"
             border="1px solid"
             borderColor="cirqueira.grey.900"
-            borderRadius="xl"
+            borderRadius="8px"
             p={5}
             h="210px"
           >
             <VStack align="stretch" gap={4}>
-              <Skeleton height="36px" borderRadius="lg" bg="cirqueira.grey.900" />
-              <Skeleton height="16px" borderRadius="md" bg="cirqueira.grey.900" />
+              <Skeleton height="36px" borderRadius="8px" bg="cirqueira.grey.900" />
+              <Skeleton height="16px" borderRadius="8px" bg="cirqueira.grey.900" />
               <Skeleton height="8px" borderRadius="full" bg="cirqueira.grey.900" />
-              <Skeleton height="28px" borderRadius="lg" bg="cirqueira.grey.900" mt={2} />
+              <Skeleton height="28px" borderRadius="8px" bg="cirqueira.grey.900" mt={2} />
             </VStack>
           </Box>
         ))}
@@ -58,13 +58,13 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
         bg="cirqueira.grey.950"
         border="1px dashed"
         borderColor="cirqueira.grey.800"
-        borderRadius="2xl"
+        borderRadius="8px"
         p={8}
       >
         <VStack gap={4} maxW="md" textAlign="center">
           <Center
             boxSize={16}
-            borderRadius="2xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/10"
             color="cirqueira.brand.400"
             border="1px solid"
@@ -85,7 +85,7 @@ export const GradeLivrosAudio = memo(function GradeLivrosAudio({
 
           <Button
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             bg="cirqueira.brand.500"
             _hover={{ bg: 'cirqueira.brand.600' }}
             color="cirqueira.grey.0"

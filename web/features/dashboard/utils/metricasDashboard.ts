@@ -8,7 +8,7 @@ import type {
   StatusMediaItem,
 } from '../types'
 
-export type TomMetrica = 'neutro' | 'sucesso' | 'alerta' | 'erro'
+export type TomMetrica = 'neutro' | 'sucesso' | 'alerta' | 'erro' | 'destaque' | 'info'
 
 export const COR_TOKEN: Record<'marca' | 'azul' | 'ambar' | 'roxo' | 'ciano', string> = {
   marca: 'var(--chakra-colors-cirqueira-brand-500)',
@@ -65,13 +65,17 @@ const PALETA_TOM: Record<TomMetrica, string> = {
   sucesso: 'green',
   alerta: 'amber',
   erro: 'red',
+  destaque: 'brand',
+  info: 'blue',
 }
 
 const COR_TEXTO_TOM: Record<TomMetrica, string> = {
   neutro: 'fg',
-  sucesso: 'cirqueira.green.500',
-  alerta: 'cirqueira.amber.500',
+  sucesso: 'cirqueira.spotify.verde',
+  alerta: 'cirqueira.spotify.amarelo',
   erro: 'cirqueira.red.500',
+  destaque: 'cirqueira.brand.400',
+  info: 'cirqueira.spotify.azul',
 }
 
 const BYTES_POR_MEGABYTE = 1024 * 1024
@@ -280,8 +284,12 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
     servicos.push({
       nome: 'Spotify',
       detalhe: spotify.coletaParada
-        ? (spotify.ultimaColetaEm ? `Coleta atrasada · última ${tempoRelativoCurto(spotify.ultimaColetaEm)}` : 'Coleta atrasada')
-        : (spotify.nomeExibicao ? `${spotify.nomeExibicao} · última ${tempoRelativoCurto(spotify.ultimaColetaEm)}` : 'Histórico ativo'),
+        ? spotify.ultimaColetaEm
+          ? `Coleta atrasada · última ${tempoRelativoCurto(spotify.ultimaColetaEm)}`
+          : 'Coleta atrasada'
+        : spotify.nomeExibicao
+          ? `${spotify.nomeExibicao} · última ${tempoRelativoCurto(spotify.ultimaColetaEm)}`
+          : 'Histórico ativo',
       estado: spotify.coletaParada ? 'Atrasado' : 'Conectado',
       tom: spotify.coletaParada ? 'alerta' : 'sucesso',
       rota: '/spotify',

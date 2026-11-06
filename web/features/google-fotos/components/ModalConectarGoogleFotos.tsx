@@ -74,7 +74,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
             borderWidth="1px"
             borderColor="border.subtle"
             color="fg"
-            borderRadius="xl"
+            borderRadius="8px"
             p={0}
             maxW="2xl"
             w="full"
@@ -85,7 +85,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                 <HStack gap={3}>
                   <Box
                     p={2.5}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="cirqueira.teal.500/10"
                     color="cirqueira.teal.500"
                   >
@@ -109,7 +109,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                   aria-label="Fechar modal"
                   variant="ghost"
                   size="sm"
-                  borderRadius="lg"
+                  borderRadius="full"
                   onClick={onFechar}
                 >
                   <Icon as={X} />
@@ -122,7 +122,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                 {isReconexao && (
                   <Box
                     p={3.5}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="cirqueira.amber.500/10"
                     border="1px solid"
                     borderColor="cirqueira.amber.500/20"
@@ -139,7 +139,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                 {/* Passo 1 */}
                 <Box
                   p={4}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="bg.subtle"
                   border="1px solid"
                   borderColor="border.subtle"
@@ -162,7 +162,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                       colorPalette="teal"
                       variant="solid"
                       size="sm"
-                      borderRadius="lg"
+                      borderRadius="full"
                       loading={isLoadingUrl}
                       disabled={isErrorUrl || !authUrl}
                       onClick={handleAbrirGoogle}
@@ -177,7 +177,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                 {/* Passo 2 */}
                 <Box
                   p={4}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="bg.subtle"
                   border="1px solid"
                   borderColor="border.subtle"
@@ -200,7 +200,7 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
                       placeholder="http://localhost/?code=4/0Acv... ou 4/0Acv..."
                       value={codigoOuUrl}
                       onChange={(e) => setCodigoOuUrl(e.target.value)}
-                      borderRadius="lg"
+                      borderRadius="8px"
                       bg="bg.panel"
                       size="sm"
                       fontFamily="mono"
@@ -213,13 +213,13 @@ export const ModalConectarGoogleFotos = memo(function ModalConectarGoogleFotos({
 
             <Dialog.Footer p={6} pt={4} borderTopWidth="1px" borderColor="border.subtle">
               <HStack justify="flex-end" gap={3} w="full">
-                <Button variant="ghost" size="sm" borderRadius="lg" onClick={onFechar}>
+                <Button variant="ghost" size="sm" borderRadius="full" onClick={onFechar}>
                   Cancelar
                 </Button>
                 <Button
                   colorPalette="teal"
                   size="sm"
-                  borderRadius="lg"
+                  borderRadius="full"
                   loading={conectarMutation.isPending}
                   disabled={!codigoOuUrl.trim()}
                   onClick={handleConcluir}

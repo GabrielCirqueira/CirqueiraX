@@ -46,8 +46,8 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
       top={0}
       zIndex={30}
       borderBottom="1px solid"
-      borderColor="cirqueira.grey.900"
-      bg="cirqueira.grey.950"
+      borderColor="border.subtle"
+      bg="bg.canvas"
       w="full"
     >
       <HStack px={{ base: 4, md: 6 }} h={14} justify="space-between" w="full">
@@ -58,9 +58,9 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
               aria-label="Abrir menu de navegação"
               variant="ghost"
               size="sm"
-              borderRadius="lg"
-              color="cirqueira.grey.300"
-              _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
+              borderRadius="full"
+              color="fg.muted"
+              _hover={{ color: 'fg', bg: 'bg.muted' }}
               onClick={onToggleMobileSidebar}
             >
               <Menu size={20} />
@@ -72,7 +72,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
               <HStack gap={1.5}>
                 <Center
                   boxSize={7}
-                  borderRadius="lg"
+                  borderRadius="full"
                   bg="cirqueira.brand.500"
                   color="cirqueira.grey.0"
                 >
@@ -84,7 +84,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
                   fontSize="sm"
                   letterSpacing="tight"
                   fontFamily="heading"
-                  color="cirqueira.grey.0"
+                  color="fg"
                 >
                   Cirqueira
                   <Text as="span" color="cirqueira.brand.400">
@@ -96,7 +96,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
           </HStack>
 
           <HStack display={{ base: 'none', md: 'flex' }} gap={3} align="center">
-            <Text fontSize="sm" fontWeight="bold" color="cirqueira.grey.0" letterSpacing="tight">
+            <Text fontSize="sm" fontWeight="bold" color="fg" letterSpacing="tight">
               {titulo}
             </Text>
             <Badge
@@ -106,8 +106,8 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
               display="inline-flex"
               alignItems="center"
               gap={1}
-              borderRadius="md"
-              px={2}
+              borderRadius="full"
+              px={2.5}
               py={0.5}
             >
               <CheckCircle2 size={12} />
@@ -122,38 +122,43 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
           <IconButton
             size="xs"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             onClick={toggleTheme}
             aria-label="Alternar tema"
-            color="cirqueira.grey.400"
-            _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
+            color="fg.muted"
+            _hover={{ color: 'fg', bg: 'bg.muted' }}
           >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </IconButton>
 
           {autenticado ? (
             <HStack gap={2} align="center">
-              <Badge
+              <HStack
                 display={{ base: 'none', sm: 'inline-flex' }}
-                colorPalette="brand"
-                variant="subtle"
-                px={2.5}
-                py={0.5}
-                borderRadius="md"
+                bg="bg.panel"
+                px={3}
+                py={1}
+                borderRadius="full"
                 fontSize="xs"
                 alignItems="center"
                 gap={1.5}
+                border="1px solid"
+                borderColor="border.subtle"
+                color="fg"
+                fontWeight="medium"
               >
-                <User size={12} />
-                {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
-              </Badge>
+                <Box as="span" color="cirqueira.brand.400" display="inline-flex">
+                  <User size={12} />
+                </Box>
+                <Text as="span">{usuario?.nomeCompleto || usuario?.username || 'Usuário'}</Text>
+              </HStack>
               <IconButton
                 size="xs"
                 variant="ghost"
-                borderRadius="lg"
+                borderRadius="full"
                 onClick={handleLogout}
-                color="cirqueira.grey.400"
-                _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
+                color="fg.muted"
+                _hover={{ color: 'cirqueira.red.400', bg: 'red.subtle' }}
                 aria-label="Sair da conta"
               >
                 <LogOut size={16} />
@@ -167,8 +172,8 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
                   bg="cirqueira.brand.500"
                   _hover={{ bg: 'cirqueira.brand.600' }}
                   color="cirqueira.grey.0"
-                  borderRadius="lg"
-                  px={3}
+                  borderRadius="full"
+                  px={4}
                   py={1}
                   fontSize="xs"
                   fontWeight="semibold"

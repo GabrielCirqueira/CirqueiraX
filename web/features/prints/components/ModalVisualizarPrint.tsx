@@ -105,7 +105,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
         <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
         <Dialog.Content
-          borderRadius="xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -124,7 +124,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
             <HStack gap={2.5}>
               <Box
                 p={2}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg="cirqueira.brand.500/10"
                 color="cirqueira.brand.400"
                 borderWidth="1px"
@@ -154,7 +154,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
               variant="ghost"
               onClick={onFechar}
               aria-label="Fechar modal"
-              borderRadius="lg"
+              borderRadius="full"
             >
               <X size={18} />
             </IconButton>
@@ -210,14 +210,14 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                 </HStack>
 
                 {item.categoria?.nome ? (
-                  <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+                  <Badge size="sm" variant="subtle" colorPalette="brand">
                     <HStack gap={1}>
                       <Folder size={11} />
                       <Text as="span">{item.categoria.nome}</Text>
                     </HStack>
                   </Badge>
                 ) : (
-                  <Badge size="sm" variant="subtle" colorPalette="gray" borderRadius="md">
+                  <Badge size="sm" variant="subtle" colorPalette="gray">
                     Print Pessoal
                   </Badge>
                 )}
@@ -232,7 +232,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                       onFechar()
                       onCategorizar(item)
                     }}
-                    borderRadius="lg"
+                    borderRadius="full"
                   >
                     <FolderPlus size={14} />
                     <Text as="span">Categorizar</Text>
@@ -244,7 +244,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                     size="sm"
                     variant="outline"
                     onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
-                    borderRadius="lg"
+                    borderRadius="full"
                   >
                     <PenLine size={14} />
                     <Text as="span">Editar</Text>
@@ -256,7 +256,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                   variant="outline"
                   onClick={handleCopiar}
                   disabled={copiando}
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   <Copy size={14} />
                   <Text as="span">{copiando ? 'Copiando...' : 'Copiar Imagem'}</Text>
@@ -268,7 +268,7 @@ export const ModalVisualizarPrint = memo(function ModalVisualizarPrint({
                   onClick={handleBaixar}
                   disabled={baixando}
                   fontWeight="semibold"
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   {baixando ? (
                     <>

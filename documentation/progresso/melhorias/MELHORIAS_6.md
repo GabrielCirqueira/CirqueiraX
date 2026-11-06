@@ -521,3 +521,36 @@
   - `src/Repository/ReproducaoSpotifyRepository.php` (`buscarUltimaTocadaAntesDe`)
   - `migrations/Version20261106120000.php` (novo)
   - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### ✅ Melhoria 116 — Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte, Badges em Pílula e Bordas Sutis)
+
+- **Status**: Concluído
+- **Data**: 06 de novembro de 2026
+- **Problema**:
+  - O sistema apresentava contraste cansativo e desarmônico: fundo em preto absoluto (`#121212`) provocando cansaço visual, enquanto os cards e painéis usavam tons cinza-claros e opacos (`#1F1F1F`, `#252525`).
+  - As badges e tags exibiam caixas retangulares duras (`borderRadius="md"`) com fundos sólidos escuros e turvos (tons 900 opacos, como `#4a1410` para vermelho e `#003225` para verde), gerando baixo contraste com o texto e aparência pesada de blocos coloridos.
+  - Cards pequenos de mídias (`CardVideo`, `CardAudio`, `CardPrint`, `CardMidiaCentral`, `CardLivroAudio`), modais e formulários usavam raios legados misturados de 16px/24px (`2xl`/`xl`/`lg`/`md`), sem coerência visual.
+  - Vários componentes continham cores em hexadecimal (`#000000`, `#FFFFFF`, `#22e368`, etc.) e strings cruas de RGB/RGBA em vez dos tokens do tema do sistema.
+- **Solução**:
+  - **Calibração de Superfícies com Alto Contraste e Cards Matte Profundo**: Fundo geral (`bg.canvas`, `spotify.fundo`) calibrado para o preto autêntico e profundo `#121212`; cards e painéis (`bg.panel`, `spotify.cartao`) definidos em `#151515` (matte escuro e aveludado, perfeitamente integrado ao canvas escuro), eliminando qualquer aspecto acinzentado/lavado em grids densos; campos de formulários, inputs e estados elevados (`bg.muted`, `cartaoElevado`) definidos em `#202020` com transição suave no hover, e estados ativos/hover (`bg.emphasized`) em `#262626`.
+  - **Eliminação de Caixas Internas Poluídas nos Cards**: Remoção de caixas internas com bordas pesadas e fundos cinzas dentro do corpo dos cards (em especial o bloco de data/horário no `CardVideo`, que criava um aspecto estranho de botão/input no meio da mídia), substituído por linha tipográfica limpa e sutil com ícones e hover refinados.
+  - **Bordas Delimitadas e Sutis**: Bordas nítidas e ultrafinas em `border.subtle` (`rgba(255, 255, 255, 0.06)`), `border.muted` (`rgba(255, 255, 255, 0.05)`) e `border.emphasized` (`rgba(255, 255, 255, 0.14)`), dando profundidade e acabamento premium sem traços pesados.
+  - **Badges e Pílulas Elegantes**: Receita global de `Badge` reformulada com `borderRadius="full"`, fundo neutro escuro suave (`bg.panel` / `bg.muted`), borda sutil (`border.subtle`) e texto/ícones vibrantes na cor da paleta (`colorPalette.fg`). Fim dos blocos coloridos turvos: todas as badges do sistema (plataformas como YouTube, TikTok, status de pipeline, contagens de mídias e tags) agora seguem o padrão clean de pílulas do Spotify.
+  - **Padronização Global de Arredondamento (8px e full)**: Varredura completa em 100% dos componentes frontend eliminando todos os raios legados (`2xl`, `xl`, `lg`, `md`, `sm`). Todos os cards, containers, modais, dialogs, inputs e selects padronizados rigorosamente em `borderRadius="8px"`; todos os botões, badges, pílulas, chips de filtro, avatares e seletores padronizados em `borderRadius="full"`.
+  - **Eliminação de Hexadecimais e RGBA**: Remoção de todos os códigos hexadecimais brutos e cores RGB soltas nos componentes JSX, substituídos integralmente pelos tokens semânticos e paletas do `theme.ts` (`cirqueira.<escala>.<tom>`, `border.subtle`, `blackAlpha.800`, `bg.panel`).
+- **Arquivos**:
+  - `web/config/theme/theme.ts`
+  - `web/layouts/MainLayout.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
+  - `web/features/dashboard/Dashboard.tsx`, `web/features/dashboard/components/*`
+  - `web/features/downloads-video/DownloadsVideo.tsx`, `web/features/downloads-video/components/*`
+  - `web/features/downloads-audio/components/*`
+  - `web/features/central-midias/components/*`
+  - `web/features/prints/components/*`
+  - `web/features/livros-audio/components/*`
+  - `web/features/upload-manual/components/*`
+  - `web/features/google-fotos/components/*`
+  - `web/features/editor-imagem/components/*`
+  - `web/features/spotify/components/*`
+  - `documentation/progresso/melhorias/MELHORIAS.md`, `documentation/progresso/melhorias/MELHORIAS_6.md`

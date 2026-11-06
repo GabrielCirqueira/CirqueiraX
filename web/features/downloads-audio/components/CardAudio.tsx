@@ -84,11 +84,11 @@ export const CardAudio = memo(function CardAudio({
       bg="bg.panel"
       borderWidth="1px"
       borderColor={tocando ? 'cirqueira.brand.500' : 'border.subtle'}
-      borderRadius="2xl"
+      borderRadius="8px"
       overflow="hidden"
       shadow={tocando ? 'md' : 'xs'}
       transition="all 0.2s ease"
-      _hover={{ borderColor: tocando ? 'cirqueira.brand.500' : 'border.emphasized', shadow: 'md' }}
+      _hover={{ bg: 'bg.muted', borderColor: tocando ? 'cirqueira.brand.500' : 'border.emphasized' }}
     >
       <Box position="relative" aspectRatio="16/10" w="full" overflow="hidden">
         <CapaAudio
@@ -101,7 +101,7 @@ export const CardAudio = memo(function CardAudio({
           {plataforma ? (
             <HStack
               gap={1}
-              borderRadius="md"
+              borderRadius="8px"
               bg="cirqueira.grey.950/85"
               px={1.5}
               py={0.5}
@@ -119,7 +119,7 @@ export const CardAudio = memo(function CardAudio({
           )}
           {duracao && (
             <Box
-              borderRadius="md"
+              borderRadius="8px"
               bg="cirqueira.grey.950/85"
               px={1.5}
               py={0.5}
@@ -209,7 +209,7 @@ export const CardAudio = memo(function CardAudio({
         </VStack>
 
         <HStack gap={1.5} flexWrap="wrap">
-          <Badge size="xs" variant="subtle" colorPalette={aparencia.paleta} borderRadius="md">
+          <Badge size="xs" variant="subtle" colorPalette={aparencia.paleta}>
             {aparencia.rotulo}
           </Badge>
           {tamanho && (
@@ -264,7 +264,7 @@ export const CardAudio = memo(function CardAudio({
               h={8}
               variant="subtle"
               colorPalette="brand"
-              borderRadius="lg"
+              borderRadius="full"
             >
               <Link
                 href={obterUrlArquivoAudio(audio.uuid)}
@@ -282,7 +282,7 @@ export const CardAudio = memo(function CardAudio({
               flex={1}
               h={8}
               variant="outline"
-              borderRadius="lg"
+              borderRadius="full"
               loading={rebaixando}
               onClick={() => onRebaixar(audio.uuid)}
             >
@@ -291,7 +291,7 @@ export const CardAudio = memo(function CardAudio({
             </Button>
           )}
           {audio.isEmProcessamento && (
-            <Button size="xs" flex={1} h={8} variant="subtle" borderRadius="lg" disabled>
+            <Button size="xs" flex={1} h={8} variant="subtle" borderRadius="full" disabled>
               <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
               {aparencia.rotulo}
             </Button>
@@ -302,7 +302,7 @@ export const CardAudio = memo(function CardAudio({
             h={8}
             w={8}
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="fg.muted"
             aria-label="Abrir link original"
             title="Abrir link original"
@@ -317,7 +317,7 @@ export const CardAudio = memo(function CardAudio({
               h={8}
               variant="subtle"
               colorPalette="red"
-              borderRadius="lg"
+              borderRadius="full"
               loading={apagando}
               onClick={removerComConfirmacao}
               onMouseLeave={() => setConfirmandoRemocao(false)}
@@ -330,7 +330,7 @@ export const CardAudio = memo(function CardAudio({
               h={8}
               w={8}
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               color="fg.muted"
               _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
               aria-label="Remover áudio"

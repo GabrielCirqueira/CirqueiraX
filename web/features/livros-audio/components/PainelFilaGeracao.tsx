@@ -28,7 +28,7 @@ export const PainelFilaGeracao = memo(function PainelFilaGeracao({
           align="start"
           px={4}
           py={3}
-          borderRadius="xl"
+          borderRadius="8px"
           border="1px solid"
           borderColor={
             avisoDisco.nivel === 'critico' ? 'cirqueira.red.500/40' : 'cirqueira.yellow.500/30'
@@ -54,7 +54,7 @@ export const PainelFilaGeracao = memo(function PainelFilaGeracao({
           bg="cirqueira.grey.950"
           border="1px solid"
           borderColor="cirqueira.grey.900"
-          borderRadius="xl"
+          borderRadius="8px"
           p={4}
         >
           <HStack justify="space-between" mb={3} gap={3} flexWrap="wrap">
@@ -88,7 +88,7 @@ export const PainelFilaGeracao = memo(function PainelFilaGeracao({
                   gap={3}
                   px={3}
                   py={2}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.grey.900/50"
                   opacity={item.pausado ? 0.65 : 1}
                 >

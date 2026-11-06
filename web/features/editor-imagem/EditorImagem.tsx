@@ -199,7 +199,7 @@ const EditorImagemView = memo(function EditorImagemView() {
           justifyContent="center"
           minH={{ base: '55dvh', md: 'calc(100dvh - 260px)' }}
           p={{ base: 3, md: 6 }}
-          borderRadius="xl"
+          borderRadius="8px"
           borderWidth="1px"
           borderStyle={imagem ? 'solid' : 'dashed'}
           borderColor={arrastandoArquivo ? 'cirqueira.brand.500' : 'border.subtle'}
@@ -228,7 +228,7 @@ const EditorImagemView = memo(function EditorImagemView() {
               <Button
                 size="sm"
                 variant="outline"
-                borderRadius="lg"
+                borderRadius="full"
                 onClick={() => setParametros({})}
               >
                 Começar do zero

@@ -62,7 +62,7 @@ const ContinuarOuvindo = memo(function ContinuarOuvindo({
         <Text fontSize="sm" color="fg.muted">
           Você ainda não ouviu nenhum livro.
         </Text>
-        <Button asChild size="xs" variant="subtle" borderRadius="lg">
+        <Button asChild size="xs" variant="subtle" borderRadius="full">
           <Link to="/livros-audio">Escolher um livro</Link>
         </Button>
       </VStack>
@@ -76,8 +76,8 @@ const ContinuarOuvindo = memo(function ContinuarOuvindo({
           key={livro.uuid}
           gap={3}
           p={3}
-          borderRadius="lg"
-          bg={indice === 0 ? 'bg.muted' : 'transparent'}
+          borderRadius="8px"
+          bg={indice === 0 ? 'bg.muted' : 'bg.panel'}
           borderWidth="1px"
           borderColor="border.subtle"
         >
@@ -102,7 +102,7 @@ const ContinuarOuvindo = memo(function ContinuarOuvindo({
           <Button
             asChild
             size="xs"
-            borderRadius="lg"
+            borderRadius="full"
             colorPalette="brand"
             variant={indice === 0 ? 'solid' : 'subtle'}
             flexShrink={0}
@@ -152,7 +152,7 @@ const GraficoEscuta = memo(function GraficoEscuta({
                 h={`${Math.max(dia.segundos > 0 ? 4 : 2, (dia.segundos / maximo) * 100)}%`}
                 bg={bateu ? COR_TOKEN.marca : dia.segundos > 0 ? 'fg.subtle' : 'bg.muted'}
                 opacity={bateu ? 1 : 0.55}
-                borderRadius="sm"
+                borderRadius="8px"
                 title={`${data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}: ${formatarMinutos(dia.segundos)}`}
               />
             )
@@ -452,7 +452,15 @@ export const SecaoLivrosDashboard = memo(function SecaoLivrosDashboard() {
       titulo="Livros em áudio"
       descricao="Onde você parou, quanto ouviu e quanto espaço os livros ocupam"
       acao={
-        <Button asChild size="xs" variant="ghost" borderRadius="lg" color="fg.muted">
+        <Button
+          asChild
+          size="xs"
+          variant="outline"
+          borderRadius="full"
+          borderColor="border.subtle"
+          color="fg.muted"
+          _hover={{ bg: 'bg.muted', color: 'fg' }}
+        >
           <Link to="/livros-audio">
             Abrir biblioteca
             <ArrowRight size={12} />
@@ -472,14 +480,14 @@ export const SecaoLivrosDashboard = memo(function SecaoLivrosDashboard() {
             Continuar ouvindo
           </Text>
           {carregandoEscuta || !estatisticas ? (
-            <Skeleton h="120px" borderRadius="lg" />
+            <Skeleton h="120px" borderRadius="8px" />
           ) : (
             <ContinuarOuvindo livros={estatisticas.continuar} />
           )}
         </VStack>
         <Box p={5} bg="bg.panel">
           {carregandoEscuta || !estatisticas ? (
-            <Skeleton h="160px" borderRadius="lg" />
+            <Skeleton h="160px" borderRadius="8px" />
           ) : (
             <ResumoEscuta estatisticas={estatisticas} />
           )}

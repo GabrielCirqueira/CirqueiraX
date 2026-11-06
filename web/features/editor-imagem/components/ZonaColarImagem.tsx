@@ -24,7 +24,7 @@ export const ZonaColarImagem = memo(function ZonaColarImagem({
     <VStack gap={5} maxW="sm" textAlign="center" px={4}>
       <Box
         p={4}
-        borderRadius="xl"
+        borderRadius="8px"
         bg="cirqueira.brand.500/10"
         color="cirqueira.brand.500"
         display="inline-flex"
@@ -42,7 +42,7 @@ export const ZonaColarImagem = memo(function ZonaColarImagem({
         </Text>
       </VStack>
 
-      <Button size="sm" variant="outline" borderRadius="lg" onClick={onEscolherArquivo}>
+      <Button size="sm" variant="outline" borderRadius="full" onClick={onEscolherArquivo}>
         <ImagePlus size={15} />
         Escolher do computador
       </Button>

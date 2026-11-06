@@ -226,11 +226,11 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
             <Button
               type="submit"
               bg="cirqueira.spotify.verde"
-              color="#000000"
+              color="cirqueira.grey.950"
               borderRadius="full"
               fontWeight="bold"
               fontSize="sm"
-              _hover={{ bg: '#22e368', transform: 'scale(1.02)' }}
+              _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
               _active={{ transform: 'scale(0.98)' }}
               transition="all 0.15s ease"
               disabled={!arquivo}
@@ -248,13 +248,13 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           gap={4}
           p={5}
           borderRadius="8px"
-          bg="rgba(30, 215, 96, 0.1)"
+          bg="cirqueira.green.500/10"
           border="1px solid"
-          borderColor="rgba(30, 215, 96, 0.3)"
+          borderColor="cirqueira.green.500/30"
           align="stretch"
         >
           <HStack gap={3}>
-            <Center boxSize={10} borderRadius="full" bg="cirqueira.spotify.verde" color="#000000">
+            <Center boxSize={10} borderRadius="full" bg="cirqueira.spotify.verde" color="cirqueira.grey.950">
               <CheckCircle2 size={20} />
             </Center>
             <VStack align="flex-start" gap={0}>
@@ -354,7 +354,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
             w="full"
             borderRadius="full"
             bg="cirqueira.spotify.verde"
-            color="#000000"
+            color="cirqueira.grey.950"
             fontWeight="bold"
             fontSize="sm"
             mt={2}
@@ -370,13 +370,13 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           gap={4}
           p={5}
           borderRadius="8px"
-          bg="rgba(239, 68, 68, 0.1)"
+          bg="cirqueira.red.500/10"
           border="1px solid"
-          borderColor="rgba(239, 68, 68, 0.3)"
+          borderColor="cirqueira.red.500/30"
           align="stretch"
         >
           <HStack gap={3}>
-            <Center boxSize={10} borderRadius="full" bg="red.500" color="#FFFFFF">
+            <Center boxSize={10} borderRadius="full" bg="red.500" color="cirqueira.grey.0">
               <AlertCircle size={20} />
             </Center>
             <VStack align="flex-start" gap={0}>

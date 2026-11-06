@@ -63,7 +63,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
     <Box
       w="full"
       overflowX="auto"
-      borderRadius="xl"
+      borderRadius="8px"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -144,7 +144,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                   <Box
                     w={11}
                     h={11}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="bg.muted"
                     overflow="hidden"
                     cursor="pointer"
@@ -165,9 +165,9 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                         loading="lazy"
                       />
                     ) : tipoInfo.isVideo ? (
-                      <FileVideo size={20} color="var(--chakra-colors-cirqueira-purple-400, #c084fc)" />
+                      <FileVideo size={20} color="var(--chakra-colors-cirqueira-purple-400)" />
                     ) : (
-                      <FileImage size={20} color="var(--chakra-colors-cirqueira-brand-400, #4ade80)" />
+                      <FileImage size={20} color="var(--chakra-colors-cirqueira-brand-400)" />
                     )}
 
                     <Box
@@ -207,7 +207,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                         #{hashCurto}
                       </Text>
                       {ehDuplicado && (
-                        <Badge size="xs" variant="subtle" colorPalette="amber" borderRadius="md">
+                        <Badge size="xs" variant="subtle" colorPalette="amber">
                           <HStack gap={1}>
                             <AlertTriangle size={10} />
                             <Text as="span">Duplicado</Text>
@@ -223,7 +223,6 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                     size="xs"
                     variant="subtle"
                     colorPalette={tipoInfo.isVideo ? 'purple' : 'brand'}
-                    borderRadius="md"
                     px={2}
                   >
                     <HStack gap={1}>
@@ -244,7 +243,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                       onChange={(e) => onClassificar(item.uuid, e.target.value)}
                       bg="bg.muted"
                       borderColor="border.subtle"
-                      borderRadius="md"
+                      borderRadius="8px"
                       fontSize="11px"
                       h={7}
                     >
@@ -274,7 +273,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                         onClick={() => onForcarGoogleFotos(item)}
                         aria-label="Forçar Google Fotos"
                         title="Forçar envio para Google Fotos"
-                        borderRadius="md"
+                        borderRadius="full"
                       >
                         <CloudUpload size={13} />
                       </IconButton>
@@ -286,7 +285,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                         variant="ghost"
                         onClick={() => onRetentar(item.uuid)}
                         aria-label="Retentar"
-                        borderRadius="md"
+                        borderRadius="full"
                       >
                         <RefreshCw size={13} />
                       </IconButton>
@@ -297,7 +296,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                       variant="ghost"
                       onClick={() => onVisualizar(item)}
                       aria-label="Visualizar"
-                      borderRadius="md"
+                      borderRadius="full"
                     >
                       <Eye size={13} />
                     </IconButton>
@@ -310,7 +309,7 @@ export const TabelaTriagemUpload = memo(function TabelaTriagemUpload({
                         aria-label="Apagar"
                         color="fg.subtle"
                         _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
-                        borderRadius="md"
+                        borderRadius="full"
                       >
                         <Trash2 size={13} />
                       </IconButton>

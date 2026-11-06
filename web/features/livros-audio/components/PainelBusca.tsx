@@ -54,7 +54,7 @@ export function PainelBusca({
       bg="cirqueira.grey.900"
       border="1px solid"
       borderColor="cirqueira.grey.800"
-      borderRadius="2xl"
+      borderRadius="8px"
       boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
       zIndex={70}
     >
@@ -116,7 +116,7 @@ export function PainelBusca({
               gap={2}
               px={2.5}
               py={2}
-              borderRadius="xl"
+              borderRadius="8px"
               cursor="pointer"
               bg={ativo ? 'cirqueira.brand.500/15' : 'transparent'}
               _hover={{ bg: ativo ? 'cirqueira.brand.500/20' : 'rgba(255, 255, 255, 0.05)' }}
@@ -128,7 +128,7 @@ export function PainelBusca({
                 </Text>
                 <Text fontSize="xs" color="cirqueira.grey.300" lineClamp={2}>
                   …{resultado.antes}
-                  <Text as="mark" bg="orange.400/30" color="white" borderRadius="sm" px="1px">
+                  <Text as="mark" bg="orange.400/30" color="white" borderRadius="8px" px="1px">
                     {resultado.encontrado}
                   </Text>
                   {resultado.depois}…

@@ -22,13 +22,13 @@ export const PlayerAudio = memo(function PlayerAudio({ audio, onFechar }: Player
       bg="bg.panel"
       borderWidth="1px"
       borderColor="cirqueira.brand.500/40"
-      borderRadius="2xl"
+      borderRadius="8px"
       shadow="xl"
       p={{ base: 2.5, md: 3 }}
     >
       <Flex gap={{ base: 2.5, md: 4 }} align="center" direction={{ base: 'column', md: 'row' }}>
         <HStack gap={3} w={{ base: 'full', md: '280px' }} flexShrink={0} minW={0}>
-          <Box boxSize={12} borderRadius="lg" overflow="hidden" flexShrink={0}>
+          <Box boxSize={12} borderRadius="8px" overflow="hidden" flexShrink={0}>
             <CapaAudio thumbnailUrl={audio.thumbnailUrl} tamanhoIcone={5} />
           </Box>
           <VStack align="flex-start" gap={0} minW={0} flex={1}>
@@ -48,7 +48,7 @@ export const PlayerAudio = memo(function PlayerAudio({ audio, onFechar }: Player
             </Text>
           </VStack>
           <HStack gap={1} display={{ base: 'flex', md: 'none' }}>
-            <IconButton asChild size="sm" variant="ghost" borderRadius="lg" aria-label="Baixar MP3">
+            <IconButton asChild size="sm" variant="ghost" borderRadius="full" aria-label="Baixar MP3">
               <Link href={obterUrlArquivoAudio(audio.uuid)} download>
                 <Download size={16} />
               </Link>
@@ -56,7 +56,7 @@ export const PlayerAudio = memo(function PlayerAudio({ audio, onFechar }: Player
             <IconButton
               size="sm"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               aria-label="Fechar player"
               onClick={onFechar}
             >
@@ -82,7 +82,7 @@ export const PlayerAudio = memo(function PlayerAudio({ audio, onFechar }: Player
             asChild
             size="sm"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="fg.muted"
             aria-label="Baixar MP3"
             title="Baixar MP3"
@@ -94,7 +94,7 @@ export const PlayerAudio = memo(function PlayerAudio({ audio, onFechar }: Player
           <IconButton
             size="sm"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="fg.muted"
             aria-label="Fechar player"
             title="Fechar player"

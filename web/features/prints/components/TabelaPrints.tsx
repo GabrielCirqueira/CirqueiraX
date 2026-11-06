@@ -71,7 +71,7 @@ export const TabelaPrints = memo(function TabelaPrints({
             w="full"
             h={16}
             bg="bg.muted"
-            borderRadius="xl"
+            borderRadius="8px"
             animation="pulse 1.5s infinite"
           />
         ))}
@@ -88,7 +88,7 @@ export const TabelaPrints = memo(function TabelaPrints({
         py={16}
         px={4}
         textAlign="center"
-        borderRadius="xl"
+        borderRadius="8px"
         borderWidth="1px"
         borderColor="border.subtle"
         bg="bg.panel"
@@ -107,7 +107,7 @@ export const TabelaPrints = memo(function TabelaPrints({
     <Box
       w="full"
       overflowX="auto"
-      borderRadius="xl"
+      borderRadius="8px"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -122,7 +122,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                   variant="ghost"
                   onClick={onToggleSelectAll}
                   aria-label="Selecionar todos os prints"
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   {todosSelecionados ? (
                     <Box as="span" color="cirqueira.brand.500" display="inline-flex">
@@ -205,7 +205,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                     variant="ghost"
                     onClick={() => onToggleSelect(item.uuid)}
                     aria-label="Selecionar"
-                    borderRadius="lg"
+                    borderRadius="full"
                   >
                     {selecionado ? (
                       <Box as="span" color="cirqueira.brand.500" display="inline-flex">
@@ -223,7 +223,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                       position="relative"
                       w="72px"
                       h="48px"
-                      borderRadius="md"
+                      borderRadius="8px"
                       bg="blackAlpha.900"
                       overflow="hidden"
                       flexShrink={0}
@@ -252,7 +252,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                       >
                         {titulo}
                       </Text>
-                      <Badge size="xs" variant="outline" colorPalette="gray" borderRadius="md">
+                      <Badge size="xs" variant="outline" colorPalette="gray">
                         PNG
                       </Badge>
                     </VStack>
@@ -288,7 +288,7 @@ export const TabelaPrints = memo(function TabelaPrints({
 
                 <Box as="td" p={3.5} verticalAlign="middle">
                   {item.categoria?.nome ? (
-                    <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+                    <Badge size="xs" variant="subtle" colorPalette="brand">
                       <HStack gap={1}>
                         <Folder size={11} />
                         <Text as="span" maxW="28" truncate>
@@ -297,7 +297,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                       </HStack>
                     </Badge>
                   ) : (
-                    <Badge size="xs" variant="subtle" colorPalette="gray" borderRadius="md">
+                    <Badge size="xs" variant="subtle" colorPalette="gray">
                       Print Pessoal
                     </Badge>
                   )}
@@ -311,7 +311,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                       onClick={() => onVisualizar(item)}
                       aria-label="Visualizar print"
                       title="Visualizar em tamanho real"
-                      borderRadius="lg"
+                      borderRadius="full"
                     >
                       <Eye size={14} />
                     </IconButton>
@@ -322,7 +322,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                       onClick={(e) => handleCopiar(item.uuid, e)}
                       aria-label="Copiar imagem"
                       title="Copiar para Área de Transferência"
-                      borderRadius="lg"
+                      borderRadius="full"
                     >
                       <Copy size={14} />
                     </IconButton>
@@ -336,7 +336,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                       title="Baixar PNG"
                       color="cirqueira.brand.500"
                       _hover={{ bg: 'cirqueira.brand.500/10' }}
-                      borderRadius="lg"
+                      borderRadius="full"
                     >
                       <Download size={14} />
                     </IconButton>
@@ -348,7 +348,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                         onClick={() => onCategorizar(item)}
                         aria-label="Categorizar print"
                         title="Categorizar"
-                        borderRadius="lg"
+                        borderRadius="full"
                       >
                         <FolderPlus size={14} />
                       </IconButton>
@@ -363,7 +363,7 @@ export const TabelaPrints = memo(function TabelaPrints({
                         title="Apagar"
                         color="cirqueira.red.500"
                         _hover={{ bg: 'cirqueira.red.500/10' }}
-                        borderRadius="lg"
+                        borderRadius="full"
                       >
                         <Trash2 size={14} />
                       </IconButton>

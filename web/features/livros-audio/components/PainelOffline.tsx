@@ -213,7 +213,7 @@ export const PainelOffline = memo(function PainelOffline({
               bg="cirqueira.brand.500/10"
               border="1px solid"
               borderColor="cirqueira.brand.500/30"
-              borderRadius="lg"
+              borderRadius="8px"
               px={2.5}
               py={1.5}
             >

@@ -58,7 +58,8 @@ export const FilaErros = memo(function FilaErros() {
           <Button
             size="xs"
             variant="outline"
-            borderRadius="lg"
+            borderRadius="full"
+            borderColor="border.subtle"
             disabled={retentandoTodos}
             onClick={handleRetentarTodos}
           >
@@ -131,8 +132,9 @@ export const FilaErros = memo(function FilaErros() {
               <Button
                 size="xs"
                 variant="ghost"
-                borderRadius="lg"
+                borderRadius="full"
                 color="fg.muted"
+                _hover={{ bg: 'bg.muted', color: 'fg' }}
                 flexShrink={0}
                 disabled={retentandoEste || retentandoTodos}
                 onClick={() => handleRetentarItem(item.uuid)}
@@ -164,7 +166,7 @@ export const FilaErros = memo(function FilaErros() {
             <Button
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               disabled={pagina <= 1}
               onClick={() => setPagina((atual) => Math.max(1, atual - 1))}
             >
@@ -174,7 +176,7 @@ export const FilaErros = memo(function FilaErros() {
             <Button
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               disabled={pagina >= totalPaginas}
               onClick={() => setPagina((atual) => atual + 1)}
             >

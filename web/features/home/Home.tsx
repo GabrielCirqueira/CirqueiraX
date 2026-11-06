@@ -92,7 +92,7 @@ const HomeContent = memo(function HomeContent() {
                 color="white"
                 fontWeight="bold"
                 px={6}
-                borderRadius="xl"
+                borderRadius="full"
                 shadow="lg"
               >
                 <LayoutDashboard size={20} style={{ marginRight: '8px' }} />
@@ -108,7 +108,7 @@ const HomeContent = memo(function HomeContent() {
                 color="cirqueira.grey.200"
                 fontWeight="bold"
                 px={6}
-                borderRadius="xl"
+                borderRadius="full"
                 _hover={{ bg: 'cirqueira.grey.800' }}
               >
                 <Box as="span" color="cirqueira.brand.500" display="inline-flex" mr={2}>
@@ -126,7 +126,7 @@ const HomeContent = memo(function HomeContent() {
                 color="cirqueira.grey.200"
                 fontWeight="bold"
                 px={6}
-                borderRadius="xl"
+                borderRadius="full"
                 _hover={{ bg: 'cirqueira.grey.800' }}
               >
                 <Box as="span" color="cirqueira.indigo.500" display="inline-flex" mr={2}>
@@ -152,7 +152,6 @@ const HomeContent = memo(function HomeContent() {
                   fontWeight="medium"
                   px={2.5}
                   py={0.5}
-                  borderRadius="md"
                 >
                   {tag}
                 </Badge>
@@ -178,7 +177,7 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
           >
             <Card.Header
               display="flex"
@@ -196,7 +195,7 @@ const HomeContent = memo(function HomeContent() {
               >
                 Mídias Processadas
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
+              <Box p={2} borderRadius="8px" bg="cirqueira.brand.500/10" color="cirqueira.brand.500">
                 <Film size={20} />
               </Box>
             </Card.Header>
@@ -215,7 +214,7 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
           >
             <Card.Header
               display="flex"
@@ -235,7 +234,7 @@ const HomeContent = memo(function HomeContent() {
               </Card.Title>
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.indigo.500/10"
                 color="cirqueira.indigo.500"
               >
@@ -257,7 +256,7 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
           >
             <Card.Header
               display="flex"
@@ -277,7 +276,7 @@ const HomeContent = memo(function HomeContent() {
               </Card.Title>
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.emerald.500/10"
                 color="cirqueira.emerald.500"
               >
@@ -296,7 +295,6 @@ const HomeContent = memo(function HomeContent() {
                   fontWeight="bold"
                   px={2}
                   py={0.5}
-                  borderRadius="md"
                 >
                   2 Conectados
                 </Badge>
@@ -312,7 +310,7 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
           >
             <Card.Header
               display="flex"
@@ -330,7 +328,7 @@ const HomeContent = memo(function HomeContent() {
               >
                 Google Fotos Pipeline
               </Card.Title>
-              <Box p={2} borderRadius="xl" bg="cirqueira.amber.500/10" color="cirqueira.amber.500">
+              <Box p={2} borderRadius="8px" bg="cirqueira.amber.500/10" color="cirqueira.amber.500">
                 <Cloud size={20} />
               </Box>
             </Card.Header>
@@ -346,7 +344,6 @@ const HomeContent = memo(function HomeContent() {
                   fontWeight="bold"
                   px={2}
                   py={0.5}
-                  borderRadius="md"
                 >
                   OAuth2 Pronto
                 </Badge>
@@ -375,14 +372,14 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
             _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.brand.500/10"
                 color="cirqueira.brand.500"
                 display="flex"
@@ -403,13 +400,13 @@ const HomeContent = memo(function HomeContent() {
               </Text>
 
               <HStack gap={2} flexWrap="wrap">
-                <Badge colorPalette="red" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="red" variant="subtle" px={2} py={0.5}>
                   <Youtube size={12} style={{ marginRight: '4px', display: 'inline' }} /> YouTube
                 </Badge>
-                <Badge colorPalette="cyan" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="cyan" variant="subtle" px={2} py={0.5}>
                   <Video size={12} style={{ marginRight: '4px', display: 'inline' }} /> TikTok
                 </Badge>
-                <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="blue" variant="subtle" px={2} py={0.5}>
                   <Globe size={12} style={{ marginRight: '4px', display: 'inline' }} /> Twitter / X
                 </Badge>
               </HStack>
@@ -438,14 +435,14 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
             _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.indigo.500/10"
                 color="cirqueira.indigo.500"
                 display="flex"
@@ -466,13 +463,13 @@ const HomeContent = memo(function HomeContent() {
               </Text>
 
               <HStack gap={2} flexWrap="wrap">
-                <Badge colorPalette="purple" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="purple" variant="subtle" px={2} py={0.5}>
                   Drag & Drop
                 </Badge>
-                <Badge colorPalette="green" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="green" variant="subtle" px={2} py={0.5}>
                   Checagem de Hash
                 </Badge>
-                <Badge colorPalette="amber" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="amber" variant="subtle" px={2} py={0.5}>
                   Ações em Lote
                 </Badge>
               </HStack>
@@ -501,14 +498,14 @@ const HomeContent = memo(function HomeContent() {
             borderColor="cirqueira.grey.800"
             bg="cirqueira.grey.900"
             shadow="sm"
-            borderRadius="xl"
+            borderRadius="8px"
             _hover={{ borderColor: 'cirqueira.brand.500/40' }}
           >
             <Card.Header>
               <Box
                 w={10}
                 h={10}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.green.500/10"
                 color="cirqueira.green.500"
                 display="flex"
@@ -529,13 +526,13 @@ const HomeContent = memo(function HomeContent() {
               </Text>
 
               <HStack gap={2} flexWrap="wrap">
-                <Badge colorPalette="green" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="green" variant="subtle" px={2} py={0.5}>
                   print_empresa
                 </Badge>
-                <Badge colorPalette="teal" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="teal" variant="subtle" px={2} py={0.5}>
                   print_pessoal
                 </Badge>
-                <Badge colorPalette="blue" variant="subtle" px={2} py={0.5} borderRadius="md">
+                <Badge colorPalette="blue" variant="subtle" px={2} py={0.5}>
                   X-Agent-Token
                 </Badge>
               </HStack>

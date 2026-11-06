@@ -94,7 +94,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"
-            borderRadius="2xl"
+            borderRadius="8px"
             maxW="lg"
             w="full"
             p={0}
@@ -114,7 +114,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
               <HStack gap={3}>
                 <Box
                   p={2.5}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="amber.500/15"
                   color="amber.500"
                   display="inline-flex"
@@ -138,7 +138,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                 disabled={carregando}
                 aria-label="Fechar modal"
                 p={1.5}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <X size={16} />
               </Button>
@@ -147,7 +147,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
             <Dialog.Body p={5} spaceY={4}>
               <Box
                 p={3.5}
-                borderRadius="xl"
+                borderRadius="8px"
                 borderWidth="1px"
                 borderColor="amber.500/30"
                 bg="amber.500/10"
@@ -164,7 +164,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
 
               <Box
                 p={4}
-                borderRadius="xl"
+                borderRadius="8px"
                 borderWidth="1px"
                 borderColor="border.subtle"
                 bg="bg.muted"
@@ -173,7 +173,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                   <Box
                     w={14}
                     h={14}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="bg.subtle"
                     borderWidth="1px"
                     borderColor="border.subtle"
@@ -217,7 +217,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                           colorPalette="green"
                           px={2}
                           py={0.5}
-                          borderRadius="md"
                         >
                           <HStack gap={1} alignItems="center">
                             <CheckCircle2 size={12} />
@@ -231,7 +230,6 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                           colorPalette="gray"
                           px={2}
                           py={0.5}
-                          borderRadius="md"
                         >
                           Sem upload no Google Fotos
                         </Badge>
@@ -255,7 +253,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                     onChange={(e) => setCategoriaEscolhida(e.target.value)}
                     bg="bg.muted"
                     borderColor="border.subtle"
-                    borderRadius="xl"
+                    borderRadius="8px"
                     fontSize="xs"
                     h={9}
                   >
@@ -275,7 +273,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
 
               <Box
                 p={3.5}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="bg.subtle"
                 borderWidth="1px"
                 borderColor="border.subtle"
@@ -301,7 +299,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                 variant="outline"
                 onClick={onFechar}
                 disabled={carregando}
-                borderRadius="xl"
+                borderRadius="full"
                 fontSize="xs"
               >
                 Não Sincronizar
@@ -312,7 +310,7 @@ export const ModalConfirmarSincronizacaoDuplicado = memo(
                 colorPalette="brand"
                 onClick={handleConfirmar}
                 disabled={carregando}
-                borderRadius="xl"
+                borderRadius="full"
                 fontWeight="semibold"
                 fontSize="xs"
               >

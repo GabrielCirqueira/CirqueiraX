@@ -158,11 +158,11 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
       className="cv-auto"
       position="relative"
       w="full"
-      borderRadius="md"
+      borderRadius="8px"
       overflow="hidden"
-      bg="cirqueira.grey.950"
-      borderWidth="2px"
-      borderColor={selecionado ? 'cirqueira.brand.500' : 'transparent'}
+      bg="bg.panel"
+      borderWidth="1px"
+      borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       cursor="pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -170,8 +170,10 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
       shadow={selecionado ? 'md' : 'none'}
       outline={selecionado ? '2px solid' : 'none'}
       outlineColor="cirqueira.brand.500"
+      transition="all 0.2s ease"
       _hover={{
-        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+        bg: 'bg.muted',
+        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.emphasized',
       }}
     >
       {!erroCarregamento ? (
@@ -193,7 +195,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
               height: 'auto',
               display: 'block',
               objectFit: 'contain',
-              backgroundColor: 'var(--chakra-colors-cirqueira-grey-950, #191b1a)',
+              backgroundColor: 'var(--chakra-colors-bg-canvas)',
             }}
             decoding="async"
           />
@@ -268,7 +270,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           borderWidth="1px"
           borderColor={selecionado ? 'cirqueira.brand.400' : 'cirqueira.grey.700'}
           aria-label="Selecionar mídia"
-          borderRadius="md"
+          borderRadius="full"
           h={6}
           w={6}
           minW={6}
@@ -294,12 +296,13 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             size="xs"
             variant="surface"
             colorPalette="gray"
-            bg="cirqueira.grey.950/85"
+            bg="rgba(0, 0, 0, 0.65)"
+            backdropFilter="blur(4px)"
             color="cirqueira.brand.300"
             borderWidth="1px"
             borderColor="cirqueira.brand.500/40"
-            borderRadius="md"
-            px={1.5}
+            borderRadius="full"
+            px={2}
             py={0.5}
             fontSize="10px"
             fontWeight="semibold"
@@ -313,8 +316,8 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
           size="xs"
           variant="solid"
           colorPalette={infoOrigem.colorPalette}
-          borderRadius="md"
-          px={1.5}
+          borderRadius="full"
+          px={2}
           py={0.5}
           fontSize="9px"
           fontWeight="bold"
@@ -328,7 +331,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             size="xs"
             variant="solid"
             colorPalette="orange"
-            borderRadius="md"
             px={1.5}
             py={0.5}
             fontSize="9px"
@@ -347,7 +349,6 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
             colorPalette="purple"
             bg="cirqueira.grey.950/90"
             color="cirqueira.grey.0"
-            borderRadius="md"
             px={1.5}
             py={0.5}
             fontSize="9px"
@@ -396,7 +397,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
                 title="Copiar para área de transferência"
                 disabled={copiando}
                 onClick={handleCopiar}
-                borderRadius="md"
+                borderRadius="full"
                 h={6}
                 w={6}
                 minW={6}
@@ -414,7 +415,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
                 aria-label="Editar imagem"
                 title="Editar no editor de imagem"
                 onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
-                borderRadius="md"
+                borderRadius="full"
                 h={6}
                 w={6}
                 minW={6}
@@ -432,7 +433,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
                 aria-label="Atribuir categoria"
                 title="Atribuir categoria"
                 onClick={() => onCategorizar(item)}
-                borderRadius="md"
+                borderRadius="full"
                 h={6}
                 w={6}
                 minW={6}
@@ -450,7 +451,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
               title="Baixar arquivo"
               disabled={baixando}
               onClick={handleBaixar}
-              borderRadius="md"
+              borderRadius="full"
               h={6}
               w={6}
               minW={6}
@@ -467,7 +468,7 @@ export const CardMidiaCentral = memo(function CardMidiaCentral({
                 aria-label="Apagar mídia"
                 title="Apagar permanentemente"
                 onClick={() => onApagar(item.uuid)}
-                borderRadius="md"
+                borderRadius="full"
                 h={6}
                 w={6}
                 minW={6}

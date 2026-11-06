@@ -85,11 +85,11 @@ export const CardPrint = memo(function CardPrint({
       className="cv-auto"
       position="relative"
       w="full"
-      borderRadius="md"
+      borderRadius="8px"
       overflow="hidden"
-      bg="blackAlpha.900"
-      borderWidth="2px"
-      borderColor={selecionado ? 'cirqueira.brand.500' : 'transparent'}
+      bg="bg.panel"
+      borderWidth="1px"
+      borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       cursor="pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -97,8 +97,10 @@ export const CardPrint = memo(function CardPrint({
       shadow={selecionado ? 'md' : 'none'}
       outline={selecionado ? '2px solid' : 'none'}
       outlineColor="cirqueira.brand.500"
+      transition="all 0.2s ease"
       _hover={{
-        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+        bg: 'bg.muted',
+        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.emphasized',
       }}
     >
       {!erroCarregamento ? (
@@ -179,10 +181,11 @@ export const CardPrint = memo(function CardPrint({
             size="xs"
             variant="subtle"
             colorPalette="gray"
-            bg="blackAlpha.750"
+            bg="rgba(0, 0, 0, 0.65)"
+            backdropFilter="blur(4px)"
             color="whiteAlpha.900"
-            borderRadius="md"
-            px={1.5}
+            borderRadius="full"
+            px={2}
             py={0.5}
             fontSize="2xs"
           >
@@ -234,7 +237,7 @@ export const CardPrint = memo(function CardPrint({
           }}
           aria-label="Copiar print"
           title="Copiar imagem para área de transferência"
-          borderRadius="md"
+          borderRadius="full"
         >
           {copiadoRecente ? <Check size={13} /> : <Copy size={13} />}
         </IconButton>
@@ -258,7 +261,7 @@ export const CardPrint = memo(function CardPrint({
             }}
             aria-label="Editar print"
             title="Editar no editor de imagem (setas, texto, formas)"
-            borderRadius="md"
+            borderRadius="8px"
           >
             <PenLine size={13} />
           </IconButton>
@@ -283,7 +286,7 @@ export const CardPrint = memo(function CardPrint({
           }}
           aria-label="Baixar print"
           title="Baixar imagem (Download)"
-          borderRadius="md"
+          borderRadius="full"
         >
           {baixando ? (
             <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
@@ -314,7 +317,7 @@ export const CardPrint = memo(function CardPrint({
             }}
             aria-label="Categorizar print"
             title="Categorizar"
-            borderRadius="md"
+            borderRadius="8px"
           >
             <FolderPlus size={13} />
           </IconButton>
@@ -342,7 +345,7 @@ export const CardPrint = memo(function CardPrint({
             }}
             aria-label="Excluir print"
             title="Excluir"
-            borderRadius="md"
+            borderRadius="8px"
           >
             <Trash2 size={13} />
           </IconButton>

@@ -48,7 +48,7 @@ export const BarraInferiorLeitor = memo(function BarraInferiorLeitor({
           <IconButton
             size="sm"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="cirqueira.grey.300"
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
             disabled={paginaAtual <= 1}
@@ -73,7 +73,7 @@ export const BarraInferiorLeitor = memo(function BarraInferiorLeitor({
           <IconButton
             size="sm"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="cirqueira.grey.300"
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
             disabled={paginaAtual >= totalPaginas}
@@ -112,7 +112,6 @@ export const BarraInferiorLeitor = memo(function BarraInferiorLeitor({
             size="sm"
             variant="outline"
             colorPalette="brand"
-            borderRadius="md"
             px={2}
             py={0.5}
             fontVariantNumeric="tabular-nums"
@@ -126,7 +125,7 @@ export const BarraInferiorLeitor = memo(function BarraInferiorLeitor({
             colorPalette={isPosicaoSalva ? 'green' : 'brand'}
             bg={isPosicaoSalva ? 'cirqueira.green.500/15' : 'cirqueira.brand.500'}
             color={isPosicaoSalva ? 'cirqueira.green.400' : 'cirqueira.grey.0'}
-            borderRadius="lg"
+            borderRadius="full"
             px={3}
             disabled={salvando}
             onClick={onSalvarMarcador}

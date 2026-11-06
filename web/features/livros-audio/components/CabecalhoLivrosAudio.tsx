@@ -40,7 +40,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
       bg="cirqueira.grey.950"
       border="1px solid"
       borderColor="cirqueira.grey.900"
-      borderRadius="2xl"
+      borderRadius="8px"
     >
       <Stack
         justify="space-between"
@@ -52,7 +52,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
         <HStack gap={3.5} align="center">
           <Center
             boxSize={12}
-            borderRadius="xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/15"
             color="cirqueira.brand.400"
             border="1px solid"
@@ -67,7 +67,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
               <Text fontSize="lg" fontWeight="bold" color="cirqueira.grey.0" letterSpacing="tight">
                 Livros em Áudio
               </Text>
-              <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="brand">
                 {contagem.total} {contagem.total === 1 ? 'livro' : 'livros'}
               </Badge>
             </HStack>
@@ -82,7 +82,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
           <IconButton
             size="sm"
             variant="outline"
-            borderRadius="lg"
+            borderRadius="full"
             borderColor="cirqueira.grey.800"
             color="cirqueira.grey.300"
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
@@ -98,7 +98,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
             <Button
               size="sm"
               variant="outline"
-              borderRadius="lg"
+              borderRadius="full"
               borderColor="cirqueira.brand.500/40"
               color="cirqueira.brand.300"
               _hover={{ bg: 'cirqueira.brand.500/10' }}
@@ -112,7 +112,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
 
           <Button
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             bg="cirqueira.brand.500"
             _hover={{ bg: 'cirqueira.brand.600' }}
             color="cirqueira.grey.0"
@@ -135,7 +135,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
         borderColor="cirqueira.grey.900"
         wrap="wrap"
       >
-        <Badge size="sm" variant="outline" colorPalette="grey" borderRadius="md" px={2.5} py={0.5}>
+        <Badge size="sm" variant="outline" colorPalette="grey" px={2.5} py={0.5}>
           Total: {contagem.total}
         </Badge>
         {contagem.prontos > 0 && (
@@ -143,7 +143,6 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
             size="sm"
             variant="subtle"
             colorPalette="green"
-            borderRadius="md"
             px={2.5}
             py={0.5}
           >
@@ -155,7 +154,6 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
             size="sm"
             variant="subtle"
             colorPalette="brand"
-            borderRadius="md"
             px={2.5}
             py={0.5}
           >
@@ -163,7 +161,7 @@ export const CabecalhoLivrosAudio = memo(function CabecalhoLivrosAudio({
           </Badge>
         )}
         {contagem.comErro > 0 && (
-          <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md" px={2.5} py={0.5}>
+          <Badge size="sm" variant="subtle" colorPalette="red" px={2.5} py={0.5}>
             Erros: {contagem.comErro}
           </Badge>
         )}

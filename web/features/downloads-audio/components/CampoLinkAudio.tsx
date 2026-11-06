@@ -68,8 +68,8 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
       bg="bg.panel"
       borderWidth="1px"
       borderColor={destacado ? 'cirqueira.brand.500' : 'border.subtle'}
-      borderRadius="2xl"
-      shadow={destacado ? 'md' : 'xs'}
+      borderRadius="8px"
+      shadow={destacado ? 'md' : 'sm'}
       transition="all 0.2s ease"
       p={{ base: 3.5, md: 4 }}
     >
@@ -78,7 +78,7 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
           <HStack gap={3}>
             <Box
               p={2}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.brand.500/15"
               color="cirqueira.brand.400"
               display="inline-flex"
@@ -100,7 +100,7 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
           </HStack>
 
           {emProcessamento > 0 && (
-            <Badge size="sm" variant="subtle" colorPalette="amber" borderRadius="md">
+            <Badge size="sm" variant="subtle" colorPalette="amber">
               <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
               {emProcessamento === 1 ? '1 convertendo' : `${emProcessamento} convertendo`}
             </Badge>
@@ -135,9 +135,9 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
                 ps={10}
                 pe={texto ? 10 : 3}
                 fontSize="sm"
-                bg="bg.muted/50"
+                bg="bg.muted"
                 borderColor="border.subtle"
-                borderRadius="xl"
+                borderRadius="8px"
                 _focusVisible={{ borderColor: 'cirqueira.brand.500', outline: 'none' }}
               />
               {texto && (
@@ -148,7 +148,7 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
                   right={1.5}
                   top="50%"
                   transform="translateY(-50%)"
-                  borderRadius="lg"
+                  borderRadius="full"
                   aria-label="Limpar campo"
                   onClick={() => setTexto('')}
                 >
@@ -161,7 +161,7 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
               <Button
                 type="submit"
                 colorPalette="brand"
-                borderRadius="xl"
+                borderRadius="full"
                 h={11}
                 px={5}
                 flexShrink={0}
@@ -174,7 +174,7 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
               <Button
                 variant="subtle"
                 colorPalette="brand"
-                borderRadius="xl"
+                borderRadius="full"
                 h={11}
                 px={4}
                 flexShrink={0}
@@ -206,7 +206,6 @@ export const CampoLinkAudio = memo(function CampoLinkAudio({
               size="xs"
               variant="subtle"
               colorPalette={suportada.paleta}
-              borderRadius="md"
               px={2}
             >
               <suportada.icone size={11} />

@@ -36,7 +36,7 @@ function SkeletonCard() {
     <Box
       display="flex"
       flexDirection="column"
-      borderRadius="2xl"
+      borderRadius="8px"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -45,11 +45,11 @@ function SkeletonCard() {
     >
       <Box aspectRatio="16/9" w="full" bg="bg.muted" />
       <VStack p={4} gap={3} alignItems="stretch">
-        <Box h={4} bg="bg.muted" borderRadius="md" w="80%" />
-        <Box h={3} bg="bg.muted" borderRadius="md" w="50%" />
+        <Box h={4} bg="bg.muted" borderRadius="8px" w="80%" />
+        <Box h={3} bg="bg.muted" borderRadius="8px" w="50%" />
         <Flex pt={2} justify="space-between">
-          <Box h={3} bg="bg.muted" borderRadius="md" w="30%" />
-          <Box h={3} bg="bg.muted" borderRadius="md" w="25%" />
+          <Box h={3} bg="bg.muted" borderRadius="8px" w="30%" />
+          <Box h={3} bg="bg.muted" borderRadius="8px" w="25%" />
         </Flex>
       </VStack>
     </Box>
@@ -155,7 +155,7 @@ export const GridVideos = memo(function GridVideos({
         py={16}
         px={4}
         textAlign="center"
-        borderRadius="xl"
+        borderRadius="8px"
         borderWidth="1px"
         borderStyle="dashed"
         borderColor="border.subtle"
@@ -164,7 +164,7 @@ export const GridVideos = memo(function GridVideos({
       >
         <Box
           p={3.5}
-          borderRadius="lg"
+          borderRadius="8px"
           bg="cirqueira.brand.500/10"
           color="cirqueira.brand.500"
           mb={2}
@@ -195,7 +195,7 @@ export const GridVideos = memo(function GridVideos({
           gap={2.5}
           p={2}
           px={3}
-          borderRadius="xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -208,7 +208,7 @@ export const GridVideos = memo(function GridVideos({
               onClick={onToggleSelectAll}
               fontSize="xs"
               fontWeight="semibold"
-              borderRadius="lg"
+              borderRadius="full"
               h={8}
               px={2.5}
             >
@@ -230,7 +230,7 @@ export const GridVideos = memo(function GridVideos({
                 variant={todosSemCategoriaMarcados ? 'solid' : 'subtle'}
                 colorPalette={todosSemCategoriaMarcados ? 'amber' : 'gray'}
                 onClick={onSelectSomenteSemCategoria}
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2.5}
@@ -249,7 +249,7 @@ export const GridVideos = memo(function GridVideos({
                 variant={todosCategorizadosMarcados ? 'solid' : 'subtle'}
                 colorPalette={todosCategorizadosMarcados ? 'purple' : 'gray'}
                 onClick={onSelectSomenteCategorizados}
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2.5}
@@ -267,7 +267,7 @@ export const GridVideos = memo(function GridVideos({
                 size="xs"
                 variant="ghost"
                 onClick={onLimparSelecao}
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2}
@@ -292,7 +292,7 @@ export const GridVideos = memo(function GridVideos({
               {itens.length} {itens.length === 1 ? 'vídeo nesta página' : 'vídeos nesta página'}
             </Text>
             {semCategoriaNaPagina.length > 0 && (
-              <Badge size="xs" variant="subtle" colorPalette="amber" borderRadius="md">
+              <Badge size="xs" variant="subtle" colorPalette="amber">
                 {semCategoriaNaPagina.length} sem categoria
               </Badge>
             )}

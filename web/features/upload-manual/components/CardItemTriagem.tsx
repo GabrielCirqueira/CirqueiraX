@@ -69,7 +69,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
 
   return (
     <Card.Root
-      borderRadius="xl"
+      borderRadius="8px"
       borderWidth="1px"
       borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       outline={selecionado ? '2px solid' : 'none'}
@@ -79,8 +79,10 @@ export const CardItemTriagem = memo(function CardItemTriagem({
       overflow="hidden"
       shadow={selecionado ? 'md' : 'none'}
       _hover={{
-        borderColor: selecionado ? 'cirqueira.brand.500' : 'cirqueira.brand.500/50',
+        bg: 'bg.muted',
+        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.emphasized',
       }}
+      transition="background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
       display="flex"
       flexDirection="column"
     >
@@ -133,7 +135,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
             bg="cirqueira.grey.950/80"
             color={selecionado ? 'cirqueira.brand.400' : 'fg'}
             _hover={{ bg: 'cirqueira.grey.950' }}
-            borderRadius="md"
+            borderRadius="full"
             p={1}
             minW="auto"
             h="auto"
@@ -149,7 +151,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               size="xs"
               variant="subtle"
               colorPalette="amber"
-              borderRadius="md"
               px={1.5}
             >
               <HStack gap={1}>
@@ -163,7 +164,6 @@ export const CardItemTriagem = memo(function CardItemTriagem({
             size="xs"
             variant="subtle"
             colorPalette={tipoInfo.isVideo ? 'purple' : 'brand'}
-            borderRadius="md"
             px={2}
           >
             {tipoInfo.isVideo ? 'Vídeo' : 'Foto'}
@@ -203,7 +203,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
           color="cirqueira.grey.0"
           px={1.5}
           py={0.5}
-          borderRadius="md"
+          borderRadius="8px"
           fontSize="10px"
           fontWeight="semibold"
         >
@@ -242,11 +242,11 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               <Text as="span">Categoria:</Text>
             </HStack>
             {item.categoria ? (
-              <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+              <Badge size="xs" variant="subtle" colorPalette="brand">
                 {item.categoria.nome}
               </Badge>
             ) : (
-              <Badge size="xs" variant="subtle" colorPalette="amber" borderRadius="md">
+              <Badge size="xs" variant="subtle" colorPalette="amber">
                 Sem Categoria
               </Badge>
             )}
@@ -258,7 +258,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               onChange={(e) => onClassificar(item.uuid, e.target.value)}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="lg"
+              borderRadius="8px"
               fontSize="11px"
               h={7}
             >
@@ -298,7 +298,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               fontWeight="semibold"
               px={2}
               h={6}
-              borderRadius="md"
+              borderRadius="full"
               title="Sincronizar com Google Fotos mesmo sendo duplicado"
             >
               <CloudUpload size={12} style={{ marginRight: '4px' }} />
@@ -314,7 +314,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               aria-label="Retentar"
               h={6}
               w={6}
-              borderRadius="md"
+              borderRadius="full"
             >
               <RefreshCw size={12} />
             </IconButton>
@@ -330,7 +330,7 @@ export const CardItemTriagem = memo(function CardItemTriagem({
               _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
               h={6}
               w={6}
-              borderRadius="md"
+              borderRadius="full"
             >
               <Trash2 size={12} />
             </IconButton>

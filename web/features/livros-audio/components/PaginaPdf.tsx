@@ -191,7 +191,7 @@ export function PaginaPdf({
         w="full"
         minH="400px"
         bg="cirqueira.grey.900"
-        borderRadius="xl"
+        borderRadius="8px"
         border="1px solid"
         borderColor="cirqueira.red.500/30"
         p={6}

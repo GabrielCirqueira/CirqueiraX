@@ -36,13 +36,25 @@ export const TabelaCategorias = memo(function TabelaCategorias({
       descricao="Pastas locais, álbuns do Google Fotos e espaço em disco"
       acao={
         <HStack gap={2}>
-          <Button asChild size="xs" variant="ghost" borderRadius="lg" color="fg.muted">
+          <Button
+            asChild
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            borderColor="border.subtle"
+            color="fg.muted"
+            _hover={{ bg: 'bg.muted', color: 'fg' }}
+          >
             <Link to="/google-fotos">Álbuns</Link>
           </Button>
           <Button
             size="xs"
             variant="outline"
-            borderRadius="lg"
+            borderRadius="full"
+            borderColor="border.subtle"
+            bg="bg.panel"
+            color="fg.muted"
+            _hover={{ bg: 'bg.muted', color: 'fg' }}
             onClick={() => setModalCriarAberto(true)}
           >
             <Plus size={12} />
@@ -69,7 +81,9 @@ export const TabelaCategorias = memo(function TabelaCategorias({
             placeholder="Buscar categoria..."
             size="sm"
             pl={8}
-            borderRadius="lg"
+            borderRadius="full"
+            bg="bg.muted"
+            borderColor="border.subtle"
           />
         </Box>
       </Box>
@@ -128,8 +142,9 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     <Button
                       size="xs"
                       variant="ghost"
-                      borderRadius="lg"
+                      borderRadius="full"
                       color="fg.muted"
+                      _hover={{ bg: 'bg.muted', color: 'fg' }}
                       onClick={() => setCategoriaVinculandoAlbum(categoria)}
                     >
                       {categoria.googlePhotosAlbumId ? 'Trocar álbum' : 'Vincular álbum'}
@@ -137,8 +152,9 @@ export const TabelaCategorias = memo(function TabelaCategorias({
                     <IconButton
                       size="xs"
                       variant="ghost"
-                      borderRadius="lg"
+                      borderRadius="full"
                       color="fg.muted"
+                      _hover={{ bg: 'bg.muted', color: 'fg' }}
                       aria-label="Editar categoria"
                       onClick={() => setCategoriaEditando(categoria)}
                     >

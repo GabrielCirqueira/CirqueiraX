@@ -154,7 +154,7 @@ export default function Prints() {
             <HStack gap={2.5} align="center">
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.brand.500/15"
                 color="cirqueira.brand.400"
                 display="inline-flex"
@@ -164,7 +164,7 @@ export default function Prints() {
               <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="black" color="fg">
                 Prints & Capturas
               </Text>
-              <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="brand">
                 {total} {total === 1 ? 'captura' : 'capturas'}
               </Badge>
             </HStack>
@@ -180,7 +180,7 @@ export default function Prints() {
               borderColor="border.subtle"
               px={3}
               py={1.5}
-              borderRadius="lg"
+              borderRadius="8px"
               fontSize="xs"
               color="fg.subtle"
               display={{ base: 'none', md: 'flex' }}
@@ -195,7 +195,7 @@ export default function Prints() {
               variant="outline"
               onClick={() => refetch()}
               disabled={isFetching}
-              borderRadius="lg"
+              borderRadius="full"
             >
               <RefreshCw
                 size={14}
@@ -215,7 +215,7 @@ export default function Prints() {
           gap={3}
           bg="bg.panel"
           p={3.5}
-          borderRadius="xl"
+          borderRadius="8px"
           borderWidth="1px"
           borderColor="border.subtle"
         >
@@ -230,7 +230,7 @@ export default function Prints() {
                   setPagina(1)
                 }}
                 pl={8}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg="bg.muted"
                 borderColor="border.subtle"
               />
@@ -255,7 +255,7 @@ export default function Prints() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   fontSize="xs"
                 >
                   <option value="">Todas as categorias</option>
@@ -270,7 +270,7 @@ export default function Prints() {
             </Box>
 
             {filtrosAtivos && (
-              <Button size="xs" variant="ghost" onClick={handleLimparFiltros} borderRadius="lg">
+              <Button size="xs" variant="ghost" onClick={handleLimparFiltros} borderRadius="full">
                 <X size={13} />
                 <Text as="span">Limpar</Text>
               </Button>
@@ -284,7 +284,7 @@ export default function Prints() {
               onClick={() => setModoVisualizacao('grid')}
               aria-label="Visualização em Grade"
               title="Grade"
-              borderRadius="lg"
+              borderRadius="full"
             >
               <LayoutGrid size={16} />
             </IconButton>
@@ -295,7 +295,7 @@ export default function Prints() {
               onClick={() => setModoVisualizacao('lista')}
               aria-label="Visualização em Lista"
               title="Lista"
-              borderRadius="lg"
+              borderRadius="full"
             >
               <List size={16} />
             </IconButton>
@@ -310,11 +310,11 @@ export default function Prints() {
             borderWidth="1px"
             borderColor="cirqueira.brand.500/30"
             p={3}
-            borderRadius="xl"
+            borderRadius="8px"
             gap={3}
           >
             <HStack gap={2}>
-              <Badge size="sm" colorPalette="brand" borderRadius="md">
+              <Badge size="sm" colorPalette="brand">
                 {selecionados.length} selecionados
               </Badge>
               <Button size="xs" variant="ghost" onClick={() => setSelecionados([])}>
@@ -330,7 +330,7 @@ export default function Prints() {
                   setItemCategorizarAlvo(null)
                   setModalCategorizarAberto(true)
                 }}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <FolderPlus size={13} />
                 <Text as="span">Categorizar</Text>
@@ -344,7 +344,7 @@ export default function Prints() {
                   setItemApagarAlvo(null)
                   setModalConfirmarApagar(true)
                 }}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <Trash2 size={13} />
                 <Text as="span">Apagar</Text>
@@ -402,7 +402,7 @@ export default function Prints() {
                 variant="outline"
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <ChevronLeft size={16} />
                 <Text as="span">Anterior</Text>
@@ -413,7 +413,7 @@ export default function Prints() {
                 variant="outline"
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
                 disabled={pagina === totalPaginas}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <Text as="span">Próxima</Text>
                 <ChevronRight size={16} />
@@ -457,7 +457,7 @@ export default function Prints() {
           <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
           <Dialog.Positioner>
           <Dialog.Content
-            borderRadius="xl"
+            borderRadius="8px"
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"

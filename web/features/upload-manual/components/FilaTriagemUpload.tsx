@@ -150,12 +150,12 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         gap={3}
         bg="bg.panel"
         p={3.5}
-        borderRadius="2xl"
+        borderRadius="8px"
         borderWidth="1px"
         borderColor="border.subtle"
         shadow="none"
       >
-        <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto">
+        <HStack gap={1} bg="bg.muted" p={1} borderRadius="8px" overflowX="auto">
           {abasFiltro.map((aba) => (
             <Button
               key={aba.value}
@@ -164,7 +164,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               colorPalette={filtroStatus === aba.value ? 'brand' : undefined}
               onClick={() => onMudarFiltroStatus(aba.value)}
               fontWeight="semibold"
-              borderRadius="lg"
+              borderRadius="full"
               px={3}
               h={7}
             >
@@ -180,7 +180,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               onChange={(e) => setFiltroCategoria(e.target.value)}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="xl"
+              borderRadius="8px"
               fontSize="xs"
               h={8}
             >
@@ -201,7 +201,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               onChange={(e) => setFiltroTipo(e.target.value as 'todos' | 'imagem' | 'video')}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="xl"
+              borderRadius="8px"
               fontSize="xs"
               h={8}
             >
@@ -234,7 +234,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               h={8}
               pl={8}
               pr={busca ? 7 : 3}
-              borderRadius="xl"
+              borderRadius="8px"
             />
             {busca && (
               <Box
@@ -253,7 +253,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             )}
           </Box>
 
-          <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle">
+          <HStack gap={1} bg="bg.muted" p={1} borderRadius="8px" borderWidth="1px" borderColor="border.subtle">
             <IconButton
               size="xs"
               variant={modoVisualizacao === 'grid' ? 'solid' : 'ghost'}
@@ -261,7 +261,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               onClick={() => setModoVisualizacao('grid')}
               aria-label="Visualização em Grade"
               title="Visualização em Grade"
-              borderRadius="lg"
+              borderRadius="full"
               h={6}
               w={6}
             >
@@ -274,7 +274,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               onClick={() => setModoVisualizacao('tabela')}
               aria-label="Visualização em Tabela"
               title="Visualização em Tabela"
-              borderRadius="lg"
+              borderRadius="full"
               h={6}
               w={6}
             >
@@ -295,7 +295,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               fontWeight="semibold"
               color="fg.subtle"
               _hover={{ color: 'fg' }}
-              borderRadius="lg"
+              borderRadius="full"
             >
               <HStack gap={1.5}>
                 {todosSelecionados ? (
@@ -316,7 +316,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
             </Button>
 
             {selecionados.length > 0 && (
-              <Badge colorPalette="brand" size="sm" borderRadius="md">
+              <Badge colorPalette="brand" size="sm">
                 {selecionados.length} selecionado{selecionados.length > 1 ? 's' : ''}
               </Badge>
             )}
@@ -342,7 +342,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           {Array.from({ length: 8 }).map((_, i) => (
             <Card.Root
               key={`sk-${i + 1}`}
-              borderRadius="xl"
+              borderRadius="8px"
               borderWidth="1px"
               borderColor="border.subtle"
               bg="bg.panel"
@@ -350,9 +350,9 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               p={3}
             >
               <VStack h="full" justify="space-between" align="stretch">
-                <Box h={36} bg="bg.muted" borderRadius="lg" />
-                <Box h={4} bg="bg.muted" borderRadius="md" w="80%" />
-                <Box h={7} bg="bg.muted" borderRadius="md" />
+                <Box h={36} bg="bg.muted" borderRadius="8px" />
+                <Box h={4} bg="bg.muted" borderRadius="8px" w="80%" />
+                <Box h={7} bg="bg.muted" borderRadius="8px" />
               </VStack>
             </Card.Root>
           ))}
@@ -363,7 +363,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
           w="full"
           py={16}
           px={6}
-          borderRadius="2xl"
+          borderRadius="8px"
           borderWidth="1px"
           borderStyle="dashed"
           borderColor="border.subtle"
@@ -373,7 +373,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         >
           <Box
             p={4}
-            borderRadius="2xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/10"
             color="cirqueira.brand.400"
             display="inline-flex"
@@ -400,7 +400,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                 setFiltroCategoria('')
                 setFiltroTipo('todos')
               }}
-              borderRadius="lg"
+              borderRadius="full"
               mt={1}
             >
               Limpar Todos os Filtros
@@ -479,14 +479,14 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
               gap={3}
               p={3}
               px={5}
-              borderRadius="2xl"
+              borderRadius="8px"
               borderWidth="1px"
               borderColor="cirqueira.brand.500/40"
               bg="rgba(20, 25, 23, 0.94)"
               shadow="0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 186, 156, 0.2)"
             >
               <HStack gap={2}>
-                <Badge colorPalette="brand" px={2.5} py={1} borderRadius="lg" fontWeight="bold">
+                <Badge colorPalette="brand" px={2.5} py={1} fontWeight="bold">
                   {selecionados.length}
                 </Badge>
                 <Text as="span" fontSize="xs" fontWeight="semibold" color="fg">
@@ -505,7 +505,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                     variant="subtle"
                     colorPalette="brand"
                     onClick={() => onCategorizarEmLote(cat.uuid)}
-                    borderRadius="lg"
+                    borderRadius="full"
                     fontWeight="bold"
                     h={7}
                     px={2}
@@ -518,7 +518,6 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                         colorPalette="brand"
                         px={1}
                         py={0}
-                        borderRadius="sm"
                         fontSize="9px"
                         lineHeight="normal"
                       >
@@ -536,7 +535,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                   variant="outline"
                   onClick={() => setModalCategorizarAberto(true)}
                   fontWeight="semibold"
-                  borderRadius="xl"
+                  borderRadius="8px"
                   h={8}
                   fontSize="xs"
                 >
@@ -550,7 +549,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                   colorPalette="red"
                   onClick={onApagarEmLote}
                   fontWeight="semibold"
-                  borderRadius="xl"
+                  borderRadius="full"
                   h={8}
                   fontSize="xs"
                 >
@@ -574,7 +573,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
         <Portal>
           <Dialog.Backdrop bg="cirqueira.grey.950/80" />
           <Dialog.Positioner>
-            <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+            <Dialog.Content borderRadius="8px" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
               <Dialog.Header pb={2}>
                 <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
                   Categorizar Mídias em Lote
@@ -593,7 +592,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                       onChange={(e) => setCategoriaLoteId(e.target.value)}
                       bg="bg.muted"
                       borderColor="border.subtle"
-                      borderRadius="lg"
+                      borderRadius="8px"
                       fontSize="xs"
                       h={9}
                     >
@@ -614,7 +613,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                   size="sm"
                   variant="ghost"
                   onClick={() => setModalCategorizarAberto(false)}
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   Cancelar
                 </Button>
@@ -623,7 +622,7 @@ export const FilaTriagemUpload = memo(function FilaTriagemUpload({
                   colorPalette="brand"
                   disabled={!categoriaLoteId}
                   onClick={handleConfirmarCategorizarLote}
-                  borderRadius="lg"
+                  borderRadius="full"
                   fontWeight="semibold"
                 >
                   Aplicar Categoria

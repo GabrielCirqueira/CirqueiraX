@@ -32,7 +32,7 @@ export const GridPrints = memo(function GridPrints({
             className="google-photos-item"
             h={idx % 3 === 0 ? '220px' : idx % 2 === 0 ? '160px' : '280px'}
             bg="bg.muted"
-            borderRadius="md"
+            borderRadius="8px"
             animation="pulse 1.5s infinite"
           />
         ))}
@@ -49,7 +49,7 @@ export const GridPrints = memo(function GridPrints({
         py={20}
         px={4}
         textAlign="center"
-        borderRadius="2xl"
+        borderRadius="8px"
         borderWidth="2px"
         borderStyle="dashed"
         borderColor="border.subtle"
@@ -57,7 +57,7 @@ export const GridPrints = memo(function GridPrints({
       >
         <Box
           p={4}
-          borderRadius="2xl"
+          borderRadius="8px"
           bg="cirqueira.brand.500/10"
           color="cirqueira.brand.400"
           mb={2}

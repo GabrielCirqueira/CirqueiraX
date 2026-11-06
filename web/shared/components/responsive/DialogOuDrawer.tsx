@@ -38,7 +38,7 @@ export function DialogOuDrawer({
           borderColor="border.subtle"
           color="fg"
           p={4}
-          borderRadius="xl"
+          borderRadius="8px"
         >
           <Dialog.Header>
             <Dialog.Title fontSize="lg" fontWeight="bold">

@@ -20,7 +20,7 @@ export const CabecalhoDownloadsAudio = memo(function CabecalhoDownloadsAudio({
         <HStack gap={2.5} flexWrap="wrap">
           <Box
             p={2}
-            borderRadius="xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/15"
             color="cirqueira.brand.400"
             display="inline-flex"
@@ -31,21 +31,21 @@ export const CabecalhoDownloadsAudio = memo(function CabecalhoDownloadsAudio({
             Downloads MP3
           </Text>
           <HStack gap={1.5} pl={1} flexWrap="wrap">
-            <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+            <Badge size="sm" variant="subtle" colorPalette="brand">
               {contagem.total} {contagem.total === 1 ? 'áudio' : 'áudios'}
             </Badge>
             {contagem.prontos > 0 && (
-              <Badge size="sm" variant="subtle" colorPalette="green" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="green">
                 {contagem.prontos} {contagem.prontos === 1 ? 'pronto' : 'prontos'}
               </Badge>
             )}
             {contagem.emProcessamento > 0 && (
-              <Badge size="sm" variant="subtle" colorPalette="amber" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="amber">
                 {contagem.emProcessamento} convertendo
               </Badge>
             )}
             {contagem.comErro > 0 && (
-              <Badge size="sm" variant="subtle" colorPalette="red" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="red">
                 {contagem.comErro} {contagem.comErro === 1 ? 'erro' : 'erros'}
               </Badge>
             )}
@@ -63,7 +63,7 @@ export const CabecalhoDownloadsAudio = memo(function CabecalhoDownloadsAudio({
           borderColor="border.subtle"
           px={3}
           py={1.5}
-          borderRadius="lg"
+          borderRadius="8px"
           fontSize="xs"
           color="fg.subtle"
           display={{ base: 'none', md: 'flex' }}
@@ -74,7 +74,7 @@ export const CabecalhoDownloadsAudio = memo(function CabecalhoDownloadsAudio({
         <Button
           size="sm"
           variant="outline"
-          borderRadius="lg"
+          borderRadius="full"
           disabled={atualizando}
           onClick={onAtualizar}
         >

@@ -64,7 +64,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
   return (
     <Box
       w="full"
-      borderRadius="xl"
+      borderRadius="8px"
       borderWidth="1px"
       borderColor={baixando ? 'cirqueira.brand.500/50' : 'border.subtle'}
       bg="bg.panel"
@@ -87,7 +87,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
         <HStack gap={2.5} flex={1} minW="240px">
           <Box
             p={2}
-            borderRadius="lg"
+            borderRadius="8px"
             bg={
               baixando
                 ? 'cirqueira.brand.500/15'
@@ -130,12 +130,11 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                 size="xs"
                 variant={baixando ? 'solid' : 'subtle'}
                 colorPalette={baixando ? 'brand' : 'gray'}
-                borderRadius="md"
               >
                 {concluidosTotal}/{total} concluídos
               </Badge>
               {erros.length > 0 && (
-                <Badge size="xs" variant="solid" colorPalette="red" borderRadius="md">
+                <Badge size="xs" variant="solid" colorPalette="red">
                   {erros.length} com erro
                 </Badge>
               )}
@@ -162,9 +161,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
           </Progress.Root>
           <HStack justify="space-between" mt={1} fontSize="10px" color="fg.subtle">
             <Text as="span">{percentual}%</Text>
-            <Text as="span">
-              {baixando ? 'Baixando...' : pausado ? 'Pausado' : 'Pronto'}
-            </Text>
+            <Text as="span">{baixando ? 'Baixando...' : pausado ? 'Pausado' : 'Pronto'}</Text>
           </HStack>
         </Box>
 
@@ -178,7 +175,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
               onClick={() => retentarTodosErros(onRefetch)}
               h={7}
               px={2.5}
-              borderRadius="md"
+              borderRadius="full"
               fontSize="xs"
               title="Retentar todos os downloads que falharam"
             >
@@ -194,7 +191,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
               onClick={() => (pausado ? retomar(onRefetch) : pausar())}
               h={7}
               px={2}
-              borderRadius="md"
+              borderRadius="full"
               color="fg.muted"
               title={pausado ? 'Retomar processamento da fila' : 'Pausar fila'}
             >
@@ -212,7 +209,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
               onClick={limparErros}
               h={7}
               px={2}
-              borderRadius="md"
+              borderRadius="full"
               color="fg.subtle"
               _hover={{ color: 'fg' }}
               title="Remover da fila os downloads que falharam"
@@ -231,7 +228,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
             aria-label={painelAberto ? 'Recolher fila' : 'Expandir fila'}
             h={7}
             w={7}
-            borderRadius="md"
+            borderRadius="full"
           >
             {painelAberto ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </IconButton>
@@ -240,14 +237,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
 
       {/* Lista de itens da fila (quando expandida) */}
       {painelAberto && (
-        <VStack
-          gap={1.5}
-          p={2.5}
-          px={3}
-          maxH="280px"
-          overflowY="auto"
-          align="stretch"
-        >
+        <VStack gap={1.5} p={2.5} px={3} maxH="280px" overflowY="auto" align="stretch">
           {itens.map((item, index) => {
             const IconePlat =
               typeof item.plataforma?.icone === 'function'
@@ -260,7 +250,7 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                 justify="space-between"
                 py={1.5}
                 px={2}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg={item.status === 'baixando' ? 'cirqueira.brand.500/8' : 'transparent'}
                 borderBottomWidth={index < itens.length - 1 ? '1px' : '0px'}
                 borderColor="border.subtle/40"
@@ -270,20 +260,20 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                 <HStack gap={2.5} flex={1} minW={0}>
                   <Box
                     p={1.5}
-                    borderRadius="md"
+                    borderRadius="8px"
                     bg={
                       item.status === 'baixando'
                         ? 'cirqueira.brand.500/20'
                         : item.status === 'erro'
-                            ? 'red.500/15'
-                            : 'bg.muted'
+                          ? 'red.500/15'
+                          : 'bg.muted'
                     }
                     color={
                       item.status === 'baixando'
                         ? 'cirqueira.brand.400'
                         : item.status === 'erro'
-                            ? 'red.400'
-                            : 'fg.subtle'
+                          ? 'red.400'
+                          : 'fg.subtle'
                     }
                     display="inline-flex"
                     alignItems="center"
@@ -311,7 +301,11 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
                         href={item.url}
                         target="_blank"
                         rel="noreferrer"
-                        style={{ color: 'var(--chakra-colors-fg-subtle)', display: 'inline-flex', flexShrink: 0 }}
+                        style={{
+                          color: 'var(--chakra-colors-fg-subtle)',
+                          display: 'inline-flex',
+                          flexShrink: 0,
+                        }}
                       >
                         <ExternalLink size={11} />
                       </a>
@@ -345,20 +339,20 @@ export const PainelFilaDownloads = memo(function PainelFilaDownloads({
 
                 <HStack gap={2} flexShrink={0}>
                   {item.status === 'baixando' && (
-                    <Badge size="xs" variant="solid" colorPalette="brand" borderRadius="md">
+                    <Badge size="xs" variant="solid" colorPalette="brand">
                       Baixando...
                     </Badge>
                   )}
 
                   {item.status === 'pendente' && (
-                    <Badge size="xs" variant="subtle" colorPalette="gray" borderRadius="md">
+                    <Badge size="xs" variant="subtle" colorPalette="gray">
                       #{index + 1} na fila
                     </Badge>
                   )}
 
                   {item.status === 'erro' && (
                     <HStack gap={1}>
-                      <Badge size="xs" variant="subtle" colorPalette="red" borderRadius="md">
+                      <Badge size="xs" variant="subtle" colorPalette="red">
                         <AlertCircle size={10} style={{ marginRight: '3px' }} />
                         Erro
                       </Badge>

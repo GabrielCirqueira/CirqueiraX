@@ -86,7 +86,7 @@ export function Toaster() {
             minW="300px"
             maxW="420px"
             bg="bg.panel"
-            borderRadius="xl"
+            borderRadius="8px"
             borderWidth="1px"
             borderColor="border.subtle"
             shadow="2xl"

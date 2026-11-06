@@ -78,7 +78,7 @@ function FormularioEditarCategoria({
           {erro && (
             <Box
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.red.500/10"
               borderWidth="1px"
               borderColor="cirqueira.red.500/20"
@@ -100,7 +100,7 @@ function FormularioEditarCategoria({
               mt={1}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="lg"
+              borderRadius="8px"
             />
           </Field.Root>
 
@@ -117,7 +117,7 @@ function FormularioEditarCategoria({
               borderColor="border.subtle"
               fontFamily="mono"
               fontSize="xs"
-              borderRadius="lg"
+              borderRadius="8px"
             />
             <Text fontSize="11px" color="fg.subtle" mt={1}>
               Os arquivos associados a esta categoria serão movidos para esta pasta.
@@ -127,7 +127,7 @@ function FormularioEditarCategoria({
           {categoria.googlePhotosAlbumId && (
             <VStack
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="bg.muted"
               borderWidth="1px"
               borderColor="border.subtle"
@@ -153,15 +153,15 @@ function FormularioEditarCategoria({
         borderTopWidth="1px"
         borderColor="border.subtle"
       >
-        <Button type="button" variant="ghost" onClick={onFechar}>
+        <Button type="button" variant="ghost" borderRadius="full" onClick={onFechar}>
           Cancelar
         </Button>
         <Button
           type="submit"
           colorPalette="brand"
           disabled={isPending}
-          fontWeight="medium"
-          borderRadius="lg"
+          fontWeight="semibold"
+          borderRadius="full"
         >
           {isPending ? (
             <HStack gap={2}>
@@ -197,14 +197,14 @@ export function ModalEditarCategoria({
       placement="center"
     >
       <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
+        <Dialog.Backdrop bg="blackAlpha.800" />
         <Dialog.Positioner>
           <Dialog.Content
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"
             color="fg"
-            borderRadius="xl"
+            borderRadius="8px"
             p={0}
             maxW="md"
             w="full"
@@ -221,7 +221,7 @@ export function ModalEditarCategoria({
               <HStack gap={2.5}>
                 <Box
                   p={2}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.purple.500/10"
                   color="cirqueira.purple.500"
                 >

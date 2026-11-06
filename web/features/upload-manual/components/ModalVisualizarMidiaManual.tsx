@@ -70,7 +70,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
         <Dialog.Backdrop bg="cirqueira.grey.950/80" />
         <Dialog.Positioner>
         <Dialog.Content
-          borderRadius="2xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -90,7 +90,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
             <HStack gap={3} minW={0} flex={1}>
               <Box
                 p={2}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg={tipoInfo.isVideo ? 'cirqueira.purple.500/15' : 'cirqueira.brand.500/15'}
                 color={tipoInfo.isVideo ? 'cirqueira.purple.400' : 'cirqueira.brand.400'}
                 flexShrink={0}
@@ -116,7 +116,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
               variant="ghost"
               onClick={onFechar}
               aria-label="Fechar"
-              borderRadius="lg"
+              borderRadius="full"
             >
               <X size={16} />
             </IconButton>
@@ -142,7 +142,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
                     maxWidth: '100%',
                     maxHeight: '65vh',
                     objectFit: 'contain',
-                    backgroundColor: '#000',
+                    backgroundColor: 'black',
                   }}
                 />
               ) : (
@@ -177,7 +177,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
               </HStack>
 
               {ehDuplicado && (
-                <Badge variant="subtle" colorPalette="amber" size="sm" borderRadius="md">
+                <Badge variant="subtle" colorPalette="amber" size="sm">
                   <HStack gap={1}>
                     <AlertTriangle size={11} />
                     <Text as="span">Duplicado</Text>
@@ -195,7 +195,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
                     onChange={(e) => onClassificar(item.uuid, e.target.value)}
                     bg="bg.muted"
                     borderColor="border.subtle"
-                    borderRadius="lg"
+                    borderRadius="8px"
                     fontSize="xs"
                     h={7}
                   >
@@ -221,7 +221,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
                     onForcarGoogleFotos(item)
                     onFechar()
                   }}
-                  borderRadius="lg"
+                  borderRadius="full"
                   fontSize="xs"
                 >
                   <CloudUpload size={14} style={{ marginRight: '5px' }} />
@@ -235,7 +235,7 @@ export const ModalVisualizarMidiaManual = memo(function ModalVisualizarMidiaManu
                 download={nomeExibicao}
                 size="sm"
                 variant="outline"
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
               >
                 <Download size={14} style={{ marginRight: '5px' }} />

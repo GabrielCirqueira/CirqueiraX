@@ -1,5 +1,13 @@
 import { Badge, Box, Button, Flex, HStack, Portal, Text } from '@chakra-ui/react'
-import { CalendarClock, DownloadCloud, FolderMinus, FolderPlus, Loader2, Trash2, X } from 'lucide-react'
+import {
+  CalendarClock,
+  DownloadCloud,
+  FolderMinus,
+  FolderPlus,
+  Loader2,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { memo } from 'react'
 
 export interface BarraAcoesEmLoteProps {
@@ -47,23 +55,17 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
           gap={{ base: 2.5, sm: 3 }}
           p={2.5}
           px={{ base: 3, sm: 4 }}
-          borderRadius="2xl"
+          borderRadius="8px"
           borderWidth="1px"
           borderColor="cirqueira.brand.500/40"
-          bg="rgba(18, 22, 20, 0.96)"
+          bg="bg.panel"
           shadow="0 20px 45px rgba(0, 0, 0, 0.75), 0 0 25px rgba(0, 186, 156, 0.2)"
         >
           <HStack gap={2} flexShrink={0} align="center">
-            <Badge colorPalette="brand" px={2} py={0.5} borderRadius="md" fontWeight="bold">
+            <Badge colorPalette="brand" px={2} py={0.5} fontWeight="bold">
               {totalSelecionados}
             </Badge>
-            <Text
-              as="span"
-              fontSize="xs"
-              fontWeight="semibold"
-              color="fg"
-              whiteSpace="nowrap"
-            >
+            <Text as="span" fontSize="xs" fontWeight="semibold" color="fg" whiteSpace="nowrap">
               {totalSelecionados === 1 ? 'item selecionado' : 'itens selecionados'}
             </Text>
             <Button
@@ -76,7 +78,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
               h={6}
               w={6}
               minW={6}
-              borderRadius="md"
+              borderRadius="full"
               color="fg.subtle"
               _hover={{ color: 'fg', bg: 'whiteAlpha.100' }}
               title="Desmarcar todos"
@@ -107,12 +109,14 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
                 colorPalette="brand"
                 disabled={processando}
                 onClick={onDistribuirHorariosLote}
-                borderRadius="lg"
+                borderRadius="full"
                 whiteSpace="nowrap"
                 flexShrink={0}
               >
                 <CalendarClock size={14} style={{ marginRight: '6px' }} />
-                <Text as="span" whiteSpace="nowrap">Distribuir Horários</Text>
+                <Text as="span" whiteSpace="nowrap">
+                  Distribuir Horários
+                </Text>
               </Button>
             )}
 
@@ -121,7 +125,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
               variant="ghost"
               disabled={processando}
               onClick={onCategorizarLote}
-              borderRadius="lg"
+              borderRadius="full"
               whiteSpace="nowrap"
               flexShrink={0}
             >
@@ -135,7 +139,9 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
                   <FolderPlus size={14} color="currentColor" />
                 </Box>
               )}
-              <Text as="span" whiteSpace="nowrap">Categorizar</Text>
+              <Text as="span" whiteSpace="nowrap">
+                Categorizar
+              </Text>
             </Button>
 
             <Button
@@ -143,14 +149,16 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
               variant="ghost"
               disabled={processando}
               onClick={onRemoverCategoriaLote}
-              borderRadius="lg"
+              borderRadius="full"
               whiteSpace="nowrap"
               flexShrink={0}
             >
               <Box as="span" color="cirqueira.amber.500" display="inline-flex" mr={1.5}>
                 <FolderMinus size={14} color="currentColor" />
               </Box>
-              <Text as="span" whiteSpace="nowrap">Remover categoria</Text>
+              <Text as="span" whiteSpace="nowrap">
+                Remover categoria
+              </Text>
             </Button>
 
             <Button
@@ -158,7 +166,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
               variant="ghost"
               disabled={processando}
               onClick={onRebaixarLote}
-              borderRadius="lg"
+              borderRadius="full"
               whiteSpace="nowrap"
               flexShrink={0}
             >
@@ -172,7 +180,9 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
                   <DownloadCloud size={14} color="currentColor" />
                 </Box>
               )}
-              <Text as="span" whiteSpace="nowrap">Rebaixar</Text>
+              <Text as="span" whiteSpace="nowrap">
+                Rebaixar
+              </Text>
             </Button>
 
             <Button
@@ -181,7 +191,7 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
               colorPalette="red"
               disabled={processando}
               onClick={onApagarLote}
-              borderRadius="lg"
+              borderRadius="full"
               whiteSpace="nowrap"
               flexShrink={0}
             >
@@ -193,7 +203,9 @@ export const BarraAcoesEmLote = memo(function BarraAcoesEmLote({
               ) : (
                 <Trash2 size={14} style={{ marginRight: '6px' }} />
               )}
-              <Text as="span" whiteSpace="nowrap">Apagar</Text>
+              <Text as="span" whiteSpace="nowrap">
+                Apagar
+              </Text>
             </Button>
           </HStack>
         </Flex>

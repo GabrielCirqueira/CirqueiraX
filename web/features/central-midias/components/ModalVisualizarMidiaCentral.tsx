@@ -150,7 +150,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
         <Dialog.Backdrop bg="cirqueira.grey.950/85" />
         <Dialog.Positioner>
         <Dialog.Content
-          borderRadius="2xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -162,7 +162,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
               <HStack gap={2.5} minW={0} flex={1}>
                 <Box
                   p={2}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg={isVideo ? 'cirqueira.purple.500/15' : 'cirqueira.brand.500/15'}
                   color={isVideo ? 'cirqueira.purple.400' : 'cirqueira.brand.400'}
                   display="inline-flex"
@@ -174,7 +174,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                     {titulo}
                   </Dialog.Title>
                   <HStack gap={1.5} fontSize="11px" color="fg.subtle">
-                    <Badge size="xs" variant="subtle" colorPalette={infoOrigem.colorPalette} borderRadius="sm">
+                    <Badge size="xs" variant="subtle" colorPalette={infoOrigem.colorPalette}>
                       {infoOrigem.label}
                     </Badge>
                     <Text as="span">•</Text>
@@ -190,7 +190,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                 variant="ghost"
                 onClick={onFechar}
                 aria-label="Fechar modal"
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <X size={16} />
               </IconButton>
@@ -260,7 +260,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                           onChange={(e) => onClassificar(item.uuid, e.target.value)}
                           bg="bg.panel"
                           borderColor="border.subtle"
-                          borderRadius="lg"
+                          borderRadius="8px"
                           fontSize="xs"
                           h={8}
                         >
@@ -330,7 +330,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                         size="sm"
                         variant="outline"
                         onClick={() => navigate(montarRotaEditorImagem(item.uuid))}
-                        borderRadius="xl"
+                        borderRadius="8px"
                         w="full"
                         fontWeight="semibold"
                       >
@@ -345,7 +345,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                         variant="outline"
                         onClick={handleCopiar}
                         disabled={copiando}
-                        borderRadius="xl"
+                        borderRadius="full"
                         w="full"
                         fontWeight="semibold"
                       >
@@ -368,7 +368,7 @@ export const ModalVisualizarMidiaCentral = memo(function ModalVisualizarMidiaCen
                       colorPalette="brand"
                       onClick={handleBaixar}
                       disabled={baixando}
-                      borderRadius="xl"
+                      borderRadius="full"
                       w="full"
                       fontWeight="bold"
                     >

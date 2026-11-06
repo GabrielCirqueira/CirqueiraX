@@ -129,7 +129,7 @@ export function PainelVozes({
       bg="cirqueira.grey.900"
       border="1px solid"
       borderColor="cirqueira.grey.800"
-      borderRadius="2xl"
+      borderRadius="8px"
       p={3.5}
       overflowY="auto"
       boxShadow="0 20px 50px rgba(0, 0, 0, 0.9)"
@@ -172,7 +172,7 @@ export function PainelVozes({
           mb={2.5}
           px={2.5}
           py={2}
-          borderRadius="lg"
+          borderRadius="8px"
           bg={disco.nivel === 'critico' ? 'cirqueira.red.500/15' : 'cirqueira.yellow.500/10'}
           color={disco.nivel === 'critico' ? 'cirqueira.red.300' : 'cirqueira.yellow.300'}
         >
@@ -209,7 +209,7 @@ export function PainelVozes({
                 gap={2}
                 px={2.5}
                 py={2}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg={selecionada ? 'cirqueira.brand.500/15' : 'rgba(255, 255, 255, 0.03)'}
                 border="1px solid"
                 borderColor={selecionada ? 'cirqueira.brand.500/40' : 'transparent'}

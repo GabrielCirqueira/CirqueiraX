@@ -275,7 +275,7 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
                   <Box
                     px={1.5}
                     py={0.5}
-                    borderRadius="md"
+                    borderRadius="8px"
                     bg={
                       variacaoMediaDiariaPercentual >= 0
                         ? 'rgba(30, 215, 96, 0.15)'

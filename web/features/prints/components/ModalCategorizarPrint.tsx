@@ -49,7 +49,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
         <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
         <Dialog.Content
-          borderRadius="xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -66,7 +66,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
             <HStack gap={2.5}>
               <Box
                 p={2}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg="cirqueira.brand.500/10"
                 color="cirqueira.brand.400"
                 display="inline-flex"
@@ -83,7 +83,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
               variant="ghost"
               onClick={onFechar}
               aria-label="Fechar"
-              borderRadius="lg"
+              borderRadius="full"
             >
               <X size={18} />
             </IconButton>
@@ -100,7 +100,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
                   value={categoriaId}
                   onChange={(e) => setCategoriaId(e.target.value)}
                   placeholder="Selecione uma categoria..."
-                  borderRadius="lg"
+                  borderRadius="8px"
                 >
                   <option value="">Selecione uma categoria...</option>
                   {categorias.map((cat) => (
@@ -116,7 +116,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
 
           <Dialog.Footer p={4} borderTopWidth="1px" borderColor="border.subtle">
             <HStack gap={2} justify="flex-end">
-              <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="lg">
+              <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="full">
                 Cancelar
               </Button>
               <Button
@@ -124,7 +124,7 @@ export const ModalCategorizarPrint = memo(function ModalCategorizarPrint({
                 colorPalette="brand"
                 onClick={handleSalvar}
                 disabled={!categoriaId || carregando}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 Salvar Categoria
               </Button>

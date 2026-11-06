@@ -23,7 +23,7 @@ export function MainLayout() {
   const ctx = useMemo<MainLayoutContext>(() => ({ abrirModal }), [abrirModal])
 
   return (
-    <Flex minH="100vh" bg="cirqueira.grey.950" color="cirqueira.grey.0" position="relative">
+    <Flex minH="100vh" bg="bg.canvas" color="fg" position="relative">
       <Box
         as="aside"
         display={{ base: 'none', md: 'block' }}
@@ -42,7 +42,8 @@ export function MainLayout() {
           <Box
             position="absolute"
             inset={0}
-            bg="cirqueira.grey.950/80"
+            bg="blackAlpha.800"
+            backdropFilter="blur(4px)"
             onClick={() => setMobileMenuAberto(false)}
           />
           <Box
@@ -52,7 +53,7 @@ export function MainLayout() {
             bottom={0}
             w="72"
             maxW="85vw"
-            bg="cirqueira.grey.950"
+            bg="bg.canvas"
             shadow="2xl"
           >
             <Sidebar isMobile onClose={() => setMobileMenuAberto(false)} />

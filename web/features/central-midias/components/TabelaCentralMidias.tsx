@@ -86,7 +86,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
             w="full"
             h={16}
             bg="bg.muted"
-            borderRadius="xl"
+            borderRadius="8px"
             animation="pulse 1.5s infinite"
           />
         ))}
@@ -97,7 +97,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
   return (
     <Box
       w="full"
-      borderRadius="2xl"
+      borderRadius="8px"
       borderWidth="1px"
       borderColor="border.subtle"
       bg="bg.panel"
@@ -230,7 +230,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                     <Box
                       w={12}
                       h={12}
-                      borderRadius="lg"
+                      borderRadius="8px"
                       overflow="hidden"
                       bg="cirqueira.grey.950"
                       flexShrink={0}
@@ -273,7 +273,6 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                     size="xs"
                     variant="subtle"
                     colorPalette={origemInfo.colorPalette}
-                    borderRadius="md"
                   >
                     {origemInfo.label}
                   </Badge>
@@ -281,12 +280,12 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
 
                 <Box as="td" p={3}>
                   {item.categoria?.nome ? (
-                    <Badge size="xs" variant="solid" colorPalette="brand" borderRadius="md">
+                    <Badge size="xs" variant="solid" colorPalette="brand">
                       <Folder size={10} style={{ marginRight: '4px' }} />
                       <Text as="span">{item.categoria.nome}</Text>
                     </Badge>
                   ) : (
-                    <Badge size="xs" variant="subtle" colorPalette="amber" borderRadius="md">
+                    <Badge size="xs" variant="subtle" colorPalette="amber">
                       Sem Categoria
                     </Badge>
                   )}
@@ -314,7 +313,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                       onClick={() => onVisualizar(item)}
                       aria-label="Visualizar mídia"
                       title="Visualizar mídia"
-                      borderRadius="md"
+                      borderRadius="full"
                     >
                       <Eye size={13} />
                     </IconButton>
@@ -326,7 +325,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                         onClick={(e) => handleCopiar(item.uuid, isVideo, e)}
                         aria-label="Copiar imagem"
                         title="Copiar para clipboard"
-                        borderRadius="md"
+                        borderRadius="full"
                       >
                         <Copy size={13} />
                       </IconButton>
@@ -339,7 +338,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                         onClick={() => onCategorizar(item)}
                         aria-label="Atribuir categoria"
                         title="Atribuir categoria"
-                        borderRadius="md"
+                        borderRadius="full"
                       >
                         <FolderPlus size={13} />
                       </IconButton>
@@ -352,7 +351,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                       onClick={(e) => handleDownload(item.uuid, titulo, isVideo, e)}
                       aria-label="Baixar arquivo"
                       title="Baixar arquivo"
-                      borderRadius="md"
+                      borderRadius="full"
                     >
                       <Download size={13} />
                     </IconButton>
@@ -366,7 +365,7 @@ export const TabelaCentralMidias = memo(function TabelaCentralMidias({
                         onClick={() => onApagar(item.uuid)}
                         aria-label="Apagar mídia"
                         title="Apagar mídia"
-                        borderRadius="md"
+                        borderRadius="full"
                       >
                         <Trash2 size={13} />
                       </IconButton>

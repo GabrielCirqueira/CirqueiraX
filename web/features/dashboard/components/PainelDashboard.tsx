@@ -24,7 +24,8 @@ export const PainelDashboard = memo(function PainelDashboard({
       bg="bg.panel"
       borderWidth="1px"
       borderColor="border.subtle"
-      borderRadius="xl"
+      borderRadius="8px"
+      shadow="sm"
       overflow="hidden"
     >
       {titulo && (
@@ -37,7 +38,7 @@ export const PainelDashboard = memo(function PainelDashboard({
           pb={semEspacamento ? 4 : 0}
         >
           <VStack align="flex-start" gap={0.5} minW={0}>
-            <Text fontSize="sm" fontWeight="semibold" color="fg">
+            <Text fontSize="sm" fontWeight="bold" color="fg" letterSpacing="tight">
               {titulo}
             </Text>
             {descricao && (
@@ -81,12 +82,18 @@ export const IndicadorMetrica = memo(function IndicadorMetrica({
       _hover={onClick ? { bg: 'bg.muted' } : undefined}
       onClick={onClick}
     >
-      <Text fontSize="xs" color="fg.subtle">
+      <Text
+        fontSize="xs"
+        fontWeight="bold"
+        color="fg.subtle"
+        textTransform="uppercase"
+        letterSpacing="wider"
+      >
         {rotulo}
       </Text>
       <Text
         fontSize="2xl"
-        fontWeight="semibold"
+        fontWeight="black"
         letterSpacing="tight"
         lineHeight="1.2"
         color={corTextoDoTom(tom)}

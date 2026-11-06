@@ -115,7 +115,7 @@ function ControleSegmentado<T extends string>({
       <Text fontSize="xs" color="fg.muted">
         {rotulo}
       </Text>
-      <HStack gap={0.5} p={0.5} bg="bg.muted" borderRadius="lg">
+      <HStack gap={0.5} p={0.5} bg="bg.muted" borderRadius="8px">
         {opcoes.map((opcao) => {
           const ativa = opcao.valor === valor
           return (
@@ -125,7 +125,7 @@ function ControleSegmentado<T extends string>({
               px={2.5}
               py={1}
               fontSize="xs"
-              borderRadius="md"
+              borderRadius="8px"
               cursor="pointer"
               bg={ativa ? 'bg.panel' : 'transparent'}
               color={ativa ? 'fg' : 'fg.muted'}
@@ -173,7 +173,7 @@ export const PainelPropriedades = memo(function PainelPropriedades({
       bg="bg.panel"
       borderWidth="1px"
       borderColor="border.subtle"
-      borderRadius="xl"
+      borderRadius="8px"
       shadow="sm"
       flexWrap="wrap"
       justify="center"
@@ -226,7 +226,7 @@ export const PainelPropriedades = memo(function PainelPropriedades({
         <IconButton
           size="xs"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           color="fg.muted"
           aria-label="Trazer para frente"
           title="Trazer para frente"
@@ -237,7 +237,7 @@ export const PainelPropriedades = memo(function PainelPropriedades({
         <IconButton
           size="xs"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           color="fg.muted"
           aria-label="Duplicar"
           title="Duplicar (Ctrl + D)"
@@ -248,7 +248,7 @@ export const PainelPropriedades = memo(function PainelPropriedades({
         <IconButton
           size="xs"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           color="fg.muted"
           _hover={{ color: 'cirqueira.red.500' }}
           aria-label="Excluir"

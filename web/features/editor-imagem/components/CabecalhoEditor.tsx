@@ -36,7 +36,7 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
         <IconButton
           size="sm"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           color="fg.muted"
           aria-label="Abrir outra imagem"
           title="Abrir outra imagem"
@@ -47,7 +47,7 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
         <IconButton
           size="sm"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           color="fg.muted"
           aria-label="Baixar imagem"
           title="Baixar PNG"
@@ -59,7 +59,7 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
         <Button
           size="sm"
           variant="outline"
-          borderRadius="lg"
+          borderRadius="full"
           disabled={!temImagem}
           onClick={onSalvar}
           title="Salvar no CirqueiraX ou enviar ao Google Fotos (Ctrl + S)"
@@ -70,7 +70,7 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
         <Button
           size="sm"
           colorPalette="brand"
-          borderRadius="lg"
+          borderRadius="full"
           disabled={!temImagem || copiando}
           onClick={onCopiar}
           title="Copiar imagem editada (Ctrl + C)"

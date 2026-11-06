@@ -49,7 +49,7 @@ function CaixaDica({ titulo, linhas }: DicaGrafico) {
       bg="bg.panel"
       borderWidth="1px"
       borderColor="border.subtle"
-      borderRadius="lg"
+      borderRadius="8px"
       fontSize="xs"
     >
       <Text fontWeight="semibold" color="fg">
@@ -114,8 +114,8 @@ export const GraficosDashboard = memo(function GraficosDashboard({
   if (carregando) {
     return (
       <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
-        <Skeleton h="320px" borderRadius="xl" />
-        <Skeleton h="320px" borderRadius="xl" />
+        <Skeleton h="320px" borderRadius="8px" />
+        <Skeleton h="320px" borderRadius="8px" />
       </Grid>
     )
   }

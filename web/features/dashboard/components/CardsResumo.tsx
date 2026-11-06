@@ -43,17 +43,19 @@ export const CardsResumo = memo(function CardsResumo({
         <IndicadorMetrica
           rotulo="Total de mídias"
           valor={pipeline.total}
+          tom="destaque"
           detalhe={`${resumo?.tamanhoTotalFormatado ?? '0 B'} em disco`}
         />
         <IndicadorMetrica
           rotulo="Concluídas"
           valor={pipeline.concluidos}
+          tom="sucesso"
           detalhe={`${pipeline.taxaConclusao}% do total`}
         />
         <IndicadorMetrica
           rotulo="Em processamento"
           valor={pendentes}
-          tom={pipeline.semCategoria > 0 ? 'alerta' : 'neutro'}
+          tom={pendentes > 0 ? 'alerta' : 'neutro'}
           detalhe={
             pendentes === 0
               ? 'Fila vazia'

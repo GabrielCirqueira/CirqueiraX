@@ -25,7 +25,15 @@ export const CardsVideosMetricas = memo(function CardsVideosMetricas({
       titulo="Vídeos"
       descricao="Downloads, arquivos em disco e limpeza automática semanal"
       acao={
-        <Button asChild size="xs" variant="ghost" borderRadius="lg" color="fg.muted">
+        <Button
+          asChild
+          size="xs"
+          variant="outline"
+          borderRadius="full"
+          borderColor="border.subtle"
+          color="fg.muted"
+          _hover={{ bg: 'bg.muted', color: 'fg' }}
+        >
           <Link to="/downloads-video">
             Ver downloads
             <ArrowRight size={12} />
@@ -41,11 +49,13 @@ export const CardsVideosMetricas = memo(function CardsVideosMetricas({
             <IndicadorMetrica
               rotulo="Baixados"
               valor={videos.totalBaixados}
+              tom="info"
               detalhe="Histórico completo"
             />
             <IndicadorMetrica
               rotulo="No disco"
               valor={videos.permanecem}
+              tom="destaque"
               detalhe={`${videos.tamanhoPermanecem} · ${videos.percentualPermanecem}%`}
             />
             <IndicadorMetrica
@@ -56,6 +66,7 @@ export const CardsVideosMetricas = memo(function CardsVideosMetricas({
             <IndicadorMetrica
               rotulo="Espaço liberado"
               valor={videos.espacoLiberado}
+              tom="sucesso"
               detalhe={pluralizar(videos.totalRemovidos, 'vídeo removido', 'vídeos removidos')}
             />
           </Grid>

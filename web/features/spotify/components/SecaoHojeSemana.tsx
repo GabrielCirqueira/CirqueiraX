@@ -1,5 +1,6 @@
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import {
+  Badge,
   Box,
   Button,
   Center,
@@ -387,17 +388,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 {formatarMinutosParaHorasEMinutos(totalMinutos)}
               </Text>
               {variacao !== null && (
-                <Box
-                  px={1.5}
-                  py={0.2}
-                  borderRadius="md"
-                  bg={variacao >= 0 ? 'rgba(30, 215, 96, 0.15)' : 'rgba(239, 68, 68, 0.15)'}
-                  color={variacao >= 0 ? 'cirqueira.spotify.verde' : 'red.400'}
-                  fontSize="2xs"
-                  fontWeight="bold"
+                <Badge
+                  size="xs"
+                  variant="subtle"
+                  colorPalette={variacao >= 0 ? 'green' : 'red'}
                 >
                   {formatarPercentualVariacao(variacao)}
-                </Box>
+                </Badge>
               )}
             </HStack>
             <HStack gap={1.5} align="center">
@@ -440,13 +437,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   value={mesSelecionado}
                   onChange={(e) => setMesSelecionado(Number(e.target.value))}
                   bg="cirqueira.spotify.cartaoElevado"
-                  borderColor="rgba(255, 255, 255, 0.08)"
-                  borderRadius="md"
+                  borderColor="border.subtle"
+                  borderRadius="8px"
                   fontSize="xs"
                   color="cirqueira.spotify.textoPrincipal"
                 >
                   {NOMES_MESES.map((m) => (
-                    <Box as="option" key={m.valor} value={m.valor} bg="#181818" color="#FFFFFF">
+                    <Box as="option" key={m.valor} value={m.valor} bg="cirqueira.spotify.cartao" color="cirqueira.spotify.textoPrincipal">
                       {m.rotulo}
                     </Box>
                   ))}
@@ -459,13 +456,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   value={anoSelecionado}
                   onChange={(e) => setAnoSelecionado(Number(e.target.value))}
                   bg="cirqueira.spotify.cartaoElevado"
-                  borderColor="rgba(255, 255, 255, 0.08)"
-                  borderRadius="md"
+                  borderColor="border.subtle"
+                  borderRadius="8px"
                   fontSize="xs"
                   color="cirqueira.spotify.textoPrincipal"
                 >
                   {anosDisponiveis.map((ano) => (
-                    <Box as="option" key={ano} value={ano} bg="#181818" color="#FFFFFF">
+                    <Box as="option" key={ano} value={ano} bg="cirqueira.spotify.cartao" color="cirqueira.spotify.textoPrincipal">
                       {ano}
                     </Box>
                   ))}
@@ -482,7 +479,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             bg="cirqueira.spotify.cartao"
             borderRadius="8px"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             align={{ base: 'stretch', sm: 'center' }}
             direction={{ base: 'column', sm: 'row' }}
             gap={2.5}
@@ -500,13 +497,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 value={anoSelecionado}
                 onChange={(e) => setAnoSelecionado(Number(e.target.value))}
                 bg="cirqueira.spotify.cartaoElevado"
-                borderColor="rgba(255, 255, 255, 0.08)"
-                borderRadius="md"
+                borderColor="border.subtle"
+                borderRadius="8px"
                 fontSize="xs"
                 color="cirqueira.spotify.textoPrincipal"
               >
                 {anosDisponiveis.map((ano) => (
-                  <Box as="option" key={ano} value={ano} bg="#181818" color="#FFFFFF">
+                  <Box as="option" key={ano} value={ano} bg="cirqueira.spotify.cartao" color="cirqueira.spotify.textoPrincipal">
                     {ano}
                   </Box>
                 ))}
@@ -522,7 +519,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             bg="cirqueira.spotify.cartao"
             borderRadius="8px"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             align={{ base: 'stretch', sm: 'center' }}
             direction={{ base: 'column', sm: 'row' }}
             gap={2.5}
@@ -548,8 +545,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   onChange={(e) => setDataInicioPersonalizada(e.target.value)}
                   bg="cirqueira.spotify.cartaoElevado"
                   border="1px solid"
-                  borderColor="rgba(255, 255, 255, 0.08)"
-                  borderRadius="md"
+                  borderColor="border.subtle"
+                  borderRadius="8px"
                   color="cirqueira.spotify.textoPrincipal"
                   fontSize="xs"
                 />
@@ -567,8 +564,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   onChange={(e) => setDataFimPersonalizada(e.target.value)}
                   bg="cirqueira.spotify.cartaoElevado"
                   border="1px solid"
-                  borderColor="rgba(255, 255, 255, 0.08)"
-                  borderRadius="md"
+                  borderColor="border.subtle"
+                  borderRadius="8px"
                   color="cirqueira.spotify.textoPrincipal"
                   fontSize="xs"
                 />
@@ -583,7 +580,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
         bg="cirqueira.spotify.cartao"
         borderRadius="8px"
         border="1px solid"
-        borderColor="cirqueira.spotify.cartaoElevado"
+        borderColor="border.subtle"
         w="full"
         maxW="100%"
       >
@@ -593,7 +590,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             align={{ base: 'stretch', sm: 'center' }}
             direction={{ base: 'column', sm: 'row' }}
             borderBottom="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             pb={3}
             gap={2.5}
             w="full"

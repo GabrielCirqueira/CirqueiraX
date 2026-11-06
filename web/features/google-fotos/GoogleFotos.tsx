@@ -42,7 +42,7 @@ export default function GoogleFotos() {
         >
           <VStack gap={1} alignItems="flex-start">
             <HStack gap={2.5}>
-              <Box p={2} borderRadius="lg" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
+              <Box p={2} borderRadius="8px" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
                 <Icon as={Images} boxSize={6} />
               </Box>
               <Text as="h1" fontSize="2xl" fontWeight="bold" color="fg">
@@ -60,7 +60,7 @@ export default function GoogleFotos() {
             variant="ghost"
             disabled={isFetching}
             onClick={() => refetch()}
-            borderRadius="lg"
+            borderRadius="full"
           >
             <RefreshCw
               size={14}
@@ -87,7 +87,7 @@ export default function GoogleFotos() {
               borderWidth="1px"
               borderColor="border.subtle"
               bg="bg.panel"
-              borderRadius="xl"
+              borderRadius="8px"
               shadow="sm"
             >
               <Card.Body p={4}>
@@ -102,7 +102,7 @@ export default function GoogleFotos() {
                   </VStack>
                   <Box
                     p={2}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="cirqueira.teal.500/10"
                     color="cirqueira.teal.500"
                   >
@@ -116,7 +116,7 @@ export default function GoogleFotos() {
               borderWidth="1px"
               borderColor="border.subtle"
               bg="bg.panel"
-              borderRadius="xl"
+              borderRadius="8px"
               shadow="sm"
             >
               <Card.Body p={4}>
@@ -131,7 +131,7 @@ export default function GoogleFotos() {
                   </VStack>
                   <Box
                     p={2}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="cirqueira.green.500/10"
                     color="cirqueira.green.500"
                   >
@@ -145,7 +145,7 @@ export default function GoogleFotos() {
               borderWidth="1px"
               borderColor="border.subtle"
               bg="bg.panel"
-              borderRadius="xl"
+              borderRadius="8px"
               shadow="sm"
             >
               <Card.Body p={4}>
@@ -160,7 +160,7 @@ export default function GoogleFotos() {
                   </VStack>
                   <Box
                     p={2}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="cirqueira.amber.500/10"
                     color="cirqueira.amber.500"
                   >
@@ -174,7 +174,7 @@ export default function GoogleFotos() {
               borderWidth="1px"
               borderColor="border.subtle"
               bg="bg.panel"
-              borderRadius="xl"
+              borderRadius="8px"
               shadow="sm"
             >
               <Card.Body p={4}>
@@ -189,7 +189,7 @@ export default function GoogleFotos() {
                   </VStack>
                   <Box
                     p={2}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="cirqueira.purple.500/10"
                     color="cirqueira.purple.500"
                   >

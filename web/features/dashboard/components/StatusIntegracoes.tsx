@@ -18,9 +18,11 @@ export interface StatusIntegracoesProps {
 
 const COR_INDICADOR: Record<TomMetrica, string> = {
   neutro: 'fg.subtle',
-  sucesso: 'cirqueira.green.500',
-  alerta: 'cirqueira.amber.500',
+  sucesso: 'cirqueira.spotify.verde',
+  alerta: 'cirqueira.spotify.amarelo',
   erro: 'cirqueira.red.500',
+  destaque: 'cirqueira.brand.400',
+  info: 'cirqueira.spotify.azul',
 }
 
 export const StatusIntegracoes = memo(function StatusIntegracoes({
@@ -57,7 +59,13 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
             _last={{ borderBottomWidth: 0 }}
             cursor={servico.rota ? 'pointer' : 'default'}
             _hover={servico.rota ? { bg: 'bg.muted' } : undefined}
-            onClick={servico.rota ? () => navigate(servico.rota!) : undefined}
+            onClick={
+              servico.rota
+                ? () => {
+                    if (servico.rota) navigate(servico.rota)
+                  }
+                : undefined
+            }
           >
             <VStack align="flex-start" gap={0.5} minW={0}>
               <Text fontSize="sm" color="fg">

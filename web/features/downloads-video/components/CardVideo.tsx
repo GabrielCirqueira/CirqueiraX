@@ -1,14 +1,4 @@
-import {
-  Badge,
-  Box,
-  Card,
-  Flex,
-  HStack,
-  IconButton,
-  Link,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Badge, Box, Card, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
   AlertTriangle,
@@ -90,7 +80,8 @@ export const CardVideo = memo(function CardVideo({
   const [baixando, setBaixando] = useState(false)
 
   const statusInfo = obterStatusConfig(item.status)
-  const ehArquivoRemovido = item.status === 'arquivo_removido' || item.status === 'arquivo_expurgado'
+  const ehArquivoRemovido =
+    item.status === 'arquivo_removido' || item.status === 'arquivo_expurgado'
   const ehImagem = verificarSeEhImagem(item)
   const duracaoNumero =
     typeof item.metadata?.duracao === 'number' ? item.metadata.duracao : undefined
@@ -154,10 +145,10 @@ export const CardVideo = memo(function CardVideo({
     return (
       <Card.Root
         position="relative"
-        borderRadius="2xl"
+        borderRadius="8px"
         borderWidth={selecionado ? '2px' : '1px'}
         borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
-        bg="cirqueira.grey.950"
+        bg="bg.panel"
         className="cv-auto"
         overflow="hidden"
         shadow={selecionado ? 'lg' : 'sm'}
@@ -165,8 +156,19 @@ export const CardVideo = memo(function CardVideo({
         outlineColor="cirqueira.brand.500"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        _hover={{
+          bg: 'bg.muted',
+          borderColor: selecionado ? 'cirqueira.brand.500' : 'border.emphasized',
+        }}
+        transition="background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
       >
-        <Box position="relative" aspectRatio="16/10" w="full" bg="cirqueira.grey.950" overflow="hidden">
+        <Box
+          position="relative"
+          aspectRatio="16/10"
+          w="full"
+          bg="cirqueira.grey.950"
+          overflow="hidden"
+        >
           {temThumbnail ? (
             <img
               src={urlThumbnail}
@@ -209,14 +211,18 @@ export const CardVideo = memo(function CardVideo({
               bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
               _hover={{ bg: selecionado ? 'cirqueira.brand.600' : 'cirqueira.grey.950' }}
               color="cirqueira.grey.0"
-              borderRadius="lg"
+              borderRadius="full"
               h={7}
               w={7}
               borderWidth="1px"
               borderColor={selecionado ? 'cirqueira.brand.400' : 'border.subtle'}
               aria-label={`Selecionar ${titulo}`}
             >
-              {selecionado ? <Check size={14} strokeWidth={3} /> : <Square size={14} opacity={0.7} />}
+              {selecionado ? (
+                <Check size={14} strokeWidth={3} />
+              ) : (
+                <Square size={14} opacity={0.7} />
+              )}
             </IconButton>
 
             {plataformaInfo && (
@@ -225,7 +231,6 @@ export const CardVideo = memo(function CardVideo({
                 variant="subtle"
                 colorPalette={plataformaInfo.colorPalette}
                 bg="cirqueira.grey.950/85"
-                borderRadius="md"
                 px={2}
                 py={0.5}
               >
@@ -240,7 +245,7 @@ export const CardVideo = memo(function CardVideo({
           <HStack position="absolute" top={2.5} right={2.5} zIndex={10} gap={1.5}>
             {duracaoFormatada && (
               <Box
-                borderRadius="md"
+                borderRadius="full"
                 bg="cirqueira.grey.950/85"
                 px={1.5}
                 py={0.5}
@@ -256,7 +261,6 @@ export const CardVideo = memo(function CardVideo({
               size="xs"
               variant="subtle"
               colorPalette={statusInfo.colorPalette}
-              borderRadius="md"
               px={2}
               py={0.5}
             >
@@ -294,7 +298,6 @@ export const CardVideo = memo(function CardVideo({
                     size="xs"
                     variant="subtle"
                     colorPalette="brand"
-                    borderRadius="md"
                     cursor="pointer"
                     onClick={(e) => {
                       e.stopPropagation()
@@ -310,7 +313,6 @@ export const CardVideo = memo(function CardVideo({
                     size="xs"
                     variant="outline"
                     colorPalette="amber"
-                    borderRadius="md"
                     cursor="pointer"
                     onClick={(e) => {
                       e.stopPropagation()
@@ -325,7 +327,7 @@ export const CardVideo = memo(function CardVideo({
                   gap={1}
                   px={2}
                   py={0.5}
-                  borderRadius="md"
+                  borderRadius="full"
                   bg="whiteAlpha.200"
                   color="whiteAlpha.900"
                   fontSize="10px"
@@ -394,7 +396,7 @@ export const CardVideo = memo(function CardVideo({
         display="flex"
         flexDirection="row"
         alignItems="stretch"
-        borderRadius="xl"
+        borderRadius="8px"
         borderWidth={selecionado ? '2px' : '1px'}
         borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
         bg="bg.panel"
@@ -404,8 +406,10 @@ export const CardVideo = memo(function CardVideo({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         _hover={{
-          borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+          bg: 'bg.muted',
+          borderColor: selecionado ? 'cirqueira.brand.500' : 'border.emphasized',
         }}
+        transition="background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
       >
         <Box
           position="relative"
@@ -447,12 +451,16 @@ export const CardVideo = memo(function CardVideo({
               }}
               bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
               color="cirqueira.grey.0"
-              borderRadius="md"
+              borderRadius="full"
               h={6}
               w={6}
               aria-label={`Selecionar ${titulo}`}
             >
-              {selecionado ? <Check size={12} strokeWidth={3} /> : <Square size={12} opacity={0.8} />}
+              {selecionado ? (
+                <Check size={12} strokeWidth={3} />
+              ) : (
+                <Square size={12} opacity={0.8} />
+              )}
             </IconButton>
           </Box>
 
@@ -462,7 +470,7 @@ export const CardVideo = memo(function CardVideo({
               bottom={1.5}
               right={1.5}
               zIndex={5}
-              borderRadius="sm"
+              borderRadius="full"
               bg="cirqueira.grey.950/85"
               px={1.5}
               py={0.2}
@@ -499,7 +507,7 @@ export const CardVideo = memo(function CardVideo({
                   </Text>
                 </HStack>
                 {plataformaInfo && (
-                  <Badge size="xs" variant="subtle" colorPalette={plataformaInfo.colorPalette} borderRadius="sm">
+                  <Badge size="xs" variant="subtle" colorPalette={plataformaInfo.colorPalette}>
                     {plataformaInfo.nome}
                   </Badge>
                 )}
@@ -511,13 +519,7 @@ export const CardVideo = memo(function CardVideo({
               </HStack>
             </VStack>
 
-            <Badge
-              size="xs"
-              variant="subtle"
-              colorPalette={statusInfo.colorPalette}
-              borderRadius="md"
-              flexShrink={0}
-            >
+            <Badge size="xs" variant="subtle" colorPalette={statusInfo.colorPalette} flexShrink={0}>
               {statusInfo.label}
             </Badge>
           </Flex>
@@ -529,7 +531,6 @@ export const CardVideo = memo(function CardVideo({
                   size="xs"
                   variant="subtle"
                   colorPalette="brand"
-                  borderRadius="md"
                   cursor="pointer"
                   onClick={() => onCategorizar?.(item)}
                 >
@@ -545,7 +546,6 @@ export const CardVideo = memo(function CardVideo({
                   size="xs"
                   variant="outline"
                   colorPalette="amber"
-                  borderRadius="md"
                   cursor="pointer"
                   onClick={() => onCategorizar?.(item)}
                 >
@@ -560,7 +560,7 @@ export const CardVideo = memo(function CardVideo({
                 gap={1.5}
                 px={2}
                 py={0.5}
-                borderRadius="md"
+                borderRadius="full"
                 borderWidth="1px"
                 borderColor="border.subtle"
                 bg="bg.muted"
@@ -588,7 +588,7 @@ export const CardVideo = memo(function CardVideo({
                   aria-label="Google Fotos"
                   title="Enviar para o Google Fotos"
                   color={ehDuplicado ? 'cirqueira.amber.500' : 'fg.subtle'}
-                  borderRadius="md"
+                  borderRadius="full"
                 >
                   <CloudUpload size={13} />
                 </IconButton>
@@ -601,7 +601,7 @@ export const CardVideo = memo(function CardVideo({
                 aria-label="Baixar MP4"
                 title="Baixar arquivo MP4"
                 color={ehArquivoRemovido ? 'fg.subtle' : 'cirqueira.brand.500'}
-                borderRadius="md"
+                borderRadius="full"
               >
                 {baixando ? (
                   <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
@@ -616,7 +616,7 @@ export const CardVideo = memo(function CardVideo({
                   onClick={() => onEditarMetadata?.(item)}
                   aria-label="Editar"
                   title="Editar metadados"
-                  borderRadius="md"
+                  borderRadius="full"
                 >
                   <Edit3 size={13} />
                 </IconButton>
@@ -628,7 +628,7 @@ export const CardVideo = memo(function CardVideo({
                   onClick={() => onCategorizar?.(item)}
                   aria-label="Categorizar"
                   title="Atribuir categoria"
-                  borderRadius="md"
+                  borderRadius="full"
                 >
                   <FolderPlus size={13} />
                 </IconButton>
@@ -641,7 +641,7 @@ export const CardVideo = memo(function CardVideo({
                   onClick={() => onRebaixar?.(item.uuid)}
                   aria-label="Rebaixar"
                   title="Rebaixar vídeo"
-                  borderRadius="md"
+                  borderRadius="full"
                 >
                   <DownloadCloud size={13} />
                 </IconButton>
@@ -654,7 +654,7 @@ export const CardVideo = memo(function CardVideo({
                   aria-label="Apagar"
                   title="Excluir vídeo"
                   color="cirqueira.red.500"
-                  borderRadius="md"
+                  borderRadius="full"
                 >
                   <Trash2 size={13} />
                 </IconButton>
@@ -671,7 +671,7 @@ export const CardVideo = memo(function CardVideo({
       position="relative"
       display="flex"
       flexDirection="column"
-      borderRadius="2xl"
+      borderRadius="8px"
       borderWidth={selecionado ? '2px' : '1px'}
       borderColor={selecionado ? 'cirqueira.brand.500' : 'border.subtle'}
       bg="bg.panel"
@@ -683,10 +683,18 @@ export const CardVideo = memo(function CardVideo({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       _hover={{
-        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.muted',
+        bg: 'bg.muted',
+        borderColor: selecionado ? 'cirqueira.brand.500' : 'border.emphasized',
       }}
+      transition="background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
     >
-      <Box position="relative" aspectRatio="16/9" w="full" bg="cirqueira.grey.950" overflow="hidden">
+      <Box
+        position="relative"
+        aspectRatio="16/9"
+        w="full"
+        bg="cirqueira.grey.950"
+        overflow="hidden"
+      >
         {temThumbnail ? (
           <img
             src={urlThumbnail}
@@ -780,18 +788,14 @@ export const CardVideo = memo(function CardVideo({
             bg={selecionado ? 'cirqueira.brand.500' : 'cirqueira.grey.950/80'}
             _hover={{ bg: selecionado ? 'cirqueira.brand.600' : 'cirqueira.grey.950' }}
             color="cirqueira.grey.0"
-            borderRadius="lg"
+            borderRadius="full"
             h={7}
             w={7}
             borderWidth="1px"
             borderColor={selecionado ? 'cirqueira.brand.400' : 'border.subtle'}
             aria-label={`Selecionar ${titulo}`}
           >
-            {selecionado ? (
-              <Check size={14} strokeWidth={3} />
-            ) : (
-              <Square size={14} opacity={0.7} />
-            )}
+            {selecionado ? <Check size={14} strokeWidth={3} /> : <Square size={14} opacity={0.7} />}
           </IconButton>
 
           {plataformaInfo && (
@@ -802,7 +806,6 @@ export const CardVideo = memo(function CardVideo({
               bg="cirqueira.grey.950/80"
               borderWidth="1px"
               borderColor="border.subtle"
-              borderRadius="lg"
               px={2}
               py={0.5}
               fontWeight="semibold"
@@ -820,7 +823,6 @@ export const CardVideo = memo(function CardVideo({
             size="sm"
             variant="subtle"
             colorPalette={statusInfo.colorPalette}
-            borderRadius="lg"
             px={2.5}
             py={0.5}
             borderWidth="1px"
@@ -847,7 +849,6 @@ export const CardVideo = memo(function CardVideo({
               size="xs"
               variant="subtle"
               colorPalette="amber"
-              borderRadius="md"
               px={1.5}
               py={0.5}
               borderWidth="1px"
@@ -872,7 +873,7 @@ export const CardVideo = memo(function CardVideo({
             left={2.5}
             zIndex={10}
             p={1.5}
-            borderRadius="md"
+            borderRadius="full"
             bg="cirqueira.grey.950/70"
             color="cirqueira.grey.0"
             display="inline-flex"
@@ -891,7 +892,7 @@ export const CardVideo = memo(function CardVideo({
             bottom={2.5}
             right={2.5}
             zIndex={10}
-            borderRadius="md"
+            borderRadius="full"
             bg="cirqueira.grey.950/85"
             px={2}
             py={0.5}
@@ -907,7 +908,13 @@ export const CardVideo = memo(function CardVideo({
         )}
       </Box>
 
-      <Card.Body display="flex" flex={1} flexDirection="column" p={densidadeAlta ? 3 : 4} gap={densidadeAlta ? 2 : 3}>
+      <Card.Body
+        display="flex"
+        flex={1}
+        flexDirection="column"
+        p={densidadeAlta ? 3 : 4}
+        gap={densidadeAlta ? 2 : 3}
+      >
         <Text
           as="h3"
           fontWeight="bold"
@@ -939,7 +946,6 @@ export const CardVideo = memo(function CardVideo({
                 variant="outline"
                 textTransform="uppercase"
                 colorPalette="gray"
-                borderRadius="md"
                 px={1.5}
               >
                 {extensao}
@@ -961,7 +967,6 @@ export const CardVideo = memo(function CardVideo({
                 size="xs"
                 variant="subtle"
                 colorPalette="brand"
-                borderRadius="md"
                 cursor={onCategorizar ? 'pointer' : 'default'}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -982,7 +987,6 @@ export const CardVideo = memo(function CardVideo({
                 size="xs"
                 variant="outline"
                 colorPalette="amber"
-                borderRadius="md"
                 cursor={onCategorizar ? 'pointer' : 'default'}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -1005,19 +1009,11 @@ export const CardVideo = memo(function CardVideo({
           </HStack>
         </Flex>
 
-        <Box
+        <HStack
+          justify="space-between"
+          align="center"
           w="full"
-          px={3}
-          py={1.5}
-          borderRadius="xl"
-          borderWidth="1px"
-          borderColor="border.subtle"
-          bg="bg.muted"
-          transition="all 0.15s ease"
-          _hover={{
-            borderColor: 'cirqueira.brand.500/40',
-            bg: 'bg.subtle',
-          }}
+          py={0.5}
           cursor="pointer"
           onClick={(e) => {
             e.stopPropagation()
@@ -1025,26 +1021,30 @@ export const CardVideo = memo(function CardVideo({
           }}
           title="Clique para editar a data e horário"
         >
-          <HStack justify="space-between" align="center" w="full">
-            <HStack gap={2}>
-              <Box color="cirqueira.brand.400" display="inline-flex">
-                <Calendar size={13} />
-              </Box>
-              <Text fontSize="xs" fontWeight="medium" color="fg">
-                {dataMidia}, {horarioMidia}
-              </Text>
-            </HStack>
-
-            <HStack gap={1} color="fg.subtle" fontSize="10px" fontWeight="semibold">
-              <Edit3 size={11} />
-              <Text as="span">Editar</Text>
-            </HStack>
+          <HStack gap={1.5}>
+            <Box color="cirqueira.brand.400" display="inline-flex">
+              <Calendar size={12} />
+            </Box>
+            <Text fontSize="xs" fontWeight="medium" color="fg.muted">
+              {dataMidia}, {horarioMidia}
+            </Text>
           </HStack>
-        </Box>
+
+          <HStack
+            gap={1}
+            color="fg.subtle"
+            fontSize="10px"
+            fontWeight="semibold"
+            _hover={{ color: 'cirqueira.brand.400' }}
+          >
+            <Edit3 size={11} />
+            <Text as="span">Editar</Text>
+          </HStack>
+        </HStack>
 
         {item.status === 'erro' && item.erroMotivo && (
           <Box
-            borderRadius="lg"
+            borderRadius="8px"
             bg="cirqueira.red.500/10"
             p={2}
             fontSize="xs"
@@ -1078,7 +1078,6 @@ export const CardVideo = memo(function CardVideo({
                 colorPalette="green"
                 px={1.5}
                 py={0.2}
-                borderRadius="md"
                 title="Sincronizado no Google Fotos"
               >
                 <HStack gap={1} alignItems="center">
@@ -1108,7 +1107,7 @@ export const CardVideo = memo(function CardVideo({
                 }
                 color={ehDuplicado ? 'cirqueira.amber.500' : 'fg.subtle'}
                 _hover={{ bg: 'bg.muted', color: 'fg' }}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <CloudUpload size={14} />
               </IconButton>
@@ -1127,7 +1126,7 @@ export const CardVideo = memo(function CardVideo({
               }
               color={ehArquivoRemovido ? 'fg.subtle' : 'cirqueira.brand.500'}
               _hover={ehArquivoRemovido ? undefined : { bg: 'cirqueira.brand.500/10' }}
-              borderRadius="lg"
+              borderRadius="full"
             >
               {baixando ? (
                 <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
@@ -1143,7 +1142,7 @@ export const CardVideo = memo(function CardVideo({
                 onClick={() => onEditarMetadata?.(item)}
                 aria-label="Editar metadados"
                 title="Editar título, data e metadados"
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <Edit3 size={14} />
               </IconButton>
@@ -1156,7 +1155,7 @@ export const CardVideo = memo(function CardVideo({
                 onClick={() => onCategorizar?.(item)}
                 aria-label="Categorizar vídeo"
                 title="Atribuir categoria"
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <FolderPlus size={14} />
               </IconButton>
@@ -1175,7 +1174,7 @@ export const CardVideo = memo(function CardVideo({
                     ? 'Rebaixar vídeo (Arquivo Removido: baixar novamente preservando datas e metadados)'
                     : 'Rebaixar vídeo'
                 }
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <DownloadCloud size={14} />
               </IconButton>
@@ -1188,7 +1187,7 @@ export const CardVideo = memo(function CardVideo({
                 onClick={() => onRetentar?.(item.uuid)}
                 aria-label="Retentar processamento"
                 title="Retentar download"
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <Box as="span" color="cirqueira.amber.500" display="inline-flex">
                   <RotateCcw size={14} color="currentColor" />
@@ -1203,7 +1202,7 @@ export const CardVideo = memo(function CardVideo({
                 onClick={() => onApagar?.(item.uuid)}
                 aria-label="Apagar vídeo"
                 title="Excluir vídeo"
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <Box as="span" color="cirqueira.red.500" display="inline-flex">
                   <Trash2 size={14} color="currentColor" />

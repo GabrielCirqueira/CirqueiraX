@@ -49,7 +49,7 @@ export const ModalVincularAlbum = memo(function ModalVincularAlbum({
           borderWidth="1px"
           borderColor="border.subtle"
           color="fg"
-          borderRadius="xl"
+          borderRadius="8px"
           p={0}
           maxW="lg"
           w="full"
@@ -64,7 +64,7 @@ export const ModalVincularAlbum = memo(function ModalVincularAlbum({
             borderColor="border.subtle"
           >
             <HStack gap={3}>
-              <Box p={2} borderRadius="lg" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
+              <Box p={2} borderRadius="8px" bg="cirqueira.teal.500/10" color="cirqueira.teal.500">
                 <Icon as={Layers} boxSize={5} />
               </Box>
               <VStack gap={0.5} align="flex-start">
@@ -153,7 +153,7 @@ function FormularioVincularAlbumParaCategoria({
           {erro && (
             <Box
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.red.500/10"
               borderWidth="1px"
               borderColor="cirqueira.red.500/20"
@@ -167,13 +167,13 @@ function FormularioVincularAlbumParaCategoria({
             </Box>
           )}
 
-          <Box p={4} borderRadius="xl" bg="bg.subtle" borderWidth="1px" borderColor="border.subtle">
+          <Box p={4} borderRadius="8px" bg="bg.subtle" borderWidth="1px" borderColor="border.subtle">
             <HStack gap={3}>
               {album.urlCapa ? (
                 <Box
                   w="56px"
                   h="56px"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   backgroundImage={`url(${album.urlCapa})`}
                   backgroundSize="cover"
                   backgroundPosition="center"
@@ -183,7 +183,7 @@ function FormularioVincularAlbumParaCategoria({
                 <Flex
                   w="56px"
                   h="56px"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.teal.500/10"
                   color="cirqueira.teal.500"
                   align="center"
@@ -222,7 +222,7 @@ function FormularioVincularAlbumParaCategoria({
                   value={categoriaSelecionadaUuid}
                   onChange={(e) => setCategoriaSelecionadaUuid(e.target.value)}
                   bg="bg.muted"
-                  borderRadius="lg"
+                  borderRadius="8px"
                 >
                   <option value="">Selecione uma categoria...</option>
                   {categorias.map((cat) => {
@@ -243,7 +243,7 @@ function FormularioVincularAlbumParaCategoria({
             {categoriaAtual && (
               <Box
                 p={3}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg="cirqueira.teal.500/5"
                 border="1px solid"
                 borderColor="cirqueira.teal.500/20"
@@ -253,7 +253,7 @@ function FormularioVincularAlbumParaCategoria({
                     <Icon as={Folder} />
                     <Text fontWeight="medium">Pasta Local: /{categoriaAtual.pastaLocal}</Text>
                   </HStack>
-                  <Badge colorPalette="teal" size="xs" variant="subtle" borderRadius="md">
+                  <Badge colorPalette="teal" size="xs" variant="subtle">
                     Selecionada
                   </Badge>
                 </HStack>
@@ -268,7 +268,7 @@ function FormularioVincularAlbumParaCategoria({
           <Button
             variant="ghost"
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             onClick={onFechar}
             disabled={isPending}
           >
@@ -278,7 +278,7 @@ function FormularioVincularAlbumParaCategoria({
             type="submit"
             colorPalette="teal"
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             loading={isPending}
             disabled={!categoriaSelecionadaUuid}
           >
@@ -342,7 +342,7 @@ function FormularioVincularCategoriaParaAlbum({
           {erro && (
             <Box
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.red.500/10"
               borderWidth="1px"
               borderColor="cirqueira.red.500/20"
@@ -356,12 +356,12 @@ function FormularioVincularCategoriaParaAlbum({
             </Box>
           )}
 
-          <Box p={4} borderRadius="xl" bg="bg.subtle" borderWidth="1px" borderColor="border.subtle">
+          <Box p={4} borderRadius="8px" bg="bg.subtle" borderWidth="1px" borderColor="border.subtle">
             <HStack gap={3}>
               <Flex
                 w="56px"
                 h="56px"
-                borderRadius="lg"
+                borderRadius="8px"
                 bg="cirqueira.teal.500/10"
                 color="cirqueira.teal.500"
                 align="center"
@@ -403,7 +403,7 @@ function FormularioVincularCategoriaParaAlbum({
                   value={albumSelecionadoId}
                   onChange={(e) => setAlbumSelecionadoId(e.target.value)}
                   bg="bg.muted"
-                  borderRadius="lg"
+                  borderRadius="8px"
                 >
                   <option value="">Selecione um álbum...</option>
                   {albuns.map((alb) => (
@@ -420,7 +420,7 @@ function FormularioVincularCategoriaParaAlbum({
             {albumAtual && (
               <Box
                 p={3}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg="cirqueira.teal.500/5"
                 border="1px solid"
                 borderColor="cirqueira.teal.500/20"
@@ -436,7 +436,6 @@ function FormularioVincularCategoriaParaAlbum({
                     colorPalette={albumAtual.vinculado ? 'amber' : 'green'}
                     size="xs"
                     variant="subtle"
-                    borderRadius="md"
                   >
                     {albumAtual.vinculado ? 'Já Vinculado' : 'Disponível'}
                   </Badge>
@@ -452,7 +451,7 @@ function FormularioVincularCategoriaParaAlbum({
           <Button
             variant="ghost"
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             onClick={onFechar}
             disabled={isPending}
           >
@@ -462,7 +461,7 @@ function FormularioVincularCategoriaParaAlbum({
             type="submit"
             colorPalette="teal"
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             loading={isPending}
             disabled={!albumSelecionadoId}
           >

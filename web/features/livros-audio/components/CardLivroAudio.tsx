@@ -83,10 +83,10 @@ export const CardLivroAudio = memo(function CardLivroAudio({
 
   return (
     <Box
-      bg="cirqueira.grey.950"
+      bg="bg.panel"
       border="1px solid"
-      borderColor="cirqueira.grey.900"
-      borderRadius="xl"
+      borderColor="border.subtle"
+      borderRadius="8px"
       p={5}
       display="flex"
       flexDirection="column"
@@ -96,7 +96,8 @@ export const CardLivroAudio = memo(function CardLivroAudio({
       position="relative"
       overflow="hidden"
       _hover={{
-        borderColor: 'cirqueira.brand.500/40',
+        bg: 'bg.muted',
+        borderColor: 'border.emphasized',
         shadow: 'lg',
         transform: 'translateY(-2px)',
       }}
@@ -106,11 +107,11 @@ export const CardLivroAudio = memo(function CardLivroAudio({
           <HStack gap={3} align="center" minW={0}>
             <Center
               boxSize={11}
-              borderRadius="lg"
-              bg="cirqueira.brand.500/15"
+              borderRadius="8px"
+              bg="rgba(0, 186, 156, 0.12)"
               color="cirqueira.brand.400"
               border="1px solid"
-              borderColor="cirqueira.brand.500/30"
+              borderColor="rgba(0, 186, 156, 0.25)"
               flexShrink={0}
             >
               <BookOpen size={22} />
@@ -120,13 +121,13 @@ export const CardLivroAudio = memo(function CardLivroAudio({
               <Text
                 fontSize="sm"
                 fontWeight="bold"
-                color="cirqueira.grey.0"
+                color="fg"
                 lineClamp={2}
                 title={livro.titulo}
               >
                 {livro.titulo}
               </Text>
-              <Text fontSize="xs" color="cirqueira.grey.500">
+              <Text fontSize="xs" color="fg.subtle">
                 {formatarTamanhoLivro(livro.tamanhoTotalBytes ?? livro.tamanhoBytes)}
                 {livro.idiomaDescricao ? ` · Voz em ${livro.idiomaDescricao.toLowerCase()}` : ''}
               </Text>
@@ -145,8 +146,8 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             size="sm"
             variant="subtle"
             colorPalette={aparencia.paleta}
-            borderRadius="md"
-            px={2}
+            borderRadius="full"
+            px={2.5}
             py={0.5}
             fontSize="10px"
             fontWeight="bold"
@@ -156,7 +157,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
           </Badge>
         </HStack>
 
-        <Box bg="cirqueira.grey.900/50" borderRadius="lg" p={3}>
+        <Box bg="bg.muted" borderRadius="8px" p={3}>
           <HStack gap={1.5} align="center" mb={1.5}>
             <Headphones size={13} color="var(--chakra-colors-cirqueira-brand-400)" />
             <Text fontSize="xs" fontWeight="bold" color="cirqueira.grey.100" flex={1} minW={0}>
@@ -231,7 +232,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
           <IconButton
             size="xs"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="cirqueira.grey.400"
             _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
             aria-label="Baixar PDF original"
@@ -246,7 +247,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               color={partesOffline > 0 ? 'cirqueira.brand.400' : 'cirqueira.grey.400'}
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               aria-label="Baixar para ouvir sem internet"
@@ -261,7 +262,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               color="cirqueira.grey.400"
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               aria-label={livro.filaPausada ? 'Retomar geração' : 'Pausar geração'}
@@ -282,7 +283,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               color="cirqueira.grey.400"
               _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
               aria-label="Gerar este livro primeiro"
@@ -297,7 +298,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
           <IconButton
             size="xs"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="cirqueira.grey.400"
             _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
             aria-label="Apagar livro"
@@ -312,7 +313,7 @@ export const CardLivroAudio = memo(function CardLivroAudio({
         <Button
           size="xs"
           variant="solid"
-          borderRadius="lg"
+          borderRadius="full"
           bg="cirqueira.brand.500"
           _hover={{ bg: 'cirqueira.brand.600' }}
           color="cirqueira.grey.0"

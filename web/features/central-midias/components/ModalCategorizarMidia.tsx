@@ -44,7 +44,7 @@ export const ModalCategorizarMidia = memo(function ModalCategorizarMidia({
         <Dialog.Backdrop bg="cirqueira.grey.950/80" />
         <Dialog.Positioner>
         <Dialog.Content
-          borderRadius="2xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -72,7 +72,7 @@ export const ModalCategorizarMidia = memo(function ModalCategorizarMidia({
                   onChange={(e) => setCategoriaId(e.target.value)}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={9}
                 >
@@ -89,7 +89,7 @@ export const ModalCategorizarMidia = memo(function ModalCategorizarMidia({
           </Dialog.Body>
 
           <Dialog.Footer pt={2}>
-            <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="lg">
+            <Button size="sm" variant="ghost" onClick={onFechar} borderRadius="full">
               Cancelar
             </Button>
             <Button
@@ -97,7 +97,7 @@ export const ModalCategorizarMidia = memo(function ModalCategorizarMidia({
               colorPalette="brand"
               disabled={!categoriaId}
               onClick={handleConfirmar}
-              borderRadius="lg"
+              borderRadius="full"
               fontWeight="bold"
             >
               Aplicar Categoria

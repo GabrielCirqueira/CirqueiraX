@@ -22,22 +22,22 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
     <Flex
       align="center"
       justify="space-between"
-      p={{ base: 2, sm: 3 }}
+      p={{ base: 2, sm: 2.5 }}
       borderRadius="8px"
       bg="cirqueira.spotify.cartao"
       border="1px solid"
-      borderColor="cirqueira.spotify.cartaoElevado"
-      _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
-      transition="background-color 0.15s ease"
+      borderColor="border.subtle"
+      _hover={{ bg: 'cirqueira.spotify.cartaoElevado', borderColor: 'border.muted' }}
+      transition="all 0.15s ease"
       gap={{ base: 2, sm: 3 }}
       w="full"
       minW={0}
     >
       <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
         <Center
-          boxSize={{ base: 6, sm: 8 }}
-          borderRadius="md"
-          fontWeight="bold"
+          boxSize={{ base: 6, sm: 7 }}
+          borderRadius="8px"
+          fontWeight="black"
           fontSize={{ base: 'xs', sm: 'sm' }}
           color={corPosicao}
           flexShrink={0}
@@ -46,9 +46,11 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
         </Center>
 
         <Box
-          boxSize={{ base: 10, sm: 12 }}
-          borderRadius="4px"
+          boxSize={{ base: 10, sm: 11 }}
+          borderRadius="6px"
           overflow="hidden"
+          border="1px solid"
+          borderColor="border.subtle"
           bg="cirqueira.spotify.cartaoElevado"
           flexShrink={0}
           display="flex"
@@ -132,7 +134,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
         borderRadius="8px"
         bg="cirqueira.spotify.cartao"
         border="1px solid"
-        borderColor={expandido ? 'cirqueira.spotify.azul' : 'cirqueira.spotify.cartaoElevado'}
+        borderColor={expandido ? 'cirqueira.spotify.azul' : 'border.subtle'}
         transition="border-color 0.15s ease, background-color 0.15s ease"
         overflow="hidden"
         w="full"
@@ -141,7 +143,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
         <Flex
           align="center"
           justify="space-between"
-          p={{ base: 2, sm: 3 }}
+          p={{ base: 2, sm: 2.5 }}
           cursor="pointer"
           _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
           onClick={() => setExpandido((prev) => !prev)}
@@ -151,9 +153,9 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
         >
           <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
             <Center
-              boxSize={{ base: 6, sm: 8 }}
-              borderRadius="md"
-              fontWeight="bold"
+              boxSize={{ base: 6, sm: 7 }}
+              borderRadius="8px"
+              fontWeight="black"
               fontSize={{ base: 'xs', sm: 'sm' }}
               color={corPosicao}
               flexShrink={0}
@@ -167,7 +169,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
               overflow="hidden"
               flexShrink={0}
               border="1px solid"
-              borderColor="cirqueira.spotify.cartaoElevado"
+              borderColor="border.subtle"
               bg="cirqueira.spotify.cartaoElevado"
               display="flex"
               alignItems="center"
@@ -190,7 +192,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                   <Avatar.Fallback
                     name={item.nomeArtista}
                     bg="cirqueira.spotify.cartaoElevado"
-                    color="cirqueira.spotify.azul"
+                    color="cirqueira.spotify.textoSecundario"
                   />
                 </Avatar.Root>
               )}

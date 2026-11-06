@@ -88,7 +88,7 @@ function FormularioCriarCategoria({
           {erro && (
             <Box
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.red.500/10"
               borderWidth="1px"
               borderColor="cirqueira.red.500/20"
@@ -110,7 +110,7 @@ function FormularioCriarCategoria({
               mt={1}
               bg="bg.muted"
               borderColor="border.subtle"
-              borderRadius="lg"
+              borderRadius="8px"
               autoFocus
             />
           </Field.Root>
@@ -128,7 +128,7 @@ function FormularioCriarCategoria({
               borderColor="border.subtle"
               fontFamily="mono"
               fontSize="xs"
-              borderRadius="lg"
+              borderRadius="8px"
             />
             <Text fontSize="11px" color="fg.subtle" mt={1}>
               Subdiretório dentro da pasta organizada onde as mídias desta categoria serão salvas.
@@ -137,7 +137,7 @@ function FormularioCriarCategoria({
 
           <Box
             p={3}
-            borderRadius="lg"
+            borderRadius="8px"
             bg="cirqueira.brand.500/5"
             borderWidth="1px"
             borderColor="cirqueira.brand.500/20"
@@ -158,15 +158,15 @@ function FormularioCriarCategoria({
         borderTopWidth="1px"
         borderColor="border.subtle"
       >
-        <Button type="button" variant="ghost" onClick={onFechar}>
+        <Button type="button" variant="ghost" borderRadius="full" onClick={onFechar}>
           Cancelar
         </Button>
         <Button
           type="submit"
           colorPalette="brand"
           disabled={isPending}
-          fontWeight="medium"
-          borderRadius="lg"
+          fontWeight="semibold"
+          borderRadius="full"
         >
           {isPending ? (
             <HStack gap={2}>
@@ -195,14 +195,14 @@ export function ModalCriarCategoria({ aberto, onFechar, onSucesso }: ModalCriarC
       placement="center"
     >
       <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
+        <Dialog.Backdrop bg="blackAlpha.800" />
         <Dialog.Positioner>
           <Dialog.Content
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"
             color="fg"
-            borderRadius="xl"
+            borderRadius="8px"
             p={0}
             maxW="md"
             w="full"
@@ -219,7 +219,7 @@ export function ModalCriarCategoria({ aberto, onFechar, onSucesso }: ModalCriarC
               <HStack gap={2.5}>
                 <Box
                   p={2}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.brand.500/10"
                   color="cirqueira.brand.500"
                 >

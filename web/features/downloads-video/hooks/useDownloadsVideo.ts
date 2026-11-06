@@ -8,6 +8,7 @@ import {
   criarPedidoDownload,
   detalharMediaItem,
   distribuirHorariosLote,
+  forcarSincronizacaoGoogleFotos,
   listarCategorias,
   listarMediaItens,
   rebaixarIndividual,
@@ -15,7 +16,6 @@ import {
   removerCategoriaLote,
   retentarMediaItem,
   retentarTodos,
-  forcarSincronizacaoGoogleFotos,
 } from '../api'
 import type {
   ApagarLoteInput,
@@ -112,9 +112,11 @@ function extrairMensagemErroApi(erro: unknown, padrao: string): string {
     typeof erro === 'object' &&
     erro !== null &&
     'response' in erro &&
-    typeof (erro as { response?: { data?: { error?: unknown; message?: unknown } } }).response?.data === 'object'
+    typeof (erro as { response?: { data?: { error?: unknown; message?: unknown } } }).response
+      ?.data === 'object'
   ) {
-    const data = (erro as { response?: { data?: { error?: unknown; message?: unknown } } }).response?.data
+    const data = (erro as { response?: { data?: { error?: unknown; message?: unknown } } }).response
+      ?.data
     if (typeof data?.error === 'string' && data.error.trim().length > 0) {
       return data.error
     }
@@ -313,4 +315,3 @@ export function useForcarGoogleFotos() {
     },
   })
 }
-

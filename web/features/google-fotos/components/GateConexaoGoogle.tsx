@@ -77,7 +77,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
         <Card.Root
           maxW="2xl"
           w="full"
-          borderRadius="xl"
+          borderRadius="8px"
           shadow="lg"
           border="1px solid"
           borderColor="border.subtle"
@@ -108,7 +108,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 <Button
                   colorPalette="teal"
                   size="lg"
-                  borderRadius="xl"
+                  borderRadius="full"
                   onClick={() => setModalConectarAberto(true)}
                   shadow="md"
                 >
@@ -119,7 +119,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
 
               <Box
                 p={4}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="bg.subtle"
                 border="1px solid"
                 borderColor="border.subtle"
@@ -140,7 +140,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                   <HStack
                     justify="space-between"
                     p={3}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     bg="bg.muted"
                     border="1px solid"
                     borderColor="border.subtle"
@@ -152,7 +152,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                       aria-label="Copiar comando"
                       size="xs"
                       variant="ghost"
-                      borderRadius="lg"
+                      borderRadius="full"
                       onClick={handleCopiarComando}
                     >
                       <Icon
@@ -168,7 +168,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 <Button
                   variant="ghost"
                   size="sm"
-                  borderRadius="lg"
+                  borderRadius="full"
                   onClick={() => refetch()}
                   loading={isRefetching}
                 >
@@ -195,7 +195,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
     <VStack w="full" gap={6} align="stretch">
       <Box
         p={4}
-        borderRadius="xl"
+        borderRadius="8px"
         bg={tokenExpirado ? 'cirqueira.amber.500/5' : 'bg.subtle'}
         border="1px solid"
         borderColor={tokenExpirado ? 'cirqueira.amber.500/30' : 'cirqueira.teal.500/20'}
@@ -206,7 +206,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
             <HStack gap={3}>
               <Box
                 p={2.5}
-                borderRadius="lg"
+                borderRadius="8px"
                 bg={tokenExpirado ? 'cirqueira.amber.500/10' : 'cirqueira.teal.500/10'}
                 color={tokenExpirado ? 'cirqueira.amber.500' : 'cirqueira.teal.500'}
               >
@@ -246,7 +246,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 size="sm"
                 colorPalette={tokenExpirado ? 'amber' : 'teal'}
                 variant={tokenExpirado ? 'solid' : 'outline'}
-                borderRadius="lg"
+                borderRadius="full"
                 onClick={() => setModalConectarAberto(true)}
               >
                 <Icon as={tokenExpirado ? AlertTriangle : KeyRound} />
@@ -257,7 +257,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
                 size="sm"
                 variant="ghost"
                 colorPalette="red"
-                borderRadius="lg"
+                borderRadius="full"
                 loading={desconectarMutation.isPending}
                 onClick={handleDesconectar}
               >
@@ -281,7 +281,7 @@ export const GateConexaoGoogle = memo(function GateConexaoGoogle({
             <HStack
               gap={2.5}
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.amber.500/10"
               border="1px solid"
               borderColor="cirqueira.amber.500/20"

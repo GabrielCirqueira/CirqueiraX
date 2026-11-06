@@ -28,16 +28,16 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/spotify', label: 'Spotify', icon: Radio },
-  { href: '/central-midias', label: 'Central de Mídias', icon: Layers },
-  { href: '/downloads', label: 'Downloads', icon: DownloadCloud },
-  { href: '/downloads-mp3', label: 'Downloads MP3', icon: Music },
-  { href: '/livros-audio', label: 'Livros em Áudio', icon: BookOpen },
-  { href: '/prints', label: 'Prints & Capturas', icon: Camera },
-  { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine },
-  { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud },
-  { href: '/google-fotos', label: 'Google Fotos', icon: Images },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, cor: 'cirqueira.brand.400' },
+  { href: '/spotify', label: 'Spotify', icon: Radio, cor: 'cirqueira.spotify.verde' },
+  { href: '/central-midias', label: 'Central de Mídias', icon: Layers, cor: 'cirqueira.cyan.300' },
+  { href: '/downloads', label: 'Downloads', icon: DownloadCloud, cor: 'cirqueira.blue.400' },
+  { href: '/downloads-mp3', label: 'Downloads MP3', icon: Music, cor: 'cirqueira.purple.300' },
+  { href: '/livros-audio', label: 'Livros em Áudio', icon: BookOpen, cor: 'cirqueira.emerald.400' },
+  { href: '/prints', label: 'Prints & Capturas', icon: Camera, cor: 'cirqueira.yellow.300' },
+  { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine, cor: 'cirqueira.rose.400' },
+  { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud, cor: 'cirqueira.orange.300' },
+  { href: '/google-fotos', label: 'Google Fotos', icon: Images, cor: 'cirqueira.blue.300' },
 ]
 
 export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: SidebarProps) {
@@ -64,18 +64,18 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
       h="100%"
       w="full"
       justify="space-between"
-      bg="cirqueira.grey.950"
+      bg="bg.canvas"
       borderRight="1px solid"
-      borderColor="cirqueira.grey.900"
-      p={4}
+      borderColor="border.subtle"
+      p={3.5}
     >
-      <VStack gap={6} align="stretch" w="full">
+      <VStack gap={5} align="stretch" w="full">
         <HStack justify="space-between" align="center" px={2} pt={1}>
           <RouterLink to="/dashboard" onClick={handleItemClick}>
             <HStack gap={3}>
               <Center
                 boxSize={8}
-                borderRadius="lg"
+                borderRadius="full"
                 bg="cirqueira.brand.500"
                 color="cirqueira.grey.0"
                 shadow="sm"
@@ -90,7 +90,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
                     fontSize="sm"
                     letterSpacing="tight"
                     fontFamily="heading"
-                    color="cirqueira.grey.0"
+                    color="fg"
                   >
                     Cirqueira
                     <Text as="span" color="cirqueira.brand.400">
@@ -101,11 +101,13 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
                     size="xs"
                     variant="subtle"
                     colorPalette="brand"
-                    px={1.5}
-                    py={0}
+                    px={2}
+                    py={0.2}
                     fontSize="9px"
                     fontWeight="bold"
-                    borderRadius="md"
+                    borderRadius="full"
+                    border="1px solid"
+                    borderColor="border.subtle"
                   >
                     Media
                   </Badge>
@@ -119,9 +121,9 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
               aria-label="Fechar menu"
               variant="ghost"
               size="xs"
-              borderRadius="lg"
-              color="cirqueira.grey.400"
-              _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.900' }}
+              borderRadius="full"
+              color="fg.muted"
+              _hover={{ color: 'fg', bg: 'bg.muted' }}
               onClick={onClose}
             >
               <X size={18} />
@@ -137,7 +139,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             fontWeight="bold"
             textTransform="uppercase"
             letterSpacing="wider"
-            color="cirqueira.grey.500"
+            color="fg.subtle"
           >
             Navegação
           </Text>
@@ -155,19 +157,26 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
                     w="full"
                     px={3}
                     py={2.5}
-                    borderRadius="lg"
+                    borderRadius="8px"
                     gap={3}
                     transition="all 0.15s ease"
-                    bg={ativo ? 'cirqueira.brand.500/15' : 'transparent'}
-                    color={ativo ? 'cirqueira.brand.300' : 'cirqueira.grey.400'}
+                    bg={ativo ? 'bg.panel' : 'transparent'}
+                    color={ativo ? 'fg' : 'fg.muted'}
                     border="1px solid"
-                    borderColor={ativo ? 'cirqueira.brand.500/30' : 'transparent'}
+                    borderColor={ativo ? 'border.subtle' : 'transparent'}
                     _hover={{
-                      bg: ativo ? 'cirqueira.brand.500/20' : 'cirqueira.grey.900/60',
-                      color: ativo ? 'cirqueira.brand.200' : 'cirqueira.grey.0',
+                      bg: ativo ? 'bg.panel' : 'bg.muted',
+                      color: 'fg',
                     }}
                   >
-                    <Icone size={18} strokeWidth={ativo ? 2.2 : 1.8} />
+                    <Box
+                      color={ativo ? item.cor : 'fg.subtle'}
+                      display="inline-flex"
+                      alignItems="center"
+                      transition="color 0.15s ease"
+                    >
+                      <Icone size={18} strokeWidth={ativo ? 2.2 : 1.8} />
+                    </Box>
                     <Text
                       as="span"
                       fontSize="sm"
@@ -180,8 +189,8 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
                       <Box
                         boxSize={1.5}
                         borderRadius="full"
-                        bg="cirqueira.brand.400"
-                        shadow="0 0 6px var(--chakra-colors-cirqueira-brand-400)"
+                        bg={item.cor}
+                        shadow={`0 0 6px ${item.cor}`}
                       />
                     )}
                   </HStack>
@@ -196,40 +205,34 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
         gap={3}
         align="stretch"
         w="full"
-        pt={4}
+        pt={3}
         borderTop="1px solid"
-        borderColor="cirqueira.grey.900"
+        borderColor="border.subtle"
       >
         <HStack
           p={2.5}
-          borderRadius="xl"
-          bg="cirqueira.grey.900/40"
+          borderRadius="8px"
+          bg="bg.panel"
           border="1px solid"
-          borderColor="cirqueira.grey.800/60"
+          borderColor="border.subtle"
           justify="space-between"
           align="center"
         >
           <HStack gap={2.5} minW={0}>
             <Center
               boxSize={8}
-              borderRadius="lg"
-              bg="cirqueira.brand.500/20"
+              borderRadius="full"
+              bg="brand.subtle"
               color="cirqueira.brand.300"
               flexShrink={0}
             >
               <User size={16} />
             </Center>
             <VStack gap={0} align="flex-start" minW={0}>
-              <Text
-                fontSize="xs"
-                fontWeight="semibold"
-                color="cirqueira.grey.0"
-                truncate
-                maxW="110px"
-              >
+              <Text fontSize="xs" fontWeight="semibold" color="fg" truncate maxW="110px">
                 {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
               </Text>
-              <Text fontSize="10px" color="cirqueira.grey.500" truncate maxW="110px">
+              <Text fontSize="10px" color="fg.subtle" truncate maxW="110px">
                 Operador
               </Text>
             </VStack>
@@ -239,11 +242,11 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               onClick={toggleTheme}
               aria-label="Alternar tema"
-              color="cirqueira.grey.400"
-              _hover={{ color: 'cirqueira.grey.0', bg: 'cirqueira.grey.800' }}
+              color="fg.muted"
+              _hover={{ color: 'fg', bg: 'bg.muted' }}
             >
               {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
             </IconButton>
@@ -251,11 +254,11 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             <IconButton
               size="xs"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               onClick={handleLogout}
               aria-label="Sair da conta"
-              color="cirqueira.grey.400"
-              _hover={{ color: 'cirqueira.red.500', bg: 'cirqueira.red.500/10' }}
+              color="fg.muted"
+              _hover={{ color: 'cirqueira.red.400', bg: 'red.subtle' }}
             >
               <LogOut size={15} />
             </IconButton>

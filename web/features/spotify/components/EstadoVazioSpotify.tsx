@@ -71,11 +71,11 @@ export const EstadoVazioSpotify = memo(function EstadoVazioSpotify({
         {!conectada && (
           <Button
             bg="cirqueira.spotify.verde"
-            color="#000000"
+            color="cirqueira.grey.950"
             borderRadius="full"
             fontWeight="bold"
             fontSize="sm"
-            _hover={{ bg: '#22e368', transform: 'scale(1.02)' }}
+            _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
             _active={{ transform: 'scale(0.98)' }}
             transition="all 0.15s ease"
             onClick={handleVincular}

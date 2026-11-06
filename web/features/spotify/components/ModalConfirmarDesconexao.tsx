@@ -113,7 +113,7 @@ export const ModalConfirmarDesconexao = memo(function ModalConfirmarDesconexao({
               </Button>
               <Button
                 bg="red.500"
-                color="#FFFFFF"
+                color="cirqueira.grey.0"
                 borderRadius="full"
                 _hover={{ bg: 'red.600' }}
                 fontSize="sm"

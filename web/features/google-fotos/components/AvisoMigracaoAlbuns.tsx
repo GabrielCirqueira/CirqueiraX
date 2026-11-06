@@ -28,7 +28,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
       borderWidth="1px"
       borderColor="cirqueira.brand.500/20"
       bg="bg.panel"
-      borderRadius="xl"
+      borderRadius="8px"
       overflow="hidden"
       shadow="sm"
     >
@@ -52,7 +52,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
             <Flex
               w={10}
               h={10}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.brand.500/15"
               color="cirqueira.brand.400"
               align="center"
@@ -66,7 +66,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
                 <Text fontSize="sm" fontWeight="bold" color="fg">
                   Por que meus álbuns antigos do Google Fotos não aparecem aqui?
                 </Text>
-                <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
+                <Badge size="xs" variant="subtle" colorPalette="brand">
                   Guia de Migração
                 </Badge>
               </HStack>
@@ -81,7 +81,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
             size="xs"
             variant="ghost"
             color="fg.subtle"
-            borderRadius="lg"
+            borderRadius="full"
             h={8}
             px={2.5}
             onClick={(e) => {
@@ -102,7 +102,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
           <VStack gap={5} align="stretch">
             <Box
               p={4}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.amber.500/10"
               borderWidth="1px"
               borderColor="cirqueira.amber.500/20"
@@ -155,7 +155,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
               <VStack gap={3} w="full" align="stretch">
                 <Box
                   p={3.5}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="bg.subtle"
                   borderWidth="1px"
                   borderColor="border.subtle"
@@ -193,7 +193,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
 
                 <Box
                   p={3.5}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="bg.subtle"
                   borderWidth="1px"
                   borderColor="border.subtle"
@@ -243,7 +243,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
 
                 <Box
                   p={3.5}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   bg="bg.subtle"
                   borderWidth="1px"
                   borderColor="border.subtle"
@@ -283,7 +283,7 @@ export const AvisoMigracaoAlbuns = memo(function AvisoMigracaoAlbuns({
 
             <HStack
               p={3}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="bg.muted"
               justify="space-between"
               align="center"

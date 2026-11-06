@@ -238,7 +238,7 @@ const CentralMidias = memo(function CentralMidias() {
             <HStack gap={2.5} align="center">
               <Box
                 p={2}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.brand.500/15"
                 color="cirqueira.brand.400"
                 display="inline-flex"
@@ -248,7 +248,7 @@ const CentralMidias = memo(function CentralMidias() {
               <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="black" color="fg">
                 Central de Mídias
               </Text>
-              <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md">
+              <Badge size="sm" variant="subtle" colorPalette="brand">
                 {total} {total === 1 ? 'mídia' : 'mídias'}
               </Badge>
             </HStack>
@@ -263,7 +263,7 @@ const CentralMidias = memo(function CentralMidias() {
               variant="outline"
               disabled={isFetching}
               onClick={() => refetch()}
-              borderRadius="lg"
+              borderRadius="full"
             >
               <RefreshCw
                 size={14}
@@ -283,7 +283,7 @@ const CentralMidias = memo(function CentralMidias() {
           w="full"
           bg="bg.panel"
           p={3.5}
-          borderRadius="2xl"
+          borderRadius="8px"
           borderWidth="1px"
           borderColor="border.subtle"
           gap={3}
@@ -295,7 +295,7 @@ const CentralMidias = memo(function CentralMidias() {
             align={{ base: 'stretch', lg: 'center' }}
             gap={3}
           >
-            <HStack gap={1.5} bg="bg.muted" p={1} borderRadius="xl" overflowX="auto" maxW="full">
+            <HStack gap={1.5} bg="bg.muted" p={1} borderRadius="8px" overflowX="auto" maxW="full">
               {origensAbas.map((aba) => {
                 const Icone = aba.icon
                 const ativo = origemFiltro === aba.value
@@ -311,7 +311,7 @@ const CentralMidias = memo(function CentralMidias() {
                       setPagina(1)
                     }}
                     fontWeight="semibold"
-                    borderRadius="lg"
+                    borderRadius="full"
                     px={3.5}
                     h="36px"
                     minH="36px"
@@ -344,7 +344,7 @@ const CentralMidias = memo(function CentralMidias() {
               })}
             </HStack>
 
-            <HStack gap={1} bg="bg.muted" p={1} borderRadius="xl" borderWidth="1px" borderColor="border.subtle" alignSelf={{ base: 'flex-start', lg: 'center' }} flexShrink={0}>
+            <HStack gap={1} bg="bg.muted" p={1} borderRadius="8px" borderWidth="1px" borderColor="border.subtle" alignSelf={{ base: 'flex-start', lg: 'center' }} flexShrink={0}>
               <IconButton
                 size="sm"
                 variant={modoVisualizacao === 'grid' ? 'solid' : 'ghost'}
@@ -352,7 +352,7 @@ const CentralMidias = memo(function CentralMidias() {
                 onClick={() => setModoVisualizacao('grid')}
                 aria-label="Grade Estilo Google Fotos"
                 title="Grade Estilo Google Fotos"
-                borderRadius="lg"
+                borderRadius="full"
                 h="36px"
                 w="36px"
               >
@@ -365,7 +365,7 @@ const CentralMidias = memo(function CentralMidias() {
                 onClick={() => setModoVisualizacao('tabela')}
                 aria-label="Tabela Compacta"
                 title="Tabela Compacta"
-                borderRadius="lg"
+                borderRadius="full"
                 h="36px"
                 w="36px"
               >
@@ -391,7 +391,7 @@ const CentralMidias = memo(function CentralMidias() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="xl"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={8}
                 >
@@ -411,7 +411,7 @@ const CentralMidias = memo(function CentralMidias() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="xl"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={8}
                 >
@@ -435,7 +435,7 @@ const CentralMidias = memo(function CentralMidias() {
                   }}
                   bg="bg.muted"
                   borderColor="border.subtle"
-                  borderRadius="xl"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={8}
                 >
@@ -474,7 +474,7 @@ const CentralMidias = memo(function CentralMidias() {
                 h={8}
                 pl={8}
                 pr={busca ? 7 : 3}
-                borderRadius="xl"
+                borderRadius="8px"
               />
               {busca && (
                 <Box
@@ -564,7 +564,7 @@ const CentralMidias = memo(function CentralMidias() {
                     setPorPagina(qtd)
                     setPagina(1)
                   }}
-                  borderRadius="md"
+                  borderRadius="full"
                   h={6}
                   px={2}
                   fontSize="xs"
@@ -582,7 +582,7 @@ const CentralMidias = memo(function CentralMidias() {
                 variant="outline"
                 disabled={pagina <= 1}
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 <ChevronLeft size={14} style={{ marginRight: '4px' }} />
                 Anterior
@@ -597,7 +597,7 @@ const CentralMidias = memo(function CentralMidias() {
                 variant="outline"
                 disabled={pagina >= totalPaginas}
                 onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
-                borderRadius="lg"
+                borderRadius="full"
               >
                 Próxima
                 <ChevronRight size={14} style={{ marginLeft: '4px' }} />
@@ -654,14 +654,14 @@ const CentralMidias = memo(function CentralMidias() {
               gap={3}
               p={3}
               px={5}
-              borderRadius="2xl"
+              borderRadius="8px"
               borderWidth="1px"
               borderColor="cirqueira.brand.500/40"
               bg="rgba(20, 25, 23, 0.94)"
               shadow="0 20px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 186, 156, 0.2)"
             >
               <HStack gap={2}>
-                <Badge colorPalette="brand" px={2.5} py={1} borderRadius="lg" fontWeight="bold">
+                <Badge colorPalette="brand" px={2.5} py={1} fontWeight="bold">
                   {selecionados.length}
                 </Badge>
                 <Text as="span" fontSize="xs" fontWeight="semibold" color="fg">
@@ -683,7 +683,7 @@ const CentralMidias = memo(function CentralMidias() {
                       categorizarLoteMutate({ uuids: selecionados, categoriaId: cat.uuid })
                       setSelecionados([])
                     }}
-                    borderRadius="lg"
+                    borderRadius="full"
                     fontWeight="bold"
                     h={7}
                     px={2}
@@ -696,7 +696,6 @@ const CentralMidias = memo(function CentralMidias() {
                         colorPalette="brand"
                         px={1}
                         py={0}
-                        borderRadius="sm"
                         fontSize="9px"
                         lineHeight="normal"
                       >
@@ -714,7 +713,7 @@ const CentralMidias = memo(function CentralMidias() {
                   variant="outline"
                   onClick={() => setModalCategorizarAberto(true)}
                   fontWeight="semibold"
-                  borderRadius="xl"
+                  borderRadius="8px"
                   h={8}
                   fontSize="xs"
                 >
@@ -731,7 +730,7 @@ const CentralMidias = memo(function CentralMidias() {
                     setModalConfirmarApagar(true)
                   }}
                   fontWeight="semibold"
-                  borderRadius="xl"
+                  borderRadius="8px"
                   h={8}
                   fontSize="xs"
                 >
@@ -755,7 +754,7 @@ const CentralMidias = memo(function CentralMidias() {
         <Portal>
           <Dialog.Backdrop bg="cirqueira.grey.950/80" />
           <Dialog.Positioner>
-            <Dialog.Content borderRadius="2xl" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
+            <Dialog.Content borderRadius="8px" bg="bg.panel" borderWidth="1px" borderColor="border.subtle">
               <Dialog.Header pb={2}>
                 <HStack gap={2} color="cirqueira.red.500">
                   <AlertTriangle size={18} />
@@ -778,7 +777,7 @@ const CentralMidias = memo(function CentralMidias() {
                   size="sm"
                   variant="ghost"
                   onClick={() => setModalConfirmarApagar(false)}
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   Cancelar
                 </Button>
@@ -787,7 +786,7 @@ const CentralMidias = memo(function CentralMidias() {
                   colorPalette="red"
                   onClick={handleConfirmarApagar}
                   disabled={pendenteApagarLote}
-                  borderRadius="lg"
+                  borderRadius="full"
                   fontWeight="bold"
                 >
                   {pendenteApagarLote ? 'Apagando...' : 'Sim, Excluir'}

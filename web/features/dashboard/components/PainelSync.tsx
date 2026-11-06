@@ -60,8 +60,9 @@ export const PainelSync = memo(function PainelSync({
           <IconButton
             size="xs"
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="fg.muted"
+            _hover={{ bg: 'bg.muted', color: 'fg' }}
             onClick={() => refetch()}
             disabled={isFetching}
             aria-label="Atualizar status"
@@ -128,7 +129,7 @@ export const PainelSync = memo(function PainelSync({
                 size="sm"
                 variant="subtle"
                 colorPalette={estado.colorPalette}
-                borderRadius="md"
+                borderRadius="full"
                 flexShrink={0}
               >
                 {estado.label}
@@ -137,8 +138,9 @@ export const PainelSync = memo(function PainelSync({
               <Button
                 size="xs"
                 variant="ghost"
-                borderRadius="lg"
+                borderRadius="full"
                 color="fg.muted"
+                _hover={{ bg: 'bg.muted', color: 'fg' }}
                 flexShrink={0}
                 disabled={sincronizandoEsta || pasta.emSincronizacao}
                 onClick={() => handleSincronizar(pasta.id)}

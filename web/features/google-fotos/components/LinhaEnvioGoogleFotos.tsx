@@ -31,7 +31,7 @@ export const LinhaEnvioGoogleFotos = memo(function LinhaEnvioGoogleFotos({
   return (
     <Table.Row bg={envioFalhou(registro) ? 'cirqueira.red.500/5' : undefined}>
       <Table.Cell verticalAlign="top">
-        <Badge size="sm" variant="subtle" colorPalette={aparencia.paleta} borderRadius="md">
+        <Badge size="sm" variant="subtle" colorPalette={aparencia.paleta}>
           {envioEmAndamento(registro) && (
             <Loader2 size={10} style={{ animation: 'spin 1s linear infinite' }} />
           )}
@@ -134,7 +134,7 @@ export const LinhaEnvioGoogleFotos = memo(function LinhaEnvioGoogleFotos({
               size="xs"
               variant="subtle"
               colorPalette="red"
-              borderRadius="lg"
+              borderRadius="full"
               disabled={reenviando}
               onClick={() => onReenviar(registro.uuid)}
             >

@@ -121,7 +121,7 @@ export function Component() {
           <HStack gap={3}>
             <Center
               boxSize={10}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="cirqueira.brand.500"
               color="cirqueira.grey.0"
               shadow="md"
@@ -153,7 +153,6 @@ export function Component() {
           fontSize="xs"
           px={3}
           py={1}
-          borderRadius="md"
         >
           Hub de Mídias
         </Badge>
@@ -183,7 +182,6 @@ export function Component() {
                 colorPalette="brand"
                 px={3}
                 py={1}
-                borderRadius="md"
                 fontSize="xs"
                 fontWeight="semibold"
                 display="inline-flex"
@@ -222,7 +220,7 @@ export function Component() {
             <Grid templateColumns={{ base: '1fr', sm: 'repeat(3, 1fr)' }} gap={4} w="full">
               <Box
                 p={4}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.grey.900/40"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.800/60"
@@ -231,7 +229,7 @@ export function Component() {
               >
                 <Center
                   boxSize={10}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.brand.500/15"
                   color="cirqueira.brand.400"
                   mb={3}
@@ -248,7 +246,7 @@ export function Component() {
 
               <Box
                 p={4}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.grey.900/40"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.800/60"
@@ -257,7 +255,7 @@ export function Component() {
               >
                 <Center
                   boxSize={10}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.blue.500/15"
                   color="cirqueira.blue.400"
                   mb={3}
@@ -274,7 +272,7 @@ export function Component() {
 
               <Box
                 p={4}
-                borderRadius="xl"
+                borderRadius="8px"
                 bg="cirqueira.grey.900/40"
                 borderWidth="1px"
                 borderColor="cirqueira.grey.800/60"
@@ -283,7 +281,7 @@ export function Component() {
               >
                 <Center
                   boxSize={10}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="cirqueira.brand.500/15"
                   color="cirqueira.brand.400"
                   mb={3}
@@ -304,7 +302,7 @@ export function Component() {
             <Box
               position="absolute"
               inset={-2}
-              borderRadius="xl"
+              borderRadius="8px"
               bg="cirqueira.brand.500/15"
               filter="blur(24px)"
               opacity={0.7}
@@ -315,7 +313,7 @@ export function Component() {
               bg="cirqueira.grey.900/90"
               borderColor="cirqueira.grey.800"
               borderWidth="1px"
-              borderRadius="xl"
+              borderRadius="8px"
               shadow="2xl"
               overflow="hidden"
             >
@@ -372,7 +370,7 @@ export function Component() {
                         w="full"
                         pl={10}
                         h={12}
-                        borderRadius="lg"
+                        borderRadius="8px"
                         bg="cirqueira.grey.950"
                         borderColor="cirqueira.grey.800"
                         color="cirqueira.grey.0"
@@ -415,7 +413,7 @@ export function Component() {
                         pl={10}
                         pr={10}
                         h={12}
-                        borderRadius="lg"
+                        borderRadius="8px"
                         bg="cirqueira.grey.950"
                         borderColor="cirqueira.grey.800"
                         color="cirqueira.grey.0"
@@ -431,7 +429,7 @@ export function Component() {
                         type="button"
                         variant="ghost"
                         size="xs"
-                        borderRadius="lg"
+                        borderRadius="full"
                         onClick={() => setMostrarSenha((v) => !v)}
                         position="absolute"
                         right={2}
@@ -465,7 +463,7 @@ export function Component() {
                     }}
                     color="cirqueira.grey.0"
                     w="full"
-                    borderRadius="lg"
+                    borderRadius="full"
                     shadow="lg"
                     display="inline-flex"
                     alignItems="center"

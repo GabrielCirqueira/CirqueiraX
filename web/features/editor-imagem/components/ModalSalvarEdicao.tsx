@@ -58,7 +58,7 @@ export const ModalSalvarEdicao = memo(function ModalSalvarEdicao({
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"
-            borderRadius="xl"
+            borderRadius="8px"
             p={5}
             maxW="md"
           >
@@ -116,7 +116,7 @@ function FormularioSalvarEdicao({
             </Field.Label>
             <Input
               size="sm"
-              borderRadius="lg"
+              borderRadius="8px"
               value={nomeArquivo}
               onChange={(evento) => setNomeArquivo(evento.target.value)}
             />
@@ -133,7 +133,7 @@ function FormularioSalvarEdicao({
               overflowY="auto"
               borderWidth="1px"
               borderColor="border.subtle"
-              borderRadius="lg"
+              borderRadius="8px"
               p={1}
             >
               <OpcaoCategoria
@@ -168,13 +168,13 @@ function FormularioSalvarEdicao({
             borderTopWidth="1px"
             borderColor="border.subtle"
           >
-            <Button size="sm" variant="ghost" borderRadius="lg" onClick={onFechar}>
+            <Button size="sm" variant="ghost" borderRadius="full" onClick={onFechar}>
               Cancelar
             </Button>
             <Button
               size="sm"
               colorPalette="brand"
-              borderRadius="lg"
+              borderRadius="full"
               disabled={salvando}
               onClick={aoSalvar}
             >
@@ -210,7 +210,7 @@ function OpcaoCategoria({
       gap={3}
       px={3}
       py={2}
-      borderRadius="md"
+      borderRadius="8px"
       textAlign="left"
       cursor="pointer"
       bg={selecionada ? 'cirqueira.brand.500/10' : 'transparent'}
@@ -239,7 +239,7 @@ function OpcaoCategoria({
         </VStack>
       </HStack>
       {temAlbumGoogleFotos && (
-        <Badge size="xs" variant="subtle" colorPalette="blue" borderRadius="md" flexShrink={0}>
+        <Badge size="xs" variant="subtle" colorPalette="blue" flexShrink={0}>
           Google Fotos
         </Badge>
       )}

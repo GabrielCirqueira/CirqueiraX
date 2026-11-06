@@ -137,4 +137,3 @@ export function obterIconePlataforma(idOuUrl?: string): LucideIcon {
 
   return Sparkles
 }
-

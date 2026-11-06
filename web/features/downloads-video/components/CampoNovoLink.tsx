@@ -183,19 +183,18 @@ export const CampoNovoLink = memo(function CampoNovoLink({
       bg="bg.panel"
       borderWidth="1px"
       borderColor={emFoco || expandido || modo === 'lote' ? 'cirqueira.brand.500' : 'border.subtle'}
-      borderRadius="xl"
-      shadow={emFoco || expandido || modo === 'lote' ? 'md' : 'xs'}
+      borderRadius="8px"
+      shadow={emFoco || expandido || modo === 'lote' ? 'md' : 'sm'}
       transition="all 0.25s ease"
       p={3}
       px={{ base: 3.5, md: 4 }}
     >
       <VStack gap={3} align="stretch">
-        {/* Barra superior de alternância entre Modo Rápido e Modo em Lote */}
         <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
           <HStack gap={2} align="center">
             <Box
               p={1.5}
-              borderRadius="lg"
+              borderRadius="8px"
               bg={processandoAtivo ? 'cirqueira.brand.500/15' : 'bg.muted'}
               color={processandoAtivo ? 'cirqueira.brand.400' : 'fg.subtle'}
               display="inline-flex"
@@ -209,13 +208,13 @@ export const CampoNovoLink = memo(function CampoNovoLink({
               )}
             </Box>
 
-            <HStack gap={1} p={0.5} bg="bg.muted" borderRadius="lg">
+            <HStack gap={1} p={0.5} bg="bg.muted" borderRadius="full">
               <Button
                 size="xs"
                 variant={modo === 'unico' ? 'solid' : 'ghost'}
                 colorPalette={modo === 'unico' ? 'brand' : 'gray'}
                 onClick={() => setModo('unico')}
-                borderRadius="md"
+                borderRadius="full"
                 h={7}
                 px={2.5}
                 fontSize="xs"
@@ -231,7 +230,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                   setModo('lote')
                   setTimeout(() => textareaRef.current?.focus(), 50)
                 }}
-                borderRadius="md"
+                borderRadius="full"
                 h={7}
                 px={2.5}
                 fontSize="xs"
@@ -245,9 +244,8 @@ export const CampoNovoLink = memo(function CampoNovoLink({
             </HStack>
           </HStack>
 
-          {/* Indicador de fila ativa */}
           {itensPendentesOuBaixando.length > 0 && (
-            <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md" px={2} py={0.5}>
+            <Badge size="xs" variant="subtle" colorPalette="brand" px={2} py={0.5}>
               <HStack gap={1}>
                 <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
                 <Text as="span">
@@ -296,7 +294,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                       onClick={() => setUrl('')}
                       aria-label="Limpar campo"
                       p={1}
-                      borderRadius="lg"
+                      borderRadius="full"
                     >
                       <X size={15} />
                     </Button>
@@ -309,7 +307,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                     variant="subtle"
                     onClick={colarAreaTransferencia}
                     fontSize="xs"
-                    borderRadius="lg"
+                    borderRadius="full"
                     px={3}
                     h={9}
                     colorPalette="brand"
@@ -330,28 +328,36 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                     Plataformas suportadas:
                   </Text>
                   <HStack gap={1.5} flexWrap="wrap">
-                    <Badge size="xs" variant="subtle" colorPalette="red" borderRadius="md" px={2} py={0.5}>
+                    <Badge size="xs" variant="subtle" colorPalette="red" px={2.5} py={0.5}>
                       <HStack gap={1} alignItems="center">
                         <Youtube size={11} />
-                        <Text as="span" fontSize="10px">YouTube</Text>
+                        <Text as="span" fontSize="10px">
+                          YouTube
+                        </Text>
                       </HStack>
                     </Badge>
-                    <Badge size="xs" variant="subtle" colorPalette="cyan" borderRadius="md" px={2} py={0.5}>
+                    <Badge size="xs" variant="subtle" colorPalette="cyan" px={2.5} py={0.5}>
                       <HStack gap={1} alignItems="center">
                         <Video size={11} />
-                        <Text as="span" fontSize="10px">TikTok</Text>
+                        <Text as="span" fontSize="10px">
+                          TikTok
+                        </Text>
                       </HStack>
                     </Badge>
-                    <Badge size="xs" variant="subtle" colorPalette="pink" borderRadius="md" px={2} py={0.5}>
+                    <Badge size="xs" variant="subtle" colorPalette="pink" px={2.5} py={0.5}>
                       <HStack gap={1} alignItems="center">
                         <Instagram size={11} />
-                        <Text as="span" fontSize="10px">Instagram</Text>
+                        <Text as="span" fontSize="10px">
+                          Instagram
+                        </Text>
                       </HStack>
                     </Badge>
-                    <Badge size="xs" variant="subtle" colorPalette="blue" borderRadius="md" px={2} py={0.5}>
+                    <Badge size="xs" variant="subtle" colorPalette="blue" px={2.5} py={0.5}>
                       <HStack gap={1} alignItems="center">
                         <Globe size={11} />
-                        <Text as="span" fontSize="10px">X / Twitter</Text>
+                        <Text as="span" fontSize="10px">
+                          X / Twitter
+                        </Text>
                       </HStack>
                     </Badge>
                   </HStack>
@@ -377,7 +383,6 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                         fontWeight="semibold"
                         px={2.5}
                         py={1}
-                        borderRadius="md"
                       >
                         <HStack gap={1.5} alignItems="center">
                           <IconePlataforma size={13} />
@@ -394,7 +399,6 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                         fontWeight="medium"
                         px={2.5}
                         py={1}
-                        borderRadius="md"
                       >
                         <HStack gap={1.5} alignItems="center">
                           {categoriaSelecionada.googlePhotosAlbumId ? (
@@ -406,14 +410,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                         </HStack>
                       </Badge>
                     ) : (
-                      <Badge
-                        variant="outline"
-                        colorPalette="gray"
-                        fontSize="xs"
-                        px={2}
-                        py={1}
-                        borderRadius="md"
-                      >
+                      <Badge variant="outline" colorPalette="gray" fontSize="xs" px={2} py={1}>
                         Sem categoria definida
                       </Badge>
                     )}
@@ -427,14 +424,15 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                           onChange={(e) => setCategoriaId(e.target.value)}
                           bg="bg.muted"
                           borderColor="border.subtle"
-                          borderRadius="lg"
+                          borderRadius="8px"
                           fontSize="xs"
                           h={9}
                         >
                           <option value="">Classificar depois</option>
                           {categorias.map((cat) => (
                             <option key={cat.uuid} value={cat.uuid}>
-                              {cat.nome} {cat.googlePhotosAlbumId ? '☁️ (Google Fotos)' : '📁 (Local)'}
+                              {cat.nome}{' '}
+                              {cat.googlePhotosAlbumId ? '☁️ (Google Fotos)' : '📁 (Local)'}
                             </option>
                           ))}
                         </NativeSelect.Field>
@@ -451,7 +449,7 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                       fontWeight="bold"
                       fontSize="xs"
                       flexShrink={0}
-                      borderRadius="lg"
+                      borderRadius="full"
                     >
                       <Download size={14} style={{ marginRight: '6px' }} />
                       <Text as="span">Adicionar à Fila</Text>
@@ -463,7 +461,6 @@ export const CampoNovoLink = memo(function CampoNovoLink({
           </Box>
         )}
 
-        {/* ── MODO 2: VÁRIOS LINKS EM LOTE (TEXTAREA) ───────────────────── */}
         {modo === 'lote' && (
           <Box as="form" onSubmit={handleSubmitLote} w="full">
             <VStack gap={3} align="stretch">
@@ -487,7 +484,7 @@ https://youtube.com/watch?v=abcdefghij`}
                   bg="bg.muted/50"
                   borderWidth="1px"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   outline="none"
                   color="fg"
                   _focus={{ borderColor: 'cirqueira.brand.500', bg: 'bg.muted' }}
@@ -504,7 +501,7 @@ https://youtube.com/watch?v=abcdefghij`}
                     onClick={() => setTextoLote('')}
                     aria-label="Limpar texto"
                     p={1}
-                    borderRadius="md"
+                    borderRadius="full"
                     color="fg.subtle"
                   >
                     <X size={14} />
@@ -523,7 +520,7 @@ https://youtube.com/watch?v=abcdefghij`}
                     size="sm"
                     variant={urlsLoteDetectadas.length > 0 ? 'solid' : 'subtle'}
                     colorPalette={urlsLoteDetectadas.length > 0 ? 'brand' : 'gray'}
-                    borderRadius="md"
+                    borderRadius="full"
                     px={2.5}
                     py={1}
                   >
@@ -551,7 +548,7 @@ https://youtube.com/watch?v=abcdefghij`}
                         onChange={(e) => setCategoriaId(e.target.value)}
                         bg="bg.muted"
                         borderColor="border.subtle"
-                        borderRadius="lg"
+                        borderRadius="8px"
                         fontSize="xs"
                         h={9}
                       >
@@ -574,12 +571,10 @@ https://youtube.com/watch?v=abcdefghij`}
                     px={5}
                     fontWeight="bold"
                     fontSize="xs"
-                    borderRadius="lg"
+                    borderRadius="full"
                   >
                     <Download size={14} style={{ marginRight: '6px' }} />
-                    <Text as="span">
-                      Baixar Todos ({urlsLoteDetectadas.length})
-                    </Text>
+                    <Text as="span">Baixar Todos ({urlsLoteDetectadas.length})</Text>
                   </Button>
                 </HStack>
               </Flex>

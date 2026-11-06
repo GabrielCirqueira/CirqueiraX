@@ -85,7 +85,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
       bg="bg.panel"
       borderWidth="1px"
       borderColor="border.subtle"
-      borderRadius="xl"
+      borderRadius="8px"
       shadow="sm"
       flexWrap="wrap"
       justify="center"
@@ -99,7 +99,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
           <IconButton
             key={opcao}
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             variant={ativa ? 'solid' : 'ghost'}
             colorPalette={ativa ? 'brand' : 'gray'}
             color={ativa ? undefined : 'fg.muted'}
@@ -151,7 +151,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
           <IconButton
             key={nivel}
             size="sm"
-            borderRadius="lg"
+            borderRadius="full"
             variant={ativo ? 'subtle' : 'ghost'}
             colorPalette={ativo ? 'brand' : 'gray'}
             aria-label={`Espessura ${ROTULO_NIVEL_ESPESSURA[nivel]}`}
@@ -173,7 +173,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
 
       <IconButton
         size="sm"
-        borderRadius="lg"
+        borderRadius="full"
         variant="ghost"
         color="fg.muted"
         aria-label="Desfazer"
@@ -185,7 +185,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
       </IconButton>
       <IconButton
         size="sm"
-        borderRadius="lg"
+        borderRadius="full"
         variant="ghost"
         color="fg.muted"
         aria-label="Refazer"
@@ -197,7 +197,7 @@ export const BarraFerramentasEditor = memo(function BarraFerramentasEditor({
       </IconButton>
       <IconButton
         size="sm"
-        borderRadius="lg"
+        borderRadius="full"
         variant="ghost"
         color="fg.muted"
         _hover={{ color: 'cirqueira.red.500' }}

@@ -52,7 +52,7 @@ export const GridAlbuns = memo(function GridAlbuns({
         {Array.from({ length: 4 }).map((_, index) => (
           <Card.Root
             key={`skeleton-album-${index}`}
-            borderRadius="2xl"
+            borderRadius="8px"
             overflow="hidden"
             border="1px solid"
             borderColor="border.subtle"
@@ -60,9 +60,9 @@ export const GridAlbuns = memo(function GridAlbuns({
             <Skeleton h="180px" w="full" />
             <Card.Body p={4}>
               <VStack gap={3} align="stretch">
-                <Skeleton h={5} w="70%" borderRadius="md" />
-                <Skeleton h={4} w="40%" borderRadius="md" />
-                <Skeleton h={8} w="full" borderRadius="xl" mt={2} />
+                <Skeleton h={5} w="70%" borderRadius="8px" />
+                <Skeleton h={4} w="40%" borderRadius="8px" />
+                <Skeleton h={8} w="full" borderRadius="8px" mt={2} />
               </VStack>
             </Card.Body>
           </Card.Root>
@@ -76,7 +76,7 @@ export const GridAlbuns = memo(function GridAlbuns({
       <Card.Root
         w="full"
         p={8}
-        borderRadius="xl"
+        borderRadius="8px"
         border="1px dashed"
         borderColor="border.subtle"
         bg="bg.subtle"
@@ -114,7 +114,7 @@ export const GridAlbuns = memo(function GridAlbuns({
         return (
           <Card.Root
             key={album.id}
-            borderRadius="xl"
+            borderRadius="8px"
             overflow="hidden"
             border="1px solid"
             borderColor={vinculado ? 'border.subtle' : 'cirqueira.amber.500/30'}
@@ -228,7 +228,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                       colorPalette="gray"
                       variant="outline"
                       size="sm"
-                      borderRadius="lg"
+                      borderRadius="full"
                       flex={1}
                       onClick={() => onVincularAlbum?.(album)}
                     >
@@ -240,7 +240,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                       <Button
                         variant="subtle"
                         size="sm"
-                        borderRadius="lg"
+                        borderRadius="full"
                         colorPalette="purple"
                         px={2.5}
                         title="Ver categoria no Dashboard"
@@ -255,7 +255,7 @@ export const GridAlbuns = memo(function GridAlbuns({
                     colorPalette="teal"
                     variant="solid"
                     size="sm"
-                    borderRadius="lg"
+                    borderRadius="full"
                     w="full"
                     onClick={() => onVincularAlbum?.(album)}
                   >

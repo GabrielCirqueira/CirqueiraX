@@ -1,6 +1,7 @@
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import {
   Avatar,
+  Badge,
   Box,
   Button,
   Center,
@@ -141,7 +142,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
   if (carregandoMeses) {
     return (
       <VStack gap={4} align="stretch" w="full">
-        <Skeleton h="32px" w="260px" borderRadius="md" />
+        <Skeleton h="32px" w="260px" borderRadius="8px" />
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={4}>
           <Skeleton h="180px" borderRadius="8px" />
           <Skeleton h="180px" borderRadius="8px" />
@@ -258,8 +259,8 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                   as="option"
                   key={`${m.ano}-${m.mes}`}
                   value={`${m.ano}-${m.mes}`}
-                  bg="#1F1F1F"
-                  color="#FFFFFF"
+                  bg="cirqueira.spotify.cartao"
+                  color="cirqueira.spotify.textoPrincipal"
                 >
                   {formatarRotuloMesAno(m.ano, m.mes)} {m.isEmAndamento ? '(em andamento)' : ''}
                 </Box>
@@ -316,7 +317,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             borderRadius="8px"
             bg="cirqueira.spotify.cartao"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             _hover={{
               bg: 'cirqueira.spotify.cartaoElevado',
               borderColor: 'cirqueira.spotify.verde',
@@ -365,7 +366,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             borderRadius="8px"
             bg="cirqueira.spotify.cartao"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             _hover={{
               bg: 'cirqueira.spotify.cartaoElevado',
               borderColor: 'cirqueira.spotify.azul',
@@ -395,8 +396,8 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                     boxSize={14}
                     borderRadius="full"
                     overflow="hidden"
-                    border="2px solid"
-                    borderColor="cirqueira.spotify.azul"
+                    border="1px solid"
+                    borderColor="border.subtle"
                     bg="cirqueira.spotify.cartaoElevado"
                     flexShrink={0}
                     display="flex"
@@ -417,7 +418,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                         <Avatar.Fallback
                           name={capsula.artistaMaisOuvido.nomeArtista}
                           bg="cirqueira.spotify.cartaoElevado"
-                          color="cirqueira.spotify.azul"
+                          color="cirqueira.spotify.textoSecundario"
                         />
                       </Avatar.Root>
                     )}
@@ -462,7 +463,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             borderRadius="8px"
             bg="cirqueira.spotify.cartao"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             _hover={{
               bg: 'cirqueira.spotify.cartaoElevado',
               borderColor: 'cirqueira.spotify.amarelo',
@@ -559,7 +560,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             borderRadius="8px"
             bg="cirqueira.spotify.cartao"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="border.subtle"
             _hover={{
               bg: 'cirqueira.spotify.cartaoElevado',
               borderColor: 'cirqueira.spotify.verde',
@@ -605,7 +606,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             </VStack>
 
             <VStack align="stretch" gap={3} pt={3}>
-              <HStack gap={1} wrap="wrap">
+              <HStack gap={1.5} wrap="wrap">
                 {capsula.topMusicas.slice(0, 4).map((m) => {
                   const chavePreview = gerarChaveFaixa(
                     m.codigoFaixa,
@@ -618,9 +619,11 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                   return (
                     <Box
                       key={m.nomeFaixa}
-                      boxSize={7}
-                      borderRadius="4px"
+                      boxSize={8}
+                      borderRadius="6px"
                       overflow="hidden"
+                      border="1px solid"
+                      borderColor="border.subtle"
                       bg="cirqueira.spotify.cartaoElevado"
                     >
                       {fotoPreview ? (
@@ -713,7 +716,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
           justify="space-between"
           p={{ base: 2, sm: 3 }}
           cursor="pointer"
-          _hover={{ bg: 'rgba(255, 255, 255, 0.05)' }}
+          _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
           onClick={() => setExpandido((prev) => !prev)}
           gap={{ base: 2, sm: 3 }}
           w="full"
@@ -722,7 +725,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
           <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
             <Center
               boxSize={{ base: 6, sm: 8 }}
-              borderRadius="md"
+              borderRadius="8px"
               fontWeight="bold"
               fontSize={{ base: 'xs', sm: 'sm' }}
               color="cirqueira.spotify.azul"
@@ -736,8 +739,8 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
               borderRadius="full"
               overflow="hidden"
               border="1px solid"
-              borderColor="cirqueira.spotify.azul"
-              bg="cirqueira.spotify.cartao"
+              borderColor="border.subtle"
+              bg="cirqueira.spotify.cartaoElevado"
               flexShrink={0}
               display="flex"
               alignItems="center"
@@ -759,8 +762,8 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
                 <Avatar.Root size="md" shape="full">
                   <Avatar.Fallback
                     name={artista.nomeArtista}
-                    bg="cirqueira.spotify.cartao"
-                    color="cirqueira.spotify.azul"
+                    bg="cirqueira.spotify.cartaoElevado"
+                    color="cirqueira.spotify.textoSecundario"
                   />
                 </Avatar.Root>
               )}
@@ -822,17 +825,9 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
             )}
 
             {artista.isEstreia && (
-              <Box
-                px={1.5}
-                py={0.5}
-                borderRadius="md"
-                bg="rgba(83, 157, 245, 0.15)"
-                color="cirqueira.spotify.azul"
-                fontSize="2xs"
-                fontWeight="bold"
-              >
+              <Badge size="xs" variant="subtle" colorPalette="blue">
                 Estreia
-              </Box>
+              </Badge>
             )}
 
             <Text
@@ -854,7 +849,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
         </Flex>
 
         <Collapsible.Content>
-          <Box px={3} pb={3} pt={1} borderTop="1px solid" borderColor="rgba(255, 255, 255, 0.08)">
+          <Box px={3} pb={3} pt={1} borderTop="1px solid" borderColor="border.subtle">
             <ListaTopMusicasArtista
               artista={artista.nomeArtista}
               ano={ano}
@@ -917,7 +912,7 @@ function ModalDetalheCapsula({
                 <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
                   <Center
                     boxSize={{ base: 6, sm: 8 }}
-                    borderRadius="md"
+                    borderRadius="8px"
                     fontWeight="bold"
                     fontSize={{ base: 'xs', sm: 'sm' }}
                     color="cirqueira.spotify.amarelo"
@@ -1012,17 +1007,9 @@ function ModalDetalheCapsula({
                   )}
 
                   {m.isEstreia && (
-                    <Box
-                      px={1.5}
-                      py={0.5}
-                      borderRadius="md"
-                      bg="rgba(254, 228, 79, 0.15)"
-                      color="cirqueira.spotify.amarelo"
-                      fontSize="2xs"
-                      fontWeight="bold"
-                    >
+                    <Badge size="xs" variant="subtle" colorPalette="yellow">
                       Estreia
-                    </Box>
+                    </Badge>
                   )}
 
                   {m.mesesNoTop5 > 1 && (
@@ -1080,32 +1067,33 @@ function ModalDetalheCapsula({
                 data={capsula.minutosPorDia}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#252525" vertical={false} />
-                <XAxis dataKey="dia" stroke="#B3B3B3" fontSize={11} tickLine={false} />
-                <YAxis stroke="#B3B3B3" fontSize={11} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--chakra-colors-border-subtle)" vertical={false} />
+                <XAxis dataKey="dia" stroke="var(--chakra-colors-cirqueira-spotify-textoSecundario)" fontSize={11} tickLine={false} />
+                <YAxis stroke="var(--chakra-colors-cirqueira-spotify-textoSecundario)" fontSize={11} tickLine={false} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null
                     const dado = payload[0].payload
                     return (
                       <Box
-                        bg="#1F1F1F"
-                        border="1px solid #252525"
+                        bg="cirqueira.spotify.cartaoElevado"
+                        border="1px solid"
+                        borderColor="border.subtle"
                         p={2}
                         borderRadius="6px"
                         fontSize="xs"
                       >
-                        <Text fontWeight="bold" color="#FFFFFF">
+                        <Text fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
                           Dia {dado.dia}
                         </Text>
-                        <Text color="#1ED760">
+                        <Text color="cirqueira.spotify.verde">
                           {formatarMinutosParaHorasEMinutos(dado.minutos)}
                         </Text>
                       </Box>
                     )
                   }}
                 />
-                <Bar dataKey="minutos" fill="#1ED760" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="minutos" fill="var(--chakra-colors-cirqueira-spotify-verde)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Box>
@@ -1120,7 +1108,7 @@ function ModalDetalheCapsula({
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
-              borderColor="rgba(255, 255, 255, 0.08)"
+              borderColor="border.subtle"
             >
               <Text
                 fontSize="2xs"
@@ -1166,7 +1154,7 @@ function ModalDetalheCapsula({
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
-              borderColor="rgba(255, 255, 255, 0.08)"
+              borderColor="border.subtle"
             >
               <Text
                 fontSize="2xs"
@@ -1194,7 +1182,7 @@ function ModalDetalheCapsula({
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
-              borderColor="rgba(255, 255, 255, 0.08)"
+              borderColor="border.subtle"
             >
               <Text
                 fontSize="2xs"
@@ -1222,7 +1210,7 @@ function ModalDetalheCapsula({
               borderRadius="8px"
               bg="cirqueira.spotify.cartaoElevado"
               border="1px solid"
-              borderColor="rgba(255, 255, 255, 0.08)"
+              borderColor="border.subtle"
             >
               <Text
                 fontSize="2xs"
@@ -1278,7 +1266,7 @@ function ModalDetalheCapsula({
                   <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
                     <Center
                       boxSize={{ base: 6, sm: 8 }}
-                      borderRadius="md"
+                      borderRadius="8px"
                       fontWeight="bold"
                       fontSize={{ base: 'xs', sm: 'sm' }}
                       color="cirqueira.spotify.amarelo"

@@ -29,7 +29,15 @@ export const AtividadesRecentes = memo(function AtividadesRecentes({
       titulo="Últimas mídias"
       descricao="Entradas mais recentes no sistema"
       acao={
-        <Button asChild size="xs" variant="ghost" borderRadius="lg" color="fg.muted">
+        <Button
+          asChild
+          size="xs"
+          variant="outline"
+          borderRadius="full"
+          borderColor="border.subtle"
+          color="fg.muted"
+          _hover={{ bg: 'bg.muted', color: 'fg' }}
+        >
           <Link to="/prints">
             Ver galeria
             <ArrowRight size={12} />
@@ -83,7 +91,7 @@ export const AtividadesRecentes = memo(function AtividadesRecentes({
                   size="sm"
                   variant="subtle"
                   colorPalette={paletaDoTom(status.tom)}
-                  borderRadius="md"
+                  borderRadius="full"
                   flexShrink={0}
                 >
                   {status.rotulo}

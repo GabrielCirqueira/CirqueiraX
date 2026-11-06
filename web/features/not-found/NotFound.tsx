@@ -36,7 +36,7 @@ export function Component() {
           bg="cirqueira.brand.500"
           _hover={{ bg: 'cirqueira.brand.600' }}
           color="cirqueira.grey.0"
-          borderRadius="xl"
+          borderRadius="full"
           px={4}
           py={2}
           fontSize="sm"

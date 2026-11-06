@@ -116,8 +116,10 @@ export const TabelaVideos = memo(function TabelaVideos({
   const labelBotaoPrincipal = useMemo(() => {
     if (todosSelecionados) return 'Desmarcar todos'
     if (algunsSelecionados) return `Selecionados (${selecionados.length}/${itens.length})`
-    if (categoriaFiltro === 'sem_categoria') return `Selecionar todos sem categoria (${itens.length})`
-    if (categoriaFiltro === 'com_categoria') return `Selecionar todos categorizados (${itens.length})`
+    if (categoriaFiltro === 'sem_categoria')
+      return `Selecionar todos sem categoria (${itens.length})`
+    if (categoriaFiltro === 'com_categoria')
+      return `Selecionar todos categorizados (${itens.length})`
     if (nomeCategoriaFiltro) return `Selecionar todos de "${nomeCategoriaFiltro}" (${itens.length})`
     return `Selecionar todos os vídeos (${itens.length})`
   }, [
@@ -138,7 +140,7 @@ export const TabelaVideos = memo(function TabelaVideos({
             w="full"
             h={16}
             bg="bg.muted"
-            borderRadius="xl"
+            borderRadius="8px"
             animation="pulse 1.5s infinite"
           />
         ))}
@@ -155,7 +157,7 @@ export const TabelaVideos = memo(function TabelaVideos({
         py={16}
         px={4}
         textAlign="center"
-        borderRadius="xl"
+        borderRadius="8px"
         borderWidth="1px"
         borderStyle="dashed"
         borderColor="border.subtle"
@@ -164,7 +166,7 @@ export const TabelaVideos = memo(function TabelaVideos({
       >
         <Box
           p={3.5}
-          borderRadius="lg"
+          borderRadius="8px"
           bg="cirqueira.brand.500/10"
           color="cirqueira.brand.500"
           mb={2}
@@ -192,7 +194,7 @@ export const TabelaVideos = memo(function TabelaVideos({
           gap={2.5}
           p={2}
           px={3}
-          borderRadius="xl"
+          borderRadius="8px"
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
@@ -205,7 +207,7 @@ export const TabelaVideos = memo(function TabelaVideos({
               onClick={onToggleSelectAll}
               fontSize="xs"
               fontWeight="semibold"
-              borderRadius="lg"
+              borderRadius="full"
               h={8}
               px={2.5}
             >
@@ -227,7 +229,7 @@ export const TabelaVideos = memo(function TabelaVideos({
                 variant={todosSemCategoriaMarcados ? 'solid' : 'subtle'}
                 colorPalette={todosSemCategoriaMarcados ? 'amber' : 'gray'}
                 onClick={onSelectSomenteSemCategoria}
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2.5}
@@ -246,7 +248,7 @@ export const TabelaVideos = memo(function TabelaVideos({
                 variant={todosCategorizadosMarcados ? 'solid' : 'subtle'}
                 colorPalette={todosCategorizadosMarcados ? 'purple' : 'gray'}
                 onClick={onSelectSomenteCategorizados}
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2.5}
@@ -264,7 +266,7 @@ export const TabelaVideos = memo(function TabelaVideos({
                 size="xs"
                 variant="ghost"
                 onClick={onLimparSelecao}
-                borderRadius="lg"
+                borderRadius="full"
                 fontSize="xs"
                 h={7}
                 px={2}
@@ -279,12 +281,17 @@ export const TabelaVideos = memo(function TabelaVideos({
             )}
           </HStack>
 
-          <HStack gap={2} fontSize="xs" color="fg.subtle" justify={{ base: 'flex-start', md: 'flex-end' }}>
+          <HStack
+            gap={2}
+            fontSize="xs"
+            color="fg.subtle"
+            justify={{ base: 'flex-start', md: 'flex-end' }}
+          >
             <Text as="span">
               {itens.length} {itens.length === 1 ? 'vídeo nesta página' : 'vídeos nesta página'}
             </Text>
             {semCategoriaNaPagina.length > 0 && (
-              <Badge size="xs" variant="subtle" colorPalette="amber" borderRadius="md">
+              <Badge size="xs" variant="subtle" colorPalette="amber">
                 {semCategoriaNaPagina.length} sem categoria
               </Badge>
             )}
@@ -294,465 +301,469 @@ export const TabelaVideos = memo(function TabelaVideos({
 
       <Box
         w="full"
-        borderRadius="xl"
+        borderRadius="8px"
         borderWidth="1px"
         borderColor="border.subtle"
         bg="bg.panel"
         overflow="hidden"
         shadow="sm"
       >
-      <Box overflowX="auto" w="full">
-        <Box as="table" w="full" style={{ borderCollapse: 'collapse', textAlign: 'left' }}>
-          <Box as="thead" bg="bg.muted/50" borderBottomWidth="1px" borderColor="border.subtle">
-            <Box as="tr">
-              <Box as="th" p={3.5} w={10} textAlign="center">
-                {onToggleSelectAll && itens.length > 0 ? (
-                  <IconButton
-                    size="xs"
-                    variant="ghost"
-                    aria-label="Selecionar todos os vídeos"
-                    onClick={onToggleSelectAll}
-                    colorPalette={selecionados.length === itens.length ? 'brand' : 'gray'}
-                  >
-                    {selecionados.length === itens.length ? (
-                      <CheckSquare size={16} />
-                    ) : (
-                      <Square size={16} />
-                    )}
-                  </IconButton>
-                ) : (
-                  <Text as="span" srOnly>
-                    Seleção
-                  </Text>
-                )}
-              </Box>
-              <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
-                Vídeo
-              </Box>
-              <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
-                Canal / Uploader
-              </Box>
-              <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
-                Categoria
-              </Box>
-              <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
-                Data & Hora
-              </Box>
-              <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
-                Tamanho
-              </Box>
-              <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
-                Status
-              </Box>
-              <Box
-                as="th"
-                p={3.5}
-                fontSize="xs"
-                fontWeight="bold"
-                color="fg.subtle"
-                textAlign="right"
-              >
-                Ações
-              </Box>
-            </Box>
-          </Box>
-          <Box as="tbody">
-            {itens.map((item) => {
-              const selecionado = selecionados.includes(item.uuid)
-              const statusInfo = obterStatusConfig(item.status)
-              const duracaoNumero =
-                typeof item.metadata?.duracao === 'number' ? item.metadata.duracao : undefined
-              const duracaoFormatada = formatarDuracao(duracaoNumero)
-              const titulo =
-                typeof item.metadata?.titulo === 'string' && item.metadata.titulo
-                  ? item.metadata.titulo
-                  : `Vídeo ${item.hash.slice(0, 10)}`
-              const uploader =
-                typeof item.metadata?.uploader === 'string' && item.metadata.uploader
-                  ? item.metadata.uploader
-                  : 'Desconhecido'
-              const urlThumbnail =
-                item.thumbnailUrl ||
-                (typeof item.metadata?.thumbnail === 'string' ? item.metadata.thumbnail : undefined) ||
-                obterUrlThumbnailMediaItem(item.uuid)
-              const urlOriginal =
-                typeof item.metadata?.url_original === 'string'
-                  ? item.metadata.url_original
-                  : undefined
-              const dataString =
-                typeof item.metadata?.data === 'string' ? item.metadata.data : undefined
-              const dataMidia = formatarDataMidia(dataString, item.criadoEm)
-              const horarioMidia = formatarHorarioMidia(item)
-              const tamanhoNumero =
-                typeof item.metadata?.tamanho_bytes === 'number'
-                  ? item.metadata.tamanho_bytes
-                  : undefined
-              const tamanhoFormatado = formatarTamanhoBytes(tamanhoNumero)
-              const extensao =
-                typeof item.metadata?.extensao === 'string' ? item.metadata.extensao : 'mp4'
-
-              return (
-                <Box
-                  as="tr"
-                  key={item.uuid}
-                  onMouseDownCapture={bloquearSelecaoDeTextoComShift}
-                  onClickCapture={(evento) =>
-                    interceptarCliqueComShift(evento, () => onSelecionarIntervalo?.(item.uuid))
-                  }
-                  borderBottomWidth="1px"
-                  borderColor="border.subtle"
-                  bg={selecionado ? 'cirqueira.brand.500/5' : 'transparent'}
-                  _hover={{ bg: selecionado ? 'cirqueira.brand.500/10' : 'bg.muted/40' }}
-                  transition="background-color 0.15s"
-                >
-                  <Box as="td" p={3.5} textAlign="center" verticalAlign="middle">
+        <Box overflowX="auto" w="full">
+          <Box as="table" w="full" style={{ borderCollapse: 'collapse', textAlign: 'left' }}>
+            <Box as="thead" bg="bg.muted/50" borderBottomWidth="1px" borderColor="border.subtle">
+              <Box as="tr">
+                <Box as="th" p={3.5} w={10} textAlign="center">
+                  {onToggleSelectAll && itens.length > 0 ? (
                     <IconButton
                       size="xs"
                       variant="ghost"
-                      onClick={() => onToggleSelect(item.uuid)}
-                      aria-label="Selecionar"
-                      borderRadius="lg"
+                      aria-label="Selecionar todos os vídeos"
+                      onClick={onToggleSelectAll}
+                      colorPalette={selecionados.length === itens.length ? 'brand' : 'gray'}
                     >
-                      {selecionado ? (
-                        <Box as="span" color="cirqueira.brand.500" display="inline-flex">
-                          <CheckSquare size={16} color="currentColor" />
-                        </Box>
+                      {selecionados.length === itens.length ? (
+                        <CheckSquare size={16} />
                       ) : (
                         <Square size={16} />
                       )}
                     </IconButton>
-                  </Box>
+                  ) : (
+                    <Text as="span" srOnly>
+                      Seleção
+                    </Text>
+                  )}
+                </Box>
+                <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
+                  Vídeo
+                </Box>
+                <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
+                  Canal / Uploader
+                </Box>
+                <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
+                  Categoria
+                </Box>
+                <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
+                  Data & Hora
+                </Box>
+                <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
+                  Tamanho
+                </Box>
+                <Box as="th" p={3.5} fontSize="xs" fontWeight="bold" color="fg.subtle">
+                  Status
+                </Box>
+                <Box
+                  as="th"
+                  p={3.5}
+                  fontSize="xs"
+                  fontWeight="bold"
+                  color="fg.subtle"
+                  textAlign="right"
+                >
+                  Ações
+                </Box>
+              </Box>
+            </Box>
+            <Box as="tbody">
+              {itens.map((item) => {
+                const selecionado = selecionados.includes(item.uuid)
+                const statusInfo = obterStatusConfig(item.status)
+                const duracaoNumero =
+                  typeof item.metadata?.duracao === 'number' ? item.metadata.duracao : undefined
+                const duracaoFormatada = formatarDuracao(duracaoNumero)
+                const titulo =
+                  typeof item.metadata?.titulo === 'string' && item.metadata.titulo
+                    ? item.metadata.titulo
+                    : `Vídeo ${item.hash.slice(0, 10)}`
+                const uploader =
+                  typeof item.metadata?.uploader === 'string' && item.metadata.uploader
+                    ? item.metadata.uploader
+                    : 'Desconhecido'
+                const urlThumbnail =
+                  item.thumbnailUrl ||
+                  (typeof item.metadata?.thumbnail === 'string'
+                    ? item.metadata.thumbnail
+                    : undefined) ||
+                  obterUrlThumbnailMediaItem(item.uuid)
+                const urlOriginal =
+                  typeof item.metadata?.url_original === 'string'
+                    ? item.metadata.url_original
+                    : undefined
+                const dataString =
+                  typeof item.metadata?.data === 'string' ? item.metadata.data : undefined
+                const dataMidia = formatarDataMidia(dataString, item.criadoEm)
+                const horarioMidia = formatarHorarioMidia(item)
+                const tamanhoNumero =
+                  typeof item.metadata?.tamanho_bytes === 'number'
+                    ? item.metadata.tamanho_bytes
+                    : undefined
+                const tamanhoFormatado = formatarTamanhoBytes(tamanhoNumero)
+                const extensao =
+                  typeof item.metadata?.extensao === 'string' ? item.metadata.extensao : 'mp4'
 
-                  <Box as="td" p={3.5} verticalAlign="middle" maxW="360px">
-                    <HStack gap={3}>
-                      <Box
-                        position="relative"
-                        w="80px"
-                        h="45px"
-                        borderRadius="md"
-                        bg="bg.muted"
-                        overflow="hidden"
-                        flexShrink={0}
-                        cursor="pointer"
-                        onClick={() => onVisualizar?.(item)}
-                      >
-                        {urlThumbnail ? (
-                          <img
-                            src={urlThumbnail}
-                            alt={titulo}
-                            referrerPolicy="no-referrer"
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            loading="lazy"
-                          />
-                        ) : (
-                          <Flex h="full" w="full" align="center" justify="center" color="fg.subtle">
-                            <Video size={18} />
-                          </Flex>
-                        )}
-                        <Flex
-                          position="absolute"
-                          inset={0}
-                          bg="cirqueira.grey.950/60"
-                          opacity={0}
-                          _hover={{ opacity: 1 }}
-                          align="center"
-                          justify="center"
-                          transition="opacity 0.15s"
-                        >
-                          <Play size={16} fill="currentColor" color="cirqueira.grey.0" />
-                        </Flex>
-                        {duracaoFormatada && (
-                          <Box
-                            position="absolute"
-                            bottom={0.5}
-                            right={0.5}
-                            bg="cirqueira.grey.950/80"
-                            px={1}
-                            py={0.2}
-                            borderRadius="xs"
-                            fontSize="9px"
-                            fontWeight="bold"
-                            color="cirqueira.grey.0"
-                          >
-                            {duracaoFormatada}
-                          </Box>
-                        )}
-                      </Box>
-
-                      <VStack align="start" gap={0.5} truncate flex={1}>
-                        <Text
-                          fontSize="xs"
-                          fontWeight="semibold"
-                          color="fg"
-                          truncate
-                          title={titulo}
-                          cursor="pointer"
-                          _hover={{ color: 'cirqueira.brand.400' }}
-                          onClick={() => onVisualizar?.(item)}
-                        >
-                          {titulo}
-                        </Text>
-                        {urlOriginal && (
-                          <Link
-                            href={urlOriginal}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            fontSize="11px"
-                            color="cirqueira.brand.400"
-                            display="inline-flex"
-                            alignItems="center"
-                            gap={1}
-                          >
-                            <Text as="span">Ver link original</Text>
-                            <ExternalLink size={10} />
-                          </Link>
-                        )}
-                      </VStack>
-                    </HStack>
-                  </Box>
-
-                  <Box as="td" p={3.5} verticalAlign="middle">
-                    <HStack gap={1.5} fontSize="xs" color="fg.subtle">
-                      <User size={13} style={{ flexShrink: 0 }} />
-                      <Text as="span" maxW="120px" truncate>
-                        {uploader}
-                      </Text>
-                    </HStack>
-                  </Box>
-
-                  <Box as="td" p={3.5} verticalAlign="middle">
-                    {item.categoria?.nome ? (
-                      <Badge size="xs" variant="subtle" colorPalette="brand" borderRadius="md">
-                        <HStack gap={1} alignItems="center">
-                          <Folder size={11} />
-                          <Text as="span" maxW="110px" truncate>
-                            {item.categoria.nome}
-                          </Text>
-                        </HStack>
-                      </Badge>
-                    ) : (
-                      <Text as="span" fontSize="xs" fontStyle="italic" color="fg.subtle">
-                        Sem categoria
-                      </Text>
-                    )}
-                  </Box>
-
-                  <Box as="td" p={3.5} verticalAlign="middle">
-                    <Box
-                      as="button"
-                      onClick={() => onEditarMetadata?.(item, 'data')}
-                      textAlign="left"
-                      p={1.5}
-                      px={2}
-                      borderRadius="md"
-                      borderWidth="1px"
-                      borderColor="cirqueira.brand.500/20"
-                      bg="cirqueira.brand.500/5"
-                      _hover={{
-                        borderColor: 'cirqueira.brand.500/50',
-                        bg: 'cirqueira.brand.500/12',
-                      }}
-                      cursor="pointer"
-                      title="Clique para editar data e horário"
-                    >
-                      <HStack gap={2} justify="space-between">
-                        <VStack align="start" gap={0} fontSize="xs">
-                          <HStack gap={1} color="cirqueira.brand.300" fontWeight="semibold">
-                            <Calendar size={11} />
-                            <Text as="span">{dataMidia}</Text>
-                          </HStack>
-                          <HStack gap={1} color="fg.muted" fontSize="11px">
-                            <Clock size={11} />
-                            <Text as="span">{horarioMidia}</Text>
-                          </HStack>
-                        </VStack>
-                        <Badge size="xs" variant="subtle" colorPalette="brand" px={1} py={0.2}>
-                          Editar
-                        </Badge>
-                      </HStack>
-                    </Box>
-                  </Box>
-
-                  <Box as="td" p={3.5} verticalAlign="middle">
-                    <HStack gap={1} fontSize="xs" color="fg.subtle">
-                      <Badge
-                        size="xs"
-                        variant="outline"
-                        textTransform="uppercase"
-                        colorPalette="gray"
-                      >
-                        {extensao}
-                      </Badge>
-                      {tamanhoFormatado && (
-                        <HStack gap={1}>
-                          <HardDrive size={11} />
-                          <Text as="span">{tamanhoFormatado}</Text>
-                        </HStack>
-                      )}
-                    </HStack>
-                  </Box>
-
-                  <Box as="td" p={3.5} verticalAlign="middle">
-                    <HStack gap={1.5} align="center">
-                      <Badge
-                        size="sm"
-                        variant="subtle"
-                        colorPalette={statusInfo.colorPalette}
-                        borderRadius="md"
-                      >
-                        <HStack gap={1} alignItems="center">
-                          {statusInfo.animado ? (
-                            <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
-                          ) : item.status === 'erro' ? (
-                            <AlertCircle size={11} />
-                          ) : item.status === 'concluido' ? (
-                            <CheckCircle2 size={11} />
-                          ) : (
-                            <Clock size={11} />
-                          )}
-                          <Text as="span">{statusInfo.label}</Text>
-                        </HStack>
-                      </Badge>
-                      {item.isDuplicado && (
-                        <Badge
-                          size="xs"
-                          variant="solid"
-                          colorPalette="amber"
-                          borderRadius="md"
-                          title="Arquivo com mesmo conteúdo ou identificação já processado no sistema"
-                        >
-                          Duplicado
-                        </Badge>
-                      )}
-                    </HStack>
-                  </Box>
-
-                  <Box as="td" p={3.5} verticalAlign="middle" textAlign="right">
-                    <HStack gap={1} justify="flex-end">
+                return (
+                  <Box
+                    as="tr"
+                    key={item.uuid}
+                    onMouseDownCapture={bloquearSelecaoDeTextoComShift}
+                    onClickCapture={(evento) =>
+                      interceptarCliqueComShift(evento, () => onSelecionarIntervalo?.(item.uuid))
+                    }
+                    borderBottomWidth="1px"
+                    borderColor="border.subtle"
+                    bg={selecionado ? 'cirqueira.brand.500/5' : 'transparent'}
+                    _hover={{ bg: selecionado ? 'cirqueira.brand.500/10' : 'bg.muted/40' }}
+                    transition="background-color 0.15s"
+                  >
+                    <Box as="td" p={3.5} textAlign="center" verticalAlign="middle">
                       <IconButton
                         size="xs"
                         variant="ghost"
-                        onClick={(e) => handleDownload(item.uuid, titulo, e)}
-                        disabled={baixandoUuid === item.uuid}
-                        aria-label="Baixar MP4"
-                        title="Baixar MP4"
-                        color="cirqueira.brand.500"
-                        _hover={{ bg: 'cirqueira.brand.500/10' }}
-                        borderRadius="lg"
+                        onClick={() => onToggleSelect(item.uuid)}
+                        aria-label="Selecionar"
+                        borderRadius="full"
                       >
-                        {baixandoUuid === item.uuid ? (
-                          <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                        {selecionado ? (
+                          <Box as="span" color="cirqueira.brand.500" display="inline-flex">
+                            <CheckSquare size={16} color="currentColor" />
+                          </Box>
                         ) : (
-                          <Download size={14} />
+                          <Square size={16} />
                         )}
                       </IconButton>
+                    </Box>
 
-                      {onForcarGoogleFotos && (
+                    <Box as="td" p={3.5} verticalAlign="middle" maxW="360px">
+                      <HStack gap={3}>
+                        <Box
+                          position="relative"
+                          w="80px"
+                          h="45px"
+                          borderRadius="8px"
+                          bg="bg.muted"
+                          overflow="hidden"
+                          flexShrink={0}
+                          cursor="pointer"
+                          onClick={() => onVisualizar?.(item)}
+                        >
+                          {urlThumbnail ? (
+                            <img
+                              src={urlThumbnail}
+                              alt={titulo}
+                              referrerPolicy="no-referrer"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              loading="lazy"
+                            />
+                          ) : (
+                            <Flex
+                              h="full"
+                              w="full"
+                              align="center"
+                              justify="center"
+                              color="fg.subtle"
+                            >
+                              <Video size={18} />
+                            </Flex>
+                          )}
+                          <Flex
+                            position="absolute"
+                            inset={0}
+                            bg="cirqueira.grey.950/60"
+                            opacity={0}
+                            _hover={{ opacity: 1 }}
+                            align="center"
+                            justify="center"
+                            transition="opacity 0.15s"
+                          >
+                            <Play size={16} fill="currentColor" color="cirqueira.grey.0" />
+                          </Flex>
+                          {duracaoFormatada && (
+                            <Box
+                              position="absolute"
+                              bottom={0.5}
+                              right={0.5}
+                              bg="cirqueira.grey.950/80"
+                              px={1}
+                              py={0.2}
+                              borderRadius="xs"
+                              fontSize="9px"
+                              fontWeight="bold"
+                              color="cirqueira.grey.0"
+                            >
+                              {duracaoFormatada}
+                            </Box>
+                          )}
+                        </Box>
+
+                        <VStack align="start" gap={0.5} truncate flex={1}>
+                          <Text
+                            fontSize="xs"
+                            fontWeight="semibold"
+                            color="fg"
+                            truncate
+                            title={titulo}
+                            cursor="pointer"
+                            _hover={{ color: 'cirqueira.brand.400' }}
+                            onClick={() => onVisualizar?.(item)}
+                          >
+                            {titulo}
+                          </Text>
+                          {urlOriginal && (
+                            <Link
+                              href={urlOriginal}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              fontSize="11px"
+                              color="cirqueira.brand.400"
+                              display="inline-flex"
+                              alignItems="center"
+                              gap={1}
+                            >
+                              <Text as="span">Ver link original</Text>
+                              <ExternalLink size={10} />
+                            </Link>
+                          )}
+                        </VStack>
+                      </HStack>
+                    </Box>
+
+                    <Box as="td" p={3.5} verticalAlign="middle">
+                      <HStack gap={1.5} fontSize="xs" color="fg.subtle">
+                        <User size={13} style={{ flexShrink: 0 }} />
+                        <Text as="span" maxW="120px" truncate>
+                          {uploader}
+                        </Text>
+                      </HStack>
+                    </Box>
+
+                    <Box as="td" p={3.5} verticalAlign="middle">
+                      {item.categoria?.nome ? (
+                        <Badge size="xs" variant="subtle" colorPalette="brand">
+                          <HStack gap={1} alignItems="center">
+                            <Folder size={11} />
+                            <Text as="span" maxW="110px" truncate>
+                              {item.categoria.nome}
+                            </Text>
+                          </HStack>
+                        </Badge>
+                      ) : (
+                        <Text as="span" fontSize="xs" fontStyle="italic" color="fg.subtle">
+                          Sem categoria
+                        </Text>
+                      )}
+                    </Box>
+
+                    <Box as="td" p={3.5} verticalAlign="middle">
+                      <Box
+                        as="button"
+                        onClick={() => onEditarMetadata?.(item, 'data')}
+                        textAlign="left"
+                        p={1.5}
+                        px={2}
+                        borderRadius="8px"
+                        borderWidth="1px"
+                        borderColor="cirqueira.brand.500/20"
+                        bg="cirqueira.brand.500/5"
+                        _hover={{
+                          borderColor: 'cirqueira.brand.500/50',
+                          bg: 'cirqueira.brand.500/12',
+                        }}
+                        cursor="pointer"
+                        title="Clique para editar data e horário"
+                      >
+                        <HStack gap={2} justify="space-between">
+                          <VStack align="start" gap={0} fontSize="xs">
+                            <HStack gap={1} color="cirqueira.brand.300" fontWeight="semibold">
+                              <Calendar size={11} />
+                              <Text as="span">{dataMidia}</Text>
+                            </HStack>
+                            <HStack gap={1} color="fg.muted" fontSize="11px">
+                              <Clock size={11} />
+                              <Text as="span">{horarioMidia}</Text>
+                            </HStack>
+                          </VStack>
+                          <Badge size="xs" variant="subtle" colorPalette="brand" px={1} py={0.2}>
+                            Editar
+                          </Badge>
+                        </HStack>
+                      </Box>
+                    </Box>
+
+                    <Box as="td" p={3.5} verticalAlign="middle">
+                      <HStack gap={1} fontSize="xs" color="fg.subtle">
+                        <Badge
+                          size="xs"
+                          variant="outline"
+                          textTransform="uppercase"
+                          colorPalette="gray"
+                        >
+                          {extensao}
+                        </Badge>
+                        {tamanhoFormatado && (
+                          <HStack gap={1}>
+                            <HardDrive size={11} />
+                            <Text as="span">{tamanhoFormatado}</Text>
+                          </HStack>
+                        )}
+                      </HStack>
+                    </Box>
+
+                    <Box as="td" p={3.5} verticalAlign="middle">
+                      <HStack gap={1.5} align="center">
+                        <Badge size="sm" variant="subtle" colorPalette={statusInfo.colorPalette}>
+                          <HStack gap={1} alignItems="center">
+                            {statusInfo.animado ? (
+                              <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
+                            ) : item.status === 'erro' ? (
+                              <AlertCircle size={11} />
+                            ) : item.status === 'concluido' ? (
+                              <CheckCircle2 size={11} />
+                            ) : (
+                              <Clock size={11} />
+                            )}
+                            <Text as="span">{statusInfo.label}</Text>
+                          </HStack>
+                        </Badge>
+                        {item.isDuplicado && (
+                          <Badge
+                            size="xs"
+                            variant="solid"
+                            colorPalette="amber"
+                            title="Arquivo com mesmo conteúdo ou identificação já processado no sistema"
+                          >
+                            Duplicado
+                          </Badge>
+                        )}
+                      </HStack>
+                    </Box>
+
+                    <Box as="td" p={3.5} verticalAlign="middle" textAlign="right">
+                      <HStack gap={1} justify="flex-end">
                         <IconButton
                           size="xs"
                           variant="ghost"
-                          onClick={() => onForcarGoogleFotos(item)}
-                          aria-label="Sincronizar Google Fotos"
-                          title={
-                            item.isDuplicado
-                              ? 'Forçar envio para o Google Fotos (mesmo marcado como duplicado)'
-                              : item.isEnviadoGoogleFotos
-                              ? 'Já sincronizado com Google Fotos (clique para reenviar se desejar)'
-                              : 'Enviar para o Google Fotos'
-                          }
-                          color={
-                            item.isDuplicado
-                              ? 'cirqueira.amber.500'
-                              : item.isEnviadoGoogleFotos
-                              ? 'cirqueira.green.500'
-                              : 'fg.subtle'
-                          }
-                          _hover={{
-                            color: item.isDuplicado ? 'cirqueira.amber.400' : 'cirqueira.brand.400',
-                          }}
-                          borderRadius="lg"
+                          onClick={(e) => handleDownload(item.uuid, titulo, e)}
+                          disabled={baixandoUuid === item.uuid}
+                          aria-label="Baixar MP4"
+                          title="Baixar MP4"
+                          color="cirqueira.brand.500"
+                          _hover={{ bg: 'cirqueira.brand.500/10' }}
+                          borderRadius="full"
                         >
-                          <CloudUpload size={14} />
+                          {baixandoUuid === item.uuid ? (
+                            <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                          ) : (
+                            <Download size={14} />
+                          )}
                         </IconButton>
-                      )}
 
-                      {onEditarMetadata && (
-                        <IconButton
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onEditarMetadata(item)}
-                          aria-label="Editar"
-                          title="Editar metadados"
-                          borderRadius="lg"
-                        >
-                          <Edit3 size={14} />
-                        </IconButton>
-                      )}
+                        {onForcarGoogleFotos && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onForcarGoogleFotos(item)}
+                            aria-label="Sincronizar Google Fotos"
+                            title={
+                              item.isDuplicado
+                                ? 'Forçar envio para o Google Fotos (mesmo marcado como duplicado)'
+                                : item.isEnviadoGoogleFotos
+                                  ? 'Já sincronizado com Google Fotos (clique para reenviar se desejar)'
+                                  : 'Enviar para o Google Fotos'
+                            }
+                            color={
+                              item.isDuplicado
+                                ? 'cirqueira.amber.500'
+                                : item.isEnviadoGoogleFotos
+                                  ? 'cirqueira.green.500'
+                                  : 'fg.subtle'
+                            }
+                            _hover={{
+                              color: item.isDuplicado
+                                ? 'cirqueira.amber.400'
+                                : 'cirqueira.brand.400',
+                            }}
+                            borderRadius="8px"
+                          >
+                            <CloudUpload size={14} />
+                          </IconButton>
+                        )}
 
-                      {onCategorizar && (
-                        <IconButton
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onCategorizar(item)}
-                          aria-label="Mover categoria"
-                          title="Mover categoria"
-                          borderRadius="lg"
-                        >
-                          <FolderPlus size={14} />
-                        </IconButton>
-                      )}
+                        {onEditarMetadata && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onEditarMetadata(item)}
+                            aria-label="Editar"
+                            title="Editar metadados"
+                            borderRadius="full"
+                          >
+                            <Edit3 size={14} />
+                          </IconButton>
+                        )}
 
-                      {onRebaixar && (
-                        <IconButton
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onRebaixar(item.uuid)}
-                          aria-label="Rebaixar"
-                          title="Baixar novamente"
-                          borderRadius="lg"
-                        >
-                          <DownloadCloud size={14} />
-                        </IconButton>
-                      )}
+                        {onCategorizar && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onCategorizar(item)}
+                            aria-label="Mover categoria"
+                            title="Mover categoria"
+                            borderRadius="full"
+                          >
+                            <FolderPlus size={14} />
+                          </IconButton>
+                        )}
 
-                      {item.status === 'erro' && onRetentar && (
-                        <IconButton
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onRetentar(item.uuid)}
-                          aria-label="Retentar"
-                          title="Retentar"
-                          borderRadius="lg"
-                        >
-                          <Box as="span" color="cirqueira.amber.500" display="inline-flex">
-                            <RotateCcw size={14} color="currentColor" />
-                          </Box>
-                        </IconButton>
-                      )}
+                        {onRebaixar && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onRebaixar(item.uuid)}
+                            aria-label="Rebaixar"
+                            title="Baixar novamente"
+                            borderRadius="full"
+                          >
+                            <DownloadCloud size={14} />
+                          </IconButton>
+                        )}
 
-                      {onApagar && (
-                        <IconButton
-                          size="xs"
-                          variant="ghost"
-                          onClick={() => onApagar(item.uuid)}
-                          aria-label="Apagar"
-                          title="Apagar"
-                          borderRadius="lg"
-                        >
-                          <Box as="span" color="cirqueira.red.500" display="inline-flex">
-                            <Trash2 size={14} color="currentColor" />
-                          </Box>
-                        </IconButton>
-                      )}
-                    </HStack>
+                        {item.status === 'erro' && onRetentar && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onRetentar(item.uuid)}
+                            aria-label="Retentar"
+                            title="Retentar"
+                            borderRadius="full"
+                          >
+                            <Box as="span" color="cirqueira.amber.500" display="inline-flex">
+                              <RotateCcw size={14} color="currentColor" />
+                            </Box>
+                          </IconButton>
+                        )}
+
+                        {onApagar && (
+                          <IconButton
+                            size="xs"
+                            variant="ghost"
+                            onClick={() => onApagar(item.uuid)}
+                            aria-label="Apagar"
+                            title="Apagar"
+                            borderRadius="full"
+                          >
+                            <Box as="span" color="cirqueira.red.500" display="inline-flex">
+                              <Trash2 size={14} color="currentColor" />
+                            </Box>
+                          </IconButton>
+                        )}
+                      </HStack>
+                    </Box>
                   </Box>
-                </Box>
-              )
-            })}
+                )
+              })}
+            </Box>
           </Box>
         </Box>
       </Box>
-    </Box>
     </VStack>
   )
 })

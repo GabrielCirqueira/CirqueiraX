@@ -170,7 +170,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         w="full"
-        borderRadius="2xl"
+        borderRadius="8px"
         borderWidth="2px"
         borderStyle="dashed"
         p={{ base: 6, sm: 8, md: 10 }}
@@ -202,7 +202,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
 
           <Box
             p={4}
-            borderRadius="2xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/15"
             color="cirqueira.brand.400"
             transition="transform 0.2s"
@@ -221,21 +221,21 @@ export const DropzoneUpload = memo(function DropzoneUpload({
           </VStack>
 
           <HStack gap={2} flexWrap="wrap" justify="center" pt={1}>
-            <HStack gap={1} px={2} py={0.5} borderRadius="md" bg="bg.muted" borderWidth="1px" borderColor="border.subtle">
+            <HStack gap={1} px={2} py={0.5} borderRadius="8px" bg="bg.muted" borderWidth="1px" borderColor="border.subtle">
               <FileImage size={12} />
               <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                 {FORMATOS_IMAGEM.join(', ')}
               </Text>
             </HStack>
 
-            <HStack gap={1} px={2} py={0.5} borderRadius="md" bg="bg.muted" borderWidth="1px" borderColor="border.subtle">
+            <HStack gap={1} px={2} py={0.5} borderRadius="8px" bg="bg.muted" borderWidth="1px" borderColor="border.subtle">
               <FileVideo size={12} />
               <Text as="span" fontSize="11px" fontWeight="medium" color="fg.subtle">
                 {FORMATOS_VIDEO.join(', ')}
               </Text>
             </HStack>
 
-            <Badge variant="subtle" colorPalette="brand" size="xs" borderRadius="md" px={2} py={0.5}>
+            <Badge variant="subtle" colorPalette="brand" size="xs" px={2} py={0.5}>
               <HStack gap={1}>
                 <Sparkles size={11} />
                 <Text as="span">Ctrl + V suportado</Text>
@@ -247,7 +247,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             mt={2}
             p={2.5}
             px={4}
-            borderRadius="xl"
+            borderRadius="8px"
             bg="bg.muted"
             borderWidth="1px"
             borderColor="border.subtle"
@@ -273,7 +273,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                   }}
                   bg="bg.panel"
                   borderColor="border.subtle"
-                  borderRadius="lg"
+                  borderRadius="8px"
                   fontSize="xs"
                   h={7}
                   fontWeight="medium"
@@ -303,7 +303,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
             bg="bg.panel"
             p={3.5}
             px={4}
-            borderRadius="xl"
+            borderRadius="8px"
             borderWidth="1px"
             borderColor="border.subtle"
           >
@@ -316,7 +316,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 fontWeight="semibold"
                 color="fg.subtle"
                 _hover={{ color: 'fg' }}
-                borderRadius="lg"
+                borderRadius="full"
                 p={1}
               >
                 <HStack gap={1.5}>
@@ -337,24 +337,24 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 </HStack>
               </Button>
 
-              <Badge colorPalette="brand" size="md" px={2.5} py={0.5} borderRadius="lg" fontWeight="bold">
+              <Badge colorPalette="brand" size="md" px={2.5} py={0.5} fontWeight="bold">
                 {fila.length} {fila.length === 1 ? 'arquivo' : 'arquivos'}
               </Badge>
 
               {semCategoriaFilaCount > 0 && (
-                <Badge colorPalette="amber" variant="subtle" size="sm" borderRadius="md">
+                <Badge colorPalette="amber" variant="subtle" size="sm">
                   {semCategoriaFilaCount} sem categoria
                 </Badge>
               )}
 
               {concluidosCount > 0 && (
-                <Badge colorPalette="green" variant="subtle" size="sm" borderRadius="md">
+                <Badge colorPalette="green" variant="subtle" size="sm">
                   {concluidosCount} enviado{concluidosCount > 1 ? 's' : ''}
                 </Badge>
               )}
 
               {errosCount > 0 && (
-                <Badge colorPalette="red" variant="subtle" size="sm" borderRadius="md">
+                <Badge colorPalette="red" variant="subtle" size="sm">
                   {errosCount} com erro
                 </Badge>
               )}
@@ -367,7 +367,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                   variant="ghost"
                   onClick={onLimparConcluidos}
                   disabled={estaProcessando}
-                  borderRadius="lg"
+                  borderRadius="full"
                 >
                   <Trash2 size={13} style={{ marginRight: '5px' }} />
                   <Text as="span">Limpar Concluídos</Text>
@@ -381,7 +381,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                   variant="subtle"
                   disabled={estaProcessando}
                   onClick={onEnviarTodos}
-                  borderRadius="lg"
+                  borderRadius="full"
                   fontWeight="bold"
                 >
                   <RotateCcw size={13} style={{ marginRight: '5px' }} />
@@ -395,7 +395,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 disabled={pendentesCount === 0 || estaProcessando}
                 onClick={onEnviarTodos}
                 fontWeight="bold"
-                borderRadius="lg"
+                borderRadius="full"
               >
                 {estaProcessando ? (
                   <>
@@ -418,7 +418,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
           <Card.Root
             w="full"
             p={3.5}
-            borderRadius="xl"
+            borderRadius="8px"
             bg="cirqueira.brand.500/8"
             borderWidth="1px"
             borderColor="cirqueira.brand.500/20"
@@ -446,7 +446,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       onChange={(e) => setCategoriaLoteFilaId(e.target.value)}
                       bg="bg.panel"
                       borderColor="border.subtle"
-                      borderRadius="md"
+                      borderRadius="8px"
                       fontSize="11px"
                       h={6}
                     >
@@ -470,7 +470,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                         setCategoriaLoteFilaId('')
                       }
                     }}
-                    borderRadius="md"
+                    borderRadius="full"
                     h={6}
                     fontSize="11px"
                   >
@@ -490,7 +490,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                     variant="subtle"
                     colorPalette="brand"
                     onClick={() => handleAplicarCategoriaRapida(cat.uuid)}
-                    borderRadius="md"
+                    borderRadius="full"
                     h={6}
                     fontSize="11px"
                     fontWeight="semibold"
@@ -505,7 +505,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                   size="xs"
                   variant="ghost"
                   onClick={() => handleAplicarCategoriaRapida(null)}
-                  borderRadius="md"
+                  borderRadius="full"
                   h={6}
                   fontSize="11px"
                   color="fg.subtle"
@@ -519,7 +519,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                 <HStack
                   p={2}
                   px={3}
-                  borderRadius="lg"
+                  borderRadius="8px"
                   bg="bg.panel"
                   borderWidth="1px"
                   borderColor="border.subtle"
@@ -544,7 +544,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           variant="outline"
                           colorPalette="brand"
                           onClick={() => handleAplicarCategoriaRapida(catPrint.uuid)}
-                          borderRadius="md"
+                          borderRadius="full"
                           h="24px"
                           fontSize="10px"
                         >
@@ -566,7 +566,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                   key={item.id}
                   p={2.5}
                   px={3.5}
-                  borderRadius="xl"
+                  borderRadius="8px"
                   borderWidth="1px"
                   borderColor={isItemSelecionado ? 'cirqueira.brand.500' : 'border.subtle'}
                   bg="bg.panel"
@@ -595,7 +595,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       <Box
                         w={10}
                         h={10}
-                        borderRadius="lg"
+                        borderRadius="8px"
                         bg="bg.muted"
                         overflow="hidden"
                         flexShrink={0}
@@ -612,9 +612,9 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         ) : item.tipoMime.startsWith('video/') ? (
-                          <FileVideo size={18} color="var(--chakra-colors-cirqueira-purple-500, #a855f7)" />
+                          <FileVideo size={18} color="var(--chakra-colors-cirqueira-purple-500)" />
                         ) : (
-                          <FileImage size={18} color="var(--chakra-colors-cirqueira-brand-500, #22c55e)" />
+                          <FileImage size={18} color="var(--chakra-colors-cirqueira-brand-500)" />
                         )}
                       </Box>
 
@@ -660,7 +660,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           onChange={(e) => onAtualizarCategoriaItem(item.id, e.target.value || null)}
                           bg="bg.muted"
                           borderColor="border.subtle"
-                          borderRadius="md"
+                          borderRadius="8px"
                           fontSize="11px"
                           h="28px"
                         >
@@ -675,13 +675,13 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       </NativeSelect.Root>
 
                       {item.status === 'pendente' && (
-                        <Badge variant="subtle" colorPalette="gray" size="xs" borderRadius="md">
+                        <Badge variant="subtle" colorPalette="gray" size="xs">
                           Pendente
                         </Badge>
                       )}
 
                       {item.status === 'enviando' && (
-                        <Badge variant="subtle" colorPalette="brand" size="xs" borderRadius="md">
+                        <Badge variant="subtle" colorPalette="brand" size="xs">
                           <HStack gap={1}>
                             <Loader2 size={10} style={{ animation: 'spin 1s linear infinite' }} />
                             <Text as="span">{item.progresso}%</Text>
@@ -690,7 +690,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       )}
 
                       {item.status === 'sucesso' && (
-                        <Badge variant="subtle" colorPalette="green" size="xs" borderRadius="md">
+                        <Badge variant="subtle" colorPalette="green" size="xs">
                           <HStack gap={1}>
                             <CheckCircle2 size={11} />
                             <Text as="span">Enviado</Text>
@@ -703,7 +703,6 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           variant="subtle"
                           colorPalette="amber"
                           size="xs"
-                          borderRadius="md"
                           title="Arquivo já coletado anteriormente pelo sistema. Nenhum registro duplicado foi criado."
                         >
                           <HStack gap={1}>
@@ -714,7 +713,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                       )}
 
                       {item.status === 'erro' && (
-                        <Badge variant="subtle" colorPalette="red" size="xs" borderRadius="md">
+                        <Badge variant="subtle" colorPalette="red" size="xs">
                           <HStack gap={1}>
                             <XCircle size={11} />
                             <Text as="span">Erro</Text>
@@ -738,7 +737,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                               })
                             }
                           }}
-                          borderRadius="md"
+                          borderRadius="8px"
                           fontSize="10px"
                           h={6}
                         >
@@ -752,7 +751,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           variant="ghost"
                           onClick={() => onReenviarItem(item.id)}
                           aria-label="Reenviar arquivo"
-                          borderRadius="md"
+                          borderRadius="full"
                           h={6}
                         >
                           Retentar
@@ -767,7 +766,7 @@ export const DropzoneUpload = memo(function DropzoneUpload({
                           aria-label="Remover da fila"
                           color="fg.subtle"
                           _hover={{ color: 'cirqueira.red.500' }}
-                          borderRadius="md"
+                          borderRadius="full"
                           h={6}
                           w={6}
                         >

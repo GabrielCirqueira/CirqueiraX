@@ -3,7 +3,7 @@ import { Globe } from 'lucide-react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { criarPedidoDownload } from '../api'
-import { identificarPlataforma, type PlataformaDetectada } from '../utils/plataformaVideo'
+import { type PlataformaDetectada, identificarPlataforma } from '../utils/plataformaVideo'
 
 // Itens concluídos saem da fila; nela só ficam os pendentes, o que está baixando e os que falharam
 export type StatusItemFila = 'pendente' | 'baixando' | 'erro'
@@ -238,9 +238,7 @@ export const useFilaDownloadsStore = create<FilaDownloadsState>()(
         // Marca como 'baixando'
         set((s) => ({
           itens: s.itens.map((it) =>
-            it.id === proximo.id
-              ? { ...it, status: 'baixando', iniciadoEm: Date.now() }
-              : it
+            it.id === proximo.id ? { ...it, status: 'baixando', iniciadoEm: Date.now() } : it
           ),
         }))
 
