@@ -23,13 +23,21 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 
 | Origem | Mecanismo | Frequência / Prazo | Granularidade |
 | :--- | :--- | :--- | :--- |
-| **Coleta Periódica (API)** | OAuth 2.0 PKCE (`user-read-recently-played`) | A cada 30 minutos via Symfony Scheduler | Últimas 50 faixas tocadas (estimativa de minutos por duração da faixa) |
+| **Coleta Periódica (API)** | OAuth 2.0 PKCE (`user-read-recently-played`) | A cada 30 minutos via Symfony Scheduler | Últimas 50 faixas tocadas (minutos estimados pelo intervalo entre reproduções, ver abaixo) |
 | **Importação de Arquivo** | Upload de `.json` ou `.zip` (`StreamingHistory*.json` / `Audio_*.json`) | Manual / sob demanda | Histórico exato em milissegundos (`msPlayed`) de até toda a conta |
 
 ### Sincronizar agora
 - Com a conta conectada, o painel tem um botão discreto (ícone de atualizar) que roda na hora a mesma coleta da rotina de 30 minutos, só para a conta do usuário.
 - `POST /api/v1/spotify/sincronizar` (`SincronizarAgoraSpotifyService` → `ColetarHistoricoRecenteSpotifyService::executarParaConta`) devolve `totalColetadas`, `totalNovas` e `totalDuplicadas`, mostrados num aviso.
 - Se a API do Spotify falhar, a coleta devolve zero, igual à rotina agendada. O motivo fica só no log.
+
+### Tempo ouvido nas reproduções da API
+- A API de "tocadas recentemente" não informa quanto da música foi ouvido, só o momento em que ela terminou (`played_at`).
+- O tempo ouvido é o intervalo entre o fim da reprodução anterior e o fim desta, limitado à duração da faixa (`EstimarTempoReproduzidoSpotifyService`). A reprodução anterior pode vir de qualquer fonte e é buscada no banco quando está fora do lote.
+- Exemplo: música de 4 min, a anterior terminou 2 min antes, entram 2 min. Se o intervalo ficar abaixo de 30 s, ela não conta como stream.
+- A primeira música de uma sessão (sem reprodução anterior próxima) e intervalos com pausa ficam limitados à duração da faixa, então podem contar a música inteira.
+- Quando o arquivo de histórico é importado, o `ms_played` real substitui a estimativa.
+- A migration `Version20261106120000` recalculou com a mesma regra as reproduções da API gravadas antes da mudança.
 
 ### Conexão da conta (OAuth)
 - `GET /api/v1/spotify/oauth/url` gera a URL de login do Spotify. `POST /api/v1/spotify/oauth/concluir` recebe `code` e `state` na volta (`/spotify/callback`).

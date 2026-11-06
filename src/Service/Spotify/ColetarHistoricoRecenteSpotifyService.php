@@ -25,6 +25,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         private SpotifyInterface $spotifyClient,
         private ObterTokenValidoSpotifyService $obterTokenValidoSpotifyService,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
+        private EstimarTempoReproduzidoSpotifyService $estimarTempoReproduzidoService,
         private LoggerInterface $logger,
     ) {
     }
@@ -73,9 +74,15 @@ final readonly class ColetarHistoricoRecenteSpotifyService
             return new ResultadoColetaHistoricoSpotifyDTO(0, 0, 0, $cursorAtual);
         }
 
+        $itensOrdenados = $lista->itens;
+        usort(
+            $itensOrdenados,
+            static fn (ItemReproducaoRecenteDTO $a, ItemReproducaoRecenteDTO $b): int => $a->tocadoEm <=> $b->tocadoEm,
+        );
+
         /** @var array<int, string> $chavesPorItem */
         $chavesPorItem = [];
-        foreach ($lista->itens as $indice => $item) {
+        foreach ($itensOrdenados as $indice => $item) {
             $chavesPorItem[$indice] = ReproducaoSpotify::gerarChaveDeduplicacao(
                 $item->codigoFaixa,
                 $item->nomeFaixa,
@@ -95,14 +102,25 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         $totalNovas = 0;
         $totalDuplicadas = 0;
         $maiorTimestampMs = $lista->cursorAfterMs;
+        $fimReproducaoAnterior = $this->reproducaoSpotifyRepository->buscarUltimaTocadaAntesDe(
+            $conta->usuario(),
+            $itensOrdenados[0]->tocadoEm,
+        );
 
-        foreach ($lista->itens as $indice => $item) {
+        foreach ($itensOrdenados as $indice => $item) {
             $chave = $chavesPorItem[$indice];
             $timestampItemMs = (int) ($item->tocadoEm->getTimestamp() * 1000);
 
             if (null === $maiorTimestampMs || $timestampItemMs > $maiorTimestampMs) {
                 $maiorTimestampMs = $timestampItemMs;
             }
+
+            $msReproduzidos = $this->estimarTempoReproduzidoService->estimar(
+                $item->duracaoMs,
+                $fimReproducaoAnterior,
+                $item->tocadoEm,
+            );
+            $fimReproducaoAnterior = $item->tocadoEm;
 
             if (isset($mapaChavesExistentes[$chave]) || isset($chavesProcessadasNoLote[$chave])) {
                 ++$totalDuplicadas;
@@ -120,7 +138,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
                 demaisArtistas: !empty($item->demaisArtistas) ? $item->demaisArtistas : null,
                 album: $item->nomeAlbum,
                 duracaoMs: $item->duracaoMs > 0 ? $item->duracaoMs : null,
-                msReproduzidos: $item->duracaoMs,
+                msReproduzidos: $msReproduzidos,
                 tocadaEm: $item->tocadoEm,
                 fonte: FonteReproducaoSpotify::Api,
             );

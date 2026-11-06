@@ -501,3 +501,23 @@
     - `web/features/spotify/components/SecaoCapsulaSonora.tsx`
     - `web/features/spotify/components/SecaoHojeSemana.tsx`
     - `web/features/spotify/Spotify.tsx`
+
+---
+
+### 🟡 Melhoria 115 — Minutos Reais nas Músicas Coletadas pela API do Spotify
+
+- **Status**: Publicado, falta validar
+- **Data**: 06 de novembro de 2026
+- **Problema**:
+  - A coleta automática (rotina de 30 min e botão "Sincronizar agora") gravava a duração inteira da faixa como tempo ouvido, porque a API não informa quanto foi ouvido. Uma música de 4 min ouvida por 2 somava 4 min, e uma pulada aos 20 s contava como stream.
+- **Solução**:
+  - O tempo ouvido passa a ser o intervalo entre o fim da reprodução anterior e o fim desta (`played_at`), limitado à duração da faixa. As reproduções do lote são ordenadas e a anterior ao lote vem do banco.
+  - Abaixo de 30 s a reprodução continua gravada, mas deixa de contar como stream, como no Spotify.
+  - Migration de dados recalcula as reproduções da API já gravadas com a mesma regra (função `LAG` por usuário).
+  - Limite conhecido: a primeira música de uma sessão e intervalos com pausa contam até a duração da faixa.
+- **Arquivos**:
+  - `src/Service/Spotify/EstimarTempoReproduzidoSpotifyService.php` (novo)
+  - `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`
+  - `src/Repository/ReproducaoSpotifyRepository.php` (`buscarUltimaTocadaAntesDe`)
+  - `migrations/Version20261106120000.php` (novo)
+  - `documentation/funcionalidades/SPOTIFY.md`

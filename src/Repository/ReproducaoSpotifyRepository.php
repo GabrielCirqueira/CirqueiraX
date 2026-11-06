@@ -78,6 +78,22 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         return $resultado;
     }
 
+    public function buscarUltimaTocadaAntesDe(Usuario $usuario, DateTimeImmutable $momento): ?DateTimeImmutable
+    {
+        /** @var ReproducaoSpotify|null $anterior */
+        $anterior = $this->createQueryBuilder('r')
+            ->andWhere('r.usuario = :usuario')
+            ->andWhere('r.tocadaEm < :momento')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('momento', $momento)
+            ->orderBy('r.tocadaEm', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $anterior?->tocadaEm();
+    }
+
     public function apagarPorUsuarioEFonte(Usuario $usuario, FonteReproducaoSpotify $fonte): int
     {
         /** @var int $resultado */
