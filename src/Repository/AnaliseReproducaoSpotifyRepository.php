@@ -39,10 +39,11 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             'SELECT MAX(r.nome_faixa) AS nome_faixa, MAX(r.artista_principal) AS artista, MAX(r.codigo_faixa) AS codigo_faixa,
-                MAX(r.album) AS album, COUNT(*) AS streams, SUM(r.ms_reproduzidos) AS ms
+                MAX(r.album) AS album, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
             FROM reproducao_spotify r
-            WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte %s
+            WHERE r.usuario_id = :usuarioId %s
             GROUP BY %s, %s
+            HAVING streams > 0
             ORDER BY streams DESC, ms DESC
             LIMIT %d',
             $filtros,
@@ -65,10 +66,11 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             'SELECT MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista,
-                COUNT(*) AS streams, SUM(r.ms_reproduzidos) AS ms
+                SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
             FROM reproducao_spotify r
-            WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte %s
+            WHERE r.usuario_id = :usuarioId %s
             GROUP BY %s
+            HAVING streams > 0
             ORDER BY %s
             LIMIT %d',
             $filtros,
@@ -92,11 +94,12 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             "WITH faixas AS (
                 SELECT LOWER(TRIM(r.album)) AS chave_album, %s AS chave_artista,
                     MAX(r.album) AS album, MAX(r.artista_principal) AS artista, MAX(r.nome_faixa) AS nome_faixa,
-                    MAX(r.codigo_faixa) AS codigo_faixa, COUNT(*) AS streams, SUM(r.ms_reproduzidos) AS ms
+                    MAX(r.codigo_faixa) AS codigo_faixa, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
                 FROM reproducao_spotify r
-                WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte
+                WHERE r.usuario_id = :usuarioId
                     AND r.album <> '' AND r.album <> 'Desconhecido' %s
                 GROUP BY chave_album, chave_artista, %s
+                HAVING streams > 0
             ), ranqueadas AS (
                 SELECT f.*,
                     ROW_NUMBER() OVER (PARTITION BY chave_album, chave_artista ORDER BY streams DESC, ms DESC) AS ordem,
@@ -141,7 +144,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             self::CHAVE_ARTISTA,
             self::CHAVE_FAIXA,
             self::CHAVE_ARTISTA,
-            self::DATA_LOCAL,
+            $periodo->expressaoData(),
             $filtros,
         ), $parametros);
 
@@ -274,7 +277,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte %s
             ORDER BY dia ASC',
-            self::DATA_LOCAL,
+            $periodo->expressaoData(),
             $filtros,
         ), $parametros);
 
@@ -296,7 +299,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             GROUP BY dia
             ORDER BY ms DESC
             LIMIT 1',
-            self::DATA_LOCAL,
+            $periodo->expressaoData(),
             $filtros,
         ), $parametros);
 
@@ -329,7 +332,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             GROUP BY dia, %s, %s
             ORDER BY streams DESC, dia DESC
             LIMIT 1',
-            self::DATA_LOCAL,
+            $periodo->expressaoData(),
             $filtros,
             self::CHAVE_FAIXA,
             self::CHAVE_ARTISTA,
@@ -366,7 +369,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             WHERE r.usuario_id = :usuarioId %2$s
             GROUP BY ano, mes
             ORDER BY ano ASC, mes ASC',
-            self::DATA_LOCAL,
+            $periodo->expressaoData(),
             $filtros,
         ), $parametros);
 
@@ -396,10 +399,11 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             'WITH mensal AS (
-                SELECT YEAR(%1$s) AS ano, MONTH(%1$s) AS mes, %2$s AS chave, COUNT(*) AS streams, SUM(r.ms_reproduzidos) AS ms
+                SELECT YEAR(%1$s) AS ano, MONTH(%1$s) AS mes, %2$s AS chave, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
                 FROM reproducao_spotify r
-                WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte
+                WHERE r.usuario_id = :usuarioId
                 GROUP BY ano, mes, chave
+                HAVING streams > 0
             ), ranqueado AS (
                 SELECT m.*, ROW_NUMBER() OVER (PARTITION BY ano, mes ORDER BY streams DESC, ms DESC) AS posicao
                 FROM mensal m
@@ -407,7 +411,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             SELECT ano, mes, posicao FROM ranqueado
             WHERE chave = %3$s AND posicao <= %4$d
             ORDER BY ano ASC, mes ASC',
-            self::DATA_LOCAL,
+            PeriodoAnaliseSpotifyDTO::expressaoDataCalendario(),
             $chave,
             $alvo,
             $tamanhoTopo,
@@ -435,10 +439,11 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $linha = $this->consultarLinha(sprintf(
             'WITH totais AS (
-                SELECT %1$s AS chave, COUNT(*) AS streams, SUM(r.ms_reproduzidos) AS ms
+                SELECT %1$s AS chave, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
                 FROM reproducao_spotify r
-                WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte
+                WHERE r.usuario_id = :usuarioId
                 GROUP BY chave
+                HAVING streams > 0
             ), ranqueado AS (
                 SELECT chave, ROW_NUMBER() OVER (ORDER BY streams DESC, ms DESC) AS posicao FROM totais
             )
@@ -468,7 +473,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId %s",
             self::CHAVE_FAIXA,
-            self::DATA_LOCAL,
+            PeriodoAnaliseSpotifyDTO::expressaoDataCalendario(),
             $filtros,
         ), $parametros);
 

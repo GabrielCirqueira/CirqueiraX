@@ -652,3 +652,31 @@
   - A invalidação ao concluir ignora a consulta de status da importação. O resultado fica salvo, a tela mostra o resumo e o polling para.
 - **Arquivos**:
   - `web/features/spotify/hooks/useImportacaoSpotify.ts`
+
+---
+
+### ✅ Melhoria 120 — Métricas do Spotify Seguindo as Regras do Próprio Spotify
+
+- **Status**: Concluído
+- **Data**: 06 de novembro de 2026
+- **Problema**:
+  - Os minutos do mês não batiam com o app do Spotify. O CirqueiraX fechava o mês no horário de Brasília, e o Spotify fecha em UTC. Em abril, maio e junho de 2026 o sistema mostrava 15.254, 10.540 e 10.776 minutos; o Spotify mostra 15.387, 10.766 e 10.956.
+  - Nos rankings, os minutos só somavam as reproduções de 30 s ou mais. O Spotify soma todo o tempo ouvido.
+  - Na Cápsula, a "faixa mais repetida no dia" contava também as puladas antes de 30 s.
+- **Solução**:
+  - Mês e ano em UTC na Cápsula, rankings, evolução mensal, resumo do ano, recordes, descobertas e detalhes de artista e música.
+  - Dias dentro desses períodos agrupados em UTC, para a soma dos dias bater com o total do mês.
+  - Minutos dos rankings somando todas as reproduções; stream continua contando a partir de 30 s.
+  - Hora do dia, dia da semana, "Hoje", "Últimos N dias" e intervalo personalizado continuam no horário de Brasília, porque o Spotify não tem regra para eles.
+- **Validação** (ambiente descartável com o histórico estendido real): abril, maio e junho de 2026 ficaram com 15.392, 10.786 e 10.957 minutos. Os 16 endpoints de análise responderam 200.
+- **Arquivos**:
+  - `src/DataObject/Spotify/PeriodoMesSpotifyDTO.php`
+  - `src/DataObject/Spotify/Analise/PeriodoAnaliseSpotifyDTO.php`
+  - `src/Repository/AnaliseReproducaoSpotifyRepository.php`
+  - `src/Repository/ReproducaoSpotifyRepository.php`
+  - `src/Service/Spotify/ObterEvolucaoMensalSpotifyService.php`
+  - `src/Service/Spotify/ObterRecordesSpotifyService.php`
+  - `src/Service/Spotify/ObterResumoHojeSemanaCuriosidadesService.php`
+  - `src/Service/Spotify/ObterResumoIntervaloPersonalizadoService.php`
+  - `src/Service/Spotify/ObterRetrospectivaAnualSpotifyService.php`
+  - `documentation/funcionalidades/SPOTIFY.md`

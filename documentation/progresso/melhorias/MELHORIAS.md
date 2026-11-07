@@ -136,3 +136,4 @@
 | M118 | Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis) | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-118--redesign-do-tema-escuro-e-design-system-inspirado-no-spotify-fundo-suave-cards-matte-profundo-badges-em-pílula-e-bordas-sutis) |
 | M118 | Importação do Histórico Estendido Funcionando com Arquivos Grandes | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-118--importação-do-histórico-estendido-funcionando-com-arquivos-grandes) |
 | M119 | Tela de Importação do Spotify Presa em "Processando" | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-119--tela-de-importação-do-spotify-presa-em-processando) |
+| M120 | Métricas do Spotify Seguindo as Regras do Próprio Spotify | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-120--métricas-do-spotify-seguindo-as-regras-do-próprio-spotify) |

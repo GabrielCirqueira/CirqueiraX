@@ -30,6 +30,8 @@ final readonly class PeriodoAnaliseSpotifyDTO
     private const int DIAS_PADRAO = 30;
     private const int DIAS_MAXIMO = 3650;
     private const string FORMATO_SQL = 'Y-m-d H:i:s';
+    private const string DATA_UTC_SQL = 'r.tocada_em';
+    private const string DATA_LOCAL_SQL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
 
     public function __construct(
         public TipoPeriodoAnaliseSpotify $tipo,
@@ -42,7 +44,7 @@ final readonly class PeriodoAnaliseSpotifyDTO
     {
         $tipo = TipoPeriodoAnaliseSpotify::tryFrom((string) $request->query->get('periodo', 'dias'))
             ?? TipoPeriodoAnaliseSpotify::Dias;
-        $agora = self::agoraLocal();
+        $agora = self::agoraCalendario();
         $ano = $request->query->getInt('ano', (int) $agora->format('Y'));
         $mes = $request->query->getInt('mes', (int) $agora->format('n'));
 
@@ -61,7 +63,7 @@ final readonly class PeriodoAnaliseSpotifyDTO
 
     public static function doAno(int $ano): self
     {
-        $inicio = new DateTimeImmutable(sprintf('%04d-01-01 00:00:00', $ano), self::fuso());
+        $inicio = new DateTimeImmutable(sprintf('%04d-01-01 00:00:00', $ano), self::fusoCalendario());
 
         return new self(TipoPeriodoAnaliseSpotify::Ano, $inicio, $inicio->modify('+1 year'), sprintf('Ano de %d', $ano));
     }
@@ -69,7 +71,7 @@ final readonly class PeriodoAnaliseSpotifyDTO
     public static function doMes(int $ano, int $mes): self
     {
         $mesValido = max(1, min(12, $mes));
-        $inicio = new DateTimeImmutable(sprintf('%04d-%02d-01 00:00:00', $ano, $mesValido), self::fuso());
+        $inicio = new DateTimeImmutable(sprintf('%04d-%02d-01 00:00:00', $ano, $mesValido), self::fusoCalendario());
 
         return new self(
             TipoPeriodoAnaliseSpotify::Mes,
@@ -102,9 +104,33 @@ final readonly class PeriodoAnaliseSpotifyDTO
         return new DateTimeImmutable('now', self::fuso());
     }
 
+    public static function agoraCalendario(): DateTimeImmutable
+    {
+        return new DateTimeImmutable('now', self::fusoCalendario());
+    }
+
     public static function fuso(): DateTimeZone
     {
         return new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_HORARIO_PADRAO);
+    }
+
+    public static function fusoCalendario(): DateTimeZone
+    {
+        return new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_CALENDARIO_SPOTIFY);
+    }
+
+    public static function expressaoDataCalendario(): string
+    {
+        return self::DATA_UTC_SQL;
+    }
+
+    public function expressaoData(): string
+    {
+        if (null === $this->inicioLocal || PeriodoMesSpotifyDTO::FUSO_CALENDARIO_SPOTIFY === $this->inicioLocal->getTimezone()->getName()) {
+            return self::DATA_UTC_SQL;
+        }
+
+        return self::DATA_LOCAL_SQL;
     }
 
     public static function utcParaIsoLocal(?string $dataUtc): ?string

@@ -39,7 +39,7 @@ final readonly class ObterRecordesSpotifyService
             totais: $this->analiseRepository->calcularTotais($usuario, $todos),
             sequencias: $this->calcularSequenciasService->calcular(
                 $this->analiseRepository->listarDiasOuvidos($usuario, $todos),
-                PeriodoAnaliseSpotifyDTO::agoraLocal(),
+                PeriodoAnaliseSpotifyDTO::agoraCalendario(),
             ),
             diaRecorde: $this->analiseRepository->buscarDiaRecorde($usuario, $todos),
             mesRecorde: $meses[0] ?? null,

@@ -154,8 +154,8 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $sql = "
             SELECT 
-                YEAR(CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')) as ano,
-                MONTH(CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')) as mes,
+                YEAR(r.tocada_em) as ano,
+                MONTH(r.tocada_em) as mes,
                 COUNT(*) as total_reproducoes,
                 ROUND(SUM(r.ms_reproduzidos) / 60000) as total_minutos
             FROM reproducao_spotify r
@@ -227,8 +227,8 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $sql = "
             SELECT 
-                DATE(CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')) as data_local,
-                DAY(CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')) as dia,
+                DATE(r.tocada_em) as data_local,
+                DAY(r.tocada_em) as dia,
                 COALESCE(ROUND(SUM(r.ms_reproduzidos) / 60000), 0) as minutos
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
@@ -284,14 +284,13 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 r.nome_faixa,
                 r.artista_principal,
                 MAX(r.album) as album,
-                COUNT(*) as total_streams,
+                SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms,
                 MAX(r.tocada_em) as mais_recente_em
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-              AND r.ms_reproduzidos >= :corteStreamMs
             GROUP BY 
                 CASE 
                     WHEN r.codigo_faixa IS NOT NULL AND r.codigo_faixa != '' THEN r.codigo_faixa 
@@ -299,6 +298,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 END,
                 r.nome_faixa,
                 r.artista_principal
+            HAVING total_streams > 0
             ORDER BY total_streams DESC, total_ms DESC, mais_recente_em DESC
             LIMIT :limite
         ";
@@ -361,14 +361,14 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 r.nome_faixa,
                 MAX(r.codigo_faixa) as codigo_faixa,
                 MAX(r.album) as album,
-                COUNT(*) as total_streams,
+                SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
               AND r.artista_principal = :artista
               {$wherePeriodo}
-              AND r.ms_reproduzidos >= :corteStreamMs
             GROUP BY r.nome_faixa
+            HAVING total_streams > 0
             ORDER BY total_streams DESC, total_ms DESC
             LIMIT :limite
         ";
@@ -408,14 +408,14 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             SELECT 
                 r.artista_principal,
                 MAX(r.codigo_artista_principal) as codigo_artista,
-                COUNT(*) as total_streams,
+                SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-              AND r.ms_reproduzidos >= :corteStreamMs
             GROUP BY r.artista_principal
+            HAVING total_streams > 0
             ORDER BY total_streams DESC, total_ms DESC
             LIMIT :limite
         ";
@@ -497,14 +497,13 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 r.nome_faixa,
                 r.artista_principal,
                 MAX(r.album) as album,
-                COUNT(*) as total_streams,
+                SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms,
                 MAX(r.tocada_em) as mais_recente_em
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-              AND r.ms_reproduzidos >= :corteStreamMs
             GROUP BY 
                 CASE 
                     WHEN r.codigo_faixa IS NOT NULL AND r.codigo_faixa != '' THEN r.codigo_faixa 
@@ -512,6 +511,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 END,
                 r.nome_faixa,
                 r.artista_principal
+            HAVING total_streams > 0
             ORDER BY total_streams DESC, total_ms DESC, mais_recente_em DESC
             LIMIT :limite
         ";
@@ -559,14 +559,14 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             SELECT 
                 r.artista_principal,
                 MAX(r.codigo_artista_principal) as codigo_artista,
-                COUNT(*) as total_streams,
+                SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-              AND r.ms_reproduzidos >= :corteStreamMs
             GROUP BY r.artista_principal
+            HAVING total_streams > 0
             ORDER BY total_streams DESC, total_ms DESC
             LIMIT :limite
         ";
@@ -664,7 +664,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         // 3. Dia mais longo
         $sqlDiaLongo = "
             SELECT 
-                DATE(CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')) as data_local,
+                DATE(r.tocada_em) as data_local,
                 ROUND(SUM(r.ms_reproduzidos) / 60000) as minutos
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
@@ -688,12 +688,13 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             SELECT 
                 r.nome_faixa,
                 r.artista_principal,
-                DATE(CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')) as data_local,
+                DATE(r.tocada_em) as data_local,
                 COUNT(*) as vezes
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
+              AND r.ms_reproduzidos >= :corteStreamMs
             GROUP BY 
                 data_local,
                 CASE 
@@ -706,7 +707,10 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             LIMIT 1
         ";
         /** @var array{nome_faixa: string, artista_principal: string, data_local: string, vezes: int|string}|false $linhaRepetida */
-        $linhaRepetida = $conn->executeQuery($sqlRepetida, $params)->fetchAssociative();
+        $linhaRepetida = $conn->executeQuery($sqlRepetida, [
+            ...$params,
+            'corteStreamMs' => AnaliseReproducaoSpotifyRepository::CORTE_STREAM_MS,
+        ])->fetchAssociative();
         $faixaRepetidaNome = null;
         $faixaRepetidaArtista = null;
         $faixaRepetidaVezes = 0;
@@ -748,9 +752,9 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         $linhaTotalMinutos = $conn->executeQuery($sqlTotalMinutos, $params)->fetchAssociative();
         $totalMinutosMes = false !== $linhaTotalMinutos ? (int) $linhaTotalMinutos['total_minutos'] : 0;
 
-        $agoraLocal = (new DateTimeImmutable())->setTimezone(new \DateTimeZone(PeriodoMesSpotifyDTO::FUSO_HORARIO_PADRAO));
+        $agoraCalendario = PeriodoMesSpotifyDTO::agoraCalendario();
         $diasNoMes = (int) (new DateTimeImmutable(sprintf('%04d-%02d-01', $periodo->ano(), $periodo->mes())))->format('t');
-        $diasDecorridos = $periodo->isMesCorrente() ? max(1, (int) $agoraLocal->format('j')) : $diasNoMes;
+        $diasDecorridos = $periodo->isMesCorrente() ? max(1, (int) $agoraCalendario->format('j')) : $diasNoMes;
         $mediaDiaria = (int) round($totalMinutosMes / $diasDecorridos);
 
         $variacaoMediaDiaria = null;

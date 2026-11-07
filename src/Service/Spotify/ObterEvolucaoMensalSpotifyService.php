@@ -28,7 +28,7 @@ final readonly class ObterEvolucaoMensalSpotifyService
     private function calcular(Usuario $usuario, ?int $meses): EvolucaoMensalSpotifyDTO
     {
         $quantidade = max(1, min(self::MESES_MAXIMO, $meses ?? self::MESES_PADRAO));
-        $agora = PeriodoAnaliseSpotifyDTO::agoraLocal();
+        $agora = PeriodoAnaliseSpotifyDTO::agoraCalendario();
         $inicioMesAtual = $agora->modify('first day of this month')->setTime(0, 0);
         $inicioJanela = $inicioMesAtual->modify(sprintf('-%d months', $quantidade - 1));
         $amanha = $agora->setTime(0, 0)->modify('+1 day');
