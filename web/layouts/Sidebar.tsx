@@ -15,6 +15,7 @@ import {
   Music,
   PenLine,
   Radio,
+  ScanText,
   Sun,
   UploadCloud,
   User,
@@ -38,7 +39,13 @@ const navItems = [
   { href: '/transcricoes', label: 'Transcrições', icon: AudioLines, cor: 'cirqueira.teal.300' },
   { href: '/prints', label: 'Prints & Capturas', icon: Camera, cor: 'cirqueira.yellow.300' },
   { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine, cor: 'cirqueira.rose.400' },
-  { href: '/upload-manual', label: 'Upload Manual', icon: UploadCloud, cor: 'cirqueira.orange.300' },
+  { href: '/extrair-texto', label: 'Extrair Texto', icon: ScanText, cor: 'cirqueira.purple.400' },
+  {
+    href: '/upload-manual',
+    label: 'Upload Manual',
+    icon: UploadCloud,
+    cor: 'cirqueira.orange.300',
+  },
   { href: '/google-fotos', label: 'Google Fotos', icon: Images, cor: 'cirqueira.blue.300' },
 ]
 

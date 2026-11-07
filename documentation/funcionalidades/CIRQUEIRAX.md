@@ -78,6 +78,7 @@ Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.m
 | `/livros-audio/:uuid` | Leitor de Livro em Áudio | [LIVROS_AUDIO.md](LIVROS_AUDIO.md) |
 | `/prints` | Prints & Capturas | [PRINTS.md](PRINTS.md) |
 | `/editor-imagem` | Editor de Imagem | [EDITOR_IMAGEM.md](EDITOR_IMAGEM.md) |
+| `/extrair-texto` | Extrair Texto | [EXTRAIR_TEXTO.md](EXTRAIR_TEXTO.md) |
 | `/upload-manual` | Upload Manual | [UPLOAD_MANUAL.md](UPLOAD_MANUAL.md) |
 | `/google-fotos` | Google Fotos | [GOOGLE_FOTOS.md](GOOGLE_FOTOS.md) |
 

@@ -693,3 +693,23 @@
   - `web/features/dashboard/components/AtividadesRecentes.tsx`
   - `web/features/dashboard/components/StatusIntegracoes.tsx`
   - `documentation/progresso/melhorias/MELHORIAS.md`, `documentation/progresso/melhorias/MELHORIAS_6.md`
+
+---
+
+### ✅ Melhoria 123 — Página para Extrair Texto de Imagens
+
+- **Status**: Concluído
+- **Data**: 07 de novembro de 2026
+- **Problema**:
+  - Para pegar o texto de um print era preciso digitar tudo à mão ou usar um serviço externo.
+- **Solução**:
+  - Nova página `/extrair-texto`, no menu como **Extrair Texto**. Colar uma imagem com Ctrl+V (ou arrastar, ou escolher um arquivo) lê o texto na hora e já copia para a área de transferência.
+  - OCR feito no navegador com `tesseract.js` 7, em português e inglês. Sem backend e sem salvar nada.
+  - O leitor é criado uma vez e reaproveitado. Na primeira leitura o navegador baixa os dados do CDN e depois usa o cache.
+  - O texto aparece num campo editável ao lado da imagem, com progresso durante a leitura e botão para copiar de novo.
+- **Arquivos**:
+  - `web/features/extrair-texto/` (página, hooks, componentes e utilitário)
+  - `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
+  - `package.json`, `package-lock.json`
+  - `documentation/funcionalidades/EXTRAIR_TEXTO.md`, `documentation/funcionalidades/CIRQUEIRAX.md`, `documentation/funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md`
+

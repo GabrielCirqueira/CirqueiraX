@@ -174,6 +174,10 @@ Você escolhe entre 8 cores e 3 espessuras, e o editor lembra suas preferências
 
 > O original nunca é alterado. Ao salvar, o sistema cria uma **nova mídia**, que mantém a origem e a data da imagem original.
 
+### Extrair Texto
+
+Cole uma imagem com Ctrl+V e o texto dela é lido na hora, já indo para a área de transferência. Funciona só no navegador, em português e inglês, sem salvar nada. Detalhes em [EXTRAIR_TEXTO.md](EXTRAIR_TEXTO.md).
+
 ### Upload Manual
 
 Serve para enviar arquivos que já estão no seu dispositivo.
