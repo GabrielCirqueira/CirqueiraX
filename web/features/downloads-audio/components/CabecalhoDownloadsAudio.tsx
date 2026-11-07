@@ -20,7 +20,7 @@ export const CabecalhoDownloadsAudio = memo(function CabecalhoDownloadsAudio({
         <HStack gap={2.5} flexWrap="wrap">
           <Box
             p={2}
-            borderRadius="8px"
+            borderRadius="full"
             bg="cirqueira.brand.500/15"
             color="cirqueira.brand.400"
             display="inline-flex"
@@ -63,7 +63,7 @@ export const CabecalhoDownloadsAudio = memo(function CabecalhoDownloadsAudio({
           borderColor="border.subtle"
           px={3}
           py={1.5}
-          borderRadius="8px"
+          borderRadius="full"
           fontSize="xs"
           color="fg.subtle"
           display={{ base: 'none', md: 'flex' }}

@@ -100,22 +100,23 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
             <Text fontSize="sm" fontWeight="bold" color="fg" letterSpacing="tight">
               {titulo}
             </Text>
-            <Badge
-              size="sm"
-              variant="subtle"
-              colorPalette="green"
-              display="inline-flex"
-              alignItems="center"
-              gap={1}
-              borderRadius="full"
+            <HStack
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
               px={2.5}
-              py={0.5}
+              py={1}
+              borderRadius="full"
+              fontSize="xs"
+              color="fg.muted"
+              alignItems="center"
+              gap={1.5}
             >
-              <CheckCircle2 size={12} />
-              <Text as="span" fontSize="10px">
+              <Box w={1.5} h={1.5} borderRadius="full" bg="cirqueira.brand.500" />
+              <Text as="span" fontSize="11px" fontWeight="medium">
                 Pipeline Ativo
               </Text>
-            </Badge>
+            </HStack>
           </HStack>
         </HStack>
 

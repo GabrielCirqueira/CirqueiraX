@@ -428,7 +428,13 @@ function renderTheme(palettes, ns) {
     .map((scale) => renderSemanticScale(ns, scale))
     .join(',\n')
 
-  return `import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
+  return `import {
+  createSystem,
+  defaultConfig,
+  defineConfig,
+  defineRecipe,
+  defineSlotRecipe,
+} from '@chakra-ui/react'
 
 export const PALETTE_NAME = '${ns}' as const
 
@@ -436,8 +442,106 @@ export function paletteToken(scale: string, shade: number | string) {
   return \`\${PALETTE_NAME}.\${scale}.\${shade}\`
 }
 
+const badgeRecipe = defineRecipe({
+  className: 'chakra-badge',
+  base: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '1',
+    fontWeight: 'medium',
+    letterSpacing: 'tight',
+    borderRadius: 'full',
+    userSelect: 'none',
+    px: '2.5',
+    py: '0.5',
+    borderWidth: '1px',
+    borderColor: 'transparent',
+  },
+  variants: {
+    variant: {
+      subtle: {
+        bg: {
+          _light: 'bg.muted',
+          _dark: 'bg.muted',
+        },
+        color: {
+          _light: 'colorPalette.fg',
+          _dark: 'colorPalette.fg',
+        },
+        borderColor: {
+          _light: 'border.subtle',
+          _dark: 'border.subtle',
+        },
+      },
+      surface: {
+        bg: {
+          _light: 'bg.muted',
+          _dark: 'bg.subtle',
+        },
+        color: 'colorPalette.fg',
+        borderColor: 'border.subtle',
+      },
+      outline: {
+        bg: 'transparent',
+        color: 'colorPalette.fg',
+        borderColor: 'border.subtle',
+      },
+      solid: {
+        bg: 'colorPalette.solid',
+        color: 'colorPalette.contrast',
+      },
+    },
+    size: {
+      xs: {
+        px: '2',
+        py: '0.2',
+        fontSize: '10px',
+      },
+      sm: {
+        px: '2.5',
+        py: '0.5',
+        fontSize: '11px',
+      },
+      md: {
+        px: '3',
+        py: '1',
+        fontSize: 'xs',
+      },
+      lg: {
+        px: '3.5',
+        py: '1.5',
+        fontSize: 'sm',
+      },
+    },
+  },
+  defaultVariants: {
+    variant: 'subtle',
+    size: 'sm',
+  },
+})
+
+const cardSlotRecipe = defineSlotRecipe({
+  slots: ['root', 'header', 'body', 'footer', 'title', 'description'],
+  base: {
+    root: {
+      borderRadius: '8px',
+      bg: 'bg.panel',
+      borderWidth: '1px',
+      borderColor: 'border.subtle',
+      overflow: 'hidden',
+      transition: 'background 0.2s ease, border-color 0.2s ease, transform 0.2s ease',
+    },
+  },
+})
+
 const config = defineConfig({
   theme: {
+    recipes: {
+      badge: badgeRecipe,
+    },
+    slotRecipes: {
+      card: cardSlotRecipe,
+    },
     tokens: {
       fonts: {
         heading: { value: 'Poppins, ui-sans-serif, system-ui, sans-serif' },
@@ -448,12 +552,12 @@ const config = defineConfig({
         ${ns}: {
 ${colors},
           spotify: {
-            fundo: { value: '#121212' },
-            cartao: { value: '#1F1F1F' },
-            cartaoElevado: { value: '#252525' },
-            textoPrincipal: { value: '#FFFFFF' },
-            textoSecundario: { value: '#B3B3B3' },
-            textoDesabilitado: { value: '#6A6A6A' },
+            fundo: { value: '#121315' },
+            cartao: { value: '#1E2023' },
+            cartaoElevado: { value: '#272A2E' },
+            textoPrincipal: { value: '#F4F5F6' },
+            textoSecundario: { value: '#9CA3AF' },
+            textoDesabilitado: { value: '#6B7280' },
             verde: { value: '#1ED760' },
             azul: { value: '#539DF5' },
             amarelo: { value: '#FEE44F' },
@@ -463,6 +567,30 @@ ${colors},
     },
     semanticTokens: {
       colors: {
+        bg: {
+          DEFAULT: { value: { _light: '{colors.white}', _dark: '#121315' } },
+          canvas: { value: { _light: '#f8f9fa', _dark: '#121315' } },
+          panel: { value: { _light: '{colors.white}', _dark: '#1E2023' } },
+          subtle: { value: { _light: '{colors.${ns}.grey.50}', _dark: '#181A1C' } },
+          muted: { value: { _light: '{colors.${ns}.grey.100}', _dark: '#272A2E' } },
+          emphasized: { value: { _light: '{colors.${ns}.grey.200}', _dark: '#32363C' } },
+        },
+        border: {
+          DEFAULT: { value: { _light: '{colors.${ns}.grey.200}', _dark: 'rgba(255, 255, 255, 0.12)' } },
+          muted: { value: { _light: '{colors.${ns}.grey.100}', _dark: 'rgba(255, 255, 255, 0.05)' } },
+          subtle: { value: { _light: '{colors.${ns}.grey.50}', _dark: 'rgba(255, 255, 255, 0.08)' } },
+          emphasized: { value: { _light: '{colors.${ns}.grey.300}', _dark: 'rgba(255, 255, 255, 0.20)' } },
+        },
+        fg: {
+          DEFAULT: { value: { _light: '{colors.${ns}.grey.950}', _dark: '#F4F5F6' } },
+          muted: { value: { _light: '{colors.${ns}.grey.600}', _dark: '#9CA3AF' } },
+          subtle: { value: { _light: '{colors.${ns}.grey.400}', _dark: '#6B7280' } },
+        },
+        acento: {
+          amarelo: { value: '#FEE44F' },
+          verde: { value: '#1ED760' },
+          azul: { value: '#539DF5' },
+        },
 ${semantics},
         spotify: {
           fundo: { value: '{colors.${ns}.spotify.fundo}' },
