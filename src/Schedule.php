@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Message\ExpirarAudiosAntigosMessage;
+use App\Message\ExpirarAudiosTranscricaoMessage;
 use App\Message\LimparVideosAntigosMessage;
 use App\Message\SincronizarHistoricoSpotifyMessage;
 use Symfony\Component\Scheduler\Attribute\AsSchedule;
@@ -27,6 +28,7 @@ class Schedule implements ScheduleProviderInterface
                 RecurringMessage::every('30 minutes', new SincronizarHistoricoSpotifyMessage()),
                 RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7)),
                 RecurringMessage::every('1 day', new ExpirarAudiosAntigosMessage()),
+                RecurringMessage::every('1 hour', new ExpirarAudiosTranscricaoMessage()),
             );
     }
 }

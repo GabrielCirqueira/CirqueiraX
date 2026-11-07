@@ -50,6 +50,10 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/livros-audio/LeitorLivroAudio'))}
           />
           <Route
+            path="transcricoes"
+            lazy={() => lazyWithRetry(() => import('@/features/transcricoes/Transcricoes'))}
+          />
+          <Route
             path="prints"
             lazy={() => lazyWithRetry(() => import('@/features/prints/Prints'))}
           />
@@ -64,6 +68,14 @@ const router = createBrowserRouter(
           <Route
             path="google-fotos"
             lazy={() => lazyWithRetry(() => import('@/features/google-fotos/GoogleFotos'))}
+          />
+          <Route
+            path="spotify/artista"
+            lazy={() => lazyWithRetry(() => import('@/features/spotify/DetalheArtistaSpotify'))}
+          />
+          <Route
+            path="spotify/musica"
+            lazy={() => lazyWithRetry(() => import('@/features/spotify/DetalheMusicaSpotify'))}
           />
           <Route
             path="spotify/callback"

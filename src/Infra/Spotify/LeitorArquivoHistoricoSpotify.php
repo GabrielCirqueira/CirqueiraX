@@ -312,6 +312,8 @@ final readonly class LeitorArquivoHistoricoSpotify implements LeitorArquivoHisto
             msReproduzidos: $msReproduzidos,
             tocadaEm: $tocadaEm,
             fonte: FonteReproducaoSpotify::ImportacaoEstendida,
+            pulada: $this->extrairBooleano($registro['skipped'] ?? null),
+            aleatorio: $this->extrairBooleano($registro['shuffle'] ?? null),
         );
     }
 
@@ -369,5 +371,17 @@ final readonly class LeitorArquivoHistoricoSpotify implements LeitorArquivoHisto
             fonte: FonteReproducaoSpotify::ImportacaoBasica,
         );
     }
-}
 
+    private function extrairBooleano(mixed $valor): ?bool
+    {
+        if (is_bool($valor)) {
+            return $valor;
+        }
+
+        if (1 === $valor || 0 === $valor) {
+            return 1 === $valor;
+        }
+
+        return null;
+    }
+}

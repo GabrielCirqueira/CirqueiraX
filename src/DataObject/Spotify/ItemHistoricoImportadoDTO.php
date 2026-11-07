@@ -17,6 +17,8 @@ final readonly class ItemHistoricoImportadoDTO
         public int $msReproduzidos,
         public DateTimeImmutable $tocadaEm,
         public FonteReproducaoSpotify $fonte,
+        public ?bool $pulada = null,
+        public ?bool $aleatorio = null,
     ) {
     }
 

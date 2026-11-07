@@ -190,6 +190,7 @@ final class SpotifyController extends DefaultController
             dataInicio: $resultado->dataInicio(),
             dataFim: $resultado->dataFim(),
             mapaImagens: $resultado->mapaImagens(),
+            topAlbuns: $resultado->topAlbuns(),
         ));
     }
 

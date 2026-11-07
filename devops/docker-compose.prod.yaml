@@ -20,6 +20,7 @@ services:
       - downloads_prod:/var/www/html/var/downloads
       - audios_prod:/var/www/html/var/audios
       - livros_prod:/var/www/html/var/livros
+      - transcricoes_prod:/var/www/html/var/transcricoes
       - thumbnails_prod:/var/www/html/var/cache/thumbnails
       - ../var/cookies:/var/www/html/var/cookies
     healthcheck:
@@ -54,6 +55,7 @@ volumes:
   downloads_prod:
   audios_prod:
   livros_prod:
+  transcricoes_prod:
   thumbnails_prod:
 
 networks:

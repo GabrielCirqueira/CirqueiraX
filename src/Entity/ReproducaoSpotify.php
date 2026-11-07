@@ -63,6 +63,12 @@ class ReproducaoSpotify
     #[ORM\Column(type: 'string', length: 255)]
     private string $chaveDeduplicacao;
 
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $pulada = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $aleatorio = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private \DateTimeImmutable $criadoEm;
 
@@ -169,6 +175,29 @@ class ReproducaoSpotify
     public function criadoEm(): \DateTimeImmutable
     {
         return $this->criadoEm;
+    }
+
+    public function pulada(): ?bool
+    {
+        return $this->pulada;
+    }
+
+    public function aleatorio(): ?bool
+    {
+        return $this->aleatorio;
+    }
+
+    public function registrarComportamento(?bool $pulada, ?bool $aleatorio): self
+    {
+        if (null !== $pulada) {
+            $this->pulada = $pulada;
+        }
+
+        if (null !== $aleatorio) {
+            $this->aleatorio = $aleatorio;
+        }
+
+        return $this;
     }
 
     public function podeSerSubstituidaPor(FonteReproducaoSpotify $novaFonte): bool

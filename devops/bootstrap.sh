@@ -15,7 +15,7 @@ fi
 
 # ── 1. Permissões de var/ ────────────────────────────────────────────────────
 if [[ -d /var/www/html/var ]]; then
-  mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/downloads /var/www/html/var/audios /var/www/html/var/storage
+  mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/var/downloads /var/www/html/var/audios /var/www/html/var/transcricoes /var/www/html/var/tmp /var/www/html/var/storage
   if [[ $(id -u) -eq 0 ]]; then
     chown -R www-data:www-data /var/www/html/var
     log "Ensured cache, log, downloads and storage directories exist with proper ownership."
@@ -93,6 +93,7 @@ fi
 if [[ -f /var/www/html/bin/console ]] && [[ -f /var/www/html/vendor/autoload.php ]]; then
   if [[ "${APP_ENV:-dev}" == "prod" ]]; then
     log "Warming up Symfony cache (prod)."
+    [[ $(id -u) -eq 0 ]] && chown -R www-data:www-data /var/www/html/var
     WARMUP_OUT=$(su -s /bin/sh www-data -c "php /var/www/html/bin/console cache:warmup" 2>&1) || {
       log "FATAL: Cache warmup failed. Output:"
       echo "$WARMUP_OUT" | while IFS= read -r line; do log "  $line"; done

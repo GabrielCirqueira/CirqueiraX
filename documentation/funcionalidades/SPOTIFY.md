@@ -14,6 +14,9 @@ A funcionalidade do Spotify traz de volta para o usuário a experiência autênt
 5. **Histórico Diário**: gráfico de distribuição de minutos ouvidos por cada dia do mês.
 6. **Métricas de Hoje e Últimos 7 Dias** com alternância de períodos e abas de faixas/artistas.
 7. **Curiosidades**: horário de pico, dia mais frequente, dia mais longo, faixa mais repetida em um único dia e novos artistas descobertos.
+8. **Tocando agora**: cartão ao vivo com capa, progresso e quantas vezes a música já foi ouvida.
+9. **Recordes e sequências**, **evolução por mês**, **hábitos** (mapa dia × hora e concentração do gosto), **descobertas** e **resumo do ano** (detalhes na seção 7).
+10. **Detalhe de artista e de música** e **imagem da Cápsula** para compartilhar.
 
 ---
 
@@ -88,3 +91,33 @@ Caso deseje carregar seus meses passados para a Cápsula:
 - O logotipo do Spotify é exibido no rodapé e no painel de conexão em estrita conformidade com as diretrizes de marca (área de respiro, cores oficiais e links diretos para abertura no aplicativo com `Abrir no Spotify`).
 - Nenhuma alteração, recorte ou sobreposição de texto é aplicada às capas de álbuns originais.
 
+
+---
+
+## 7. Análises
+
+Todas usam o fuso `America/Sao_Paulo` e o corte de 30 s para stream. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
+
+| Seção | O que mostra | Regra |
+| :--- | :--- | :--- |
+| Tocando agora | Faixa atual, capa, progresso, vezes ouvida e primeira vez | `GET /me/player/currently-playing`. Consulta de novo perto do fim da faixa; sem conta conectada não aparece |
+| Recordes e sequências | Sequência atual e maior sequência, dia e mês recorde, música mais ouvida, artista com mais horas, maior repetição num dia | Sequência atual conta até ontem quando ainda não houve música hoje |
+| Evolução por mês | Barras de 12, 24 ou 60 meses e comparação do mês atual | Compara até o mesmo dia do mês passado e do mesmo mês no ano anterior |
+| Hábitos | Mapa dia × hora, % do tempo nos 5 artistas do topo, músicas ouvidas uma vez, streams por música, pulos e aleatório | Pulos e aleatório só contam reproduções vindas do histórico estendido |
+| Descobertas | Artistas novos, músicas novas, redescobertas e obsessões | Novo = primeira reprodução dentro do período. Redescoberta = volta após 90 dias sem ouvir. Obsessão = 8 ou mais streams em 7 dias |
+| Resumo do ano | Totais, top 5 de artistas, músicas e álbuns, mês mais intenso, momento favorito, maior sequência, descobertas e gráfico do ano | Ano em andamento aparece marcado |
+| Detalhe | Totais, primeira e última vez, evolução mensal, meses no top 5, músicas e álbuns | `/spotify/artista?nome=` e `/spotify/musica?nome=&artista=` |
+| Rankings | Hoje até 90 dias, mês, ano, sempre e personalizado; abas de músicas, artistas e álbuns | Álbum agrupado por nome e artista |
+
+### Pulos e aleatório
+- Vêm dos campos `skipped` e `shuffle` do histórico estendido (`Streaming_History_Audio_*.json`) e ficam em `reproducao_spotify.pulada` e `reproducao_spotify.aleatorio`. IP, país e plataforma não são guardados.
+- A API e o arquivo básico não trazem esses campos. Reimportar o histórico estendido preenche as reproduções já gravadas.
+
+### Gêneros
+- Não há análise por gênero: desde as mudanças de fevereiro, a API devolve a lista de gêneros dos artistas vazia.
+
+### Cache
+- As análises ficam em cache por usuário por até 6 h (a chave muda a cada dia) e são invalidadas quando chegam reproduções novas (coleta ou importação) ou quando a conta é desconectada.
+
+### Imagem da Cápsula
+- O botão **Gerar imagem** monta no navegador um PNG 1080×1920 com o mês, os números, as 5 músicas e o artista do topo. As capas aparecem inteiras, sem corte, e a imagem leva o ícone do Spotify com "Dados do Spotify".

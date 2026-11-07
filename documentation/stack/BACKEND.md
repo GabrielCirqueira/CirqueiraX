@@ -141,6 +141,35 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `PUT` | `/livros-audio/meta` | Altera a meta diária |
 | `GET` | `/livros-audio/disco` | Espaço livre e nível do alerta |
 
+### Transcrições
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/transcricoes` | Lista paginada (`busca`, `filtro`, `pagina`, `limite`) |
+| `GET` | `/transcricoes/resumo` | Números da conta e previsão da fila |
+| `POST` | `/transcricoes` | Envia um áudio (multipart `arquivo`, `idioma`) |
+| `GET` | `/transcricoes/{uuid}` | Detalhe com texto e trechos |
+| `PATCH` | `/transcricoes/{uuid}` | Renomeia e favorita |
+| `POST` | `/transcricoes/{uuid}/reprocessar` | Transcreve de novo (`idioma` opcional) |
+| `DELETE` | `/transcricoes/{uuid}` | Apaga a transcrição e o áudio |
+| `GET` | `/transcricoes/{uuid}/audio` | Áudio original (aceita `?token=`) |
+
+### Spotify: análises
+
+Períodos aceitos por `habitos` e `descobertas`: `periodo` = `todos`, `ano` (`ano`), `mes` (`ano`, `mes`), `dias` (`dias`) ou `intervalo`. Resultados ficam em cache por usuário (`CacheAnaliseSpotifyService`, tag `spotify_analise_{id}`), invalidado em coleta, importação e desconexão.
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/spotify/artistas/detalhe?artista=` | Detalhe do artista (404 sem reproduções) |
+| `GET` | `/spotify/musicas/detalhe?nome=&artista=` | Detalhe da música (404 sem reproduções) |
+| `GET` | `/spotify/habitos` | Mapa dia × hora, concentração, pulos e aleatório |
+| `GET` | `/spotify/recordes` | Sequências, recordes e totais de todos os tempos |
+| `GET` | `/spotify/evolucao?meses=` | Minutos e streams por mês (12, 24 ou 60) e comparação com o mesmo mês |
+| `GET` | `/spotify/descobertas` | Artistas e músicas novos, redescobertas e obsessões |
+| `GET` | `/spotify/retrospectiva/{ano}` | Resumo do ano |
+| `GET` | `/spotify/tocando-agora` | Faixa atual (sem cache) |
+| `GET` | `/spotify/ranking?tipo=todos` | Ranking de todos os tempos; a resposta traz também `topAlbuns` |
+
 ### Categorias e regras
 
 | Método | Rota | Descrição |

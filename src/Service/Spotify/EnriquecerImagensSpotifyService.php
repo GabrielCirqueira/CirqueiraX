@@ -61,6 +61,7 @@ final readonly class EnriquecerImagensSpotifyService
         $imagensPorChave = [];
         $urlsSpotifyPorChave = [];
         $novasEntidades = [];
+        $mensagensPendentes = [];
 
         foreach ($dadosPorChave as $chave => $dados) {
             if (isset($imagensExistentes[$chave])) {
@@ -105,7 +106,7 @@ final readonly class EnriquecerImagensSpotifyService
             $this->imagemRepository->salvar($nova, flush: false);
             $novasEntidades[] = $nova;
 
-            $this->messageBus->dispatch(new BuscarImagemSpotifyMessage(
+            $mensagensPendentes[] = new BuscarImagemSpotifyMessage(
                 usuarioId: (int) $usuario->getId(),
                 tipo: $tipo,
                 nome: $nome,
@@ -113,11 +114,15 @@ final readonly class EnriquecerImagensSpotifyService
                 codigoSpotify: $codigo,
                 duracaoMs: $duracaoMs,
                 prioridade: $prioridade,
-            ));
+            );
         }
 
         if (!empty($novasEntidades)) {
             $this->imagemRepository->flush();
+        }
+
+        foreach ($mensagensPendentes as $mensagem) {
+            $this->messageBus->dispatch($mensagem);
         }
 
         return new MapaImagensSpotifyDTO($imagensPorChave, $urlsSpotifyPorChave);

@@ -524,7 +524,57 @@
 
 ---
 
-### ✅ Melhoria 116 — Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte, Badges em Pílula e Bordas Sutis)
+### 🟡 Melhoria 116 — Página de Transcrição de Áudios
+
+- **Status**: Publicado, falta validar
+- **Data**: 06 de novembro de 2026
+- **Objetivo**:
+  - Enviar vários áudios de uma vez e ver cada um sendo transcrito em tempo real, com o texto salvo na conta e o áudio apagado 7 dias depois.
+- **Solução**:
+  - Nova página `/transcricoes` (menu "Transcrições"): envio múltiplo com arrastar e soltar, fila com progresso e tempo restante, texto aparecendo ao vivo, toasts de conclusão, estatísticas da conta, busca no texto, filtros e favoritas.
+  - Painel da transcrição: player sincronizado com destaque do trecho falado, trechos clicáveis, visão em trechos ou texto corrido, procurar no texto, copiar, exportar `.txt`, `.md`, `.srt` e `.vtt`, renomear, transcrever de novo em outro idioma e apagar.
+  - Motor local `whisper.cpp` (modelo `ggml-small-q5_1`) compilado na imagem de produção; nada sai do servidor. Fila Messenger própria (`transcricao`, 1 worker).
+  - Rotina horária apaga os áudios com mais de 7 dias e marca como erro transcrições presas há mais de 6 h. O texto fica no banco.
+  - `bootstrap.sh` passa a ajustar o dono de `var/` antes do cache warmup, o que corrige o reinício do container no primeiro boot depois de migrations.
+- **Arquivos**:
+  - Backend: `src/Entity/Transcricao.php`, `src/Repository/TranscricaoRepository.php`, `src/Controller/Transcricao/`, `src/Service/Transcricao/`, `src/DataObject/Transcricao/`, `src/Exception/Transcricao/`, `src/Enum/StatusTranscricao.php`, `src/Enum/IdiomaTranscricao.php`, `src/Enum/FiltroListagemTranscricao.php`, `src/Interface/TranscritorAudioInterface.php`, `src/Interface/ArmazenamentoTranscricaoInterface.php`, `src/Infra/Transcricao/`, `src/Infra/Storage/ArmazenamentoTranscricaoClient.php`, `src/Message/TranscreverAudioMessage.php`, `src/Message/ExpirarAudiosTranscricaoMessage.php`, `src/MessageHandler/` (2 novos), `src/Serializer/TranscricaoSerializer.php`, `src/Schedule.php`, `migrations/Version20261106213627.php`
+  - Config e infra: `config/services.yaml`, `config/packages/messenger.yaml`, `devops/php/Dockerfile.prod`, `devops/docker-compose.prod.yaml`, `devops/php/supervisord-prod.conf`, `devops/supervisord.conf`, `devops/bootstrap.sh`
+  - Frontend: `web/features/transcricoes/`, `web/App.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
+  - Documentação: `documentation/funcionalidades/TRANSCRICOES.md` (novo)
+
+---
+
+### 🟡 Melhoria 117 — Análises Completas do Spotify: Detalhes, Recordes, Hábitos, Descobertas e Resumo do Ano
+
+- **Status**: Publicado, falta validar
+- **Data**: 06 de novembro de 2026
+- **Objetivo**:
+  - Aproveitar melhor o histórico guardado: ver cada artista e música em detalhe, saber quando e quanto se escuta e ter rankings de qualquer período, inclusive de todos os tempos.
+- **Solução**:
+  - **Detalhe de artista e de música** (`/spotify/artista?nome=` e `/spotify/musica?nome=&artista=`): streams, minutos, primeira e última vez, dias diferentes, posição de todos os tempos, evolução mês a mês (streams ou minutos), meses em que esteve no top 5, recorde em um dia, taxa de pulos e aleatório, músicas e álbuns mais ouvidos do artista. Os nomes nos rankings levam a essas páginas.
+  - **Tocando agora**: cartão ao vivo com capa, barra de progresso e quantas vezes a música já foi ouvida (`/me/player/currently-playing`, escopo já concedido). Consulta de novo perto do fim da faixa.
+  - **Recordes e sequências**: sequência atual e maior sequência de dias seguidos, dia e mês recorde, música mais ouvida da vida, artista com mais horas e maior repetição num dia.
+  - **Evolução por mês**: gráfico de 12 meses, 24 meses ou 5 anos com média, e o mês atual comparado ao mês passado e ao mesmo mês do ano anterior até o mesmo dia.
+  - **Hábitos**: mapa dia da semana × hora, concentração do gosto (fatia dos 5 artistas do topo), músicas ouvidas uma única vez, proporção de repetição, taxa de pulos e de aleatório.
+  - **Novas descobertas**: listas com capa de artistas novos, músicas novas, redescobertas (voltou depois de 90 dias) e obsessões (8 ou mais streams em 7 dias).
+  - **Rankings**: opção "Sempre" (todos os tempos) e aba "Álbuns" com capa no ranking principal.
+  - **Resumo do ano** no estilo Wrapped, com top artistas, músicas e álbuns, mês mais intenso, momento favorito, maior sequência, descobertas e gráfico do ano.
+  - **Imagem da Cápsula**: botão "Gerar imagem" cria um PNG 1080×1920 do mês, com capas inteiras sem corte e atribuição "Dados do Spotify", para baixar ou compartilhar.
+  - **Pulos e aleatório**: a importação do histórico estendido passa a guardar `skipped` e `shuffle` (campos `pulada` e `aleatorio`). IP, país e plataforma continuam ignorados. Reimportar o arquivo preenche as reproduções já existentes.
+  - **Gêneros**: não implementado. A API devolve a lista de gêneros dos artistas vazia desde as mudanças de fevereiro.
+  - **Cache**: as análises ficam em cache por usuário (6 h, vira no dia seguinte) e são invalidadas a cada coleta, importação ou desconexão. Com ~100 mil reproduções, a primeira consulta leva de 0,5 a 6 s e as seguintes menos de 0,15 s.
+- **Correções encontradas no caminho**:
+  - Os workers `messenger` (fila async) e `scheduler` rodavam como root e criavam a pasta do cache da aplicação como root, então o PHP-FPM (www-data) não conseguia gravar nenhum item de cache. Os dois passam a rodar como `www-data`, igual aos demais workers.
+  - A busca de capas em segundo plano podia tentar gravar a mesma imagem duas vezes (erro 500 por chave duplicada no ranking). As mensagens agora só são enviadas depois de gravar as imagens novas.
+- **Arquivos**:
+  - Backend: `src/Controller/Spotify/SpotifyAnaliseController.php` (novo), `src/Repository/AnaliseReproducaoSpotifyRepository.php` (novo), `src/DataObject/Spotify/Analise/` (novo), `src/DataObject/Spotify/TocandoAgoraSpotifyDTO.php` (novo), `src/Enum/TipoPeriodoAnaliseSpotify.php` (novo), `src/Service/Spotify/` (`AplicarImagensAnaliseSpotifyService`, `CacheAnaliseSpotifyService`, `CalcularSequenciasSpotifyService`, `ObterDetalheArtistaSpotifyService`, `ObterDetalheMusicaSpotifyService`, `ObterHabitosSpotifyService`, `ObterRecordesSpotifyService`, `ObterEvolucaoMensalSpotifyService`, `ObterDescobertasSpotifyService`, `ObterRetrospectivaAnualSpotifyService`, `ObterTocandoAgoraSpotifyService` novos; `ObterResumoIntervaloPersonalizadoService`, `EnriquecerImagensSpotifyService`, `DeduplicarEImportarHistoricoSpotifyService`, `ColetarHistoricoRecenteSpotifyService`, `DesconectarSpotifyService` alterados), `src/Entity/ReproducaoSpotify.php`, `src/DataObject/Spotify/ItemHistoricoImportadoDTO.php`, `src/DataObject/Spotify/ResumoIntervaloComImagensDTO.php`, `src/Infra/Spotify/LeitorArquivoHistoricoSpotify.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Interface/SpotifyInterface.php`, `src/Exception/Spotify/SpotifyException.php`, `src/Serializer/SpotifyResumoSerializer.php`, `src/Controller/Spotify/SpotifyController.php`, `migrations/Version20261106230359.php` (novo)
+  - Infra: `devops/php/supervisord-prod.conf`
+  - Frontend: `web/features/spotify/DetalheArtistaSpotify.tsx` e `DetalheMusicaSpotify.tsx` (novos), `web/features/spotify/components/` (`CartaoTocandoAgora`, `SecaoRecordes`, `SecaoEvolucaoMensal`, `GraficoMensalSpotify`, `SecaoHabitos`, `MapaHorariosSpotify`, `SecaoDescobertas`, `SecaoRetrospectiva`, `ModalImagemCapsula`, `HeroDetalheSpotify`, `PainelEvolucaoDetalhe`, `EstadoDetalheSpotify`, `CapaSpotify`, `CartaoMetricaSpotify`, `CabecalhoSecaoSpotify`, `SeletorPeriodoAnalise` novos; `SecaoHojeSemana`, `ItensRankingSpotify`, `SecaoCapsulaSonora` alterados), `web/features/spotify/hooks/` (`useAnaliseSpotify`, `useTocandoAgoraSpotify`, `useImagensItensSpotify` novos), `web/features/spotify/utils/analiseSpotify.ts` e `imagemCapsula.ts` (novos), `web/features/spotify/api.ts`, `web/features/spotify/types.ts`, `web/features/spotify/Spotify.tsx`, `web/App.tsx`
+  - Documentação: `documentation/funcionalidades/SPOTIFY.md`, `documentation/FUNCIONALIDADES_DO_SISTEMA.md`, `documentation/stack/BACKEND.md`, `documentation/stack/FRONTEND.md`
+
+---
+
+### ✅ Melhoria 118 — Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis)
 
 - **Status**: Concluído
 - **Data**: 06 de novembro de 2026

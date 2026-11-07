@@ -30,7 +30,8 @@
 | [funcionalidades/GOOGLE_FOTOS.md](funcionalidades/GOOGLE_FOTOS.md) | OAuth, envio, álbuns, duplicados e histórico de envios |
 | [funcionalidades/SYNCTHING.md](funcionalidades/SYNCTHING.md) | Pasta sincronizada, integração e réplica no Android |
 | [funcionalidades/CATEGORIAS_E_REGRAS.md](funcionalidades/CATEGORIAS_E_REGRAS.md) | Categorias, regras de origem, distribuição e troca de categoria |
-| [funcionalidades/RETENCAO_E_LIMPEZA.md](funcionalidades/RETENCAO_E_LIMPEZA.md) | Limpeza de vídeos, expiração de áudios e rebaixar |
+| [funcionalidades/TRANSCRICOES.md](funcionalidades/TRANSCRICOES.md) | Transcrição de áudios com Whisper local, fila ao vivo, exportação e áudio apagado em 7 dias |
+| [funcionalidades/RETENCAO_E_LIMPEZA.md](funcionalidades/RETENCAO_E_LIMPEZA.md) | Limpeza de vídeos, expiração de áudios (MP3 e transcrições) e rebaixar |
 
 ---
 

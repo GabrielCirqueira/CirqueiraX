@@ -70,6 +70,12 @@ Para que o download automatizado de vídeos sociais (TikTok, Twitter/X, Instagra
 O endpoint `/api/v1/media-itens/{uuid}/thumbnail` grava miniaturas processadas em `var/cache/thumbnails/`. Para evitar que recreações de container (`docker compose up -d --force-recreate`) descartassem as capas em cache, foi criado o volume nomeado:
 - `thumbnails_prod:/var/www/html/var/cache/thumbnails`.
 
+### 2.2.1. Transcrições (`Dockerfile.prod` e `docker-compose.prod.yaml`)
+- O estágio `whisper-builder` compila o `whisper.cpp` v1.7.6 e baixa o modelo `ggml-small-q5_1`; a imagem final copia `/opt/whisper` e instala `libstdc++` e `libgomp`.
+- Os áudios enviados ficam no volume `transcricoes_prod:/var/www/html/var/transcricoes` (apagados em 7 dias).
+- O Supervisor roda o worker `messenger-transcricao` (1 processo) para a fila `transcricao`.
+- O `bootstrap.sh` ajusta o dono de `var/` antes do cache warmup, evitando o reinício do container no primeiro boot após migrations.
+
 ### 2.3. Isolamento da Pasta de Sincronização (`MEDIA_STORAGE_PATH`)
 Seguindo o design de desacoplamento, os arquivos binários de mídia residem **fora do repositório Git**:
 - **Caminho no Host:** `/<caminho_base>/cirqueirax/sync_media`

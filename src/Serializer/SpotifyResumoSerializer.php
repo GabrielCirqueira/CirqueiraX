@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
+use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
 use App\DataObject\Spotify\CuriosidadesSpotifyDTO;
 use App\DataObject\Spotify\ItemRankingArtistaDTO;
 use App\DataObject\Spotify\ItemRankingMusicaDTO;
@@ -29,6 +30,8 @@ final readonly class SpotifyResumoSerializer
     }
 
     /**
+     * @param list<AlbumAnaliseSpotifyDTO> $topAlbuns
+     *
      * @return array<string, mixed>
      */
     public function serializarIntervaloComPeriodo(
@@ -37,11 +40,13 @@ final readonly class SpotifyResumoSerializer
         string $dataInicio,
         string $dataFim,
         ?MapaImagensSpotifyDTO $mapaImagens = null,
+        array $topAlbuns = [],
     ): array {
         $dados = $this->serializarIntervalo($intervalo, $mapaImagens);
         $dados['rotuloPeriodo'] = $rotuloPeriodo;
         $dados['dataInicio'] = $dataInicio;
         $dados['dataFim'] = $dataFim;
+        $dados['topAlbuns'] = array_map(static fn (AlbumAnaliseSpotifyDTO $album): array => $album->paraArray(), $topAlbuns);
 
         return $dados;
     }

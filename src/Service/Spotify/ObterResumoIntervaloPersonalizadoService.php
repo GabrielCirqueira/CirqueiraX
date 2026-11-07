@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Service\Spotify;
 
+use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
+use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\DataObject\Spotify\ItemRankingArtistaDTO;
 use App\DataObject\Spotify\ItemRankingMusicaDTO;
 use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\DataObject\Spotify\ResumoIntervaloComImagensDTO;
 use App\DataObject\Spotify\ResumoIntervaloSpotifyDTO;
 use App\Entity\Usuario;
+use App\Repository\AnaliseReproducaoSpotifyRepository;
 use App\Repository\ReproducaoSpotifyRepository;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -19,6 +22,7 @@ final readonly class ObterResumoIntervaloPersonalizadoService
     public function __construct(
         private ReproducaoSpotifyRepository $reproducaoRepository,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
+        private AnaliseReproducaoSpotifyRepository $analiseRepository,
     ) {}
 
     public function executar(
@@ -41,6 +45,7 @@ final readonly class ObterResumoIntervaloPersonalizadoService
             'mes' => $this->resolverIntervaloMes($agoraLocal, $fusoLocal, $ano, $mes),
             'ano' => $this->resolverIntervaloAno($agoraLocal, $fusoLocal, $ano),
             'personalizado' => $this->resolverIntervaloPersonalizado($agoraLocal, $fusoLocal, $inicio, $fim),
+            'todos' => $this->resolverIntervaloTodos($agoraLocal, $fusoLocal),
             default => $this->resolverIntervaloDias($agoraLocal, $fusoLocal, $dias ?? 7),
         };
 
@@ -97,6 +102,16 @@ final readonly class ObterResumoIntervaloPersonalizadoService
             ];
         }
 
+        $topAlbuns = $this->analiseRepository->listarRankingAlbuns(
+            $usuario,
+            'todos' === $tipo ? PeriodoAnaliseSpotifyDTO::todos() : PeriodoAnaliseSpotifyDTO::entre($inicioLocal, $fimLocal, $rotuloPeriodo),
+            $limiteSanitizado,
+        );
+
+        foreach ($topAlbuns as $album) {
+            $faixas[] = $album->paraEnriquecimento();
+        }
+
         $mapaImagens = $this->enriquecerImagensService->enriquecerEAgendar(
             usuario: $usuario,
             faixas: $faixas,
@@ -110,7 +125,19 @@ final readonly class ObterResumoIntervaloPersonalizadoService
             dataInicio: $inicioLocal->format('Y-m-d H:i:s'),
             dataFim: $fimLocal->format('Y-m-d H:i:s'),
             mapaImagens: $mapaImagens,
+            topAlbuns: array_map(static fn (AlbumAnaliseSpotifyDTO $album): AlbumAnaliseSpotifyDTO => $album->comImagem($mapaImagens), $topAlbuns),
         );
+    }
+
+    /**
+     * @return array{0: DateTimeImmutable, 1: DateTimeImmutable, 2: DateTimeImmutable, 3: DateTimeImmutable, 4: string}
+     */
+    private function resolverIntervaloTodos(DateTimeImmutable $agoraLocal, DateTimeZone $fusoLocal): array
+    {
+        $inicioLocal = new DateTimeImmutable('2000-01-01 00:00:00', $fusoLocal);
+        $fimLocal = $agoraLocal->setTime(0, 0)->modify('+1 day');
+
+        return [$inicioLocal, $fimLocal, $inicioLocal, $inicioLocal, 'Desde sempre'];
     }
 
     /**

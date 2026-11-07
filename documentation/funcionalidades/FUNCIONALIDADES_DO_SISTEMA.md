@@ -94,6 +94,8 @@ Transforma vídeos em música para você ouvir ou baixar.
 
 Conecte sua conta do Spotify e reviva a antiga **Cápsula Sonora** com o resumo de cada mês: minutos ouvidos, músicas e artistas mais tocados, variedade musical comparada com o mês anterior e histórico diário. Acompanhe também o resumo de hoje e dos últimos 7 dias com curiosidades musicais e exportação em planilha CSV.
 
+A página também mostra a música tocando agora, recordes e sequências de dias, a evolução mês a mês, o mapa de horários, a concentração do gosto, taxa de pulos e de aleatório, descobertas, redescobertas e obsessões, rankings de todos os tempos com álbuns e o resumo do ano. Cada artista e música tem página própria, e a Cápsula do mês pode virar uma imagem para compartilhar.
+
 ### Livros em Áudio
 
 Transforma seus livros em formato PDF em audiolivros interativos com narração por voz neural no idioma do livro (português, inglês, espanhol, francês, italiano ou alemão).
@@ -116,6 +118,20 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 - Áudio e PDF por links assinados de curta duração, sem o login na URL.
 - No Dashboard: continuar ouvindo, tempo ouvido por dia com meta diária e sequência, e quanto os livros ocupam de disco e memória.
 - Baixe as próximas partes para ouvir sem internet.
+
+### Transcrições
+
+Transforma áudios em texto. Jogue vários arquivos de uma vez e veja cada um sendo transcrito na hora.
+
+- Envie vários áudios ou vídeos (MP3, M4A, WAV, OPUS do WhatsApp, MP4...) arrastando para a tela, até 500 MB cada.
+- Cada arquivo entra numa fila e mostra o percentual e o tempo que falta. O texto vai aparecendo enquanto é reconhecido, e um aviso chega quando fica pronto.
+- O idioma é detectado sozinho ou você escolhe entre português, inglês e espanhol.
+- Ouça o áudio com o trecho falado destacado no texto. Clique numa frase para ouvir dali.
+- Veja em trechos com o tempo de cada frase ou em texto corrido com parágrafos, procure palavras dentro do texto, copie ou baixe em TXT, Markdown, SRT ou VTT (legendas).
+- Renomeie, favorite, busque em todas as transcrições e filtre por prontas, em andamento, favoritas ou com erro.
+- Números da conta: horas transcritas, palavras e tempo de leitura.
+- A transcrição roda no próprio servidor, sem enviar o áudio para fora.
+- O texto fica salvo para sempre. O áudio é apagado 7 dias depois do envio; até lá dá para ouvir e transcrever de novo.
 
 ### Prints & Capturas
 

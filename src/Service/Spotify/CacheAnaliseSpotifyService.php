@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service\Spotify;
+
+use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
+use App\Entity\Usuario;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
+
+final readonly class CacheAnaliseSpotifyService
+{
+    private const int VALIDADE_SEGUNDOS = 21600;
+    private const string PREFIXO = 'spotify_analise';
+
+    public function __construct(
+        private TagAwareCacheInterface $cache,
+    ) {}
+
+    /**
+     * @template T
+     *
+     * @param callable(): T $calcular
+     *
+     * @return T
+     */
+    public function lembrar(Usuario $usuario, string $chave, callable $calcular): mixed
+    {
+        $chaveCompleta = sprintf(
+            '%s_%d_%s',
+            self::PREFIXO,
+            (int) $usuario->getId(),
+            md5(PeriodoAnaliseSpotifyDTO::agoraLocal()->format('Y-m-d') . '|' . $chave),
+        );
+
+        return $this->cache->get($chaveCompleta, function (ItemInterface $item) use ($usuario, $calcular): mixed {
+            $item->expiresAfter(self::VALIDADE_SEGUNDOS);
+            $item->tag($this->tag($usuario));
+
+            return $calcular();
+        });
+    }
+
+    public function invalidar(Usuario $usuario): void
+    {
+        $this->cache->invalidateTags([$this->tag($usuario)]);
+    }
+
+    private function tag(Usuario $usuario): string
+    {
+        return sprintf('%s_%d', self::PREFIXO, (int) $usuario->getId());
+    }
+}

@@ -14,6 +14,7 @@ final readonly class DesconectarSpotifyService
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
         private ReproducaoSpotifyRepository $reproducaoSpotifyRepository,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {
     }
 
@@ -25,6 +26,9 @@ final readonly class DesconectarSpotifyService
             $this->contaSpotifyRepository->salvar($conta);
         }
 
-        return $this->reproducaoSpotifyRepository->apagarPorUsuarioEFonte($usuario, FonteReproducaoSpotify::Api);
+        $removidas = $this->reproducaoSpotifyRepository->apagarPorUsuarioEFonte($usuario, FonteReproducaoSpotify::Api);
+        $this->cacheAnalise->invalidar($usuario);
+
+        return $removidas;
     }
 }

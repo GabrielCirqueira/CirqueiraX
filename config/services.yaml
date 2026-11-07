@@ -11,6 +11,9 @@ parameters:
     env(SYNCTHING_API_KEY): ''
     env(YTDLP_COOKIES_PATH): ''
     env(PIPER_MODELOS_DIR): '/opt/piper/vozes'
+    env(WHISPER_EXECUTAVEL): '/opt/whisper/whisper-cli'
+    env(WHISPER_MODELO): '/opt/whisper/modelos/ggml-small-q5_1.bin'
+    env(WHISPER_THREADS): '4'
     env(SPOTIFY_CLIENT_ID): ''
     env(SPOTIFY_CLIENT_SECRET): ''
     env(SPOTIFY_REDIRECT_URI): 'http://127.0.0.1:4012/spotify/callback'
@@ -139,6 +142,19 @@ services:
             $apiKey: '%env(SYNCTHING_API_KEY)%'
 
     App\Interface\SpotifyInterface: '@App\Infra\Spotify\SpotifyClient'
+    App\Interface\TranscritorAudioInterface: '@App\Infra\Transcricao\WhisperCppClient'
+    App\Interface\ArmazenamentoTranscricaoInterface: '@App\Infra\Storage\ArmazenamentoTranscricaoClient'
+
+    App\Infra\Transcricao\WhisperCppClient:
+        arguments:
+            $executavelWhisper: '%env(WHISPER_EXECUTAVEL)%'
+            $caminhoModelo: '%env(WHISPER_MODELO)%'
+            $diretorioTemporario: '%kernel.project_dir%/var/tmp'
+            $threads: '%env(int:WHISPER_THREADS)%'
+
+    App\Infra\Storage\ArmazenamentoTranscricaoClient:
+        arguments:
+            $diretorioBaseTranscricoes: '%kernel.project_dir%/var/transcricoes'
     App\Interface\LeitorArquivoHistoricoSpotifyInterface: '@App\Infra\Spotify\LeitorArquivoHistoricoSpotify'
     App\Interface\ArmazenamentoImportacaoSpotifyInterface: '@App\Infra\Spotify\ArmazenamentoImportacaoSpotifyClient'
 
