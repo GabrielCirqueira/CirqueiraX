@@ -51,19 +51,27 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 ### Regra de Deduplicação e Refinamento
 - Quando um registro importado de arquivo bate no mesmo minuto de uma reprodução coletada via API, o sistema **substitui** a estimativa da API pelo tempo exato registrado pelo arquivo do Spotify (`msPlayed`), marcando a fonte como `arquivo_estendido` ou `arquivo_basico`.
 - Reimportar o mesmo arquivo ou arquivos de períodos sobrepostos é totalmente seguro: registros repetidos são identificados e ignorados sem duplicação.
+- Os horários são comparados em UTC, que é como ficam gravados. A tolerância vale só entre fontes diferentes: 90 s para o arquivo estendido e 180 s para o básico. Dentro da mesma fonte, só a mesma faixa no mesmo segundo é considerada repetida.
+- Ao substituir uma reprodução da coleta, o arquivo estendido também ajusta o horário e a chave para os do arquivo.
+- Registros com 0 ms tocados são descartados.
+- O importador grava em lotes de 500. Para o histórico estendido completo (cerca de 100 mil registros), a importação leva uns 5 minutos.
 
 ---
 
 ## 3. Regras de Negócio da Cápsula Sonora
 
-1. **Corte Mínimo de Stream**: reproduções com duração inferior a 30 segundos (`30.000 ms`) são descartadas e não contam como stream nem pontuam nos rankings, respeitando o padrão oficial da indústria fonográfica e do Spotify.
-2. **Fuso Horário Oficial**: todas as agregações de início e fim de mês e dias são truncadas e calculadas no fuso horário de Brasília (`America/Sao_Paulo`).
-3. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
-4. **Comparação com o Mês Anterior**:
+As métricas seguem sempre as regras do próprio Spotify, para os números baterem com os do app. O CirqueiraX não cria regra própria de contagem.
+
+1. **Stream**: só conta como stream a reprodução com 30 segundos ou mais (`30.000 ms`). Rankings ordenam por streams e só listam o que teve ao menos um stream.
+2. **Minutos**: somam todo o tempo ouvido, inclusive reproduções com menos de 30 s, nos totais e nos rankings.
+3. **Calendário em UTC**: mês e ano começam e terminam em UTC, como no Spotify. Os dias dentro de mês, ano e "desde sempre" (minutos por dia, dia recorde, maior repetição num dia, sequências) também são dias UTC, para a soma dos dias bater com o mês.
+4. **Horário local onde o Spotify não define regra**: hora do dia e dia da semana (mapa de hábitos, horário de pico), "Hoje", "Últimos N dias", "Personalizado" e as datas exibidas seguem o horário de Brasília (`America/Sao_Paulo`).
+5. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
+6. **Comparação com o Mês Anterior**:
    - Variação percentual de músicas distintas: `((músicas_mês_atual - músicas_mês_anterior) / músicas_mês_anterior) * 100`.
    - Variação de ranking (`movimento`): diferença de posições no top 5 em relação ao mês imediatamente anterior.
    - Flag de estreia (`isEstreia`): sinaliza se o artista ou música entrou no top 5 pela primeira vez no histórico recente.
-5. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
+7. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
 
 ---
 
@@ -127,7 +135,7 @@ A página do Spotify (`/spotify` e suas telas de detalhe) é uma **exceção int
 
 ## 7. Análises
 
-Todas usam o fuso `America/Sao_Paulo` e o corte de 30 s para stream. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
+Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia da semana no horário de Brasília, stream a partir de 30 s e minutos somando todo o tempo ouvido. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
 
 | Seção | O que mostra | Regra |
 | :--- | :--- | :--- |

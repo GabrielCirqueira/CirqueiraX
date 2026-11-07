@@ -10,6 +10,8 @@ use App\Entity\ReproducaoSpotify;
 use App\Entity\Usuario;
 use App\Interface\LeitorArquivoHistoricoSpotifyInterface;
 use App\Repository\ReproducaoSpotifyRepository;
+use DateTimeImmutable;
+use DateTimeZone;
 
 final readonly class DeduplicarEImportarHistoricoSpotifyService
 {
@@ -40,6 +42,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
 
             if (count($lote) >= self::TAMANHO_LOTE) {
                 $this->processarLote($lote, $usuario, $totalNovos, $totalIgnorados, $totalSubstituidos);
+                $usuario = $this->reproducaoRepository->obterReferenciaUsuario($usuario);
                 $lote = [];
             }
         }
@@ -83,53 +86,22 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
             }
         }
 
-        $inicio = (new \DateTimeImmutable())->setTimestamp($minTimestamp - self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS);
-        $fim = (new \DateTimeImmutable())->setTimestamp($maxTimestamp + self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS);
+        $existentes = $this->reproducaoRepository->buscarPorIntervaloTempo(
+            $usuario,
+            new DateTimeImmutable('@'.($minTimestamp - self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS)),
+            new DateTimeImmutable('@'.($maxTimestamp + self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS)),
+        );
 
-        $existentes = $this->reproducaoRepository->buscarPorIntervaloTempo($usuario, $inicio, $fim);
-
-        /** @var array<string, true> $chavesNoLote */
-        $chavesNoLote = [];
+        /** @var array<string, ReproducaoSpotify> $existentesPorChave */
+        $existentesPorChave = [];
         foreach ($existentes as $existente) {
-            $chavesNoLote[$existente->chaveDeduplicacao()] = true;
+            $existentesPorChave[$existente->chaveDeduplicacao()] = $existente;
         }
 
+        /** @var array<int, true> $candidatosUsados */
+        $candidatosUsados = [];
+
         foreach ($lote as $item) {
-            $janelaTolerancia = $item->fonte()->isImportacaoEstendida()
-                ? self::JANELA_TOLERANCIA_ESTENDIDA_SEGUNDOS
-                : self::JANELA_TOLERANCIA_BASICA_SEGUNDOS;
-
-            $candidatoEncontrado = null;
-            $itemTimestamp = $item->tocadaEm()->getTimestamp();
-
-            foreach ($existentes as $candidato) {
-                if (!$candidato->isMesmaFaixa($item->codigoFaixa(), $item->nomeFaixa(), $item->artistaPrincipal())) {
-                    continue;
-                }
-
-                $diferencaSegundos = abs($candidato->tocadaEm()->getTimestamp() - $itemTimestamp);
-                if ($diferencaSegundos <= $janelaTolerancia) {
-                    $candidatoEncontrado = $candidato;
-                    break;
-                }
-            }
-
-            if (null !== $candidatoEncontrado) {
-                $candidatoEncontrado->registrarComportamento($item->pulada, $item->aleatorio);
-                if ($candidatoEncontrado->podeSerSubstituidaPor($item->fonte())) {
-                    $candidatoEncontrado->atualizarDeImportacao(
-                        msReproduzidos: $item->msReproduzidos(),
-                        novaFonte: $item->fonte(),
-                        codigoFaixa: $item->codigoFaixa(),
-                        album: $item->album(),
-                    );
-                    $substituidos++;
-                } else {
-                    $ignorados++;
-                }
-                continue;
-            }
-
             $chaveDeduplicacao = ReproducaoSpotify::gerarChaveDeduplicacao(
                 $item->codigoFaixa(),
                 $item->nomeFaixa(),
@@ -137,8 +109,26 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
                 $item->tocadaEm(),
             );
 
-            if (isset($chavesNoLote[$chaveDeduplicacao])) {
-                $ignorados++;
+            $candidatoEncontrado = $existentesPorChave[$chaveDeduplicacao]
+                ?? $this->buscarCandidatoDeOutraFonte($item, $existentes, $candidatosUsados);
+
+            if (null !== $candidatoEncontrado) {
+                $candidatosUsados[spl_object_id($candidatoEncontrado)] = true;
+                $candidatoEncontrado->registrarComportamento($item->pulada, $item->aleatorio);
+                if (!$candidatoEncontrado->podeSerSubstituidaPor($item->fonte())) {
+                    $ignorados++;
+                    continue;
+                }
+
+                $candidatoEncontrado->atualizarDeImportacao(
+                    msReproduzidos: $item->msReproduzidos(),
+                    novaFonte: $item->fonte(),
+                    codigoFaixa: $item->codigoFaixa(),
+                    album: $item->album(),
+                    tocadaEm: $item->fonte()->isImportacaoEstendida() ? $item->tocadaEm() : null,
+                );
+                $existentesPorChave[$candidatoEncontrado->chaveDeduplicacao()] = $candidatoEncontrado;
+                $substituidos++;
                 continue;
             }
 
@@ -161,12 +151,51 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
 
             $this->reproducaoRepository->salvar($novaReproducao, flush: false);
             $existentes[] = $novaReproducao;
-            $chavesNoLote[$chaveDeduplicacao] = true;
+            $existentesPorChave[$chaveDeduplicacao] = $novaReproducao;
+            $candidatosUsados[spl_object_id($novaReproducao)] = true;
             $novos++;
         }
 
         $this->reproducaoRepository->flush();
         $this->reproducaoRepository->limparCache();
         $this->cacheAnalise->invalidar($usuario);
+    }
+
+    /**
+     * @param array<int, ReproducaoSpotify> $existentes
+     * @param array<int, true>              $candidatosUsados
+     */
+    private function buscarCandidatoDeOutraFonte(
+        ItemHistoricoImportadoDTO $item,
+        array $existentes,
+        array $candidatosUsados,
+    ): ?ReproducaoSpotify {
+        $janelaTolerancia = $item->fonte()->isImportacaoEstendida()
+            ? self::JANELA_TOLERANCIA_ESTENDIDA_SEGUNDOS
+            : self::JANELA_TOLERANCIA_BASICA_SEGUNDOS;
+        $itemTimestamp = $item->tocadaEm()->getTimestamp();
+
+        foreach ($existentes as $candidato) {
+            if ($candidato->fonte() === $item->fonte() || isset($candidatosUsados[spl_object_id($candidato)])) {
+                continue;
+            }
+
+            if (!$candidato->isMesmaFaixa($item->codigoFaixa(), $item->nomeFaixa(), $item->artistaPrincipal())) {
+                continue;
+            }
+
+            if (abs($this->timestampGravadoEmUtc($candidato->tocadaEm()) - $itemTimestamp) <= $janelaTolerancia) {
+                return $candidato;
+            }
+        }
+
+        return null;
+    }
+
+    private function timestampGravadoEmUtc(DateTimeImmutable $momento): int
+    {
+        $momentoUtc = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $momento->format('Y-m-d H:i:s'), new DateTimeZone('UTC'));
+
+        return false === $momentoUtc ? $momento->getTimestamp() : $momentoUtc->getTimestamp();
     }
 }

@@ -99,10 +99,7 @@ final readonly class ObterResumoHojeSemanaCuriosidadesService
             topArtistas: $topArtistasSemana,
         );
 
-        $periodoAtual = PeriodoMesSpotifyDTO::criar(
-            (int) $agoraLocal->format('Y'),
-            (int) $agoraLocal->format('m'),
-        );
+        $periodoAtual = PeriodoMesSpotifyDTO::criarDoMesmoAnoMes(PeriodoMesSpotifyDTO::agoraCalendario());
         $periodoAnterior = $periodoAtual->mesAnterior();
 
         $curiosidades = $this->reproducaoRepository->obterCuriosidadesMes($usuario, $periodoAtual, $periodoAnterior);

@@ -574,7 +574,82 @@
 
 ---
 
-### ✅ Melhoria 118 — Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis)
+### ✅ Melhoria 118 — Importação do Histórico Estendido Funcionando com Arquivos Grandes
+
+- **Status**: Concluído (validado em produção: 100.574 lidos, 100.484 novos, 83 substituídos, 7 ignorados, em 3 min 27 s)
+- **Data**: 06 de novembro de 2026
+- **Problema** (achado ao testar a importação com o histórico estendido real, 101 mil registros):
+  - Nenhum arquivo com mais de 500 reproduções terminava. Depois do primeiro lote o importador limpava o EntityManager e o lote seguinte falhava com "Unable to find Usuario entity identifier".
+  - A busca de duplicados montava a janela de horário no fuso de Brasília, mas o horário fica gravado em UTC. A janela ficava 3 h adiantada e deixava escapar reproduções já gravadas, o que gerava erro de chave duplicada.
+  - As reproduções lidas do banco também voltavam deslocadas 3 h, então a tolerância de 90 s nunca casava a coleta automática com o arquivo. A sobreposição entre as duas fontes viraria reprodução duplicada.
+  - A tolerância valia também dentro da mesma fonte e juntava duas reproduções reais da mesma faixa com menos de 90 s de diferença (1.730 casos no histórico real, 130 deles streams).
+  - Quando algo falhava, o EntityManager fechado impedia gravar o motivo, o arquivo era apagado e a nova tentativa mostrava só "arquivo não encontrado".
+  - A primeira música de cada coleta automática recebia a duração inteira, porque a reprodução anterior vinha do banco deslocada 3 h.
+- **Solução**:
+  - Janela de busca e comparação de horários em UTC.
+  - Tolerância de horário só entre fontes diferentes (coleta, arquivo básico e arquivo estendido). Na mesma fonte só a chave exata conta como repetida.
+  - Ao substituir uma reprodução da coleta pelo arquivo estendido, ela passa a usar o horário e a chave do arquivo, então reimportar não duplica.
+  - O usuário é reanexado a cada lote, a importação é buscada de novo antes de concluir e, em caso de erro, o EntityManager é reaberto para gravar o motivo real.
+  - A reprodução anterior usada na estimativa de minutos da coleta é lida em UTC.
+- **Validação** (ambiente descartável, histórico real + 40 reproduções falsas da coleta sobrepostas):
+  - 100.574 registros lidos (335 com 0 ms descartados), 100.527 novos, 7 repetidos exatos ignorados, 40 substituídos. Total final: 100.567, igual ao número de reproduções únicas nos arquivos.
+  - Cerca de 4,5 min e 35 MB de memória no worker. Reimportar o mesmo ZIP não cria nada.
+- **Análise feita antes da importação**:
+  - Os nomes `Streaming_History_Audio_*.json` e `Streaming_History_Video_*.json` já eram aceitos.
+  - O artista do arquivo (`master_metadata_album_artist_name`) é o primeiro artista da faixa, igual ao que a coleta grava. Conferido pela API em 50 faixas, 50 iguais. Trocar a coleta para o artista do álbum pioraria os dados ("Various Artists" em coletâneas).
+- **Arquivos**:
+  - `src/Service/Spotify/DeduplicarEImportarHistoricoSpotifyService.php`
+  - `src/Service/Spotify/ProcessarArquivoImportacaoSpotifyService.php`
+  - `src/Repository/ReproducaoSpotifyRepository.php`
+  - `src/Entity/ReproducaoSpotify.php`
+  - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### ✅ Melhoria 119 — Tela de Importação do Spotify Presa em "Processando"
+
+- **Status**: Concluído
+- **Data**: 06 de novembro de 2026
+- **Problema**:
+  - A importação terminava no servidor em cerca de 3,5 min, mas a tela continuava em "Processando histórico em segundo plano..." para sempre.
+  - Ao receber o status `concluida`, a própria consulta invalidava todas as chaves `['spotify']`, inclusive a dela. O React Query cancelava a requisição em andamento antes de guardar o resultado e disparava outra, que via `concluida` de novo e repetia o ciclo.
+  - Cada volta recarregava todas as consultas pesadas do Spotify (cápsulas, rankings e resumo), o que deixava o MySQL acima de 400% de CPU enquanto a tela ficava aberta.
+- **Solução**:
+  - A invalidação ao concluir ignora a consulta de status da importação. O resultado fica salvo, a tela mostra o resumo e o polling para.
+- **Arquivos**:
+  - `web/features/spotify/hooks/useImportacaoSpotify.ts`
+
+---
+
+### ✅ Melhoria 120 — Métricas do Spotify Seguindo as Regras do Próprio Spotify
+
+- **Status**: Concluído
+- **Data**: 06 de novembro de 2026
+- **Problema**:
+  - Os minutos do mês não batiam com o app do Spotify. O CirqueiraX fechava o mês no horário de Brasília, e o Spotify fecha em UTC. Em abril, maio e junho de 2026 o sistema mostrava 15.254, 10.540 e 10.776 minutos; o Spotify mostra 15.387, 10.766 e 10.956.
+  - Nos rankings, os minutos só somavam as reproduções de 30 s ou mais. O Spotify soma todo o tempo ouvido.
+  - Na Cápsula, a "faixa mais repetida no dia" contava também as puladas antes de 30 s.
+- **Solução**:
+  - Mês e ano em UTC na Cápsula, rankings, evolução mensal, resumo do ano, recordes, descobertas e detalhes de artista e música.
+  - Dias dentro desses períodos agrupados em UTC, para a soma dos dias bater com o total do mês.
+  - Minutos dos rankings somando todas as reproduções; stream continua contando a partir de 30 s.
+  - Hora do dia, dia da semana, "Hoje", "Últimos N dias" e intervalo personalizado continuam no horário de Brasília, porque o Spotify não tem regra para eles.
+- **Validação** (ambiente descartável com o histórico estendido real): abril, maio e junho de 2026 ficaram com 15.392, 10.786 e 10.957 minutos. Os 16 endpoints de análise responderam 200.
+- **Arquivos**:
+  - `src/DataObject/Spotify/PeriodoMesSpotifyDTO.php`
+  - `src/DataObject/Spotify/Analise/PeriodoAnaliseSpotifyDTO.php`
+  - `src/Repository/AnaliseReproducaoSpotifyRepository.php`
+  - `src/Repository/ReproducaoSpotifyRepository.php`
+  - `src/Service/Spotify/ObterEvolucaoMensalSpotifyService.php`
+  - `src/Service/Spotify/ObterRecordesSpotifyService.php`
+  - `src/Service/Spotify/ObterResumoHojeSemanaCuriosidadesService.php`
+  - `src/Service/Spotify/ObterResumoIntervaloPersonalizadoService.php`
+  - `src/Service/Spotify/ObterRetrospectivaAnualSpotifyService.php`
+  - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### ✅ Melhoria 121 — Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis)
 
 - **Status**: Concluído
 - **Data**: 06 de novembro de 2026
@@ -584,7 +659,7 @@
   - Cards pequenos de mídias (`CardVideo`, `CardAudio`, `CardPrint`, `CardMidiaCentral`, `CardLivroAudio`), modais e formulários usavam raios legados misturados de 16px/24px (`2xl`/`xl`/`lg`/`md`), sem coerência visual.
   - Vários componentes continham cores em hexadecimal (`#000000`, `#FFFFFF`, `#22e368`, etc.) e strings cruas de RGB/RGBA em vez dos tokens do tema do sistema.
 - **Solução**:
-  - **Calibração de Superfícies com Alto Contraste no Espectro Preto-Cinza**: Fundo geral (`bg.canvas`, `spotify.fundo`) calibrado para o tom grafite escuro neutro `#121315` (RGB: 18, 19, 21), profundo e confortável sem qualquer desvio ou tonalidade verde/azulada excessiva; cards e painéis (`bg.panel`, `spotify.cartao`) definidos em `#1E2023` (RGB: 30, 32, 35), proporcionando uma separação nítida e marcante de ~6% de luminosidade sobre o canvas; campos de formulários, inputs e estados elevados (`bg.muted`, `cartaoElevado`) definidos em `#272A2E` e estados ativos/hover (`bg.emphasized`) em `#32363C`. Texto principal (`fg.DEFAULT`) calibrado em `#F4F5F6` e texto secundário em `#9CA3AF`.
+  - **Calibração de Superfícies com Alto Contraste no Espectro Preto-Cinza**: Fundo geral (`bg.canvas`) calibrado para o tom grafite escuro neutro `#121315` (RGB: 18, 19, 21), profundo e confortável sem qualquer desvio ou tonalidade verde/azulada excessiva; cards e painéis (`bg.panel`) definidos em `#1E2023` (RGB: 30, 32, 35), proporcionando uma separação nítida e marcante de ~6% de luminosidade sobre o canvas; campos de formulários, inputs e estados elevados (`bg.muted`, `cartaoElevado`) definidos em `#272A2E` e estados ativos/hover (`bg.emphasized`) em `#32363C`. Texto principal (`fg.DEFAULT`) calibrado em `#F4F5F6` e texto secundário em `#9CA3AF`.
   - **Eliminação de Caixas Internas Poluídas nos Cards**: Remoção de caixas internas com bordas pesadas e fundos cinzas dentro do corpo dos cards (em especial o bloco de data/horário no `CardVideo`, que criava um aspecto estranho de botão/input no meio da mídia), substituído por linha tipográfica limpa e sutil com ícones e hover refinados.
   - **Bordas Delimitadas e Neutras**: Bordas refinadas e nítidas em branco translúcido neutro: `border.subtle` (`rgba(255, 255, 255, 0.08)`), `border.muted` (`rgba(255, 255, 255, 0.05)`), `border.DEFAULT` (`rgba(255, 255, 255, 0.12)`) e `border.emphasized` (`rgba(255, 255, 255, 0.20)`), eliminando bordas coloridas invasivas e conferindo profundidade discreta e profissional.
   - **Badges e Pílulas Elegantes**: Receita global de `Badge` (`badgeRecipe`) reformulada com `borderRadius="full"`, fundo neutro escuro matte (`bg.muted`), borda sutil (`border.subtle`) e texto/ícones vibrantes na cor da paleta (`colorPalette.fg`). Fim dos blocos coloridos turvos: todas as badges do sistema (plataformas como YouTube, TikTok, status de pipeline, contagens de mídias e tags) agora seguem o padrão clean de cápsulas refinadas.
@@ -592,7 +667,7 @@
   - **Eliminação de Hexadecimais e RGBA**: Remoção de todos os códigos hexadecimais brutos e cores RGB soltas nos componentes JSX, substituídos integralmente pelos tokens semânticos e paletas do `theme.ts` (`cirqueira.<escala>.<tom>`, `border.subtle`, `blackAlpha.800`, `bg.panel`).
 ---
 
-### ✅ Melhoria 119 — Redesign do Dashboard Geral (Cards Individuais Elevados com Ícones, Barra de Ações Rápidas Expandida e Painéis Modernizados)
+### ✅ Melhoria 122 — Redesign do Dashboard Geral (Cards Individuais Elevados com Ícones, Barra de Ações Rápidas Expandida e Painéis Modernizados)
 
 - **Status**: Concluído
 - **Data**: 07 de novembro de 2026

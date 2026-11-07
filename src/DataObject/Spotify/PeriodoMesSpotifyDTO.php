@@ -7,6 +7,7 @@ namespace App\DataObject\Spotify;
 final readonly class PeriodoMesSpotifyDTO
 {
     public const string FUSO_HORARIO_PADRAO = 'America/Sao_Paulo';
+    public const string FUSO_CALENDARIO_SPOTIFY = 'UTC';
 
     public function __construct(
         private int $ano,
@@ -17,28 +18,26 @@ final readonly class PeriodoMesSpotifyDTO
 
     public static function criar(int $ano, int $mes): self
     {
-        $fuso = new \DateTimeZone(self::FUSO_HORARIO_PADRAO);
-        $utc = new \DateTimeZone('UTC');
-
-        $inicioLocal = new \DateTimeImmutable(sprintf('%04d-%02d-01 00:00:00', $ano, $mes), $fuso);
-        $fimLocal = $inicioLocal->modify('+1 month');
+        $inicioUtc = new \DateTimeImmutable(
+            sprintf('%04d-%02d-01 00:00:00', $ano, $mes),
+            new \DateTimeZone(self::FUSO_CALENDARIO_SPOTIFY),
+        );
 
         return new self(
             ano: $ano,
             mes: $mes,
-            inicioUtc: $inicioLocal->setTimezone($utc),
-            fimUtc: $fimLocal->setTimezone($utc),
+            inicioUtc: $inicioUtc,
+            fimUtc: $inicioUtc->modify('+1 month'),
         );
     }
 
     public static function criarDoMesmoAnoMes(\DateTimeImmutable $dataUtc): self
     {
-        $fuso = new \DateTimeZone(self::FUSO_HORARIO_PADRAO);
-        $dataLocal = $dataUtc->setTimezone($fuso);
+        $dataCalendario = $dataUtc->setTimezone(new \DateTimeZone(self::FUSO_CALENDARIO_SPOTIFY));
 
         return self::criar(
-            (int) $dataLocal->format('Y'),
-            (int) $dataLocal->format('m'),
+            (int) $dataCalendario->format('Y'),
+            (int) $dataCalendario->format('m'),
         );
     }
 
@@ -77,9 +76,14 @@ final readonly class PeriodoMesSpotifyDTO
 
     public function isMesCorrente(): bool
     {
-        $agoraLocal = (new \DateTimeImmutable())->setTimezone(new \DateTimeZone(self::FUSO_HORARIO_PADRAO));
+        $agora = self::agoraCalendario();
 
-        return (int) $agoraLocal->format('Y') === $this->ano && (int) $agoraLocal->format('m') === $this->mes;
+        return (int) $agora->format('Y') === $this->ano && (int) $agora->format('m') === $this->mes;
+    }
+
+    public static function agoraCalendario(): \DateTimeImmutable
+    {
+        return new \DateTimeImmutable('now', new \DateTimeZone(self::FUSO_CALENDARIO_SPOTIFY));
     }
 }
 

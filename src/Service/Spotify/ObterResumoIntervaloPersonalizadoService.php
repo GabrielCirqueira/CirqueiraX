@@ -38,12 +38,14 @@ final readonly class ObterResumoIntervaloPersonalizadoService
         $fusoLocal = new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_HORARIO_PADRAO);
         $fusoUtc = new DateTimeZone('UTC');
         $agoraLocal = new DateTimeImmutable('now', $fusoLocal);
+        $fusoCalendario = new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_CALENDARIO_SPOTIFY);
+        $agoraCalendario = new DateTimeImmutable('now', $fusoCalendario);
 
         $limiteSanitizado = max(5, min(100, $limite));
 
         [$inicioLocal, $fimLocal, $compInicioLocal, $compFimLocal, $rotuloPeriodo] = match ($tipo) {
-            'mes' => $this->resolverIntervaloMes($agoraLocal, $fusoLocal, $ano, $mes),
-            'ano' => $this->resolverIntervaloAno($agoraLocal, $fusoLocal, $ano),
+            'mes' => $this->resolverIntervaloMes($agoraCalendario, $fusoCalendario, $ano, $mes),
+            'ano' => $this->resolverIntervaloAno($agoraCalendario, $fusoCalendario, $ano),
             'personalizado' => $this->resolverIntervaloPersonalizado($agoraLocal, $fusoLocal, $inicio, $fim),
             'todos' => $this->resolverIntervaloTodos($agoraLocal, $fusoLocal),
             default => $this->resolverIntervaloDias($agoraLocal, $fusoLocal, $dias ?? 7),

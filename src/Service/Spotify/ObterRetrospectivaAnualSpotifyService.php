@@ -30,7 +30,7 @@ final readonly class ObterRetrospectivaAnualSpotifyService
     private function calcular(Usuario $usuario, int $ano): RetrospectivaAnualSpotifyDTO
     {
         $periodo = PeriodoAnaliseSpotifyDTO::doAno($ano);
-        $agora = PeriodoAnaliseSpotifyDTO::agoraLocal();
+        $agora = PeriodoAnaliseSpotifyDTO::agoraCalendario();
         $totais = $this->analiseRepository->calcularTotais($usuario, $periodo);
         $minutosAnoAnterior = $this->analiseRepository->calcularTotais($usuario, PeriodoAnaliseSpotifyDTO::doAno($ano - 1))['minutos'];
         $topArtistas = $this->analiseRepository->listarRankingArtistas($usuario, $periodo, self::TAMANHO_TOPO);
