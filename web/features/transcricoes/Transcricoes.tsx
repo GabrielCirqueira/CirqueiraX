@@ -118,7 +118,7 @@ export function Component() {
             bg="bg.panel"
             borderWidth="1px"
             borderColor="border.subtle"
-            borderRadius="2xl"
+            borderRadius="8px"
             shadow="xs"
             minW={0}
             scrollMarginTop={20}

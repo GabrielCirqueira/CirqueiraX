@@ -49,7 +49,7 @@ export const EstadoSemSelecao = memo(function EstadoSemSelecao() {
               key={recurso.texto}
               gap={2.5}
               p={2.5}
-              borderRadius="lg"
+              borderRadius="8px"
               bg="bg.subtle"
               textAlign="left"
             >

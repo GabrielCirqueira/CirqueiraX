@@ -51,7 +51,7 @@ export const AreaEnvioAudios = memo(function AreaEnvioAudios({
       bg="bg.panel"
       borderWidth="1px"
       borderColor="border.subtle"
-      borderRadius="2xl"
+      borderRadius="8px"
     >
       <Box
         position="relative"
@@ -67,7 +67,7 @@ export const AreaEnvioAudios = memo(function AreaEnvioAudios({
         borderStyle="dashed"
         borderColor={arrastando ? 'cirqueira.brand.400' : 'border.emphasized'}
         bg={arrastando ? 'cirqueira.brand.500/10' : 'bg.subtle'}
-        borderRadius="xl"
+        borderRadius="8px"
         textAlign="center"
         transition="all 0.2s ease"
         transform={arrastando ? 'scale(1.01)' : 'none'}
@@ -113,7 +113,7 @@ export const AreaEnvioAudios = memo(function AreaEnvioAudios({
             onChange={aoMudarIdioma}
             bg="bg.muted"
             borderColor="border.subtle"
-            borderRadius="lg"
+            borderRadius="8px"
           >
             {OPCOES_IDIOMA.map((opcao) => (
               <option key={opcao.valor} value={opcao.valor}>
@@ -132,7 +132,7 @@ export const AreaEnvioAudios = memo(function AreaEnvioAudios({
           size="sm"
           variant="subtle"
           colorPalette="brand"
-          borderRadius="lg"
+          borderRadius="full"
           onClick={() => inputRef.current?.click()}
         >
           <UploadCloud size={14} />

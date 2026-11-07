@@ -75,10 +75,10 @@ export const PainelTranscricao = memo(function PainelTranscricao({
   if (isLoading) {
     return (
       <VStack align="stretch" gap={3} p={5}>
-        <Skeleton h="28px" w="60%" borderRadius="md" />
-        <Skeleton h="16px" w="40%" borderRadius="md" />
-        <Skeleton h="56px" borderRadius="xl" />
-        <Skeleton h="240px" borderRadius="xl" />
+        <Skeleton h="28px" w="60%" borderRadius="8px" />
+        <Skeleton h="16px" w="40%" borderRadius="8px" />
+        <Skeleton h="56px" borderRadius="8px" />
+        <Skeleton h="240px" borderRadius="8px" />
       </VStack>
     )
   }
@@ -129,7 +129,7 @@ export const PainelTranscricao = memo(function PainelTranscricao({
       {transcricao.status === 'erro' && (
         <Box
           p={3}
-          borderRadius="xl"
+          borderRadius="8px"
           bg="cirqueira.red.500/10"
           borderWidth="1px"
           borderColor="cirqueira.red.500/30"

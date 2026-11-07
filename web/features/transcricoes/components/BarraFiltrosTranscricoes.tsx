@@ -26,7 +26,7 @@ export const BarraFiltrosTranscricoes = memo(function BarraFiltrosTranscricoes({
             <IconButton
               size="2xs"
               variant="ghost"
-              borderRadius="md"
+              borderRadius="full"
               aria-label="Limpar busca"
               onClick={() => onMudarBusca('')}
             >
@@ -42,7 +42,7 @@ export const BarraFiltrosTranscricoes = memo(function BarraFiltrosTranscricoes({
           onChange={(evento) => onMudarBusca(evento.target.value)}
           bg="bg.panel"
           borderColor="border.subtle"
-          borderRadius="lg"
+          borderRadius="full"
         />
       </InputGroup>
       <Box overflowX="auto" mx={-1} px={1} pb={1}>

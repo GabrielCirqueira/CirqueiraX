@@ -23,7 +23,7 @@ export const ListaTranscricoes = memo(function ListaTranscricoes({
     return (
       <VStack align="stretch" gap={2}>
         {[0, 1, 2, 3].map((indice) => (
-          <Skeleton key={indice} h="84px" borderRadius="xl" />
+          <Skeleton key={indice} h="84px" borderRadius="8px" />
         ))}
       </VStack>
     )
@@ -37,7 +37,7 @@ export const ListaTranscricoes = memo(function ListaTranscricoes({
         borderWidth="1px"
         borderStyle="dashed"
         borderColor="border.subtle"
-        borderRadius="xl"
+        borderRadius="8px"
       >
         <VStack gap={2} color="fg.subtle" textAlign="center">
           {filtrando ? <SearchX size={26} /> : <Inbox size={26} />}

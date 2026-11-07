@@ -603,4 +603,5 @@
   - `web/features/google-fotos/components/*`
   - `web/features/editor-imagem/components/*`
   - `web/features/spotify/components/*`
+  - `web/features/transcricoes/Transcricoes.tsx`, `web/features/transcricoes/components/*`
   - `documentation/progresso/melhorias/MELHORIAS.md`, `documentation/progresso/melhorias/MELHORIAS_6.md`

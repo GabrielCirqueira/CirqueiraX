@@ -68,7 +68,7 @@ export const EstatisticasTranscricoes = memo(function EstatisticasTranscricoes({
     return (
       <SimpleGrid columns={{ base: 2, lg: 4 }} gap={3}>
         {[0, 1, 2, 3].map((indice) => (
-          <Skeleton key={indice} h="88px" borderRadius="xl" />
+          <Skeleton key={indice} h="88px" borderRadius="8px" />
         ))}
       </SimpleGrid>
     )
@@ -85,13 +85,13 @@ export const EstatisticasTranscricoes = memo(function EstatisticasTranscricoes({
           bg="bg.panel"
           borderWidth="1px"
           borderColor="border.subtle"
-          borderRadius="xl"
+          borderRadius="8px"
           transition="all 0.2s ease"
-          _hover={{ borderColor: 'border.emphasized', transform: 'translateY(-1px)', shadow: 'sm' }}
+          _hover={{ bg: 'bg.muted', borderColor: 'border.emphasized', transform: 'translateY(-1px)', shadow: 'sm' }}
         >
           <Box
             p={2}
-            borderRadius="lg"
+            borderRadius="8px"
             bg={`cirqueira.${cartao.paleta}.500/12`}
             color={`cirqueira.${cartao.paleta}.500`}
             display={{ base: 'none', sm: 'inline-flex' }}

@@ -67,7 +67,7 @@ export const RodapeAcoesTranscricao = memo(function RodapeAcoesTranscricao({
         {transcricao.isReprocessavel ? (
           <HStack gap={1.5}>
             <NativeSelect.Root size="xs" w="150px">
-              <NativeSelect.Field value={idioma} onChange={aoMudarIdioma} borderRadius="lg" h={8}>
+              <NativeSelect.Field value={idioma} onChange={aoMudarIdioma} borderRadius="8px" h={8}>
                 {OPCOES_IDIOMA.map((opcao) => (
                   <option key={opcao.valor} value={opcao.valor}>
                     {opcao.bandeira} {opcao.rotulo}
@@ -80,7 +80,7 @@ export const RodapeAcoesTranscricao = memo(function RodapeAcoesTranscricao({
               size="xs"
               h={8}
               variant="outline"
-              borderRadius="lg"
+              borderRadius="full"
               loading={reprocessando}
               onClick={() => onReprocessar(idioma)}
             >
@@ -99,7 +99,7 @@ export const RodapeAcoesTranscricao = memo(function RodapeAcoesTranscricao({
           h={8}
           variant={confirmando ? 'solid' : 'ghost'}
           colorPalette="red"
-          borderRadius="lg"
+          borderRadius="full"
           loading={apagando}
           disabled={!transcricao.isApagavel}
           title={

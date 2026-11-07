@@ -22,7 +22,7 @@ export const CabecalhoTranscricoes = memo(function CabecalhoTranscricoes({
         <HStack gap={2.5} flexWrap="wrap">
           <Box
             p={2}
-            borderRadius="xl"
+            borderRadius="8px"
             bgGradient="to-br"
             gradientFrom="cirqueira.brand.500/25"
             gradientTo="cirqueira.brand.700/10"
@@ -35,7 +35,7 @@ export const CabecalhoTranscricoes = memo(function CabecalhoTranscricoes({
             Transcrições
           </Text>
           {emAndamento > 0 && (
-            <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="md" gap={1.5}>
+            <Badge size="sm" variant="subtle" colorPalette="brand" borderRadius="full" gap={1.5}>
               <Box
                 boxSize={1.5}
                 borderRadius="full"
@@ -58,7 +58,7 @@ export const CabecalhoTranscricoes = memo(function CabecalhoTranscricoes({
           borderColor="border.subtle"
           px={3}
           py={1.5}
-          borderRadius="lg"
+          borderRadius="full"
           fontSize="xs"
           color="fg.subtle"
           display={{ base: 'none', md: 'flex' }}
@@ -71,7 +71,7 @@ export const CabecalhoTranscricoes = memo(function CabecalhoTranscricoes({
         <Button
           size="sm"
           variant="outline"
-          borderRadius="lg"
+          borderRadius="full"
           disabled={atualizando}
           onClick={onAtualizar}
         >

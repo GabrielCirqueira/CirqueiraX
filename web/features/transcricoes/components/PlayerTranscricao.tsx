@@ -69,7 +69,7 @@ export const PlayerTranscricao = memo(function PlayerTranscricao({
       bg="bg.subtle"
       borderWidth="1px"
       borderColor="border.subtle"
-      borderRadius="xl"
+      borderRadius="8px"
     >
       <audio
         ref={audioRef}
@@ -98,7 +98,7 @@ export const PlayerTranscricao = memo(function PlayerTranscricao({
       <IconButton
         size="xs"
         variant="ghost"
-        borderRadius="lg"
+        borderRadius="full"
         aria-label="Voltar 5 segundos"
         title="Voltar 5 s"
         color="fg.muted"
@@ -138,7 +138,7 @@ export const PlayerTranscricao = memo(function PlayerTranscricao({
       <IconButton
         size="xs"
         variant="ghost"
-        borderRadius="lg"
+        borderRadius="full"
         aria-label="Avançar 5 segundos"
         title="Avançar 5 s"
         color="fg.muted"
@@ -153,7 +153,7 @@ export const PlayerTranscricao = memo(function PlayerTranscricao({
         onClick={trocarVelocidade}
         px={2}
         py={1}
-        borderRadius="md"
+        borderRadius="full"
         fontSize="11px"
         fontWeight="bold"
         fontFamily="mono"
@@ -171,7 +171,7 @@ export const PlayerTranscricao = memo(function PlayerTranscricao({
         asChild
         size="xs"
         variant="ghost"
-        borderRadius="lg"
+        borderRadius="full"
         aria-label="Baixar áudio"
         title="Baixar áudio original"
         color="fg.muted"

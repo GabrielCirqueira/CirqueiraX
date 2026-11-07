@@ -65,13 +65,13 @@ export const CabecalhoPainelTranscricao = memo(function CabecalhoPainelTranscric
               maxLength={255}
               onChange={(evento) => setTitulo(evento.target.value)}
               onKeyDown={(evento) => evento.key === 'Escape' && setEditando(false)}
-              borderRadius="lg"
+              borderRadius="8px"
             />
             <IconButton
               type="submit"
               size="sm"
               colorPalette="brand"
-              borderRadius="lg"
+              borderRadius="full"
               aria-label="Salvar título"
             >
               <Check size={14} />
@@ -79,7 +79,7 @@ export const CabecalhoPainelTranscricao = memo(function CabecalhoPainelTranscric
             <IconButton
               size="sm"
               variant="ghost"
-              borderRadius="lg"
+              borderRadius="full"
               aria-label="Cancelar"
               onClick={() => setEditando(false)}
             >
@@ -100,7 +100,7 @@ export const CabecalhoPainelTranscricao = memo(function CabecalhoPainelTranscric
             <IconButton
               size="2xs"
               variant="ghost"
-              borderRadius="md"
+              borderRadius="full"
               aria-label="Renomear"
               title="Renomear"
               color="fg.subtle"
@@ -117,7 +117,7 @@ export const CabecalhoPainelTranscricao = memo(function CabecalhoPainelTranscric
         <IconButton
           size="sm"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           aria-label={transcricao.favorita ? 'Remover dos favoritos' : 'Favoritar'}
           title={transcricao.favorita ? 'Remover dos favoritos' : 'Favoritar'}
           color={transcricao.favorita ? 'cirqueira.amber.400' : 'fg.subtle'}
@@ -128,7 +128,7 @@ export const CabecalhoPainelTranscricao = memo(function CabecalhoPainelTranscric
         <IconButton
           size="sm"
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="full"
           aria-label="Fechar"
           color="fg.subtle"
           onClick={onFechar}
@@ -138,7 +138,7 @@ export const CabecalhoPainelTranscricao = memo(function CabecalhoPainelTranscric
       </HStack>
 
       <HStack gap={1.5} flexWrap="wrap">
-        <Badge size="sm" variant="subtle" colorPalette={aparencia.paleta} borderRadius="md">
+        <Badge size="sm" variant="subtle" colorPalette={aparencia.paleta} borderRadius="full">
           {aparencia.rotulo}
         </Badge>
         {informacoes.map((informacao) => (

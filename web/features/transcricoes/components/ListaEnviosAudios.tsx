@@ -44,7 +44,7 @@ export const ListaEnviosAudios = memo(function ListaEnviosAudios({
           Envios · {finalizados}/{envios.length}
         </Text>
         {finalizados > 0 && (
-          <Button size="2xs" variant="ghost" borderRadius="md" color="fg.subtle" onClick={onLimpar}>
+          <Button size="2xs" variant="ghost" borderRadius="full" color="fg.subtle" onClick={onLimpar}>
             Limpar concluídos
           </Button>
         )}
@@ -55,7 +55,7 @@ export const ListaEnviosAudios = memo(function ListaEnviosAudios({
             key={envio.id}
             gap={2.5}
             p={2}
-            borderRadius="lg"
+            borderRadius="8px"
             bg="bg.subtle"
             animation="fade-in 0.25s ease-out"
           >

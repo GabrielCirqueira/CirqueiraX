@@ -31,10 +31,10 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
 }: BarraFerramentasTextoProps) {
   return (
     <HStack gap={2} flexWrap="wrap" justify="space-between">
-      <HStack gap={1} p={0.5} bg="bg.muted" borderRadius="lg">
+      <HStack gap={1} p={0.5} bg="bg.muted" borderRadius="full">
         <Button
           size="xs"
-          borderRadius="md"
+          borderRadius="full"
           variant={modo === 'trechos' ? 'solid' : 'ghost'}
           colorPalette={modo === 'trechos' ? 'brand' : 'gray'}
           onClick={() => onMudarModo('trechos')}
@@ -44,7 +44,7 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
         </Button>
         <Button
           size="xs"
-          borderRadius="md"
+          borderRadius="full"
           variant={modo === 'corrido' ? 'solid' : 'ghost'}
           colorPalette={modo === 'corrido' ? 'brand' : 'gray'}
           onClick={() => onMudarModo('corrido')}
@@ -72,7 +72,7 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
             placeholder="Procurar no texto"
             value={termo}
             onChange={(evento) => onMudarTermo(evento.target.value)}
-            borderRadius="lg"
+            borderRadius="full"
             bg="bg.panel"
           />
         </InputGroup>
@@ -81,7 +81,7 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
             size="xs"
             h={8}
             w={8}
-            borderRadius="lg"
+            borderRadius="full"
             variant={seguirAudio ? 'subtle' : 'ghost'}
             colorPalette={seguirAudio ? 'brand' : 'gray'}
             aria-label="Seguir o áudio"
@@ -94,7 +94,7 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
       </HStack>
 
       <Wrap gap={1} order={{ base: 2, md: 3 }}>
-        <Button size="xs" h={8} variant="outline" borderRadius="lg" onClick={onCopiar}>
+        <Button size="xs" h={8} variant="outline" borderRadius="full" onClick={onCopiar}>
           <Copy size={13} />
           Copiar
         </Button>
@@ -104,7 +104,7 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
             size="xs"
             h={8}
             variant="ghost"
-            borderRadius="lg"
+            borderRadius="full"
             color="fg.muted"
             title={opcao.descricao}
             onClick={() => onExportar(opcao.formato)}

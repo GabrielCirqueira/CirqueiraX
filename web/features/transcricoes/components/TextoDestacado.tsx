@@ -17,7 +17,7 @@ export const TextoDestacado = memo(function TextoDestacado({ texto, termo }: Tex
             key={`${indice}-${parte.texto}`}
             bg="cirqueira.amber.400/40"
             color="inherit"
-            borderRadius="sm"
+            borderRadius="2px"
             px={0.5}
           >
             {parte.texto}

@@ -45,14 +45,15 @@ export const CardTranscricao = memo(function CardTranscricao({
       p={3}
       w="full"
       textAlign="left"
-      bg={selecionada ? 'cirqueira.brand.500/8' : 'bg.panel'}
+      bg={selecionada ? 'cirqueira.brand.500/10' : 'bg.panel'}
       borderWidth="1px"
       borderColor={selecionada ? 'cirqueira.brand.500' : 'border.subtle'}
-      borderRadius="xl"
+      borderRadius="8px"
       cursor="pointer"
       transition="all 0.18s ease"
       animation="fade-in 0.3s ease-out"
       _hover={{
+        bg: selecionada ? 'cirqueira.brand.500/10' : 'bg.muted',
         borderColor: selecionada ? 'cirqueira.brand.500' : 'border.emphasized',
         shadow: 'sm',
       }}
@@ -61,7 +62,7 @@ export const CardTranscricao = memo(function CardTranscricao({
       <HStack gap={2.5} align="start">
         <Box
           p={2}
-          borderRadius="lg"
+          borderRadius="8px"
           flexShrink={0}
           bg={`${tokenCorStatus(aparencia.paleta, 500)}/12`}
           color={tokenCorStatus(aparencia.paleta, 400)}
@@ -87,7 +88,7 @@ export const CardTranscricao = memo(function CardTranscricao({
             )}
           </HStack>
           <HStack gap={1.5} flexWrap="wrap">
-            <Badge size="xs" variant="subtle" colorPalette={aparencia.paleta} borderRadius="md">
+            <Badge size="xs" variant="subtle" colorPalette={aparencia.paleta} borderRadius="full">
               {transcricao.status === 'transcrevendo'
                 ? `${transcricao.progresso}%`
                 : aparencia.rotulo}
