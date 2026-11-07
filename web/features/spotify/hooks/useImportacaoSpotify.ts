@@ -41,7 +41,10 @@ export function useConsultarImportacaoSpotify(uuid: string | null, aoConcluir?: 
       }
       const resultado = await consultarImportacaoSpotify(uuid)
       if (resultado.status === 'concluida') {
-        queryClient.invalidateQueries({ queryKey: ['spotify'] })
+        queryClient.invalidateQueries({
+          queryKey: ['spotify'],
+          predicate: (consulta) => consulta.queryKey[1] !== 'importacao',
+        })
         queryClient.invalidateQueries({ queryKey: ['dashboard'] })
         aoConcluir?.()
       }

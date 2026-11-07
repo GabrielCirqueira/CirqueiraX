@@ -134,4 +134,5 @@
 | M116 | Página de Transcrição de Áudios | 🟡 Publicado, falta validar | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-116--página-de-transcrição-de-áudios) |
 | M117 | Análises Completas do Spotify: Detalhes, Recordes, Hábitos, Descobertas e Resumo do Ano | 🟡 Publicado, falta validar | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-117--análises-completas-do-spotify-detalhes-recordes-hábitos-descobertas-e-resumo-do-ano) |
 | M118 | Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis) | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-118--redesign-do-tema-escuro-e-design-system-inspirado-no-spotify-fundo-suave-cards-matte-profundo-badges-em-pílula-e-bordas-sutis) |
-| M118 | Importação do Histórico Estendido Funcionando com Arquivos Grandes | 🟡 Publicado, falta validar | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-118--importação-do-histórico-estendido-funcionando-com-arquivos-grandes) |
+| M118 | Importação do Histórico Estendido Funcionando com Arquivos Grandes | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-118--importação-do-histórico-estendido-funcionando-com-arquivos-grandes) |
+| M119 | Tela de Importação do Spotify Presa em "Processando" | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-119--tela-de-importação-do-spotify-presa-em-processando) |

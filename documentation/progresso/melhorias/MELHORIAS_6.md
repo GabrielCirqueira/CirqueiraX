@@ -608,9 +608,9 @@
 
 ---
 
-### 🟡 Melhoria 118 — Importação do Histórico Estendido Funcionando com Arquivos Grandes
+### ✅ Melhoria 118 — Importação do Histórico Estendido Funcionando com Arquivos Grandes
 
-- **Status**: Publicado, falta validar
+- **Status**: Concluído (validado em produção: 100.574 lidos, 100.484 novos, 83 substituídos, 7 ignorados, em 3 min 27 s)
 - **Data**: 06 de novembro de 2026
 - **Problema** (achado ao testar a importação com o histórico estendido real, 101 mil registros):
   - Nenhum arquivo com mais de 500 reproduções terminava. Depois do primeiro lote o importador limpava o EntityManager e o lote seguinte falhava com "Unable to find Usuario entity identifier".
@@ -637,3 +637,18 @@
   - `src/Repository/ReproducaoSpotifyRepository.php`
   - `src/Entity/ReproducaoSpotify.php`
   - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### ✅ Melhoria 119 — Tela de Importação do Spotify Presa em "Processando"
+
+- **Status**: Concluído
+- **Data**: 06 de novembro de 2026
+- **Problema**:
+  - A importação terminava no servidor em cerca de 3,5 min, mas a tela continuava em "Processando histórico em segundo plano..." para sempre.
+  - Ao receber o status `concluida`, a própria consulta invalidava todas as chaves `['spotify']`, inclusive a dela. O React Query cancelava a requisição em andamento antes de guardar o resultado e disparava outra, que via `concluida` de novo e repetia o ciclo.
+  - Cada volta recarregava todas as consultas pesadas do Spotify (cápsulas, rankings e resumo), o que deixava o MySQL acima de 400% de CPU enquanto a tela ficava aberta.
+- **Solução**:
+  - A invalidação ao concluir ignora a consulta de status da importação. O resultado fica salvo, a tela mostra o resumo e o polling para.
+- **Arquivos**:
+  - `web/features/spotify/hooks/useImportacaoSpotify.ts`
