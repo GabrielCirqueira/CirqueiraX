@@ -12,7 +12,7 @@
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 > - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
-> - **M101–M123** → [MELHORIAS_6.md](MELHORIAS_6.md)
+> - **M101–M124** → [MELHORIAS_6.md](MELHORIAS_6.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -139,3 +139,4 @@
 | M121 | Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis) | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-121--redesign-do-tema-escuro-e-design-system-inspirado-no-spotify-fundo-suave-cards-matte-profundo-badges-em-pílula-e-bordas-sutis) |
 | M122 | Redesign do Dashboard Geral (Cards Individuais Elevados com Ícones, Barra de Ações Rápidas Expandida e Painéis Modernizados) | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-122--redesign-do-dashboard-geral-cards-individuais-elevados-com-ícones-barra-de-ações-rápidas-expandida-e-painéis-modernizados) |
 | M123 | Página para Extrair Texto de Imagens | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-123--página-para-extrair-texto-de-imagens) |
+| M124 | Top Artistas do Spotify Ordenado por Minutos Ouvidos | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-124--top-artistas-do-spotify-ordenado-por-minutos-ouvidos) |

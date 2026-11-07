@@ -713,3 +713,22 @@
   - `package.json`, `package-lock.json`
   - `documentation/funcionalidades/EXTRAIR_TEXTO.md`, `documentation/funcionalidades/CIRQUEIRAX.md`, `documentation/funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md`
 
+---
+
+### ✅ Melhoria 124 — Top Artistas do Spotify Ordenado por Minutos Ouvidos
+
+- **Status**: Concluído
+- **Data**: 07 de novembro de 2026
+- **Problema**:
+  - No Resumo do ano, o top artistas aparecia fora de ordem: Lana Del Rey, com 47h 59m, ficava em 3º, atrás de Alan Walker, com 37h 48m.
+  - A lista era ordenada por streams, mas mostrava só as horas. Artistas com músicas mais curtas somavam mais streams com menos tempo.
+  - O Wrapped pessoal do Spotify ordena os artistas pelos minutos ouvidos. As músicas continuam por streams.
+- **Solução**:
+  - Todos os rankings de artistas passam a ordenar por minutos e, no empate, por streams: cápsula do mês, rankings (hoje, dias, mês, ano, sempre, personalizado), resumo do ano, recordes, hábitos, meses no top 5 e posição geral do artista.
+  - Músicas e álbuns continuam ordenados por streams.
+- **Arquivos**:
+  - `src/Repository/AnaliseReproducaoSpotifyRepository.php`
+  - `src/Repository/ReproducaoSpotifyRepository.php`
+  - `src/Service/Spotify/ObterRecordesSpotifyService.php`, `src/Service/Spotify/ObterHabitosSpotifyService.php`
+  - `documentation/funcionalidades/SPOTIFY.md`
+

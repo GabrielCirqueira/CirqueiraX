@@ -29,7 +29,7 @@ final readonly class ObterHabitosSpotifyService
     {
         $totais = $this->analiseRepository->calcularTotais($usuario, $periodo);
         $faixas = $this->analiseRepository->contarFaixasPorRepeticao($usuario, $periodo);
-        $topArtistas = $this->analiseRepository->listarRankingArtistas($usuario, $periodo, self::QUANTIDADE_TOPO, true);
+        $topArtistas = $this->analiseRepository->listarRankingArtistas($usuario, $periodo, self::QUANTIDADE_TOPO);
         $mapa = $this->aplicarImagensService->mapear($usuario, [], $topArtistas);
 
         return new HabitosSpotifyDTO(

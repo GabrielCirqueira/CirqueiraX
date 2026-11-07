@@ -28,7 +28,7 @@ final readonly class ObterRecordesSpotifyService
     {
         $todos = PeriodoAnaliseSpotifyDTO::todos();
         $musicas = $this->analiseRepository->listarRankingMusicas($usuario, $todos, 1);
-        $artistas = $this->analiseRepository->listarRankingArtistas($usuario, $todos, 1, true);
+        $artistas = $this->analiseRepository->listarRankingArtistas($usuario, $todos, 1);
         $repeticao = RepeticaoDiariaSpotifyDTO::deArray($this->analiseRepository->buscarMaiorRepeticaoDiaria($usuario, $todos));
         $faixasComImagem = null === $repeticao ? $musicas : [...$musicas, $repeticao->musica];
         $mapa = $this->aplicarImagensService->mapear($usuario, $faixasComImagem, $artistas);

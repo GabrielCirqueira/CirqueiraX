@@ -23,6 +23,8 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
     private const string DATA_LOCAL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
     private const string CHAVE_FAIXA = 'LOWER(TRIM(r.nome_faixa))';
     private const string CHAVE_ARTISTA = 'LOWER(TRIM(r.artista_principal))';
+    private const string ORDEM_ARTISTAS = 'ms DESC, streams DESC';
+    private const string ORDEM_MUSICAS = 'streams DESC, ms DESC';
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -58,9 +60,8 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
     /**
      * @return list<ArtistaAnaliseSpotifyDTO>
      */
-    public function listarRankingArtistas(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, int $limite, bool $porMinutos = false): array
+    public function listarRankingArtistas(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, int $limite): array
     {
-        $ordem = $porMinutos ? 'ms DESC, streams DESC' : 'streams DESC, ms DESC';
         $parametros = $this->parametrosBase($usuario);
         $filtros = $this->filtroPeriodo($periodo, $parametros);
 
@@ -75,7 +76,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             LIMIT %d',
             $filtros,
             self::CHAVE_ARTISTA,
-            $ordem,
+            self::ORDEM_ARTISTAS,
             $limite,
         ), $parametros);
 
@@ -390,11 +391,13 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $parametros['artista'] = $artista;
         $chave = sprintf('%s', self::CHAVE_ARTISTA);
         $alvo = 'LOWER(TRIM(:artista))';
+        $ordem = self::ORDEM_ARTISTAS;
 
         if (null !== $nomeFaixa) {
             $parametros['faixa'] = $nomeFaixa;
             $chave = sprintf("CONCAT(%s, '|', %s)", self::CHAVE_FAIXA, self::CHAVE_ARTISTA);
             $alvo = "CONCAT(LOWER(TRIM(:faixa)), '|', LOWER(TRIM(:artista)))";
+            $ordem = self::ORDEM_MUSICAS;
         }
 
         $linhas = $this->consultar(sprintf(
@@ -405,7 +408,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
                 GROUP BY ano, mes, chave
                 HAVING streams > 0
             ), ranqueado AS (
-                SELECT m.*, ROW_NUMBER() OVER (PARTITION BY ano, mes ORDER BY streams DESC, ms DESC) AS posicao
+                SELECT m.*, ROW_NUMBER() OVER (PARTITION BY ano, mes ORDER BY %5$s) AS posicao
                 FROM mensal m
             )
             SELECT ano, mes, posicao FROM ranqueado
@@ -415,6 +418,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             $chave,
             $alvo,
             $tamanhoTopo,
+            $ordem,
         ), $parametros);
 
         return array_map(static fn (array $linha): array => [
@@ -430,11 +434,13 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $parametros['artista'] = $artista;
         $agrupamento = self::CHAVE_ARTISTA;
         $alvo = 'LOWER(TRIM(:artista))';
+        $ordem = self::ORDEM_ARTISTAS;
 
         if (null !== $nomeFaixa) {
             $parametros['faixa'] = $nomeFaixa;
             $agrupamento = sprintf("CONCAT(%s, '|', %s)", self::CHAVE_FAIXA, self::CHAVE_ARTISTA);
             $alvo = "CONCAT(LOWER(TRIM(:faixa)), '|', LOWER(TRIM(:artista)))";
+            $ordem = self::ORDEM_MUSICAS;
         }
 
         $linha = $this->consultarLinha(sprintf(
@@ -445,11 +451,12 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
                 GROUP BY chave
                 HAVING streams > 0
             ), ranqueado AS (
-                SELECT chave, ROW_NUMBER() OVER (ORDER BY streams DESC, ms DESC) AS posicao FROM totais
+                SELECT chave, ROW_NUMBER() OVER (ORDER BY %3$s) AS posicao FROM totais
             )
             SELECT posicao FROM ranqueado WHERE chave = %2$s',
             $agrupamento,
             $alvo,
+            $ordem,
         ), $parametros);
 
         return null === $linha ? null : (int) $linha['posicao'];

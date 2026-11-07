@@ -62,16 +62,17 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 
 As métricas seguem sempre as regras do próprio Spotify, para os números baterem com os do app. O CirqueiraX não cria regra própria de contagem.
 
-1. **Stream**: só conta como stream a reprodução com 30 segundos ou mais (`30.000 ms`). Rankings ordenam por streams e só listam o que teve ao menos um stream.
-2. **Minutos**: somam todo o tempo ouvido, inclusive reproduções com menos de 30 s, nos totais e nos rankings.
-3. **Calendário em UTC**: mês e ano começam e terminam em UTC, como no Spotify. Os dias dentro de mês, ano e "desde sempre" (minutos por dia, dia recorde, maior repetição num dia, sequências) também são dias UTC, para a soma dos dias bater com o mês.
-4. **Horário local onde o Spotify não define regra**: hora do dia e dia da semana (mapa de hábitos, horário de pico), "Hoje", "Últimos N dias", "Personalizado" e as datas exibidas seguem o horário de Brasília (`America/Sao_Paulo`).
-5. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
-6. **Comparação com o Mês Anterior**:
+1. **Stream**: só conta como stream a reprodução com 30 segundos ou mais (`30.000 ms`). Rankings só listam o que teve ao menos um stream.
+2. **Ordem dos rankings**: como no Wrapped pessoal, artistas são ordenados pelos minutos ouvidos. Músicas e álbuns são ordenados por streams. Vale para cápsula, rankings, resumo do ano, recordes, hábitos, meses no top 5 e posição geral no detalhe.
+3. **Minutos**: somam todo o tempo ouvido, inclusive reproduções com menos de 30 s, nos totais e nos rankings.
+4. **Calendário em UTC**: mês e ano começam e terminam em UTC, como no Spotify. Os dias dentro de mês, ano e "desde sempre" (minutos por dia, dia recorde, maior repetição num dia, sequências) também são dias UTC, para a soma dos dias bater com o mês.
+5. **Horário local onde o Spotify não define regra**: hora do dia e dia da semana (mapa de hábitos, horário de pico), "Hoje", "Últimos N dias", "Personalizado" e as datas exibidas seguem o horário de Brasília (`America/Sao_Paulo`).
+6. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
+7. **Comparação com o Mês Anterior**:
    - Variação percentual de músicas distintas: `((músicas_mês_atual - músicas_mês_anterior) / músicas_mês_anterior) * 100`.
    - Variação de ranking (`movimento`): diferença de posições no top 5 em relação ao mês imediatamente anterior.
    - Flag de estreia (`isEstreia`): sinaliza se o artista ou música entrou no top 5 pela primeira vez no histórico recente.
-7. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
+8. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
 
 ---
 
@@ -135,7 +136,7 @@ A página do Spotify (`/spotify` e suas telas de detalhe) é uma **exceção int
 
 ## 7. Análises
 
-Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia da semana no horário de Brasília, stream a partir de 30 s e minutos somando todo o tempo ouvido. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
+Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia da semana no horário de Brasília, stream a partir de 30 s, minutos somando todo o tempo ouvido, artistas ordenados por minutos e músicas por streams. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
 
 | Seção | O que mostra | Regra |
 | :--- | :--- | :--- |

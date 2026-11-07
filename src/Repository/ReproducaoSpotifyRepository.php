@@ -416,7 +416,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
               AND r.tocada_em < :fimUtc
             GROUP BY r.artista_principal
             HAVING total_streams > 0
-            ORDER BY total_streams DESC, total_ms DESC
+            ORDER BY total_ms DESC, total_streams DESC
             LIMIT :limite
         ";
 
@@ -567,7 +567,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
               AND r.tocada_em < :fimUtc
             GROUP BY r.artista_principal
             HAVING total_streams > 0
-            ORDER BY total_streams DESC, total_ms DESC
+            ORDER BY total_ms DESC, total_streams DESC
             LIMIT :limite
         ";
 
