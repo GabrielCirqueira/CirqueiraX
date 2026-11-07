@@ -51,6 +51,10 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 ### Regra de Deduplicação e Refinamento
 - Quando um registro importado de arquivo bate no mesmo minuto de uma reprodução coletada via API, o sistema **substitui** a estimativa da API pelo tempo exato registrado pelo arquivo do Spotify (`msPlayed`), marcando a fonte como `arquivo_estendido` ou `arquivo_basico`.
 - Reimportar o mesmo arquivo ou arquivos de períodos sobrepostos é totalmente seguro: registros repetidos são identificados e ignorados sem duplicação.
+- Os horários são comparados em UTC, que é como ficam gravados. A tolerância vale só entre fontes diferentes: 90 s para o arquivo estendido e 180 s para o básico. Dentro da mesma fonte, só a mesma faixa no mesmo segundo é considerada repetida.
+- Ao substituir uma reprodução da coleta, o arquivo estendido também ajusta o horário e a chave para os do arquivo.
+- Registros com 0 ms tocados são descartados.
+- O importador grava em lotes de 500. Para o histórico estendido completo (cerca de 100 mil registros), a importação leva uns 5 minutos.
 
 ---
 

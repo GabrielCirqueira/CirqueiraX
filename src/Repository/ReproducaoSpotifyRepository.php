@@ -16,6 +16,7 @@ use App\Entity\Usuario;
 use App\Enum\FonteReproducaoSpotify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\Persistence\ManagerRegistry;
 use PDO;
 
@@ -55,6 +56,11 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         $this->getEntityManager()->clear();
     }
 
+    public function obterReferenciaUsuario(Usuario $usuario): Usuario
+    {
+        return $this->getEntityManager()->getReference(Usuario::class, $usuario->getId()) ?? $usuario;
+    }
+
     /**
      * @return array<int, ReproducaoSpotify>
      */
@@ -91,7 +97,13 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
 
-        return $anterior?->tocadaEm();
+        if (null === $anterior) {
+            return null;
+        }
+
+        $fimEmUtc = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $anterior->tocadaEm()->format('Y-m-d H:i:s'), new DateTimeZone('UTC'));
+
+        return false === $fimEmUtc ? $anterior->tocadaEm() : $fimEmUtc;
     }
 
     public function apagarPorUsuarioEFonte(Usuario $usuario, FonteReproducaoSpotify $fonte): int

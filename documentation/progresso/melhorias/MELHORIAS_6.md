@@ -605,3 +605,35 @@
   - `web/features/spotify/components/*`
   - `web/features/transcricoes/Transcricoes.tsx`, `web/features/transcricoes/components/*`
   - `documentation/progresso/melhorias/MELHORIAS.md`, `documentation/progresso/melhorias/MELHORIAS_6.md`
+
+---
+
+### 🟡 Melhoria 118 — Importação do Histórico Estendido Funcionando com Arquivos Grandes
+
+- **Status**: Publicado, falta validar
+- **Data**: 06 de novembro de 2026
+- **Problema** (achado ao testar a importação com o histórico estendido real, 101 mil registros):
+  - Nenhum arquivo com mais de 500 reproduções terminava. Depois do primeiro lote o importador limpava o EntityManager e o lote seguinte falhava com "Unable to find Usuario entity identifier".
+  - A busca de duplicados montava a janela de horário no fuso de Brasília, mas o horário fica gravado em UTC. A janela ficava 3 h adiantada e deixava escapar reproduções já gravadas, o que gerava erro de chave duplicada.
+  - As reproduções lidas do banco também voltavam deslocadas 3 h, então a tolerância de 90 s nunca casava a coleta automática com o arquivo. A sobreposição entre as duas fontes viraria reprodução duplicada.
+  - A tolerância valia também dentro da mesma fonte e juntava duas reproduções reais da mesma faixa com menos de 90 s de diferença (1.730 casos no histórico real, 130 deles streams).
+  - Quando algo falhava, o EntityManager fechado impedia gravar o motivo, o arquivo era apagado e a nova tentativa mostrava só "arquivo não encontrado".
+  - A primeira música de cada coleta automática recebia a duração inteira, porque a reprodução anterior vinha do banco deslocada 3 h.
+- **Solução**:
+  - Janela de busca e comparação de horários em UTC.
+  - Tolerância de horário só entre fontes diferentes (coleta, arquivo básico e arquivo estendido). Na mesma fonte só a chave exata conta como repetida.
+  - Ao substituir uma reprodução da coleta pelo arquivo estendido, ela passa a usar o horário e a chave do arquivo, então reimportar não duplica.
+  - O usuário é reanexado a cada lote, a importação é buscada de novo antes de concluir e, em caso de erro, o EntityManager é reaberto para gravar o motivo real.
+  - A reprodução anterior usada na estimativa de minutos da coleta é lida em UTC.
+- **Validação** (ambiente descartável, histórico real + 40 reproduções falsas da coleta sobrepostas):
+  - 100.574 registros lidos (335 com 0 ms descartados), 100.527 novos, 7 repetidos exatos ignorados, 40 substituídos. Total final: 100.567, igual ao número de reproduções únicas nos arquivos.
+  - Cerca de 4,5 min e 35 MB de memória no worker. Reimportar o mesmo ZIP não cria nada.
+- **Análise feita antes da importação**:
+  - Os nomes `Streaming_History_Audio_*.json` e `Streaming_History_Video_*.json` já eram aceitos.
+  - O artista do arquivo (`master_metadata_album_artist_name`) é o primeiro artista da faixa, igual ao que a coleta grava. Conferido pela API em 50 faixas, 50 iguais. Trocar a coleta para o artista do álbum pioraria os dados ("Various Artists" em coletâneas).
+- **Arquivos**:
+  - `src/Service/Spotify/DeduplicarEImportarHistoricoSpotifyService.php`
+  - `src/Service/Spotify/ProcessarArquivoImportacaoSpotifyService.php`
+  - `src/Repository/ReproducaoSpotifyRepository.php`
+  - `src/Entity/ReproducaoSpotify.php`
+  - `documentation/funcionalidades/SPOTIFY.md`

@@ -210,6 +210,7 @@ class ReproducaoSpotify
         FonteReproducaoSpotify $novaFonte,
         ?string $codigoFaixa = null,
         ?string $album = null,
+        ?\DateTimeImmutable $tocadaEm = null,
     ): self {
         $this->msReproduzidos = $msReproduzidos;
         $this->fonte = $novaFonte;
@@ -220,6 +221,11 @@ class ReproducaoSpotify
 
         if (null !== $album && '' !== trim($album)) {
             $this->album = trim($album);
+        }
+
+        if (null !== $tocadaEm) {
+            $this->tocadaEm = $tocadaEm;
+            $this->chaveDeduplicacao = self::gerarChaveDeduplicacao($this->codigoFaixa, $this->nomeFaixa, $this->artistaPrincipal, $tocadaEm);
         }
 
         return $this;
