@@ -86,7 +86,38 @@ Caso deseje carregar seus meses passados para a Cápsula:
 
 ---
 
-## 6. Diretrizes de Marca e Conformidade
+## 6. Diretrizes de Marca, Identidade Visual e Conformidade
+
+### 6.1 Identidade Visual Autêntica e Paleta Oficial (Exceção de Design)
+
+A página do Spotify (`/spotify` e suas telas de detalhe) é uma **exceção intencional de design** em todo o ecossistema CirqueiraX. Ela foi concebida para recriar com máxima fidelidade a experiência do aplicativo oficial do Spotify e da clássica Cápsula Sonora.
+
+> **Regra Mandatória de Isolamento:** A feature do Spotify possui sua própria identidade visual e **nunca** deve ser mesclada ou sobrescrita pela paleta neutra/cinza/ardósia global da aplicação. Quaisquer scripts de geração de tema (`gerar-paleta-brand.sh`/`mjs`) ou refatorações visuais devem obrigatoriamente manter preservada a paleta oficial do Spotify.
+
+| Token Semântico | Token de Cor | Hex Oficial | Uso na Interface |
+| :--- | :--- | :--- | :--- |
+| `spotify.fundo` | `cirqueira.spotify.fundo` | `#121212` | Superfície base da tela (preto fosco oficial Spotify) |
+| `spotify.cartao` | `cirqueira.spotify.cartao` | `#1F1F1F` | Superfície base de cartões, listas e painéis de dados |
+| `spotify.cartaoElevado` | `cirqueira.spotify.cartaoElevado` | `#252525` | Superfícies elevadas, hover de cartões, badges e bordas de separação |
+| `spotify.textoPrincipal` | `cirqueira.spotify.textoPrincipal` | `#FFFFFF` | Títulos, métricas em destaque, valores e texto de alto contraste |
+| `spotify.textoSecundario` | `cirqueira.spotify.textoSecundario` | `#B3B3B3` | Legendas, subtítulos, durações e metadados (contraste > 5:1) |
+| `spotify.textoDesabilitado` | `cirqueira.spotify.textoDesabilitado` | `#6A6A6A` | Rótulos inativos ou controles desabilitados |
+| `spotify.verde` | `cirqueira.spotify.verde` | `#1ED760` | Verde oficial Spotify: botões de ação principal, minutos e status |
+| `spotify.verdeHover` | `cirqueira.spotify.verdeHover` | `#22E368` | Estado hover interativo dos botões em pílula |
+| `spotify.azul` | `cirqueira.spotify.azul` | `#539DF5` | Destaque oficial para "Top Artista" e badges de artistas |
+| `spotify.amarelo` | `cirqueira.spotify.amarelo` | `#FEE44F` | Destaque oficial para "Top Música" e posições do ranking |
+
+### 6.2 Regras Estruturais de Design
+
+- **Dark Mode Sempre Ativo**: A página é renderizada sob o wrapper `<TemaSpotify>`, que força modo escuro independente do tema claro ou escuro configurado no restante do sistema. Header e Sidebar continuam respeitando o tema global.
+- **Tipografia Inter**: Carregada pontualmente para esta feature (`fontFamily="inter"`), respeitando a tipografia moderna do player.
+- **Geometria dos Componentes**:
+  - Botões de ação em pílula (`borderRadius="full"`).
+  - Cartões com raio suave de 8px (`borderRadius="8px"`).
+  - Capas de álbuns quadradas com 4px (`borderRadius="4px"`) e 8px no desktop.
+  - Fotos de artista estritamente circulares (`borderRadius="full"`).
+
+### 6.3 Conformidade com Diretrizes da Marca Spotify
 
 - O logotipo do Spotify é exibido no rodapé e no painel de conexão em estrita conformidade com as diretrizes de marca (área de respiro, cores oficiais e links diretos para abertura no aplicativo com `Abrir no Spotify`).
 - Nenhuma alteração, recorte ou sobreposição de texto é aplicada às capas de álbuns originais.
