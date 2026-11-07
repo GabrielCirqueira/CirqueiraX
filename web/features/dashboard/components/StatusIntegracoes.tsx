@@ -1,5 +1,6 @@
 import { useStatusGoogleFotos } from '@/features/google-fotos'
 import { Box, HStack, Text, VStack } from '@chakra-ui/react'
+import { Activity } from 'lucide-react'
 import { memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { ResumoDashboard, StatusSyncthing } from '../types'
@@ -45,7 +46,7 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
   })
 
   return (
-    <PainelDashboard semEspacamento titulo="Serviços" descricao="Estado das integrações">
+    <PainelDashboard semEspacamento icone={Activity} titulo="Serviços" descricao="Estado das integrações">
       <VStack align="stretch" gap={0} borderTopWidth="1px" borderColor="border.subtle">
         {servicos.map((servico) => (
           <HStack

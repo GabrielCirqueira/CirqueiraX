@@ -1,4 +1,5 @@
 import { Box, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { BarChart3, FolderTree, PieChart as PieIcon } from 'lucide-react'
 import { memo } from 'react'
 import {
   Bar,
@@ -127,7 +128,7 @@ export const GraficosDashboard = memo(function GraficosDashboard({
   return (
     <VStack gap={4} w="full" align="stretch">
       <Grid w="full" templateColumns={{ base: '1fr', lg: 'repeat(2, 1fr)' }} gap={4}>
-        <PainelDashboard titulo="Origem das mídias" descricao="Volume por canal de entrada">
+        <PainelDashboard icone={PieIcon} titulo="Origem das mídias" descricao="Volume por canal de entrada">
           {fatias.length === 0 ? (
             <EstadoVazio mensagem="Nenhuma mídia registrada ainda." />
           ) : (
@@ -196,6 +197,7 @@ export const GraficosDashboard = memo(function GraficosDashboard({
         </PainelDashboard>
 
         <PainelDashboard
+          icone={BarChart3}
           titulo="Armazenamento por categoria"
           descricao="Espaço em disco por pasta (MB)"
         >
@@ -233,6 +235,7 @@ export const GraficosDashboard = memo(function GraficosDashboard({
 
       {barras.length > 0 && (
         <PainelDashboard
+          icone={FolderTree}
           titulo="Ocupação das pastas"
           descricao={`Total indexado: ${resumo?.tamanhoTotalFormatado ?? '0 B'}`}
         >

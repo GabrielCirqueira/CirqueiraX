@@ -1,5 +1,5 @@
 import { Badge, Button, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Clock } from 'lucide-react'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import type { MidiaRecenteDashboard } from '../types'
@@ -26,6 +26,7 @@ export const AtividadesRecentes = memo(function AtividadesRecentes({
   return (
     <PainelDashboard
       semEspacamento
+      icone={Clock}
       titulo="Últimas mídias"
       descricao="Entradas mais recentes no sistema"
       acao={

@@ -1,5 +1,5 @@
 import { Box, Button, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Download, HardDrive, Sparkles, Video } from 'lucide-react'
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import type { MetricasVideosDashboard } from '../types'
@@ -22,6 +22,7 @@ export const CardsVideosMetricas = memo(function CardsVideosMetricas({
   return (
     <PainelDashboard
       semEspacamento
+      icone={Video}
       titulo="Vídeos"
       descricao="Downloads, arquivos em disco e limpeza automática semanal"
       acao={
@@ -49,23 +50,27 @@ export const CardsVideosMetricas = memo(function CardsVideosMetricas({
             <IndicadorMetrica
               rotulo="Baixados"
               valor={videos.totalBaixados}
+              icone={Download}
               tom="info"
               detalhe="Histórico completo"
             />
             <IndicadorMetrica
               rotulo="No disco"
               valor={videos.permanecem}
+              icone={HardDrive}
               tom="destaque"
               detalhe={`${videos.tamanhoPermanecem} · ${videos.percentualPermanecem}%`}
             />
             <IndicadorMetrica
               rotulo="Apagados hoje"
               valor={videos.removidosHoje}
+              icone={Sparkles}
               detalhe={videos.removidosHoje > 0 ? 'Pela rotina de limpeza' : 'Nenhum hoje'}
             />
             <IndicadorMetrica
               rotulo="Espaço liberado"
               valor={videos.espacoLiberado}
+              icone={CheckCircle2}
               tom="sucesso"
               detalhe={pluralizar(videos.totalRemovidos, 'vídeo removido', 'vídeos removidos')}
             />

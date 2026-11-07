@@ -590,18 +590,31 @@
   - **Badges e Pílulas Elegantes**: Receita global de `Badge` (`badgeRecipe`) reformulada com `borderRadius="full"`, fundo neutro escuro matte (`bg.muted`), borda sutil (`border.subtle`) e texto/ícones vibrantes na cor da paleta (`colorPalette.fg`). Fim dos blocos coloridos turvos: todas as badges do sistema (plataformas como YouTube, TikTok, status de pipeline, contagens de mídias e tags) agora seguem o padrão clean de cápsulas refinadas.
   - **Padronização Global de Arredondamento (8px e full)**: Varredura completa em 100% dos componentes frontend eliminando todos os raios legados (`2xl`, `xl`, `lg`, `md`, `sm`). Todos os cards, containers, modais, dialogs, inputs e selects padronizados rigorosamente em `borderRadius="8px"`; todos os botões, badges, pílulas, chips de filtro, avatares e seletores padronizados em `borderRadius="full"`.
   - **Eliminação de Hexadecimais e RGBA**: Remoção de todos os códigos hexadecimais brutos e cores RGB soltas nos componentes JSX, substituídos integralmente pelos tokens semânticos e paletas do `theme.ts` (`cirqueira.<escala>.<tom>`, `border.subtle`, `blackAlpha.800`, `bg.panel`).
+---
+
+### ✅ Melhoria 119 — Redesign do Dashboard Geral (Cards Individuais Elevados com Ícones, Barra de Ações Rápidas Expandida e Painéis Modernizados)
+
+- **Status**: Concluído
+- **Data**: 07 de novembro de 2026
+- **Problema**:
+  - O Dashboard geral mantinha uma estrutura visual monótona e ultrapassada: o resumo de mídias utilizava um bloco único dividido por linhas de 1px com tipografia em caixa alta e sem ícones representativos.
+  - O cabeçalho continha apenas um ponto simples com texto plano, sem integração visual com a linguagem de pílulas do sistema.
+  - A barra de ações rápidas continha poucos botões genéricos, sem atalhos para recursos importantes como Downloads MP3, Transcrições e Spotify.
+  - Os painéis de seções (Vídeos, Livros, Gráficos, Atividades e Serviços) careciam de ícones nos cabeçalhos e usavam estados vazios muito simples.
+- **Solução**:
+  - **Cards de Métricas Individuais e Elevados (`CardsResumo`)**: Substituição da grade contínua de 1px por 4 cards individuais independentes com elevação suave (`bg.panel`, `border.subtle`, hover animado em `translateY(-1px)`). Cada métrica agora conta com um ícone dedicado em container colorido suave (Total de Mídias em Brand, Concluídas em Verde, Processamento em Âmbar e Erros em Vermelho), tipografia em hierarquia clara e métricas secundárias contextuais.
+  - **Cabeçalho com Pílula de Status Operacional**: Título do Dashboard alinhado a uma pílula refinada de status em tempo real com indicador luminoso verde/vermelho ("Todos os sistemas operacionais"), padronizada em `borderRadius="full"` e `bg="bg.panel"`.
+  - **Barra de Ações Rápidas Expandida (`BarraAcoesRapidas`)**: Inclusão de atalhos diretos para Downloads MP3, Transcrições e Spotify, além de Baixar Vídeo, Prints, Upload Manual, Nova Categoria e Sincronização, cada um com ícone temático e microinterações no hover.
+  - **Painéis com Ícones e Microinterações nos Cabeçalhos (`PainelDashboard`)**: Suporte a ícones em containers temáticos em todos os cabeçalhos de painéis (Vídeos, Livros, Origem das Mídias, Armazenamento, Ocupação, Atividades e Serviços).
+  - **Modernização de Livros em Áudio e Métricas de Vídeos**: Reformulação do estado vazio de escuta em andamento com card dedicado, ícone de fones e botão de ação direta; barras de proporção calibradas em altura expressiva (6px) com cantos arredondados.
 - **Arquivos**:
-  - `web/config/theme/theme.ts`
-  - `web/layouts/MainLayout.tsx`, `web/layouts/Sidebar.tsx`, `web/layouts/Header.tsx`
-  - `web/features/dashboard/Dashboard.tsx`, `web/features/dashboard/components/*`
-  - `web/features/downloads-video/DownloadsVideo.tsx`, `web/features/downloads-video/components/*`
-  - `web/features/downloads-audio/components/*`
-  - `web/features/central-midias/components/*`
-  - `web/features/prints/components/*`
-  - `web/features/livros-audio/components/*`
-  - `web/features/upload-manual/components/*`
-  - `web/features/google-fotos/components/*`
-  - `web/features/editor-imagem/components/*`
-  - `web/features/spotify/components/*`
-  - `web/features/transcricoes/Transcricoes.tsx`, `web/features/transcricoes/components/*`
+  - `web/features/dashboard/Dashboard.tsx`
+  - `web/features/dashboard/components/CardsResumo.tsx`
+  - `web/features/dashboard/components/BarraAcoesRapidas.tsx`
+  - `web/features/dashboard/components/CardsVideosMetricas.tsx`
+  - `web/features/dashboard/components/SecaoLivrosDashboard.tsx`
+  - `web/features/dashboard/components/PainelDashboard.tsx`
+  - `web/features/dashboard/components/GraficosDashboard.tsx`
+  - `web/features/dashboard/components/AtividadesRecentes.tsx`
+  - `web/features/dashboard/components/StatusIntegracoes.tsx`
   - `documentation/progresso/melhorias/MELHORIAS.md`, `documentation/progresso/melhorias/MELHORIAS_6.md`

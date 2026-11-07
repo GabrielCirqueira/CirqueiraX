@@ -74,25 +74,36 @@ const DashboardView = memo(function DashboardView() {
   return (
     <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }}>
       <VStack w="full" gap={6} alignItems="stretch">
-        <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
-          <VStack gap={1} alignItems="flex-start">
-            <Text as="h1" fontSize="2xl" fontWeight="semibold" color="fg" letterSpacing="tight">
+        <HStack justify="space-between" align={{ base: 'flex-start', sm: 'center' }} flexWrap="wrap" gap={4}>
+          <HStack gap={3} align="center" flexWrap="wrap">
+            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="black" color="fg" letterSpacing="tight">
               Dashboard
             </Text>
-            <HStack gap={2} fontSize="sm" color="fg.subtle">
+            <HStack
+              bg="bg.panel"
+              borderWidth="1px"
+              borderColor="border.subtle"
+              px={2.5}
+              py={1}
+              borderRadius="full"
+              fontSize="xs"
+              color="fg.muted"
+              alignItems="center"
+              gap={1.5}
+            >
               <Box
                 w={1.5}
                 h={1.5}
                 borderRadius="full"
                 bg={totalErros > 0 ? 'cirqueira.red.500' : 'cirqueira.green.500'}
               />
-              <Text as="span">
+              <Text as="span" fontSize="11px" fontWeight="medium">
                 {totalErros > 0
                   ? pluralizar(totalErros, 'erro pendente', 'erros pendentes')
-                  : 'Tudo funcionando'}
+                  : 'Todos os sistemas operacionais'}
               </Text>
             </HStack>
-          </VStack>
+          </HStack>
 
           <Button
             size="sm"
@@ -101,12 +112,12 @@ const DashboardView = memo(function DashboardView() {
             bg="bg.panel"
             borderColor="border.subtle"
             color="fg.muted"
-            _hover={{ bg: 'bg.muted', color: 'fg' }}
+            _hover={{ bg: 'bg.muted', color: 'fg', borderColor: 'border.emphasized' }}
             disabled={atualizandoManual}
             onClick={handleAtualizarTudo}
           >
             <RefreshCw
-              size={14}
+              size={13}
               style={{ animation: atualizandoManual ? 'spin 1s linear infinite' : 'none' }}
             />
             {atualizandoManual ? 'Atualizando...' : 'Atualizar'}

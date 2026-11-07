@@ -1,4 +1,5 @@
 import { Box, HStack, Text, VStack } from '@chakra-ui/react'
+import type { LucideIcon } from 'lucide-react'
 import { type ReactNode, memo } from 'react'
 import { type TomMetrica, corTextoDoTom } from '../utils/metricasDashboard'
 
@@ -6,6 +7,7 @@ interface PainelDashboardProps {
   titulo?: string
   descricao?: string
   acao?: ReactNode
+  icone?: LucideIcon
   semEspacamento?: boolean
   children: ReactNode
 }
@@ -14,6 +16,7 @@ export const PainelDashboard = memo(function PainelDashboard({
   titulo,
   descricao,
   acao,
+  icone: Icone,
   semEspacamento = false,
   children,
 }: PainelDashboardProps) {
@@ -37,16 +40,30 @@ export const PainelDashboard = memo(function PainelDashboard({
           pt={4}
           pb={semEspacamento ? 4 : 0}
         >
-          <VStack align="flex-start" gap={0.5} minW={0}>
-            <Text fontSize="sm" fontWeight="bold" color="fg" letterSpacing="tight">
-              {titulo}
-            </Text>
-            {descricao && (
-              <Text fontSize="xs" color="fg.subtle">
-                {descricao}
-              </Text>
+          <HStack gap={3} align="center" minW={0}>
+            {Icone && (
+              <Box
+                p={2}
+                borderRadius="8px"
+                bg="cirqueira.brand.500/12"
+                color="cirqueira.brand.400"
+                display="inline-flex"
+                flexShrink={0}
+              >
+                <Icone size={18} strokeWidth={2.2} />
+              </Box>
             )}
-          </VStack>
+            <VStack align="flex-start" gap={0.5} minW={0}>
+              <Text fontSize="sm" fontWeight="bold" color="fg" letterSpacing="tight">
+                {titulo}
+              </Text>
+              {descricao && (
+                <Text fontSize="xs" color="fg.subtle">
+                  {descricao}
+                </Text>
+              )}
+            </VStack>
+          </HStack>
           {acao}
         </HStack>
       )}
@@ -60,6 +77,7 @@ interface IndicadorMetricaProps {
   valor: ReactNode
   detalhe?: ReactNode
   tom?: TomMetrica
+  icone?: LucideIcon
   onClick?: () => void
 }
 
@@ -68,6 +86,7 @@ export const IndicadorMetrica = memo(function IndicadorMetrica({
   valor,
   detalhe,
   tom = 'neutro',
+  icone: Icone,
   onClick,
 }: IndicadorMetricaProps) {
   return (
@@ -78,21 +97,28 @@ export const IndicadorMetrica = memo(function IndicadorMetrica({
       minW={0}
       bg="bg.panel"
       cursor={onClick ? 'pointer' : 'default'}
-      transition="background 0.15s"
+      transition="background 0.15s ease"
       _hover={onClick ? { bg: 'bg.muted' } : undefined}
       onClick={onClick}
     >
+      <HStack gap={2} align="center">
+        {Icone && (
+          <Box color="fg.subtle">
+            <Icone size={13} strokeWidth={2.2} />
+          </Box>
+        )}
+        <Text
+          fontSize="11px"
+          fontWeight="semibold"
+          color="fg.subtle"
+          textTransform="uppercase"
+          letterSpacing="wide"
+        >
+          {rotulo}
+        </Text>
+      </HStack>
       <Text
-        fontSize="xs"
-        fontWeight="bold"
-        color="fg.subtle"
-        textTransform="uppercase"
-        letterSpacing="wider"
-      >
-        {rotulo}
-      </Text>
-      <Text
-        fontSize="2xl"
+        fontSize={{ base: 'xl', md: '2xl' }}
         fontWeight="black"
         letterSpacing="tight"
         lineHeight="1.2"
@@ -101,7 +127,7 @@ export const IndicadorMetrica = memo(function IndicadorMetrica({
         {valor}
       </Text>
       {detalhe && (
-        <Text fontSize="xs" color="fg.subtle" lineClamp={1}>
+        <Text fontSize="11px" color="fg.muted" lineClamp={1}>
           {detalhe}
         </Text>
       )}
@@ -115,7 +141,7 @@ interface BarraProporcaoProps {
 
 export const BarraProporcao = memo(function BarraProporcao({ segmentos }: BarraProporcaoProps) {
   return (
-    <HStack w="full" h="4px" gap={0} borderRadius="full" bg="bg.muted" overflow="hidden">
+    <HStack w="full" h="6px" gap={0} borderRadius="full" bg="bg.muted" overflow="hidden">
       {segmentos.map((segmento) => (
         <Box
           key={segmento.cor}

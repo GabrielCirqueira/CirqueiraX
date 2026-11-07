@@ -9,7 +9,16 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { ArrowRight, BookOpen, Flame, Play, Target } from 'lucide-react'
+import {
+  ArrowRight,
+  BookOpen,
+  Clock3,
+  Flame,
+  HardDrive,
+  Headphones,
+  Play,
+  Target,
+} from 'lucide-react'
 import { memo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDefinirMetaEscuta, useEstatisticasEscuta, usePainelLivros } from '../hooks/useDashboard'
@@ -58,14 +67,44 @@ const ContinuarOuvindo = memo(function ContinuarOuvindo({
 }) {
   if (livros.length === 0) {
     return (
-      <VStack align="flex-start" gap={2} py={2}>
-        <Text fontSize="sm" color="fg.muted">
-          Você ainda não ouviu nenhum livro.
-        </Text>
-        <Button asChild size="xs" variant="subtle" borderRadius="full">
-          <Link to="/livros-audio">Escolher um livro</Link>
+      <HStack
+        gap={3.5}
+        p={4}
+        borderRadius="8px"
+        bg="bg.muted"
+        borderWidth="1px"
+        borderColor="border.subtle"
+        align="center"
+        justify="space-between"
+        flexWrap="wrap"
+      >
+        <HStack gap={3} align="center" minW={0}>
+          <Box
+            p={2.5}
+            borderRadius="8px"
+            bg="cirqueira.purple.500/12"
+            color="cirqueira.purple.400"
+            display="inline-flex"
+            flexShrink={0}
+          >
+            <Headphones size={20} strokeWidth={2.2} />
+          </Box>
+          <VStack align="flex-start" gap={0.5} minW={0}>
+            <Text fontSize="xs" fontWeight="semibold" color="fg">
+              Nenhuma escuta em andamento
+            </Text>
+            <Text fontSize="11px" color="fg.subtle">
+              Inicie um audiolivro da sua biblioteca para acompanhar seu progresso
+            </Text>
+          </VStack>
+        </HStack>
+        <Button asChild size="xs" variant="outline" borderRadius="full">
+          <Link to="/livros-audio">
+            Explorar livros
+            <ArrowRight size={12} />
+          </Link>
         </Button>
-      </VStack>
+      </HStack>
     )
   }
 
@@ -289,16 +328,19 @@ const ArmazenamentoLivros = memo(function ArmazenamentoLivros({
         <IndicadorMetrica
           rotulo="Livros"
           valor={livros.total}
+          icone={BookOpen}
           detalhe={`${pluralizar(livros.pdfs, 'PDF', 'PDFs')} · ${formatarBytes(livros.bytesPdfs)}`}
         />
         <IndicadorMetrica
           rotulo="Áudio gerado"
           valor={formatarHoras(audios.segundos)}
+          icone={Headphones}
           detalhe={`${audios.partesProntas} de ${audios.partes} partes · ${formatarBytes(audios.bytes)}`}
         />
         <IndicadorMetrica
           rotulo="Espaço dos livros"
           valor={formatarBytes(bytesLivros)}
+          icone={HardDrive}
           detalhe={
             vozesExtras.bytes > 0
               ? `Vozes extras: ${formatarBytes(vozesExtras.bytes)}`
@@ -308,6 +350,7 @@ const ArmazenamentoLivros = memo(function ArmazenamentoLivros({
         <IndicadorMetrica
           rotulo="Fila de geração"
           valor={pluralizar(fila.partesNaFila, 'parte', 'partes')}
+          icone={Clock3}
           detalhe={
             fila.partesNaFila > 0
               ? `Cerca de ${formatarMinutos(fila.segundosRestantes)} · ${fila.segundosPorParte} s por parte`
@@ -449,6 +492,7 @@ export const SecaoLivrosDashboard = memo(function SecaoLivrosDashboard() {
   return (
     <PainelDashboard
       semEspacamento
+      icone={BookOpen}
       titulo="Livros em áudio"
       descricao="Onde você parou, quanto ouviu e quanto espaço os livros ocupam"
       acao={

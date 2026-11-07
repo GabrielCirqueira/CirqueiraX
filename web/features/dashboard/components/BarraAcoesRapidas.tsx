@@ -1,5 +1,14 @@
-import { Button, HStack } from '@chakra-ui/react'
-import { DownloadCloud, FolderPlus, Images, RefreshCw, UploadCloud } from 'lucide-react'
+import { Box, Button, HStack } from '@chakra-ui/react'
+import {
+  AudioLines,
+  Disc3,
+  DownloadCloud,
+  FolderPlus,
+  Images,
+  Music,
+  RefreshCw,
+  UploadCloud,
+} from 'lucide-react'
 import { memo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSincronizarPasta } from '../hooks/useDashboard'
@@ -7,9 +16,12 @@ import type { PastaSync } from '../types'
 import { ModalCriarCategoria } from './ModalCriarCategoria'
 
 const ACOES_NAVEGACAO = [
-  { rota: '/downloads', rotulo: 'Baixar vídeo', icone: DownloadCloud },
-  { rota: '/prints', rotulo: 'Prints', icone: Images },
-  { rota: '/upload-manual', rotulo: 'Upload manual', icone: UploadCloud },
+  { rota: '/downloads', rotulo: 'Baixar vídeo', icone: DownloadCloud, cor: 'cirqueira.brand.400' },
+  { rota: '/downloads-mp3', rotulo: 'Downloads MP3', icone: Music, cor: 'cirqueira.purple.400' },
+  { rota: '/transcricoes', rotulo: 'Transcrições', icone: AudioLines, cor: 'cirqueira.teal.400' },
+  { rota: '/spotify', rotulo: 'Spotify', icone: Disc3, cor: 'cirqueira.green.400' },
+  { rota: '/prints', rotulo: 'Prints', icone: Images, cor: 'cirqueira.cyan.400' },
+  { rota: '/upload-manual', rotulo: 'Upload manual', icone: UploadCloud, cor: 'cirqueira.amber.400' },
 ]
 
 export interface BarraAcoesRapidasProps {
@@ -63,10 +75,18 @@ export const BarraAcoesRapidas = memo(function BarraAcoesRapidas({
             borderColor="border.subtle"
             fontWeight="semibold"
             color="fg.muted"
-            _hover={{ bg: 'bg.muted', color: 'fg' }}
+            transition="all 0.2s ease"
+            _hover={{
+              bg: 'bg.muted',
+              borderColor: 'border.emphasized',
+              color: 'fg',
+              transform: 'translateY(-1px)',
+            }}
             onClick={() => navigate(acao.rota)}
           >
-            <acao.icone size={14} />
+            <Box as="span" color={acao.cor} display="inline-flex">
+              <acao.icone size={14} />
+            </Box>
             {acao.rotulo}
           </Button>
         ))}
