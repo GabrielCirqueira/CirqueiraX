@@ -23,7 +23,11 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
     private const string DATA_LOCAL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
     private const string CHAVE_FAIXA = 'LOWER(TRIM(r.nome_faixa))';
     private const string CHAVE_ARTISTA = 'LOWER(TRIM(r.artista_principal))';
-    private const string ORDEM_ARTISTAS = 'ms DESC, streams DESC';
+    private const string ORDEM_ARTISTAS = 'streams DESC, ms DESC';
+    private const string JUNCAO_ARTISTAS = 'LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa';
+    private const string CHAVE_ARTISTA_CREDITADO = 'LOWER(TRIM(COALESCE(af.nome_artista, r.artista_principal)))';
+    private const string NOME_ARTISTA_CREDITADO = 'MAX(COALESCE(af.nome_artista, r.artista_principal))';
+    private const string CODIGO_ARTISTA_CREDITADO = 'MAX(CASE WHEN af.id IS NULL THEN r.codigo_artista_principal ELSE af.codigo_artista END)';
     private const string ORDEM_MUSICAS = 'streams DESC, ms DESC';
 
     public function __construct(ManagerRegistry $registry)
@@ -66,16 +70,19 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $filtros = $this->filtroPeriodo($periodo, $parametros);
 
         $linhas = $this->consultar(sprintf(
-            'SELECT MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista,
+            'SELECT %s AS artista, %s AS codigo_artista,
                 SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
-            FROM reproducao_spotify r
+            FROM reproducao_spotify r %s
             WHERE r.usuario_id = :usuarioId %s
             GROUP BY %s
             HAVING streams > 0
             ORDER BY %s
             LIMIT %d',
+            self::NOME_ARTISTA_CREDITADO,
+            self::CODIGO_ARTISTA_CREDITADO,
+            self::JUNCAO_ARTISTAS,
             $filtros,
-            self::CHAVE_ARTISTA,
+            self::CHAVE_ARTISTA_CREDITADO,
             self::ORDEM_ARTISTAS,
             $limite,
         ), $parametros);
@@ -135,17 +142,23 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             "SELECT COALESCE(SUM(r.ms_reproduzidos), 0) AS ms,
                 COALESCE(SUM(r.ms_reproduzidos >= :corte), 0) AS streams,
                 COUNT(*) AS reproducoes,
-                COUNT(DISTINCT %s) AS artistas,
                 COUNT(DISTINCT CONCAT(%s, '|', %s)) AS faixas,
                 COUNT(DISTINCT DATE(%s)) AS dias,
                 MIN(r.tocada_em) AS primeira,
                 MAX(r.tocada_em) AS ultima
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId %s",
-            self::CHAVE_ARTISTA,
             self::CHAVE_FAIXA,
             self::CHAVE_ARTISTA,
             $periodo->expressaoData(),
+            $filtros,
+        ), $parametros);
+        $linhaArtistas = $this->consultarLinha(sprintf(
+            'SELECT COUNT(DISTINCT %s) AS artistas
+            FROM reproducao_spotify r %s
+            WHERE r.usuario_id = :usuarioId %s',
+            self::CHAVE_ARTISTA_CREDITADO,
+            self::JUNCAO_ARTISTAS,
             $filtros,
         ), $parametros);
 
@@ -153,7 +166,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             'minutos' => (int) round(((int) ($linha['ms'] ?? 0)) / 60000),
             'streams' => (int) ($linha['streams'] ?? 0),
             'reproducoes' => (int) ($linha['reproducoes'] ?? 0),
-            'artistas' => (int) ($linha['artistas'] ?? 0),
+            'artistas' => (int) ($linhaArtistas['artistas'] ?? 0),
             'faixas' => (int) ($linha['faixas'] ?? 0),
             'dias' => (int) ($linha['dias'] ?? 0),
             'primeira' => is_string($linha['primeira'] ?? null) ? $linha['primeira'] : null,
@@ -193,16 +206,23 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $filtros = $this->filtroPeriodo($periodo, $parametros);
 
         $linha = $this->consultarLinha(sprintf(
-            'SELECT COALESCE(SUM(ms), 0) AS ms FROM (
-                SELECT SUM(r.ms_reproduzidos) AS ms
-                FROM reproducao_spotify r
-                WHERE r.usuario_id = :usuarioId %s
-                GROUP BY %s
-                ORDER BY ms DESC
-                LIMIT %d
-            ) topo',
+            'WITH creditos AS (
+                SELECT r.uuid, r.ms_reproduzidos, %1$s AS chave
+                FROM reproducao_spotify r %2$s
+                WHERE r.usuario_id = :usuarioId %3$s
+            ), topo AS (
+                SELECT chave FROM creditos
+                GROUP BY chave
+                HAVING SUM(ms_reproduzidos >= :corte) > 0
+                ORDER BY SUM(ms_reproduzidos >= :corte) DESC, SUM(ms_reproduzidos) DESC
+                LIMIT %4$d
+            )
+            SELECT COALESCE(SUM(ms_reproduzidos), 0) AS ms FROM (
+                SELECT DISTINCT c.uuid, c.ms_reproduzidos FROM creditos c JOIN topo t ON t.chave = c.chave
+            ) reproducoes_topo',
+            self::CHAVE_ARTISTA_CREDITADO,
+            self::JUNCAO_ARTISTAS,
             $filtros,
-            self::CHAVE_ARTISTA,
             $quantidade,
         ), $parametros);
 
@@ -389,7 +409,8 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
     {
         $parametros = $this->parametrosBase($usuario);
         $parametros['artista'] = $artista;
-        $chave = sprintf('%s', self::CHAVE_ARTISTA);
+        $chave = self::CHAVE_ARTISTA_CREDITADO;
+        $juncao = self::JUNCAO_ARTISTAS;
         $alvo = 'LOWER(TRIM(:artista))';
         $ordem = self::ORDEM_ARTISTAS;
 
@@ -398,12 +419,13 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             $chave = sprintf("CONCAT(%s, '|', %s)", self::CHAVE_FAIXA, self::CHAVE_ARTISTA);
             $alvo = "CONCAT(LOWER(TRIM(:faixa)), '|', LOWER(TRIM(:artista)))";
             $ordem = self::ORDEM_MUSICAS;
+            $juncao = '';
         }
 
         $linhas = $this->consultar(sprintf(
             'WITH mensal AS (
                 SELECT YEAR(%1$s) AS ano, MONTH(%1$s) AS mes, %2$s AS chave, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
-                FROM reproducao_spotify r
+                FROM reproducao_spotify r %6$s
                 WHERE r.usuario_id = :usuarioId
                 GROUP BY ano, mes, chave
                 HAVING streams > 0
@@ -419,6 +441,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             $alvo,
             $tamanhoTopo,
             $ordem,
+            $juncao,
         ), $parametros);
 
         return array_map(static fn (array $linha): array => [
@@ -432,7 +455,8 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
     {
         $parametros = $this->parametrosBase($usuario);
         $parametros['artista'] = $artista;
-        $agrupamento = self::CHAVE_ARTISTA;
+        $agrupamento = self::CHAVE_ARTISTA_CREDITADO;
+        $juncao = self::JUNCAO_ARTISTAS;
         $alvo = 'LOWER(TRIM(:artista))';
         $ordem = self::ORDEM_ARTISTAS;
 
@@ -441,12 +465,13 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             $agrupamento = sprintf("CONCAT(%s, '|', %s)", self::CHAVE_FAIXA, self::CHAVE_ARTISTA);
             $alvo = "CONCAT(LOWER(TRIM(:faixa)), '|', LOWER(TRIM(:artista)))";
             $ordem = self::ORDEM_MUSICAS;
+            $juncao = '';
         }
 
         $linha = $this->consultarLinha(sprintf(
             'WITH totais AS (
                 SELECT %1$s AS chave, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
-                FROM reproducao_spotify r
+                FROM reproducao_spotify r %4$s
                 WHERE r.usuario_id = :usuarioId
                 GROUP BY chave
                 HAVING streams > 0
@@ -457,6 +482,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
             $agrupamento,
             $alvo,
             $ordem,
+            $juncao,
         ), $parametros);
 
         return null === $linha ? null : (int) $linha['posicao'];
@@ -471,7 +497,8 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $filtros = $this->filtroArtista($artista, $parametros) . $this->filtroFaixa($nomeFaixa, $parametros);
 
         $linha = $this->consultarLinha(sprintf(
-            "SELECT MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista,
+            "SELECT MAX(r.artista_principal) AS artista,
+                COALESCE(MAX(CASE WHEN LOWER(TRIM(r.artista_principal)) = LOWER(TRIM(:artistaFiltro)) THEN r.codigo_artista_principal END), MAX(r.codigo_artista_principal)) AS codigo_artista,
                 MAX(r.nome_faixa) AS nome_faixa, MAX(r.codigo_faixa) AS codigo_faixa, MAX(r.album) AS album,
                 COALESCE(SUM(r.ms_reproduzidos >= :corte), 0) AS streams, COALESCE(SUM(r.ms_reproduzidos), 0) AS ms,
                 COUNT(*) AS reproducoes, COUNT(DISTINCT %s) AS faixas, COUNT(DISTINCT LOWER(TRIM(r.album))) AS albuns,
@@ -489,7 +516,7 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         }
 
         return [
-            'artista' => (string) $linha['artista'],
+            'artista' => null === $nomeFaixa ? trim($artista) : (string) $linha['artista'],
             'codigo_artista' => is_string($linha['codigo_artista']) ? $linha['codigo_artista'] : null,
             'nome_faixa' => is_string($linha['nome_faixa']) ? $linha['nome_faixa'] : null,
             'codigo_faixa' => is_string($linha['codigo_faixa']) ? $linha['codigo_faixa'] : null,
@@ -518,16 +545,19 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $parametros = $this->parametrosPeriodo($usuario, $periodo);
 
         $linhas = $this->consultar(sprintf(
-            'SELECT MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista,
+            'SELECT %s AS artista, %s AS codigo_artista,
                 MIN(r.tocada_em) AS primeira,
                 SUM(r.tocada_em >= :inicioUtc AND r.ms_reproduzidos >= :corte) AS streams,
                 SUM(CASE WHEN r.tocada_em >= :inicioUtc THEN r.ms_reproduzidos ELSE 0 END) AS ms
-            FROM reproducao_spotify r
+            FROM reproducao_spotify r %s
             WHERE r.usuario_id = :usuarioId AND r.tocada_em < :fimUtc
             GROUP BY %s
             HAVING primeira >= :inicioUtc
             ORDER BY streams DESC, ms DESC',
-            self::CHAVE_ARTISTA,
+            self::NOME_ARTISTA_CREDITADO,
+            self::CODIGO_ARTISTA_CREDITADO,
+            self::JUNCAO_ARTISTAS,
+            self::CHAVE_ARTISTA_CREDITADO,
         ), $parametros);
 
         return array_map(static fn (array $linha): array => [
@@ -581,25 +611,28 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
         $linhas = $this->consultar(sprintf(
             'SELECT p.artista, p.codigo_artista, p.streams, p.ms, a.ultima_antes, p.voltou_em
             FROM (
-                SELECT %1$s AS chave, MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista,
+                SELECT %1$s AS chave, %4$s AS artista, %5$s AS codigo_artista,
                     COUNT(*) AS streams, SUM(r.ms_reproduzidos) AS ms, MIN(r.tocada_em) AS voltou_em
-                FROM reproducao_spotify r
+                FROM reproducao_spotify r %6$s
                 WHERE r.usuario_id = :usuarioId AND r.ms_reproduzidos >= :corte
                     AND r.tocada_em >= :inicioUtc AND r.tocada_em < :fimUtc
                 GROUP BY chave
             ) p
             JOIN (
                 SELECT %1$s AS chave, MAX(r.tocada_em) AS ultima_antes
-                FROM reproducao_spotify r
+                FROM reproducao_spotify r %6$s
                 WHERE r.usuario_id = :usuarioId AND r.tocada_em < :inicioUtc
                 GROUP BY chave
             ) a ON a.chave = p.chave
             WHERE a.ultima_antes < DATE_SUB(p.voltou_em, INTERVAL %2$d DAY)
             ORDER BY p.streams DESC, p.ms DESC
             LIMIT %3$d',
-            self::CHAVE_ARTISTA,
+            self::CHAVE_ARTISTA_CREDITADO,
             $diasAusencia,
             $limite,
+            self::NOME_ARTISTA_CREDITADO,
+            self::CODIGO_ARTISTA_CREDITADO,
+            self::JUNCAO_ARTISTAS,
         ), $parametros);
 
         return array_map(static fn (array $linha): array => [
@@ -725,7 +758,13 @@ final class AnaliseReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $parametros['artistaFiltro'] = $artista;
 
-        return sprintf(' AND %s = LOWER(TRIM(:artistaFiltro))', self::CHAVE_ARTISTA);
+        return sprintf(
+            ' AND (%s = LOWER(TRIM(:artistaFiltro)) OR EXISTS (
+                SELECT 1 FROM artista_faixa_spotify afx
+                WHERE afx.codigo_faixa = r.codigo_faixa AND LOWER(TRIM(afx.nome_artista)) = LOWER(TRIM(:artistaFiltro))
+            ))',
+            self::CHAVE_ARTISTA,
+        );
     }
 
     /**

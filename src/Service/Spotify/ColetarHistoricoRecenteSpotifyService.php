@@ -11,6 +11,7 @@ use App\Entity\ReproducaoSpotify;
 use App\Enum\FonteReproducaoSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
+use App\Repository\ArtistaFaixaSpotifyRepository;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\ReproducaoSpotifyRepository;
 use Psr\Log\LoggerInterface;
@@ -27,6 +28,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
         private EstimarTempoReproduzidoSpotifyService $estimarTempoReproduzidoService,
         private CacheAnaliseSpotifyService $cacheAnalise,
+        private ArtistaFaixaSpotifyRepository $artistaFaixaRepository,
         private LoggerInterface $logger,
     ) {
     }
@@ -146,6 +148,13 @@ final readonly class ColetarHistoricoRecenteSpotifyService
 
             $this->reproducaoSpotifyRepository->salvar($reproducao, false);
             ++$totalNovas;
+
+            if (null !== $item->codigoFaixa) {
+                $this->artistaFaixaRepository->registrarArtistasDaFaixa($item->codigoFaixa, [
+                    ['nome' => $item->artistaPrincipal, 'codigo' => $item->codigoArtistaPrincipal],
+                    ...array_map(static fn (string $nome): array => ['nome' => $nome, 'codigo' => null], array_values($item->demaisArtistas)),
+                ]);
+            }
 
             if (null !== $item->urlCapa && null !== $item->codigoFaixa && '' !== trim($item->codigoFaixa)) {
                 $this->enriquecerImagensService->catalogarCapaColetada(

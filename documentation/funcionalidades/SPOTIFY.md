@@ -35,6 +35,7 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 - Cada coleta pede sempre as 50 últimas músicas, sem cursor `after`, e a deduplicação descarta as já gravadas. Assim, uma música que o Spotify registra com atraso, com horário anterior à última coletada, ainda entra.
 - Com a página aberta, o cartão **Tocando agora** dispara uma sincronização silenciosa 20 s depois de cada troca de música.
 - O Spotify só informa a música depois que ela termina. Músicas puladas ou muito curtas podem não aparecer em "tocadas recentemente", mesmo estando na playlist "Hoje" do app; elas entram ao importar o histórico estendido.
+- **Artistas de cada música** (`artista_faixa_spotify`): uma linha por artista creditado em cada música (`codigo_faixa`, `posicao`, 0 = principal). A coleta grava os artistas que a API já devolve. Para o histórico importado, que só traz o artista principal, a rotina `SincronizarArtistasFaixasSpotifyMessage` roda a cada minuto e busca 40 músicas sem artistas em `GET /tracks/{id}`, das mais recentes para as mais antigas. Se a música não existir mais, grava só o artista principal. Também dá para rodar na mão: `php bin/console app:spotify:artistas-faixas --limite=500`. Enquanto uma música não tem artistas gravados, ela conta só para o artista principal.
 - Se a API do Spotify falhar, a coleta devolve zero, igual à rotina agendada. O motivo fica só no log.
 
 ### Tempo ouvido nas reproduções da API
@@ -66,12 +67,13 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 As métricas seguem sempre as regras do próprio Spotify, para os números baterem com os do app. O CirqueiraX não cria regra própria de contagem.
 
 1. **Stream**: só conta como stream a reprodução com 30 segundos ou mais (`30.000 ms`). Rankings só listam o que teve ao menos um stream.
-2. **Ordem dos rankings**: como no Wrapped pessoal, artistas são ordenados pelos minutos ouvidos. Músicas e álbuns são ordenados por streams. Vale para cápsula, rankings, resumo do ano, recordes, hábitos, meses no top 5 e posição geral no detalhe.
-3. **Minutos**: somam todo o tempo ouvido, inclusive reproduções com menos de 30 s, nos totais e nos rankings.
-4. **Calendário em UTC**: mês e ano começam e terminam em UTC, como no Spotify. Os dias dentro de mês, ano e "desde sempre" (minutos por dia, dia recorde, maior repetição num dia, sequências) também são dias UTC, para a soma dos dias bater com o mês.
-5. **Horário local onde o Spotify não define regra**: hora do dia e dia da semana (mapa de hábitos, horário de pico), "Hoje", "Últimos N dias", "Personalizado" e as datas exibidas seguem o horário de Brasília (`America/Sao_Paulo`).
-6. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
-7. **Comparação com o Mês Anterior**:
+2. **Ordem dos rankings**: artistas, músicas e álbuns são ordenados por streams, como no Wrapped e nos Top Artists do Spotify. Os minutos só desempatam. Vale para cápsula, rankings, resumo do ano, recordes, hábitos, meses no top 5 e posição geral no detalhe.
+3. **Crédito para todos os artistas da música**: cada stream e cada minuto contam inteiros para todos os artistas creditados na música, não só para o principal. Exemplo: Play (K-391, Alan Walker, Martin Tungevaag, Mangoo) conta para os quatro. O Spotify dá peso maior ao artista principal; aqui todos recebem o crédito completo, por escolha do usuário. Totais gerais e rankings de músicas não duplicam nada: cada reprodução continua contando uma vez.
+4. **Minutos**: somam todo o tempo ouvido, inclusive reproduções com menos de 30 s, nos totais e nos rankings.
+5. **Calendário em UTC**: mês e ano começam e terminam em UTC, como no Spotify. Os dias dentro de mês, ano e "desde sempre" (minutos por dia, dia recorde, maior repetição num dia, sequências) também são dias UTC, para a soma dos dias bater com o mês.
+6. **Horário local onde o Spotify não define regra**: hora do dia e dia da semana (mapa de hábitos, horário de pico), "Hoje", "Últimos N dias", "Personalizado" e as datas exibidas seguem o horário de Brasília (`America/Sao_Paulo`).
+7. **Mês em Andamento**: o mês corrente é exibido como "em andamento" na interface, recalculando suas métricas a cada nova coleta ou importação.
+8. **Comparação com o Mês Anterior**:
    - Variação percentual de músicas distintas: `((músicas_mês_atual - músicas_mês_anterior) / músicas_mês_anterior) * 100`.
    - Variação de ranking (`movimento`): diferença de posições no top 5 em relação ao mês imediatamente anterior.
    - Flag de estreia (`isEstreia`): sinaliza se o artista ou música entrou no top 5 pela primeira vez no histórico recente.
@@ -140,12 +142,12 @@ A página do Spotify (`/spotify` e suas telas de detalhe) é uma **exceção int
 
 ## 7. Análises
 
-Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia da semana no horário de Brasília, stream a partir de 30 s, minutos somando todo o tempo ouvido, artistas ordenados por minutos e músicas por streams. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
+Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia da semana no horário de Brasília, stream a partir de 30 s, minutos somando todo o tempo ouvido, artistas, músicas e álbuns ordenados por streams, artistas creditados com todos os artistas da música. Uma música é identificada pelo nome e pelo artista principal, sem diferenciar maiúsculas.
 
 | Seção | O que mostra | Regra |
 | :--- | :--- | :--- |
 | Tocando agora | Faixa atual, capa, progresso, vezes ouvida e primeira vez | `GET /me/player/currently-playing`. Consulta de novo perto do fim da faixa; sem conta conectada não aparece |
-| Recordes e sequências | Sequência atual e maior sequência, dia e mês recorde, música mais ouvida, artista com mais horas, maior repetição num dia | Sequência atual conta até ontem quando ainda não houve música hoje |
+| Recordes e sequências | Sequência atual e maior sequência, dia e mês recorde, música mais ouvida, artista mais ouvido, maior repetição num dia | Sequência atual conta até ontem quando ainda não houve música hoje |
 | Evolução por mês | Barras de 12, 24 ou 60 meses e comparação do mês atual | Compara até o mesmo dia do mês passado e do mesmo mês no ano anterior |
 | Hábitos | Mapa dia × hora, % do tempo nos 5 artistas do topo, músicas ouvidas uma vez, streams por música, pulos e aleatório | Pulos e aleatório só contam reproduções vindas do histórico estendido |
 | Descobertas | Artistas novos, músicas novas, redescobertas e obsessões | Novo = primeira reprodução dentro do período. Redescoberta = volta após 90 dias sem ouvir. Obsessão = 8 ou mais streams em 7 dias |

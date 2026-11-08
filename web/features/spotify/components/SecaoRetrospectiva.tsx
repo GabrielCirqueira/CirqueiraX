@@ -238,7 +238,12 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                 />
               }
               titulo={artista.nome}
-              subtitulo={<MinutosSpotify minutos={artista.minutos} />}
+              subtitulo={
+                <>
+                  {formatarNumeroPtBr(artista.streams)} streams ·{' '}
+                  <MinutosSpotify minutos={artista.minutos} />
+                </>
+              }
             />
           ))}
         </ListaTopo>

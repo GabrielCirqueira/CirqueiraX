@@ -372,7 +372,13 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
-              AND LOWER(TRIM(r.artista_principal)) = LOWER(TRIM(:artista))
+              AND (
+                LOWER(TRIM(r.artista_principal)) = LOWER(TRIM(:artista))
+                OR EXISTS (
+                    SELECT 1 FROM artista_faixa_spotify afx
+                    WHERE afx.codigo_faixa = r.codigo_faixa AND LOWER(TRIM(afx.nome_artista)) = LOWER(TRIM(:artista))
+                )
+              )
               {$wherePeriodo}
             GROUP BY r.nome_faixa
             HAVING total_streams > 0
@@ -413,17 +419,18 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $sql = "
             SELECT 
-                r.artista_principal,
-                MAX(r.codigo_artista_principal) as codigo_artista,
+                MAX(COALESCE(af.nome_artista, r.artista_principal)) as artista_principal,
+                MAX(CASE WHEN af.id IS NULL THEN r.codigo_artista_principal ELSE af.codigo_artista END) as codigo_artista,
                 SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
+            LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-            GROUP BY r.artista_principal
+            GROUP BY LOWER(TRIM(COALESCE(af.nome_artista, r.artista_principal)))
             HAVING total_streams > 0
-            ORDER BY total_ms DESC, total_streams DESC
+            ORDER BY total_streams DESC, total_ms DESC
             LIMIT :limite
         ";
 
@@ -564,17 +571,18 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
 
         $sql = "
             SELECT 
-                r.artista_principal,
-                MAX(r.codigo_artista_principal) as codigo_artista,
+                MAX(COALESCE(af.nome_artista, r.artista_principal)) as artista_principal,
+                MAX(CASE WHEN af.id IS NULL THEN r.codigo_artista_principal ELSE af.codigo_artista END) as codigo_artista,
                 SUM(CASE WHEN r.ms_reproduzidos >= :corteStreamMs THEN 1 ELSE 0 END) as total_streams,
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
+            LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-            GROUP BY r.artista_principal
+            GROUP BY LOWER(TRIM(COALESCE(af.nome_artista, r.artista_principal)))
             HAVING total_streams > 0
-            ORDER BY total_ms DESC, total_streams DESC
+            ORDER BY total_streams DESC, total_ms DESC
             LIMIT :limite
         ";
 
@@ -731,14 +739,16 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
 
         // 5. Artistas descobertos no mês
         $sqlDescobertos = "
-            SELECT COUNT(DISTINCT r.artista_principal) as total
+            SELECT COUNT(DISTINCT LOWER(TRIM(COALESCE(af.nome_artista, r.artista_principal)))) as total
             FROM reproducao_spotify r
+            LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
             WHERE r.usuario_id = :usuarioId
               AND r.tocada_em >= :inicioUtc
               AND r.tocada_em < :fimUtc
-              AND r.artista_principal NOT IN (
-                  SELECT DISTINCT r2.artista_principal
+              AND LOWER(TRIM(COALESCE(af.nome_artista, r.artista_principal))) NOT IN (
+                  SELECT DISTINCT LOWER(TRIM(COALESCE(af2.nome_artista, r2.artista_principal)))
                   FROM reproducao_spotify r2
+                  LEFT JOIN artista_faixa_spotify af2 ON af2.codigo_faixa = r2.codigo_faixa
                   WHERE r2.usuario_id = :usuarioId
                     AND r2.tocada_em < :inicioUtc
               )

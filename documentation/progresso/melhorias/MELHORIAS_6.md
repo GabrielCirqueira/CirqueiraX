@@ -792,3 +792,25 @@
   - `web/features/spotify/components/CartaoTocandoAgora.tsx`, `web/features/spotify/components/PainelConexaoSpotify.tsx`, `web/features/spotify/components/EstadoVazioSpotify.tsx`
   - `documentation/funcionalidades/SPOTIFY.md`
 
+
+---
+
+### ✅ Melhoria 128 — Streams e Minutos Contam para Todos os Artistas da Música
+
+- **Status**: Concluído
+- **Data**: 08 de novembro de 2026
+- **Problema**:
+  - Uma música com vários artistas contava só para o artista principal. Play (K-391 com Alan Walker), End of Time e Strongest (Alan Walker Remix) não entravam nos números do Alan Walker.
+  - O histórico importado do Spotify só traz o artista principal, então não havia de onde tirar os demais.
+  - A M124 passou a ordenar os artistas por minutos com base numa fonte secundária. A metodologia oficial do Spotify ordena por streams.
+- **Solução**:
+  - Nova tabela `artista_faixa_spotify` com todos os artistas de cada música. A coleta grava os artistas que a API devolve. Uma rotina a cada minuto busca 40 músicas sem artistas em `GET /tracks/{id}` até cobrir todo o histórico (cerca de 14,9 mil músicas). Comando manual: `app:spotify:artistas-faixas --limite=N`.
+  - Rankings de artistas, top 5 de artistas, artista do ano, detalhe do artista, meses no top 5, posição geral, artistas novos, redescobertas, concentração nos 5 do topo e curiosidades passam a creditar a música inteira para cada artista. Totais e rankings de músicas não duplicam.
+  - Os números antigos foram recalculados: os cálculos são feitos na hora a partir das reproduções, então valem para todo o histórico assim que os artistas de cada música são gravados.
+  - Artistas voltam a ser ordenados por streams, com minutos como desempate. Top artistas da Retrospectiva mostram streams e minutos.
+- **Arquivos**:
+  - `src/Entity/ArtistaFaixaSpotify.php`, `src/Repository/ArtistaFaixaSpotifyRepository.php`, `migrations/Version20261108220436.php` (novos)
+  - `src/Service/Spotify/SincronizarArtistasFaixasSpotifyService.php`, `src/Message/SincronizarArtistasFaixasSpotifyMessage.php`, `src/MessageHandler/SincronizarArtistasFaixasSpotifyMessageHandler.php`, `src/Command/SincronizarArtistasFaixasSpotifyCommand.php` (novos)
+  - `src/Schedule.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Repository/AnaliseReproducaoSpotifyRepository.php`, `src/Repository/ReproducaoSpotifyRepository.php`
+  - `web/features/spotify/components/SecaoRetrospectiva.tsx`
+  - `documentation/funcionalidades/SPOTIFY.md`
