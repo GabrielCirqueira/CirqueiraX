@@ -41,7 +41,7 @@ export const ModalMusicasItemSpotify = memo(function ModalMusicasItemSpotify({
       onOpenChange={(evento) => !evento.open && onFechar()}
       scrollBehavior="inside"
       placement="center"
-      size={{ base: 'full', md: 'lg' }}
+      size="lg"
     >
       <Portal>
         <Dialog.Backdrop bg="blackAlpha.800" backdropFilter="blur(4px)" />
@@ -51,10 +51,14 @@ export const ModalMusicasItemSpotify = memo(function ModalMusicasItemSpotify({
             bg="cirqueira.spotify.cartao"
             border="1px solid"
             borderColor="cirqueira.spotify.cartaoElevado"
-            borderRadius={{ base: '0', md: '8px' }}
+            borderRadius="8px"
             color="cirqueira.spotify.textoPrincipal"
             fontFamily="inter"
-            maxH={{ md: '85vh' }}
+            w={{ base: 'calc(100% - 24px)', md: 'full' }}
+            maxW="lg"
+            h="auto"
+            maxH={{ base: '85dvh', md: '75vh' }}
+            my="auto"
           >
             <Dialog.Header
               px={{ base: 4, md: 6 }}
@@ -100,7 +104,13 @@ export const ModalMusicasItemSpotify = memo(function ModalMusicasItemSpotify({
               </Dialog.CloseTrigger>
             </Dialog.Header>
 
-            <Dialog.Body px={{ base: 4, md: 6 }} pb={{ base: 4, md: 6 }}>
+            <Dialog.Body
+              px={{ base: 4, md: 6 }}
+              pb={{ base: 4, md: 6 }}
+              overflowY="auto"
+              flex="1"
+              minH={0}
+            >
               {isLoading ? (
                 <VStack gap={1.5} align="stretch">
                   <Skeleton h="44px" borderRadius="6px" />

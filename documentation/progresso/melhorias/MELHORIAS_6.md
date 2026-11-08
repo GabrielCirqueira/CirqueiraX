@@ -764,6 +764,7 @@
   - Artistas e álbuns abrem com as 5 músicas mais ouvidas no mesmo período do ranking. Se houver mais, o botão **Ver todas as músicas** abre um popup (tela cheia no celular) com a lista completa.
   - O endpoint `GET /api/v1/spotify/artistas/top-musicas` passou a aceitar o mesmo período do ranking (`tipo`, `dias`, `ano`, `mes`, `inicio`, `fim`), filtro por `album` e `limite` (até 500). O período é resolvido pela mesma regra do ranking (`ObterResumoIntervaloPersonalizadoService::resolverIntervalo`).
   - A Cápsula do mês continua mostrando as músicas do mês.
+  - Correção (08/11/2026): o popup ocupava a tela inteira na vertical. Agora tem tamanho fixo (`lg`), altura máxima de 75% da tela no computador e 85% no celular, e a lista rola por dentro.
 - **Arquivos**:
   - `src/Controller/Spotify/SpotifyController.php`, `src/Service/Spotify/ObterTopMusicasArtistaService.php`, `src/Service/Spotify/ObterResumoIntervaloPersonalizadoService.php`, `src/Repository/ReproducaoSpotifyRepository.php`
   - `web/features/spotify/components/ListaMusicasItemSpotify.tsx` (antes `ListaTopMusicasArtista.tsx`), `web/features/spotify/components/ModalMusicasItemSpotify.tsx` (novo), `web/features/spotify/components/ItensRankingSpotify.tsx`, `web/features/spotify/components/SecaoHojeSemana.tsx`, `web/features/spotify/components/SecaoCapsulaSonora.tsx`
