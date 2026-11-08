@@ -751,3 +751,22 @@
   - `web/features/spotify/components/` (cápsula, rankings, seções e gráficos), `web/features/spotify/DetalheArtistaSpotify.tsx`, `web/features/spotify/DetalheMusicaSpotify.tsx`
   - `documentation/funcionalidades/SPOTIFY.md`
 
+---
+
+### ✅ Melhoria 126 — Músicas de Artistas e Álbuns no Ranking com Popup da Lista Completa
+
+- **Status**: Concluído
+- **Data**: 08 de novembro de 2026
+- **Problema**:
+  - No ranking da primeira seção (músicas, artistas e álbuns), abrir um artista mostrava no máximo 5 músicas, sem como ver o resto. Álbuns não abriam.
+  - As músicas do artista ignoravam o período escolhido: em "Hoje", "Últimos N dias", "Ano" e "Personalizado" apareciam os números de sempre (por exemplo, Faded com 85 streams no ranking de hoje). Só "Mês" filtrava.
+- **Solução**:
+  - Artistas e álbuns abrem com as 5 músicas mais ouvidas no mesmo período do ranking. Se houver mais, o botão **Ver todas as músicas** abre um popup (tela cheia no celular) com a lista completa.
+  - O endpoint `GET /api/v1/spotify/artistas/top-musicas` passou a aceitar o mesmo período do ranking (`tipo`, `dias`, `ano`, `mes`, `inicio`, `fim`), filtro por `album` e `limite` (até 500). O período é resolvido pela mesma regra do ranking (`ObterResumoIntervaloPersonalizadoService::resolverIntervalo`).
+  - A Cápsula do mês continua mostrando as músicas do mês.
+- **Arquivos**:
+  - `src/Controller/Spotify/SpotifyController.php`, `src/Service/Spotify/ObterTopMusicasArtistaService.php`, `src/Service/Spotify/ObterResumoIntervaloPersonalizadoService.php`, `src/Repository/ReproducaoSpotifyRepository.php`
+  - `web/features/spotify/components/ListaMusicasItemSpotify.tsx` (antes `ListaTopMusicasArtista.tsx`), `web/features/spotify/components/ModalMusicasItemSpotify.tsx` (novo), `web/features/spotify/components/ItensRankingSpotify.tsx`, `web/features/spotify/components/SecaoHojeSemana.tsx`, `web/features/spotify/components/SecaoCapsulaSonora.tsx`
+  - `web/features/spotify/api.ts`, `web/features/spotify/hooks/useMusicasItemSpotify.ts` (antes `useTopMusicasArtista.ts`), `web/features/spotify/hooks/chavesQuerySpotify.ts`
+  - `documentation/funcionalidades/SPOTIFY.md`
+

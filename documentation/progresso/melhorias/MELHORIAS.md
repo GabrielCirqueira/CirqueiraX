@@ -12,7 +12,7 @@
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 > - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
-> - **M101–M125** → [MELHORIAS_6.md](MELHORIAS_6.md)
+> - **M101–M126** → [MELHORIAS_6.md](MELHORIAS_6.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -141,3 +141,4 @@
 | M123 | Página para Extrair Texto de Imagens | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-123--página-para-extrair-texto-de-imagens) |
 | M124 | Top Artistas do Spotify Ordenado por Minutos Ouvidos | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-124--top-artistas-do-spotify-ordenado-por-minutos-ouvidos) |
 | M125 | Tempo do Spotify Exibido em Minutos com Horas no Tooltip | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-125--tempo-do-spotify-exibido-em-minutos-com-horas-no-tooltip) |
+| M126 | Músicas de Artistas e Álbuns no Ranking com Popup da Lista Completa | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-126--músicas-de-artistas-e-álbuns-no-ranking-com-popup-da-lista-completa) |

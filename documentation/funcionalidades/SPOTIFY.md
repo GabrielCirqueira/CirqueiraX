@@ -148,7 +148,7 @@ Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia
 | Descobertas | Artistas novos, músicas novas, redescobertas e obsessões | Novo = primeira reprodução dentro do período. Redescoberta = volta após 90 dias sem ouvir. Obsessão = 8 ou mais streams em 7 dias |
 | Resumo do ano | Totais, top 5 de artistas, músicas e álbuns, mês mais intenso, momento favorito, maior sequência, descobertas e gráfico do ano | Ano em andamento aparece marcado |
 | Detalhe | Totais, primeira e última vez, evolução mensal, meses no top 5, músicas e álbuns | `/spotify/artista?nome=` e `/spotify/musica?nome=&artista=` |
-| Rankings | Hoje até 90 dias, mês, ano, sempre e personalizado; abas de músicas, artistas e álbuns | Álbum agrupado por nome e artista |
+| Rankings | Hoje até 90 dias, mês, ano, sempre e personalizado; abas de músicas, artistas e álbuns | Álbum agrupado por nome e artista. Clicar num artista ou álbum abre as 5 músicas mais ouvidas no mesmo período do ranking; se houver mais, **Ver todas as músicas** abre um popup com a lista completa (`GET /api/v1/spotify/artistas/top-musicas` com `tipo`, `dias`, `ano`, `mes`, `inicio`, `fim`, `album` e `limite`, até 500) |
 
 ### Pulos e aleatório
 - Vêm dos campos `skipped` e `shuffle` do histórico estendido (`Streaming_History_Audio_*.json`) e ficam em `reproducao_spotify.pulada` e `reproducao_spotify.aleatorio`. IP, país e plataforma não são guardados.

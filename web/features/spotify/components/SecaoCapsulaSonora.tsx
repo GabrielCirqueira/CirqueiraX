@@ -60,7 +60,7 @@ import {
   gerarChaveArtista,
   gerarChaveFaixa,
 } from '../utils'
-import { ListaTopMusicasArtista } from './ListaTopMusicasArtista'
+import { ListaMusicasItemSpotify } from './ListaMusicasItemSpotify'
 import { MinutosSpotify, TooltipSpotify } from './MinutosSpotify'
 import { BotaoImagemCapsula } from './ModalImagemCapsula'
 
@@ -885,10 +885,9 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
 
         <Collapsible.Content>
           <Box px={3} pb={3} pt={1} borderTop="1px solid" borderColor="border.subtle">
-            <ListaTopMusicasArtista
+            <ListaMusicasItemSpotify
               artista={artista.nomeArtista}
-              ano={ano}
-              mes={mes}
+              periodo={{ tipo: 'mes', ano, mes }}
               aberto={expandido}
             />
           </Box>

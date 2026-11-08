@@ -29,7 +29,7 @@ import {
   X,
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
-import type { FiltroIntervaloRankingParams } from '../api'
+import type { FiltroIntervaloRankingParams, PeriodoMusicasItemSpotify } from '../api'
 import {
   useCapsulasSpotify,
   useImagensItensSpotify,
@@ -151,6 +151,11 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
     dataInicioPersonalizada,
     dataFimPersonalizada,
   ])
+
+  const periodoMusicasItem = useMemo<PeriodoMusicasItemSpotify>(() => {
+    const { limite: _limite, ...periodo } = paramsRanking
+    return periodo
+  }, [paramsRanking])
 
   const ehPadraoHoje = tipoFiltro === 'dias' && diasSelecionados === 1
   const ehPadraoSemana = tipoFiltro === 'dias' && diasSelecionados === 7
@@ -800,6 +805,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                     item={album}
                     posicao={indice + 1}
                     imagemUrl={imagemAlbum(album)}
+                    periodo={periodoMusicasItem}
+                    rotuloPeriodo={rotuloAtivo}
                   />
                 ))}
               </VStack>
@@ -816,8 +823,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   <ItemRankingArtistaLinha
                     key={artista.nomeArtista}
                     item={artista}
-                    ano={tipoFiltro === 'mes' || tipoFiltro === 'ano' ? anoSelecionado : null}
-                    mes={tipoFiltro === 'mes' ? mesSelecionado : null}
+                    periodo={periodoMusicasItem}
+                    rotuloPeriodo={rotuloAtivo}
                     imagemUrlResolvida={mapaImagensCompleto?.[chave]?.imagemUrl}
                   />
                 )
@@ -857,8 +864,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
           onFechar={() => setModalRankingAberto(false)}
           tipo={aba}
           rotuloPeriodo={rotuloAtivo}
-          ano={tipoFiltro === 'mes' || tipoFiltro === 'ano' ? anoSelecionado : null}
-          mes={tipoFiltro === 'mes' ? mesSelecionado : null}
+          periodo={periodoMusicasItem}
           topMusicas={topMusicas}
           topArtistas={topArtistas}
           topAlbuns={topAlbuns}
@@ -876,8 +882,7 @@ interface ModalRankingHojeSemanaProps {
   onFechar: () => void
   tipo: AbaRanking
   rotuloPeriodo: string
-  ano?: number | null
-  mes?: number | null
+  periodo: PeriodoMusicasItemSpotify
   topMusicas: ItemRankingMusica[]
   topArtistas: ItemRankingArtista[]
   topAlbuns: AlbumAnalise[]
@@ -891,8 +896,7 @@ function ModalRankingHojeSemana({
   onFechar,
   tipo,
   rotuloPeriodo,
-  ano,
-  mes,
+  periodo,
   topMusicas,
   topArtistas,
   topAlbuns,
@@ -928,6 +932,8 @@ function ModalRankingHojeSemana({
               item={album}
               posicao={indice + 1}
               imagemUrl={imagemAlbum(album)}
+              periodo={periodo}
+              rotuloPeriodo={rotuloPeriodo}
             />
           ))}
       {tipo === 'musicas' &&
@@ -952,8 +958,8 @@ function ModalRankingHojeSemana({
             <ItemRankingArtistaLinha
               key={`${artista.posicao}-${artista.nomeArtista}`}
               item={artista}
-              ano={ano}
-              mes={mes}
+              periodo={periodo}
+              rotuloPeriodo={rotuloPeriodo}
               imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
             />
           )

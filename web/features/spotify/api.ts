@@ -110,21 +110,6 @@ export async function consultarImagensSpotify(chaves: string[]): Promise<Respost
   return RespostaConsultaImagensSchema.parse(data.data)
 }
 
-export async function obterTopMusicasArtista(
-  artista: string,
-  ano?: number | null,
-  mes?: number | null
-): Promise<ItemTopMusicaArtista[]> {
-  const params: Record<string, string | number> = { artista }
-  if (ano !== undefined && ano !== null) params.ano = ano
-  if (mes !== undefined && mes !== null) params.mes = mes
-
-  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/artistas/top-musicas', {
-    params,
-  })
-  return z.array(ItemTopMusicaArtistaSchema).parse(data.data)
-}
-
 export interface FiltroIntervaloRankingParams {
   tipo: 'dias' | 'mes' | 'ano' | 'personalizado' | 'todos'
   dias?: number
@@ -133,6 +118,36 @@ export interface FiltroIntervaloRankingParams {
   inicio?: string
   fim?: string
   limite?: number
+}
+
+export type PeriodoMusicasItemSpotify = Omit<FiltroIntervaloRankingParams, 'limite'>
+
+export interface FiltroMusicasItemSpotify {
+  artista: string
+  album?: string | null
+  periodo?: PeriodoMusicasItemSpotify | null
+  limite: number
+}
+
+export async function obterMusicasItemSpotify(
+  filtro: FiltroMusicasItemSpotify
+): Promise<ItemTopMusicaArtista[]> {
+  const params: Record<string, string | number> = {
+    artista: filtro.artista,
+    limite: filtro.limite,
+    tipo: filtro.periodo?.tipo ?? 'todos',
+  }
+  if (filtro.album) params.album = filtro.album
+  if (filtro.periodo?.dias !== undefined) params.dias = filtro.periodo.dias
+  if (filtro.periodo?.ano !== undefined) params.ano = filtro.periodo.ano
+  if (filtro.periodo?.mes !== undefined) params.mes = filtro.periodo.mes
+  if (filtro.periodo?.inicio) params.inicio = filtro.periodo.inicio
+  if (filtro.periodo?.fim) params.fim = filtro.periodo.fim
+
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/artistas/top-musicas', {
+    params,
+  })
+  return z.array(ItemTopMusicaArtistaSchema).parse(data.data)
 }
 
 export async function obterRankingIntervaloSpotify(

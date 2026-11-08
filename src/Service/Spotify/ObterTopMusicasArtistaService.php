@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace App\Service\Spotify;
 
 use App\DataObject\Spotify\ItemTopMusicaArtistaDTO;
-use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\Entity\ImagemSpotify;
 use App\Entity\Usuario;
 use App\Repository\ReproducaoSpotifyRepository;
+use DateTimeImmutable;
+use DateTimeZone;
 
 final readonly class ObterTopMusicasArtistaService
 {
+    public const int LIMITE_PADRAO = 5;
+    private const int LIMITE_MAXIMO = 500;
+
     public function __construct(
         private ReproducaoSpotifyRepository $reproducaoRepository,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
+        private ObterResumoIntervaloPersonalizadoService $obterResumoIntervaloService,
     ) {
     }
 
@@ -24,20 +29,25 @@ final readonly class ObterTopMusicasArtistaService
     public function executar(
         Usuario $usuario,
         string $nomeArtista,
+        ?string $album = null,
+        ?string $tipo = null,
+        ?int $dias = null,
         ?int $ano = null,
         ?int $mes = null,
-        int $limite = 5,
+        ?string $inicio = null,
+        ?string $fim = null,
+        int $limite = self::LIMITE_PADRAO,
     ): array {
-        $periodo = null;
-        if (null !== $ano && null !== $mes && $mes >= 1 && $mes <= 12) {
-            $periodo = PeriodoMesSpotifyDTO::criar($ano, $mes);
-        }
+        $tipoFinal = $tipo ?? (null !== $ano && null !== $mes ? 'mes' : 'todos');
+        [$inicioUtc, $fimUtc] = $this->resolverIntervaloUtc($tipoFinal, $dias, $ano, $mes, $inicio, $fim);
 
         $linhas = $this->reproducaoRepository->obterMusicasMaisOuvidasDoArtista(
             usuario: $usuario,
             nomeArtista: $nomeArtista,
-            periodo: $periodo,
-            limite: $limite,
+            inicioUtc: $inicioUtc,
+            fimUtc: $fimUtc,
+            album: null !== $album && '' !== trim($album) ? trim($album) : null,
+            limite: max(1, min(self::LIMITE_MAXIMO, $limite)),
         );
 
         if (empty($linhas)) {
@@ -89,5 +99,19 @@ final readonly class ObterTopMusicasArtistaService
 
         return $resultado;
     }
-}
 
+    /**
+     * @return array{0: ?DateTimeImmutable, 1: ?DateTimeImmutable}
+     */
+    private function resolverIntervaloUtc(string $tipo, ?int $dias, ?int $ano, ?int $mes, ?string $inicio, ?string $fim): array
+    {
+        if ('todos' === $tipo) {
+            return [null, null];
+        }
+
+        [$inicioLocal, $fimLocal] = $this->obterResumoIntervaloService->resolverIntervalo($tipo, $dias, $ano, $mes, $inicio, $fim);
+        $fusoUtc = new DateTimeZone('UTC');
+
+        return [$inicioLocal->setTimezone($fusoUtc), $fimLocal->setTimezone($fusoUtc)];
+    }
+}

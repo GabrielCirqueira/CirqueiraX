@@ -336,7 +336,9 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
     public function obterMusicasMaisOuvidasDoArtista(
         Usuario $usuario,
         string $nomeArtista,
-        ?PeriodoMesSpotifyDTO $periodo = null,
+        ?DateTimeImmutable $inicioUtc = null,
+        ?DateTimeImmutable $fimUtc = null,
+        ?string $album = null,
         int $limite = 5,
         int $corteStreamMs = 30000,
     ): array {
@@ -350,10 +352,15 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             'limite' => $limite,
         ];
 
-        if (null !== $periodo) {
+        if (null !== $inicioUtc && null !== $fimUtc) {
             $wherePeriodo = 'AND r.tocada_em >= :inicioUtc AND r.tocada_em < :fimUtc';
-            $params['inicioUtc'] = $periodo->inicioUtc()->format('Y-m-d H:i:s');
-            $params['fimUtc'] = $periodo->fimUtc()->format('Y-m-d H:i:s');
+            $params['inicioUtc'] = $inicioUtc->format('Y-m-d H:i:s');
+            $params['fimUtc'] = $fimUtc->format('Y-m-d H:i:s');
+        }
+
+        if (null !== $album) {
+            $wherePeriodo .= ' AND LOWER(TRIM(r.album)) = LOWER(TRIM(:album))';
+            $params['album'] = $album;
         }
 
         $sql = "
@@ -365,7 +372,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
                 SUM(r.ms_reproduzidos) as total_ms
             FROM reproducao_spotify r
             WHERE r.usuario_id = :usuarioId
-              AND r.artista_principal = :artista
+              AND LOWER(TRIM(r.artista_principal)) = LOWER(TRIM(:artista))
               {$wherePeriodo}
             GROUP BY r.nome_faixa
             HAVING total_streams > 0

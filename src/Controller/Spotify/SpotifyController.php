@@ -204,10 +204,18 @@ final class SpotifyController extends DefaultController
             return $this->error('O parâmetro "artista" é obrigatório.');
         }
 
-        $ano = $request->query->has('ano') ? $request->query->getInt('ano') : null;
-        $mes = $request->query->has('mes') ? $request->query->getInt('mes') : null;
-
-        $topMusicas = $this->obterTopMusicasArtistaService->executar($usuario, trim($artista), $ano, $mes);
+        $topMusicas = $this->obterTopMusicasArtistaService->executar(
+            usuario: $usuario,
+            nomeArtista: trim($artista),
+            album: $request->query->has('album') ? (string) $request->query->get('album') : null,
+            tipo: $request->query->has('tipo') ? (string) $request->query->get('tipo') : null,
+            dias: $request->query->has('dias') ? $request->query->getInt('dias') : null,
+            ano: $request->query->has('ano') ? $request->query->getInt('ano') : null,
+            mes: $request->query->has('mes') ? $request->query->getInt('mes') : null,
+            inicio: $request->query->has('inicio') ? (string) $request->query->get('inicio') : null,
+            fim: $request->query->has('fim') ? (string) $request->query->get('fim') : null,
+            limite: $request->query->getInt('limite', ObterTopMusicasArtistaService::LIMITE_PADRAO),
+        );
 
         return $this->success(array_map(
             static fn (ItemTopMusicaArtistaDTO $item): array => $item->toArray(),

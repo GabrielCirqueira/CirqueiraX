@@ -35,21 +35,10 @@ final readonly class ObterResumoIntervaloPersonalizadoService
         ?string $fim = null,
         int $limite = 50,
     ): ResumoIntervaloComImagensDTO {
-        $fusoLocal = new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_HORARIO_PADRAO);
         $fusoUtc = new DateTimeZone('UTC');
-        $agoraLocal = new DateTimeImmutable('now', $fusoLocal);
-        $fusoCalendario = new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_CALENDARIO_SPOTIFY);
-        $agoraCalendario = new DateTimeImmutable('now', $fusoCalendario);
-
         $limiteSanitizado = max(5, min(100, $limite));
 
-        [$inicioLocal, $fimLocal, $compInicioLocal, $compFimLocal, $rotuloPeriodo] = match ($tipo) {
-            'mes' => $this->resolverIntervaloMes($agoraCalendario, $fusoCalendario, $ano, $mes),
-            'ano' => $this->resolverIntervaloAno($agoraCalendario, $fusoCalendario, $ano),
-            'personalizado' => $this->resolverIntervaloPersonalizado($agoraLocal, $fusoLocal, $inicio, $fim),
-            'todos' => $this->resolverIntervaloTodos($agoraLocal, $fusoLocal),
-            default => $this->resolverIntervaloDias($agoraLocal, $fusoLocal, $dias ?? 7),
-        };
+        [$inicioLocal, $fimLocal, $compInicioLocal, $compFimLocal, $rotuloPeriodo] = $this->resolverIntervalo($tipo, $dias, $ano, $mes, $inicio, $fim);
 
         $inicioUtc = $inicioLocal->setTimezone($fusoUtc);
         $fimUtc = $fimLocal->setTimezone($fusoUtc);
@@ -129,6 +118,31 @@ final readonly class ObterResumoIntervaloPersonalizadoService
             mapaImagens: $mapaImagens,
             topAlbuns: array_map(static fn (AlbumAnaliseSpotifyDTO $album): AlbumAnaliseSpotifyDTO => $album->comImagem($mapaImagens), $topAlbuns),
         );
+    }
+
+    /**
+     * @return array{0: DateTimeImmutable, 1: DateTimeImmutable, 2: DateTimeImmutable, 3: DateTimeImmutable, 4: string}
+     */
+    public function resolverIntervalo(
+        string $tipo,
+        ?int $dias,
+        ?int $ano,
+        ?int $mes,
+        ?string $inicio,
+        ?string $fim,
+    ): array {
+        $fusoLocal = new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_HORARIO_PADRAO);
+        $agoraLocal = new DateTimeImmutable('now', $fusoLocal);
+        $fusoCalendario = new DateTimeZone(PeriodoMesSpotifyDTO::FUSO_CALENDARIO_SPOTIFY);
+        $agoraCalendario = new DateTimeImmutable('now', $fusoCalendario);
+
+        return match ($tipo) {
+            'mes' => $this->resolverIntervaloMes($agoraCalendario, $fusoCalendario, $ano, $mes),
+            'ano' => $this->resolverIntervaloAno($agoraCalendario, $fusoCalendario, $ano),
+            'personalizado' => $this->resolverIntervaloPersonalizado($agoraLocal, $fusoLocal, $inicio, $fim),
+            'todos' => $this->resolverIntervaloTodos($agoraLocal, $fusoLocal),
+            default => $this->resolverIntervaloDias($agoraLocal, $fusoLocal, $dias ?? 7),
+        };
     }
 
     /**
