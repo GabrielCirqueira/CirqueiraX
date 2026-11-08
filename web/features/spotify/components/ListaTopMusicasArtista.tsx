@@ -2,7 +2,7 @@ import { Box, Center, Flex, HStack, Skeleton, Text, VStack } from '@chakra-ui/re
 import { ExternalLink, Music2 } from 'lucide-react'
 import { memo } from 'react'
 import { useTopMusicasArtista } from '../hooks'
-import { formatarMinutosParaHorasEMinutos } from '../utils'
+import { MinutosSpotify } from './MinutosSpotify'
 
 export interface ListaTopMusicasArtistaProps {
   artista: string
@@ -131,7 +131,7 @@ export const ListaTopMusicasArtista = memo(function ListaTopMusicasArtista({
               fontWeight="bold"
               color="cirqueira.spotify.verde"
             >
-              {formatarMinutosParaHorasEMinutos(musica.totalMinutos)}
+              <MinutosSpotify minutos={musica.totalMinutos} />
             </Text>
             <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
               {musica.totalStreams} {musica.totalStreams === 1 ? 'stream' : 'streams'}

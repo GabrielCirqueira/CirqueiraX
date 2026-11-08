@@ -72,7 +72,8 @@ As métricas seguem sempre as regras do próprio Spotify, para os números bater
    - Variação percentual de músicas distintas: `((músicas_mês_atual - músicas_mês_anterior) / músicas_mês_anterior) * 100`.
    - Variação de ranking (`movimento`): diferença de posições no top 5 em relação ao mês imediatamente anterior.
    - Flag de estreia (`isEstreia`): sinaliza se o artista ou música entrou no top 5 pela primeira vez no histórico recente.
-8. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
+8. **Tempo exibido em minutos**: como nos relatórios do Spotify, todo tempo ouvido aparece em minutos (ex.: `2.879 min`). Ao passar o mouse, um tooltip no visual do Spotify mostra o mesmo valor em horas (ex.: `47 horas e 59 minutos`). Valores abaixo de 1 hora não têm tooltip. Gráficos mostram minutos no eixo e minutos e horas no tooltip. A imagem PNG da Cápsula também usa minutos.
+9. **Exportação CSV**: o frontend permite baixar uma planilha estruturada com BOM UTF-8 com os totais, rankings e histórico diário do mês selecionado.
 
 ---
 

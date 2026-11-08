@@ -1,12 +1,11 @@
 import { Box, Flex, HStack, Link, SimpleGrid, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { CalendarCheck, Clock3, Crown, Flame, Headphones, Mic2, Repeat, Trophy } from 'lucide-react'
-import { memo } from 'react'
+import { type ReactNode, memo } from 'react'
 import { Link as LinkRouter } from 'react-router-dom'
 import { useImagensItensSpotify, useRecordesSpotify } from '../hooks'
 import type { ArtistaAnalise, MusicaAnalise } from '../types'
 import {
   formatarDataExtensa,
-  formatarMinutosParaHorasEMinutos,
   formatarNomeMes,
   formatarNumeroPtBr,
   gerarRotaArtista,
@@ -15,6 +14,7 @@ import {
 import { CabecalhoSecaoSpotify } from './CabecalhoSecaoSpotify'
 import { CapaSpotify } from './CapaSpotify'
 import { CartaoMetricaSpotify } from './CartaoMetricaSpotify'
+import { MinutosSpotify } from './MinutosSpotify'
 
 export interface SecaoRecordesProps {
   habilitado: boolean
@@ -84,14 +84,14 @@ export const SecaoRecordes = memo(function SecaoRecordes({ habilitado }: SecaoRe
           icone={Clock3}
           cor="cirqueira.spotify.azul"
           rotulo="Dia recorde"
-          valor={data.diaRecorde ? formatarMinutosParaHorasEMinutos(data.diaRecorde.minutos) : '—'}
+          valor={data.diaRecorde ? <MinutosSpotify minutos={data.diaRecorde.minutos} /> : '—'}
           detalhe={data.diaRecorde ? `Em ${formatarDataExtensa(data.diaRecorde.data)}` : undefined}
         />
         <CartaoMetricaSpotify
           icone={CalendarCheck}
           cor="cirqueira.spotify.verde"
           rotulo="Mês recorde"
-          valor={data.mesRecorde ? formatarMinutosParaHorasEMinutos(data.mesRecorde.minutos) : '—'}
+          valor={data.mesRecorde ? <MinutosSpotify minutos={data.mesRecorde.minutos} /> : '—'}
           detalhe={
             data.mesRecorde
               ? `${formatarNomeMes(data.mesRecorde.mes)} de ${data.mesRecorde.ano}`
@@ -139,7 +139,7 @@ export const SecaoRecordes = memo(function SecaoRecordes({ habilitado }: SecaoRe
       >
         <ResumoVida
           icone={Headphones}
-          valor={formatarMinutosParaHorasEMinutos(totais.minutos)}
+          valor={<MinutosSpotify minutos={totais.minutos} />}
           rotulo="ouvidos no total"
         />
         <ResumoVida icone={Repeat} valor={formatarNumeroPtBr(totais.streams)} rotulo="streams" />
@@ -230,7 +230,7 @@ function DestaqueArtista({
             <HStack gap={1.5} color="cirqueira.spotify.azul">
               <Mic2 size={12} />
               <Text fontSize="2xs" textTransform="uppercase" fontWeight="bold" letterSpacing="wide">
-                Artista com mais horas
+                Artista mais ouvido
               </Text>
             </HStack>
             <Text
@@ -243,8 +243,8 @@ function DestaqueArtista({
               {artista.nome}
             </Text>
             <Text fontSize="xs" fontWeight="semibold" color="cirqueira.spotify.verde">
-              {formatarMinutosParaHorasEMinutos(artista.minutos)} ·{' '}
-              {formatarNumeroPtBr(artista.streams)} streams
+              <MinutosSpotify minutos={artista.minutos} /> · {formatarNumeroPtBr(artista.streams)}{' '}
+              streams
             </Text>
           </VStack>
         </HStack>
@@ -257,7 +257,7 @@ function ResumoVida({
   icone: Icone,
   valor,
   rotulo,
-}: { icone: typeof Crown; valor: string; rotulo: string }) {
+}: { icone: typeof Crown; valor: ReactNode; rotulo: string }) {
   return (
     <HStack gap={2} color="cirqueira.spotify.textoSecundario">
       <Icone size={14} />

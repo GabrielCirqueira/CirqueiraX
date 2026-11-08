@@ -13,9 +13,10 @@ import { ChevronDown, ExternalLink, Music2 } from 'lucide-react'
 import { memo, useState } from 'react'
 import { Link as LinkRouter } from 'react-router-dom'
 import type { AlbumAnalise, ItemRankingArtista, ItemRankingMusica } from '../types'
-import { formatarMinutosParaHorasEMinutos, gerarRotaArtista, gerarRotaMusica } from '../utils'
+import { gerarRotaArtista, gerarRotaMusica } from '../utils'
 import { CapaSpotify } from './CapaSpotify'
 import { ListaTopMusicasArtista } from './ListaTopMusicasArtista'
+import { MinutosSpotify } from './MinutosSpotify'
 
 export interface ItemRankingFaixaProps {
   item: ItemRankingMusica
@@ -115,7 +116,7 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
 
       <VStack align="flex-end" gap={0} flexShrink={0}>
         <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="bold" color="cirqueira.spotify.verde">
-          {formatarMinutosParaHorasEMinutos(item.totalMinutos)}
+          <MinutosSpotify minutos={item.totalMinutos} />
         </Text>
         <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
           {item.totalStreams} {item.totalStreams === 1 ? 'stream' : 'streams'}
@@ -261,7 +262,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                 fontWeight="bold"
                 color="cirqueira.spotify.verde"
               >
-                {formatarMinutosParaHorasEMinutos(item.totalMinutos)}
+                <MinutosSpotify minutos={item.totalMinutos} />
               </Text>
             </VStack>
             <Box
@@ -360,7 +361,7 @@ export const ItemRankingAlbum = memo(function ItemRankingAlbum({
       </HStack>
       <VStack align="flex-end" gap={0} flexShrink={0}>
         <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="bold" color="cirqueira.spotify.verde">
-          {formatarMinutosParaHorasEMinutos(item.minutos)}
+          <MinutosSpotify minutos={item.minutos} />
         </Text>
         <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
           {item.streams} {item.streams === 1 ? 'stream' : 'streams'}

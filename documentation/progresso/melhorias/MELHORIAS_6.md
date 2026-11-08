@@ -732,3 +732,22 @@
   - `src/Service/Spotify/ObterRecordesSpotifyService.php`, `src/Service/Spotify/ObterHabitosSpotifyService.php`
   - `documentation/funcionalidades/SPOTIFY.md`
 
+---
+
+### ✅ Melhoria 125 — Tempo do Spotify Exibido em Minutos com Horas no Tooltip
+
+- **Status**: Concluído
+- **Data**: 08 de novembro de 2026
+- **Problema**:
+  - A página do Spotify mostrava o tempo ouvido em horas (`47h 59m`), enquanto os relatórios do próprio Spotify usam minutos.
+- **Solução**:
+  - Todo tempo ouvido passa a ser exibido em minutos (`2.879 min`): cápsula, rankings, hoje e últimos dias, curiosidades, recordes, evolução por mês, hábitos, resumo do ano e páginas de detalhe.
+  - Ao passar o mouse, um tooltip no visual do Spotify (fundo `cartaoElevado`, texto branco em negrito, cantos de 4px) mostra o valor em horas, por extenso (`47 horas e 59 minutos`). Abaixo de 1 hora não há tooltip.
+  - Gráficos mostram minutos no eixo e minutos e horas no tooltip. A imagem PNG da Cápsula também usa minutos.
+  - Novos componentes `MinutosSpotify` e `TooltipSpotify`, e formatadores `formatarMinutos` e `formatarMinutosEmHorasExtenso`.
+- **Arquivos**:
+  - `web/features/spotify/components/MinutosSpotify.tsx` (novo)
+  - `web/features/spotify/utils/formatadoresSpotify.ts`, `web/features/spotify/utils/imagemCapsula.ts`
+  - `web/features/spotify/components/` (cápsula, rankings, seções e gráficos), `web/features/spotify/DetalheArtistaSpotify.tsx`, `web/features/spotify/DetalheMusicaSpotify.tsx`
+  - `documentation/funcionalidades/SPOTIFY.md`
+

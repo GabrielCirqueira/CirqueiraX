@@ -17,7 +17,6 @@ import type { HabitosSpotify } from '../types'
 import {
   criarOpcoesPeriodoAnalise,
   descreverPerfilGosto,
-  formatarMinutosParaHorasEMinutos,
   formatarNumeroPtBr,
   formatarPercentualSimples,
   gerarRotaArtista,
@@ -26,6 +25,7 @@ import { CabecalhoSecaoSpotify } from './CabecalhoSecaoSpotify'
 import { CapaSpotify } from './CapaSpotify'
 import { CartaoMetricaSpotify } from './CartaoMetricaSpotify'
 import { MapaHorariosSpotify } from './MapaHorariosSpotify'
+import { MinutosSpotify } from './MinutosSpotify'
 import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
 
 export interface SecaoHabitosProps {
@@ -124,8 +124,8 @@ function ConteudoHabitos({ dados }: { dados: HabitosSpotify }) {
                 </Progress.Track>
               </Progress.Root>
               <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
-                {formatarMinutosParaHorasEMinutos(concentracao.minutosTopArtistas)} de{' '}
-                {formatarMinutosParaHorasEMinutos(dados.totalMinutos)} entre{' '}
+                <MinutosSpotify minutos={concentracao.minutosTopArtistas} /> de{' '}
+                <MinutosSpotify minutos={dados.totalMinutos} /> entre{' '}
                 {formatarNumeroPtBr(concentracao.artistasDistintos)} artistas
               </Text>
             </VStack>

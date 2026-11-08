@@ -6,7 +6,7 @@ import {
   NOMES_DIAS_SEMANA_EXTENSO,
   ORDEM_DIAS_SEMANA,
   formatarFaixaHoraria,
-  formatarMinutosParaHorasEMinutos,
+  formatarMinutos,
 } from '../utils'
 
 const HORAS = Array.from({ length: 24 }, (_, hora) => hora)
@@ -57,7 +57,7 @@ export const MapaHorariosSpotify = memo(function MapaHorariosSpotify({
       <HStack justify="space-between" wrap="wrap" gap={2}>
         <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
           {pico && pico.minutos > 0
-            ? `Seu horário mais forte: ${NOMES_DIAS_SEMANA_EXTENSO[pico.diaSemana]}, ${formatarFaixaHoraria(pico.hora)} (${formatarMinutosParaHorasEMinutos(pico.minutos)})`
+            ? `Seu horário mais forte: ${NOMES_DIAS_SEMANA_EXTENSO[pico.diaSemana]}, ${formatarFaixaHoraria(pico.hora)} (${formatarMinutos(pico.minutos)})`
             : 'Sem reproduções no período'}
         </Text>
         <HStack gap={1.5}>
@@ -105,7 +105,7 @@ function LinhaDia({ dia, porChave, maximo }: LinhaDiaProps) {
             aspectRatio="1"
             borderRadius="3px"
             bg="cirqueira.spotify.cartaoElevado"
-            title={`${NOMES_DIAS_SEMANA_EXTENSO[dia]}, ${formatarFaixaHoraria(hora)}: ${formatarMinutosParaHorasEMinutos(minutos)}`}
+            title={`${NOMES_DIAS_SEMANA_EXTENSO[dia]}, ${formatarFaixaHoraria(hora)}: ${formatarMinutos(minutos)}`}
           >
             {minutos > 0 && (
               <Box

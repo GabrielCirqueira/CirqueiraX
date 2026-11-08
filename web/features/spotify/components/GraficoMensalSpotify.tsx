@@ -14,7 +14,8 @@ import {
 import type { PontoMensal } from '../types'
 import {
   CORES_GRAFICO_SPOTIFY,
-  formatarMinutosParaHorasEMinutos,
+  formatarMinutos,
+  formatarMinutosEmHorasExtenso,
   formatarNomeMes,
   formatarNumeroPtBr,
   formatarRotuloMesCurto,
@@ -42,9 +43,7 @@ export const GraficoMensalSpotify = memo(function GraficoMensalSpotify({
       ? comValor.reduce((soma, ponto) => soma + ponto[metrica], 0) / comValor.length
       : 0
   const formatarValor = (valor: number) =>
-    metrica === 'minutos'
-      ? formatarMinutosParaHorasEMinutos(valor)
-      : `${formatarNumeroPtBr(valor)} streams`
+    metrica === 'minutos' ? formatarMinutos(valor) : `${formatarNumeroPtBr(valor)} streams`
 
   return (
     <Box h={altura} w="full" css={{ '& .recharts-text': { fontSize: '11px' } }}>
@@ -67,10 +66,8 @@ export const GraficoMensalSpotify = memo(function GraficoMensalSpotify({
             stroke={CORES_GRAFICO_SPOTIFY.eixo}
             fontSize={10}
             tickLine={false}
-            width={40}
-            tickFormatter={(valor: number) =>
-              metrica === 'minutos' ? `${Math.round(valor / 60)}h` : String(valor)
-            }
+            width={48}
+            tickFormatter={(valor: number) => formatarNumeroPtBr(Math.round(valor))}
           />
           <Tooltip
             cursor={{ fill: 'rgba(255, 255, 255, 0.04)' }}
@@ -89,9 +86,12 @@ export const GraficoMensalSpotify = memo(function GraficoMensalSpotify({
                   <Text fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
                     {formatarNomeMes(ponto.mes)} de {ponto.ano}
                   </Text>
-                  <Text color="cirqueira.spotify.verde">
-                    {formatarMinutosParaHorasEMinutos(ponto.minutos)}
-                  </Text>
+                  <Text color="cirqueira.spotify.verde">{formatarMinutos(ponto.minutos)}</Text>
+                  {ponto.minutos >= 60 && (
+                    <Text color="cirqueira.spotify.textoSecundario">
+                      {formatarMinutosEmHorasExtenso(ponto.minutos)}
+                    </Text>
+                  )}
                   <Text color="cirqueira.spotify.textoSecundario">
                     {formatarNumeroPtBr(ponto.streams)} streams
                   </Text>

@@ -43,13 +43,9 @@ import type {
   RespostaConsultaImagens,
   ResumoGeralSpotify,
 } from '../types'
-import {
-  formatarMinutosParaHorasEMinutos,
-  formatarPercentualVariacao,
-  gerarChaveArtista,
-  gerarChaveFaixa,
-} from '../utils'
+import { formatarPercentualVariacao, gerarChaveArtista, gerarChaveFaixa } from '../utils'
 import { ItemRankingAlbum, ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingSpotify'
+import { MinutosSpotify } from './MinutosSpotify'
 
 export interface SecaoHojeSemanaProps {
   resumo?: ResumoGeralSpotify
@@ -441,14 +437,10 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 fontWeight="bold"
                 color="cirqueira.spotify.verde"
               >
-                {formatarMinutosParaHorasEMinutos(totalMinutos)}
+                <MinutosSpotify minutos={totalMinutos} />
               </Text>
               {variacao !== null && (
-                <Badge
-                  size="xs"
-                  variant="subtle"
-                  colorPalette={variacao >= 0 ? 'green' : 'red'}
-                >
+                <Badge size="xs" variant="subtle" colorPalette={variacao >= 0 ? 'green' : 'red'}>
                   {formatarPercentualVariacao(variacao)}
                 </Badge>
               )}
@@ -499,7 +491,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   color="cirqueira.spotify.textoPrincipal"
                 >
                   {NOMES_MESES.map((m) => (
-                    <Box as="option" key={m.valor} value={m.valor} bg="cirqueira.spotify.cartao" color="cirqueira.spotify.textoPrincipal">
+                    <Box
+                      as="option"
+                      key={m.valor}
+                      value={m.valor}
+                      bg="cirqueira.spotify.cartao"
+                      color="cirqueira.spotify.textoPrincipal"
+                    >
                       {m.rotulo}
                     </Box>
                   ))}
@@ -518,7 +516,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                   color="cirqueira.spotify.textoPrincipal"
                 >
                   {anosDisponiveis.map((ano) => (
-                    <Box as="option" key={ano} value={ano} bg="cirqueira.spotify.cartao" color="cirqueira.spotify.textoPrincipal">
+                    <Box
+                      as="option"
+                      key={ano}
+                      value={ano}
+                      bg="cirqueira.spotify.cartao"
+                      color="cirqueira.spotify.textoPrincipal"
+                    >
                       {ano}
                     </Box>
                   ))}
@@ -559,7 +563,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                 color="cirqueira.spotify.textoPrincipal"
               >
                 {anosDisponiveis.map((ano) => (
-                  <Box as="option" key={ano} value={ano} bg="cirqueira.spotify.cartao" color="cirqueira.spotify.textoPrincipal">
+                  <Box
+                    as="option"
+                    key={ano}
+                    value={ano}
+                    bg="cirqueira.spotify.cartao"
+                    color="cirqueira.spotify.textoPrincipal"
+                  >
                     {ano}
                   </Box>
                 ))}

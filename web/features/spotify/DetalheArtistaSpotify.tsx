@@ -17,6 +17,7 @@ import {
   CarregandoDetalheSpotify,
   CartaoMetricaSpotify,
   HeroDetalheSpotify,
+  MinutosSpotify,
   NaoEncontradoDetalheSpotify,
   PainelEvolucaoDetalhe,
   TemaSpotify,
@@ -26,7 +27,6 @@ import type { DetalheArtista } from './types'
 import {
   extrairMensagemErroApi,
   formatarDataExtensa,
-  formatarMinutosParaHorasEMinutos,
   formatarNumeroPtBr,
   formatarPercentualSimples,
   formatarTempoRelativo,
@@ -76,7 +76,13 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
         tipo="artista"
         rotulo="Artista"
         titulo={dados.artista.nome}
-        subtitulo={`${formatarNumeroPtBr(dados.artista.streams)} streams · ${formatarMinutosParaHorasEMinutos(dados.artista.minutos)} · ${formatarPercentualSimples(dados.percentualDoTempoTotal)} de todo o seu tempo no Spotify`}
+        subtitulo={
+          <>
+            {formatarNumeroPtBr(dados.artista.streams)} streams ·{' '}
+            <MinutosSpotify minutos={dados.artista.minutos} /> ·{' '}
+            {formatarPercentualSimples(dados.percentualDoTempoTotal)} de todo o seu tempo no Spotify
+          </>
+        }
         imagemUrl={imagemDe(dados.artista)}
         urlSpotify={dados.artista.urlSpotify}
         posicaoGeral={dados.posicaoGeral}
@@ -93,7 +99,7 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
           icone={Headphones}
           cor="cirqueira.spotify.azul"
           rotulo="Tempo ouvido"
-          valor={formatarMinutosParaHorasEMinutos(dados.artista.minutos)}
+          valor={<MinutosSpotify minutos={dados.artista.minutos} />}
           detalhe={`Em ${formatarNumeroPtBr(dados.diasOuvidos)} dias diferentes`}
         />
         <CartaoMetricaSpotify

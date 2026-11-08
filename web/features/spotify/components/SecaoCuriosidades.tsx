@@ -2,11 +2,8 @@ import { Box, HStack, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react
 import { Award, Calendar, Clock, Flame, Repeat, Sparkles, UserPlus } from 'lucide-react'
 import { memo } from 'react'
 import type { CuriosidadesSpotify } from '../types'
-import {
-  formatarDataPtBr,
-  formatarMinutosParaHorasEMinutos,
-  formatarPercentualVariacao,
-} from '../utils'
+import { formatarDataPtBr, formatarPercentualVariacao } from '../utils'
+import { MinutosSpotify } from './MinutosSpotify'
 
 export interface SecaoCuriosidadesProps {
   curiosidades?: CuriosidadesSpotify
@@ -76,9 +73,11 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
                 {horarioPico ?? '—'}
               </Text>
               <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
-                {minutosHorarioPico > 0
-                  ? `${formatarMinutosParaHorasEMinutos(minutosHorarioPico)} ouvidos neste horário`
-                  : 'Sem dados suficientes'}
+                {minutosHorarioPico > 0 ? (
+                  <MinutosSpotify minutos={minutosHorarioPico} sufixo="ouvidos neste horário" />
+                ) : (
+                  'Sem dados suficientes'
+                )}
               </Text>
             </VStack>
           </HStack>
@@ -114,9 +113,11 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
                 {diaSemanaMaisOuvido ?? '—'}
               </Text>
               <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
-                {minutosDiaSemana > 0
-                  ? `${formatarMinutosParaHorasEMinutos(minutosDiaSemana)} acumulados`
-                  : 'Sem dados suficientes'}
+                {minutosDiaSemana > 0 ? (
+                  <MinutosSpotify minutos={minutosDiaSemana} sufixo="acumulados" />
+                ) : (
+                  'Sem dados suficientes'
+                )}
               </Text>
             </VStack>
           </HStack>
@@ -149,9 +150,7 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
                 Dia Mais Longo
               </Text>
               <Text fontSize="md" fontWeight="bold" color="cirqueira.spotify.verde">
-                {diaMaisLongoMinutos > 0
-                  ? formatarMinutosParaHorasEMinutos(diaMaisLongoMinutos)
-                  : '—'}
+                {diaMaisLongoMinutos > 0 ? <MinutosSpotify minutos={diaMaisLongoMinutos} /> : '—'}
               </Text>
               <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
                 {diaMaisLongoData ? `Em ${formatarDataPtBr(diaMaisLongoData)}` : 'Sem registros'}
@@ -269,7 +268,7 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
               </Text>
               <HStack gap={2}>
                 <Text fontSize="md" fontWeight="bold" color="cirqueira.spotify.verde">
-                  {formatarMinutosParaHorasEMinutos(mediaMinutosDiarios)}
+                  <MinutosSpotify minutos={mediaMinutosDiarios} />
                 </Text>
                 {variacaoMediaDiariaPercentual !== null && (
                   <Box

@@ -30,7 +30,7 @@ import type { ItemComImagemSpotify, RetrospectivaAnual } from '../types'
 import {
   NOMES_DIAS_SEMANA_EXTENSO,
   formatarDataExtensa,
-  formatarMinutosParaHorasEMinutos,
+  formatarMinutosEmHorasExtenso,
   formatarNomeMes,
   formatarNumeroPtBr,
   formatarPercentualVariacao,
@@ -40,6 +40,7 @@ import {
 import { CabecalhoSecaoSpotify } from './CabecalhoSecaoSpotify'
 import { CapaSpotify } from './CapaSpotify'
 import { GraficoMensalSpotify } from './GraficoMensalSpotify'
+import { MinutosSpotify, TooltipSpotify } from './MinutosSpotify'
 
 export interface SecaoRetrospectivaProps {
   habilitado: boolean
@@ -150,17 +151,20 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                 </Badge>
               )}
             </HStack>
-            <Heading
-              as="h3"
-              fontSize={{ base: '5xl', md: '7xl' }}
-              fontWeight="black"
-              lineHeight="1"
-              letterSpacing="tight"
-            >
-              {formatarNumeroPtBr(Math.round(dados.totalMinutos))}
-            </Heading>
+            <TooltipSpotify conteudo={formatarMinutosEmHorasExtenso(dados.totalMinutos)}>
+              <Heading
+                as="h3"
+                fontSize={{ base: '5xl', md: '7xl' }}
+                fontWeight="black"
+                lineHeight="1"
+                letterSpacing="tight"
+                cursor="default"
+              >
+                {formatarNumeroPtBr(Math.round(dados.totalMinutos))}
+              </Heading>
+            </TooltipSpotify>
             <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="bold">
-              minutos ouvidos · {formatarMinutosParaHorasEMinutos(dados.totalMinutos)}
+              minutos ouvidos
             </Text>
             {dados.variacaoMinutosAnoAnterior !== null && (
               <Text fontSize="sm" fontWeight="semibold" opacity={0.85}>
@@ -207,7 +211,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                       {artistaDoAno.nome}
                     </Text>
                     <Text fontSize="sm" color="cirqueira.spotify.textoSecundario">
-                      {formatarMinutosParaHorasEMinutos(artistaDoAno.minutos)} ·{' '}
+                      <MinutosSpotify minutos={artistaDoAno.minutos} /> ·{' '}
                       {formatarNumeroPtBr(artistaDoAno.streams)} streams
                     </Text>
                   </VStack>
@@ -234,7 +238,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                 />
               }
               titulo={artista.nome}
-              subtitulo={formatarMinutosParaHorasEMinutos(artista.minutos)}
+              subtitulo={<MinutosSpotify minutos={artista.minutos} />}
             />
           ))}
         </ListaTopo>
@@ -274,9 +278,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
           valor={
             mesMaisIntenso && mesMaisIntenso.minutos > 0 ? formatarNomeMes(mesMaisIntenso.mes) : '—'
           }
-          detalhe={
-            mesMaisIntenso ? formatarMinutosParaHorasEMinutos(mesMaisIntenso.minutos) : undefined
-          }
+          detalhe={mesMaisIntenso ? <MinutosSpotify minutos={mesMaisIntenso.minutos} /> : undefined}
         />
         <CartaoFato
           icone={<Clock3 size={16} />}
@@ -311,9 +313,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
           icone={<Clock3 size={16} />}
           cor="cirqueira.spotify.azul"
           rotulo="Dia recorde"
-          valor={
-            dados.diaRecorde ? formatarMinutosParaHorasEMinutos(dados.diaRecorde.minutos) : '—'
-          }
+          valor={dados.diaRecorde ? <MinutosSpotify minutos={dados.diaRecorde.minutos} /> : '—'}
           detalhe={dados.diaRecorde ? formatarDataExtensa(dados.diaRecorde.data) : undefined}
         />
         <CartaoFato
@@ -406,7 +406,7 @@ interface ItemTopoProps {
   rota: string
   capa: ReactNode
   titulo: string
-  subtitulo: string
+  subtitulo: ReactNode
 }
 
 function ItemTopo({ posicao, rota, capa, titulo, subtitulo }: ItemTopoProps) {
@@ -454,8 +454,8 @@ interface CartaoFatoProps {
   icone: ReactNode
   cor: string
   rotulo: string
-  valor: string
-  detalhe?: string
+  valor: ReactNode
+  detalhe?: ReactNode
 }
 
 function CartaoFato({ icone, cor, rotulo, valor, detalhe }: CartaoFatoProps) {

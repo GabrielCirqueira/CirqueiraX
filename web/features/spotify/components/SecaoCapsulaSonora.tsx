@@ -52,7 +52,8 @@ import {
   baixarArquivoCsv,
   exportarResumoCapsulaParaCsv,
   formatarDataPtBr,
-  formatarMinutosParaHorasEMinutos,
+  formatarMinutos,
+  formatarMinutosEmHorasExtenso,
   formatarNomeMes,
   formatarPercentualVariacao,
   formatarRotuloMesAno,
@@ -60,6 +61,7 @@ import {
   gerarChaveFaixa,
 } from '../utils'
 import { ListaTopMusicasArtista } from './ListaTopMusicasArtista'
+import { MinutosSpotify, TooltipSpotify } from './MinutosSpotify'
 import { BotaoImagemCapsula } from './ModalImagemCapsula'
 
 export interface SecaoCapsulaSonoraProps {
@@ -367,12 +369,18 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
               >
                 Tempo ouvindo
               </Text>
-              <Text fontSize="2xl" fontWeight="black" color="cirqueira.spotify.verde">
-                {capsula.totalMinutos.toLocaleString('pt-BR')} minutos
-              </Text>
+              <TooltipSpotify conteudo={formatarMinutosEmHorasExtenso(capsula.totalMinutos)}>
+                <Text
+                  fontSize="2xl"
+                  fontWeight="black"
+                  color="cirqueira.spotify.verde"
+                  cursor="default"
+                >
+                  {capsula.totalMinutos.toLocaleString('pt-BR')} minutos
+                </Text>
+              </TooltipSpotify>
               <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
-                {formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} ouvidos em{' '}
-                {capsula.totalStreams} reproduções
+                ouvidos em {capsula.totalStreams.toLocaleString('pt-BR')} reproduções
               </Text>
             </VStack>
 
@@ -862,7 +870,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
               fontWeight="bold"
               color="cirqueira.spotify.verde"
             >
-              {formatarMinutosParaHorasEMinutos(artista.totalMinutos)}
+              <MinutosSpotify minutos={artista.totalMinutos} />
             </Text>
 
             <Box
@@ -913,7 +921,7 @@ function ModalDetalheCapsula({
       : tipo === 'artistas'
         ? `${capsula.topArtistas.length} artistas no ranking principal`
         : tipo === 'tempo'
-          ? `Total de ${formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} distribuídos ao longo do mês`
+          ? `Total de ${formatarMinutos(capsula.totalMinutos)} distribuídos ao longo do mês`
           : `Exploração do catálogo no período de ${capsula.rotulo}`
 
   const renderConteudo = () => (
@@ -1058,7 +1066,7 @@ function ModalDetalheCapsula({
                       {m.totalStreams} streams
                     </Text>
                     <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
-                      {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
+                      <MinutosSpotify minutos={m.totalMinutos} />
                     </Text>
                   </VStack>
                 </HStack>
@@ -1094,9 +1102,22 @@ function ModalDetalheCapsula({
                 data={capsula.minutosPorDia}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--chakra-colors-border-subtle)" vertical={false} />
-                <XAxis dataKey="dia" stroke="var(--chakra-colors-cirqueira-spotify-textoSecundario)" fontSize={11} tickLine={false} />
-                <YAxis stroke="var(--chakra-colors-cirqueira-spotify-textoSecundario)" fontSize={11} tickLine={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--chakra-colors-border-subtle)"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="dia"
+                  stroke="var(--chakra-colors-cirqueira-spotify-textoSecundario)"
+                  fontSize={11}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke="var(--chakra-colors-cirqueira-spotify-textoSecundario)"
+                  fontSize={11}
+                  tickLine={false}
+                />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null
@@ -1113,14 +1134,21 @@ function ModalDetalheCapsula({
                         <Text fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
                           Dia {dado.dia}
                         </Text>
-                        <Text color="cirqueira.spotify.verde">
-                          {formatarMinutosParaHorasEMinutos(dado.minutos)}
-                        </Text>
+                        <Text color="cirqueira.spotify.verde">{formatarMinutos(dado.minutos)}</Text>
+                        {dado.minutos >= 60 && (
+                          <Text color="cirqueira.spotify.textoSecundario">
+                            {formatarMinutosEmHorasExtenso(dado.minutos)}
+                          </Text>
+                        )}
                       </Box>
                     )
                   }}
                 />
-                <Bar dataKey="minutos" fill="var(--chakra-colors-cirqueira-spotify-verde)" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="minutos"
+                  fill="var(--chakra-colors-cirqueira-spotify-verde)"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </Box>
@@ -1200,7 +1228,7 @@ function ModalDetalheCapsula({
                 {capsula.totalStreams.toLocaleString('pt-BR')}
               </Text>
               <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario" mt={1}>
-                {formatarMinutosParaHorasEMinutos(capsula.totalMinutos)} ouvidos
+                <MinutosSpotify minutos={capsula.totalMinutos} sufixo="ouvidos" />
               </Text>
             </Box>
 
@@ -1364,7 +1392,7 @@ function ModalDetalheCapsula({
                       color="cirqueira.spotify.verde"
                       lineHeight="short"
                     >
-                      {formatarMinutosParaHorasEMinutos(m.totalMinutos)}
+                      <MinutosSpotify minutos={m.totalMinutos} />
                     </Text>
                     <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
                       {m.totalStreams} {m.totalStreams === 1 ? 'stream' : 'streams'}

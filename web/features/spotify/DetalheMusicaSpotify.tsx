@@ -17,6 +17,7 @@ import {
   CarregandoDetalheSpotify,
   CartaoMetricaSpotify,
   HeroDetalheSpotify,
+  MinutosSpotify,
   NaoEncontradoDetalheSpotify,
   PainelEvolucaoDetalhe,
   TemaSpotify,
@@ -27,7 +28,6 @@ import {
   extrairMensagemErroApi,
   formatarDataExtensa,
   formatarDuracaoMs,
-  formatarMinutosParaHorasEMinutos,
   formatarNumeroPtBr,
   formatarPercentualSimples,
   formatarTempoRelativo,
@@ -107,7 +107,7 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
           icone={Headphones}
           cor="cirqueira.spotify.azul"
           rotulo="Tempo ouvido"
-          valor={formatarMinutosParaHorasEMinutos(musica.minutos)}
+          valor={<MinutosSpotify minutos={musica.minutos} />}
           detalhe={`Em ${formatarNumeroPtBr(dados.diasOuvidos)} dias diferentes`}
         />
         <CartaoMetricaSpotify

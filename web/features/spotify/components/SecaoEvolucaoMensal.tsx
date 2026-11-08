@@ -2,13 +2,10 @@ import { Box, Flex, HStack, SimpleGrid, Skeleton, Text, VStack } from '@chakra-u
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { memo, useState } from 'react'
 import { useEvolucaoMensalSpotify } from '../hooks'
-import {
-  type OpcaoPeriodoAnalise,
-  formatarMinutosParaHorasEMinutos,
-  formatarNomeMes,
-} from '../utils'
+import { type OpcaoPeriodoAnalise, formatarMinutos, formatarNomeMes } from '../utils'
 import { CabecalhoSecaoSpotify } from './CabecalhoSecaoSpotify'
 import { GraficoMensalSpotify } from './GraficoMensalSpotify'
+import { MinutosSpotify } from './MinutosSpotify'
 import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
 
 const OPCOES_JANELA: OpcaoPeriodoAnalise[] = [
@@ -75,7 +72,7 @@ export const SecaoEvolucaoMensal = memo(function SecaoEvolucaoMensal({
                 variacao={data.comparacao.variacaoAnoAnterior}
                 rodape={
                   data.comparacao.minutosMesmoMesAnoAnterior > 0
-                    ? `No mês inteiro: ${formatarMinutosParaHorasEMinutos(data.comparacao.minutosMesmoMesAnoAnterior)}`
+                    ? `No mês inteiro: ${formatarMinutos(data.comparacao.minutosMesmoMesAnoAnterior)}`
                     : undefined
                 }
               />
@@ -116,7 +113,7 @@ function BlocoComparacao({ rotulo, valor, variacao, destaque, rodape }: BlocoCom
           fontWeight="bold"
           color={destaque ? 'cirqueira.spotify.verde' : 'cirqueira.spotify.textoPrincipal'}
         >
-          {formatarMinutosParaHorasEMinutos(valor)}
+          <MinutosSpotify minutos={valor} />
         </Text>
         {variacao !== undefined && variacao !== null && (
           <HStack

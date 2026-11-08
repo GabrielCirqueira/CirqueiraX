@@ -1,5 +1,5 @@
 import type { CapsulaMensal } from '../types'
-import { formatarMinutosParaHorasEMinutos } from './formatadoresSpotify'
+import { formatarMinutos } from './formatadoresSpotify'
 
 const LARGURA = 1080
 const ALTURA = 1920
@@ -134,7 +134,7 @@ export async function gerarImagemCapsula(
 
   contexto.font = `800 120px ${FONTE}`
   contexto.fillStyle = CORES.verde
-  contexto.fillText(formatarMinutosParaHorasEMinutos(capsula.totalMinutos), MARGEM, 420)
+  contexto.fillText(formatarMinutos(capsula.totalMinutos), MARGEM, 420)
   contexto.font = `500 34px ${FONTE}`
   contexto.fillStyle = CORES.cinza
   contexto.fillText(
@@ -162,7 +162,7 @@ export async function gerarImagemCapsula(
     contexto.fillStyle = CORES.cinza
     contexto.font = `500 32px ${FONTE}`
     contexto.fillText(
-      `${formatarMinutosParaHorasEMinutos(artista.totalMinutos)} · ${artista.totalStreams} streams`,
+      `${formatarMinutos(artista.totalMinutos)} · ${artista.totalStreams} streams`,
       MARGEM + tamanhoFoto + 40,
       752
     )

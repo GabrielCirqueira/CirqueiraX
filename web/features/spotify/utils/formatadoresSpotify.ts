@@ -39,6 +39,19 @@ const NOMES_MESES_ABREV = [
   'Dez',
 ]
 
+export function formatarMinutos(minutos: number): string {
+  return `${Math.max(0, Math.round(minutos)).toLocaleString('pt-BR')} min`
+}
+
+export function formatarMinutosEmHorasExtenso(minutos: number): string {
+  const minutosArredondados = Math.max(0, Math.round(minutos))
+  const horas = Math.floor(minutosArredondados / 60)
+  const minutosRestantes = minutosArredondados % 60
+  const textoHoras = `${horas.toLocaleString('pt-BR')} ${horas === 1 ? 'hora' : 'horas'}`
+  if (minutosRestantes === 0) return textoHoras
+  return `${textoHoras} e ${minutosRestantes} ${minutosRestantes === 1 ? 'minuto' : 'minutos'}`
+}
+
 export function formatarMinutosParaHorasEMinutos(minutos: number): string {
   const minutosArredondados = Math.max(0, Math.round(minutos))
   const horas = Math.floor(minutosArredondados / 60)
