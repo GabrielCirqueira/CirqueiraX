@@ -770,3 +770,24 @@
   - `web/features/spotify/api.ts`, `web/features/spotify/hooks/useMusicasItemSpotify.ts` (antes `useTopMusicasArtista.ts`), `web/features/spotify/hooks/chavesQuerySpotify.ts`
   - `documentation/funcionalidades/SPOTIFY.md`
 
+---
+
+### ✅ Melhoria 127 — Sincronização do Spotify Mais Rápida e Sem Perder Músicas Atrasadas
+
+- **Status**: Concluído
+- **Data**: 08 de novembro de 2026
+- **Problema**:
+  - Músicas ouvidas não apareciam: das 15 da playlist "Hoje" do Spotify, algumas demoravam a entrar e uma (Force) não entrou.
+  - A coleta pedia ao Spotify só as músicas depois da última coletada (cursor `after`). Quando o Spotify registra uma música com atraso, com horário anterior a esse cursor, ela era pulada para sempre.
+  - A coleta automática rodava só a cada 30 minutos e o reinício do container atrasava ainda mais.
+- **Solução**:
+  - Cada coleta pede sempre as 50 últimas músicas e deixa a deduplicação descartar as já gravadas.
+  - Coleta automática a cada 5 minutos.
+  - Com a página aberta, o cartão **Tocando agora** sincroniza sozinho 20 s depois de cada troca de música e atualiza a tela se entrar música nova.
+  - O aviso de "Sincronizar agora" mostra quantas músicas novas entraram e explica que o Spotify só informa a música depois que ela termina.
+- **Arquivos**:
+  - `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Schedule.php`
+  - `web/features/spotify/hooks/useSincronizacaoAutomaticaSpotify.ts` (novo), `web/features/spotify/hooks/useSincronizarSpotify.ts`, `web/features/spotify/hooks/index.ts`
+  - `web/features/spotify/components/CartaoTocandoAgora.tsx`, `web/features/spotify/components/PainelConexaoSpotify.tsx`, `web/features/spotify/components/EstadoVazioSpotify.tsx`
+  - `documentation/funcionalidades/SPOTIFY.md`
+

@@ -64,7 +64,7 @@ export const EstadoVazioSpotify = memo(function EstadoVazioSpotify({
       >
         {conectada
           ? 'Importe o arquivo do histórico completo exportado do Spotify ou comece a ouvir para acumular novos dados pela sincronização automática.'
-          : 'Conecte sua conta do Spotify para ativar a coleta a cada 30 minutos ou importe seu arquivo histórico para acessar os meses anteriores.'}
+          : 'Conecte sua conta do Spotify para ativar a coleta automática a cada 5 minutos ou importe seu arquivo histórico para acessar os meses anteriores.'}
       </Text>
 
       <Center gap={3} flexWrap="wrap">

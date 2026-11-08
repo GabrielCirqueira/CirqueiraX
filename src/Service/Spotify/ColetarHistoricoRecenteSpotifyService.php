@@ -54,7 +54,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         try {
             $lista = $this->spotifyClient->listarReproducoesRecentes(
                 $accessToken,
-                $cursorAtual,
+                null,
                 self::LIMITE_PADRAO_COLETA,
             );
         } catch (SpotifyException $e) {

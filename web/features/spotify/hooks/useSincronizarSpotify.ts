@@ -14,9 +14,9 @@ export function useSincronizarSpotify() {
       addToast({
         title: 'Sincronização concluída',
         description:
-          resultado.totalColetadas === 0
-            ? 'O Spotify não devolveu nenhuma música nova desde a última coleta.'
-            : `${resultado.totalColetadas} lidas do Spotify: ${resultado.totalNovas} novas e ${resultado.totalDuplicadas} já registradas.`,
+          resultado.totalNovas === 0
+            ? 'Nenhuma música nova. O Spotify só informa a música depois que ela termina.'
+            : `${resultado.totalNovas} ${resultado.totalNovas === 1 ? 'música nova registrada' : 'músicas novas registradas'}.`,
         type: 'success',
       })
     },

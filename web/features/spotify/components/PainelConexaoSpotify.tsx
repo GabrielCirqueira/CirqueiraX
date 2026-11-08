@@ -222,7 +222,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                 onClick={() => sincronizarMutation.mutate()}
                 disabled={sincronizarMutation.isPending}
                 aria-label="Sincronizar agora"
-                title="Sincronizar agora (faz a mesma coleta que roda a cada 30 minutos)"
+                title="Sincronizar agora (faz a mesma coleta que roda a cada 5 minutos)"
                 h="38px"
                 w="38px"
               >

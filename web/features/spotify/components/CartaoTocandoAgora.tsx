@@ -3,7 +3,11 @@ import { keyframes } from '@emotion/react'
 import { ExternalLink, Pause, Radio } from 'lucide-react'
 import { memo } from 'react'
 import { Link as LinkRouter } from 'react-router-dom'
-import { useRelogioSpotify, useTocandoAgoraSpotify } from '../hooks'
+import {
+  useRelogioSpotify,
+  useSincronizacaoAutomaticaSpotify,
+  useTocandoAgoraSpotify,
+} from '../hooks'
 import type { TocandoAgora } from '../types'
 import { formatarDataExtensa, formatarDuracaoMs, gerarRotaArtista, gerarRotaMusica } from '../utils'
 import { CapaSpotify } from './CapaSpotify'
@@ -23,6 +27,7 @@ export const CartaoTocandoAgora = memo(function CartaoTocandoAgora({
   conectada,
 }: CartaoTocandoAgoraProps) {
   const { data } = useTocandoAgoraSpotify(conectada)
+  useSincronizacaoAutomaticaSpotify(data)
 
   if (!conectada || !data) {
     return null

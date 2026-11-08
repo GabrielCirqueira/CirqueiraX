@@ -25,7 +25,7 @@ class Schedule implements ScheduleProviderInterface
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true)
             ->add(
-                RecurringMessage::every('30 minutes', new SincronizarHistoricoSpotifyMessage()),
+                RecurringMessage::every('5 minutes', new SincronizarHistoricoSpotifyMessage()),
                 RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7)),
                 RecurringMessage::every('1 day', new ExpirarAudiosAntigosMessage()),
                 RecurringMessage::every('1 hour', new ExpirarAudiosTranscricaoMessage()),

@@ -26,12 +26,15 @@ O sistema opera com duas origens de dados que se complementam e se deduplicam au
 
 | Origem | Mecanismo | Frequência / Prazo | Granularidade |
 | :--- | :--- | :--- | :--- |
-| **Coleta Periódica (API)** | OAuth 2.0 PKCE (`user-read-recently-played`) | A cada 30 minutos via Symfony Scheduler | Últimas 50 faixas tocadas (minutos estimados pelo intervalo entre reproduções, ver abaixo) |
+| **Coleta Periódica (API)** | OAuth 2.0 PKCE (`user-read-recently-played`) | A cada 5 minutos via Symfony Scheduler, e 20 s depois de cada troca de música com a página aberta | Últimas 50 faixas tocadas (minutos estimados pelo intervalo entre reproduções, ver abaixo) |
 | **Importação de Arquivo** | Upload de `.json` ou `.zip` (`StreamingHistory*.json` / `Audio_*.json`) | Manual / sob demanda | Histórico exato em milissegundos (`msPlayed`) de até toda a conta |
 
 ### Sincronizar agora
-- Com a conta conectada, o painel tem um botão discreto (ícone de atualizar) que roda na hora a mesma coleta da rotina de 30 minutos, só para a conta do usuário.
-- `POST /api/v1/spotify/sincronizar` (`SincronizarAgoraSpotifyService` → `ColetarHistoricoRecenteSpotifyService::executarParaConta`) devolve `totalColetadas`, `totalNovas` e `totalDuplicadas`, mostrados num aviso.
+- Com a conta conectada, o painel tem um botão discreto (ícone de atualizar) que roda na hora a mesma coleta da rotina de 5 minutos, só para a conta do usuário.
+- `POST /api/v1/spotify/sincronizar` (`SincronizarAgoraSpotifyService` → `ColetarHistoricoRecenteSpotifyService::executarParaConta`) devolve `totalColetadas`, `totalNovas` e `totalDuplicadas`. O aviso mostra quantas músicas novas entraram.
+- Cada coleta pede sempre as 50 últimas músicas, sem cursor `after`, e a deduplicação descarta as já gravadas. Assim, uma música que o Spotify registra com atraso, com horário anterior à última coletada, ainda entra.
+- Com a página aberta, o cartão **Tocando agora** dispara uma sincronização silenciosa 20 s depois de cada troca de música.
+- O Spotify só informa a música depois que ela termina. Músicas puladas ou muito curtas podem não aparecer em "tocadas recentemente", mesmo estando na playlist "Hoje" do app; elas entram ao importar o histórico estendido.
 - Se a API do Spotify falhar, a coleta devolve zero, igual à rotina agendada. O motivo fica só no log.
 
 ### Tempo ouvido nas reproduções da API
