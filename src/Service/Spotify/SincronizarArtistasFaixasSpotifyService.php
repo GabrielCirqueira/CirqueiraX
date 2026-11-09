@@ -10,12 +10,17 @@ use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
 use App\Repository\ArtistaFaixaSpotifyRepository;
 use App\Repository\ContaSpotifyRepository;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class SincronizarArtistasFaixasSpotifyService
 {
-    public const int LIMITE_PADRAO = 40;
+    public const int LIMITE_PADRAO = 20;
     private const int CODIGO_RESPOSTA_INESPERADA = 500;
+    private const int CODIGO_LIMITE_REQUISICOES = 429;
+    private const int PAUSA_LIMITE_REQUISICOES_SEGUNDOS = 900;
+    private const int INTERVALO_ENTRE_REQUISICOES_MICROSSEGUNDOS = 500000;
+    private const string CHAVE_PAUSA = 'spotify_artistas_faixas_pausa';
 
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
@@ -23,6 +28,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         private ObterTokenValidoSpotifyService $obterTokenValidoService,
         private SpotifyInterface $spotifyClient,
         private CacheAnaliseSpotifyService $cacheAnalise,
+        private CacheItemPoolInterface $cache,
         private LoggerInterface $logger,
     ) {
     }
@@ -39,7 +45,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
 
     public function executarParaConta(ContaSpotify $conta, int $limite = self::LIMITE_PADRAO): int
     {
-        if (!$conta->isConectada()) {
+        if (!$conta->isConectada() || $this->estaPausado()) {
             return 0;
         }
 
@@ -58,6 +64,10 @@ final readonly class SincronizarArtistasFaixasSpotifyService
 
         $processadas = 0;
         foreach ($faixas as $faixa) {
+            if ($processadas > 0) {
+                usleep(self::INTERVALO_ENTRE_REQUISICOES_MICROSSEGUNDOS);
+            }
+
             $artistas = $this->buscarArtistas($token, $faixa['codigo_faixa'], $faixa['artista'], $faixa['codigo_artista']);
             if (null === $artistas) {
                 break;
@@ -82,6 +92,10 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         try {
             return self::artistasDaFaixa($this->spotifyClient->obterFaixa($token, $codigoFaixa));
         } catch (SpotifyException $excecao) {
+            if (self::CODIGO_LIMITE_REQUISICOES === $excecao->getCode()) {
+                $this->pausar();
+            }
+
             if (self::CODIGO_RESPOSTA_INESPERADA !== $excecao->getCode()) {
                 $this->logger->info('Busca dos artistas das músicas do Spotify pausada.', ['erro' => $excecao->getMessage()]);
 
@@ -90,6 +104,19 @@ final readonly class SincronizarArtistasFaixasSpotifyService
 
             return [['nome' => $artistaPrincipal, 'codigo' => $codigoArtistaPrincipal]];
         }
+    }
+
+    private function estaPausado(): bool
+    {
+        return $this->cache->getItem(self::CHAVE_PAUSA)->isHit();
+    }
+
+    private function pausar(): void
+    {
+        $item = $this->cache->getItem(self::CHAVE_PAUSA);
+        $item->set(true);
+        $item->expiresAfter(self::PAUSA_LIMITE_REQUISICOES_SEGUNDOS);
+        $this->cache->save($item);
     }
 
     /**

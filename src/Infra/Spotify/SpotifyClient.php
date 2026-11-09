@@ -26,6 +26,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
     private const int TIMEOUT_SEGUNDOS = 15;
     private const int MAX_TENTATIVAS_RATE_LIMIT = 3;
     private const int ESPERA_PADRAO_RATE_LIMIT_SEGUNDOS = 2;
+    private const int ESPERA_MAXIMA_RATE_LIMIT_SEGUNDOS = 10;
     private const int LIMITE_PADRAO_RECENTES = 50;
     private const int LIMITE_MAXIMO_BUSCA = 10;
 
@@ -507,7 +508,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
 
                 if (429 === $statusCode) {
                     $retryAfter = $this->extrairSegundosRetryAfter($e);
-                    if ($tentativa < self::MAX_TENTATIVAS_RATE_LIMIT) {
+                    if ($tentativa < self::MAX_TENTATIVAS_RATE_LIMIT && $retryAfter <= self::ESPERA_MAXIMA_RATE_LIMIT_SEGUNDOS) {
                         sleep($retryAfter);
                         ++$tentativa;
                         continue;
