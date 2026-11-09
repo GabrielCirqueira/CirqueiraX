@@ -15,11 +15,11 @@ use Psr\Log\LoggerInterface;
 
 final readonly class SincronizarArtistasFaixasSpotifyService
 {
-    public const int LIMITE_PADRAO = 20;
+    public const int LIMITE_PADRAO = 15;
     private const int CODIGO_RESPOSTA_INESPERADA = 500;
     private const int CODIGO_LIMITE_REQUISICOES = 429;
     private const int PAUSA_LIMITE_REQUISICOES_SEGUNDOS = 900;
-    private const int INTERVALO_ENTRE_REQUISICOES_MICROSSEGUNDOS = 500000;
+    private const int INTERVALO_ENTRE_REQUISICOES_MICROSSEGUNDOS = 2000000;
     private const string CHAVE_PAUSA = 'spotify_artistas_faixas_pausa';
 
     public function __construct(
@@ -93,7 +93,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
             return self::artistasDaFaixa($this->spotifyClient->obterFaixa($token, $codigoFaixa));
         } catch (SpotifyException $excecao) {
             if (self::CODIGO_LIMITE_REQUISICOES === $excecao->getCode()) {
-                $this->pausar();
+                $this->pausar(max(self::PAUSA_LIMITE_REQUISICOES_SEGUNDOS, $excecao->segundosEspera() + 60));
             }
 
             if (self::CODIGO_RESPOSTA_INESPERADA !== $excecao->getCode()) {
@@ -111,11 +111,11 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         return $this->cache->getItem(self::CHAVE_PAUSA)->isHit();
     }
 
-    private function pausar(): void
+    private function pausar(int $segundos): void
     {
         $item = $this->cache->getItem(self::CHAVE_PAUSA);
         $item->set(true);
-        $item->expiresAfter(self::PAUSA_LIMITE_REQUISICOES_SEGUNDOS);
+        $item->expiresAfter($segundos);
         $this->cache->save($item);
     }
 

@@ -804,14 +804,14 @@
   - O histórico importado do Spotify só traz o artista principal, então não havia de onde tirar os demais.
   - A M124 passou a ordenar os artistas por minutos com base numa fonte secundária. A metodologia oficial do Spotify ordena por streams.
 - **Solução**:
-  - Nova tabela `artista_faixa_spotify` com todos os artistas de cada música. A coleta grava os artistas que a API devolve. Uma rotina a cada minuto busca 20 músicas sem artistas em `GET /tracks/{id}` até cobrir todo o histórico (cerca de 14,9 mil músicas). Comando manual: `app:spotify:artistas-faixas --limite=N`.
+  - Nova tabela `artista_faixa_spotify` com todos os artistas de cada música. A coleta grava os artistas que a API devolve. Uma rotina a cada minuto busca 15 músicas sem artistas em `GET /tracks/{id}` até cobrir todo o histórico (cerca de 14,9 mil músicas). Comando manual: `app:spotify:artistas-faixas --limite=N`.
   - Rankings de artistas, top 5 de artistas, artista do ano, detalhe do artista, meses no top 5, posição geral, artistas novos, redescobertas, concentração nos 5 do topo e curiosidades passam a creditar a música inteira para cada artista. Totais e rankings de músicas não duplicam.
   - Os números antigos foram recalculados: os cálculos são feitos na hora a partir das reproduções, então valem para todo o histórico assim que os artistas de cada música são gravados.
   - Artistas voltam a ser ordenados por streams, com minutos como desempate. Top artistas da Retrospectiva mostram streams e minutos.
-  - Correção (09/11/2026): a busca em massa levou um limite de requisições (429) do Spotify com espera longa. O cliente dormia o tempo inteiro e travava também a coleta das músicas recentes por cerca de 1 hora. Agora o cliente só espera até 10 s, a busca pausa 15 minutos ao levar 429 e vai mais devagar (20 músicas por minuto, meio segundo entre chamadas).
+  - Correção (09/11/2026): a busca em massa levou um limite de requisições (429) do Spotify com espera longa. O cliente dormia o tempo inteiro e travava também a coleta das músicas recentes por cerca de 1 hora. Agora o cliente só espera até 10 s, a busca pausa pelo tempo exato que o Spotify pede (o primeiro castigo foi de cerca de 22 horas) e vai mais devagar (15 músicas por minuto, 2 s entre chamadas).
 - **Arquivos**:
   - `src/Entity/ArtistaFaixaSpotify.php`, `src/Repository/ArtistaFaixaSpotifyRepository.php`, `migrations/Version20261108220436.php` (novos)
   - `src/Service/Spotify/SincronizarArtistasFaixasSpotifyService.php`, `src/Message/SincronizarArtistasFaixasSpotifyMessage.php`, `src/MessageHandler/SincronizarArtistasFaixasSpotifyMessageHandler.php`, `src/Command/SincronizarArtistasFaixasSpotifyCommand.php` (novos)
-  - `src/Schedule.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Repository/AnaliseReproducaoSpotifyRepository.php`, `src/Repository/ReproducaoSpotifyRepository.php`
+  - `src/Schedule.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Exception/Spotify/SpotifyException.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Repository/AnaliseReproducaoSpotifyRepository.php`, `src/Repository/ReproducaoSpotifyRepository.php`
   - `web/features/spotify/components/SecaoRetrospectiva.tsx`
   - `documentation/funcionalidades/SPOTIFY.md`

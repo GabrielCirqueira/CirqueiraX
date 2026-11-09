@@ -6,9 +6,19 @@ namespace App\Exception\Spotify;
 
 final class SpotifyException extends \DomainException
 {
+    private int $segundosEspera = 0;
+
     public static function limiteRequisicoesExcedido(int $segundosEspera): self
     {
-        return new self(sprintf('Limite de requisições da API do Spotify excedido. Tente novamente em %d segundos.', $segundosEspera), 429);
+        $excecao = new self(sprintf('Limite de requisições da API do Spotify excedido. Tente novamente em %d segundos.', $segundosEspera), 429);
+        $excecao->segundosEspera = $segundosEspera;
+
+        return $excecao;
+    }
+
+    public function segundosEspera(): int
+    {
+        return $this->segundosEspera;
     }
 
     public static function tokenInvalidoOuExpirado(): self
