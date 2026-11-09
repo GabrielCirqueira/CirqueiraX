@@ -97,7 +97,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
             }
 
             if (self::CODIGO_RESPOSTA_INESPERADA !== $excecao->getCode()) {
-                $this->logger->info('Busca dos artistas das músicas do Spotify pausada.', ['erro' => $excecao->getMessage()]);
+                $this->logger->warning('Busca dos artistas das músicas do Spotify pausada.', ['erro' => $excecao->getMessage()]);
 
                 return null;
             }
