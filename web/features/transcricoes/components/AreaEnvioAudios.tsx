@@ -92,10 +92,13 @@ export const AreaEnvioAudios = memo(function AreaEnvioAudios({
             {arrastando ? <FileAudio size={26} /> : <UploadCloud size={26} />}
           </Center>
           <Text fontSize="sm" fontWeight="bold" color="fg">
-            {arrastando ? 'Solte para transcrever' : 'Arraste áudios aqui ou clique para escolher'}
+            {arrastando
+              ? 'Solte para transcrever'
+              : 'Arraste áudios ou vídeos aqui ou clique para escolher'}
           </Text>
           <Text fontSize="xs" color="fg.muted" maxW="320px">
-            Vários de uma vez · MP3, M4A, WAV, OGG, OPUS (WhatsApp), FLAC e vídeos · até 500 MB cada
+            Vários de uma vez · áudios (MP3, M4A, WAV, OGG, OPUS do WhatsApp, FLAC) e vídeos (MP4,
+            MOV, MKV, WEBM, AVI) · até 2 GB cada
           </Text>
         </VStack>
       </Box>
@@ -104,7 +107,7 @@ export const AreaEnvioAudios = memo(function AreaEnvioAudios({
         <HStack gap={1.5} color="fg.muted">
           <Mic size={14} />
           <Text fontSize="xs" fontWeight="medium">
-            Idioma do áudio
+            Idioma da fala
           </Text>
         </HStack>
         <NativeSelect.Root size="sm" w={{ base: 'full', sm: '190px' }}>

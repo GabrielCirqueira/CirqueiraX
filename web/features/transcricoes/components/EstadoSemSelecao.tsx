@@ -40,7 +40,7 @@ export const EstadoSemSelecao = memo(function EstadoSemSelecao() {
             Escolha uma transcrição
           </Text>
           <Text fontSize="sm" color="fg.muted">
-            Clique em um áudio da lista para ler o texto, acompanhar ao vivo ou exportar.
+            Clique em um item da lista para ler o texto, acompanhar ao vivo ou exportar.
           </Text>
         </VStack>
         <VStack align="stretch" gap={2} w="full">

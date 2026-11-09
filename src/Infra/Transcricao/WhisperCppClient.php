@@ -19,7 +19,7 @@ final class WhisperCppClient implements TranscritorAudioInterface
 {
     private const float TIMEOUT_CONVERSAO_SEGUNDOS = 1800.0;
     private const float TIMEOUT_MEDICAO_SEGUNDOS = 60.0;
-    private const float TIMEOUT_TRANSCRICAO_SEGUNDOS = 21600.0;
+    private const float TIMEOUT_TRANSCRICAO_SEGUNDOS = 43200.0;
     private const int TAXA_AMOSTRAGEM = 16000;
     private const int PERCENTUAL_MAXIMO_PARCIAL = 99;
     private const int PERCENTUAL_MAXIMO_ESTIMADO = 95;

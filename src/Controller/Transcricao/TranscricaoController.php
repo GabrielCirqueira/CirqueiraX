@@ -16,6 +16,7 @@ use App\Service\Transcricao\AtualizarTranscricaoService;
 use App\Service\Transcricao\ConsultarTranscricoesService;
 use App\Service\Transcricao\EnviarAudioTranscricaoService;
 use App\Service\Transcricao\ReprocessarTranscricaoService;
+use App\Service\Transcricao\SolicitarCorrecaoTranscricaoService;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +37,7 @@ final class TranscricaoController extends DefaultController
         private readonly AtualizarTranscricaoService $atualizarTranscricaoService,
         private readonly ReprocessarTranscricaoService $reprocessarTranscricaoService,
         private readonly ApagarTranscricaoService $apagarTranscricaoService,
+        private readonly SolicitarCorrecaoTranscricaoService $solicitarCorrecaoTranscricaoService,
         private readonly TranscricaoSerializer $transcricaoSerializer,
     ) {}
 
@@ -99,6 +101,14 @@ final class TranscricaoController extends DefaultController
         $transcricao = $this->reprocessarTranscricaoService->executar($uuid, $dto, $usuario);
 
         return $this->success($this->transcricaoSerializer->normalizarResumo($transcricao));
+    }
+
+    #[Route('/{uuid}/corrigir', name: 'corrigir', methods: ['POST'])]
+    public function corrigir(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        $transcricao = $this->solicitarCorrecaoTranscricaoService->executar($uuid, $usuario);
+
+        return $this->success($this->transcricaoSerializer->normalizarDetalhe($transcricao));
     }
 
     #[Route('/{uuid}', name: 'apagar', methods: ['DELETE'])]

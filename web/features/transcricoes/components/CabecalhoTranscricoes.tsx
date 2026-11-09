@@ -47,7 +47,7 @@ export const CabecalhoTranscricoes = memo(function CabecalhoTranscricoes({
           )}
         </HStack>
         <Text fontSize="xs" color="fg.subtle">
-          Solte vários áudios de uma vez e acompanhe cada texto aparecendo em tempo real
+          Solte áudios ou vídeos de uma vez e acompanhe cada texto aparecendo em tempo real
         </Text>
       </VStack>
 

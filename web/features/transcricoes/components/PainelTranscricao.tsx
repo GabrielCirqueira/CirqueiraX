@@ -1,10 +1,12 @@
+import { addToast } from '@/shared/components/ui/toaster'
 import { Box, Center, Skeleton, Spinner, Text, VStack } from '@chakra-ui/react'
 import { AlertTriangle, FileX2 } from 'lucide-react'
-import { memo, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import {
   useApagarTranscricao,
   useAtualizarTranscricao,
   useCopiarTexto,
+  useCorrigirTranscricaoComIa,
   useDetalheTranscricao,
   useReprocessarTranscricao,
 } from '../hooks'
@@ -22,6 +24,7 @@ import {
 } from '../utils'
 import { BarraFerramentasTexto } from './BarraFerramentasTexto'
 import { CabecalhoPainelTranscricao } from './CabecalhoPainelTranscricao'
+import { CorrecaoIaTranscricao } from './CorrecaoIaTranscricao'
 import { PlayerTranscricao } from './PlayerTranscricao'
 import { ProgressoAoVivo } from './ProgressoAoVivo'
 import { RodapeAcoesTranscricao } from './RodapeAcoesTranscricao'
@@ -42,6 +45,7 @@ export const PainelTranscricao = memo(function PainelTranscricao({
   const reprocessar = useReprocessarTranscricao()
   const apagar = useApagarTranscricao()
   const copiar = useCopiarTexto()
+  const corrigir = useCorrigirTranscricaoComIa()
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const areaTextoRef = useRef<HTMLDivElement | null>(null)
@@ -54,7 +58,30 @@ export const PainelTranscricao = memo(function PainelTranscricao({
   const indiceAtivo = transcricao?.isAudioDisponivel
     ? encontrarIndiceSegmentoAtual(segmentos, tempoAtual)
     : -1
-  const ocorrencias = useMemo(() => contarOcorrencias(segmentos, termo), [segmentos, termo])
+  const textoCorrigido = transcricao?.textoCorrigido ?? null
+  const ocorrencias = useMemo(
+    () =>
+      modo === 'corrigido' && textoCorrigido
+        ? contarOcorrencias([{ inicio: 0, fim: 0, texto: textoCorrigido }], termo)
+        : contarOcorrencias(segmentos, termo),
+    [modo, textoCorrigido, segmentos, termo]
+  )
+  const statusCorrecao = transcricao?.statusCorrecao ?? null
+  const statusCorrecaoAnterior = useRef(statusCorrecao)
+
+  useEffect(() => {
+    const anterior = statusCorrecaoAnterior.current
+    statusCorrecaoAnterior.current = statusCorrecao
+    if (anterior !== 'na_fila' && anterior !== 'corrigindo') return
+    if (statusCorrecao === 'concluida') {
+      setModo('corrigido')
+      addToast({ title: 'Texto corrigido com IA', type: 'success' })
+      return
+    }
+    if (statusCorrecao === 'erro') {
+      addToast({ title: 'A correção com IA falhou', type: 'error' })
+    }
+  }, [statusCorrecao])
 
   function aoAtualizarTempo(segundos: number) {
     const indiceNovo = encontrarIndiceSegmentoAtual(segmentos, segundos)
@@ -99,9 +126,11 @@ export const PainelTranscricao = memo(function PainelTranscricao({
 
   const aoVivo = transcricao.isEmAndamento
   const temTexto = segmentos.length > 0
+  const temCorrigido = Boolean(transcricao.textoCorrigido)
+  const modoExibido = modo === 'corrigido' && !temCorrigido ? 'corrido' : modo
 
   function exportar(formato: FormatoExportacao) {
-    if (transcricao) baixarExportacao(transcricao, formato)
+    if (transcricao) baixarExportacao(transcricao, formato, modoExibido === 'corrigido')
   }
 
   function reprocessarCom(idioma: IdiomaTranscricao) {
@@ -156,18 +185,29 @@ export const PainelTranscricao = memo(function PainelTranscricao({
         />
       )}
 
+      {temTexto && !aoVivo && transcricao.status === 'concluida' && (
+        <CorrecaoIaTranscricao
+          transcricao={transcricao}
+          enviando={corrigir.isPending}
+          onCorrigir={() => corrigir.mutate(uuid)}
+        />
+      )}
+
       {temTexto && !aoVivo && (
         <BarraFerramentasTexto
-          modo={modo}
+          modo={modoExibido}
           termo={termo}
           ocorrencias={ocorrencias}
           seguirAudio={seguirAudio}
-          exibirSeguirAudio={transcricao.isAudioDisponivel && modo === 'trechos'}
+          exibirSeguirAudio={transcricao.isAudioDisponivel && modoExibido === 'trechos'}
+          exibirCorrigido={temCorrigido}
           onMudarModo={setModo}
           onMudarTermo={setTermo}
           onAlternarSeguirAudio={() => setSeguirAudio((atual) => !atual)}
           onCopiar={() =>
-            copiar(transcricao.texto ?? '', `${transcricao.totalPalavras} palavras copiadas.`)
+            modoExibido === 'corrigido'
+              ? copiar(transcricao.textoCorrigido ?? '', 'Texto corrigido copiado.')
+              : copiar(transcricao.texto ?? '', `${transcricao.totalPalavras} palavras copiadas.`)
           }
           onExportar={exportar}
         />
@@ -183,7 +223,7 @@ export const PainelTranscricao = memo(function PainelTranscricao({
         pr={1}
       >
         <Box>
-          {temTexto && modo === 'trechos' && (
+          {temTexto && modoExibido === 'trechos' && (
             <TrechosTranscricao
               segmentos={segmentos}
               indiceAtivo={indiceAtivo}
@@ -193,8 +233,11 @@ export const PainelTranscricao = memo(function PainelTranscricao({
               onClicarTrecho={tocarTrecho}
             />
           )}
-          {temTexto && modo === 'corrido' && (
+          {temTexto && modoExibido === 'corrido' && (
             <TextoCorridoTranscricao texto={transcricao.texto ?? ''} termo={termo} />
+          )}
+          {temTexto && modoExibido === 'corrigido' && (
+            <TextoCorridoTranscricao texto={transcricao.textoCorrigido ?? ''} termo={termo} />
           )}
           {!temTexto && aoVivo && (
             <Center py={10} gap={3} color="fg.subtle">

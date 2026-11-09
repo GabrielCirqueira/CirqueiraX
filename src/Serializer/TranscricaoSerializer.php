@@ -30,6 +30,13 @@ final readonly class TranscricaoSerializer
             'totalPalavras' => $transcricao->totalPalavras(),
             'erroMotivo' => $transcricao->erroMotivo(),
             'favorita' => $transcricao->isFavorita(),
+            'origemVideo' => $transcricao->isOrigemVideo(),
+            'statusCorrecao' => $transcricao->statusCorrecao()?->value,
+            'statusCorrecaoDescricao' => $transcricao->statusCorrecao()?->descricao(),
+            'erroCorrecao' => $transcricao->erroCorrecao(),
+            'isCorrecaoEmAndamento' => $transcricao->isCorrecaoEmAndamento(),
+            'isCorrigivel' => $transcricao->isCorrigivel(),
+            'corrigidoEm' => $transcricao->corrigidoEm()?->format(DateTimeInterface::ATOM),
             'isEmAndamento' => $transcricao->isEmAndamento(),
             'isAudioDisponivel' => $transcricao->isAudioDisponivel(),
             'isReprocessavel' => $transcricao->isReprocessavel(),
@@ -53,6 +60,7 @@ final readonly class TranscricaoSerializer
         return [
             ...$this->normalizarResumo($transcricao),
             'texto' => $transcricao->texto(),
+            'textoCorrigido' => $transcricao->textoCorrigido(),
             'segmentos' => $transcricao->segmentos(),
         ];
     }

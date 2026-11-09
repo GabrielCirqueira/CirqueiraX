@@ -17,7 +17,7 @@ final class TranscricaoException extends DomainException
 
     public static function arquivoNaoEnviado(): self
     {
-        return new self('Envie um arquivo de áudio para transcrever.', 422);
+        return new self('Envie um arquivo de áudio ou vídeo para transcrever.', 422);
     }
 
     public static function arquivoInvalido(string $motivo): self
@@ -33,6 +33,26 @@ final class TranscricaoException extends DomainException
     public static function falhaAoRemoverAudio(string $caminho): self
     {
         return new self(sprintf('Não foi possível apagar o arquivo de áudio "%s".', basename($caminho)), 500);
+    }
+
+    public static function falhaAoExtrairAudioDoVideo(string $detalhe): self
+    {
+        return new self(sprintf('Não foi possível tirar o áudio do vídeo. Confira se o vídeo tem som. Detalhe: %s', self::resumirDetalhe($detalhe)), 422);
+    }
+
+    public static function naoPodeCorrigir(): self
+    {
+        return new self('Só dá para corrigir com IA uma transcrição pronta, com texto e sem outra correção em andamento.', 409);
+    }
+
+    public static function correcaoIndisponivel(): self
+    {
+        return new self('A correção com IA não está configurada no servidor.', 503);
+    }
+
+    public static function falhaNaCorrecao(string $detalhe): self
+    {
+        return new self(sprintf('A IA não conseguiu corrigir o texto. Detalhe: %s', self::resumirDetalhe($detalhe)), 502);
     }
 
     public static function audioIndisponivel(): self

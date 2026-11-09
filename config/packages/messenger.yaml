@@ -35,7 +35,7 @@ framework:
                     queue_name: transcricao
                     use_notify: true
                     check_delayed_interval: 60000
-                    redeliver_timeout: 28800
+                    redeliver_timeout: 50400
                 retry_strategy:
                     max_retries: 1
                     multiplier: 2

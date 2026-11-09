@@ -1,5 +1,5 @@
 import { Button, HStack, IconButton, Input, InputGroup, Text, Wrap } from '@chakra-ui/react'
-import { AlignLeft, Copy, Download, ListOrdered, LocateFixed, Search } from 'lucide-react'
+import { AlignLeft, Copy, Download, ListOrdered, LocateFixed, Search, Sparkles } from 'lucide-react'
 import { memo } from 'react'
 import type { FormatoExportacao, ModoVisualizacaoTexto } from '../types'
 import { OPCOES_EXPORTACAO } from '../utils'
@@ -10,6 +10,7 @@ export interface BarraFerramentasTextoProps {
   ocorrencias: number
   seguirAudio: boolean
   exibirSeguirAudio: boolean
+  exibirCorrigido: boolean
   onMudarModo: (modo: ModoVisualizacaoTexto) => void
   onMudarTermo: (termo: string) => void
   onAlternarSeguirAudio: () => void
@@ -23,6 +24,7 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
   ocorrencias,
   seguirAudio,
   exibirSeguirAudio,
+  exibirCorrigido,
   onMudarModo,
   onMudarTermo,
   onAlternarSeguirAudio,
@@ -52,6 +54,18 @@ export const BarraFerramentasTexto = memo(function BarraFerramentasTexto({
           <AlignLeft size={13} />
           Texto corrido
         </Button>
+        {exibirCorrigido && (
+          <Button
+            size="xs"
+            borderRadius="full"
+            variant={modo === 'corrigido' ? 'solid' : 'ghost'}
+            colorPalette={modo === 'corrigido' ? 'purple' : 'gray'}
+            onClick={() => onMudarModo('corrigido')}
+          >
+            <Sparkles size={13} />
+            Corrigido com IA
+          </Button>
+        )}
       </HStack>
 
       <HStack gap={1.5} flex={{ base: '1 1 100%', md: '0 1 auto' }} order={{ base: 3, md: 2 }}>

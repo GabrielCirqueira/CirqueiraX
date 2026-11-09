@@ -815,3 +815,26 @@
   - `src/Schedule.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Exception/Spotify/SpotifyException.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Repository/AnaliseReproducaoSpotifyRepository.php`, `src/Repository/ReproducaoSpotifyRepository.php`
   - `web/features/spotify/components/SecaoRetrospectiva.tsx`
   - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### ✅ Melhoria 129 — Transcrição de Vídeos, Limite de 2 GB e Correção do Texto com IA
+
+- **Status**: Concluído
+- **Data**: 09 de novembro de 2026
+- **Problema**:
+  - A tela de transcrições só falava em áudio, e o limite era de 500 MB por arquivo, pouco para vídeos.
+  - O texto que sai do reconhecimento de fala vem com falhas (palavras trocadas, nomes errados, pontuação), e não havia como consertar sem editar na mão.
+- **Solução**:
+  - Vídeos (MP4, MOV, MKV, WEBM, AVI, WMV, M4V...) são aceitos de forma explícita. Antes de transcrever, o worker tira só o áudio do vídeo com `ffmpeg` e apaga o vídeo, para não ocupar até 2 GB por 7 dias.
+  - Limite de 2 GB por arquivo em todas as camadas: Nginx do host, Nginx interno, PHP (`upload_max_filesize`, `post_max_size` 2100M, `max_input_time` 3600) e validação. O Whisper pode rodar por até 12 horas.
+  - Botão **Corrigir com IA**: manda o texto pronto para a OpenAI (`gpt-5.4-mini`), explicando que é uma transcrição automática de áudio ou vídeo. Roda na fila, em blocos de até 1.500 palavras. O texto corrigido fica numa aba própria, com copiar e `.txt`; o original continua salvo.
+  - Chave `OPENAI_API_KEY` e modelo `OPENAI_MODELO_TEXTO` no `.env`.
+- **Arquivos**:
+  - `src/Entity/Transcricao.php`, `src/Enum/StatusCorrecaoTranscricao.php` (novo), `migrations/Version20261109193657.php` (novo)
+  - `src/Interface/ExtratorAudioVideoInterface.php`, `src/Infra/Transcricao/ExtratorAudioFfmpegClient.php`, `src/Interface/CorretorTextoTranscricaoInterface.php`, `src/Infra/OpenAi/OpenAiCorretorTextoClient.php` (novos)
+  - `src/Service/Transcricao/SolicitarCorrecaoTranscricaoService.php`, `src/Service/Transcricao/CorrigirTextoTranscricaoService.php`, `src/Message/CorrigirTextoTranscricaoMessage.php`, `src/MessageHandler/CorrigirTextoTranscricaoMessageHandler.php` (novos)
+  - `src/Service/Transcricao/TranscreverAudioService.php`, `src/Service/Transcricao/ExpirarAudiosTranscricaoService.php`, `src/Infra/Transcricao/WhisperCppClient.php`, `src/DataObject/Transcricao/EnviarAudioTranscricaoDTO.php`, `src/Exception/Transcricao/TranscricaoException.php`, `src/Controller/Transcricao/TranscricaoController.php`, `src/Serializer/TranscricaoSerializer.php`
+  - `config/services.yaml`, `config/packages/messenger.yaml`, `devops/php/php.prod.ini`, `devops/php/php.dev.ini`, `devops/php/nginx-internal.conf`, `devops/nginx/prod.conf`, `devops/nginx/dev.conf`
+  - `web/features/transcricoes/components/CorrecaoIaTranscricao.tsx` (novo), `PainelTranscricao.tsx`, `BarraFerramentasTexto.tsx`, `AreaEnvioAudios.tsx`, `CabecalhoTranscricoes.tsx`, `EstadoSemSelecao.tsx`, `api.ts`, `types.ts`, `hooks/useAcoesTranscricao.ts`, `hooks/useTranscricoes.ts`, `utils/arquivos.ts`, `utils/exportacao.ts`
+  - `documentation/funcionalidades/TRANSCRICOES.md`, `documentation/funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md`, `documentation/README.md`

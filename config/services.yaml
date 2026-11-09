@@ -17,6 +17,8 @@ parameters:
     env(SPOTIFY_CLIENT_ID): ''
     env(SPOTIFY_CLIENT_SECRET): ''
     env(SPOTIFY_REDIRECT_URI): 'http://127.0.0.1:4012/spotify/callback'
+    env(OPENAI_API_KEY): ''
+    env(OPENAI_MODELO_TEXTO): 'gpt-5.4-mini'
 
 services:
     # default configuration for services in *this* file
@@ -144,6 +146,13 @@ services:
     App\Interface\SpotifyInterface: '@App\Infra\Spotify\SpotifyClient'
     App\Interface\TranscritorAudioInterface: '@App\Infra\Transcricao\WhisperCppClient'
     App\Interface\ArmazenamentoTranscricaoInterface: '@App\Infra\Storage\ArmazenamentoTranscricaoClient'
+    App\Interface\ExtratorAudioVideoInterface: '@App\Infra\Transcricao\ExtratorAudioFfmpegClient'
+    App\Interface\CorretorTextoTranscricaoInterface: '@App\Infra\OpenAi\OpenAiCorretorTextoClient'
+
+    App\Infra\OpenAi\OpenAiCorretorTextoClient:
+        arguments:
+            $chaveApi: '%env(OPENAI_API_KEY)%'
+            $modelo: '%env(OPENAI_MODELO_TEXTO)%'
 
     App\Infra\Transcricao\WhisperCppClient:
         arguments:

@@ -48,8 +48,10 @@ function gerarMarkdown(transcricao: TranscricaoDetalhe): string {
 
 export function gerarConteudoExportacao(
   transcricao: TranscricaoDetalhe,
-  formato: FormatoExportacao
+  formato: FormatoExportacao,
+  usarTextoCorrigido = false
 ): string {
+  if (usarTextoCorrigido && formato === 'txt') return `${transcricao.textoCorrigido ?? ''}\n`
   if (formato === 'srt') return gerarLegendaSrt(transcricao.segmentos)
   if (formato === 'vtt') return gerarLegendaVtt(transcricao.segmentos)
   if (formato === 'md') return gerarMarkdown(transcricao)
@@ -58,10 +60,12 @@ export function gerarConteudoExportacao(
 
 export function baixarExportacao(
   transcricao: TranscricaoDetalhe,
-  formato: FormatoExportacao
+  formato: FormatoExportacao,
+  usarTextoCorrigido = false
 ): void {
-  const conteudo = gerarConteudoExportacao(transcricao, formato)
-  const nomeBase = transcricao.titulo.replace(PADRAO_NOME_INVALIDO, ' ').trim() || NOME_PADRAO
+  const conteudo = gerarConteudoExportacao(transcricao, formato, usarTextoCorrigido)
+  const titulo = transcricao.titulo.replace(PADRAO_NOME_INVALIDO, ' ').trim() || NOME_PADRAO
+  const nomeBase = usarTextoCorrigido && formato === 'txt' ? `${titulo} (corrigido)` : titulo
   const url = URL.createObjectURL(new Blob([conteudo], { type: TIPOS_MIME[formato] }))
   const link = document.createElement('a')
   link.href = url

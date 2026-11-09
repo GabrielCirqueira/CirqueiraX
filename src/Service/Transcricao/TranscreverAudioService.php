@@ -9,6 +9,7 @@ use App\DataObject\Transcricao\ResultadoTranscricaoDTO;
 use App\Entity\Transcricao;
 use App\Exception\Transcricao\TranscricaoException;
 use App\Interface\ArmazenamentoTranscricaoInterface;
+use App\Interface\ExtratorAudioVideoInterface;
 use App\Interface\TranscritorAudioInterface;
 use App\Repository\TranscricaoRepository;
 use Psr\Log\LoggerInterface;
@@ -16,11 +17,13 @@ use Psr\Log\LoggerInterface;
 final readonly class TranscreverAudioService
 {
     private const float INTERVALO_GRAVACAO_PROGRESSO_SEGUNDOS = 1.5;
+    private const string SUFIXO_AUDIO_EXTRAIDO = '-audio.m4a';
 
     public function __construct(
         private TranscricaoRepository $transcricaoRepository,
         private ArmazenamentoTranscricaoInterface $armazenamento,
         private TranscritorAudioInterface $transcritor,
+        private ExtratorAudioVideoInterface $extratorAudio,
         private LoggerInterface $logger,
     ) {}
 
@@ -41,6 +44,7 @@ final readonly class TranscreverAudioService
         $this->transcricaoRepository->flush();
 
         try {
+            $this->extrairAudioSeForVideo($transcricao);
             $resultado = $this->transcritor->transcrever(
                 (string) $transcricao->caminhoArquivo(),
                 $transcricao->idiomaSolicitado(),
@@ -53,6 +57,21 @@ final readonly class TranscreverAudioService
         }
 
         $this->concluir($transcricao, $resultado);
+    }
+
+    private function extrairAudioSeForVideo(Transcricao $transcricao): void
+    {
+        if (!$transcricao->precisaExtrairAudioDoVideo()) {
+            return;
+        }
+
+        $caminhoVideo = (string) $transcricao->caminhoArquivo();
+        $caminhoAudio = sprintf('%s/%s%s', dirname($caminhoVideo), $transcricao->uuidTexto(), self::SUFIXO_AUDIO_EXTRAIDO);
+
+        $this->extratorAudio->extrairAudioDoVideo($caminhoVideo, $caminhoAudio);
+        $transcricao->substituirVideoPorAudio($caminhoAudio);
+        $this->transcricaoRepository->flush();
+        $this->armazenamento->remover($caminhoVideo);
     }
 
     /**

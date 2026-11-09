@@ -1,6 +1,12 @@
 import { z } from 'zod'
 
 export const StatusTranscricaoSchema = z.enum(['na_fila', 'transcrevendo', 'concluida', 'erro'])
+export const StatusCorrecaoTranscricaoSchema = z.enum([
+  'na_fila',
+  'corrigindo',
+  'concluida',
+  'erro',
+])
 export const IdiomaTranscricaoSchema = z.enum(['auto', 'pt', 'en', 'es'])
 export const FiltroListagemTranscricaoSchema = z.enum([
   'todas',
@@ -32,6 +38,13 @@ export const TranscricaoResumoSchema = z.object({
   totalPalavras: z.number(),
   erroMotivo: z.string().nullable(),
   favorita: z.boolean(),
+  origemVideo: z.boolean(),
+  statusCorrecao: StatusCorrecaoTranscricaoSchema.nullable(),
+  statusCorrecaoDescricao: z.string().nullable(),
+  erroCorrecao: z.string().nullable(),
+  isCorrecaoEmAndamento: z.boolean(),
+  isCorrigivel: z.boolean(),
+  corrigidoEm: z.string().nullable(),
   isEmAndamento: z.boolean(),
   isAudioDisponivel: z.boolean(),
   isReprocessavel: z.boolean(),
@@ -48,6 +61,7 @@ export const TranscricaoResumoSchema = z.object({
 
 export const TranscricaoDetalheSchema = TranscricaoResumoSchema.extend({
   texto: z.string().nullable(),
+  textoCorrigido: z.string().nullable(),
   segmentos: z.array(SegmentoTranscricaoSchema),
 })
 
@@ -64,6 +78,7 @@ export const ResumoTranscricoesSchema = z.object({
 })
 
 export type StatusTranscricao = z.infer<typeof StatusTranscricaoSchema>
+export type StatusCorrecaoTranscricao = z.infer<typeof StatusCorrecaoTranscricaoSchema>
 export type IdiomaTranscricao = z.infer<typeof IdiomaTranscricaoSchema>
 export type FiltroListagemTranscricao = z.infer<typeof FiltroListagemTranscricaoSchema>
 export type SegmentoTranscricao = z.infer<typeof SegmentoTranscricaoSchema>
@@ -101,7 +116,7 @@ export interface EnvioAudio {
 
 export type FormatoExportacao = 'txt' | 'srt' | 'vtt' | 'md'
 
-export type ModoVisualizacaoTexto = 'trechos' | 'corrido'
+export type ModoVisualizacaoTexto = 'trechos' | 'corrido' | 'corrigido'
 
 export type PaletaStatusTranscricao = 'gray' | 'amber' | 'green' | 'red' | 'brand'
 

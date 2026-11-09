@@ -1,9 +1,9 @@
 import type { EnvioAudio } from '../types'
 
-export const LIMITE_BYTES_ARQUIVO = 500 * 1024 * 1024
+export const LIMITE_BYTES_ARQUIVO = 2 * 1024 * 1024 * 1024
 export const ENVIOS_SIMULTANEOS = 2
 export const TIPOS_ACEITOS =
-  'audio/*,video/*,.mp3,.m4a,.wav,.ogg,.oga,.opus,.aac,.flac,.amr,.weba,.webm,.mp4,.mov,.mkv,.3gp'
+  'audio/*,video/*,.mp3,.m4a,.wav,.ogg,.oga,.opus,.aac,.flac,.amr,.weba,.webm,.mp4,.mov,.mkv,.3gp,.avi,.wmv,.m4v,.flv,.mpeg,.mpg,.ts'
 
 const EXTENSOES_ACEITAS = new Set([
   'mp3',
@@ -23,6 +23,13 @@ const EXTENSOES_ACEITAS = new Set([
   '3gp',
   'wma',
   'aiff',
+  'avi',
+  'wmv',
+  'm4v',
+  'flv',
+  'mpeg',
+  'mpg',
+  'ts',
 ])
 
 function extensaoDe(nome: string): string {
@@ -44,7 +51,7 @@ export function separarArquivosAceitos(arquivos: File[]): { aceitos: File[]; rec
       continue
     }
     if (arquivo.size > LIMITE_BYTES_ARQUIVO) {
-      recusados.push(`${arquivo.name}: passa de 500 MB`)
+      recusados.push(`${arquivo.name}: passa de 2 GB`)
       continue
     }
     aceitos.push(arquivo)

@@ -71,7 +71,9 @@ export function useDetalheTranscricao(uuid: string | null) {
     queryFn: () => obterTranscricao(uuid ?? ''),
     enabled: uuid !== null,
     refetchInterval: (query) =>
-      query.state.data?.isEmAndamento ? INTERVALO_ATUALIZACAO_DETALHE_MS : false,
+      query.state.data?.isEmAndamento || query.state.data?.isCorrecaoEmAndamento
+        ? INTERVALO_ATUALIZACAO_DETALHE_MS
+        : false,
     refetchIntervalInBackground: true,
   })
 }

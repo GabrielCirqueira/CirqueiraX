@@ -12,11 +12,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 final readonly class EnviarAudioTranscricaoDTO
 {
     public function __construct(
-        #[Assert\NotNull(message: 'Envie um arquivo de áudio para transcrever.')]
+        #[Assert\NotNull(message: 'Envie um arquivo de áudio ou vídeo para transcrever.')]
         #[Assert\File(
-            maxSize: '500M',
+            maxSize: 2147483648,
             mimeTypes: ['audio/*', 'video/*', 'application/ogg'],
-            maxSizeMessage: 'O arquivo passa do limite de 500 MB.',
+            maxSizeMessage: 'O arquivo passa do limite de 2 GB.',
             mimeTypesMessage: 'O arquivo enviado precisa ser um áudio ou vídeo.'
         )]
         public ?UploadedFile $arquivo,

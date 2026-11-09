@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 
 final readonly class ExpirarAudiosTranscricaoService
 {
-    private const string LIMITE_TRANSCRICAO_TRAVADA = '-6 hours';
+    private const string LIMITE_TRANSCRICAO_TRAVADA = '-13 hours';
 
     public function __construct(
         private TranscricaoRepository $transcricaoRepository,

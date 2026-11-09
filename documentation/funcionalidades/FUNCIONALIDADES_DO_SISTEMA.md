@@ -121,16 +121,17 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 
 ### Transcrições
 
-Transforma áudios em texto. Jogue vários arquivos de uma vez e veja cada um sendo transcrito na hora.
+Transforma áudios e vídeos em texto. Jogue vários arquivos de uma vez e veja cada um sendo transcrito na hora.
 
-- Envie vários áudios ou vídeos (MP3, M4A, WAV, OPUS do WhatsApp, MP4...) arrastando para a tela, até 500 MB cada.
+- Envie vários áudios ou vídeos (MP3, M4A, WAV, OPUS do WhatsApp, MP4, MOV, MKV...) arrastando para a tela, até 2 GB cada. No vídeo, o sistema transcreve o que foi falado e guarda só o áudio.
 - Cada arquivo entra numa fila e mostra o percentual e o tempo que falta. O texto vai aparecendo enquanto é reconhecido, e um aviso chega quando fica pronto.
 - O idioma é detectado sozinho ou você escolhe entre português, inglês e espanhol.
 - Ouça o áudio com o trecho falado destacado no texto. Clique numa frase para ouvir dali.
 - Veja em trechos com o tempo de cada frase ou em texto corrido com parágrafos, procure palavras dentro do texto, copie ou baixe em TXT, Markdown, SRT ou VTT (legendas).
 - Renomeie, favorite, busque em todas as transcrições e filtre por prontas, em andamento, favoritas ou com erro.
 - Números da conta: horas transcritas, palavras e tempo de leitura.
-- A transcrição roda no próprio servidor, sem enviar o áudio para fora.
+- **Corrigir com IA**: depois de pronto, um botão manda o texto para a IA consertar palavras trocadas, nomes, pontuação e acentos, sem mudar o que foi dito. O texto corrigido aparece numa aba própria e o original continua salvo.
+- A transcrição roda no próprio servidor, sem enviar o áudio para fora. Só a correção com IA envia o texto (nunca o áudio) para a OpenAI.
 - O texto fica salvo para sempre. O áudio é apagado 7 dias depois do envio; até lá dá para ouvir e transcrever de novo.
 
 ### Prints & Capturas

@@ -79,6 +79,11 @@ export async function reprocessarTranscricao(
   return TranscricaoResumoSchema.parse(data.data)
 }
 
+export async function corrigirTranscricaoComIa(uuid: string): Promise<TranscricaoDetalhe> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${URL_TRANSCRICOES}/${uuid}/corrigir`)
+  return TranscricaoDetalheSchema.parse(data.data)
+}
+
 export async function apagarTranscricao(uuid: string): Promise<void> {
   await api.delete(`${URL_TRANSCRICOES}/${uuid}`)
 }

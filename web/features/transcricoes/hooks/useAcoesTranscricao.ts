@@ -1,6 +1,11 @@
 import { addToast } from '@/shared/components/ui/toaster'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { apagarTranscricao, atualizarTranscricao, reprocessarTranscricao } from '../api'
+import {
+  apagarTranscricao,
+  atualizarTranscricao,
+  corrigirTranscricaoComIa,
+  reprocessarTranscricao,
+} from '../api'
 import type { AtualizarTranscricaoPayload, IdiomaTranscricao } from '../types'
 import { extrairMensagemErroApi } from '../utils'
 import { TRANSCRICOES_QUERY_KEYS } from './chavesQueryTranscricoes'
@@ -41,6 +46,25 @@ export function useReprocessarTranscricao() {
     onError: (erro) => {
       addToast({
         title: 'Não foi possível transcrever de novo',
+        description: extrairMensagemErroApi(erro, 'Tente novamente em instantes.'),
+        type: 'error',
+      })
+    },
+  })
+}
+
+export function useCorrigirTranscricaoComIa() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: corrigirTranscricaoComIa,
+    onSuccess: (transcricao) => {
+      queryClient.setQueryData(TRANSCRICOES_QUERY_KEYS.detalhe(transcricao.uuid), transcricao)
+      queryClient.invalidateQueries({ queryKey: TRANSCRICOES_QUERY_KEYS.todas })
+    },
+    onError: (erro) => {
+      addToast({
+        title: 'Não foi possível corrigir com IA',
         description: extrairMensagemErroApi(erro, 'Tente novamente em instantes.'),
         type: 'error',
       })

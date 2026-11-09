@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\DataObject\Transcricao\SegmentoTranscricaoDTO;
 use App\Enum\IdiomaTranscricao;
+use App\Enum\StatusCorrecaoTranscricao;
 use App\Enum\StatusTranscricao;
 use App\Repository\TranscricaoRepository;
 use DateTimeImmutable;
@@ -28,6 +29,8 @@ class Transcricao
     private const string SEPARADOR_PARAGRAFO = "\n\n";
     private const string SEPARADOR_FRASE = ' ';
     private const string PADRAO_PALAVRAS = '/[\p{L}\p{N}]+/u';
+    private const string PREFIXO_MIME_VIDEO = 'video/';
+    private const string MIME_AUDIO_EXTRAIDO = 'audio/mp4';
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -85,6 +88,21 @@ class Transcricao
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $favorita = false;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $origemVideo = false;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $textoCorrigido = null;
+
+    #[ORM\Column(type: Types::STRING, length: 20, nullable: true, enumType: StatusCorrecaoTranscricao::class)]
+    private ?StatusCorrecaoTranscricao $statusCorrecao = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $erroCorrecao = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $corrigidoEm = null;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $criadoEm;
 
@@ -129,8 +147,74 @@ class Transcricao
         return $this;
     }
 
+    public function substituirVideoPorAudio(string $caminhoAudio): self
+    {
+        $this->caminhoArquivo = $caminhoAudio;
+        $this->mimeType = self::MIME_AUDIO_EXTRAIDO;
+        $this->origemVideo = true;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function solicitarCorrecao(): self
+    {
+        $this->statusCorrecao = StatusCorrecaoTranscricao::NA_FILA;
+        $this->erroCorrecao = null;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function iniciarCorrecao(): self
+    {
+        $this->statusCorrecao = StatusCorrecaoTranscricao::CORRIGINDO;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function concluirCorrecao(string $textoCorrigido): self
+    {
+        $this->textoCorrigido = $textoCorrigido;
+        $this->statusCorrecao = StatusCorrecaoTranscricao::CONCLUIDA;
+        $this->erroCorrecao = null;
+        $this->corrigidoEm = new DateTimeImmutable();
+        $this->atualizadoEm = $this->corrigidoEm;
+
+        return $this;
+    }
+
+    public function registrarFalhaCorrecao(string $erroCorrecao): self
+    {
+        $this->statusCorrecao = StatusCorrecaoTranscricao::ERRO;
+        $this->erroCorrecao = $erroCorrecao;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function precisaExtrairAudioDoVideo(): bool
+    {
+        return !$this->origemVideo && null !== $this->mimeType && str_starts_with($this->mimeType, self::PREFIXO_MIME_VIDEO);
+    }
+
+    public function isCorrecaoEmAndamento(): bool
+    {
+        return null !== $this->statusCorrecao && $this->statusCorrecao->isEmAndamento();
+    }
+
+    public function isCorrigivel(): bool
+    {
+        return $this->status->isConcluida() && null !== $this->texto && !$this->isCorrecaoEmAndamento();
+    }
+
     public function iniciarTranscricao(): self
     {
+        $this->textoCorrigido = null;
+        $this->statusCorrecao = null;
+        $this->erroCorrecao = null;
+        $this->corrigidoEm = null;
         $this->progresso = 0;
         $this->texto = null;
         $this->segmentos = null;
@@ -396,6 +480,31 @@ class Transcricao
     public function texto(): ?string
     {
         return $this->texto;
+    }
+
+    public function isOrigemVideo(): bool
+    {
+        return $this->origemVideo;
+    }
+
+    public function textoCorrigido(): ?string
+    {
+        return $this->textoCorrigido;
+    }
+
+    public function statusCorrecao(): ?StatusCorrecaoTranscricao
+    {
+        return $this->statusCorrecao;
+    }
+
+    public function erroCorrecao(): ?string
+    {
+        return $this->erroCorrecao;
+    }
+
+    public function corrigidoEm(): ?DateTimeImmutable
+    {
+        return $this->corrigidoEm;
     }
 
     /**
