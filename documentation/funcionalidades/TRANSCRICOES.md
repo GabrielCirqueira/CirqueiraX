@@ -62,7 +62,7 @@ Configuração (`config/services.yaml`, com padrão para produção):
 ## 4. Correção com IA
 
 - Botão **Corrigir com IA** no painel, para transcrições prontas. A correção roda na fila `async` (`CorrigirTextoTranscricaoMessage` → `CorrigirTextoTranscricaoService`), para textos longos não estourarem o tempo da requisição. O painel se atualiza sozinho enquanto ela roda.
-- Cliente: `src/Infra/OpenAi/OpenAiCorretorTextoClient.php` (`CorretorTextoTranscricaoInterface`), API Chat Completions com `reasoning_effort: low`.
+- Cliente: `src/Infra/OpenAi/OpenAiCorretorTextoClient.php` (`CorretorTextoTranscricaoInterface`), API Chat Completions com `reasoning_effort: medium` (testado: acerta mais pontuação, maiúsculas e parágrafos que `low`).
 - O texto é dividido em blocos de até 1.500 palavras (por parágrafo, depois por frase, depois por palavra) e cada bloco é corrigido em sequência. A IA recebe a explicação de que o texto é uma transcrição automática de áudio ou vídeo e a regra de não resumir, não traduzir e não acrescentar nada.
 - Status (`status_correcao`): `na_fila` → `corrigindo` → `concluida` ou `erro`. Transcrever de novo apaga a correção anterior.
 - Campos: `texto_corrigido`, `status_correcao`, `erro_correcao`, `corrigido_em`.

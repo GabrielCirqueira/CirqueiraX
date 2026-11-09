@@ -13,7 +13,7 @@ final readonly class OpenAiCorretorTextoClient implements CorretorTextoTranscric
 {
     private const string URL_CHAT = 'https://api.openai.com/v1/chat/completions';
     private const float TIMEOUT_SEGUNDOS = 300.0;
-    private const string ESFORCO_RACIOCINIO = 'low';
+    private const string ESFORCO_RACIOCINIO = 'medium';
     private const int CODIGO_SUCESSO = 200;
     private const string INSTRUCOES = <<<'TEXTO'
         Você corrige textos gerados por transcrição automática (Whisper) de um áudio ou vídeo. O texto veio do reconhecimento de fala e tem falhas típicas desse processo.
