@@ -20,6 +20,18 @@ import { TemaSpotify } from './TemaSpotify'
 
 const codigosEnviados = new Set<string>()
 
+export const CHAVE_RETORNO_APOS_CONEXAO = 'cirqueirax_spotify_retorno'
+
+function lerRetornoAposConexao(): string {
+  try {
+    const retorno = sessionStorage.getItem(CHAVE_RETORNO_APOS_CONEXAO)
+    sessionStorage.removeItem(CHAVE_RETORNO_APOS_CONEXAO)
+    return retorno?.startsWith('/spotify') ? retorno : '/spotify'
+  } catch {
+    return '/spotify'
+  }
+}
+
 export const SpotifyCallback = memo(function SpotifyCallback() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
@@ -38,7 +50,7 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
         { code, state },
         {
           onSuccess: () => {
-            navigate('/spotify', { replace: true })
+            navigate(lerRetornoAposConexao(), { replace: true })
           },
         }
       )

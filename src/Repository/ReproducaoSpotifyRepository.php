@@ -84,6 +84,20 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         return $resultado;
     }
 
+    public function buscarUltimaReproducao(Usuario $usuario): ?ReproducaoSpotify
+    {
+        /** @var ReproducaoSpotify|null $ultima */
+        $ultima = $this->createQueryBuilder('r')
+            ->andWhere('r.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->orderBy('r.tocadaEm', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $ultima;
+    }
+
     public function buscarUltimaTocadaAntesDe(Usuario $usuario, DateTimeImmutable $momento): ?DateTimeImmutable
     {
         /** @var ReproducaoSpotify|null $anterior */

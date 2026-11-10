@@ -167,3 +167,17 @@ Todas seguem as regras da seção 3: calendário (mês e ano) em UTC, hora e dia
 
 ### Imagem da Cápsula
 - O botão **Gerar imagem** monta no navegador um PNG 1080×1920 com o mês, os números, as 5 músicas e o artista do topo. As capas aparecem inteiras, sem corte, e a imagem leva o ícone do Spotify com "Dados do Spotify".
+
+---
+
+## Teste do player (Web Playback SDK)
+
+Página `/spotify/player-teste`, sem link no menu. Serve para descobrir se o Spotify toca dentro do CirqueiraX numa rede com proxy (como a do trabalho), antes de construir um player de verdade.
+
+- O teste roda em 4 passos e mostra onde travou: baixar `https://sdk.scdn.co/spotify-player.js`, conferir a permissão de reprodução da conta, transformar a aba num dispositivo do Spotify ("CirqueiraX (teste)") e tocar a última música registrada no histórico.
+- O comando de tocar sai do servidor (`POST /api/v1/spotify/player/tocar-teste` → `PUT /me/player/play?device_id=`). Só o áudio e a biblioteca vêm direto do Spotify para o navegador, que é o que o proxy pode bloquear.
+- `GET /api/v1/spotify/player/token` devolve o token de acesso da própria conta para o player e diz quais permissões faltam.
+- Permissões novas na conexão: `streaming`, `user-read-email`, `user-read-private`, `user-read-playback-state` e `user-modify-playback-state`. Contas conectadas antes precisam reconectar; o botão **Reconectar Spotify** da página volta para o teste depois da autorização.
+- Exige Spotify Premium e um navegador com suporte a DRM (Widevine).
+- Arquivos: `src/Controller/Spotify/PlayerSpotifyController.php`, `src/Service/Spotify/PlayerTesteSpotifyService.php`, `web/features/spotify/PlayerTesteSpotify.tsx`, `web/features/spotify/hooks/usePlayerTesteSpotify.ts`.
+

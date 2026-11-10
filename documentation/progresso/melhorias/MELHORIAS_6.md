@@ -838,3 +838,21 @@
   - `config/services.yaml`, `config/packages/messenger.yaml`, `devops/php/php.prod.ini`, `devops/php/php.dev.ini`, `devops/php/nginx-internal.conf`, `devops/nginx/prod.conf`, `devops/nginx/dev.conf`
   - `web/features/transcricoes/components/CorrecaoIaTranscricao.tsx` (novo), `PainelTranscricao.tsx`, `BarraFerramentasTexto.tsx`, `AreaEnvioAudios.tsx`, `CabecalhoTranscricoes.tsx`, `EstadoSemSelecao.tsx`, `api.ts`, `types.ts`, `hooks/useAcoesTranscricao.ts`, `hooks/useTranscricoes.ts`, `utils/arquivos.ts`, `utils/exportacao.ts`
   - `documentation/funcionalidades/TRANSCRICOES.md`, `documentation/funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md`, `documentation/README.md`
+
+---
+
+### ✅ Melhoria 130 — Página de Teste do Player do Spotify
+
+- **Status**: Concluído
+- **Data**: 10 de novembro de 2026
+- **Problema**:
+  - No trabalho, o proxy bloqueia o Spotify. A ideia é ouvir pelo CirqueiraX, mas antes é preciso saber se o player do Spotify consegue tocar nessa rede.
+- **Solução**:
+  - Página `/spotify/player-teste` com um teste em 4 passos (biblioteca do Spotify, permissão, dispositivo e som), um registro do que aconteceu e um mini player com tocar e pausar.
+  - O comando de tocar sai do servidor; só o áudio vem direto do Spotify para o navegador.
+  - A conexão com o Spotify passa a pedir as permissões de reprodução. A página tem o botão **Reconectar Spotify**, que volta para o teste.
+- **Arquivos**:
+  - `src/Controller/Spotify/PlayerSpotifyController.php`, `src/Service/Spotify/PlayerTesteSpotifyService.php` (novos)
+  - `src/Service/Spotify/GerarUrlAutorizacaoSpotifyService.php`, `src/Interface/SpotifyInterface.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Repository/ReproducaoSpotifyRepository.php`, `src/Exception/Spotify/SpotifyException.php`
+  - `web/features/spotify/PlayerTesteSpotify.tsx`, `web/features/spotify/hooks/usePlayerTesteSpotify.ts` (novos), `web/features/spotify/api.ts`, `web/features/spotify/hooks/index.ts`, `web/features/spotify/components/SpotifyCallback.tsx`, `web/App.tsx`
+  - `documentation/funcionalidades/SPOTIFY.md`
