@@ -851,6 +851,7 @@
   - Página `/spotify/player-teste` com um teste em 4 passos (biblioteca do Spotify, permissão, dispositivo e som), um registro do que aconteceu e um mini player com tocar e pausar.
   - O comando de tocar sai do servidor; só o áudio vem direto do Spotify para o navegador.
   - A conexão com o Spotify passa a pedir as permissões de reprodução. A página tem o botão **Reconectar Spotify**, que volta para o teste.
+  - Ajuste (10/11/2026): no primeiro teste no trabalho, o passo 3 parou sem nenhum erro do Spotify. O registro passou a mostrar o suporte a DRM, o pedido e a entrega do token e a resposta do `connect()`. O tempo limite subiu para 40 s e, se falhar, a página testa os endereços do Spotify e mostra quais o proxy bloqueia.
 - **Arquivos**:
   - `src/Controller/Spotify/PlayerSpotifyController.php`, `src/Service/Spotify/PlayerTesteSpotifyService.php` (novos)
   - `src/Service/Spotify/GerarUrlAutorizacaoSpotifyService.php`, `src/Interface/SpotifyInterface.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Repository/ReproducaoSpotifyRepository.php`, `src/Exception/Spotify/SpotifyException.php`

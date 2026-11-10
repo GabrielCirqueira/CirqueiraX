@@ -4,10 +4,22 @@ import { extrairMensagemErroApi } from '../utils'
 
 const URL_SDK = 'https://sdk.scdn.co/spotify-player.js'
 const TEMPO_LIMITE_SDK_MS = 15000
-const TEMPO_LIMITE_PLAYER_MS = 20000
+const TEMPO_LIMITE_PLAYER_MS = 40000
 const TEMPO_LIMITE_AUDIO_MS = 20000
 const NOME_DISPOSITIVO = 'CirqueiraX (teste)'
 const VOLUME_INICIAL = 0.5
+const TEMPO_LIMITE_REDE_MS = 8000
+const ENDERECOS_SPOTIFY = [
+  { nome: 'API do Spotify', url: 'https://api.spotify.com/v1' },
+  {
+    nome: 'Descoberta de servidores',
+    url: 'https://apresolve.spotify.com/?type=dealer&type=spclient',
+  },
+  { nome: 'Conexão em tempo real (dealer)', url: 'https://dealer.spotify.com' },
+  { nome: 'Servidor do player (spclient)', url: 'https://spclient.wg.spotify.com' },
+  { nome: 'Licença do áudio (DRM)', url: 'https://gew1-spclient.spotify.com' },
+  { nome: 'Áudio (CDN)', url: 'https://audio-ak-spotify-com.akamaized.net' },
+]
 
 export type EtapaPlayerTeste = 'sdk' | 'permissao' | 'player' | 'audio'
 export type SituacaoEtapa = 'aguardando' | 'executando' | 'ok' | 'falhou'
@@ -64,6 +76,32 @@ const ETAPAS_INICIAIS: Record<EtapaPlayerTeste, EstadoEtapa> = {
   audio: { situacao: 'aguardando', detalhe: null },
 }
 
+async function testarEndereco(url: string): Promise<string> {
+  const controle = new AbortController()
+  const limite = window.setTimeout(() => controle.abort(), TEMPO_LIMITE_REDE_MS)
+  const inicio = performance.now()
+  try {
+    await fetch(url, { mode: 'no-cors', cache: 'no-store', signal: controle.signal })
+    return `alcançável (${Math.round(performance.now() - inicio)} ms)`
+  } catch (erro) {
+    return controle.signal.aborted
+      ? 'sem resposta em 8 s (provável bloqueio)'
+      : `bloqueado (${String(erro)})`
+  } finally {
+    window.clearTimeout(limite)
+  }
+}
+
+function suportaDrm(): Promise<boolean> {
+  if (!navigator.requestMediaKeySystemAccess) return Promise.resolve(false)
+  return navigator
+    .requestMediaKeySystemAccess('com.widevine.alpha', [
+      { audioCapabilities: [{ contentType: 'audio/mp4; codecs="mp4a.40.2"' }] },
+    ])
+    .then(() => true)
+    .catch(() => false)
+}
+
 function carregarSdk(): Promise<SdkSpotify> {
   if (window.Spotify) return Promise.resolve(window.Spotify)
 
@@ -112,16 +150,20 @@ export function usePlayerTesteSpotify() {
     (sdk: SdkSpotify) =>
       new Promise<string>((resolve, reject) => {
         const limite = window.setTimeout(
-          () => reject(new Error('O player não ficou pronto em 20 s.')),
+          () => reject(new Error('O player não ficou pronto em 40 s.')),
           TEMPO_LIMITE_PLAYER_MS
         )
         const player = new sdk.Player({
           name: NOME_DISPOSITIVO,
           volume: VOLUME_INICIAL,
           getOAuthToken: (callback) => {
+            registrar('O player pediu o token ao CirqueiraX.')
             obterTokenPlayerSpotify()
-              .then((token) => callback(token.accessToken))
-              .catch(() => registrar('Falha ao renovar o token do player.'))
+              .then((token) => {
+                callback(token.accessToken)
+                registrar('Token entregue ao player. Aguardando o Spotify registrar o dispositivo…')
+              })
+              .catch(() => registrar('Falha ao buscar o token do player.'))
           },
         })
         const falhar = (tipo: string) => (erro: ErroSdkSpotify) => {
@@ -156,7 +198,9 @@ export function usePlayerTesteSpotify() {
           marcar('audio', 'ok', 'O som está saindo por esta aba.')
         })
         playerRef.current = player
+        registrar('Chamando player.connect()…')
         player.connect().then((conectou) => {
+          registrar(`player.connect() respondeu: ${conectou ? 'sim' : 'não'}`)
           if (conectou) return
           window.clearTimeout(limite)
           reject(new Error('O player recusou a conexão.'))
@@ -203,13 +247,25 @@ export function usePlayerTesteSpotify() {
     marcar('permissao', 'ok', 'A conta tem permissão de reprodução.')
 
     marcar('player', 'executando')
+    registrar(
+      `DRM Widevine no navegador: ${(await suportaDrm()) ? 'sim' : 'NÃO (o player não funciona sem ele)'}`
+    )
     try {
       const id = await conectarPlayer(sdk)
       setDeviceId(id)
       marcar('player', 'ok', 'Esta aba virou um dispositivo do Spotify.')
     } catch (erro) {
       const mensagem = erro instanceof Error ? erro.message : 'Falha desconhecida.'
-      marcar('player', 'falhou', mensagem)
+      registrar(mensagem)
+      marcar(
+        'player',
+        'falhou',
+        `${mensagem} Veja no registro quais endereços do Spotify estão bloqueados.`
+      )
+      registrar('Testando os endereços do Spotify a partir deste navegador…')
+      for (const endereco of ENDERECOS_SPOTIFY) {
+        registrar(`${endereco.nome}: ${await testarEndereco(endereco.url)}`)
+      }
     }
   }, [conectarPlayer, marcar, registrar])
 
