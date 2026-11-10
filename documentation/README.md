@@ -18,6 +18,7 @@
 | :--- | :--- |
 | [funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md](funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md) | **Guia para o cliente**: todas as páginas e funcionalidades em linguagem simples |
 | [funcionalidades/CIRQUEIRAX.md](funcionalidades/CIRQUEIRAX.md) | Visão técnica geral: arquitetura, páginas, ciclo da mídia e modelo de dados |
+| [funcionalidades/YOUTUBE_PLAYER.md](funcionalidades/YOUTUBE_PLAYER.md) | Página de teste do player oficial do YouTube na rede do trabalho |
 | [funcionalidades/MULTIUSUARIO.md](funcionalidades/MULTIUSUARIO.md) | Vários usuários: o que é de cada conta, pastas, Google Fotos por pessoa e como adicionar alguém |
 | [guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md](guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md) | **Manual do ecossistema**: sincronização, Google Fotos, Celular (Syncthing-Fork) e Agente PC |
 | [funcionalidades/DASHBOARD.md](funcionalidades/DASHBOARD.md) | Painel inicial, métricas, categorias, sincronização e fila de erros |

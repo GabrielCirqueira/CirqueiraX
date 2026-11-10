@@ -86,6 +86,10 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/spotify/PlayerTesteSpotify'))}
           />
           <Route
+            path="youtube/player-teste"
+            lazy={() => lazyWithRetry(() => import('@/features/youtube/PlayerTesteYoutube'))}
+          />
+          <Route
             path="spotify/callback"
             lazy={() =>
               lazyWithRetry(() => import('@/features/spotify/components/SpotifyCallback'))

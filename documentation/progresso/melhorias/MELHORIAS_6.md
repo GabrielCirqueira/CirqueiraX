@@ -1,6 +1,6 @@
-# Melhorias — M101 a M133
+# Melhorias — M101 a M134
 
-> Detalhamento das melhorias **M101–M133**. Índice em [MELHORIAS.md](MELHORIAS.md).
+> Detalhamento das melhorias **M101–M134**. Índice em [MELHORIAS.md](MELHORIAS.md).
 
 ---
 
@@ -922,3 +922,19 @@
   - `src/Entity/BloqueioSpotify.php`, `src/Repository/BloqueioSpotifyRepository.php`, `src/Service/Spotify/ControleLimiteSpotifyService.php`, `migrations/Version20261110172427.php` (novos)
   - `src/Service/Spotify/SincronizarArtistasFaixasSpotifyService.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Repository/ArtistaFaixaSpotifyRepository.php`, `src/Command/SincronizarArtistasFaixasSpotifyCommand.php`
   - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### 🟡 Melhoria 134 — Página de Teste do Player do YouTube
+
+- **Status**: Publicado, falta validar
+- **Data**: 10 de novembro de 2026
+- **Problema**:
+  - O Spotify não toca na rede do trabalho (M130). Antes de pensar num player próprio usando o YouTube, é preciso saber se o player oficial embutido do YouTube funciona nessa rede.
+- **Solução**:
+  - Página `/youtube/player-teste`, só no navegador: baixa a biblioteca do player, abre o player (356 × 200) e, ao clicar em **Tocar**, confirma que o tempo do vídeo anda.
+  - Campo para colar um link do YouTube ou do YouTube Music e testar se aquela música aceita tocar fora do YouTube; erros 101/150 aparecem traduzidos.
+  - Teste dos endereços do YouTube (biblioteca, site, YouTube Music, imagens, `googlevideo.com` e anúncios) para mostrar o que o proxy bloqueia.
+- **Arquivos**:
+  - `web/features/youtube/PlayerTesteYoutube.tsx`, `web/features/youtube/hooks/usePlayerTesteYoutube.ts` (novos), `web/App.tsx`
+  - `documentation/funcionalidades/YOUTUBE_PLAYER.md` (novo), `documentation/README.md`
