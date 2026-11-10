@@ -179,6 +179,7 @@ Página `/spotify/player-teste`, sem link no menu. Serve para descobrir se o Spo
 - `GET /api/v1/spotify/player/token` devolve o token de acesso da própria conta para o player e diz quais permissões faltam.
 - Permissões novas na conexão: `streaming`, `user-read-email`, `user-read-private`, `user-read-playback-state` e `user-modify-playback-state`. Contas conectadas antes precisam reconectar; o botão **Reconectar Spotify** da página volta para o teste depois da autorização.
 - Exige Spotify Premium e um navegador com suporte a DRM (Widevine).
+- Resultado na rede do trabalho (10/11/2026): todos os endereços do Spotify usados pelo player ficam bloqueados pelo proxy; só a biblioteca em `sdk.scdn.co` carrega. O player não funciona lá.
 - Diagnóstico: o registro mostra se o navegador tem DRM Widevine, quando o player pede e recebe o token e a resposta do `player.connect()`. Se o dispositivo não ficar pronto em 40 s, a página testa daquele navegador os endereços que o player usa (API, `apresolve`, `dealer`, `spclient`, licença DRM e CDN de áudio) e diz quais respondem e quais estão bloqueados.
 - Arquivos: `src/Controller/Spotify/PlayerSpotifyController.php`, `src/Service/Spotify/PlayerTesteSpotifyService.php`, `web/features/spotify/PlayerTesteSpotify.tsx`, `web/features/spotify/hooks/usePlayerTesteSpotify.ts`.
 
