@@ -1,6 +1,6 @@
-# Melhorias — M101 a M131
+# Melhorias — M101 a M132
 
-> Detalhamento das melhorias **M101–M131**. Índice em [MELHORIAS.md](MELHORIAS.md).
+> Detalhamento das melhorias **M101–M132**. Índice em [MELHORIAS.md](MELHORIAS.md).
 
 ---
 
@@ -887,3 +887,17 @@
   - `src/Command/GerarTokenAgenteCommand.php`, `SeedOrigemRegrasCommand.php`, `AutorizarContaGoogleFotosCommand.php`, `LimparDuplicadosFrankyCommand.php`
   - `web/features/dashboard/Dashboard.tsx`, `web/features/dashboard/hooks/useDashboard.ts`
   - `documentation/funcionalidades/MULTIUSUARIO.md` (novo), `CATEGORIAS_E_REGRAS.md`, `GOOGLE_FOTOS.md`, `SYNCTHING.md`, `DASHBOARD.md`, `CENTRAL_MIDIAS.md`, `documentation/stack/BACKEND.md`, `documentation/guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md`, `documentation/README.md`
+
+---
+
+### ✅ Melhoria 132 — Links Curtos `vt.tiktok.com` Aceitos no Download
+
+- **Status**: Concluído
+- **Data**: 10 de novembro de 2026
+- **Problema**:
+  - O link curto de compartilhamento do TikTok `https://vt.tiktok.com/...` era recusado como "URL inválida ou não pertence a uma plataforma suportada". O validador só aceitava `tiktok.com` e `vm.tiktok.com`.
+- **Solução**:
+  - O validador passou a aceitar qualquer subdomínio de `tiktok.com`. O yt-dlp já resolve o link curto para o vídeo (testado com o link que falhou).
+- **Arquivos**:
+  - `src/Service/Video/ValidadorUrlPlataforma.php`
+  - `documentation/funcionalidades/DOWNLOADS_VIDEOS.md`

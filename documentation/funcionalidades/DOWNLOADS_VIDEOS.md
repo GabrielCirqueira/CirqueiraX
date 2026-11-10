@@ -71,7 +71,7 @@ A dedupe segue esta ordem: SHA-256 → MD5 → hash visual (ffmpeg) → URL orig
 
 - `youtube.com` (`www`, `m`, `music`) e `youtu.be`
 - `instagram.com` em `/p/`, `/reel/` e `/tv/`
-- `tiktok.com` e `vm.tiktok.com`
+- `tiktok.com` e qualquer subdomínio, incluindo os links curtos `vm.tiktok.com` e `vt.tiktok.com`
 - `x.com` e `twitter.com` em `/status/`
 
 ---

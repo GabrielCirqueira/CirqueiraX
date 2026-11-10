@@ -10,7 +10,7 @@ final class ValidadorUrlPlataforma
     private const array PADROES_SUPORTADOS = [
         '/^https?:\/\/(www\.|m\.|music\.)?(youtube\.com|youtu\.be)\/.+$/i',
         '/^https?:\/\/(www\.)?instagram\.com\/(p|reel|tv)\/.+$/i',
-        '/^https?:\/\/(www\.)?(tiktok\.com|vm\.tiktok\.com)\/.+$/i',
+        '/^https?:\/\/([a-z0-9-]+\.)?tiktok\.com\/.+$/i',
         '/^https?:\/\/(www\.)?x\.com\/.+\/status\/.+$/i',
         '/^https?:\/\/(www\.)?twitter\.com\/.+\/status\/.+$/i',
     ];
