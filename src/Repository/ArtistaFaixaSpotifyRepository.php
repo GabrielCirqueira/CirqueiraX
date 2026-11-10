@@ -15,6 +15,8 @@ use PDO;
  */
 final class ArtistaFaixaSpotifyRepository extends ServiceEntityRepository
 {
+    private const int MS_MINIMO_STREAM = 30000;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ArtistaFaixaSpotify::class);
@@ -62,7 +64,7 @@ final class ArtistaFaixaSpotifyRepository extends ServiceEntityRepository
     /**
      * @return list<array{codigo_faixa: string, artista: string, codigo_artista: ?string}>
      */
-    public function listarFaixasSemArtistas(Usuario $usuario, int $limite): array
+    public function listarFaixasSemArtistas(Usuario $usuario, int $minimoStreams, int $limite): array
     {
         /** @var list<array{codigo_faixa: string, artista: string, codigo_artista: ?string}> $linhas */
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
@@ -71,23 +73,29 @@ final class ArtistaFaixaSpotifyRepository extends ServiceEntityRepository
             LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
             WHERE r.usuario_id = :usuarioId AND r.codigo_faixa IS NOT NULL AND r.codigo_faixa <> \'\' AND af.id IS NULL
             GROUP BY r.codigo_faixa
-            ORDER BY MAX(r.tocada_em) DESC
+            HAVING SUM(r.ms_reproduzidos >= :msStream) >= :minimoStreams
+            ORDER BY SUM(r.ms_reproduzidos >= :msStream) DESC, MAX(r.tocada_em) DESC
             LIMIT :limite',
-            ['usuarioId' => $usuario->getId(), 'limite' => $limite],
-            ['limite' => PDO::PARAM_INT],
+            ['usuarioId' => $usuario->getId(), 'msStream' => self::MS_MINIMO_STREAM, 'minimoStreams' => $minimoStreams, 'limite' => $limite],
+            ['limite' => PDO::PARAM_INT, 'minimoStreams' => PDO::PARAM_INT, 'msStream' => PDO::PARAM_INT],
         )->fetchAllAssociative();
 
         return $linhas;
     }
 
-    public function contarFaixasSemArtistas(Usuario $usuario): int
+    public function contarFaixasSemArtistas(Usuario $usuario, int $minimoStreams): int
     {
         return (int) $this->getEntityManager()->getConnection()->fetchOne(
-            'SELECT COUNT(DISTINCT r.codigo_faixa)
-            FROM reproducao_spotify r
-            LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
-            WHERE r.usuario_id = :usuarioId AND r.codigo_faixa IS NOT NULL AND r.codigo_faixa <> \'\' AND af.id IS NULL',
-            ['usuarioId' => $usuario->getId()],
+            'SELECT COUNT(*) FROM (
+                SELECT r.codigo_faixa
+                FROM reproducao_spotify r
+                LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
+                WHERE r.usuario_id = :usuarioId AND r.codigo_faixa IS NOT NULL AND r.codigo_faixa <> \'\' AND af.id IS NULL
+                GROUP BY r.codigo_faixa
+                HAVING SUM(r.ms_reproduzidos >= :msStream) >= :minimoStreams
+            ) pendentes',
+            ['usuarioId' => $usuario->getId(), 'msStream' => self::MS_MINIMO_STREAM, 'minimoStreams' => $minimoStreams],
+            ['minimoStreams' => PDO::PARAM_INT, 'msStream' => PDO::PARAM_INT],
         );
     }
 }

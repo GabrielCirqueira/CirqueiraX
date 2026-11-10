@@ -1,6 +1,6 @@
-# Melhorias — M101 a M132
+# Melhorias — M101 a M133
 
-> Detalhamento das melhorias **M101–M132**. Índice em [MELHORIAS.md](MELHORIAS.md).
+> Detalhamento das melhorias **M101–M133**. Índice em [MELHORIAS.md](MELHORIAS.md).
 
 ---
 
@@ -901,3 +901,24 @@
 - **Arquivos**:
   - `src/Service/Video/ValidadorUrlPlataforma.php`
   - `documentation/funcionalidades/DOWNLOADS_VIDEOS.md`
+
+---
+
+### 🟡 Melhoria 133 — Busca de Artistas do Spotify pelas Músicas Mais Tocadas e Registro dos Bloqueios
+
+- **Status**: Publicado, falta validar
+- **Data**: 10 de novembro de 2026
+- **Problema**:
+  - A busca dos artistas (M128) ia das músicas mais recentes para as mais antigas, uma a cada 2 s. O Spotify aceita umas 600 consultas e bloqueia o app por horas; no ritmo de 600 a 700 por dia, as 13.377 que faltavam levariam umas 3 semanas, e as 1.538 já feitas eram as mais recentes, não as mais tocadas.
+  - A pausa ficava no cache do container: cada deploy apagava a pausa e a busca chamava o Spotify durante o bloqueio (foi o que aconteceu em 10/11 às 13h33).
+  - Durante o bloqueio, a coleta das músicas novas também para, e o recently-played só guarda as últimas 50.
+- **Solução**:
+  - Ordem por streams (30 s ou mais), das mais tocadas para as menos tocadas. Só entram músicas com 3 ou mais streams (3.522 músicas, 88% dos streams; faltavam 2.576). As outras ficam só com o artista principal.
+  - Ritmo mais lento para medir se o bloqueio some: uma consulta a cada 6 s, até 9 por minuto.
+  - Tabela `bloqueio_spotify`: cada 429 grava o `Retry-After`, a hora de liberação, a origem (coleta ou busca), as consultas feitas desde o bloqueio anterior e o ritmo. A janela de bloqueio fica no banco e vale para a coleta e para a busca, mesmo depois de deploy. O bloqueio em curso (13h33, 24.179 s, libera às 20h17) já foi gravado.
+  - Prioridade da coleta: depois de cada bloqueio, a busca de artistas só volta depois de uma coleta bem-sucedida das músicas recentes.
+  - A consulta em lote `GET /tracks?ids=` não foi testada: o Spotify a removeu do modo de desenvolvimento.
+- **Arquivos**:
+  - `src/Entity/BloqueioSpotify.php`, `src/Repository/BloqueioSpotifyRepository.php`, `src/Service/Spotify/ControleLimiteSpotifyService.php`, `migrations/Version20261110172427.php` (novos)
+  - `src/Service/Spotify/SincronizarArtistasFaixasSpotifyService.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Repository/ArtistaFaixaSpotifyRepository.php`, `src/Command/SincronizarArtistasFaixasSpotifyCommand.php`
+  - `documentation/funcionalidades/SPOTIFY.md`

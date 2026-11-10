@@ -10,17 +10,15 @@ use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
 use App\Repository\ArtistaFaixaSpotifyRepository;
 use App\Repository\ContaSpotifyRepository;
-use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class SincronizarArtistasFaixasSpotifyService
 {
-    public const int LIMITE_PADRAO = 15;
+    public const int LIMITE_PADRAO = 9;
+    public const int MINIMO_STREAMS = 3;
+    public const int INTERVALO_ENTRE_REQUISICOES_SEGUNDOS = 6;
     private const int CODIGO_RESPOSTA_INESPERADA = 500;
     private const int CODIGO_LIMITE_REQUISICOES = 429;
-    private const int PAUSA_LIMITE_REQUISICOES_SEGUNDOS = 900;
-    private const int INTERVALO_ENTRE_REQUISICOES_MICROSSEGUNDOS = 2000000;
-    private const string CHAVE_PAUSA = 'spotify_artistas_faixas_pausa';
 
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
@@ -28,7 +26,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         private ObterTokenValidoSpotifyService $obterTokenValidoService,
         private SpotifyInterface $spotifyClient,
         private CacheAnaliseSpotifyService $cacheAnalise,
-        private CacheItemPoolInterface $cache,
+        private ControleLimiteSpotifyService $controleLimite,
         private LoggerInterface $logger,
     ) {
     }
@@ -45,11 +43,11 @@ final readonly class SincronizarArtistasFaixasSpotifyService
 
     public function executarParaConta(ContaSpotify $conta, int $limite = self::LIMITE_PADRAO): int
     {
-        if (!$conta->isConectada() || $this->estaPausado()) {
+        if (!$conta->isConectada() || !$this->controleLimite->podeBuscarArtistas()) {
             return 0;
         }
 
-        $faixas = $this->artistaFaixaRepository->listarFaixasSemArtistas($conta->usuario(), $limite);
+        $faixas = $this->artistaFaixaRepository->listarFaixasSemArtistas($conta->usuario(), self::MINIMO_STREAMS, $limite);
         if ([] === $faixas) {
             return 0;
         }
@@ -65,7 +63,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         $processadas = 0;
         foreach ($faixas as $faixa) {
             if ($processadas > 0) {
-                usleep(self::INTERVALO_ENTRE_REQUISICOES_MICROSSEGUNDOS);
+                sleep(self::INTERVALO_ENTRE_REQUISICOES_SEGUNDOS);
             }
 
             $artistas = $this->buscarArtistas($token, $faixa['codigo_faixa'], $faixa['artista'], $faixa['codigo_artista']);
@@ -89,11 +87,19 @@ final readonly class SincronizarArtistasFaixasSpotifyService
      */
     private function buscarArtistas(string $token, string $codigoFaixa, string $artistaPrincipal, ?string $codigoArtistaPrincipal): ?array
     {
+        $this->controleLimite->registrarConsultaArtistas();
+
         try {
             return self::artistasDaFaixa($this->spotifyClient->obterFaixa($token, $codigoFaixa));
         } catch (SpotifyException $excecao) {
             if (self::CODIGO_LIMITE_REQUISICOES === $excecao->getCode()) {
-                $this->pausar(max(self::PAUSA_LIMITE_REQUISICOES_SEGUNDOS, $excecao->segundosEspera() + 60));
+                $this->controleLimite->registrarBloqueio(
+                    $excecao->segundosEspera(),
+                    ControleLimiteSpotifyService::ORIGEM_ARTISTAS,
+                    self::INTERVALO_ENTRE_REQUISICOES_SEGUNDOS,
+                );
+
+                return null;
             }
 
             if (self::CODIGO_RESPOSTA_INESPERADA !== $excecao->getCode()) {
@@ -104,19 +110,6 @@ final readonly class SincronizarArtistasFaixasSpotifyService
 
             return [['nome' => $artistaPrincipal, 'codigo' => $codigoArtistaPrincipal]];
         }
-    }
-
-    private function estaPausado(): bool
-    {
-        return $this->cache->getItem(self::CHAVE_PAUSA)->isHit();
-    }
-
-    private function pausar(int $segundos): void
-    {
-        $item = $this->cache->getItem(self::CHAVE_PAUSA);
-        $item->set(true);
-        $item->expiresAfter($segundos);
-        $this->cache->save($item);
     }
 
     /**

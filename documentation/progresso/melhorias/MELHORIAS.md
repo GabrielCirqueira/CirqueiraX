@@ -12,7 +12,7 @@
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 > - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
-> - **M101–M132** → [MELHORIAS_6.md](MELHORIAS_6.md)
+> - **M101–M133** → [MELHORIAS_6.md](MELHORIAS_6.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -148,3 +148,4 @@
 | M130 | Página de Teste do Player do Spotify | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-130--página-de-teste-do-player-do-spotify) |
 | M131 | Cada Usuário com as Suas Mídias, Categorias e Google Fotos | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-131--cada-usuário-com-as-suas-mídias-categorias-e-google-fotos) |
 | M132 | Links Curtos `vt.tiktok.com` Aceitos no Download | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-132--links-curtos-vttiktokcom-aceitos-no-download) |
+| M133 | Busca de Artistas do Spotify pelas Músicas Mais Tocadas e Registro dos Bloqueios | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-133--busca-de-artistas-do-spotify-pelas-músicas-mais-tocadas-e-registro-dos-bloqueios) |

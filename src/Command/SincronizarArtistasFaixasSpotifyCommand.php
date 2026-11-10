@@ -40,7 +40,7 @@ final class SincronizarArtistasFaixasSpotifyCommand extends Command
 
         foreach ($this->contaSpotifyRepository->listarConectadas() as $conta) {
             $processadas = $this->sincronizarArtistasFaixasService->executarParaConta($conta, $limite);
-            $restantes = $this->artistaFaixaRepository->contarFaixasSemArtistas($conta->usuario());
+            $restantes = $this->artistaFaixaRepository->contarFaixasSemArtistas($conta->usuario(), SincronizarArtistasFaixasSpotifyService::MINIMO_STREAMS);
             $io->writeln(sprintf('Conta %s: %d músicas processadas, %d restantes.', $conta->uuid()->toRfc4122(), $processadas, $restantes));
         }
 

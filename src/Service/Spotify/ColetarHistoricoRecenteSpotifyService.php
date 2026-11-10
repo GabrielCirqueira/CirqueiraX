@@ -19,6 +19,8 @@ use Psr\Log\LoggerInterface;
 final readonly class ColetarHistoricoRecenteSpotifyService
 {
     private const int LIMITE_PADRAO_COLETA = 50;
+    private const int CODIGO_LIMITE_REQUISICOES = 429;
+    private const int INTERVALO_COLETA_SEGUNDOS = 300;
 
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
@@ -30,12 +32,13 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         private CacheAnaliseSpotifyService $cacheAnalise,
         private ArtistaFaixaSpotifyRepository $artistaFaixaRepository,
         private LoggerInterface $logger,
+        private ControleLimiteSpotifyService $controleLimite,
     ) {
     }
 
     public function executarParaConta(ContaSpotify $conta): ResultadoColetaHistoricoSpotifyDTO
     {
-        if (!$conta->isConectada()) {
+        if (!$conta->isConectada() || $this->controleLimite->estaBloqueado()) {
             return new ResultadoColetaHistoricoSpotifyDTO(0, 0, 0, $conta->cursorUltimaReproducaoMs());
         }
 
@@ -60,6 +63,9 @@ final readonly class ColetarHistoricoRecenteSpotifyService
                 self::LIMITE_PADRAO_COLETA,
             );
         } catch (SpotifyException $e) {
+            if (self::CODIGO_LIMITE_REQUISICOES === $e->getCode()) {
+                $this->controleLimite->registrarBloqueio($e->segundosEspera(), ControleLimiteSpotifyService::ORIGEM_COLETA, self::INTERVALO_COLETA_SEGUNDOS);
+            }
             $this->logger->warning('Erro retornado pela API do Spotify durante a coleta do histórico.', [
                 'conta' => $conta->uuid()->toRfc4122(),
                 'usuario' => $conta->usuario()->getId(),
@@ -69,6 +75,8 @@ final readonly class ColetarHistoricoRecenteSpotifyService
 
             return new ResultadoColetaHistoricoSpotifyDTO(0, 0, 0, $cursorAtual);
         }
+
+        $this->controleLimite->registrarColetaConcluida();
 
         if (empty($lista->itens)) {
             $conta->registrarColeta();
