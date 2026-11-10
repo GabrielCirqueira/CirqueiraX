@@ -935,6 +935,7 @@
   - Página `/youtube/player-teste`, só no navegador: baixa a biblioteca do player, abre o player (356 × 200) e, ao clicar em **Tocar**, confirma que o tempo do vídeo anda.
   - Campo para colar um link do YouTube ou do YouTube Music e testar se aquela música aceita tocar fora do YouTube; erros 101/150 aparecem traduzidos.
   - Teste dos endereços do YouTube (biblioteca, site, YouTube Music, imagens, `googlevideo.com` e anúncios) para mostrar o que o proxy bloqueia.
+  - Resultado (10/11/2026, 14h50): na rede do trabalho os 3 passos passaram. A biblioteca carregou, o player abriu em 1 s e o vídeo de exemplo tocou e avançou normalmente (tocar e pausar funcionaram). Falta testar músicas reais (bloqueio de incorporação 101/150).
 - **Arquivos**:
   - `web/features/youtube/PlayerTesteYoutube.tsx`, `web/features/youtube/hooks/usePlayerTesteYoutube.ts` (novos), `web/App.tsx`
   - `documentation/funcionalidades/YOUTUBE_PLAYER.md` (novo), `documentation/README.md`

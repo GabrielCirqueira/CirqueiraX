@@ -23,6 +23,10 @@ Tudo roda no navegador; o servidor não participa e nada é salvo.
 - Erros do player são traduzidos: 2 (código inválido), 5 (erro HTML5), 100 (não existe/privado), 101 e 150 (o dono não permite tocar fora do YouTube).
 - Se algum passo falhar, ou ao clicar em **Testar endereços**, a página testa `iframe_api`, `www.youtube.com`, `music.youtube.com`, `i.ytimg.com`, `redirector.googlevideo.com` (de onde vem o som) e `googleads.g.doubleclick.net`, e mostra quais o proxy bloqueia.
 
+## Resultado no trabalho
+
+10/11/2026, 14h50: os 3 passos passaram. A biblioteca carregou, o player abriu em cerca de 1 s e o vídeo de exemplo tocou, avançou e pausou normalmente. O proxy não bloqueia o player do YouTube. Falta testar músicas reais, por causa do bloqueio de incorporação de algumas gravadoras.
+
 ## Limites conhecidos
 
 - O vídeo precisa ficar visível (regra do YouTube): um player só de áudio não é permitido.
