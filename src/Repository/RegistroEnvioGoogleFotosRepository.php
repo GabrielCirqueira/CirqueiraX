@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Usuario;
 use App\DataObject\PaginaRegistrosEnvioGoogleFotosDTO;
 use App\Entity\RegistroEnvioGoogleFotos;
 use App\Enum\StatusEnvioGoogleFotos;
@@ -30,13 +31,13 @@ class RegistroEnvioGoogleFotosRepository extends ServiceEntityRepository
         }
     }
 
-    public function buscarPorUuid(string $uuid): ?RegistroEnvioGoogleFotos
+    public function buscarDoUsuario(string $uuid, Usuario $usuario): ?RegistroEnvioGoogleFotos
     {
         if (!Uuid::isValid($uuid)) {
             return null;
         }
 
-        return $this->find(Uuid::fromString($uuid));
+        return $this->findOneBy(['uuid' => Uuid::fromString($uuid), 'usuario' => $usuario]);
     }
 
     public function contarTentativasDaMidia(string $mediaItemUuid): int
@@ -44,9 +45,12 @@ class RegistroEnvioGoogleFotosRepository extends ServiceEntityRepository
         return $this->count(['mediaItemUuid' => $mediaItemUuid]);
     }
 
-    public function paginarRecentes(?StatusEnvioGoogleFotos $status, int $pagina, int $limite): PaginaRegistrosEnvioGoogleFotosDTO
+    public function paginarRecentes(Usuario $usuario, ?StatusEnvioGoogleFotos $status, int $pagina, int $limite): PaginaRegistrosEnvioGoogleFotosDTO
     {
-        $consulta = $this->createQueryBuilder('r')->orderBy('r.iniciadoEm', 'DESC');
+        $consulta = $this->createQueryBuilder('r')
+            ->where('r.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->orderBy('r.iniciadoEm', 'DESC');
         if (null !== $status) {
             $consulta->andWhere('r.status = :status')->setParameter('status', $status);
         }
@@ -66,11 +70,13 @@ class RegistroEnvioGoogleFotosRepository extends ServiceEntityRepository
     /**
      * @return array<string, int>
      */
-    public function contarPorStatusDesde(DateTimeImmutable $desde): array
+    public function contarPorStatusDesde(Usuario $usuario, DateTimeImmutable $desde): array
     {
         /** @var list<array{status: StatusEnvioGoogleFotos, total: int|string}> $linhas */
         $linhas = $this->createQueryBuilder('r')
             ->select('r.status AS status, COUNT(r.uuid) AS total')
+            ->where('r.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
             ->andWhere('r.iniciadoEm >= :desde')
             ->setParameter('desde', $desde)
             ->groupBy('r.status')
@@ -85,8 +91,8 @@ class RegistroEnvioGoogleFotosRepository extends ServiceEntityRepository
         return $contagem;
     }
 
-    public function buscarUltimaFalha(): ?RegistroEnvioGoogleFotos
+    public function buscarUltimaFalha(Usuario $usuario): ?RegistroEnvioGoogleFotos
     {
-        return $this->findOneBy(['status' => StatusEnvioGoogleFotos::FALHA], ['iniciadoEm' => 'DESC']);
+        return $this->findOneBy(['usuario' => $usuario, 'status' => StatusEnvioGoogleFotos::FALHA], ['iniciadoEm' => 'DESC']);
     }
 }

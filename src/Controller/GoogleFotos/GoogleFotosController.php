@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Controller\GoogleFotos;
 
 use App\Controller\Common\DefaultController;
+use App\Entity\Usuario;
 use App\Service\GoogleFotos\AutorizarContaGoogleFotosService;
 use App\Service\GoogleFotos\ListarAlbunsGoogleFotosService;
 use App\Service\GoogleFotos\ObterStatusContaGoogleFotosService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[Route('/api/v1/google-fotos', name: 'api_google_fotos_')]
 final class GoogleFotosController extends DefaultController
@@ -22,9 +24,9 @@ final class GoogleFotosController extends DefaultController
     ) {}
 
     #[Route('/status', name: 'status', methods: ['GET'])]
-    public function status(): Response
+    public function status(#[CurrentUser] Usuario $usuario): Response
     {
-        $statusDTO = $this->obterStatusContaService->obterStatus();
+        $statusDTO = $this->obterStatusContaService->obterStatus($usuario);
 
         return $this->success($statusDTO->paraArray());
     }
@@ -38,7 +40,7 @@ final class GoogleFotosController extends DefaultController
     }
 
     #[Route('/oauth/concluir', name: 'oauth_concluir', methods: ['POST'])]
-    public function concluirAutorizacao(Request $request): Response
+    public function concluirAutorizacao(Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         /** @var array<string, mixed> $payload */
         $payload = json_decode($request->getContent(), true) ?? [];
@@ -49,7 +51,7 @@ final class GoogleFotosController extends DefaultController
         }
 
         try {
-            $conta = $this->autorizarContaService->concluirAutorizacao($entrada);
+            $conta = $this->autorizarContaService->concluirAutorizacao($usuario, $entrada);
 
             return $this->success([
                 'email' => $conta->email(),
@@ -61,16 +63,16 @@ final class GoogleFotosController extends DefaultController
     }
 
     #[Route('/desconectar', name: 'desconectar', methods: ['POST'])]
-    public function desconectar(): Response
+    public function desconectar(#[CurrentUser] Usuario $usuario): Response
     {
-        $this->autorizarContaService->desconectar();
+        $this->autorizarContaService->desconectar($usuario);
 
         return $this->success(['desconectado' => true]);
     }
 
     #[Route('/albuns', name: 'albuns', methods: ['GET'])]
-    public function albuns(): Response
+    public function albuns(#[CurrentUser] Usuario $usuario): Response
     {
-        return $this->success($this->listarAlbunsService->listar());
+        return $this->success($this->listarAlbunsService->listar($usuario));
     }
 }

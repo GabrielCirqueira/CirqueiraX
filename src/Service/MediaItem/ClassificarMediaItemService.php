@@ -47,7 +47,7 @@ final readonly class ClassificarMediaItemService
             throw MediaItemException::midiaNaoEncontradaPorUuid();
         }
 
-        $categoriaNova = $this->categoriaService->buscarPorUuid($dto->categoriaId());
+        $categoriaNova = $this->categoriaService->buscarDoUsuario($dto->categoriaId(), $mediaItem->usuario());
         $categoriaAntigaId = $mediaItem->categoriaId();
 
         if ($categoriaAntigaId === $categoriaNova->uuid()?->toString()) {
@@ -114,7 +114,7 @@ final readonly class ClassificarMediaItemService
 
         $baseStorage = $this->resolverBaseStorage();
 
-        $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoriaNova->pastaLocal(), '/');
+        $diretorioDestino = rtrim($baseStorage, '/') . '/' . $categoriaNova->diretorioRelativo();
         $this->armazenamentoClient->criarDiretorio($diretorioDestino);
 
         $nomeArquivo = basename((string) $caminhoLocal);
@@ -149,7 +149,7 @@ final readonly class ClassificarMediaItemService
             return;
         }
 
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($mediaItem->usuario());
         if (null === $conta) {
             return;
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\GoogleFotos;
 
+use App\Entity\Usuario;
 use App\DataObject\StatusContaGoogleFotosDTO;
 use App\Repository\ContaGoogleFotosRepository;
 
@@ -14,9 +15,9 @@ final readonly class ObterStatusContaGoogleFotosService
         private GoogleFotosOAuthService $oAuthService,
     ) {}
 
-    public function obterStatus(): StatusContaGoogleFotosDTO
+    public function obterStatus(Usuario $usuario): StatusContaGoogleFotosDTO
     {
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($usuario);
         if (null === $conta) {
             return new StatusContaGoogleFotosDTO(
                 conectado: false,

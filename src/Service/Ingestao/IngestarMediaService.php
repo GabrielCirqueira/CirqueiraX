@@ -34,6 +34,7 @@ final readonly class IngestarMediaService
         $hashVisual = $metadataEnriquecida[MetadataKeys::HASH_VISUAL] ?? null;
 
         $existente = $this->mediaItemRepository->buscarDuplicado(
+            $dto->usuario(),
             $hash,
             is_string($md5) ? $md5 : null,
             is_int($tamanho) ? $tamanho : null,

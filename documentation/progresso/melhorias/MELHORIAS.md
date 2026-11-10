@@ -12,7 +12,7 @@
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 > - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
-> - **M101–M130** → [MELHORIAS_6.md](MELHORIAS_6.md)
+> - **M101–M131** → [MELHORIAS_6.md](MELHORIAS_6.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -146,3 +146,4 @@
 | M128 | Streams e Minutos Contam para Todos os Artistas da Música | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-128--streams-e-minutos-contam-para-todos-os-artistas-da-música) |
 | M129 | Transcrição de Vídeos, Limite de 2 GB e Correção do Texto com IA | ✅ Concluído | 09/11/2026 | [ver](MELHORIAS_6.md#melhoria-129--transcrição-de-vídeos-limite-de-2-gb-e-correção-do-texto-com-ia) |
 | M130 | Página de Teste do Player do Spotify | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-130--página-de-teste-do-player-do-spotify) |
+| M131 | Cada Usuário com as Suas Mídias, Categorias e Google Fotos | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-131--cada-usuário-com-as-suas-mídias-categorias-e-google-fotos) |

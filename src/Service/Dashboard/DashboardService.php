@@ -57,13 +57,13 @@ final readonly class DashboardService
      *     }
      * }
      */
-    public function obterResumo(?Usuario $usuario = null): array
+    public function obterResumo(Usuario $usuario): array
     {
-        $totaisStatus = $this->mediaItemRepository->contarAgrupadoPorStatus();
-        $totaisOrigem = $this->mediaItemRepository->contarAgrupadoPorOrigem();
-        $espacoOrigem = $this->mediaItemRepository->obterEspacoAgrupadoPorOrigem();
-        $tamanhoTotalBytes = $this->mediaItemRepository->obterTamanhoTotalBytes();
-        $metricasVideosRaw = $this->mediaItemRepository->obterMetricasVideos();
+        $totaisStatus = $this->mediaItemRepository->contarAgrupadoPorStatus($usuario);
+        $totaisOrigem = $this->mediaItemRepository->contarAgrupadoPorOrigem($usuario);
+        $espacoOrigem = $this->mediaItemRepository->obterEspacoAgrupadoPorOrigem($usuario);
+        $tamanhoTotalBytes = $this->mediaItemRepository->obterTamanhoTotalBytes($usuario);
+        $metricasVideosRaw = $this->mediaItemRepository->obterMetricasVideos($usuario);
 
         $origemEspaco = [];
         foreach ($espacoOrigem as $origemVal => $dados) {
@@ -77,7 +77,7 @@ final readonly class DashboardService
         $totalGeral = array_sum($totaisStatus);
         $totalErros = $totaisStatus[StatusMediaItem::ERRO->value] ?? 0;
 
-        $ultimosItens = $this->mediaItemRepository->findBy([], ['criadoEm' => 'DESC'], 6);
+        $ultimosItens = $this->mediaItemRepository->findBy(['usuario' => $usuario], ['criadoEm' => 'DESC'], 6);
 
         $metricasVideos = [
             'totalBaixados' => $metricasVideosRaw['totalBaixados'],
@@ -90,11 +90,7 @@ final readonly class DashboardService
             'espacoLiberadoFormatado' => self::formatarBytes($metricasVideosRaw['espacoLiberadoBytes']),
         ];
 
-        $contaSpotify = null !== $usuario ? $this->contaSpotifyRepository->buscarDoUsuario($usuario) : null;
-        if (null === $contaSpotify && null === $usuario) {
-            $contasConectadas = $this->contaSpotifyRepository->listarConectadas();
-            $contaSpotify = $contasConectadas[0] ?? null;
-        }
+        $contaSpotify = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
 
         $agora = new \DateTimeImmutable();
         $isColetaParada = false;
@@ -143,10 +139,10 @@ final readonly class DashboardService
      *     tamanhoFormatado: string
      * }>
      */
-    public function resumoPorCategoria(): array
+    public function resumoPorCategoria(Usuario $usuario): array
     {
-        $categorias = $this->categoriaRepository->listarTodas();
-        $metricasPorCat = $this->mediaItemRepository->obterMetricasAgrupadasPorCategoria();
+        $categorias = $this->categoriaRepository->listarTodas($usuario);
+        $metricasPorCat = $this->mediaItemRepository->obterMetricasAgrupadasPorCategoria($usuario);
 
         $resultado = [];
         foreach ($categorias as $cat) {

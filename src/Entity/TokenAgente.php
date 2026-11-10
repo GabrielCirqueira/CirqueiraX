@@ -19,6 +19,10 @@ class TokenAgente
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private ?Uuid $uuid = null;
 
+    #[ORM\ManyToOne(targetEntity: Usuario::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Usuario $usuario;
+
     #[ORM\Column(type: 'string', length: 100)]
     private string $nome;
 
@@ -44,12 +48,14 @@ class TokenAgente
     private ?\DateTimeImmutable $revogadoEm = null;
 
     public function __construct(
+        Usuario $usuario,
         string $nome,
         string $tokenHash,
         string $origem,
         TipoCliente $tipoCliente = TipoCliente::AGENTE,
     ) {
         $this->uuid = Uuid::v7();
+        $this->usuario = $usuario;
         $this->nome = $nome;
         $this->tokenHash = $tokenHash;
         $this->origem = $origem;
@@ -58,6 +64,11 @@ class TokenAgente
         $this->criadoEm = new \DateTimeImmutable();
         $this->atualizadoEm = new \DateTimeImmutable();
         $this->revogadoEm = null;
+    }
+
+    public function usuario(): Usuario
+    {
+        return $this->usuario;
     }
 
     public function uuid(): ?Uuid

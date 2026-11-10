@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\MediaItem;
 
+use App\Entity\Usuario;
 use App\DataObject\ClassificarManualDTO;
 use App\DataObject\IngestarMediaDTO;
 use App\DataObject\SalvarEdicaoImagemDTO;
@@ -39,18 +40,19 @@ final readonly class SalvarEdicaoImagemService
         private ArmazenamentoInterface $armazenamentoClient,
     ) {}
 
-    public function executar(SalvarEdicaoImagemDTO $dto): MediaItem
+    public function executar(SalvarEdicaoImagemDTO $dto, Usuario $usuario): MediaItem
     {
         $arquivo = $dto->arquivo();
         if (null === $arquivo) {
             throw EdicaoImagemException::arquivoDaEdicaoNaoInformado();
         }
 
-        $midiaOrigem = $this->buscarMidiaOrigem($dto->mediaItemOrigemUuid());
+        $midiaOrigem = $this->buscarMidiaOrigem($dto->mediaItemOrigemUuid(), $usuario);
         $extensao = $arquivo->guessExtension() ?? self::EXTENSAO_PADRAO;
         $caminhoArquivo = $this->moverParaDiretorioTemporario($arquivo, $extensao);
 
         $mediaItem = $this->ingestarMediaService->executar(new IngestarMediaDTO(
+            usuario: $usuario,
             caminhoArquivo: $caminhoArquivo,
             origem: $midiaOrigem?->origem() ?? OrigemMedia::MANUAL,
             metadata: $this->montarMetadata($dto, $midiaOrigem, $extensao),
@@ -66,13 +68,13 @@ final readonly class SalvarEdicaoImagemService
         );
     }
 
-    private function buscarMidiaOrigem(?string $uuid): ?MediaItem
+    private function buscarMidiaOrigem(?string $uuid, Usuario $usuario): ?MediaItem
     {
         if (null === $uuid) {
             return null;
         }
 
-        $midiaOrigem = $this->mediaItemRepository->buscarPorUuid($uuid);
+        $midiaOrigem = $this->mediaItemRepository->buscarDoUsuario($uuid, $usuario);
         if (null === $midiaOrigem) {
             throw EdicaoImagemException::midiaDeOrigemNaoEncontrada();
         }

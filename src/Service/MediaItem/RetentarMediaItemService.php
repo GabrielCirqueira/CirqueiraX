@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\MediaItem;
 
+use App\Entity\Usuario;
 use App\Entity\MediaItem;
 use App\Enum\StatusMediaItem;
 use App\Exception\MediaItem\MediaItemException;
@@ -35,9 +36,9 @@ final readonly class RetentarMediaItemService
     /**
      * @return list<MediaItem>
      */
-    public function retentarTodosComErro(): array
+    public function retentarTodosComErro(?Usuario $usuario = null): array
     {
-        $itensComErro = $this->mediaItemRepository->buscarPorStatus(StatusMediaItem::ERRO);
+        $itensComErro = $this->mediaItemRepository->buscarPorStatus(StatusMediaItem::ERRO, $usuario);
         foreach ($itensComErro as $mediaItem) {
             $this->retentarMediaItem($mediaItem);
         }

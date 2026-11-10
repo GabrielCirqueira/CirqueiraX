@@ -14,11 +14,12 @@ use App\DataObject\FiltrarMediaItemDTO;
 use App\DataObject\RebaixarLoteDTO;
 use App\DataObject\RemoverCategoriaLoteDTO;
 use App\DataObject\UploadManualDTO;
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
-use App\Repository\CategoriaRepository;
 use App\Repository\MediaItemRepository;
 use App\Serializer\MediaItemSerializer;
 use App\Service\GoogleFotos\EnviarGoogleFotosService;
+use App\Service\Categoria\CategoriaService;
 use App\Service\MediaItem\ApagarMediaItemService;
 use App\Service\MediaItem\AtualizarMetadataMediaItemService;
 use App\Service\MediaItem\ClassificarMediaItemService;
@@ -36,6 +37,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/v1/media-itens', name: 'api_media_itens_')]
@@ -53,15 +55,16 @@ final class MediaItemController extends DefaultController
         private readonly ObterArquivoMidiaService $obterArquivoMidiaService,
         private readonly MediaItemSerializer $mediaItemSerializer,
         private readonly EnviarGoogleFotosService $enviarGoogleFotosService,
-        private readonly CategoriaRepository $categoriaRepository,
+        private readonly CategoriaService $categoriaService,
         private readonly MediaItemRepository $mediaItemRepository,
     ) {}
 
     #[Route('', name: 'listar', methods: ['GET'])]
-    public function listar(#[MapQueryString] ?FiltrarMediaItemDTO $filtro = null): Response
+    public function listar(#[CurrentUser] Usuario $usuario, #[MapQueryString] ?FiltrarMediaItemDTO $filtro = null): Response
     {
         $filtro ??= new FiltrarMediaItemDTO();
         $resultado = $this->mediaItemService->paginarComFiltros(
+            $usuario,
             $filtro->paraFiltros(),
             $filtro->pagina(),
             $filtro->porPagina(),
@@ -79,6 +82,7 @@ final class MediaItemController extends DefaultController
     public function uploadManual(
         Request $request,
         ValidatorInterface $validator,
+        #[CurrentUser] Usuario $usuario,
     ): Response {
         $dto = UploadManualDTO::fromRequest($request);
         $violacoes = $validator->validate($dto);
@@ -92,7 +96,8 @@ final class MediaItemController extends DefaultController
             return $this->unprocessable('dados_invalidos', $detalhes);
         }
 
-        $resultado = $this->uploadManualService->executar($dto);
+        $this->garantirCategoriaDoUsuario($dto->categoriaId(), $usuario);
+        $resultado = $this->uploadManualService->executar($dto, $usuario);
         $data = $this->mediaItemSerializer->normalizar($resultado->mediaItem());
         if ($resultado->ehDuplicado()) {
             $data['_warning'] = 'item_duplicado_existente';
@@ -102,57 +107,66 @@ final class MediaItemController extends DefaultController
     }
 
     #[Route('/lote/categorizar', name: 'categorizar_lote', methods: ['POST'])]
-    public function categorizarLote(#[MapRequestPayload] CategorizarLoteDTO $dto): Response
+    public function categorizarLote(#[MapRequestPayload] CategorizarLoteDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->garantirQuePertencemAoUsuario($dto->uuids(), $usuario);
+        $this->categoriaService->buscarDoUsuario($dto->categoriaId(), $usuario);
         $itens = $this->classificarMediaItemService->classificarEmLote($dto);
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/lote/remover-categoria', name: 'remover_categoria_lote', methods: ['POST'])]
-    public function removerCategoriaLote(#[MapRequestPayload] RemoverCategoriaLoteDTO $dto): Response
+    public function removerCategoriaLote(#[MapRequestPayload] RemoverCategoriaLoteDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->garantirQuePertencemAoUsuario($dto->uuids(), $usuario);
         $itens = $this->removerCategoriaMediaItemService->removerEmLote($dto);
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/lote/rebaixar', name: 'rebaixar_lote', methods: ['POST'])]
-    public function rebaixarLote(#[MapRequestPayload] RebaixarLoteDTO $dto): Response
+    public function rebaixarLote(#[MapRequestPayload] RebaixarLoteDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->garantirQuePertencemAoUsuario($dto->uuids(), $usuario);
         $itens = $this->rebaixarMediaItemService->rebaixarEmLote($dto);
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/lote/apagar', name: 'apagar_lote', methods: ['POST'])]
-    public function apagarLote(#[MapRequestPayload] ApagarLoteDTO $dto): Response
+    public function apagarLote(#[MapRequestPayload] ApagarLoteDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->garantirQuePertencemAoUsuario($dto->uuids(), $usuario);
         $resultado = $this->apagarMediaItemService->apagarEmLote($dto);
 
         return $this->success($resultado);
     }
 
     #[Route('/lote/distribuir-horarios', name: 'distribuir_horarios_lote', methods: ['POST'])]
-    public function distribuirHorariosLote(#[MapRequestPayload] DistribuirHorariosLoteDTO $dto): Response
+    public function distribuirHorariosLote(#[MapRequestPayload] DistribuirHorariosLoteDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->garantirQuePertencemAoUsuario(
+            array_map(static fn (array $item): string => $item['uuid'], $dto->itens()),
+            $usuario,
+        );
         $itens = $this->atualizarMetadataMediaItemService->distribuirHorarios($dto->itens());
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/retentar', name: 'retentar_lote', methods: ['POST'])]
-    public function retentarLote(): Response
+    public function retentarLote(#[CurrentUser] Usuario $usuario): Response
     {
-        $itens = $this->retentarMediaItemService->retentarTodosComErro();
+        $itens = $this->retentarMediaItemService->retentarTodosComErro($usuario);
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }
 
     #[Route('/contagens', name: 'contagens', methods: ['GET'])]
-    public function contagens(): Response
+    public function contagens(#[CurrentUser] Usuario $usuario): Response
     {
-        $origens = $this->mediaItemRepository->contarAgrupadoPorOrigem();
+        $origens = $this->mediaItemRepository->contarAgrupadoPorOrigem($usuario);
         $totalGeral = array_sum($origens);
 
         $manual = $origens[OrigemMedia::MANUAL->value] ?? 0;
@@ -169,58 +183,60 @@ final class MediaItemController extends DefaultController
     }
 
     #[Route('/{uuid}', name: 'detalhar', methods: ['GET'])]
-    public function detalhar(string $uuid): Response
+    public function detalhar(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
-        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
+        $mediaItem = $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
     #[Route('/{uuid}', name: 'atualizar_metadata', methods: ['PATCH'])]
-    public function atualizarMetadata(string $uuid, #[MapRequestPayload] AtualizarMetadataMediaItemDTO $dto): Response
+    public function atualizarMetadata(string $uuid, #[MapRequestPayload] AtualizarMetadataMediaItemDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         $mediaItem = $this->atualizarMetadataMediaItemService->atualizarMetadata($uuid, $dto);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
     #[Route('/{uuid}/categoria', name: 'classificar_categoria', methods: ['PATCH'])]
-    public function classificarCategoria(string $uuid, #[MapRequestPayload] ClassificarManualDTO $dto): Response
+    public function classificarCategoria(string $uuid, #[MapRequestPayload] ClassificarManualDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         $mediaItem = $this->classificarMediaItemService->classificarManualmente($uuid, $dto);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
     #[Route('/{uuid}/retentar', name: 'retentar_individual', methods: ['POST'])]
-    public function retentarIndividual(string $uuid): Response
+    public function retentarIndividual(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         $mediaItem = $this->retentarMediaItemService->retentar($uuid);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
     #[Route('/{uuid}/rebaixar', name: 'rebaixar_individual', methods: ['POST'])]
-    public function rebaixarIndividual(string $uuid): Response
+    public function rebaixarIndividual(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         $mediaItem = $this->rebaixarMediaItemService->rebaixarIndividual($uuid);
 
         return $this->success($this->mediaItemSerializer->normalizar($mediaItem));
     }
 
     #[Route('/{uuid}/forcar-google-fotos', name: 'forcar_google_fotos', methods: ['POST'])]
-    public function forcarGoogleFotos(string $uuid, Request $request): Response
+    public function forcarGoogleFotos(string $uuid, Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $corpo = json_decode((string) $request->getContent(), true);
         $categoriaId = is_array($corpo) && isset($corpo['categoriaId']) ? (string) $corpo['categoriaId'] : null;
 
-        $mediaItem = $this->mediaItemService->buscarPorUuid($uuid);
+        $mediaItem = $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         if (null !== $categoriaId && '' !== trim($categoriaId)) {
-            $categoria = $this->categoriaRepository->buscarPorUuid($categoriaId);
-            if (null !== $categoria) {
-                $mediaItem->setCategoriaId($categoriaId);
-                $this->mediaItemRepository->salvar($mediaItem);
-            }
+            $this->categoriaService->buscarDoUsuario($categoriaId, $usuario);
+            $mediaItem->setCategoriaId($categoriaId);
+            $this->mediaItemRepository->salvar($mediaItem);
         }
 
         if (null === $mediaItem->categoriaId() || '' === trim($mediaItem->categoriaId())) {
@@ -241,8 +257,9 @@ final class MediaItemController extends DefaultController
     }
 
     #[Route('/{uuid}/stream', name: 'stream', methods: ['GET'])]
-    public function streamArquivo(string $uuid): Response
+    public function streamArquivo(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         $arquivoMidia = $this->obterArquivoMidiaService->obterParaStream($uuid);
 
         $response = new BinaryFileResponse($arquivoMidia->caminhoFisico());
@@ -258,8 +275,13 @@ final class MediaItemController extends DefaultController
     }
 
     #[Route('/{uuid}/thumbnail', name: 'thumbnail', methods: ['GET'])]
-    public function thumbnail(string $uuid): Response
+    public function thumbnail(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
+        $mediaItem = $this->mediaItemRepository->buscarDoUsuario($uuid, $usuario);
+        if (null === $mediaItem) {
+            return new Response(null, Response::HTTP_NOT_FOUND);
+        }
+
         $cacheDir = $this->getParameter('kernel.project_dir') . '/var/cache/thumbnails';
         $cacheArquivo = sprintf('%s/%s.jpg', $cacheDir, $uuid);
 
@@ -273,11 +295,6 @@ final class MediaItemController extends DefaultController
                 $uuid . '.jpg',
             );
             return $response;
-        }
-
-        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
-        if (null === $mediaItem) {
-            return new Response(null, Response::HTTP_NOT_FOUND);
         }
 
         try {
@@ -338,8 +355,9 @@ final class MediaItemController extends DefaultController
     }
 
     #[Route('/{uuid}/download', name: 'download_arquivo', methods: ['GET'])]
-    public function baixarArquivo(string $uuid): Response
+    public function baixarArquivo(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
+        $this->mediaItemService->buscarDoUsuario($uuid, $usuario);
         $arquivoMidia = $this->obterArquivoMidiaService->obterParaDownload($uuid);
 
         $response = new BinaryFileResponse($arquivoMidia->caminhoFisico());
@@ -349,5 +367,14 @@ final class MediaItemController extends DefaultController
         );
 
         return $response;
+    }
+
+    private function garantirCategoriaDoUsuario(?string $categoriaId, Usuario $usuario): void
+    {
+        if (null === $categoriaId || '' === trim($categoriaId)) {
+            return;
+        }
+
+        $this->categoriaService->buscarDoUsuario($categoriaId, $usuario);
     }
 }

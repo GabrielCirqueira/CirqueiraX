@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\ContaGoogleFotos;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -35,11 +36,6 @@ class ContaGoogleFotosRepository extends ServiceEntityRepository
         }
     }
 
-    public function buscarPorEmail(string $email): ?ContaGoogleFotos
-    {
-        return $this->findOneBy(['email' => $email]);
-    }
-
     public function buscarPorUuid(Uuid|string $uuid): ?ContaGoogleFotos
     {
         if (is_string($uuid)) {
@@ -49,13 +45,8 @@ class ContaGoogleFotosRepository extends ServiceEntityRepository
         return $this->find($uuid);
     }
 
-    public function buscarContaAtiva(): ?ContaGoogleFotos
+    public function buscarDoUsuario(Usuario $usuario): ?ContaGoogleFotos
     {
-        return $this->buscarContaPrincipal();
-    }
-
-    public function buscarContaPrincipal(): ?ContaGoogleFotos
-    {
-        return $this->findOneBy([]);
+        return $this->findOneBy(['usuario' => $usuario]);
     }
 }

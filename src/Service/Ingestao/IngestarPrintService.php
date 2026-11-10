@@ -68,6 +68,7 @@ final readonly class IngestarPrintService
         $caminhoTemp = $arquivoMovido->getPathname();
 
         $ingestarMediaDTO = new IngestarMediaDTO(
+            usuario: $tokenAgente->usuario(),
             caminhoArquivo: $caminhoTemp,
             origem: $origemMedia,
             metadata: $metadata,

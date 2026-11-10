@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\MediaItem;
 
 use App\Entity\MediaItem;
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
 use App\Enum\StatusMediaItem;
 use App\Exception\MediaItem\MediaItemException;
@@ -17,9 +18,9 @@ final readonly class MediaItemService
         private MediaItemRepository $mediaItemRepository,
     ) {}
 
-    public function buscarPorUuid(string|Uuid $uuid): MediaItem
+    public function buscarDoUsuario(string|Uuid $uuid, Usuario $usuario): MediaItem
     {
-        $mediaItem = $this->mediaItemRepository->buscarPorUuid($uuid);
+        $mediaItem = $this->mediaItemRepository->buscarDoUsuario($uuid, $usuario);
         if (null === $mediaItem) {
             throw MediaItemException::midiaNaoEncontradaPorUuid();
         }
@@ -28,11 +29,16 @@ final readonly class MediaItemService
     }
 
     /**
-     * @return array{itens: array<int, MediaItem>, total: int}
+     * @param list<string> $uuids
      */
-    public function listarPaginado(int $pagina = 1, int $limite = 20): array
+    public function garantirQuePertencemAoUsuario(array $uuids, Usuario $usuario): void
     {
-        return $this->mediaItemRepository->listarPaginado($pagina, $limite);
+        $unicos = array_values(array_unique($uuids));
+        if ($this->mediaItemRepository->contarDoUsuario($unicos, $usuario) === count($unicos)) {
+            return;
+        }
+
+        throw MediaItemException::midiaNaoEncontradaPorUuid();
     }
 
     /**
@@ -47,8 +53,8 @@ final readonly class MediaItemService
      *
      * @return array{itens: array<int, MediaItem>, total: int}
      */
-    public function paginarComFiltros(array $filtros = [], int $pagina = 1, int $limite = 20): array
+    public function paginarComFiltros(Usuario $usuario, array $filtros = [], int $pagina = 1, int $limite = 20): array
     {
-        return $this->mediaItemRepository->paginarComFiltros($filtros, $pagina, $limite);
+        return $this->mediaItemRepository->paginarComFiltros($usuario, $filtros, $pagina, $limite);
     }
 }

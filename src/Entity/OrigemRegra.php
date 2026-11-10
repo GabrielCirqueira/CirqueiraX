@@ -13,12 +13,16 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrigemRegraRepository::class)]
 #[ORM\Table(name: 'origem_regra')]
-#[ORM\UniqueConstraint(name: 'UNIQ_ORIGEM_REGRA_ORIGEM', fields: ['origem'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_ORIGEM_REGRA_USUARIO_ORIGEM', fields: ['usuario', 'origem'])]
 class OrigemRegra
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private ?Uuid $uuid = null;
+
+    #[ORM\ManyToOne(targetEntity: Usuario::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Usuario $usuario;
 
     #[ORM\Column(type: 'string', enumType: OrigemMedia::class)]
     private OrigemMedia $origem;
@@ -33,22 +37,30 @@ class OrigemRegra
     private \DateTimeImmutable $atualizadoEm;
 
     public function __construct(
+        Usuario $usuario,
         OrigemMedia|string $origem,
         string $categoriaId,
     ) {
         $this->uuid = Uuid::v7();
+        $this->usuario = $usuario;
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;
         $this->categoriaId = $categoriaId;
         $this->criadoEm = new \DateTimeImmutable();
         $this->atualizadoEm = new \DateTimeImmutable();
     }
 
-    public static function fromDTO(CriarOrigemRegraDTO $dto): self
+    public static function fromDTO(CriarOrigemRegraDTO $dto, Usuario $usuario): self
     {
         return new self(
+            usuario: $usuario,
             origem: $dto->origem(),
             categoriaId: $dto->categoriaId(),
         );
+    }
+
+    public function usuario(): Usuario
+    {
+        return $this->usuario;
     }
 
     public function uuid(): ?Uuid

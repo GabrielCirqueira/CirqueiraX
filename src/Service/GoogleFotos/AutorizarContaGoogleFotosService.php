@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\GoogleFotos;
 
+use App\Entity\Usuario;
 use App\Entity\ContaGoogleFotos;
 use App\Infra\GoogleOAuth\GoogleOAuthAPI;
 use App\Interface\CriptografiaInterface;
@@ -37,7 +38,7 @@ final readonly class AutorizarContaGoogleFotosService
         );
     }
 
-    public function concluirAutorizacao(string $entrada, ?string $emailFornecido = null): ContaGoogleFotos
+    public function concluirAutorizacao(Usuario $usuario, string $entrada, ?string $emailFornecido = null): ContaGoogleFotos
     {
         $code = $this->extrairCodigoAutorizacao($entrada);
         if (null === $code || '' === $code) {
@@ -76,11 +77,12 @@ final readonly class AutorizarContaGoogleFotosService
         $expiraEm = (new DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
         $refreshTokenCriptografado = $this->criptografia->criptografar($refreshToken);
 
-        $conta = $this->contaRepository->buscarPorEmail($email);
+        $conta = $this->contaRepository->buscarDoUsuario($usuario);
         if (null === $conta) {
-            $conta = new ContaGoogleFotos($email, $refreshTokenCriptografado);
+            $conta = new ContaGoogleFotos($usuario, $email, $refreshTokenCriptografado);
         } else {
             $conta->setRefreshTokenCriptografado($refreshTokenCriptografado);
+            $conta->setEmail($email);
         }
 
         $conta->setAccessTokenCache($accessToken, $expiraEm);
@@ -89,9 +91,9 @@ final readonly class AutorizarContaGoogleFotosService
         return $conta;
     }
 
-    public function desconectar(): void
+    public function desconectar(Usuario $usuario): void
     {
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($usuario);
         if (null !== $conta) {
             $this->contaRepository->remover($conta);
         }

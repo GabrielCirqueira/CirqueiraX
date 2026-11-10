@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\MediaItem;
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
 use App\Enum\StatusMediaItem;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -42,9 +43,41 @@ class MediaItemRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function buscarPorHash(string $hash): ?MediaItem
+    public function buscarPorHash(Usuario $usuario, string $hash): ?MediaItem
     {
-        return $this->findOneBy(['hash' => $hash]);
+        return $this->findOneBy(['usuario' => $usuario, 'hash' => $hash]);
+    }
+
+    public function buscarDoUsuario(Uuid|string $uuid, Usuario $usuario): ?MediaItem
+    {
+        if (is_string($uuid) && !Uuid::isValid($uuid)) {
+            return null;
+        }
+
+        return $this->findOneBy(['uuid' => is_string($uuid) ? Uuid::fromString($uuid) : $uuid, 'usuario' => $usuario]);
+    }
+
+    /**
+     * @param list<string> $uuids
+     */
+    public function contarDoUsuario(array $uuids, Usuario $usuario): int
+    {
+        $binarios = array_map(
+            static fn (string $uuid): string => Uuid::fromString($uuid)->toBinary(),
+            array_values(array_filter(array_unique($uuids), static fn (string $uuid): bool => Uuid::isValid($uuid))),
+        );
+        if ([] === $binarios) {
+            return 0;
+        }
+
+        return (int) $this->createQueryBuilder('m')
+            ->select('COUNT(m.uuid)')
+            ->where('m.usuario = :usuario')
+            ->andWhere('m.uuid IN (:uuids)')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('uuids', $binarios)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     public function buscarPorUuid(Uuid|string $uuid): ?MediaItem
@@ -57,33 +90,34 @@ class MediaItemRepository extends ServiceEntityRepository
     }
 
     public function buscarDuplicado(
+        Usuario $usuario,
         string $hash,
         ?string $md5 = null,
         ?int $tamanhoBytes = null,
         ?string $urlOriginal = null,
         ?string $hashVisual = null,
     ): ?MediaItem {
-        $porHash = $this->buscarPorHash($hash);
+        $porHash = $this->buscarPorHash($usuario, $hash);
         if (null !== $porHash) {
             return $porHash;
         }
 
         if (null !== $md5 && '' !== trim($md5)) {
-            $porMd5 = $this->buscarPorMd5($md5);
+            $porMd5 = $this->buscarPorMd5($usuario, $md5);
             if (null !== $porMd5) {
                 return $porMd5;
             }
         }
 
         if (null !== $hashVisual && '' !== trim($hashVisual)) {
-            $porVisual = $this->buscarPorHashVisual($hashVisual);
+            $porVisual = $this->buscarPorHashVisual($usuario, $hashVisual);
             if (null !== $porVisual) {
                 return $porVisual;
             }
         }
 
         if (null !== $urlOriginal && '' !== trim($urlOriginal)) {
-            $porUrl = $this->buscarPorUrlOriginal($urlOriginal);
+            $porUrl = $this->buscarPorUrlOriginal($usuario, $urlOriginal);
             if (null !== $porUrl) {
                 return $porUrl;
             }
@@ -92,10 +126,12 @@ class MediaItemRepository extends ServiceEntityRepository
         return null;
     }
 
-    public function buscarPorMd5(string $md5): ?MediaItem
+    public function buscarPorMd5(Usuario $usuario, string $md5): ?MediaItem
     {
         $qb = $this->createQueryBuilder('m')
-            ->where('m.metadata LIKE :md5')
+            ->where('m.usuario = :usuario')
+            ->andWhere('m.metadata LIKE :md5')
+            ->setParameter('usuario', $usuario)
             ->setParameter('md5', '%' . $md5 . '%')
             ->setMaxResults(1);
 
@@ -105,10 +141,12 @@ class MediaItemRepository extends ServiceEntityRepository
         return $item;
     }
 
-    public function buscarPorHashVisual(string $hashVisual): ?MediaItem
+    public function buscarPorHashVisual(Usuario $usuario, string $hashVisual): ?MediaItem
     {
         $qb = $this->createQueryBuilder('m')
-            ->where('m.metadata LIKE :hashVisual')
+            ->where('m.usuario = :usuario')
+            ->andWhere('m.metadata LIKE :hashVisual')
+            ->setParameter('usuario', $usuario)
             ->setParameter('hashVisual', '%' . $hashVisual . '%')
             ->setMaxResults(1);
 
@@ -118,10 +156,12 @@ class MediaItemRepository extends ServiceEntityRepository
         return $item;
     }
 
-    public function buscarPorUrlOriginal(string $urlOriginal): ?MediaItem
+    public function buscarPorUrlOriginal(Usuario $usuario, string $urlOriginal): ?MediaItem
     {
         $qb = $this->createQueryBuilder('m')
-            ->where('m.metadata LIKE :url')
+            ->where('m.usuario = :usuario')
+            ->andWhere('m.metadata LIKE :url')
+            ->setParameter('usuario', $usuario)
             ->setParameter('url', '%' . $urlOriginal . '%')
             ->setMaxResults(1);
 
@@ -132,14 +172,17 @@ class MediaItemRepository extends ServiceEntityRepository
     }
 
     public function buscarOutroItemComGoogleFotos(
+        Usuario $usuario,
         string $hash,
         ?Uuid $ignorarUuid = null,
         ?string $md5 = null,
         ?string $hashVisual = null,
     ): ?MediaItem {
         $qb = $this->createQueryBuilder('m')
-            ->where('m.googlePhotosMediaId IS NOT NULL')
-            ->andWhere("m.googlePhotosMediaId != ''");
+            ->where('m.usuario = :usuario')
+            ->andWhere('m.googlePhotosMediaId IS NOT NULL')
+            ->andWhere("m.googlePhotosMediaId != ''")
+            ->setParameter('usuario', $usuario);
 
         $orCondicoes = ['m.hash = :hash'];
         $qb->setParameter('hash', $hash);
@@ -172,37 +215,12 @@ class MediaItemRepository extends ServiceEntityRepository
     /**
      * @return list<MediaItem>
      */
-    public function buscarPorStatus(StatusMediaItem|string $status): array
+    public function buscarPorStatus(StatusMediaItem|string $status, ?Usuario $usuario = null): array
     {
         $statusStr = is_string($status) ? $status : $status->value;
+        $criterios = null === $usuario ? ['status' => $statusStr] : ['status' => $statusStr, 'usuario' => $usuario];
 
-        return $this->findBy(['status' => $statusStr], ['criadoEm' => 'ASC']);
-    }
-
-    /**
-     * @return array{itens: array<int, MediaItem>, total: int}
-     */
-    public function listarPaginado(int $pagina = 1, int $limite = 20): array
-    {
-        $offset = ($pagina - 1) * $limite;
-
-        $qb = $this->createQueryBuilder('m')
-            ->orderBy('m.criadoEm', 'DESC')
-            ->setFirstResult($offset)
-            ->setMaxResults($limite);
-
-        /** @var array<int, MediaItem> $itens */
-        $itens = $qb->getQuery()->getResult();
-
-        $totalQb = $this->createQueryBuilder('m')
-            ->select('COUNT(m.uuid)');
-
-        $total = (int) $totalQb->getQuery()->getSingleScalarResult();
-
-        return [
-            'itens' => $itens,
-            'total' => $total,
-        ];
+        return $this->findBy($criterios, ['criadoEm' => 'ASC']);
     }
 
     /**
@@ -217,9 +235,11 @@ class MediaItemRepository extends ServiceEntityRepository
      *
      * @return array{itens: array<int, MediaItem>, total: int}
      */
-    public function paginarComFiltros(array $filtros = [], int $pagina = 1, int $porPagina = 20): array
+    public function paginarComFiltros(Usuario $usuario, array $filtros = [], int $pagina = 1, int $porPagina = 20): array
     {
-        $qb = $this->createQueryBuilder('m');
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.usuario = :usuario')
+            ->setParameter('usuario', $usuario);
 
         if (!empty($filtros['status'])) {
             $statusVal = $filtros['status'] instanceof StatusMediaItem ? $filtros['status']->value : $filtros['status'];
@@ -306,11 +326,13 @@ class MediaItemRepository extends ServiceEntityRepository
     /**
      * @return array<string, int>
      */
-    public function contarAgrupadoPorStatus(): array
+    public function contarAgrupadoPorStatus(Usuario $usuario): array
     {
         /** @var list<array{status: StatusMediaItem|string, total: int|string}> $resultados */
         $resultados = $this->createQueryBuilder('m')
             ->select('m.status as status, COUNT(m.uuid) as total')
+            ->where('m.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
             ->groupBy('m.status')
             ->getQuery()
             ->getArrayResult();
@@ -333,11 +355,13 @@ class MediaItemRepository extends ServiceEntityRepository
     /**
      * @return array<string, int>
      */
-    public function contarAgrupadoPorOrigem(): array
+    public function contarAgrupadoPorOrigem(Usuario $usuario): array
     {
         /** @var list<array{origem: OrigemMedia|string, total: int|string}> $resultados */
         $resultados = $this->createQueryBuilder('m')
             ->select('m.origem as origem, COUNT(m.uuid) as total')
+            ->where('m.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
             ->groupBy('m.origem')
             ->getQuery()
             ->getArrayResult();
@@ -357,16 +381,16 @@ class MediaItemRepository extends ServiceEntityRepository
         return $totais;
     }
 
-    public function obterTamanhoTotalBytes(): int
+    public function obterTamanhoTotalBytes(Usuario $usuario): int
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = "SELECT COALESCE(SUM(COALESCE(
             CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED),
             CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED),
             0
-        )), 0) as total_bytes FROM media_item";
+        )), 0) as total_bytes FROM media_item WHERE usuario_id = :usuarioId";
 
-        $total = $conn->executeQuery($sql)->fetchOne();
+        $total = $conn->executeQuery($sql, ['usuarioId' => $usuario->getId()])->fetchOne();
 
         return (int) $total;
     }
@@ -374,16 +398,16 @@ class MediaItemRepository extends ServiceEntityRepository
     /**
      * @return array<string, array{totalItens: int, tamanhoBytes: int}>
      */
-    public function obterEspacoAgrupadoPorOrigem(): array
+    public function obterEspacoAgrupadoPorOrigem(Usuario $usuario): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = "SELECT origem, COUNT(*) as total_itens, COALESCE(SUM(COALESCE(
             CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED),
             CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED),
             0
-        )), 0) as total_bytes FROM media_item GROUP BY origem";
+        )), 0) as total_bytes FROM media_item WHERE usuario_id = :usuarioId GROUP BY origem";
 
-        $linhas = $conn->executeQuery($sql)->fetchAllAssociative();
+        $linhas = $conn->executeQuery($sql, ['usuarioId' => $usuario->getId()])->fetchAllAssociative();
 
         $dados = [];
         foreach (OrigemMedia::cases() as $case) {
@@ -409,16 +433,16 @@ class MediaItemRepository extends ServiceEntityRepository
     /**
      * @return array<string|null, array{totalItens: int, tamanhoBytes: int}>
      */
-    public function obterMetricasAgrupadasPorCategoria(): array
+    public function obterMetricasAgrupadasPorCategoria(Usuario $usuario): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $sql = "SELECT categoria_id, COUNT(*) as total_itens, COALESCE(SUM(COALESCE(
             CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.tamanho_bytes')) AS UNSIGNED),
             CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.filesize')) AS UNSIGNED),
             0
-        )), 0) as total_bytes FROM media_item GROUP BY categoria_id";
+        )), 0) as total_bytes FROM media_item WHERE usuario_id = :usuarioId GROUP BY categoria_id";
 
-        $linhas = $conn->executeQuery($sql)->fetchAllAssociative();
+        $linhas = $conn->executeQuery($sql, ['usuarioId' => $usuario->getId()])->fetchAllAssociative();
 
         $dados = [];
         foreach ($linhas as $linha) {
@@ -488,7 +512,7 @@ class MediaItemRepository extends ServiceEntityRepository
      *     espacoLiberadoBytes: int
      * }
      */
-    public function obterMetricasVideos(): array
+    public function obterMetricasVideos(Usuario $usuario): array
     {
         $conn = $this->getEntityManager()->getConnection();
         $agoraSp = new \DateTimeImmutable('now', new \DateTimeZone('America/Sao_Paulo'));
@@ -512,11 +536,13 @@ class MediaItemRepository extends ServiceEntityRepository
             FROM media_item
             WHERE (origem IN ('download', 'bot_telegram') OR caminho_local LIKE '%.mp4' OR caminho_local LIKE '%.mkv' OR caminho_local LIKE '%.webm' OR metadata LIKE '%video/%')
               AND origem NOT IN ('print_pessoal', 'print_empresa')
+              AND usuario_id = :usuarioId
         ";
 
         /** @var array<string, mixed> $linha */
         $linha = $conn->executeQuery($sql, [
             'hojePrefix' => $hojePrefix,
+            'usuarioId' => $usuario->getId(),
         ])->fetchAssociative() ?: [];
 
         return [

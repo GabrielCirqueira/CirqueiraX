@@ -35,24 +35,23 @@ final class DashboardController extends DefaultController
     }
 
     #[Route('/resumo', name: 'resumo', methods: ['GET'])]
-    public function resumo(): Response
+    public function resumo(#[CurrentUser] Usuario $usuario): Response
     {
-        $usuario = $this->getUser();
-
-        return $this->success($this->dashboardService->obterResumo($usuario instanceof Usuario ? $usuario : null));
+        return $this->success($this->dashboardService->obterResumo($usuario));
     }
 
     #[Route('/categorias', name: 'categorias', methods: ['GET'])]
-    public function categorias(): Response
+    public function categorias(#[CurrentUser] Usuario $usuario): Response
     {
-        return $this->success($this->dashboardService->resumoPorCategoria());
+        return $this->success($this->dashboardService->resumoPorCategoria($usuario));
     }
 
     #[Route('/erros', name: 'erros', methods: ['GET'])]
-    public function erros(#[MapQueryString] ?PaginacaoDTO $paginacao = null): Response
+    public function erros(#[CurrentUser] Usuario $usuario, #[MapQueryString] ?PaginacaoDTO $paginacao = null): Response
     {
         $paginacao ??= new PaginacaoDTO();
         $resultado = $this->mediaItemService->paginarComFiltros(
+            $usuario,
             ['status' => 'erro'],
             $paginacao->pagina(),
             $paginacao->limite(),
@@ -67,9 +66,9 @@ final class DashboardController extends DefaultController
     }
 
     #[Route('/erros/retentar', name: 'erros_retentar', methods: ['POST'])]
-    public function retentarErros(): Response
+    public function retentarErros(#[CurrentUser] Usuario $usuario): Response
     {
-        $itens = $this->retentarMediaItemService->retentarTodosComErro();
+        $itens = $this->retentarMediaItemService->retentarTodosComErro($usuario);
 
         return $this->success($this->mediaItemSerializer->normalizarLista($itens));
     }

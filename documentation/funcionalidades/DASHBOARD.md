@@ -2,6 +2,8 @@
 
 O **Dashboard** (`/`, `/dashboard` ou `/app`) é a página inicial e mostra o estado de todo o pipeline. A interface foi simplificada na melhoria M86.
 
+> Desde a M131, todos os números, as últimas mídias, as categorias, a fila de erros e o card do Spotify são da conta logada. A aba **Sincronização** só aparece para administradores ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
+
 ---
 
 ## 1. Estrutura

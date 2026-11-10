@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\MediaItem;
 
+use App\Entity\Usuario;
 use App\DataObject\ClassificarManualDTO;
 use App\DataObject\IngestarMediaDTO;
 use App\DataObject\ResultadoUploadDTO;
@@ -32,7 +33,7 @@ final readonly class UploadManualService
         private ExtratorMetadataService $extratorMetadataService,
     ) {}
 
-    public function executar(UploadManualDTO $dto): ResultadoUploadDTO
+    public function executar(UploadManualDTO $dto, Usuario $usuario): ResultadoUploadDTO
     {
         $arquivo = $dto->arquivo();
         if (null === $arquivo) {
@@ -64,6 +65,7 @@ final readonly class UploadManualService
         $hashVisual = $metadataExtraida[MetadataKeys::HASH_VISUAL] ?? null;
 
         $existente = $this->mediaItemRepository->buscarDuplicado(
+            $usuario,
             $hash,
             is_string($md5) ? $md5 : null,
             (int) @filesize($caminhoArquivo),
@@ -104,6 +106,7 @@ final readonly class UploadManualService
         $metadata = array_merge($dto->metadata(), $metadataExtra);
 
         $ingestarDTO = new IngestarMediaDTO(
+            usuario: $usuario,
             caminhoArquivo: $caminhoArquivo,
             origem: OrigemMedia::MANUAL,
             metadata: $metadata,

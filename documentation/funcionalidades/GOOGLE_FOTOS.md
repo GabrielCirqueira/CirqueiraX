@@ -40,8 +40,10 @@ Com o token expirado, a tela mostra **Reconectar**. **Desconectar** usa `POST /a
 ```bash
 make google-fotos-autorizar
 # ou
-php bin/console app:google-fotos:autorizar-conta
+php bin/console app:google-fotos:autorizar-conta --usuario=<email ou username>
 ```
+
+Cada usuário conecta a **própria** conta Google (uma por usuário). Os envios usam a conta do dono da mídia, e o histórico de envios mostra só os da conta logada. Enquanto o app OAuth estiver em modo de teste, o e-mail Google de cada pessoa precisa estar em **Test users** ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
 
 ### Credenciais
 

@@ -6,11 +6,13 @@ namespace App\Controller\MediaItem;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\SalvarEdicaoImagemDTO;
+use App\Entity\Usuario;
 use App\Serializer\MediaItemSerializer;
 use App\Service\MediaItem\SalvarEdicaoImagemService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api/v1/media-itens/edicoes', name: 'api_media_itens_edicoes_')]
@@ -23,7 +25,7 @@ final class EdicaoImagemController extends DefaultController
     ) {}
 
     #[Route('', name: 'salvar', methods: ['POST'])]
-    public function salvar(Request $request): Response
+    public function salvar(Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $dto = SalvarEdicaoImagemDTO::fromRequest($request);
         $violacoes = $this->validator->validate($dto);
@@ -37,7 +39,7 @@ final class EdicaoImagemController extends DefaultController
             return $this->unprocessable('dados_invalidos', $detalhes);
         }
 
-        $mediaItem = $this->salvarEdicaoImagemService->executar($dto);
+        $mediaItem = $this->salvarEdicaoImagemService->executar($dto, $usuario);
 
         return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
     }

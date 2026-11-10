@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\GoogleFotos;
 
+use App\Entity\Usuario;
 use App\DataObject\FiltroEnviosGoogleFotosDTO;
 use App\DataObject\PaginaRegistrosEnvioGoogleFotosDTO;
 use App\Enum\StatusEnvioGoogleFotos;
@@ -19,18 +20,18 @@ final readonly class ListarEnviosGoogleFotosService
         private RegistroEnvioGoogleFotosRepository $registroRepository,
     ) {}
 
-    public function listar(FiltroEnviosGoogleFotosDTO $filtro): PaginaRegistrosEnvioGoogleFotosDTO
+    public function listar(FiltroEnviosGoogleFotosDTO $filtro, Usuario $usuario): PaginaRegistrosEnvioGoogleFotosDTO
     {
-        return $this->registroRepository->paginarRecentes($filtro->status(), $filtro->pagina(), $filtro->limite());
+        return $this->registroRepository->paginarRecentes($usuario, $filtro->status(), $filtro->pagina(), $filtro->limite());
     }
 
     /**
      * @return array{enviados: int, reaproveitados: int, falhas: int, enviando: int, ultimaFalhaEm: string|null, ultimaFalhaMotivo: string|null}
      */
-    public function resumirUltimas24Horas(): array
+    public function resumirUltimas24Horas(Usuario $usuario): array
     {
-        $contagem = $this->registroRepository->contarPorStatusDesde(new DateTimeImmutable(self::PERIODO_RESUMO));
-        $ultimaFalha = $this->registroRepository->buscarUltimaFalha();
+        $contagem = $this->registroRepository->contarPorStatusDesde($usuario, new DateTimeImmutable(self::PERIODO_RESUMO));
+        $ultimaFalha = $this->registroRepository->buscarUltimaFalha($usuario);
 
         return [
             'enviados' => $contagem[StatusEnvioGoogleFotos::ENVIADO->value] ?? 0,

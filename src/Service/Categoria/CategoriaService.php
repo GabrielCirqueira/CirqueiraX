@@ -6,6 +6,7 @@ namespace App\Service\Categoria;
 
 use App\DataObject\CriarCategoriaDTO;
 use App\Entity\Categoria;
+use App\Entity\Usuario;
 use App\Exception\Categoria\CategoriaException;
 use App\Repository\CategoriaRepository;
 use Symfony\Component\Uid\Uuid;
@@ -16,23 +17,23 @@ final readonly class CategoriaService
         private CategoriaRepository $categoriaRepository,
     ) {}
 
-    public function criar(CriarCategoriaDTO $dto): Categoria
+    public function criar(CriarCategoriaDTO $dto, Usuario $usuario): Categoria
     {
-        if ($this->categoriaRepository->existeComNome($dto->nome())) {
+        if ($this->categoriaRepository->existeComNome($usuario, $dto->nome())) {
             throw CategoriaException::nomeJaExiste($dto->nome());
         }
 
-        $categoria = Categoria::fromDTO($dto);
+        $categoria = Categoria::fromDTO($dto, $usuario);
         $this->categoriaRepository->salvar($categoria);
 
         return $categoria;
     }
 
-    public function atualizar(string|Uuid $uuid, CriarCategoriaDTO $dto): Categoria
+    public function atualizar(string|Uuid $uuid, CriarCategoriaDTO $dto, Usuario $usuario): Categoria
     {
-        $categoria = $this->buscarPorUuid($uuid);
+        $categoria = $this->buscarDoUsuario($uuid, $usuario);
 
-        if ($categoria->nome() !== $dto->nome() && $this->categoriaRepository->existeComNome($dto->nome(), $uuid)) {
+        if ($categoria->nome() !== $dto->nome() && $this->categoriaRepository->existeComNome($usuario, $dto->nome(), $uuid)) {
             throw CategoriaException::nomeJaExiste($dto->nome());
         }
 
@@ -47,9 +48,19 @@ final readonly class CategoriaService
     /**
      * @return list<Categoria>
      */
-    public function listarTodas(): array
+    public function listarTodas(Usuario $usuario): array
     {
-        return $this->categoriaRepository->listarTodas();
+        return $this->categoriaRepository->listarTodas($usuario);
+    }
+
+    public function buscarDoUsuario(string|Uuid $uuid, Usuario $usuario): Categoria
+    {
+        $categoria = $this->categoriaRepository->buscarDoUsuario($uuid, $usuario);
+        if (null === $categoria) {
+            throw CategoriaException::categoriaNaoEncontrada();
+        }
+
+        return $categoria;
     }
 
     public function buscarPorUuid(string|Uuid $uuid): Categoria
@@ -62,9 +73,9 @@ final readonly class CategoriaService
         return $categoria;
     }
 
-    public function remover(string|Uuid $uuid): void
+    public function remover(string|Uuid $uuid, Usuario $usuario): void
     {
-        $categoria = $this->buscarPorUuid($uuid);
+        $categoria = $this->buscarDoUsuario($uuid, $usuario);
         $this->categoriaRepository->remover($categoria);
     }
 }

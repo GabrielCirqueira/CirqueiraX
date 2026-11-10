@@ -1,6 +1,6 @@
-# Melhorias — M101 a M120
+# Melhorias — M101 a M131
 
-> Detalhamento das melhorias **M101–M120**. Índice em [MELHORIAS.md](MELHORIAS.md).
+> Detalhamento das melhorias **M101–M131**. Índice em [MELHORIAS.md](MELHORIAS.md).
 
 ---
 
@@ -858,3 +858,32 @@
   - `src/Service/Spotify/GerarUrlAutorizacaoSpotifyService.php`, `src/Interface/SpotifyInterface.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Repository/ReproducaoSpotifyRepository.php`, `src/Exception/Spotify/SpotifyException.php`
   - `web/features/spotify/PlayerTesteSpotify.tsx`, `web/features/spotify/hooks/usePlayerTesteSpotify.ts` (novos), `web/features/spotify/api.ts`, `web/features/spotify/hooks/index.ts`, `web/features/spotify/components/SpotifyCallback.tsx`, `web/App.tsx`
   - `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+### 🟡 Melhoria 131 — Cada Usuário com as Suas Mídias, Categorias e Google Fotos
+
+- **Status**: Publicado, falta validar
+- **Data**: 10 de novembro de 2026
+- **Problema**:
+  - O sistema vai ser usado por mais pessoas, mas a central de mídias, as categorias, as regras de origem, o Google Fotos (uma conta só), o histórico de envios, os tokens de agente e o painel eram compartilhados: qualquer usuário logado via e mexia em tudo.
+- **Solução**:
+  - Backup completo antes (`/root/backups/cirqueirax/2026-11-10_antes-multiusuario/`, tag `backup-antes-multiusuario-2026-11-10`).
+  - Mídias, categorias, regras de origem, conta do Google Fotos, envios e tokens de agente ganharam dono (`usuario_id`). Tudo o que existia foi ligado à conta `gabrielcirqueira711@gmail.com`.
+  - Todas as rotas filtram pela conta logada; item de outra pessoa responde 404, inclusive em lote, stream, miniatura, download, edição de imagem e envio forçado ao Google Fotos. Categoria usada numa ação precisa ser da mesma conta.
+  - Duplicados são procurados só dentro da conta. O nome da categoria e a origem da regra só precisam ser únicos por conta.
+  - Google Fotos: uma conta Google por usuário; envio usa a conta do dono da mídia; status, álbuns, conectar, desconectar e histórico são da conta logada.
+  - Print enviado pelo agente entra na conta do dono do token.
+  - Arquivos de cada usuário ficam em `<pasta do usuário>/<pasta da categoria>`. A conta principal usa a pasta vazia, então nenhum arquivo mudou de lugar.
+  - Painel: números, últimas mídias, categorias, erros e Spotify da conta logada. Sincronização (Syncthing) só para administradores; a conta principal recebeu `ROLE_ADMIN`.
+  - Comandos `app:agente:gerar-token`, `app:seed:origem-regras`, `app:google-fotos:autorizar-conta` e `app:google-fotos:limpar-duplicados-franky` pedem `--usuario`.
+- **Arquivos**:
+  - `migrations/Version20261110151341.php` (novo)
+  - `src/Entity/Usuario.php`, `MediaItem.php`, `Categoria.php`, `OrigemRegra.php`, `ContaGoogleFotos.php`, `RegistroEnvioGoogleFotos.php`, `TokenAgente.php`, `src/DataObject/IngestarMediaDTO.php`
+  - `src/Repository/MediaItemRepository.php`, `CategoriaRepository.php`, `OrigemRegraRepository.php`, `ContaGoogleFotosRepository.php`, `RegistroEnvioGoogleFotosRepository.php`, `UsuarioRepository.php`
+  - `src/Controller/MediaItem/MediaItemController.php`, `EdicaoImagemController.php`, `src/Controller/Categoria/CategoriaController.php`, `src/Controller/OrigemRegra/OrigemRegraController.php`, `src/Controller/GoogleFotos/GoogleFotosController.php`, `EnviosGoogleFotosController.php`, `src/Controller/Dashboard/DashboardController.php`, `src/Controller/Video/DownloadController.php`, `src/Controller/Sync/SyncController.php`
+  - `src/Service/MediaItem/*` (MediaItemService, ClassificarMediaItemService, UploadManualService, SalvarEdicaoImagemService, RetentarMediaItemService, RebaixarMediaItemService), `src/Service/Ingestao/*`, `src/Service/Video/BaixarVideoService.php`, `src/Service/Distribuicao/DistribuirLocalService.php`, `src/Service/Categoria/*`, `src/Service/OrigemRegra/OrigemRegraService.php`, `src/Service/GoogleFotos/*`, `src/Service/Dashboard/DashboardService.php`
+  - `src/Message/BaixarVideoMessage.php`, `src/MessageHandler/BaixarVideoMessageHandler.php`, `src/MessageHandler/ClassificarMediaMessageHandler.php`
+  - `src/Command/GerarTokenAgenteCommand.php`, `SeedOrigemRegrasCommand.php`, `AutorizarContaGoogleFotosCommand.php`, `LimparDuplicadosFrankyCommand.php`
+  - `web/features/dashboard/Dashboard.tsx`, `web/features/dashboard/hooks/useDashboard.ts`
+  - `documentation/funcionalidades/MULTIUSUARIO.md` (novo), `CATEGORIAS_E_REGRAS.md`, `GOOGLE_FOTOS.md`, `SYNCTHING.md`, `DASHBOARD.md`, `CENTRAL_MIDIAS.md`, `documentation/stack/BACKEND.md`, `documentation/guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md`, `documentation/README.md`

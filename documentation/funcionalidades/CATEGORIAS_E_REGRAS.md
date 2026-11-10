@@ -32,7 +32,7 @@ Origens existentes em `OrigemMedia`:
 
 ## 2. Categorias iniciais
 
-Criadas por `app:seed:origem-regras`:
+Criadas por `app:seed:origem-regras --usuario=<email ou username>`. Categorias e regras são de cada usuário: o nome da categoria e a origem da regra só precisam ser únicos dentro da conta, e os arquivos ficam em `MEDIA_STORAGE_PATH/<pasta do usuário>/<pasta da categoria>` ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
 
 | Categoria | Pasta | Regra automática |
 | :--- | :--- | :--- |
@@ -110,5 +110,5 @@ Disponível para itens `classificado`, `distribuido_local`, `concluido` ou `erro
 **Seed:**
 
 ```bash
-docker exec -it cirqueirax_symfony php bin/console app:seed:origem-regras
+docker exec -it cirqueirax_symfony php bin/console app:seed:origem-regras --usuario=<email ou username>
 ```

@@ -112,6 +112,7 @@ final readonly class EnviarGoogleFotosService
                 : null;
 
             $outroItemComGoogle = $this->mediaItemRepository->buscarOutroItemComGoogleFotos(
+                $mediaItem->usuario(),
                 $mediaItem->hash(),
                 $mediaItem->uuid(),
                 $md5,
@@ -137,7 +138,7 @@ final readonly class EnviarGoogleFotosService
                 ]);
 
                 try {
-                    $conta = $this->contaRepository->buscarContaAtiva();
+                    $conta = $this->contaRepository->buscarDoUsuario($mediaItem->usuario());
                     if (null !== $conta) {
                         $token = $this->oAuthService->obterAccessTokenValido($conta);
                         $albumId = $this->albumService->obterOuCriarAlbumId($categoria);
@@ -170,6 +171,7 @@ final readonly class EnviarGoogleFotosService
         $caminhoLocal = $mediaItem->caminhoLocal();
         if (TextoUtil::estaEmBranco($caminhoLocal) || !file_exists((string) $caminhoLocal)) {
             $outroItem = $this->mediaItemRepository->buscarDuplicado(
+                $mediaItem->usuario(),
                 $mediaItem->hash(),
                 is_string($mediaItem->metadata()[MetadataKeys::HASH_MD5] ?? null) ? (string) $mediaItem->metadata()[MetadataKeys::HASH_MD5] : null,
                 $mediaItem->tamanhoBytes()
@@ -204,7 +206,7 @@ final readonly class EnviarGoogleFotosService
             }
         }
 
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($mediaItem->usuario());
         if (null === $conta) {
             throw GoogleFotosAPIException::contaNaoEncontrada();
         }

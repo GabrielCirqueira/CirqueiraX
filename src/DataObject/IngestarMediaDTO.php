@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataObject;
 
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -15,6 +16,7 @@ final readonly class IngestarMediaDTO
      * @param array<string, mixed> $metadata
      */
     public function __construct(
+        public Usuario $usuario,
         #[Assert\NotBlank(message: 'O caminho do arquivo é obrigatório.')]
         public string $caminhoArquivo,
         OrigemMedia|string $origem,
@@ -22,6 +24,11 @@ final readonly class IngestarMediaDTO
         public ?string $hash = null,
     ) {
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;
+    }
+
+    public function usuario(): Usuario
+    {
+        return $this->usuario;
     }
 
     public function caminhoArquivo(): string

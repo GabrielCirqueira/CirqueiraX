@@ -45,6 +45,9 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'smallint', options: ['default' => 30])]
     private int $metaEscutaMinutos = 30;
 
+    #[ORM\Column(type: 'string', length: 150, nullable: true)]
+    private ?string $pastaArmazenamento = null;
+
     public function __construct(string $nomeCompleto, string $username, string $email)
     {
         $this->nomeCompleto = $nomeCompleto;
@@ -140,6 +143,16 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function getCriadoEm(): \DateTimeImmutable
     {
         return $this->criadoEm;
+    }
+
+    public function pastaArmazenamento(): string
+    {
+        return $this->pastaArmazenamento ?? 'usuarios/' . $this->username;
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->getRoles(), true);
     }
 
     public function getMetaEscutaMinutos(): int

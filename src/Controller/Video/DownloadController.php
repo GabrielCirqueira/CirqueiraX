@@ -6,12 +6,14 @@ namespace App\Controller\Video;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\BaixarVideoDTO;
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
 use App\Serializer\MediaItemSerializer;
 use App\Service\Video\BaixarVideoService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 #[Route('/api/v1/downloads', name: 'api_downloads_')]
 final class DownloadController extends DefaultController
@@ -22,9 +24,9 @@ final class DownloadController extends DefaultController
     ) {}
 
     #[Route('', name: 'solicitar', methods: ['POST'])]
-    public function solicitar(#[MapRequestPayload] BaixarVideoDTO $dto): Response
+    public function solicitar(#[MapRequestPayload] BaixarVideoDTO $dto, #[CurrentUser] Usuario $usuario): Response
     {
-        $mediaItem = $this->baixarVideoService->executar($dto->url(), OrigemMedia::DOWNLOAD, $dto->categoriaId());
+        $mediaItem = $this->baixarVideoService->executar($usuario, $dto->url(), OrigemMedia::DOWNLOAD, $dto->categoriaId());
 
         return $this->created($this->mediaItemSerializer->normalizar($mediaItem));
     }

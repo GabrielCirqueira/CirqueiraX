@@ -7,6 +7,7 @@ namespace App\Command;
 use App\Entity\TokenAgente;
 use App\Enum\TipoCliente;
 use App\Repository\TokenAgenteRepository;
+use App\Repository\UsuarioRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,6 +24,7 @@ final class GerarTokenAgenteCommand extends Command
 {
     public function __construct(
         private readonly TokenAgenteRepository $tokenAgenteRepository,
+        private readonly UsuarioRepository $usuarioRepository,
     ) {
         parent::__construct();
     }
@@ -32,13 +34,23 @@ final class GerarTokenAgenteCommand extends Command
         $this
             ->addArgument('nome', InputArgument::OPTIONAL, 'Nome descritivo do agente (ex: "Agente Print Empresa")')
             ->addArgument('origem', InputArgument::OPTIONAL, 'Identificador da origem (ex: "print_empresa", "bot_telegram")')
-            ->addOption('tipo', 't', InputOption::VALUE_REQUIRED, 'Tipo do cliente ("agente" ou "usuario")', 'agente');
+            ->addOption('tipo', 't', InputOption::VALUE_REQUIRED, 'Tipo do cliente ("agente" ou "usuario")', 'agente')
+            ->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'E-mail ou username do dono');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Gerador de Token de Agente');
+
+        /** @var string $identificadorUsuario */
+        $identificadorUsuario = $input->getOption('usuario') ?? '';
+        $usuario = $this->usuarioRepository->buscarPorEmailOuUsername($identificadorUsuario);
+        if (null === $usuario) {
+            $io->error('Informe um usuário existente com --usuario=<email ou username>.');
+
+            return Command::FAILURE;
+        }
 
         /** @var string|null $nome */
         $nome = $input->getArgument('nome');
@@ -76,6 +88,7 @@ final class GerarTokenAgenteCommand extends Command
             $hash = hash('sha256', $tokenBruto);
 
             $tokenAgente = new TokenAgente(
+                usuario: $usuario,
                 nome: $nome,
                 tokenHash: $hash,
                 origem: $origem,
@@ -87,6 +100,7 @@ final class GerarTokenAgenteCommand extends Command
             $io->success('Token de agente gerado e persistido com sucesso!');
             $io->definitionList(
                 ['UUID' => $tokenAgente->uuid()?->toString() ?? 'N/A'],
+                ['Dono' => $usuario->getEmail()],
                 ['Nome' => $tokenAgente->nome()],
                 ['Origem' => $tokenAgente->origem()],
                 ['Tipo' => $tokenAgente->tipoCliente()->value],

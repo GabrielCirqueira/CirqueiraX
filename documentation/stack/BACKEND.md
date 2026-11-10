@@ -230,13 +230,13 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | Comando | Função |
 | :--- | :--- |
 | `app:seed` | Popula dados iniciais |
-| `app:seed:origem-regras` | Cria categorias e regras padrão |
+| `app:seed:origem-regras` | Cria categorias e regras padrão (`--usuario`) |
 | `app:usuario:criar` | Cria usuário |
-| `app:agente:gerar-token` | Gera token de agente |
+| `app:agente:gerar-token` | Gera token de agente (`--usuario`) |
 | `app:jwt:master` | Gera JWT administrativo |
-| `app:google-fotos:autorizar-conta` | Autoriza a conta Google |
+| `app:google-fotos:autorizar-conta` | Autoriza a conta Google (`--usuario`) |
 | `app:google-fotos:enviar` | Envia pendentes |
-| `app:google-fotos:limpar-duplicados-franky` | Trata duplicados do Franky |
+| `app:google-fotos:limpar-duplicados-franky` | Trata duplicados do Franky (`--usuario`) |
 | `app:media:limpar-videos-antigos` | Limpa vídeos (`--dias`, `--dry-run`) |
 | `app:media:rebaixar` | Rebaixa mídias |
 | `app:media:retentar` | Retenta mídias com erro |

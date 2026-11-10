@@ -1,6 +1,6 @@
 # Funcionalidade: Central de Mídias
 
-A **Central de Mídias** (`/central-midias`, também acessível por `/todas-midias`) é a biblioteca unificada do sistema. Ela lista todos os `MediaItem`, de qualquer origem.
+A **Central de Mídias** (`/central-midias`, também acessível por `/todas-midias`) é a biblioteca unificada do sistema. Ela lista todos os `MediaItem` do usuário logado, de qualquer origem. Mídias de outros usuários não aparecem e respondem 404 ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
 
 ---
 

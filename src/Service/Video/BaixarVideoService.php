@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Video;
 
+use App\Entity\Usuario;
 use App\DataObject\ClassificarManualDTO;
 use App\DataObject\IngestarMediaDTO;
 use App\Entity\MediaItem;
@@ -29,13 +30,13 @@ final readonly class BaixarVideoService
         private AplicarMetadataArquivoService $aplicarMetadataArquivoService,
     ) {}
 
-    public function executar(string $url, ?OrigemMedia $origem = null, ?string $categoriaId = null): MediaItem
+    public function executar(Usuario $usuario, string $url, ?OrigemMedia $origem = null, ?string $categoriaId = null): MediaItem
     {
         if (!$this->validadorUrl->ehUrlSuportada($url)) {
             throw YtDlpException::urlInvalidaOuNaoSuportada($url);
         }
 
-        $itemExistente = $this->mediaItemRepository->buscarPorUrlOriginal($url);
+        $itemExistente = $this->mediaItemRepository->buscarPorUrlOriginal($usuario, $url);
         if (null !== $itemExistente) {
             $tentativas = ((int) ($itemExistente->metadata()[MetadataKeys::TENTATIVAS_DUPLICADAS] ?? 0)) + 1;
             $itemExistente->adicionarMetadata(MetadataKeys::TENTATIVAS_DUPLICADAS, $tentativas);
@@ -60,6 +61,7 @@ final readonly class BaixarVideoService
         $metadataExtraida = $this->baixarVideoDownloadService->extrairMetadata($url);
 
         $dto = new IngestarMediaDTO(
+            usuario: $usuario,
             caminhoArquivo: $caminhoLocal,
             origem: $origem ?? OrigemMedia::DOWNLOAD,
             metadata: $metadataExtraida,

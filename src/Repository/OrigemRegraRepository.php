@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\OrigemRegra;
+use App\Entity\Usuario;
 use App\Enum\OrigemMedia;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -36,11 +37,20 @@ class OrigemRegraRepository extends ServiceEntityRepository
         }
     }
 
-    public function buscarPorOrigem(OrigemMedia|string $origem): ?OrigemRegra
+    public function buscarPorOrigem(Usuario $usuario, OrigemMedia|string $origem): ?OrigemRegra
     {
         $valor = $origem instanceof OrigemMedia ? $origem->value : $origem;
 
-        return $this->findOneBy(['origem' => $valor]);
+        return $this->findOneBy(['usuario' => $usuario, 'origem' => $valor]);
+    }
+
+    public function buscarDoUsuario(Uuid|string $uuid, Usuario $usuario): ?OrigemRegra
+    {
+        if (is_string($uuid) && !Uuid::isValid($uuid)) {
+            return null;
+        }
+
+        return $this->findOneBy(['uuid' => is_string($uuid) ? Uuid::fromString($uuid) : $uuid, 'usuario' => $usuario]);
     }
 
     public function buscarPorUuid(Uuid|string $uuid): ?OrigemRegra
@@ -52,12 +62,14 @@ class OrigemRegraRepository extends ServiceEntityRepository
         return $this->find($uuid);
     }
 
-    public function existeComOrigem(OrigemMedia|string $origem, Uuid|string|null $ignorarUuid = null): bool
+    public function existeComOrigem(Usuario $usuario, OrigemMedia|string $origem, Uuid|string|null $ignorarUuid = null): bool
     {
         $valor = $origem instanceof OrigemMedia ? $origem->value : $origem;
         $qb = $this->createQueryBuilder('r')
             ->select('COUNT(r.uuid)')
-            ->where('r.origem = :origem')
+            ->where('r.usuario = :usuario')
+            ->andWhere('r.origem = :origem')
+            ->setParameter('usuario', $usuario)
             ->setParameter('origem', $valor);
 
         if (null !== $ignorarUuid) {
@@ -72,37 +84,11 @@ class OrigemRegraRepository extends ServiceEntityRepository
     /**
      * @return list<OrigemRegra>
      */
-    public function listarTodas(): array
+    public function listarTodas(Usuario $usuario): array
     {
         /** @var list<OrigemRegra> $resultado */
-        $resultado = $this->findBy([], ['criadoEm' => 'DESC']);
+        $resultado = $this->findBy(['usuario' => $usuario], ['criadoEm' => 'DESC']);
 
         return $resultado;
-    }
-
-    /**
-     * @return array{itens: array<int, OrigemRegra>, total: int}
-     */
-    public function listarPaginado(int $pagina = 1, int $limite = 20): array
-    {
-        $offset = ($pagina - 1) * $limite;
-
-        $qb = $this->createQueryBuilder('r')
-            ->orderBy('r.criadoEm', 'DESC')
-            ->setFirstResult($offset)
-            ->setMaxResults($limite);
-
-        /** @var array<int, OrigemRegra> $itens */
-        $itens = $qb->getQuery()->getResult();
-
-        $totalQb = $this->createQueryBuilder('r')
-            ->select('COUNT(r.uuid)');
-
-        $total = (int) $totalQb->getQuery()->getSingleScalarResult();
-
-        return [
-            'itens' => $itens,
-            'total' => $total,
-        ];
     }
 }

@@ -11,14 +11,18 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ContaGoogleFotosRepository::class)]
 #[ORM\Table(name: 'conta_google_fotos')]
-#[ORM\UniqueConstraint(name: 'UNIQ_CONTA_GOOGLE_FOTOS_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_CONTA_GOOGLE_FOTOS_USUARIO', fields: ['usuario'])]
 class ContaGoogleFotos
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private ?Uuid $uuid = null;
 
-    #[ORM\Column(type: 'string', length: 255, unique: true)]
+    #[ORM\OneToOne(targetEntity: Usuario::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Usuario $usuario;
+
+    #[ORM\Column(type: 'string', length: 255)]
     private string $email;
 
     #[ORM\Column(type: 'text')]
@@ -37,16 +41,23 @@ class ContaGoogleFotos
     private \DateTimeImmutable $atualizadoEm;
 
     public function __construct(
+        Usuario $usuario,
         string $email,
         string $refreshTokenCriptografado,
     ) {
         $this->uuid = Uuid::v7();
+        $this->usuario = $usuario;
         $this->email = $email;
         $this->refreshTokenCriptografado = $refreshTokenCriptografado;
         $this->accessTokenCache = null;
         $this->expiraEm = null;
         $this->criadoEm = new \DateTimeImmutable();
         $this->atualizadoEm = new \DateTimeImmutable();
+    }
+
+    public function usuario(): Usuario
+    {
+        return $this->usuario;
     }
 
     public function uuid(): ?Uuid

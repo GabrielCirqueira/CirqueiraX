@@ -30,7 +30,7 @@ final readonly class ClassificarMediaMessageHandler
                 return;
             }
 
-            $regra = $this->origemRegraRepository->buscarPorOrigem($mediaItem->origem());
+            $regra = $this->origemRegraRepository->buscarPorOrigem($mediaItem->usuario(), $mediaItem->origem());
             if (null !== $regra) {
                 $mediaItem->setCategoriaId($regra->categoriaId());
                 $mediaItem->transicionarPara(StatusMediaItem::CLASSIFICADO);

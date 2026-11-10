@@ -11,6 +11,7 @@ import { SecaoLivrosDashboard } from './components/SecaoLivrosDashboard'
 import { StatusIntegracoes } from './components/StatusIntegracoes'
 import {
   DASHBOARD_QUERY_KEYS,
+  ehAcessoNegado,
   useCategoriasMetricas,
   usePastasSync,
   useResumoDashboard,
@@ -51,8 +52,9 @@ const DashboardView = memo(function DashboardView() {
 
   const { data: resumo, isLoading: carregandoResumo } = useResumoDashboard()
   const { data: categorias = [], isLoading: carregandoCategorias } = useCategoriasMetricas()
-  const { data: pastasSync = [] } = usePastasSync()
-  const { data: statusSync } = useStatusSync()
+  const { data: pastasSync = [], error: erroPastasSync } = usePastasSync()
+  const syncDisponivel = !ehAcessoNegado(erroPastasSync)
+  const { data: statusSync } = useStatusSync(syncDisponivel)
 
   const totalErros = resumo?.totalErros ?? 0
 
@@ -74,9 +76,20 @@ const DashboardView = memo(function DashboardView() {
   return (
     <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }}>
       <VStack w="full" gap={6} alignItems="stretch">
-        <HStack justify="space-between" align={{ base: 'flex-start', sm: 'center' }} flexWrap="wrap" gap={4}>
+        <HStack
+          justify="space-between"
+          align={{ base: 'flex-start', sm: 'center' }}
+          flexWrap="wrap"
+          gap={4}
+        >
           <HStack gap={3} align="center" flexWrap="wrap">
-            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="black" color="fg" letterSpacing="tight">
+            <Text
+              as="h1"
+              fontSize={{ base: 'xl', md: '2xl' }}
+              fontWeight="black"
+              color="fg"
+              letterSpacing="tight"
+            >
               Dashboard
             </Text>
             <HStack
@@ -146,7 +159,9 @@ const DashboardView = memo(function DashboardView() {
           <Tabs.List borderColor="border.subtle" overflowX="auto">
             <Tabs.Trigger value="visao-geral">Visão geral</Tabs.Trigger>
             <Tabs.Trigger value="categorias">Categorias · {categorias.length}</Tabs.Trigger>
-            <Tabs.Trigger value="sincronizacao">Sincronização · {pastasSync.length}</Tabs.Trigger>
+            {syncDisponivel && (
+              <Tabs.Trigger value="sincronizacao">Sincronização · {pastasSync.length}</Tabs.Trigger>
+            )}
             <Tabs.Trigger value="erros">
               Erros
               {totalErros > 0 && (
@@ -185,7 +200,7 @@ const DashboardView = memo(function DashboardView() {
             <TabelaCategorias categorias={categorias} carregando={carregandoCategorias} />
           )}
 
-          {abaAtiva === 'sincronizacao' && <PainelSync />}
+          {abaAtiva === 'sincronizacao' && syncDisponivel && <PainelSync />}
 
           {abaAtiva === 'erros' && <FilaErros />}
         </Suspense>

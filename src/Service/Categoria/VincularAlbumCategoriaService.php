@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Categoria;
 
+use App\Entity\Usuario;
 use App\DataObject\VincularAlbumDTO;
 use App\Entity\Categoria;
 use App\Exception\Categoria\CategoriaException;
@@ -21,14 +22,14 @@ final readonly class VincularAlbumCategoriaService
         private GoogleFotosAlbumService $albumService,
     ) {}
 
-    public function executar(string|Uuid $categoriaUuid, VincularAlbumDTO $dto): Categoria
+    public function executar(string|Uuid $categoriaUuid, VincularAlbumDTO $dto, Usuario $usuario): Categoria
     {
-        $categoria = $this->categoriaRepository->buscarPorUuid($categoriaUuid);
+        $categoria = $this->categoriaRepository->buscarDoUsuario($categoriaUuid, $usuario);
         if (null === $categoria) {
             throw CategoriaException::categoriaNaoEncontrada();
         }
 
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($usuario);
         if (null === $conta) {
             throw GoogleFotosAPIException::contaNaoEncontrada();
         }

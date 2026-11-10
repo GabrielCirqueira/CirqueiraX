@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\GoogleFotos;
 
+use App\Entity\Usuario;
 use App\Entity\RegistroEnvioGoogleFotos;
 use App\Exception\GoogleFotos\RegistroEnvioGoogleFotosException;
 use App\Exception\MediaItem\MediaItemException;
@@ -20,9 +21,9 @@ final readonly class ReenviarGoogleFotosService
         private MessageBusInterface $messageBus,
     ) {}
 
-    public function reenviar(string $registroUuid): RegistroEnvioGoogleFotos
+    public function reenviar(string $registroUuid, Usuario $usuario): RegistroEnvioGoogleFotos
     {
-        $registro = $this->registroRepository->buscarPorUuid($registroUuid);
+        $registro = $this->registroRepository->buscarDoUsuario($registroUuid, $usuario);
         if (null === $registro) {
             throw RegistroEnvioGoogleFotosException::registroNaoEncontrado();
         }

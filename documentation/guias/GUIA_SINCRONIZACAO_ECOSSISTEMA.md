@@ -334,7 +334,7 @@ Execute este checklist prático para ter 100% de certeza de que o ecossistema es
 * **Causa**: O `AGENT_TOKEN` no arquivo `agente/.env` não bate com o token cadastrado no servidor.
 * **Solução**: Verifique o valor de `AGENT_TOKEN` no `.env` da VPS ou gere um novo token via terminal do servidor:
   ```bash
-  docker exec -it cirqueirax_symfony_prod php bin/console app:gerar-token-agente "PC-Principal" "print_pessoal"
+  docker exec -it cirqueirax_symfony_prod php bin/console app:agente:gerar-token "PC-Principal" "print_pessoal" --usuario=<email ou username>
   ```
   Atualize o `agente/.env` do computador pessoal com o token gerado.
 

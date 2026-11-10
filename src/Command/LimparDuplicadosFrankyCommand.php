@@ -9,6 +9,7 @@ use App\Enum\StatusMediaItem;
 use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Repository\ContaGoogleFotosRepository;
 use App\Repository\MediaItemRepository;
+use App\Repository\UsuarioRepository;
 use App\Service\GoogleFotos\GoogleFotosOAuthService;
 use App\Support\MetadataKeys;
 use App\Support\TextoUtil;
@@ -32,6 +33,7 @@ final class LimparDuplicadosFrankyCommand extends Command
         private readonly GoogleFotosOAuthService $oAuthService,
         private readonly GoogleFotosAPI $googleFotosApi,
         private readonly EntityManagerInterface $entityManager,
+        private readonly UsuarioRepository $usuarioRepository,
     ) {
         parent::__construct();
     }
@@ -40,13 +42,23 @@ final class LimparDuplicadosFrankyCommand extends Command
     {
         $this
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Apenas simula sem remover')
-            ->addOption('desde', null, InputOption::VALUE_REQUIRED, 'Data/hora mínima de atualização (padrão: 2026-10-12 23:00:00)', '2026-10-12 23:00:00');
+            ->addOption('desde', null, InputOption::VALUE_REQUIRED, 'Data/hora mínima de atualização (padrão: 2026-10-12 23:00:00)', '2026-10-12 23:00:00')
+            ->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'E-mail ou username do dono');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Limpeza de Duplicados da Franky no Google Fotos');
+
+        /** @var string $identificadorUsuario */
+        $identificadorUsuario = $input->getOption('usuario') ?? '';
+        $usuario = $this->usuarioRepository->buscarPorEmailOuUsername($identificadorUsuario);
+        if (null === $usuario) {
+            $io->error('Informe um usuário existente com --usuario=<email ou username>.');
+
+            return Command::FAILURE;
+        }
 
         $dryRun = (bool) $input->getOption('dry-run');
         $desde = (string) $input->getOption('desde');
@@ -63,10 +75,11 @@ final class LimparDuplicadosFrankyCommand extends Command
             WHERE JSON_EXTRACT(metadata, '$.franky_id') IS NOT NULL
               AND google_photos_media_id IS NOT NULL
               AND atualizado_em >= :desde
+              AND usuario_id = :usuarioId
         ";
 
         /** @var list<array<string, mixed>> $linhas */
-        $linhas = $conn->executeQuery($sql, ['desde' => $desde])->fetchAllAssociative();
+        $linhas = $conn->executeQuery($sql, ['desde' => $desde, 'usuarioId' => $usuario->getId()])->fetchAllAssociative();
 
         if (empty($linhas)) {
             $io->success('Nenhum item da Franky com upload recente no Google Fotos foi encontrado.');
@@ -87,7 +100,7 @@ final class LimparDuplicadosFrankyCommand extends Command
         }
 
         if (!$dryRun) {
-            $conta = $this->contaRepository->buscarContaAtiva();
+            $conta = $this->contaRepository->buscarDoUsuario($usuario);
             if (null !== $conta) {
                 try {
                     $token = $this->oAuthService->obterAccessTokenValido($conta);

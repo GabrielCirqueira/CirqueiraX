@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\GoogleFotos;
 
+use App\Entity\Usuario;
 use App\Exception\GoogleFotos\GoogleFotosAPIException;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaGoogleFotosRepository;
@@ -30,14 +31,14 @@ final readonly class ListarAlbunsGoogleFotosService
      *     resumo: array{totalAlbuns: int, totalVinculados: int, totalOrfaos: int, totalCategoriasSemAlbum: int}
      * }
      */
-    public function listar(): array
+    public function listar(Usuario $usuario): array
     {
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($usuario);
         if (null === $conta) {
             throw GoogleFotosAPIException::contaNaoEncontrada();
         }
 
-        $categorias = $this->categoriaRepository->listarTodas();
+        $categorias = $this->categoriaRepository->listarTodas($usuario);
         $categoriasPorAlbumId = [];
         $categoriasSemAlbum = [];
 

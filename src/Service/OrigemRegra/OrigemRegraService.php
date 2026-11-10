@@ -6,6 +6,7 @@ namespace App\Service\OrigemRegra;
 
 use App\DataObject\CriarOrigemRegraDTO;
 use App\Entity\OrigemRegra;
+use App\Entity\Usuario;
 use App\Exception\OrigemRegra\OrigemRegraException;
 use App\Repository\OrigemRegraRepository;
 use App\Service\Categoria\CategoriaService;
@@ -18,29 +19,29 @@ final readonly class OrigemRegraService
         private CategoriaService $categoriaService,
     ) {}
 
-    public function criar(CriarOrigemRegraDTO $dto): OrigemRegra
+    public function criar(CriarOrigemRegraDTO $dto, Usuario $usuario): OrigemRegra
     {
-        if ($this->origemRegraRepository->existeComOrigem($dto->origem())) {
+        if ($this->origemRegraRepository->existeComOrigem($usuario, $dto->origem())) {
             throw OrigemRegraException::regraDuplicada($dto->origem()->value);
         }
 
-        $categoria = $this->categoriaService->buscarPorUuid($dto->categoriaId());
+        $this->categoriaService->buscarDoUsuario($dto->categoriaId(), $usuario);
 
-        $origemRegra = OrigemRegra::fromDTO($dto);
+        $origemRegra = OrigemRegra::fromDTO($dto, $usuario);
         $this->origemRegraRepository->salvar($origemRegra);
 
         return $origemRegra;
     }
 
-    public function atualizar(string|Uuid $uuid, CriarOrigemRegraDTO $dto): OrigemRegra
+    public function atualizar(string|Uuid $uuid, CriarOrigemRegraDTO $dto, Usuario $usuario): OrigemRegra
     {
-        $origemRegra = $this->buscarPorUuid($uuid);
+        $origemRegra = $this->buscarDoUsuario($uuid, $usuario);
 
-        if ($origemRegra->origem()->value !== $dto->origem()->value && $this->origemRegraRepository->existeComOrigem($dto->origem(), $uuid)) {
+        if ($origemRegra->origem()->value !== $dto->origem()->value && $this->origemRegraRepository->existeComOrigem($usuario, $dto->origem(), $uuid)) {
             throw OrigemRegraException::regraDuplicada($dto->origem()->value);
         }
 
-        $categoria = $this->categoriaService->buscarPorUuid($dto->categoriaId());
+        $categoria = $this->categoriaService->buscarDoUsuario($dto->categoriaId(), $usuario);
 
         $origemRegra->setOrigem($dto->origem());
         $origemRegra->setCategoriaId($categoria->uuid()?->toString() ?? $dto->categoriaId());
@@ -53,14 +54,14 @@ final readonly class OrigemRegraService
     /**
      * @return list<OrigemRegra>
      */
-    public function listarTodas(): array
+    public function listarTodas(Usuario $usuario): array
     {
-        return $this->origemRegraRepository->listarTodas();
+        return $this->origemRegraRepository->listarTodas($usuario);
     }
 
-    public function buscarPorUuid(string|Uuid $uuid): OrigemRegra
+    public function buscarDoUsuario(string|Uuid $uuid, Usuario $usuario): OrigemRegra
     {
-        $origemRegra = $this->origemRegraRepository->buscarPorUuid($uuid);
+        $origemRegra = $this->origemRegraRepository->buscarDoUsuario($uuid, $usuario);
         if (null === $origemRegra) {
             throw OrigemRegraException::regraNaoEncontrada();
         }
@@ -68,9 +69,9 @@ final readonly class OrigemRegraService
         return $origemRegra;
     }
 
-    public function remover(string|Uuid $uuid): void
+    public function remover(string|Uuid $uuid, Usuario $usuario): void
     {
-        $origemRegra = $this->buscarPorUuid($uuid);
+        $origemRegra = $this->buscarDoUsuario($uuid, $usuario);
         $this->origemRegraRepository->remover($origemRegra);
     }
 }

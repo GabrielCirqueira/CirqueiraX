@@ -51,6 +51,11 @@ class UsuarioRepository extends ServiceEntityRepository implements PasswordUpgra
         return $this->findOneBy(['username' => $username]);
     }
 
+    public function buscarPorEmailOuUsername(string $identificador): ?Usuario
+    {
+        return $this->buscarPorEmail($identificador) ?? $this->buscarPorUsername($identificador);
+    }
+
     public function loadUserByIdentifier(string $identifier): ?UserInterface
     {
         return $this->createQueryBuilder('u')

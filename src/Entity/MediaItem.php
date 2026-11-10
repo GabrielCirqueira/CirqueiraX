@@ -17,8 +17,9 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: MediaItemRepository::class)]
 #[ORM\Table(name: 'media_item')]
-#[ORM\UniqueConstraint(name: 'UNIQ_MEDIA_ITEM_HASH', fields: ['hash'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_MEDIA_ITEM_USUARIO_HASH', fields: ['usuario', 'hash'])]
 #[ORM\Index(name: 'IDX_MEDIA_ITEM_DATA_EXIBICAO', fields: ['dataExibicao'])]
+#[ORM\Index(name: 'IDX_MEDIA_ITEM_USUARIO_DATA_EXIBICAO', fields: ['usuario', 'dataExibicao'])]
 class MediaItem
 {
     private const array CHAVES_METADATA_GOOGLE_FOTOS = [
@@ -32,7 +33,11 @@ class MediaItem
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private ?Uuid $uuid = null;
 
-    #[ORM\Column(type: 'string', length: 64, unique: true)]
+    #[ORM\ManyToOne(targetEntity: Usuario::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Usuario $usuario;
+
+    #[ORM\Column(type: 'string', length: 64)]
     private string $hash;
 
     #[ORM\Column(type: 'string', enumType: OrigemMedia::class)]
@@ -78,11 +83,13 @@ class MediaItem
     private \DateTimeImmutable $atualizadoEm;
 
     public function __construct(
+        Usuario $usuario,
         string $hash,
         OrigemMedia|string $origem,
         StatusMediaItem|string $status = StatusMediaItem::RECEBIDO,
     ) {
         $this->uuid = Uuid::v7();
+        $this->usuario = $usuario;
         $this->hash = $hash;
         $this->origem = is_string($origem) ? (OrigemMedia::tryFrom($origem) ?? OrigemMedia::MANUAL) : $origem;
         $this->status = is_string($status) ? (StatusMediaItem::tryFrom($status) ?? StatusMediaItem::RECEBIDO) : $status;
@@ -107,6 +114,7 @@ class MediaItem
     public static function fromIngestaoDTO(IngestarMediaDTO $dto, string $hash): self
     {
         $item = new self(
+            usuario: $dto->usuario(),
             hash: $hash,
             origem: $dto->origem(),
             status: StatusMediaItem::RECEBIDO,
@@ -122,9 +130,10 @@ class MediaItem
         return $item;
     }
 
-    public static function fromDTO(CriarMediaItemDTO $dto): self
+    public static function fromDTO(CriarMediaItemDTO $dto, Usuario $usuario): self
     {
         $item = new self(
+            usuario: $usuario,
             hash: $dto->hash(),
             origem: $dto->origem(),
             status: $dto->status(),
@@ -154,6 +163,16 @@ class MediaItem
         }
 
         return $item;
+    }
+
+    public function usuario(): Usuario
+    {
+        return $this->usuario;
+    }
+
+    public function pertenceA(Usuario $usuario): bool
+    {
+        return $this->usuario->getId() === $usuario->getId();
     }
 
     public function uuid(): ?Uuid

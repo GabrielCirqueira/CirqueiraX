@@ -29,7 +29,7 @@ final readonly class GoogleFotosAlbumService
             return $albumIdExistente;
         }
 
-        $conta = $this->contaRepository->buscarContaAtiva();
+        $conta = $this->contaRepository->buscarDoUsuario($categoria->usuario());
         if (null === $conta) {
             throw GoogleFotosAPIException::contaNaoEncontrada();
         }

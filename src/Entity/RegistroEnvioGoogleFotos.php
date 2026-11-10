@@ -26,6 +26,10 @@ class RegistroEnvioGoogleFotos
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
 
+    #[ORM\ManyToOne(targetEntity: Usuario::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private Usuario $usuario;
+
     #[ORM\Column(type: 'string', length: 36)]
     private string $mediaItemUuid;
 
@@ -86,6 +90,7 @@ class RegistroEnvioGoogleFotos
         int $tentativa,
     ) {
         $this->uuid = Uuid::v7();
+        $this->usuario = $mediaItem->usuario();
         $this->mediaItemUuid = $mediaItem->uuidTexto();
         $this->origemMidia = $mediaItem->origem();
         $this->dataMidia = $mediaItem->dataExibicao();
@@ -150,6 +155,11 @@ class RegistroEnvioGoogleFotos
         $this->duracaoMs = (int) round(
             ((float) $this->finalizadoEm->format('U.u') - (float) $this->iniciadoEm->format('U.u')) * self::MILISSEGUNDOS_POR_SEGUNDO
         );
+    }
+
+    public function usuario(): Usuario
+    {
+        return $this->usuario;
     }
 
     public function uuid(): Uuid

@@ -49,7 +49,7 @@ final readonly class DistribuirLocalService
 
         $baseStorage = $this->resolverBaseStorage();
 
-        $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoria->pastaLocal(), '/');
+        $diretorioDestino = rtrim($baseStorage, '/') . '/' . $categoria->diretorioRelativo();
         $this->armazenamentoClient->criarDiretorio($diretorioDestino);
 
         $nomeArquivo = basename((string) $caminhoOrigem);

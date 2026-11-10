@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import {
   atualizarMapeamentoCategoria,
   criarCategoria,
@@ -84,22 +85,35 @@ export function useFilaErros(pagina = 1, limite = 20) {
   })
 }
 
+const TENTATIVAS_SYNC = 3
+
+export function ehAcessoNegado(erro: unknown): boolean {
+  return axios.isAxiosError(erro) && erro.response?.status === 403
+}
+
+function tentarNovamenteSync(falhas: number, erro: unknown): boolean {
+  return !ehAcessoNegado(erro) && falhas < TENTATIVAS_SYNC
+}
+
 export function usePastasSync() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.syncPastas,
     queryFn: obterPastasSync,
     staleTime: 1000 * 45,
-    refetchInterval: 30_000,
+    retry: tentarNovamenteSync,
+    refetchInterval: (consulta) => (ehAcessoNegado(consulta.state.error) ? false : 30_000),
     refetchIntervalInBackground: false,
   })
 }
 
-export function useStatusSync() {
+export function useStatusSync(habilitado = true) {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.syncStatus,
     queryFn: obterStatusSync,
+    enabled: habilitado,
     staleTime: 1000 * 30,
-    refetchInterval: 20_000,
+    retry: tentarNovamenteSync,
+    refetchInterval: (consulta) => (ehAcessoNegado(consulta.state.error) ? false : 20_000),
     refetchIntervalInBackground: false,
   })
 }

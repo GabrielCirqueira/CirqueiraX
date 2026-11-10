@@ -8,6 +8,7 @@ use App\Entity\ContaGoogleFotos;
 use App\Infra\GoogleOAuth\GoogleOAuthAPI;
 use App\Interface\CriptografiaInterface;
 use App\Repository\ContaGoogleFotosRepository;
+use App\Repository\UsuarioRepository;
 use DateTimeImmutable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -30,6 +31,7 @@ final class AutorizarContaGoogleFotosCommand extends Command
         private readonly GoogleOAuthAPI $googleOAuthApi,
         private readonly CriptografiaInterface $criptografia,
         private readonly ContaGoogleFotosRepository $contaRepository,
+        private readonly UsuarioRepository $usuarioRepository,
     ) {
         parent::__construct();
     }
@@ -40,13 +42,23 @@ final class AutorizarContaGoogleFotosCommand extends Command
             ->addArgument('email', InputArgument::OPTIONAL, 'E-mail da conta Google Fotos (opcional, será obtido no OAuth se omitido)')
             ->addOption('client-id', null, InputOption::VALUE_REQUIRED, 'Google OAuth Client ID')
             ->addOption('client-secret', null, InputOption::VALUE_REQUIRED, 'Google OAuth Client Secret')
-            ->addOption('redirect-uri', null, InputOption::VALUE_REQUIRED, 'Google OAuth Redirect URI', 'http://localhost');
+            ->addOption('redirect-uri', null, InputOption::VALUE_REQUIRED, 'Google OAuth Redirect URI', 'http://localhost')
+            ->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'E-mail ou username do dono');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
         $io->title('Autorização OAuth — Google Fotos');
+
+        /** @var string $identificadorUsuario */
+        $identificadorUsuario = $input->getOption('usuario') ?? '';
+        $usuario = $this->usuarioRepository->buscarPorEmailOuUsername($identificadorUsuario);
+        if (null === $usuario) {
+            $io->error('Informe um usuário existente com --usuario=<email ou username>.');
+
+            return Command::FAILURE;
+        }
 
         /** @var string|null $clientId */
         $clientId = $input->getOption('client-id') ?? $_ENV['GOOGLE_CLIENT_ID'] ?? getenv('GOOGLE_CLIENT_ID') ?: null;
@@ -149,11 +161,12 @@ final class AutorizarContaGoogleFotosCommand extends Command
             $expiraEm = (new DateTimeImmutable())->modify(sprintf('+%d seconds', $expiresIn));
             $refreshTokenCriptografado = $this->criptografia->criptografar($refreshToken);
 
-            $conta = $this->contaRepository->buscarPorEmail($email);
+            $conta = $this->contaRepository->buscarDoUsuario($usuario);
             if (null === $conta) {
-                $conta = new ContaGoogleFotos($email, $refreshTokenCriptografado);
+                $conta = new ContaGoogleFotos($usuario, $email, $refreshTokenCriptografado);
             } else {
                 $conta->setRefreshTokenCriptografado($refreshTokenCriptografado);
+                $conta->setEmail($email);
             }
 
             $conta->setAccessTokenCache($accessToken, $expiraEm);

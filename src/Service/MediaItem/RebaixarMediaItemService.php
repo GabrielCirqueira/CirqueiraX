@@ -156,7 +156,7 @@ final readonly class RebaixarMediaItemService
         if (TextoUtil::naoEstaEmBranco($categoriaId)) {
             $categoria = $this->categoriaRepository->buscarPorUuid((string) $categoriaId);
             if (null !== $categoria && TextoUtil::naoEstaEmBranco($categoria->pastaLocal())) {
-                $diretorioDestino = rtrim($baseStorage, '/') . '/' . trim($categoria->pastaLocal(), '/');
+                $diretorioDestino = rtrim($baseStorage, '/') . '/' . $categoria->diretorioRelativo();
             }
         }
 
