@@ -279,8 +279,26 @@
   - `migrations/Version20261111151907.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 194 — Infra — identificador de músicas por IA com resposta estruturada e registro de custo
-- **Status**: Pendente
+### ✅ Tópico 194 — Infra — identificador de músicas por IA com resposta estruturada e registro de custo
+- **Status**: Concluído
+- **O que foi feito**:
+  - `IdentificadorMusicaInterface` (`TAMANHO_LOTE_IDENTIFICACAO = 10`) e `OpenAiIdentificadorMusicaClient` com saída estruturada por esquema JSON estrito, tempo limite de 30 s, 2 tentativas com espera crescente e `Retry-After` no 429.
+  - DTOs `EntradaIdentificacaoDTO` (descrição cortada em 500 caracteres), `ComponenteIdentificadoDTO`, `ResultadoIdentificacaoDTO` (validado com o Validator do Symfony) e `ResultadoLoteIdentificacaoDTO` (resultados por id, modelo e tokens). Enum `TipoIdentificacaoMusica`.
+  - `IdentificacaoException` com `respostaInvalida()` (carrega modelo e tokens para o custo), `servicoIndisponivel()`, `chaveAusente()`, `limiteDeRequisicoes()` e `pedidoRecusado()`.
+  - Instruções do modelo em `InstrucoesIdentificacaoMusica`.
+  - Custo: entidade `ConsumoIa` (`consumo_ia`), enum `FinalidadeConsumoIa`, `ConsumoIaRepository` (soma por usuário e finalidade) e `RegistrarConsumoIaService` com preços por milhão de tokens vindos do `services.yaml` (`OPENAI_PRECO_ENTRADA_POR_MILHAO`, `OPENAI_PRECO_SAIDA_POR_MILHAO`). Migration `Version20261111164509` gerada pelo diff e validada.
+  - Comparação de esforço com 14 títulos reais: `low` acertou todos e marcou "Renegade" como ambíguo; `none` custa metade mas inventou o artista com confiança 92; `minimal` é recusado pelo modelo. Escolha `low` (`OPENAI_ESFORCO_IDENTIFICACAO`), registrada em `MUSICA.md`.
+  - Casos de erro conferidos com respostas simuladas: item faltando, confiança fora da faixa, tipo inválido, JSON quebrado, 429 repetido, 500 seguido de sucesso e 400.
+- **Diferença do roadmap**: sem testes automatizados (regra do projeto). A comparação foi com 14 títulos, não 100, porque ainda não há histórico coletado nem Takeout; repetir com 100 no tópico 205. Não houve base comum extraída com o `OpenAiCorretorTextoClient` (os dois só compartilham a URL e a autenticação), e a correção de transcrição (M129) ainda não grava consumo, porque o cliente dela não devolve os tokens.
+- **Arquivos**:
+  - `src/Interface/IdentificadorMusicaInterface.php`, `src/Infra/OpenAi/OpenAiIdentificadorMusicaClient.php`, `src/Infra/OpenAi/InstrucoesIdentificacaoMusica.php`
+  - `src/DataObject/IdentificacaoMusica/EntradaIdentificacaoDTO.php`, `ComponenteIdentificadoDTO.php`, `ResultadoIdentificacaoDTO.php`, `ResultadoLoteIdentificacaoDTO.php`
+  - `src/Exception/IdentificacaoMusica/IdentificacaoException.php`
+  - `src/Enum/TipoIdentificacaoMusica.php`, `src/Enum/FinalidadeConsumoIa.php`
+  - `src/Entity/ConsumoIa.php`, `src/Repository/ConsumoIaRepository.php`, `src/Service/Ia/RegistrarConsumoIaService.php`
+  - `config/services.yaml`, `.tooling/env/.env.example`, `.tooling/env/.env.prod.example`
+  - `migrations/Version20261111164509.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 195 — Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão
 - **Status**: Pendente

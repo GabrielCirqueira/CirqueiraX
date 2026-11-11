@@ -129,6 +129,26 @@ As políticas para desenvolvedores (seção III.E.4) dizem que dados obtidos sem
 
 Decisão: o catálogo é reatualizado. A cada hora, `AtualizarDetalhesVideosYoutubeMessage` pega até 500 vídeos com `detalhesAtualizadosEm` vazio ou com mais de 30 dias e consulta de novo (10 unidades por rodada). As reproduções e a identificação feita pelo sistema são dados do próprio usuário e não dependem dessa regra.
 
+## Identificação por IA (tópico 194)
+
+- `IdentificadorMusicaInterface` / `OpenAiIdentificadorMusicaClient` (`src/Infra/OpenAi/`). Recebe lotes de até 10 vídeos (`TAMANHO_LOTE_IDENTIFICACAO`) com id, título, canal, duração, categoria e no máximo 500 caracteres da descrição. Nada além disso sai do sistema.
+- A resposta usa **saída estruturada** (esquema JSON estrito): `id`, `tipo` (`musica`, `mashup`, `compilacao`, `nao_musica`), `confianca` (0–100), `versao` (valores de `TipoVersaoMusica`), `componentes` (`titulo` + `artistas`), `ambiguo` e até 2 `alternativas`. Cada item é validado com o Validator do Symfony em `ResultadoIdentificacaoDTO`; JSON quebrado, item faltando ou valor fora do esperado gera `IdentificacaoException::respostaInvalida()` (o serviço do tópico 195 manda esses vídeos para `revisar`), que leva junto os tokens gastos para o custo ser registrado mesmo assim.
+- As instruções ficam em `InstrucoesIdentificacaoMusica`: remover rótulos, remix/cover/instrumental como versões da mesma música, colaboração ≠ mashup, as duas ordens de "Artista - Título", letras espaçadas e títulos em português, não usar o canal como artista e não inventar.
+- Tempo limite de 30 s, 2 tentativas com espera crescente (respeitando `Retry-After` no 429). Pedido recusado (4xx) não é repetido.
+- **Custo:** cada chamada vira uma linha em `consumo_ia` (finalidade, modelo, tokens de entrada e saída, custo em microdólares, usuário), gravada por `RegistrarConsumoIaService`. Os preços por milhão de tokens vêm de `OPENAI_PRECO_ENTRADA_POR_MILHAO` e `OPENAI_PRECO_SAIDA_POR_MILHAO` (padrão 0,75 e 4,50 dólares, valores de agregadores, **a confirmar** na página de preços da OpenAI).
+
+### Esforço de raciocínio
+
+Comparação com os 14 títulos reais disponíveis (os 9 do teste anterior e 5 do coletor de teste), em lotes de 10, com o `gpt-5.4-mini`:
+
+| Esforço | Tokens entrada / saída | Tempo | Custo por vídeo | Resultado |
+|---|---|---|---|---|
+| `low` | 2.323 / 2.272 | 18 s | US$ 0,00086 | Todos corretos. "Renegade" com confiança 46 e marcado como ambíguo. |
+| `none` | 2.323 / 893 | 7 s | US$ 0,00041 | Mesmos títulos, mas inventou "Renegade (Ariana Grande)" com confiança 92. |
+| `minimal` | — | — | — | Recusado pelo modelo (só existe nos modelos mais antigos). |
+
+Decisão: `low` como padrão (`OPENAI_ESFORCO_IDENTIFICACAO`). Custa o dobro, mas o ponto fraco do teste era justamente a confiança alta em título ambíguo, e só o `low` acertou isso. Em 10.000 vídeos do Takeout, o `low` sai por volta de US$ 8,60. A comparação com 100 títulos fica para o tópico 205, quando houver histórico coletado e Takeout importado.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.
@@ -137,7 +157,8 @@ Decisão: o catálogo é reatualizado. A cada hora, `AtualizarDetalhesVideosYout
 4. **Atraso do histórico:** dar play em 5 músicas novas anotando o horário de cada play, para comparar com a hora em que o coletor viu cada uma. Mediana: _pendente_. Máximo: _pendente_. Precisa de um cookie válido no coletor de teste.
 5. **Credenciais do teste OAuth:** apagar o cliente OAuth do teste no Google Cloud e revogar o acesso em myaccount.google.com → Segurança → Apps de terceiros. As variáveis `YTMUSIC_CLIENT_ID` e `YTMUSIC_CLIENT_SECRET` já foram removidas do `.env` do servidor.
 6. **Chave da YouTube Data API:** no Google Cloud, num projeto separado do cliente OAuth do teste, ativar a YouTube Data API v3, criar uma chave de API restrita só a essa API e colocar em `YOUTUBE_API_KEY` no `.env` do servidor. Sem ela, os detalhes dos vídeos não são buscados.
-7. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
+7. **Preço da OpenAI:** conferir na página de preços o valor por milhão de tokens do modelo em `OPENAI_MODELO_TEXTO` e ajustar `OPENAI_PRECO_ENTRADA_POR_MILHAO` e `OPENAI_PRECO_SAIDA_POR_MILHAO` se for diferente de 0,75 e 4,50.
+8. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
 
 ## Limpeza do teste
 
