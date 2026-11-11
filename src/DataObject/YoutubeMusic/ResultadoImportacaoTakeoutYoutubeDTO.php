@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DataObject\YoutubeMusic;
 
+use DateTimeImmutable;
+
 final readonly class ResultadoImportacaoTakeoutYoutubeDTO
 {
     public function __construct(
@@ -13,6 +15,8 @@ final readonly class ResultadoImportacaoTakeoutYoutubeDTO
         public int $totalIgnorados,
         public int $totalUnificados,
         public int $totalVideosNovos,
+        public ?DateTimeImmutable $primeiraReproducaoEm,
+        public ?DateTimeImmutable $ultimaReproducaoEm,
     ) {
     }
 }

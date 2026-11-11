@@ -39,6 +39,16 @@ final class ImportacaoYoutubeException extends DomainException
         return new self('Importação não encontrada.', self::CODIGO_NAO_ENCONTRADA);
     }
 
+    public static function semConfirmacaoPendente(): self
+    {
+        return new self('Esta importação não está aguardando confirmação.', self::CODIGO_CONFLITO);
+    }
+
+    public static function leituraNaoRetomavel(): self
+    {
+        return new self('A importação falhou na leitura e o arquivo já foi apagado. Envie o arquivo de novo.', self::CODIGO_CONFLITO);
+    }
+
     public static function falhaAoArmazenar(): self
     {
         return new self('Não foi possível guardar o arquivo enviado.', self::CODIGO_ERRO_INTERNO);

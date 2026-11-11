@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service\YoutubeMusic\Importacao;
 
-use App\Interface\ArmazenamentoImportacaoYoutubeInterface;
+use App\Entity\ImportacaoYoutube;
+use App\Enum\EtapaImportacaoYoutube;
+use App\Enum\ResultadoEtapaImportacaoYoutube;
 use App\Repository\ImportacaoYoutubeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,40 +16,44 @@ final readonly class ProcessarImportacaoYoutubeService
 {
     public function __construct(
         private ImportacaoYoutubeRepository $importacaoRepository,
-        private ImportarHistoricoTakeoutYoutubeService $importarService,
-        private ArmazenamentoImportacaoYoutubeInterface $armazenamento,
+        private LerArquivoImportacaoYoutubeService $lerArquivo,
+        private EnriquecerVideosImportacaoYoutubeService $enriquecer,
+        private FiltrarVideosImportacaoYoutubeService $filtrar,
+        private CalcularPreviaImportacaoYoutubeService $calcularPrevia,
+        private ClassificarVideosImportacaoYoutubeService $classificar,
+        private CalcularTempoOuvidoImportacaoYoutubeService $calcularTempoOuvido,
         private ManagerRegistry $managerRegistry,
     ) {
     }
 
-    public function executar(string $importacaoUuid): void
+    public function executar(string $importacaoUuid): ResultadoEtapaImportacaoYoutube
     {
+        $this->importacaoRepository->limparCache();
         $importacao = $this->importacaoRepository->buscarPorUuid($importacaoUuid);
-        if (null === $importacao || $importacao->isFinalizada()) {
-            return;
+        if (null === $importacao || $importacao->isFinalizada() || $importacao->isAguardandoConfirmacao()) {
+            return ResultadoEtapaImportacaoYoutube::Parar;
         }
-
-        $caminhoArquivo = $importacao->caminhoArquivo();
-        $importacao->iniciarProcessamento();
-        $this->importacaoRepository->salvar($importacao);
 
         try {
-            $resultado = $this->importarService->executar($caminhoArquivo, $importacao->usuario());
-            $atualizada = $this->importacaoRepository->buscarPorUuid($importacaoUuid) ?? $importacao;
-            $atualizada->registrarLeitura(
-                totalLidos: $resultado->totalLidos,
-                totalDescartados: $resultado->totalDescartados,
-                totalNovos: $resultado->totalNovos,
-                totalIgnorados: $resultado->totalIgnorados,
-                totalUnificados: $resultado->totalUnificados,
-                totalVideosNovos: $resultado->totalVideosNovos,
-            )->concluir();
-            $this->importacaoRepository->salvar($atualizada);
+            return $this->executarEtapa($importacao);
         } catch (Throwable $erro) {
             $this->registrarFalha($importacaoUuid, $erro->getMessage());
-        } finally {
-            $this->armazenamento->removerArquivo($caminhoArquivo);
+
+            return ResultadoEtapaImportacaoYoutube::Parar;
         }
+    }
+
+    private function executarEtapa(ImportacaoYoutube $importacao): ResultadoEtapaImportacaoYoutube
+    {
+        return match ($importacao->etapa()) {
+            EtapaImportacaoYoutube::Leitura => $this->lerArquivo->executar($importacao),
+            EtapaImportacaoYoutube::Enriquecimento => $this->enriquecer->executar($importacao),
+            EtapaImportacaoYoutube::Filtro => $this->filtrar->executar($importacao),
+            EtapaImportacaoYoutube::Previa => $this->calcularPrevia->executar($importacao),
+            EtapaImportacaoYoutube::Classificacao => $this->classificar->executar($importacao),
+            EtapaImportacaoYoutube::TempoOuvido => $this->calcularTempoOuvido->executar($importacao),
+            EtapaImportacaoYoutube::Concluida => ResultadoEtapaImportacaoYoutube::Parar,
+        };
     }
 
     private function registrarFalha(string $importacaoUuid, string $motivo): void

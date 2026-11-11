@@ -35,11 +35,15 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
     {
         $contadores = ['lidos' => 0, 'novos' => 0, 'ignorados' => 0, 'unificados' => 0, 'videosNovos' => 0];
         $lote = [];
+        $primeira = null;
+        $ultima = null;
         $leitura = $this->leitor->ler($caminhoArquivo);
 
         foreach ($leitura as $item) {
             ++$contadores['lidos'];
             $lote[] = $item;
+            $primeira = null === $primeira || $item->tocadaEm < $primeira ? $item->tocadaEm : $primeira;
+            $ultima = null === $ultima || $item->tocadaEm > $ultima ? $item->tocadaEm : $ultima;
 
             if (count($lote) < self::TAMANHO_LOTE) {
                 continue;
@@ -61,6 +65,8 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
             totalIgnorados: $contadores['ignorados'],
             totalUnificados: $contadores['unificados'],
             totalVideosNovos: $contadores['videosNovos'],
+            primeiraReproducaoEm: $primeira,
+            ultimaReproducaoEm: $ultima,
         );
     }
 

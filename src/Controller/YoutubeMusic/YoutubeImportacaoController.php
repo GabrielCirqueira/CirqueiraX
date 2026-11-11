@@ -8,6 +8,7 @@ use App\Controller\Common\DefaultController;
 use App\DataObject\YoutubeMusic\UploadImportacaoYoutubeDTO;
 use App\Entity\Usuario;
 use App\Serializer\ImportacaoYoutubeSerializer;
+use App\Service\YoutubeMusic\Importacao\ConfirmarImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\ConsultarImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\IniciarImportacaoYoutubeService;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,7 @@ final class YoutubeImportacaoController extends DefaultController
     public function __construct(
         private readonly IniciarImportacaoYoutubeService $iniciarService,
         private readonly ConsultarImportacaoYoutubeService $consultarService,
+        private readonly ConfirmarImportacaoYoutubeService $confirmarService,
         private readonly ImportacaoYoutubeSerializer $serializer,
     ) {
     }
@@ -37,5 +39,11 @@ final class YoutubeImportacaoController extends DefaultController
     public function consultar(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
         return $this->success($this->serializer->serializar($this->consultarService->executar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/confirmar', name: 'confirmar', methods: ['POST'])]
+    public function confirmar(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->serializer->serializar($this->confirmarService->executar($uuid, $usuario)));
     }
 }

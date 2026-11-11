@@ -4,20 +4,33 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+use App\Enum\ResultadoEtapaImportacaoYoutube;
 use App\Message\ImportarHistoricoYoutubeMessage;
 use App\Service\YoutubeMusic\Importacao\ProcessarImportacaoYoutubeService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 #[AsMessageHandler]
 final readonly class ImportarHistoricoYoutubeMessageHandler
 {
+    private const int ESPERA_PARA_TENTAR_DE_NOVO_MS = 3600000;
+
     public function __construct(
         private ProcessarImportacaoYoutubeService $processarService,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
     public function __invoke(ImportarHistoricoYoutubeMessage $message): void
     {
-        $this->processarService->executar($message->importacaoUuid);
+        $resultado = $this->processarService->executar($message->importacaoUuid);
+
+        if (ResultadoEtapaImportacaoYoutube::Parar === $resultado) {
+            return;
+        }
+
+        $carimbos = ResultadoEtapaImportacaoYoutube::Aguardar === $resultado ? [new DelayStamp(self::ESPERA_PARA_TENTAR_DE_NOVO_MS)] : [];
+        $this->messageBus->dispatch(new ImportarHistoricoYoutubeMessage($message->importacaoUuid), $carimbos);
     }
 }

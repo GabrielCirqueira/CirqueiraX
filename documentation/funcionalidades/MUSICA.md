@@ -225,6 +225,19 @@ Toda correção marca a música como `confirmadaManualmente` (ou o vídeo com or
 - **Arquivo temporário:** em `var/tmp/youtube_importacoes`, pelo `ArmazenamentoImportacaoYoutubeInterface`, apagado no fim do processamento com sucesso ou erro. Em erro, o EntityManager é reaberto para gravar o motivo.
 - O leitor de JSON em streaming saiu do leitor do Spotify para `LeitorStreamObjetosJson` e é usado pelos dois.
 
+## Importação do Takeout — etapas até o relatório (tópico 198)
+
+Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), uma por mensagem da fila `youtube_importacao`. Cada etapa devolve `continuar` (a mensagem é reenviada na hora), `aguardar` (reenviada em 1 hora) ou `parar`. Todas são idempotentes e trabalham sobre os vídeos com `aguardandoImportacao`.
+
+1. **Enriquecimento:** até 1000 vídeos por rodada pela YouTube Data API (lotes de 50, respeitando o orçamento diário). Os que não voltam viram `indisponivel`. Sem cota ou sem chave, a etapa espera 1 hora.
+2. **Filtro sem IA:** regra de canal, categorias de `CATEGORIAS_NAO_MUSICA_DIRETAS` (20, 25, 26, 27, 28) e duração acima de `DURACAO_MAXIMA_SEM_CATEGORIA_MUSICA_MS` (20 min) fora da categoria Música viram `nao_musica` (origem `regra`). Entretenimento (24) e Pessoas e Blogs (22) seguem para a IA. Os resolvidos saem da reserva.
+3. **Prévia:** conta os pendentes, separa as faixas oficiais ("- Topic", classificadas sem IA) e estima o custo com `TOKENS_ENTRADA_ESTIMADOS_POR_VIDEO = 300` e `TOKENS_SAIDA_ESTIMADOS_POR_VIDEO = 170` (medição do tópico 194 com folga para a descrição) e os preços do tópico 194. Até `LIMITE_CUSTO_AUTOMATICO_MICRODOLARES` (US$ 2) segue sozinha; acima, fica em `aguardando_confirmacao` até `POST /api/v1/youtube-music/importacoes/{uuid}/confirmar`.
+4. **Classificação:** 100 vídeos por rodada pelo `IdentificarVideosYoutubeService`. Os classificados saem da reserva; tokens e custo reais vêm do `consumo_ia` desde o início da classificação. Rodada sem nenhum classificado (falha da IA) espera 1 hora.
+5. **Tempo ouvido:** 6 meses por rodada, com cursor gravado. Ordena todas as reproduções do usuário no mês (de qualquer fonte e de vídeos que não são música) e estima as do Takeout com `EstimarTempoReproduzidoYoutubeService`: o menor entre o intervalo até o próximo vídeo e a duração. Sem duração, 0; a última de todas fica com a duração.
+6. **Relatório:** ao concluir, libera qualquer vídeo que ainda estivesse reservado (o identificador de cada minuto assume) e grava o relatório: reproduções lidas, vídeos únicos, músicas, mashups, compilações, não música, a revisar, indisponíveis, pendentes, meses com dados e tokens e custo estimados contra reais.
+
+`app:youtube:continuar-importacao {uuid}` roda as etapas no terminal até terminar ou precisar esperar; se a importação estiver em erro depois da leitura, retoma da etapa onde parou.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.

@@ -13,6 +13,7 @@ use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use PDO;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -257,5 +258,119 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
         usort($videos, static fn (VideoYoutube $a, VideoYoutube $b): int => $ordem[$a->uuid()->toRfc4122()] <=> $ordem[$b->uuid()->toRfc4122()]);
 
         return $videos;
+    }
+
+    /**
+     * @return list<VideoYoutube>
+     */
+    public function listarReservadosSemDetalhes(Usuario $usuario, int $limite): array
+    {
+        /** @var list<VideoYoutube> $videos */
+        $videos = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.aguardandoImportacao = true')
+            ->andWhere('e.status = :status')
+            ->andWhere('e.detalhesAtualizadosEm IS NULL')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', StatusClassificacaoVideo::Pendente)
+            ->orderBy('e.uuid', 'ASC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $videos;
+    }
+
+    /**
+     * @return list<VideoYoutube>
+     */
+    public function listarReservadosPendentes(Usuario $usuario, ?Uuid $depoisDe, int $limite): array
+    {
+        $consulta = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.aguardandoImportacao = true')
+            ->andWhere('e.status = :status')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', StatusClassificacaoVideo::Pendente)
+            ->orderBy('e.uuid', 'ASC')
+            ->setMaxResults($limite);
+
+        if (null !== $depoisDe) {
+            $consulta->andWhere('e.uuid > :depoisDe')->setParameter('depoisDe', $depoisDe, UuidType::NAME);
+        }
+
+        /** @var list<VideoYoutube> $videos */
+        $videos = $consulta->getQuery()->getResult();
+
+        return $videos;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function contarReservadosPorStatus(Usuario $usuario): array
+    {
+        /** @var list<array{status: StatusClassificacaoVideo, total: int|string}> $linhas */
+        $linhas = $this->createQueryBuilder('e')
+            ->select('e.status AS status, COUNT(e.uuid) AS total')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.aguardandoImportacao = true')
+            ->setParameter('usuario', $usuario)
+            ->groupBy('e.status')
+            ->getQuery()
+            ->getResult();
+
+        $totais = [];
+        foreach ($linhas as $linha) {
+            $totais[$linha['status']->value] = (int) $linha['total'];
+        }
+
+        return $totais;
+    }
+
+    public function contarReservadosPendentesFaixaOficial(Usuario $usuario, string $sufixoCanal): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->select('COUNT(e.uuid)')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.aguardandoImportacao = true')
+            ->andWhere('e.status = :status')
+            ->andWhere('e.canal LIKE :sufixo')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', StatusClassificacaoVideo::Pendente)
+            ->setParameter('sufixo', '%'.$sufixoCanal)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function liberarReservadosResolvidos(Usuario $usuario): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->update()
+            ->set('e.aguardandoImportacao', 'false')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.aguardandoImportacao = true')
+            ->andWhere('e.status != :status')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', StatusClassificacaoVideo::Pendente)
+            ->getQuery()
+            ->execute();
+    }
+
+    public function liberarTodosReservados(Usuario $usuario): int
+    {
+        return (int) $this->createQueryBuilder('e')
+            ->update()
+            ->set('e.aguardandoImportacao', 'false')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.aguardandoImportacao = true')
+            ->setParameter('usuario', $usuario)
+            ->getQuery()
+            ->execute();
+    }
+
+    public function limparCache(): void
+    {
+        $this->getEntityManager()->clear();
     }
 }

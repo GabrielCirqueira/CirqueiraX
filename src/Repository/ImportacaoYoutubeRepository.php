@@ -62,4 +62,9 @@ final class ImportacaoYoutubeRepository extends ServiceEntityRepository
 
         return $importacao;
     }
+
+    public function limparCache(): void
+    {
+        $this->getEntityManager()->clear();
+    }
 }

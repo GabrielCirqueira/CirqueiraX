@@ -373,8 +373,27 @@
   - `migrations/Version20261111175012.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 198 — Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido
-- **Status**: Pendente
+### ✅ Tópico 198 — Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido
+- **Status**: Concluído
+- **O que foi feito**:
+  - Enums `EtapaImportacaoYoutube` e `ResultadoEtapaImportacaoYoutube`. `ImportacaoYoutube` ganhou etapa, período coberto, números do filtro e da prévia, tokens e custo estimados e reais, datas de classificação e confirmação, cursor do tempo ouvido e relatório. Migration `Version20261111180215`.
+  - `ProcessarImportacaoYoutubeService` virou o orquestrador das etapas; o handler reenvia a mensagem na hora (`continuar`) ou com atraso de 1 hora (`aguardar`).
+  - Etapas: `LerArquivoImportacaoYoutubeService`, `EnriquecerVideosImportacaoYoutubeService`, `FiltrarVideosImportacaoYoutubeService` (`CATEGORIAS_NAO_MUSICA_DIRETAS`, `DURACAO_MAXIMA_SEM_CATEGORIA_MUSICA_MS`, regra de canal), `CalcularPreviaImportacaoYoutubeService` (`LIMITE_CUSTO_AUTOMATICO_MICRODOLARES`), `ClassificarVideosImportacaoYoutubeService`, `CalcularTempoOuvidoImportacaoYoutubeService` e `GerarRelatorioImportacaoYoutubeService`.
+  - `ConfirmarImportacaoYoutubeService` e `POST /api/v1/youtube-music/importacoes/{uuid}/confirmar`; `RetomarImportacaoYoutubeService` e comando `app:youtube:continuar-importacao {uuid}`.
+  - Repositórios: vídeos reservados (sem detalhes, pendentes por cursor, contagem por status, faixas oficiais, liberação), reproduções no intervalo, primeira a partir de um momento e resumo por status e meses.
+  - Serializer mostra leitura, prévia, classificação e relatório, com o período coberto em UTC.
+  - Conferido num MySQL temporário com o esquema de produção e um identificador falso (sem gastar IA): faixa oficial virou música por regra, categoria 20 e vídeo de 30 minutos viraram não música sem IA, o edit da categoria 24 foi para a IA, o vídeo apagado ficou indisponível, o tempo ouvido saiu limitado pelo próximo vídeo e pela duração (inclusive cruzando o mês), o relatório bateu e nenhum vídeo reservado apareceu para o identificador automático. Com 2.100 vídeos a prévia deu US$ 2,08, parou em `aguardando_confirmacao`, não andou sem confirmação, seguiu para a classificação depois de confirmar e a segunda confirmação respondeu 409.
+- **Diferença do roadmap**: a estimativa usa tokens fixos por vídeo (300 de entrada e 170 de saída), a ajustar com o Takeout real. O custo real soma o `consumo_ia` do usuário desde o início da classificação, então inclui a identificação da coleta que rodar no mesmo período. Sem testes automatizados (regra do projeto).
+- **A confirmar**: categorias e regra dos 20 minutos com a distribuição real do arquivo; o limite de US$ 2.
+- **Arquivos**:
+  - `src/Service/YoutubeMusic/Importacao/` (etapas, orquestrador, confirmação, retomada, relatório)
+  - `src/Enum/EtapaImportacaoYoutube.php`, `src/Enum/ResultadoEtapaImportacaoYoutube.php`
+  - `src/Entity/ImportacaoYoutube.php`, `src/Repository/ImportacaoYoutubeRepository.php`, `VideoYoutubeRepository.php`, `ReproducaoYoutubeRepository.php`
+  - `src/MessageHandler/ImportarHistoricoYoutubeMessageHandler.php`, `src/Command/ContinuarImportacaoYoutubeCommand.php`
+  - `src/Controller/YoutubeMusic/YoutubeImportacaoController.php`, `src/Serializer/ImportacaoYoutubeSerializer.php`
+  - `src/DataObject/YoutubeMusic/ResultadoImportacaoTakeoutYoutubeDTO.php`, `src/Exception/ImportacaoYoutube/ImportacaoYoutubeException.php`
+  - `migrations/Version20261111180215.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 199 — Leitura unificada — projeção das reproduções e paridade com os números do Spotify
 - **Status**: Pendente

@@ -16,6 +16,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class ReproducaoYoutubeRepository extends ServiceEntityRepository
 {
+    private const string FORMATO_MOMENTO_BANCO = 'Y-m-d H:i:s';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, ReproducaoYoutube::class);
@@ -131,5 +133,73 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
             ->setParameter('usuario', $usuario)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    /**
+     * @return list<ReproducaoYoutube>
+     */
+    public function listarNoIntervalo(Usuario $usuario, DateTimeImmutable $inicio, DateTimeImmutable $fim): array
+    {
+        /** @var list<ReproducaoYoutube> $reproducoes */
+        $reproducoes = $this->createQueryBuilder('e')
+            ->innerJoin('e.video', 'v')
+            ->addSelect('v')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.tocadaEm >= :inicio')
+            ->andWhere('e.tocadaEm < :fim')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('inicio', $inicio)
+            ->setParameter('fim', $fim)
+            ->orderBy('e.tocadaEm', 'ASC')
+            ->addOrderBy('e.uuid', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $reproducoes;
+    }
+
+    public function buscarPrimeiraAPartirDe(Usuario $usuario, DateTimeImmutable $momento): ?ReproducaoYoutube
+    {
+        /** @var ReproducaoYoutube|null $reproducao */
+        $reproducao = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.tocadaEm >= :momento')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('momento', $momento)
+            ->orderBy('e.tocadaEm', 'ASC')
+            ->addOrderBy('e.uuid', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $reproducao;
+    }
+
+    /**
+     * @return array{videosPorStatus: array<string, int>, videosUnicos: int, mesesComDados: int}
+     */
+    public function resumirDaFonteNoIntervalo(Usuario $usuario, FonteReproducaoYoutube $fonte, DateTimeImmutable $inicio, DateTimeImmutable $fim): array
+    {
+        $conexao = $this->getEntityManager()->getConnection();
+        $parametros = [
+            'usuarioId' => $usuario->getId(),
+            'fonte' => $fonte->value,
+            'inicio' => $inicio->format(self::FORMATO_MOMENTO_BANCO),
+            'fim' => $fim->format(self::FORMATO_MOMENTO_BANCO),
+        ];
+        $filtro = 'r.usuario_id = :usuarioId AND r.fonte = :fonte AND r.tocada_em BETWEEN :inicio AND :fim';
+
+        $porStatus = [];
+        $linhas = $conexao->fetchAllAssociative(
+            "SELECT v.status, COUNT(DISTINCT v.uuid) AS total FROM reproducao_youtube r INNER JOIN video_youtube v ON v.uuid = r.video_uuid WHERE {$filtro} GROUP BY v.status",
+            $parametros,
+        );
+        foreach ($linhas as $linha) {
+            $porStatus[(string) $linha['status']] = (int) $linha['total'];
+        }
+
+        $meses = (int) $conexao->fetchOne("SELECT COUNT(DISTINCT DATE_FORMAT(r.tocada_em, '%Y-%m')) FROM reproducao_youtube r WHERE {$filtro}", $parametros);
+
+        return ['videosPorStatus' => $porStatus, 'videosUnicos' => array_sum($porStatus), 'mesesComDados' => $meses];
     }
 }
