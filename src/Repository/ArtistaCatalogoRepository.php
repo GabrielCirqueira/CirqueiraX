@@ -66,4 +66,23 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
 
         return $artista;
     }
+
+    /**
+     * @return list<string>
+     */
+    public function listarUuidsSemFotoBuscada(Usuario $usuario): array
+    {
+        /** @var list<array{uuid: Uuid}> $linhas */
+        $linhas = $this->createQueryBuilder('a')
+            ->select('a.uuid')
+            ->andWhere('a.usuario = :usuario')
+            ->andWhere('a.unidoA IS NULL')
+            ->andWhere('a.urlFoto IS NULL')
+            ->andWhere('a.fotoBuscadaEm IS NULL')
+            ->setParameter('usuario', $usuario)
+            ->getQuery()
+            ->getArrayResult();
+
+        return array_map(static fn (array $linha): string => $linha['uuid']->toRfc4122(), $linhas);
+    }
 }

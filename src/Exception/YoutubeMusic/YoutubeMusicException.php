@@ -53,4 +53,9 @@ final class YoutubeMusicException extends DomainException
     {
         return self::CODIGO_CREDENCIAIS_INVALIDAS === $this->getCode();
     }
+
+    public function isServicoIndisponivel(): bool
+    {
+        return self::CODIGO_SERVICO_INDISPONIVEL === $this->getCode();
+    }
 }

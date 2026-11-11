@@ -7,7 +7,6 @@ namespace App\Controller\Spotify;
 use App\Controller\Common\DefaultController;
 use App\DataObject\Spotify\ConcluirAutorizacaoSpotifyDTO;
 use App\DataObject\Spotify\ConsultarImagensSpotifyDTO;
-use App\DataObject\Spotify\ItemTopMusicaArtistaDTO;
 use App\DataObject\Spotify\UploadImportacaoSpotifyDTO;
 use App\Entity\ImagemSpotify;
 use App\Entity\Usuario;
@@ -16,19 +15,12 @@ use App\Message\BuscarImagemSpotifyMessage;
 use App\Repository\ImagemSpotifyRepository;
 use App\Serializer\ContaSpotifySerializer;
 use App\Serializer\ImportacaoSpotifySerializer;
-use App\Serializer\SpotifyCapsulaSerializer;
-use App\Serializer\SpotifyResumoSerializer;
 use App\Service\Spotify\ConcluirAutorizacaoSpotifyService;
 use App\Service\Spotify\ConsultarImportacaoSpotifyService;
 use App\Service\Spotify\DesconectarSpotifyService;
 use App\Service\Spotify\GerarUrlAutorizacaoSpotifyService;
 use App\Service\Spotify\IniciarImportacaoSpotifyService;
-use App\Service\Spotify\ListarMesesCapsulaService;
-use App\Service\Spotify\ObterDetalheCapsulaService;
-use App\Service\Spotify\ObterResumoHojeSemanaCuriosidadesService;
-use App\Service\Spotify\ObterResumoIntervaloPersonalizadoService;
 use App\Service\Spotify\ObterStatusSpotifyService;
-use App\Service\Spotify\ObterTopMusicasArtistaService;
 use App\Service\Spotify\ResolverImagemSpotifyService;
 use App\Service\Spotify\SincronizarAgoraSpotifyService;
 use Psr\Log\LoggerInterface;
@@ -48,18 +40,11 @@ final class SpotifyController extends DefaultController
         private readonly DesconectarSpotifyService $desconectarService,
         private readonly IniciarImportacaoSpotifyService $iniciarImportacaoService,
         private readonly ConsultarImportacaoSpotifyService $consultarImportacaoService,
-        private readonly ListarMesesCapsulaService $listarMesesCapsulaService,
-        private readonly ObterDetalheCapsulaService $obterDetalheCapsulaService,
-        private readonly ObterResumoHojeSemanaCuriosidadesService $obterResumoService,
-        private readonly ObterResumoIntervaloPersonalizadoService $obterResumoIntervaloService,
-        private readonly ObterTopMusicasArtistaService $obterTopMusicasArtistaService,
         private readonly SincronizarAgoraSpotifyService $sincronizarAgoraService,
         private readonly ResolverImagemSpotifyService $resolverImagemService,
         private readonly ImagemSpotifyRepository $imagemRepository,
         private readonly ContaSpotifySerializer $contaSpotifySerializer,
         private readonly ImportacaoSpotifySerializer $importacaoSpotifySerializer,
-        private readonly SpotifyCapsulaSerializer $capsulaSerializer,
-        private readonly SpotifyResumoSerializer $resumoSerializer,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -128,99 +113,6 @@ final class SpotifyController extends DefaultController
         $importacao = $this->consultarImportacaoService->executar($uuid, $usuario);
 
         return $this->success($this->importacaoSpotifySerializer->serializar($importacao));
-    }
-
-    #[Route('/capsula', name: 'listar_capsulas', methods: ['GET'])]
-    public function listarCapsulas(#[CurrentUser] Usuario $usuario): Response
-    {
-        $meses = $this->listarMesesCapsulaService->executar($usuario);
-
-        return $this->success($this->capsulaSerializer->serializarListaMeses($meses));
-    }
-
-    #[Route('/capsula/{ano<\d{4}>}/{mes<\d{1,2}>}', name: 'obter_capsula', methods: ['GET'])]
-    public function obterCapsula(int $ano, int $mes, #[CurrentUser] Usuario $usuario): Response
-    {
-        $detalhe = $this->obterDetalheCapsulaService->executar($usuario, $ano, $mes);
-
-        return $this->success($this->capsulaSerializer->serializarCapsula(
-            $detalhe->capsula(),
-            $detalhe->mapaImagens(),
-        ));
-    }
-
-    #[Route('/resumo', name: 'obter_resumo', methods: ['GET'])]
-    public function obterResumo(#[CurrentUser] Usuario $usuario): Response
-    {
-        $resumoComImagens = $this->obterResumoService->executar($usuario);
-
-        return $this->success($this->resumoSerializer->serializarResumo(
-            $resumoComImagens->resumo(),
-            $resumoComImagens->mapaImagens(),
-        ));
-    }
-
-    #[Route('/ranking', name: 'obter_ranking_intervalo', methods: ['GET'])]
-    public function obterRankingIntervalo(
-        Request $request,
-        #[CurrentUser] Usuario $usuario,
-    ): Response {
-        $tipo = (string) $request->query->get('tipo', 'dias');
-        $dias = $request->query->has('dias') ? $request->query->getInt('dias') : null;
-        $ano = $request->query->has('ano') ? $request->query->getInt('ano') : null;
-        $mes = $request->query->has('mes') ? $request->query->getInt('mes') : null;
-        $inicio = $request->query->has('inicio') ? (string) $request->query->get('inicio') : null;
-        $fim = $request->query->has('fim') ? (string) $request->query->get('fim') : null;
-        $limite = $request->query->getInt('limite', 50);
-
-        $resultado = $this->obterResumoIntervaloService->executar(
-            usuario: $usuario,
-            tipo: $tipo,
-            dias: $dias,
-            ano: $ano,
-            mes: $mes,
-            inicio: $inicio,
-            fim: $fim,
-            limite: $limite,
-        );
-
-        return $this->success($this->resumoSerializer->serializarIntervaloComPeriodo(
-            intervalo: $resultado->intervalo(),
-            rotuloPeriodo: $resultado->rotuloPeriodo(),
-            dataInicio: $resultado->dataInicio(),
-            dataFim: $resultado->dataFim(),
-            mapaImagens: $resultado->mapaImagens(),
-            topAlbuns: $resultado->topAlbuns(),
-        ));
-    }
-
-    #[Route('/artistas/top-musicas', name: 'obter_top_musicas_artista', methods: ['GET'])]
-    public function obterTopMusicasArtista(
-        Request $request,
-        #[CurrentUser] Usuario $usuario,
-    ): Response {
-        $artista = (string) $request->query->get('artista', '');
-        if ('' === trim($artista)) {
-            return $this->error('O parâmetro "artista" é obrigatório.');
-        }
-
-        $topMusicas = $this->obterTopMusicasArtistaService->executar(
-            usuario: $usuario,
-            nomeArtista: trim($artista),
-            album: $request->query->has('album') ? (string) $request->query->get('album') : null,
-            tipo: $request->query->has('tipo') ? (string) $request->query->get('tipo') : null,
-            dias: $request->query->has('dias') ? $request->query->getInt('dias') : null,
-            ano: $request->query->has('ano') ? $request->query->getInt('ano') : null,
-            mes: $request->query->has('mes') ? $request->query->getInt('mes') : null,
-            inicio: $request->query->has('inicio') ? (string) $request->query->get('inicio') : null,
-            fim: $request->query->has('fim') ? (string) $request->query->get('fim') : null,
-            limite: $request->query->getInt('limite', ObterTopMusicasArtistaService::LIMITE_PADRAO),
-        );
-
-        return $this->success(array_map(
-            static fn (ItemTopMusicaArtistaDTO $item): array => $item->toArray(),
-            $topMusicas,
-        ));
     }
 
     #[Route('/imagens/consultar', name: 'consultar_imagens', methods: ['POST'])]

@@ -24,6 +24,9 @@ final readonly class AplicarImagensAnaliseSpotifyService
      */
     public function mapear(Usuario $usuario, array $itensComFaixa, array $artistas): MapaImagensSpotifyDTO
     {
+        $itensComFaixa = array_values(array_filter($itensComFaixa, static fn (MusicaAnaliseSpotifyDTO|AlbumAnaliseSpotifyDTO $item): bool => $item->temSpotify()));
+        $artistas = array_values(array_filter($artistas, static fn (ArtistaAnaliseSpotifyDTO $item): bool => $item->temSpotify()));
+
         if ([] === $itensComFaixa && [] === $artistas) {
             return new MapaImagensSpotifyDTO();
         }

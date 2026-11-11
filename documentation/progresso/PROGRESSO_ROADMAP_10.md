@@ -417,5 +417,24 @@
   - `migrations/Version20261111181335.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 200 — Endpoints unificados /api/v1/musica com filtro de fonte
-- **Status**: Pendente
+### ✅ Tópico 200 — Endpoints unificados /api/v1/musica com filtro de fonte
+- **Status**: Concluído
+- **O que foi feito**:
+  - `MusicaController` e `MusicaAnaliseController` em `src/Controller/Musica/`, com rotas em `/api/v1/musica/` (resumo, Cápsula, ranking, top músicas do artista, hábitos, recordes, evolução, descobertas, retrospectiva, detalhe da música e do artista por uuid, identificação: resumo e consumo) e o parâmetro `fonte` (`FiltroFonteRequisicaoDTO`, 422 quando inválido).
+  - As rotas antigas de análise em `/api/v1/spotify/` viraram uma segunda rota no mesmo método, com `fonte = spotify` por padrão; os detalhes por nome resolvem o uuid do catálogo (`ResolverAlvoPorNomeService`).
+  - Serviços movidos para `src/Service/Musica/Analise/` com nomes neutros, todos lendo `AnaliseReproducaoMusicalRepository`, que ganhou as consultas que faltavam (rankings de álbuns, mapa de horários, recordes, repetição diária, evolução, meses no topo, posição geral, resumo do alvo, variantes, novidades, redescobertas, obsessões, Cápsula e curiosidades). `MontarResumoIntervaloMusicaService` compartilha o resumo de intervalo.
+  - Itens com `musicaUuid`/`artistaUuid`, `artistas`, `fontes`, `porFonte`, `mashup`, `estimado` e `urlYoutubeMusic`; detalhe da música com `variantes` e `componentes`; detalhe do artista com `mashups`; ambos com primeira e última vez de cada fonte. DTOs e serializers existentes estendidos.
+  - Itens só do YouTube não entram no enriquecimento de imagens do Spotify. Foto de artista: `imagem_spotify` ou uma única busca pela `ytmusicapi` (`foto_artista` no `bin/ytmusic.py`, `BuscarFotoArtistaMessage`, comando `app:musica:buscar-fotos-artistas`), migration `Version20261111190918` (`artista_catalogo.foto_buscada_em`).
+  - Teste numa cópia dos dados de produção: todos os endpoints responderam; o caminho do YouTube foi validado com um vídeo de teste. Tempos no `MUSICA.md`.
+- **Diferença do roadmap**: os DTOs mantêm o nome com "Spotify" (só os serviços foram renomeados) para não mexer no frontend antes dos tópicos 201 a 203. As rotas antigas já devolvem os números agrupados pelo catálogo (decisão pendente do tópico 199). A lista da Cápsula leva 22 s na primeira vez, sem cache. Sem testes automatizados (regra do projeto).
+- **Pendente**: rodar `app:musica:buscar-fotos-artistas` em produção depois do deploy final; remover as rotas alias no tópico 203.
+- **Arquivos**:
+  - `src/Controller/Musica/MusicaController.php`, `MusicaAnaliseController.php`, `src/Controller/Spotify/SpotifyController.php`, `SpotifyAnaliseController.php`
+  - `src/Service/Musica/Analise/` (13 serviços), `src/Service/Musica/BuscarFotoArtistaCatalogoService.php`, `src/Service/IdentificacaoMusica/ObterResumoIdentificacaoService.php`, `ObterConsumoIdentificacaoService.php`
+  - `src/Repository/AnaliseReproducaoMusicalRepository.php`, `ArtistaCatalogoRepository.php`, `VideoYoutubeRepository.php`, `ConsumoIaRepository.php`
+  - `src/DataObject/Musica/AlvoAnaliseMusicaDTO.php`, `FiltroFonteRequisicaoDTO.php`, DTOs de análise e de ranking em `src/DataObject/Spotify/`
+  - `src/Serializer/SpotifyCapsulaSerializer.php`, `SpotifyResumoSerializer.php`
+  - `src/Message/BuscarFotoArtistaMessage.php`, `src/MessageHandler/BuscarFotoArtistaMessageHandler.php`, `src/Command/BuscarFotosArtistasCommand.php`
+  - `src/Interface/YoutubeMusicInterface.php`, `src/Infra/YoutubeMusic/YoutubeMusicClient.php`, `bin/ytmusic.py`, `src/Entity/ArtistaCatalogo.php`
+  - `src/Exception/Musica/AnaliseMusicaException.php`, `src/Exception/YoutubeMusic/YoutubeMusicException.php`
+  - `migrations/Version20261111190918.php`, `documentation/funcionalidades/MUSICA.md`

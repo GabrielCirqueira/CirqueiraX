@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Spotify;
+namespace App\Service\Musica\Analise;
 
 use App\DataObject\Spotify\Analise\DescobertasSpotifyDTO;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
-use App\Repository\AnaliseReproducaoSpotifyRepository;
+use App\Enum\FiltroFonteMusica;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
+use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
+use App\Repository\AnaliseReproducaoMusicalRepository;
 
-final readonly class ObterDescobertasSpotifyService
+final readonly class ObterDescobertasMusicaService
 {
     private const int LIMITE_NOVIDADES = 24;
     private const int LIMITE_REDESCOBERTAS = 12;
@@ -20,30 +23,32 @@ final readonly class ObterDescobertasSpotifyService
 
     public function __construct(
         private CacheAnaliseSpotifyService $cacheAnalise,
-        private AnaliseReproducaoSpotifyRepository $analiseRepository,
+        private AnaliseReproducaoMusicalRepository $analiseRepository,
         private AplicarImagensAnaliseSpotifyService $aplicarImagensService,
     ) {}
 
-    public function executar(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo): DescobertasSpotifyDTO
+    public function executar(Usuario $usuario, FiltroFonteMusica $fonte, PeriodoAnaliseSpotifyDTO $periodo): DescobertasSpotifyDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, 'descobertas|' . $periodo->chaveCache(), fn (): DescobertasSpotifyDTO => $this->calcular($usuario, $periodo));
+        return $this->cacheAnalise->lembrar($usuario, 'descobertas|' . $periodo->chaveCache(), fn (): DescobertasSpotifyDTO => $this->calcular($usuario, $fonte, $periodo), $fonte);
     }
 
-    private function calcular(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo): DescobertasSpotifyDTO
+    private function calcular(Usuario $usuario, FiltroFonteMusica $fonte, PeriodoAnaliseSpotifyDTO $periodo): DescobertasSpotifyDTO
     {
-        $artistasNovos = $this->analiseRepository->listarArtistasNovos($usuario, $periodo);
-        $musicasNovas = $this->analiseRepository->listarMusicasNovas($usuario, $periodo);
+        $artistasNovos = $this->analiseRepository->listarArtistasNovos($usuario, $periodo, $fonte);
+        $musicasNovas = $this->analiseRepository->listarMusicasNovas($usuario, $periodo, $fonte);
         $artistasExibidos = array_slice($artistasNovos, 0, self::LIMITE_NOVIDADES);
         $musicasExibidas = array_slice($musicasNovas, 0, self::LIMITE_NOVIDADES);
         $redescobertas = $this->analiseRepository->listarRedescobertas(
             $usuario,
             $periodo,
+            $fonte,
             self::DIAS_AUSENCIA_REDESCOBERTA,
             self::LIMITE_REDESCOBERTAS,
         );
         $obsessoes = $this->analiseRepository->listarObsessoes(
             $usuario,
             $periodo,
+            $fonte,
             self::DIAS_JANELA_OBSESSAO,
             self::MINIMO_NA_JANELA_OBSESSAO,
             self::LIMITE_OBSESSOES,

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DataObject\Spotify;
 
+use App\DataObject\Spotify\Analise\ArtistaAnaliseSpotifyDTO;
+
 final readonly class ItemRankingArtistaCapsulaDTO
 {
     public function __construct(
@@ -15,7 +17,18 @@ final readonly class ItemRankingArtistaCapsulaDTO
         private ?int $movimento,
         private bool $isEstreia,
         private ?string $urlSpotify = null,
+        private ?ArtistaAnaliseSpotifyDTO $analise = null,
     ) {}
+
+    public function analise(): ?ArtistaAnaliseSpotifyDTO
+    {
+        return $this->analise;
+    }
+
+    public function temSpotify(): bool
+    {
+        return $this->analise?->temSpotify() ?? true;
+    }
 
     public function posicao(): int
     {

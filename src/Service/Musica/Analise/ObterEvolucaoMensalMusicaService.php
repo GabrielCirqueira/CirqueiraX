@@ -2,30 +2,32 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Spotify;
+namespace App\Service\Musica\Analise;
 
 use App\DataObject\Spotify\Analise\EvolucaoMensalSpotifyDTO;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
-use App\Repository\AnaliseReproducaoSpotifyRepository;
+use App\Enum\FiltroFonteMusica;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
+use App\Repository\AnaliseReproducaoMusicalRepository;
 use DateTimeImmutable;
 
-final readonly class ObterEvolucaoMensalSpotifyService
+final readonly class ObterEvolucaoMensalMusicaService
 {
     private const int MESES_PADRAO = 24;
     private const int MESES_MAXIMO = 120;
 
     public function __construct(
         private CacheAnaliseSpotifyService $cacheAnalise,
-        private AnaliseReproducaoSpotifyRepository $analiseRepository,
+        private AnaliseReproducaoMusicalRepository $analiseRepository,
     ) {}
 
-    public function executar(Usuario $usuario, ?int $meses): EvolucaoMensalSpotifyDTO
+    public function executar(Usuario $usuario, FiltroFonteMusica $fonte, ?int $meses): EvolucaoMensalSpotifyDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, 'evolucao|' . ($meses ?? 0), fn (): EvolucaoMensalSpotifyDTO => $this->calcular($usuario, $meses));
+        return $this->cacheAnalise->lembrar($usuario, 'evolucao|' . ($meses ?? 0), fn (): EvolucaoMensalSpotifyDTO => $this->calcular($usuario, $fonte, $meses), $fonte);
     }
 
-    private function calcular(Usuario $usuario, ?int $meses): EvolucaoMensalSpotifyDTO
+    private function calcular(Usuario $usuario, FiltroFonteMusica $fonte, ?int $meses): EvolucaoMensalSpotifyDTO
     {
         $quantidade = max(1, min(self::MESES_MAXIMO, $meses ?? self::MESES_PADRAO));
         $agora = PeriodoAnaliseSpotifyDTO::agoraCalendario();
@@ -37,6 +39,7 @@ final readonly class ObterEvolucaoMensalSpotifyService
         $linhas = $this->analiseRepository->calcularEvolucaoMensal(
             $usuario,
             PeriodoAnaliseSpotifyDTO::entre($inicioJanela, $inicioMesAtual->modify('+1 month'), 'Evolução'),
+            $fonte,
         );
 
         return new EvolucaoMensalSpotifyDTO(
@@ -44,11 +47,12 @@ final readonly class ObterEvolucaoMensalSpotifyService
             ano: (int) $agora->format('Y'),
             mes: (int) $agora->format('n'),
             diaAtual: $diaAtual,
-            minutosMesAtual: $this->minutosEntre($usuario, $inicioMesAtual, $amanha),
-            minutosMesAnteriorAteMesmoDia: $this->minutosAteMesmoDia($usuario, $inicioMesAtual->modify('-1 month'), $diaAtual),
-            minutosMesmoMesAnoAnteriorAteMesmoDia: $this->minutosAteMesmoDia($usuario, $inicioMesAtual->modify('-1 year'), $diaAtual),
+            minutosMesAtual: $this->minutosEntre($usuario, $fonte, $inicioMesAtual, $amanha),
+            minutosMesAnteriorAteMesmoDia: $this->minutosAteMesmoDia($usuario, $fonte, $inicioMesAtual->modify('-1 month'), $diaAtual),
+            minutosMesmoMesAnoAnteriorAteMesmoDia: $this->minutosAteMesmoDia($usuario, $fonte, $inicioMesAtual->modify('-1 year'), $diaAtual),
             minutosMesmoMesAnoAnterior: $this->minutosEntre(
                 $usuario,
+                $fonte,
                 $inicioMesAtual->modify('-1 year'),
                 $inicioMesAtual->modify('-1 year')->modify('+1 month'),
             ),
@@ -82,15 +86,15 @@ final readonly class ObterEvolucaoMensalSpotifyService
         return $meses;
     }
 
-    private function minutosAteMesmoDia(Usuario $usuario, DateTimeImmutable $inicioMes, int $dia): int
+    private function minutosAteMesmoDia(Usuario $usuario, FiltroFonteMusica $fonte, DateTimeImmutable $inicioMes, int $dia): int
     {
         $diasNoMes = (int) $inicioMes->format('t');
 
-        return $this->minutosEntre($usuario, $inicioMes, $inicioMes->modify(sprintf('+%d days', min($dia, $diasNoMes))));
+        return $this->minutosEntre($usuario, $fonte, $inicioMes, $inicioMes->modify(sprintf('+%d days', min($dia, $diasNoMes))));
     }
 
-    private function minutosEntre(Usuario $usuario, DateTimeImmutable $inicio, DateTimeImmutable $fim): int
+    private function minutosEntre(Usuario $usuario, FiltroFonteMusica $fonte, DateTimeImmutable $inicio, DateTimeImmutable $fim): int
     {
-        return $this->analiseRepository->calcularTotais($usuario, PeriodoAnaliseSpotifyDTO::entre($inicio, $fim, 'Comparação'))['minutos'];
+        return $this->analiseRepository->calcularTotais($usuario, PeriodoAnaliseSpotifyDTO::entre($inicio, $fim, 'Comparação'), $fonte)['minutos'];
     }
 }

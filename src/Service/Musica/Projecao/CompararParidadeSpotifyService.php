@@ -74,7 +74,7 @@ final readonly class CompararParidadeSpotifyService
             $this->analiseAntiga->listarRankingMusicas($usuario, $periodo, self::TAMANHO_TOPO),
         );
         $novas = array_map(
-            fn (array $musica): string => sprintf('%s (%d)', $this->normalizador->normalizarTitulo($musica['titulo']), $musica['streams']),
+            fn (MusicaAnaliseSpotifyDTO $musica): string => sprintf('%s (%d)', $this->normalizador->normalizarTitulo($musica->nomeFaixa), $musica->streams),
             $this->analiseNova->listarRankingMusicas($usuario, $periodo, FiltroFonteMusica::Spotify, self::TAMANHO_TOPO),
         );
 
@@ -91,7 +91,7 @@ final readonly class CompararParidadeSpotifyService
             $this->analiseAntiga->listarRankingArtistas($usuario, $periodo, self::TAMANHO_TOPO),
         );
         $novos = array_map(
-            fn (array $artista): string => sprintf('%s (%d)', $this->normalizador->normalizar($artista['nome']), $artista['streams']),
+            fn (ArtistaAnaliseSpotifyDTO $artista): string => sprintf('%s (%d)', $this->normalizador->normalizar($artista->nome), $artista->streams),
             $this->analiseNova->listarRankingArtistas($usuario, $periodo, FiltroFonteMusica::Spotify, self::TAMANHO_TOPO),
         );
 

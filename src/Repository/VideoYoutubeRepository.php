@@ -308,6 +308,28 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     /**
      * @return array<string, int>
      */
+    public function contarPorStatus(Usuario $usuario): array
+    {
+        /** @var list<array{status: StatusClassificacaoVideo, total: int|string}> $linhas */
+        $linhas = $this->createQueryBuilder('e')
+            ->select('e.status AS status, COUNT(e.uuid) AS total')
+            ->andWhere('e.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->groupBy('e.status')
+            ->getQuery()
+            ->getResult();
+
+        $totais = [];
+        foreach ($linhas as $linha) {
+            $totais[$linha['status']->value] = (int) $linha['total'];
+        }
+
+        return $totais;
+    }
+
+    /**
+     * @return array<string, int>
+     */
     public function contarReservadosPorStatus(Usuario $usuario): array
     {
         /** @var list<array{status: StatusClassificacaoVideo, total: int|string}> $linhas */

@@ -141,16 +141,34 @@ def comando_buscar(entrada):
     return {"itens": [mapear_item(item, posicao) for posicao, item in enumerate(itens[: int(limite)])]}
 
 
+def normalizar_nome(nome):
+    return re.sub(r"\s+", " ", (nome or "").strip().lower())
+
+
+def comando_foto_artista(entrada):
+    nome = entrada.get("nome")
+    if not isinstance(nome, str) or not nome.strip():
+        raise FalhaYoutubeMusic(FORMATO_INESPERADO, "O nome do artista não foi informado.")
+    cliente = YTMusic()
+    resultados = executar_com_classificacao(lambda: cliente.search(nome.strip(), filter="artists", limit=LIMITE_BUSCA_PADRAO))
+    procurado = normalizar_nome(nome)
+    for item in resultados:
+        if isinstance(item, dict) and normalizar_nome(item.get("artist")) == procurado:
+            return {"urlFoto": maior_capa(item)}
+    return {"urlFoto": None}
+
+
 COMANDOS = {
     "validar": comando_validar,
     "historico": comando_historico,
     "buscar": comando_buscar,
+    "foto_artista": comando_foto_artista,
 }
 
 
 def principal():
     if len(sys.argv) != 2 or sys.argv[1] not in COMANDOS:
-        sys.stdout.write(json.dumps({"erro": "Use: ytmusic.py validar|historico|buscar"}))
+        sys.stdout.write(json.dumps({"erro": "Use: ytmusic.py validar|historico|buscar|foto_artista"}))
         return FORMATO_INESPERADO
     try:
         resultado = COMANDOS[sys.argv[1]](ler_entrada())

@@ -23,6 +23,7 @@ final readonly class YoutubeMusicClient implements YoutubeMusicInterface
     private const string COMANDO_VALIDAR = 'validar';
     private const string COMANDO_HISTORICO = 'historico';
     private const string COMANDO_BUSCAR = 'buscar';
+    private const string COMANDO_FOTO_ARTISTA = 'foto_artista';
     private const int SAIDA_SUCESSO = 0;
     private const int SAIDA_CREDENCIAIS_INVALIDAS = 2;
     private const int SAIDA_SERVICO_INDISPONIVEL = 3;
@@ -54,6 +55,13 @@ final readonly class YoutubeMusicClient implements YoutubeMusicInterface
         $resposta = $this->executar(self::COMANDO_BUSCAR, ['texto' => $texto, 'limite' => $limite]);
 
         return new ResultadoBuscaYoutubeMusicDTO($this->mapearItens($resposta));
+    }
+
+    public function buscarFotoArtista(string $nome): ?string
+    {
+        $resposta = $this->executar(self::COMANDO_FOTO_ARTISTA, ['nome' => $nome]);
+
+        return $this->textoOuNulo($resposta['urlFoto'] ?? null);
     }
 
     /**

@@ -2,10 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Spotify;
+namespace App\Service\Musica\Analise;
 
 use App\DataObject\Spotify\DetalheCapsulaComImagensDTO;
+use App\DataObject\Spotify\ItemRankingArtistaCapsulaDTO;
+use App\DataObject\Spotify\ItemRankingMusicaCapsulaDTO;
 use App\Entity\Usuario;
+use App\Enum\FiltroFonteMusica;
+use App\Service\Spotify\EnriquecerImagensSpotifyService;
 
 final readonly class ObterDetalheCapsulaService
 {
@@ -15,13 +19,13 @@ final readonly class ObterDetalheCapsulaService
     ) {
     }
 
-    public function executar(Usuario $usuario, int $ano, int $mes): DetalheCapsulaComImagensDTO
+    public function executar(Usuario $usuario, FiltroFonteMusica $fonte, int $ano, int $mes): DetalheCapsulaComImagensDTO
     {
-        $capsula = $this->calcularCapsulaService->executar($usuario, $ano, $mes);
+        $capsula = $this->calcularCapsulaService->executar($usuario, $fonte, $ano, $mes);
 
         $faixas = [];
         $musicaDestaque = $capsula->musicaMaisOuvida();
-        if (null !== $musicaDestaque) {
+        if (null !== $musicaDestaque && $musicaDestaque->temSpotify()) {
             $faixas[] = [
                 'codigo' => $musicaDestaque->codigoFaixa(),
                 'nome' => $musicaDestaque->nomeFaixa(),
@@ -29,7 +33,7 @@ final readonly class ObterDetalheCapsulaService
             ];
         }
 
-        foreach ($capsula->topMusicas() as $item) {
+        foreach (array_filter($capsula->topMusicas(), static fn (ItemRankingMusicaCapsulaDTO $item): bool => $item->temSpotify()) as $item) {
             $faixas[] = [
                 'codigo' => $item->codigoFaixa(),
                 'nome' => $item->nomeFaixa(),
@@ -39,14 +43,14 @@ final readonly class ObterDetalheCapsulaService
 
         $artistas = [];
         $artistaDestaque = $capsula->artistaMaisOuvido();
-        if (null !== $artistaDestaque) {
+        if (null !== $artistaDestaque && $artistaDestaque->temSpotify()) {
             $artistas[] = [
                 'codigo' => $artistaDestaque->codigoArtista(),
                 'nome' => $artistaDestaque->nomeArtista(),
             ];
         }
 
-        foreach ($capsula->topArtistas() as $item) {
+        foreach (array_filter($capsula->topArtistas(), static fn (ItemRankingArtistaCapsulaDTO $item): bool => $item->temSpotify()) as $item) {
             $artistas[] = [
                 'codigo' => $item->codigoArtista(),
                 'nome' => $item->nomeArtista(),

@@ -11,6 +11,8 @@ final readonly class DetalheArtistaSpotifyDTO
      * @param list<array{ano: int, mes: int, posicao: int}> $mesesNoTopo
      * @param list<MusicaAnaliseSpotifyDTO> $topMusicas
      * @param list<AlbumAnaliseSpotifyDTO> $topAlbuns
+     * @param array<string, array{streams: int, minutos: int, primeira: ?string, ultima: ?string}> $porFonte
+     * @param list<MusicaAnaliseSpotifyDTO> $mashups
      */
     public function __construct(
         public ArtistaAnaliseSpotifyDTO $artista,
@@ -28,6 +30,9 @@ final readonly class DetalheArtistaSpotifyDTO
         public array $topAlbuns,
         public ?RepeticaoDiariaSpotifyDTO $maiorRepeticaoDiaria,
         public ComportamentoReproducaoSpotifyDTO $comportamento,
+        public array $porFonte = [],
+        public int $minutosEstimados = 0,
+        public array $mashups = [],
     ) {}
 
     /**
@@ -51,6 +56,9 @@ final readonly class DetalheArtistaSpotifyDTO
             'topAlbuns' => array_map(static fn (AlbumAnaliseSpotifyDTO $item): array => $item->paraArray(), $this->topAlbuns),
             'maiorRepeticaoDiaria' => $this->maiorRepeticaoDiaria?->paraArray(),
             'comportamento' => $this->comportamento->paraArray(),
+            'porFonte' => $this->porFonte,
+            'minutosEstimados' => $this->minutosEstimados,
+            'mashups' => array_map(static fn (MusicaAnaliseSpotifyDTO $item): array => $item->paraArray(), $this->mashups),
         ];
     }
 }

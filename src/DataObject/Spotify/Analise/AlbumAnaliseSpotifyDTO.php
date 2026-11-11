@@ -19,6 +19,7 @@ final readonly class AlbumAnaliseSpotifyDTO
         public ?string $codigoFaixaReferencia,
         public ?string $imagemUrl = null,
         public ?string $urlSpotify = null,
+        public ?string $musicaReferenciaUuid = null,
     ) {}
 
     /**
@@ -36,7 +37,15 @@ final readonly class AlbumAnaliseSpotifyDTO
             (int) ($linha['faixas_distintas'] ?? 0),
             (string) $linha['nome_faixa'],
             $codigo,
+            is_string($linha['url_capa'] ?? null) ? $linha['url_capa'] : null,
+            null,
+            is_string($linha['musica_uuid'] ?? null) ? $linha['musica_uuid'] : null,
         );
+    }
+
+    public function temSpotify(): bool
+    {
+        return null !== $this->codigoFaixaReferencia || null === $this->musicaReferenciaUuid;
     }
 
     public function chaveImagem(): string
@@ -64,11 +73,11 @@ final readonly class AlbumAnaliseSpotifyDTO
             $this->faixasDistintas,
             $this->faixaReferencia,
             $this->codigoFaixaReferencia,
-            $mapa->obterImagem($chave),
-            $mapa->obterUrlSpotify(
-                $chave,
-                ImagemSpotify::gerarUrlSpotifyFaixa($this->codigoFaixaReferencia, $this->artista, $this->faixaReferencia),
-            ),
+            $mapa->obterImagem($chave) ?? $this->imagemUrl,
+            $this->temSpotify()
+                ? $mapa->obterUrlSpotify($chave, ImagemSpotify::gerarUrlSpotifyFaixa($this->codigoFaixaReferencia, $this->artista, $this->faixaReferencia))
+                : null,
+            $this->musicaReferenciaUuid,
         );
     }
 
@@ -87,6 +96,7 @@ final readonly class AlbumAnaliseSpotifyDTO
             'codigoFaixaReferencia' => $this->codigoFaixaReferencia,
             'imagemUrl' => $this->imagemUrl,
             'urlSpotify' => $this->urlSpotify,
+            'musicaReferenciaUuid' => $this->musicaReferenciaUuid,
         ];
     }
 }

@@ -16,4 +16,6 @@ interface YoutubeMusicInterface
     public function listarHistorico(CredenciaisYoutubeMusicDTO $credenciais): ListaHistoricoYoutubeMusicDTO;
 
     public function buscarMusica(string $texto, int $limite = 5): ResultadoBuscaYoutubeMusicDTO;
+
+    public function buscarFotoArtista(string $nome): ?string;
 }

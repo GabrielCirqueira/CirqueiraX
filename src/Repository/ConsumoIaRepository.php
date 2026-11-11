@@ -8,6 +8,7 @@ use App\Entity\ConsumoIa;
 use App\Entity\Usuario;
 use App\Enum\FinalidadeConsumoIa;
 use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -52,5 +53,34 @@ final class ConsumoIaRepository extends ServiceEntityRepository
             'tokensSaida' => (int) $linha['tokensSaida'],
             'custoMicrodolares' => (int) $linha['custoMicrodolares'],
         ];
+    }
+
+    /**
+     * @return list<array{dia: string, chamadas: int, tokensEntrada: int, tokensSaida: int, custoMicrodolares: int}>
+     */
+    public function listarPorDia(Usuario $usuario, FinalidadeConsumoIa $finalidade, DateTimeImmutable $desde): array
+    {
+        /** @var list<array{dia: string, chamadas: int|string, tokens_entrada: int|string|null, tokens_saida: int|string|null, custo: int|string|null}> $linhas */
+        $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            "SELECT DATE(CONVERT_TZ(criado_em, '+00:00', '-03:00')) AS dia, COUNT(*) AS chamadas, SUM(tokens_entrada) AS tokens_entrada,
+                SUM(tokens_saida) AS tokens_saida, SUM(custo_microdolares) AS custo
+            FROM consumo_ia
+            WHERE usuario_id = :usuarioId AND finalidade = :finalidade AND criado_em >= :desde
+            GROUP BY dia
+            ORDER BY dia DESC",
+            [
+                'usuarioId' => $usuario->getId(),
+                'finalidade' => $finalidade->value,
+                'desde' => $desde->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+            ],
+        );
+
+        return array_map(static fn (array $linha): array => [
+            'dia' => (string) $linha['dia'],
+            'chamadas' => (int) $linha['chamadas'],
+            'tokensEntrada' => (int) $linha['tokens_entrada'],
+            'tokensSaida' => (int) $linha['tokens_saida'],
+            'custoMicrodolares' => (int) $linha['custo'],
+        ], $linhas);
     }
 }

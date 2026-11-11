@@ -39,6 +39,9 @@ class ArtistaCatalogo
     #[ORM\JoinColumn(name: 'unido_a_uuid', referencedColumnName: 'uuid', nullable: true, onDelete: 'SET NULL')]
     private ?ArtistaCatalogo $unidoA = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $fotoBuscadaEm = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
@@ -56,6 +59,19 @@ class ArtistaCatalogo
         $this->urlFoto = $urlFoto;
 
         return $this;
+    }
+
+    public function registrarBuscaFoto(?string $urlFoto): self
+    {
+        $this->urlFoto = $urlFoto ?? $this->urlFoto;
+        $this->fotoBuscadaEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function precisaBuscarFoto(): bool
+    {
+        return null === $this->urlFoto && null === $this->fotoBuscadaEm;
     }
 
     public function unirA(self $destino): self

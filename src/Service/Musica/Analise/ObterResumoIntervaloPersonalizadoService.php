@@ -2,31 +2,34 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Spotify;
+namespace App\Service\Musica\Analise;
 
 use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
-use App\DataObject\Spotify\ItemRankingArtistaDTO;
-use App\DataObject\Spotify\ItemRankingMusicaDTO;
 use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\DataObject\Spotify\ResumoIntervaloComImagensDTO;
-use App\DataObject\Spotify\ResumoIntervaloSpotifyDTO;
 use App\Entity\Usuario;
-use App\Repository\AnaliseReproducaoSpotifyRepository;
-use App\Repository\ReproducaoSpotifyRepository;
+use App\Enum\FiltroFonteMusica;
+use App\Service\Spotify\EnriquecerImagensSpotifyService;
+use App\Repository\AnaliseReproducaoMusicalRepository;
 use DateTimeImmutable;
 use DateTimeZone;
 
 final readonly class ObterResumoIntervaloPersonalizadoService
 {
+    private const string TIPO_TODOS = 'todos';
+    private const int LIMITE_MINIMO = 5;
+    private const int LIMITE_MAXIMO = 100;
+
     public function __construct(
-        private ReproducaoSpotifyRepository $reproducaoRepository,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
-        private AnaliseReproducaoSpotifyRepository $analiseRepository,
+        private AnaliseReproducaoMusicalRepository $analiseRepository,
+        private MontarResumoIntervaloMusicaService $montarResumoService,
     ) {}
 
     public function executar(
         Usuario $usuario,
+        FiltroFonteMusica $fonte,
         string $tipo = 'dias',
         ?int $dias = 7,
         ?int $ano = null,
@@ -35,73 +38,22 @@ final readonly class ObterResumoIntervaloPersonalizadoService
         ?string $fim = null,
         int $limite = 50,
     ): ResumoIntervaloComImagensDTO {
-        $fusoUtc = new DateTimeZone('UTC');
-        $limiteSanitizado = max(5, min(100, $limite));
+        $limiteSanitizado = max(self::LIMITE_MINIMO, min(self::LIMITE_MAXIMO, $limite));
 
         [$inicioLocal, $fimLocal, $compInicioLocal, $compFimLocal, $rotuloPeriodo] = $this->resolverIntervalo($tipo, $dias, $ano, $mes, $inicio, $fim);
 
-        $inicioUtc = $inicioLocal->setTimezone($fusoUtc);
-        $fimUtc = $fimLocal->setTimezone($fusoUtc);
-        $compInicioUtc = $compInicioLocal->setTimezone($fusoUtc);
-        $compFimUtc = $compFimLocal->setTimezone($fusoUtc);
+        $periodo = self::TIPO_TODOS === $tipo ? PeriodoAnaliseSpotifyDTO::todos() : PeriodoAnaliseSpotifyDTO::entre($inicioLocal, $fimLocal, $rotuloPeriodo);
+        $comparacao = self::TIPO_TODOS === $tipo ? null : PeriodoAnaliseSpotifyDTO::entre($compInicioLocal, $compFimLocal, $rotuloPeriodo);
+        $resumoIntervalo = $this->montarResumoService->montar($usuario, $fonte, $periodo, $comparacao, $limiteSanitizado);
+        $topAlbuns = $this->analiseRepository->listarRankingAlbuns($usuario, $periodo, $fonte, $limiteSanitizado);
 
-        $totais = $this->reproducaoRepository->calcularTotaisIntervalo($usuario, $inicioUtc, $fimUtc);
-        $totaisAnterior = $this->reproducaoRepository->calcularTotaisIntervalo($usuario, $compInicioUtc, $compFimUtc);
-
-        $variacao = null;
-        if ($totaisAnterior['totalMinutos'] > 0) {
-            $diferenca = $totais['totalMinutos'] - $totaisAnterior['totalMinutos'];
-            $variacao = (int) round(($diferenca / $totaisAnterior['totalMinutos']) * 100);
-        }
-
-        $topMusicas = $this->reproducaoRepository->obterRankingMusicasIntervalo(
-            usuario: $usuario,
-            inicioUtc: $inicioUtc,
-            fimUtc: $fimUtc,
-            limite: $limiteSanitizado,
-        );
-
-        $topArtistas = $this->reproducaoRepository->obterRankingArtistasIntervalo(
-            usuario: $usuario,
-            inicioUtc: $inicioUtc,
-            fimUtc: $fimUtc,
-            limite: $limiteSanitizado,
-        );
-
-        $resumoIntervalo = new ResumoIntervaloSpotifyDTO(
-            totalMinutos: $totais['totalMinutos'],
-            totalStreams: $totais['totalStreams'],
-            variacaoMinutosPercentual: $variacao,
-            topMusicas: $topMusicas,
-            topArtistas: $topArtistas,
-        );
-
-        $faixas = [];
-        foreach ($topMusicas as $m) {
-            $faixas[] = [
-                'codigo' => $m->codigoFaixa(),
-                'nome' => $m->nomeFaixa(),
-                'artista' => $m->artistaPrincipal(),
-            ];
-        }
-
-        $artistas = [];
-        foreach ($topArtistas as $a) {
-            $artistas[] = [
-                'codigo' => $a->codigoArtista(),
-                'nome' => $a->nomeArtista(),
-            ];
-        }
-
-        $topAlbuns = $this->analiseRepository->listarRankingAlbuns(
-            $usuario,
-            'todos' === $tipo ? PeriodoAnaliseSpotifyDTO::todos() : PeriodoAnaliseSpotifyDTO::entre($inicioLocal, $fimLocal, $rotuloPeriodo),
-            $limiteSanitizado,
-        );
-
+        $faixas = $this->montarResumoService->listarFaixasParaImagens($resumoIntervalo);
         foreach ($topAlbuns as $album) {
-            $faixas[] = $album->paraEnriquecimento();
+            if ($album->temSpotify()) {
+                $faixas[] = $album->paraEnriquecimento();
+            }
         }
+        $artistas = $this->montarResumoService->listarArtistasParaImagens($resumoIntervalo);
 
         $mapaImagens = $this->enriquecerImagensService->enriquecerEAgendar(
             usuario: $usuario,

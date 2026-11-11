@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
+use App\DataObject\Spotify\Analise\ArtistaAnaliseSpotifyDTO;
+use App\DataObject\Spotify\Analise\MusicaAnaliseSpotifyDTO;
 use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
 use App\DataObject\Spotify\CuriosidadesSpotifyDTO;
 use App\DataObject\Spotify\ItemRankingArtistaDTO;
@@ -116,7 +118,7 @@ final readonly class SpotifyResumoSerializer
         );
         $urlSpotify = $mapaImagens?->obterUrlSpotify($chave, $urlSpotifyPadrao);
 
-        return [
+        return $this->complementarMusica([
             'posicao' => $posicao,
             'codigoFaixa' => $item->codigoFaixa(),
             'nomeFaixa' => $item->nomeFaixa(),
@@ -126,7 +128,7 @@ final readonly class SpotifyResumoSerializer
             'totalMinutos' => $item->totalMinutos(),
             'urlSpotify' => $urlSpotify,
             'imagemUrl' => $imagemUrl,
-        ];
+        ], $item->analise(), $mapaImagens);
     }
 
     /**
@@ -145,7 +147,7 @@ final readonly class SpotifyResumoSerializer
         );
         $urlSpotify = $mapaImagens?->obterUrlSpotify($chave, $urlSpotifyPadrao);
 
-        return [
+        return $this->complementarArtista([
             'posicao' => $posicao,
             'nomeArtista' => $item->nomeArtista(),
             'codigoArtista' => $item->codigoArtista(),
@@ -153,6 +155,57 @@ final readonly class SpotifyResumoSerializer
             'totalMinutos' => $item->totalMinutos(),
             'urlSpotify' => $urlSpotify,
             'imagemUrl' => $imagemUrl,
+        ], $item->analise(), $mapaImagens);
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     *
+     * @return array<string, mixed>
+     */
+    private function complementarMusica(array $dados, ?MusicaAnaliseSpotifyDTO $analise, ?MapaImagensSpotifyDTO $mapaImagens): array
+    {
+        if (null === $analise) {
+            return $dados;
+        }
+
+        $completa = null === $mapaImagens ? $analise : $analise->comImagem($mapaImagens);
+
+        return [
+            ...$dados,
+            'imagemUrl' => $completa->imagemUrl,
+            'urlSpotify' => $completa->urlSpotify,
+            'musicaUuid' => $completa->musicaUuid,
+            'artistas' => $completa->artistas,
+            'fontes' => $completa->fontes,
+            'porFonte' => $completa->porFonte,
+            'mashup' => $completa->mashup,
+            'estimado' => $completa->estimado,
+            'urlYoutubeMusic' => $completa->urlYoutubeMusic,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     *
+     * @return array<string, mixed>
+     */
+    private function complementarArtista(array $dados, ?ArtistaAnaliseSpotifyDTO $analise, ?MapaImagensSpotifyDTO $mapaImagens): array
+    {
+        if (null === $analise) {
+            return $dados;
+        }
+
+        $completo = null === $mapaImagens ? $analise : $analise->comImagem($mapaImagens);
+
+        return [
+            ...$dados,
+            'imagemUrl' => $completo->imagemUrl,
+            'urlSpotify' => $completo->urlSpotify,
+            'artistaUuid' => $completo->artistaUuid,
+            'fontes' => $completo->fontes,
+            'porFonte' => $completo->porFonte,
+            'estimado' => $completo->estimado,
         ];
     }
 }
