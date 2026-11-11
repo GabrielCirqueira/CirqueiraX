@@ -255,8 +255,29 @@
   - `src/Serializer/ContaYoutubeMusicSerializer.php`, `src/Controller/YoutubeMusic/YoutubeMusicController.php`, `src/Service/Dashboard/ResumoIntegracoesMusicaService.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 193 — Infra — YouTube Data API em lote para categoria, duração e descrição
-- **Status**: Pendente
+### ✅ Tópico 193 — Infra — YouTube Data API em lote para categoria, duração e descrição
+- **Status**: Concluído
+- **O que foi feito**:
+  - `YoutubeDataInterface` e `YoutubeDataClient` em `src/Infra/YoutubeData/`, com o Guzzle dedicado `guzzle.youtube_data` e a chave `YOUTUBE_API_KEY` injetada por parâmetro (vazia por padrão). `buscarVideos` usa `videos.list` (`snippet`, `contentDetails`) em lotes de 50 e devolve `ListaVideosYoutubeDataDTO` com `VideoYoutubeDataDTO` por `videoId`, os ids não encontrados e o número de chamadas. A chave vai no cabeçalho `X-goog-api-key`, fora da URL.
+  - Conversão da duração ISO 8601 (`PT4M13S`, `PT1H2M3S`, `P1DT1S`, `P0D`) para ms, descrição cortada em 1.000 caracteres e escolha da maior capa.
+  - `YoutubeDataException` com `cotaExcedida()`, `chaveInvalida()`, `respostaInesperada()` e `servicoIndisponivel()`, classificando os motivos do corpo do erro do Google.
+  - Cota: entidade `CotaYoutubeDataDia` (`cota_youtube_data_dia`, soma atômica por dia) e `ControleCotaYoutubeDataService` com `ORCAMENTO_DIARIO_UNIDADES = 5000`, dia no fuso do Pacífico e pausa até o dia seguinte ao receber `quotaExceeded`.
+  - `AtualizarDetalhesVideosYoutubeService` aplica os detalhes no `VideoYoutube` e marca os que não voltam como indisponíveis. `VideoYoutube` ganhou `detalhesAtualizadosEm` (com índice), e `marcarIndisponivel` só troca o status de vídeos ainda pendentes.
+  - Política de dados lida (dados sem login: atualizar ou apagar em 30 dias). Reatualização periódica: `AtualizarDetalhesVideosYoutubeMessage` a cada hora, até 500 vídeos sem detalhes ou com mais de 30 dias.
+  - Migration `Version20261111151907` gerada pelo diff e validada.
+  - `YOUTUBE_API_KEY` nos modelos `.tooling/env/.env.example` e `.env.prod.example`; seção e pendência nova em `MUSICA.md`.
+- **Diferença do roadmap**: sem testes automatizados (regra do projeto); a conversão de duração e o parsing foram conferidos com respostas simuladas do Guzzle (sucesso, lote de 60 ids em 2 chamadas, cota excedida, chave inválida, erro 500 e resposta sem `items`).
+- **Pendente**: criar a chave `YOUTUBE_API_KEY` (Pendências do Gabriel em `MUSICA.md`); até lá a rotina horária registra só um aviso.
+- **Arquivos**:
+  - `src/Interface/YoutubeDataInterface.php`, `src/Infra/YoutubeData/YoutubeDataClient.php`
+  - `src/DataObject/YoutubeData/VideoYoutubeDataDTO.php`, `ListaVideosYoutubeDataDTO.php`
+  - `src/Exception/YoutubeData/YoutubeDataException.php`
+  - `src/Entity/CotaYoutubeDataDia.php`, `src/Repository/CotaYoutubeDataDiaRepository.php`, `src/Entity/VideoYoutube.php`, `src/Repository/VideoYoutubeRepository.php`
+  - `src/Service/YoutubeData/ControleCotaYoutubeDataService.php`, `AtualizarDetalhesVideosYoutubeService.php`, `AtualizarDetalhesVencidosYoutubeService.php`
+  - `src/Message/AtualizarDetalhesVideosYoutubeMessage.php`, `src/MessageHandler/AtualizarDetalhesVideosYoutubeMessageHandler.php`, `src/Schedule.php`
+  - `config/services.yaml`, `.tooling/env/.env.example`, `.tooling/env/.env.prod.example`
+  - `migrations/Version20261111151907.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 194 — Infra — identificador de músicas por IA com resposta estruturada e registro de custo
 - **Status**: Pendente

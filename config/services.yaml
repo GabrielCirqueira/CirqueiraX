@@ -18,6 +18,7 @@ parameters:
     env(SPOTIFY_CLIENT_SECRET): ''
     env(SPOTIFY_REDIRECT_URI): 'http://127.0.0.1:4012/spotify/callback'
     env(OPENAI_API_KEY): ''
+    env(YOUTUBE_API_KEY): ''
     env(OPENAI_MODELO_TEXTO): 'gpt-5.4-mini'
 
 services:
@@ -128,6 +129,18 @@ services:
         class: GuzzleHttp\Client
         arguments:
             - { base_uri: 'https://oauth2.googleapis.com' }
+
+    guzzle.youtube_data:
+        class: GuzzleHttp\Client
+        arguments:
+            - { base_uri: 'https://www.googleapis.com/youtube/v3/' }
+
+    App\Interface\YoutubeDataInterface: '@App\Infra\YoutubeData\YoutubeDataClient'
+
+    App\Infra\YoutubeData\YoutubeDataClient:
+        arguments:
+            $client: '@guzzle.youtube_data'
+            $chaveApi: '%env(YOUTUBE_API_KEY)%'
 
     App\Infra\GoogleFotos\GoogleFotosAPI:
         arguments:

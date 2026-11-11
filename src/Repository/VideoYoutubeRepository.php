@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
 use App\Enum\StatusClassificacaoVideo;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -113,6 +114,24 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
             ->andWhere('e.canal = :canal')
             ->setParameter('usuario', $usuario)
             ->setParameter('canal', $canal)
+            ->getQuery()
+            ->getResult();
+
+        return $videos;
+    }
+
+    /**
+     * @return list<VideoYoutube>
+     */
+    public function listarComDetalhesVencidos(DateTimeImmutable $atualizadosAntesDe, int $limite): array
+    {
+        /** @var list<VideoYoutube> $videos */
+        $videos = $this->createQueryBuilder('e')
+            ->andWhere('e.detalhesAtualizadosEm IS NULL OR e.detalhesAtualizadosEm < :limite')
+            ->setParameter('limite', $atualizadosAntesDe)
+            ->orderBy('e.detalhesAtualizadosEm', 'ASC')
+            ->addOrderBy('e.criadoEm', 'ASC')
+            ->setMaxResults($limite)
             ->getQuery()
             ->getResult();
 

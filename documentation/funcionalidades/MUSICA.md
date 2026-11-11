@@ -116,6 +116,19 @@ As tabelas do Spotify (`reproducao_spotify`, `artista_faixa_spotify`) não mudar
 - Repetir a mesma música em seguida não muda o topo do histórico, então a segunda reprodução é perdida.
 - O horário é o momento em que a reprodução foi vista, não o início real. O atraso entre tocar e aparecer no histórico ainda precisa ser medido (Pendências do Gabriel).
 
+## Detalhes dos vídeos pela YouTube Data API (tópico 193)
+
+- `YoutubeDataInterface` / `YoutubeDataClient` (`src/Infra/YoutubeData/`) com o Guzzle `guzzle.youtube_data`. `buscarVideos` chama `videos.list` com `snippet,contentDetails` em lotes de 50 e devolve título, canal, `canalId`, `categoriaId` (10 = Música), duração em ms (convertida do formato `PT#H#M#S`), descrição cortada em 1.000 caracteres e a maior capa. Os `videoId` que não voltam vêm em `idsNaoEncontrados`.
+- A chave `YOUTUBE_API_KEY` vai no cabeçalho `X-goog-api-key`, nunca na URL, então não aparece em log de requisição. Sem chave configurada, o cliente lança `YoutubeDataException::chaveInvalida()` e nada é consultado.
+- **Cota**: orçamento de 5.000 unidades por dia (cada `videos.list` custa 1, ou seja, até 250.000 vídeos por dia), contado na tabela `cota_youtube_data_dia`. O dia segue o horário do Pacífico, que é como o Google costuma reiniciar a cota (a política não diz o horário; confirmar no console do Google Cloud). Ao receber `quotaExceeded`, o dia é marcado como excedido e nada mais é consultado até o dia seguinte.
+- `AtualizarDetalhesVideosYoutubeService` aplica os dados no `VideoYoutube` e grava `detalhesAtualizadosEm`. Vídeo que não volta fica `disponivel = false`; só muda o status para `indisponivel` se ainda estava pendente, para não apagar das contas uma música já identificada que saiu do ar depois de ouvida.
+
+### Política de dados da API do YouTube
+
+As políticas para desenvolvedores (seção III.E.4) dizem que dados obtidos sem login do usuário, como os desta chave, só podem ficar guardados temporariamente e precisam ser **atualizados ou apagados depois de 30 dias**, além de manter esforço razoável para que fiquem iguais aos dados atuais. Pedido de exclusão do usuário precisa ser atendido em até 7 dias.
+
+Decisão: o catálogo é reatualizado. A cada hora, `AtualizarDetalhesVideosYoutubeMessage` pega até 500 vídeos com `detalhesAtualizadosEm` vazio ou com mais de 30 dias e consulta de novo (10 unidades por rodada). As reproduções e a identificação feita pelo sistema são dados do próprio usuário e não dependem dessa regra.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.
@@ -123,7 +136,8 @@ As tabelas do Spotify (`reproducao_spotify`, `artista_faixa_spotify`) não mudar
 3. **Marca do Spotify:** ler as diretrizes de marca e a política de desenvolvedor do Spotify para confirmar se dados do Spotify podem aparecer misturados com outro serviço sob o visual do Spotify. Conclusão: _pendente_.
 4. **Atraso do histórico:** dar play em 5 músicas novas anotando o horário de cada play, para comparar com a hora em que o coletor viu cada uma. Mediana: _pendente_. Máximo: _pendente_. Precisa de um cookie válido no coletor de teste.
 5. **Credenciais do teste OAuth:** apagar o cliente OAuth do teste no Google Cloud e revogar o acesso em myaccount.google.com → Segurança → Apps de terceiros. As variáveis `YTMUSIC_CLIENT_ID` e `YTMUSIC_CLIENT_SECRET` já foram removidas do `.env` do servidor.
-6. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
+6. **Chave da YouTube Data API:** no Google Cloud, num projeto separado do cliente OAuth do teste, ativar a YouTube Data API v3, criar uma chave de API restrita só a essa API e colocar em `YOUTUBE_API_KEY` no `.env` do servidor. Sem ela, os detalhes dos vídeos não são buscados.
+7. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
 
 ## Limpeza do teste
 

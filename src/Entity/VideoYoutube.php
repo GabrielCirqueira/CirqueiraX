@@ -17,6 +17,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Table(name: 'video_youtube')]
 #[ORM\UniqueConstraint(name: 'UNIQ_VIDEO_YOUTUBE_USUARIO_VIDEO', fields: ['usuario', 'videoId'])]
 #[ORM\Index(name: 'IDX_VIDEO_YOUTUBE_USUARIO_STATUS', fields: ['usuario', 'status'])]
+#[ORM\Index(name: 'IDX_VIDEO_YOUTUBE_DETALHES_ATUALIZADOS', fields: ['detalhesAtualizadosEm'])]
 #[ORM\HasLifecycleCallbacks]
 class VideoYoutube
 {
@@ -60,6 +61,9 @@ class VideoYoutube
 
     #[ORM\Column(type: 'boolean')]
     private bool $disponivel = true;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $detalhesAtualizadosEm = null;
 
     #[ORM\Column(type: 'string', length: 20, enumType: StatusClassificacaoVideo::class)]
     private StatusClassificacaoVideo $status;
@@ -127,6 +131,7 @@ class VideoYoutube
         $this->duracaoMs = $duracaoMs ?? $this->duracaoMs;
         $this->descricaoResumo = null === $descricao ? null : mb_substr($descricao, 0, self::TAMANHO_MAXIMO_DESCRICAO);
         $this->disponivel = true;
+        $this->detalhesAtualizadosEm = new DateTimeImmutable();
 
         return $this;
     }
@@ -134,6 +139,12 @@ class VideoYoutube
     public function marcarIndisponivel(): self
     {
         $this->disponivel = false;
+        $this->detalhesAtualizadosEm = new DateTimeImmutable();
+
+        if (!$this->isPendente()) {
+            return $this;
+        }
+
         $this->status = StatusClassificacaoVideo::Indisponivel;
         $this->classificadoEm = new DateTimeImmutable();
 
@@ -230,6 +241,11 @@ class VideoYoutube
     public function disponivel(): bool
     {
         return $this->disponivel;
+    }
+
+    public function detalhesAtualizadosEm(): ?DateTimeImmutable
+    {
+        return $this->detalhesAtualizadosEm;
     }
 
     public function status(): StatusClassificacaoVideo
