@@ -6,7 +6,7 @@ import {
   createRoutesFromElements,
 } from 'react-router-dom'
 
-import { RotaProtegida } from '@/routes'
+import { RotaProtegida, redirecionarComBusca } from '@/routes'
 import { lazyWithRetry } from '@/shared/utils/lazyWithRetry'
 
 const router = createBrowserRouter(
@@ -22,9 +22,10 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
           />
           <Route
-            path="spotify"
-            lazy={() => lazyWithRetry(() => import('@/features/spotify/Spotify'))}
+            path="musica"
+            lazy={() => lazyWithRetry(() => import('@/features/musica/Musica'))}
           />
+          <Route path="spotify" loader={redirecionarComBusca('/musica')} />
           <Route
             path="central-midias"
             lazy={() => lazyWithRetry(() => import('@/features/central-midias/CentralMidias'))}
@@ -74,13 +75,15 @@ const router = createBrowserRouter(
             lazy={() => lazyWithRetry(() => import('@/features/google-fotos/GoogleFotos'))}
           />
           <Route
-            path="spotify/artista"
-            lazy={() => lazyWithRetry(() => import('@/features/spotify/DetalheArtistaSpotify'))}
+            path="musica/artista"
+            lazy={() => lazyWithRetry(() => import('@/features/musica/DetalheArtistaMusica'))}
           />
           <Route
-            path="spotify/musica"
-            lazy={() => lazyWithRetry(() => import('@/features/spotify/DetalheMusicaSpotify'))}
+            path="musica/faixa"
+            lazy={() => lazyWithRetry(() => import('@/features/musica/DetalheMusicaMusica'))}
           />
+          <Route path="spotify/artista" loader={redirecionarComBusca('/musica/artista')} />
+          <Route path="spotify/musica" loader={redirecionarComBusca('/musica/faixa')} />
           <Route
             path="youtube/player-teste"
             lazy={() => lazyWithRetry(() => import('@/features/youtube/PlayerTesteYoutube'))}

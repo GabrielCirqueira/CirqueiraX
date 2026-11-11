@@ -26,6 +26,7 @@ export function useConcluirAutorizacaoSpotify() {
     onSuccess: (status) => {
       queryClient.setQueryData(SPOTIFY_QUERY_KEYS.status, status)
       queryClient.invalidateQueries({ queryKey: ['spotify'] })
+      queryClient.invalidateQueries({ queryKey: ['musica'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       addToast({
         title: 'Spotify conectado!',

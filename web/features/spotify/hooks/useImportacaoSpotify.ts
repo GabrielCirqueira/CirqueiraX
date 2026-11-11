@@ -45,6 +45,7 @@ export function useConsultarImportacaoSpotify(uuid: string | null, aoConcluir?: 
           queryKey: ['spotify'],
           predicate: (consulta) => consulta.queryKey[1] !== 'importacao',
         })
+        queryClient.invalidateQueries({ queryKey: ['musica'] })
         queryClient.invalidateQueries({ queryKey: ['dashboard'] })
         aoConcluir?.()
       }

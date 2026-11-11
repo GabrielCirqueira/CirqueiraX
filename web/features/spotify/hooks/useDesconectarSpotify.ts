@@ -11,6 +11,7 @@ export function useDesconectarSpotify() {
     mutationFn: desconectarSpotify,
     onSuccess: (resultado) => {
       queryClient.invalidateQueries({ queryKey: ['spotify'] })
+      queryClient.invalidateQueries({ queryKey: ['musica'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       addToast({
         title: 'Spotify desconectado',

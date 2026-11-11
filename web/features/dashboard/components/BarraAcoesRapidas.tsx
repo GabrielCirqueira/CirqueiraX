@@ -19,9 +19,14 @@ const ACOES_NAVEGACAO = [
   { rota: '/downloads', rotulo: 'Baixar vídeo', icone: DownloadCloud, cor: 'cirqueira.brand.400' },
   { rota: '/downloads-mp3', rotulo: 'Downloads MP3', icone: Music, cor: 'cirqueira.purple.400' },
   { rota: '/transcricoes', rotulo: 'Transcrições', icone: AudioLines, cor: 'cirqueira.teal.400' },
-  { rota: '/spotify', rotulo: 'Spotify', icone: Disc3, cor: 'cirqueira.green.400' },
+  { rota: '/musica', rotulo: 'Música', icone: Disc3, cor: 'cirqueira.green.400' },
   { rota: '/prints', rotulo: 'Prints', icone: Images, cor: 'cirqueira.cyan.400' },
-  { rota: '/upload-manual', rotulo: 'Upload manual', icone: UploadCloud, cor: 'cirqueira.amber.400' },
+  {
+    rota: '/upload-manual',
+    rotulo: 'Upload manual',
+    icone: UploadCloud,
+    cor: 'cirqueira.amber.400',
+  },
 ]
 
 export interface BarraAcoesRapidasProps {

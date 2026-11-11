@@ -1,3 +1,4 @@
+import { TemaMusica } from '@/features/musica/components/TemaMusica'
 import { useMountEffect } from '@/shared/hooks'
 import {
   Box,
@@ -16,7 +17,6 @@ import { memo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useConcluirAutorizacaoSpotify, useObterUrlAutorizacaoSpotify } from '../hooks'
 import { extrairMensagemErroApi } from '../utils'
-import { TemaSpotify } from './TemaSpotify'
 
 const codigosEnviados = new Set<string>()
 
@@ -26,9 +26,9 @@ function lerRetornoAposConexao(): string {
   try {
     const retorno = sessionStorage.getItem(CHAVE_RETORNO_APOS_CONEXAO)
     sessionStorage.removeItem(CHAVE_RETORNO_APOS_CONEXAO)
-    return retorno?.startsWith('/spotify') ? retorno : '/spotify'
+    return retorno?.startsWith('/musica') ? retorno : '/musica'
   } catch {
-    return '/spotify'
+    return '/musica'
   }
 }
 
@@ -66,7 +66,7 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
   }
 
   function handleIrParaSpotify() {
-    navigate('/spotify', { replace: true })
+    navigate('/musica', { replace: true })
   }
 
   let titulo = 'Conectando ao Spotify...'
@@ -97,14 +97,14 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
   const isCarregando = concluirMutation.isPending && !tipoErro
 
   return (
-    <TemaSpotify>
+    <TemaMusica>
       <Center minH="calc(100vh - 120px)" p={4}>
         <VStack
           w="full"
           maxW="md"
-          bg="cirqueira.spotify.cartao"
+          bg="cirqueira.musica.cartao"
           border="1px solid"
-          borderColor="cirqueira.spotify.cartaoElevado"
+          borderColor="cirqueira.musica.cartaoElevado"
           borderRadius="8px"
           p={8}
           gap={6}
@@ -115,12 +115,12 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
             boxSize={16}
             borderRadius="full"
             bg={tipoErro ? 'rgba(239, 68, 68, 0.15)' : 'rgba(30, 215, 96, 0.15)'}
-            color={tipoErro ? 'red.400' : 'cirqueira.spotify.verde'}
+            color={tipoErro ? 'red.400' : 'cirqueira.musica.verde'}
           >
             {tipoErro ? (
               <AlertTriangle size={32} />
             ) : isCarregando ? (
-              <Spinner size="lg" color="cirqueira.spotify.verde" />
+              <Spinner size="lg" color="cirqueira.musica.verde" />
             ) : (
               <CheckCircle2 size={32} />
             )}
@@ -131,11 +131,11 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
               as="h1"
               fontSize="2xl"
               fontWeight="bold"
-              color="cirqueira.spotify.textoPrincipal"
+              color="cirqueira.musica.textoPrincipal"
             >
               {titulo}
             </Heading>
-            <Text fontSize="sm" color="cirqueira.spotify.textoSecundario" lineHeight="tall">
+            <Text fontSize="sm" color="cirqueira.musica.textoSecundario" lineHeight="tall">
               {descricao}
             </Text>
           </VStack>
@@ -145,12 +145,12 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
               <Button
                 w="full"
                 h="44px"
-                bg="cirqueira.spotify.verde"
+                bg="cirqueira.musica.verde"
                 color="cirqueira.grey.950"
                 fontWeight="bold"
                 fontSize="sm"
                 borderRadius="full"
-                _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
+                _hover={{ bg: 'cirqueira.musica.verdeHover', transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
                 transition="all 0.15s ease"
                 onClick={handleTentarNovamente}
@@ -166,12 +166,12 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
                 w="full"
                 h="44px"
                 variant="ghost"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 fontSize="sm"
                 borderRadius="full"
                 _hover={{
-                  bg: 'cirqueira.spotify.cartaoElevado',
-                  color: 'cirqueira.spotify.textoPrincipal',
+                  bg: 'cirqueira.musica.cartaoElevado',
+                  color: 'cirqueira.musica.textoPrincipal',
                 }}
                 onClick={handleIrParaSpotify}
               >
@@ -181,7 +181,7 @@ export const SpotifyCallback = memo(function SpotifyCallback() {
           )}
         </VStack>
       </Center>
-    </TemaSpotify>
+    </TemaMusica>
   )
 })
 

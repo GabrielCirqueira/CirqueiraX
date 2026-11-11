@@ -1,3 +1,4 @@
+import { formatarDataHoraPtBr } from '@/features/musica/utils'
 import {
   Avatar,
   Box,
@@ -19,7 +20,7 @@ import {
   useSincronizarSpotify,
   useStatusSpotify,
 } from '../hooks'
-import { formatarDataHoraPtBr, mensagemBloqueioSpotify } from '../utils'
+import { mensagemBloqueioSpotify } from '../utils'
 import { ModalConfirmarDesconexao } from './ModalConfirmarDesconexao'
 
 export interface PainelConexaoSpotifyProps {
@@ -55,14 +56,14 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
     return (
       <Box
         p={6}
-        bg="cirqueira.spotify.cartao"
+        bg="cirqueira.musica.cartao"
         borderRadius="8px"
         border="1px solid"
-        borderColor="cirqueira.spotify.cartaoElevado"
+        borderColor="cirqueira.musica.cartaoElevado"
       >
         <HStack gap={4}>
-          <Spinner size="sm" color="cirqueira.spotify.verde" />
-          <Text fontSize="sm" color="cirqueira.spotify.textoSecundario">
+          <Spinner size="sm" color="cirqueira.musica.verde" />
+          <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
             Verificando conexão com o Spotify...
           </Text>
         </HStack>
@@ -77,10 +78,10 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
     <>
       <Box
         p={{ base: 4, md: 6 }}
-        bg="cirqueira.spotify.cartao"
+        bg="cirqueira.musica.cartao"
         borderRadius="8px"
         border="1px solid"
-        borderColor="cirqueira.spotify.cartaoElevado"
+        borderColor="cirqueira.musica.cartaoElevado"
         transition="all 0.2s ease"
         boxShadow="0 4px 20px rgba(0, 0, 0, 0.3)"
       >
@@ -97,15 +98,15 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                   size="lg"
                   shape="full"
                   border="2px solid"
-                  borderColor="cirqueira.spotify.verde"
+                  borderColor="cirqueira.musica.verde"
                 >
                   {status.urlFoto && (
                     <Avatar.Image src={status.urlFoto} alt={status.nomeExibicao ?? 'Spotify'} />
                   )}
                   <Avatar.Fallback
                     name={status.nomeExibicao ?? 'Spotify'}
-                    bg="cirqueira.spotify.cartaoElevado"
-                    color="cirqueira.spotify.verde"
+                    bg="cirqueira.musica.cartaoElevado"
+                    color="cirqueira.musica.verde"
                   />
                 </Avatar.Root>
                 <Center
@@ -114,7 +115,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                   right={-1}
                   boxSize={5}
                   borderRadius="full"
-                  bg="cirqueira.spotify.verde"
+                  bg="cirqueira.musica.verde"
                   color="cirqueira.grey.950"
                 >
                   <CheckCircle2 size={12} />
@@ -133,8 +134,8 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
               <Center
                 boxSize={12}
                 borderRadius="full"
-                bg="cirqueira.spotify.cartaoElevado"
-                color="cirqueira.spotify.verde"
+                bg="cirqueira.musica.cartaoElevado"
+                color="cirqueira.musica.verde"
               >
                 <Music size={24} />
               </Center>
@@ -146,7 +147,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                   as="h2"
                   fontSize="md"
                   fontWeight="bold"
-                  color="cirqueira.spotify.textoPrincipal"
+                  color="cirqueira.musica.textoPrincipal"
                 >
                   {isConectada
                     ? (status.nomeExibicao ?? 'Conta Spotify Conectada')
@@ -169,7 +170,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                 )}
               </HStack>
 
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+              <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
                 {isConectada
                   ? `Sincronizado desde ${formatarDataHoraPtBr(status.conectadoEm)}${
                       status.ultimaColetaEm
@@ -188,8 +189,8 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                   py={2}
                   borderRadius="lg"
                   borderWidth="1px"
-                  borderColor="cirqueira.spotify.amarelo"
-                  color="cirqueira.spotify.amarelo"
+                  borderColor="cirqueira.musica.amarelo"
+                  color="cirqueira.musica.amarelo"
                   fontSize="xs"
                 >
                   <AlertCircle size={14} />
@@ -211,11 +212,11 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                 variant="outline"
                 size="sm"
                 borderRadius="full"
-                borderColor="cirqueira.spotify.cartaoElevado"
-                color="cirqueira.spotify.textoPrincipal"
+                borderColor="cirqueira.musica.cartaoElevado"
+                color="cirqueira.musica.textoPrincipal"
                 _hover={{
-                  bg: 'cirqueira.spotify.cartaoElevado',
-                  borderColor: 'cirqueira.spotify.textoSecundario',
+                  bg: 'cirqueira.musica.cartaoElevado',
+                  borderColor: 'cirqueira.musica.textoSecundario',
                 }}
                 onClick={onAbrirModalImportacao}
                 h="38px"
@@ -233,8 +234,8 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                 variant="ghost"
                 size="sm"
                 borderRadius="full"
-                color="cirqueira.spotify.textoSecundario"
-                _hover={{ color: 'cirqueira.spotify.verde', bg: 'cirqueira.spotify.cartaoElevado' }}
+                color="cirqueira.musica.textoSecundario"
+                _hover={{ color: 'cirqueira.musica.verde', bg: 'cirqueira.musica.cartaoElevado' }}
                 onClick={() => sincronizarMutation.mutate()}
                 disabled={sincronizarMutation.isPending}
                 aria-label="Sincronizar agora"
@@ -256,8 +257,8 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                 variant="ghost"
                 size="sm"
                 borderRadius="full"
-                color="cirqueira.spotify.textoSecundario"
-                _hover={{ color: 'red.400', bg: 'cirqueira.spotify.cartaoElevado' }}
+                color="cirqueira.musica.textoSecundario"
+                _hover={{ color: 'red.400', bg: 'cirqueira.musica.cartaoElevado' }}
                 onClick={() => setModalDesconectarAberto(true)}
                 h="38px"
                 px={4}
@@ -269,12 +270,12 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
               </Button>
             ) : isReconectar ? (
               <Button
-                bg="cirqueira.spotify.verde"
+                bg="cirqueira.musica.verde"
                 color="cirqueira.grey.950"
                 size="sm"
                 borderRadius="full"
                 fontWeight="bold"
-                _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
+                _hover={{ bg: 'cirqueira.musica.verdeHover', transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
                 transition="all 0.15s ease"
                 onClick={handleVincularOuReconectar}
@@ -290,12 +291,12 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
               </Button>
             ) : (
               <Button
-                bg="cirqueira.spotify.verde"
+                bg="cirqueira.musica.verde"
                 color="cirqueira.grey.950"
                 size="sm"
                 borderRadius="full"
                 fontWeight="bold"
-                _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
+                _hover={{ bg: 'cirqueira.musica.verdeHover', transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
                 transition="all 0.15s ease"
                 onClick={handleVincularOuReconectar}

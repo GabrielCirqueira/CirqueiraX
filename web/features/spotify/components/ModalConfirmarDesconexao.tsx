@@ -21,14 +21,14 @@ export const ModalConfirmarDesconexao = memo(function ModalConfirmarDesconexao({
         <Dialog.Backdrop bg="rgba(0, 0, 0, 0.8)" backdropFilter="blur(4px)" />
         <Dialog.Positioner>
           <Dialog.Content
-            bg="cirqueira.spotify.cartao"
+            bg="cirqueira.musica.cartao"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="cirqueira.musica.cartaoElevado"
             borderRadius="8px"
             p={6}
             maxW="md"
             w="full"
-            color="cirqueira.spotify.textoPrincipal"
+            color="cirqueira.musica.textoPrincipal"
             boxShadow="0 20px 40px rgba(0, 0, 0, 0.6)"
           >
             <Dialog.Header
@@ -58,10 +58,10 @@ export const ModalConfirmarDesconexao = memo(function ModalConfirmarDesconexao({
                   size="xs"
                   variant="ghost"
                   borderRadius="full"
-                  color="cirqueira.spotify.textoSecundario"
+                  color="cirqueira.musica.textoSecundario"
                   _hover={{
-                    color: 'cirqueira.spotify.textoPrincipal',
-                    bg: 'cirqueira.spotify.cartaoElevado',
+                    color: 'cirqueira.musica.textoPrincipal',
+                    bg: 'cirqueira.musica.cartaoElevado',
                   }}
                   onClick={onFechar}
                 >
@@ -72,24 +72,24 @@ export const ModalConfirmarDesconexao = memo(function ModalConfirmarDesconexao({
 
             <Dialog.Body p={0} mb={6}>
               <VStack align="flex-start" gap={3}>
-                <Text fontSize="sm" color="cirqueira.spotify.textoSecundario" lineHeight="tall">
+                <Text fontSize="sm" color="cirqueira.musica.textoSecundario" lineHeight="tall">
                   Ao desconectar sua conta, as reproduções sincronizadas automaticamente via API
                   serão excluídas.
                 </Text>
                 <Box
                   p={3}
                   borderRadius="8px"
-                  bg="cirqueira.spotify.cartaoElevado"
+                  bg="cirqueira.musica.cartaoElevado"
                   borderLeft="3px solid"
-                  borderColor="cirqueira.spotify.verde"
+                  borderColor="cirqueira.musica.verde"
                   w="full"
                 >
-                  <Text fontSize="xs" color="cirqueira.spotify.textoPrincipal">
+                  <Text fontSize="xs" color="cirqueira.musica.textoPrincipal">
                     Os dados importados de arquivos de histórico não serão apagados e continuarão
                     preservados.
                   </Text>
                 </Box>
-                <Text fontSize="xs" color="cirqueira.spotify.textoDesabilitado" lineHeight="tall">
+                <Text fontSize="xs" color="cirqueira.musica.textoDesabilitado" lineHeight="tall">
                   Lembre-se de que você também pode gerenciar ou revogar o acesso do aplicativo
                   diretamente na página de aplicativos da sua conta do Spotify.
                 </Text>
@@ -100,10 +100,10 @@ export const ModalConfirmarDesconexao = memo(function ModalConfirmarDesconexao({
               <Button
                 variant="ghost"
                 borderRadius="full"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 _hover={{
-                  bg: 'cirqueira.spotify.cartaoElevado',
-                  color: 'cirqueira.spotify.textoPrincipal',
+                  bg: 'cirqueira.musica.cartaoElevado',
+                  color: 'cirqueira.musica.textoPrincipal',
                 }}
                 onClick={onFechar}
                 disabled={carregando}

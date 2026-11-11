@@ -24,6 +24,7 @@ export function useSincronizacaoAutomaticaSpotify(tocando: TocandoAgora | undefi
           queryKey: ['spotify'],
           predicate: (consulta) => !CHAVES_SEM_INVALIDAR.has(String(consulta.queryKey[1])),
         })
+        queryClient.invalidateQueries({ queryKey: ['musica'] })
         queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       } catch {
         return

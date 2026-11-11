@@ -11,7 +11,8 @@ interface HeaderProps {
 }
 
 function getTituloRota(pathname: string): string {
-  if (pathname.startsWith('/spotify')) return 'Spotify & Cápsula Sonora'
+  if (pathname.startsWith('/musica') || pathname.startsWith('/spotify'))
+    return 'Música & Cápsula Sonora'
   if (pathname.startsWith('/central-midias') || pathname.startsWith('/todas-midias'))
     return 'Central de Mídias'
   if (pathname.startsWith('/downloads-mp3')) return 'Downloads MP3'

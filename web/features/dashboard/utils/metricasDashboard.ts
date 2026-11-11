@@ -72,11 +72,11 @@ const PALETA_TOM: Record<TomMetrica, string> = {
 
 const COR_TEXTO_TOM: Record<TomMetrica, string> = {
   neutro: 'fg',
-  sucesso: 'cirqueira.spotify.verde',
-  alerta: 'cirqueira.spotify.amarelo',
+  sucesso: 'cirqueira.musica.verde',
+  alerta: 'cirqueira.musica.amarelo',
   erro: 'cirqueira.red.500',
   destaque: 'cirqueira.brand.400',
-  info: 'cirqueira.spotify.azul',
+  info: 'cirqueira.musica.azul',
 }
 
 const BYTES_POR_MEGABYTE = 1024 * 1024
@@ -279,7 +279,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: spotify.motivoErro ?? 'Autorização expirada. Clique para reconectar.',
       estado: 'Reconectar',
       tom: 'erro',
-      rota: '/spotify',
+      rota: '/musica',
     })
   } else if (spotify?.conectado && spotify.bloqueadoAte) {
     servicos.push({
@@ -287,7 +287,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: `Bloqueado pelo Spotify até ${formatarHoraBrasilia(spotify.bloqueadoAte)} · coleta pausada`,
       estado: 'Bloqueado',
       tom: 'alerta',
-      rota: '/spotify',
+      rota: '/musica',
     })
   } else if (spotify?.conectado) {
     servicos.push({
@@ -301,7 +301,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
           : 'Histórico ativo',
       estado: spotify.coletaParada ? 'Atrasado' : 'Conectado',
       tom: spotify.coletaParada ? 'alerta' : 'sucesso',
-      rota: '/spotify',
+      rota: '/musica',
     })
   } else {
     servicos.push({
@@ -309,7 +309,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: 'Vincule sua conta para a Cápsula Sonora',
       estado: 'Desconectado',
       tom: 'neutro',
-      rota: '/spotify',
+      rota: '/musica',
     })
   }
 

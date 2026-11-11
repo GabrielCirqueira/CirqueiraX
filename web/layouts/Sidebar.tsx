@@ -31,7 +31,7 @@ interface SidebarProps {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, cor: 'cirqueira.brand.400' },
-  { href: '/spotify', label: 'Spotify', icon: Radio, cor: 'cirqueira.spotify.verde' },
+  { href: '/musica', label: 'Música', icon: Radio, cor: 'cirqueira.musica.verde' },
   { href: '/central-midias', label: 'Central de Mídias', icon: Layers, cor: 'cirqueira.cyan.300' },
   { href: '/downloads', label: 'Downloads', icon: DownloadCloud, cor: 'cirqueira.blue.400' },
   { href: '/downloads-mp3', label: 'Downloads MP3', icon: Music, cor: 'cirqueira.purple.300' },

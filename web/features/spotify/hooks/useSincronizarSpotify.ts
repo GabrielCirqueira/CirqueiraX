@@ -10,6 +10,7 @@ export function useSincronizarSpotify() {
     mutationFn: sincronizarSpotifyAgora,
     onSuccess: (resultado) => {
       queryClient.invalidateQueries({ queryKey: ['spotify'] })
+      queryClient.invalidateQueries({ queryKey: ['musica'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       addToast({
         title: 'Sincronização concluída',

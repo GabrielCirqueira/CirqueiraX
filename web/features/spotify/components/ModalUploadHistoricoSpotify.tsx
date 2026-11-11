@@ -134,8 +134,8 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
             cursor={isProcessando ? 'not-allowed' : 'pointer'}
             p={6}
             border="2px dashed"
-            borderColor={arrastando ? 'cirqueira.spotify.verde' : 'cirqueira.spotify.cartaoElevado'}
-            bg={arrastando ? 'rgba(30, 215, 96, 0.08)' : 'cirqueira.spotify.cartaoElevado'}
+            borderColor={arrastando ? 'cirqueira.musica.verde' : 'cirqueira.musica.cartaoElevado'}
+            bg={arrastando ? 'rgba(30, 215, 96, 0.08)' : 'cirqueira.musica.cartaoElevado'}
             borderRadius="8px"
             textAlign="center"
             transition="all 0.2s ease"
@@ -143,7 +143,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
               isProcessando
                 ? undefined
                 : {
-                    borderColor: 'cirqueira.spotify.verde',
+                    borderColor: 'cirqueira.musica.verde',
                     bg: 'rgba(30, 215, 96, 0.05)',
                   }
             }
@@ -161,27 +161,27 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
               <Center
                 boxSize={12}
                 borderRadius="full"
-                bg="cirqueira.spotify.cartao"
-                color={arquivo ? 'cirqueira.spotify.verde' : 'cirqueira.spotify.textoSecundario'}
+                bg="cirqueira.musica.cartao"
+                color={arquivo ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoSecundario'}
               >
                 <UploadCloud size={24} />
               </Center>
 
               {arquivo ? (
                 <VStack gap={0.5}>
-                  <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
+                  <Text fontSize="sm" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
                     {arquivo.name}
                   </Text>
-                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                  <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
                     {(arquivo.size / (1024 * 1024)).toFixed(2)} MB • Clique para trocar
                   </Text>
                 </VStack>
               ) : (
                 <VStack gap={0.5}>
-                  <Text fontSize="sm" fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
+                  <Text fontSize="sm" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
                     Arraste seu arquivo ZIP ou JSON aqui
                   </Text>
-                  <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+                  <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
                     Arquivos do Spotify: StreamingHistory*.json ou ZIP completo
                   </Text>
                 </VStack>
@@ -194,29 +194,25 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
               gap={2}
               align="stretch"
               p={4}
-              bg="cirqueira.spotify.cartaoElevado"
+              bg="cirqueira.musica.cartaoElevado"
               borderRadius="8px"
             >
               <HStack justify="space-between">
                 <HStack gap={2}>
-                  <Spinner size="xs" color="cirqueira.spotify.verde" />
-                  <Text
-                    fontSize="xs"
-                    fontWeight="semibold"
-                    color="cirqueira.spotify.textoPrincipal"
-                  >
+                  <Spinner size="xs" color="cirqueira.musica.verde" />
+                  <Text fontSize="xs" fontWeight="semibold" color="cirqueira.musica.textoPrincipal">
                     {iniciarImportacao.isPending
                       ? 'Enviando arquivo...'
                       : 'Processando histórico em segundo plano...'}
                   </Text>
                 </HStack>
-                <Text fontSize="2xs" color="cirqueira.spotify.textoSecundario">
+                <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
                   Não feche a aba
                 </Text>
               </HStack>
               <Progress.Root value={null} size="xs" colorPalette="green">
-                <Progress.Track bg="cirqueira.spotify.cartao">
-                  <Progress.Range bg="cirqueira.spotify.verde" />
+                <Progress.Track bg="cirqueira.musica.cartao">
+                  <Progress.Range bg="cirqueira.musica.verde" />
                 </Progress.Track>
               </Progress.Root>
             </VStack>
@@ -225,12 +221,12 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           {!isProcessando && (
             <Button
               type="submit"
-              bg="cirqueira.spotify.verde"
+              bg="cirqueira.musica.verde"
               color="cirqueira.grey.950"
               borderRadius="full"
               fontWeight="bold"
               fontSize="sm"
-              _hover={{ bg: 'cirqueira.spotify.verdeHover', transform: 'scale(1.02)' }}
+              _hover={{ bg: 'cirqueira.musica.verdeHover', transform: 'scale(1.02)' }}
               _active={{ transform: 'scale(0.98)' }}
               transition="all 0.15s ease"
               disabled={!arquivo}
@@ -254,7 +250,12 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           align="stretch"
         >
           <HStack gap={3}>
-            <Center boxSize={10} borderRadius="full" bg="cirqueira.spotify.verde" color="cirqueira.grey.950">
+            <Center
+              boxSize={10}
+              borderRadius="full"
+              bg="cirqueira.musica.verde"
+              color="cirqueira.grey.950"
+            >
               <CheckCircle2 size={20} />
             </Center>
             <VStack align="flex-start" gap={0}>
@@ -262,11 +263,11 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 as="h3"
                 fontSize="md"
                 fontWeight="bold"
-                color="cirqueira.spotify.textoPrincipal"
+                color="cirqueira.musica.textoPrincipal"
               >
                 Importação concluída com sucesso!
               </Heading>
-              <Text fontSize="xs" color="cirqueira.spotify.textoSecundario">
+              <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
                 Seus dados e cápsulas mensais já foram atualizados.
               </Text>
             </VStack>
@@ -275,76 +276,76 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={3} pt={2}>
             <Box
               p={3}
-              bg="cirqueira.spotify.cartao"
+              bg="cirqueira.musica.cartao"
               borderRadius="6px"
               border="1px solid"
-              borderColor="cirqueira.spotify.cartaoElevado"
+              borderColor="cirqueira.musica.cartaoElevado"
             >
               <Text
                 fontSize="2xs"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 textTransform="uppercase"
               >
                 Total de reproduções
               </Text>
-              <Text fontSize="lg" fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
+              <Text fontSize="lg" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
                 {importacao.totalLidos.toLocaleString('pt-BR')}
               </Text>
             </Box>
 
             <Box
               p={3}
-              bg="cirqueira.spotify.cartao"
+              bg="cirqueira.musica.cartao"
               borderRadius="6px"
               border="1px solid"
-              borderColor="cirqueira.spotify.cartaoElevado"
+              borderColor="cirqueira.musica.cartaoElevado"
             >
               <Text
                 fontSize="2xs"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 textTransform="uppercase"
               >
                 Novas adicionadas
               </Text>
-              <Text fontSize="lg" fontWeight="bold" color="cirqueira.spotify.verde">
+              <Text fontSize="lg" fontWeight="bold" color="cirqueira.musica.verde">
                 +{importacao.totalNovos.toLocaleString('pt-BR')}
               </Text>
             </Box>
 
             <Box
               p={3}
-              bg="cirqueira.spotify.cartao"
+              bg="cirqueira.musica.cartao"
               borderRadius="6px"
               border="1px solid"
-              borderColor="cirqueira.spotify.cartaoElevado"
+              borderColor="cirqueira.musica.cartaoElevado"
             >
               <Text
                 fontSize="2xs"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 textTransform="uppercase"
               >
                 Substituídas / Refinadas
               </Text>
-              <Text fontSize="lg" fontWeight="bold" color="cirqueira.spotify.azul">
+              <Text fontSize="lg" fontWeight="bold" color="cirqueira.musica.azul">
                 {importacao.totalSubstituidos.toLocaleString('pt-BR')}
               </Text>
             </Box>
 
             <Box
               p={3}
-              bg="cirqueira.spotify.cartao"
+              bg="cirqueira.musica.cartao"
               borderRadius="6px"
               border="1px solid"
-              borderColor="cirqueira.spotify.cartaoElevado"
+              borderColor="cirqueira.musica.cartaoElevado"
             >
               <Text
                 fontSize="2xs"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 textTransform="uppercase"
               >
                 Ignoradas / Repetidas
               </Text>
-              <Text fontSize="lg" fontWeight="bold" color="cirqueira.spotify.textoDesabilitado">
+              <Text fontSize="lg" fontWeight="bold" color="cirqueira.musica.textoDesabilitado">
                 {importacao.totalIgnorados.toLocaleString('pt-BR')}
               </Text>
             </Box>
@@ -353,7 +354,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           <Button
             w="full"
             borderRadius="full"
-            bg="cirqueira.spotify.verde"
+            bg="cirqueira.musica.verde"
             color="cirqueira.grey.950"
             fontWeight="bold"
             fontSize="sm"
@@ -384,7 +385,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 as="h3"
                 fontSize="md"
                 fontWeight="bold"
-                color="cirqueira.spotify.textoPrincipal"
+                color="cirqueira.musica.textoPrincipal"
               >
                 Falha no processamento
               </Heading>
@@ -398,9 +399,9 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
             w="full"
             borderRadius="full"
             variant="outline"
-            borderColor="cirqueira.spotify.cartaoElevado"
-            color="cirqueira.spotify.textoPrincipal"
-            _hover={{ bg: 'cirqueira.spotify.cartaoElevado' }}
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
+            _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
             fontSize="sm"
             onClick={limparFormulario}
           >
@@ -414,15 +415,15 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
         align="stretch"
         pt={2}
         borderTop="1px solid"
-        borderColor="cirqueira.spotify.cartaoElevado"
+        borderColor="cirqueira.musica.cartaoElevado"
       >
-        <HStack gap={2} color="cirqueira.spotify.verde">
+        <HStack gap={2} color="cirqueira.musica.verde">
           <ShieldCheck size={16} />
-          <Text fontSize="xs" fontWeight="bold" color="cirqueira.spotify.textoPrincipal">
+          <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
             Aviso de privacidade e dados
           </Text>
         </HStack>
-        <Text fontSize="xs" color="cirqueira.spotify.textoSecundario" lineHeight="tall">
+        <Text fontSize="xs" color="cirqueira.musica.textoSecundario" lineHeight="tall">
           O arquivo ZIP exportado pelo Spotify pode conter dados cadastrais e outros registros. O
           CirqueiraX processa exclusivamente as reproduções de áudio (`StreamingHistory*.json` e
           `Audio_*.json`), descartando imediatamente qualquer outro dado.
@@ -431,11 +432,11 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
         <Box
           p={3}
           borderRadius="6px"
-          bg="cirqueira.spotify.cartaoElevado"
+          bg="cirqueira.musica.cartaoElevado"
           borderLeft="3px solid"
-          borderColor="cirqueira.spotify.amarelo"
+          borderColor="cirqueira.musica.amarelo"
         >
-          <Text fontSize="xs" color="cirqueira.spotify.textoPrincipal" lineHeight="tall">
+          <Text fontSize="xs" color="cirqueira.musica.textoPrincipal" lineHeight="tall">
             <strong>Deduplicação garantida:</strong> Você pode enviar o mesmo arquivo ou arquivos de
             períodos sobrepostos quantas vezes quiser. Reproduções já registradas não serão
             duplicadas.
@@ -446,14 +447,14 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           <Accordion.Item
             value="instrucoes"
             border="none"
-            bg="cirqueira.spotify.cartaoElevado"
+            bg="cirqueira.musica.cartaoElevado"
             borderRadius="8px"
             px={3}
           >
             <Accordion.ItemTrigger py={2.5}>
-              <HStack gap={2} flex={1} color="cirqueira.spotify.textoSecundario" fontSize="xs">
-                <HelpCircle size={14} color="var(--chakra-colors-cirqueira-spotify-verde)" />
-                <Text as="span" fontWeight="semibold" color="cirqueira.spotify.textoPrincipal">
+              <HStack gap={2} flex={1} color="cirqueira.musica.textoSecundario" fontSize="xs">
+                <HelpCircle size={14} color="var(--chakra-colors-cirqueira-musica-verde)" />
+                <Text as="span" fontWeight="semibold" color="cirqueira.musica.textoPrincipal">
                   Como solicitar seus arquivos no Spotify?
                 </Text>
               </HStack>
@@ -463,7 +464,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 align="flex-start"
                 gap={2}
                 fontSize="xs"
-                color="cirqueira.spotify.textoSecundario"
+                color="cirqueira.musica.textoSecundario"
                 lineHeight="tall"
               >
                 <Text>
@@ -477,7 +478,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 <Text>
                   3. As <em>Informações técnicas de registro</em> não são necessárias.
                 </Text>
-                <Text color="cirqueira.spotify.textoDesabilitado">
+                <Text color="cirqueira.musica.textoDesabilitado">
                   Nota: O intervalo de dias entre a solicitação do arquivo e a conexão da API só é
                   preenchido em uma importação posterior.
                 </Text>
@@ -500,14 +501,14 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
           <Drawer.Backdrop bg="rgba(0, 0, 0, 0.8)" backdropFilter="blur(4px)" />
           <Drawer.Positioner>
             <Drawer.Content
-              bg="cirqueira.spotify.cartao"
+              bg="cirqueira.musica.cartao"
               borderTop="1px solid"
-              borderColor="cirqueira.spotify.cartaoElevado"
+              borderColor="cirqueira.musica.cartaoElevado"
               borderTopRadius="16px"
               p={5}
               maxH="85vh"
               overflowY="auto"
-              color="cirqueira.spotify.textoPrincipal"
+              color="cirqueira.musica.textoPrincipal"
             >
               <Drawer.Header
                 p={0}
@@ -521,7 +522,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                     p={2}
                     borderRadius="full"
                     bg="rgba(30, 215, 96, 0.15)"
-                    color="cirqueira.spotify.verde"
+                    color="cirqueira.musica.verde"
                     display="inline-flex"
                   >
                     <Archive size={20} />
@@ -536,10 +537,10 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                     size="xs"
                     variant="ghost"
                     borderRadius="full"
-                    color="cirqueira.spotify.textoSecundario"
+                    color="cirqueira.musica.textoSecundario"
                     _hover={{
-                      color: 'cirqueira.spotify.textoPrincipal',
-                      bg: 'cirqueira.spotify.cartaoElevado',
+                      color: 'cirqueira.musica.textoPrincipal',
+                      bg: 'cirqueira.musica.cartaoElevado',
                     }}
                     onClick={handleFechar}
                   >
@@ -562,14 +563,14 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
         <Dialog.Backdrop bg="rgba(0, 0, 0, 0.8)" backdropFilter="blur(4px)" />
         <Dialog.Positioner>
           <Dialog.Content
-            bg="cirqueira.spotify.cartao"
+            bg="cirqueira.musica.cartao"
             border="1px solid"
-            borderColor="cirqueira.spotify.cartaoElevado"
+            borderColor="cirqueira.musica.cartaoElevado"
             borderRadius="8px"
             p={6}
             maxW="xl"
             w="full"
-            color="cirqueira.spotify.textoPrincipal"
+            color="cirqueira.musica.textoPrincipal"
             boxShadow="0 20px 40px rgba(0, 0, 0, 0.6)"
           >
             <Dialog.Header
@@ -584,7 +585,7 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                   p={2}
                   borderRadius="full"
                   bg="rgba(30, 215, 96, 0.15)"
-                  color="cirqueira.spotify.verde"
+                  color="cirqueira.musica.verde"
                   display="inline-flex"
                 >
                   <Archive size={20} />
@@ -599,10 +600,10 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                   size="xs"
                   variant="ghost"
                   borderRadius="full"
-                  color="cirqueira.spotify.textoSecundario"
+                  color="cirqueira.musica.textoSecundario"
                   _hover={{
-                    color: 'cirqueira.spotify.textoPrincipal',
-                    bg: 'cirqueira.spotify.cartaoElevado',
+                    color: 'cirqueira.musica.textoPrincipal',
+                    bg: 'cirqueira.musica.cartaoElevado',
                   }}
                   onClick={handleFechar}
                 >
