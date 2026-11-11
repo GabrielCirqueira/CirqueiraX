@@ -71,16 +71,6 @@ final class SpotifyException extends \DomainException
         return new self('Esta conta Spotify já está vinculada a outro usuário ou difere da conta originalmente conectada.', 409);
     }
 
-    public static function dispositivoNaoInformado(): self
-    {
-        return new self('O player do navegador ainda não está pronto. Conecte o player antes de tocar.', 422);
-    }
-
-    public static function semMusicaParaTestar(): self
-    {
-        return new self('Ainda não há nenhuma música registrada para usar no teste do player.', 404);
-    }
-
     public static function contaNaoConectada(): self
     {
         return new self('Nenhuma conta do Spotify está conectada para este usuário.', 400);

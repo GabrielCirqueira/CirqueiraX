@@ -205,7 +205,7 @@
 | 184 | Frontend — seção Cápsula Sonora com seletor de mês | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 185 | Calibração com os prints, teste end-to-end e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 186 | Preparação — decisões, limpeza do teste e verificações antes de construir | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
-| 187 | Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 187 | Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 188 | Infra — cliente do YouTube Music com ytmusicapi por processo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
 | 189 | Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
 | 190 | Conexão do YouTube Music — serviços, endpoints e status no Dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |

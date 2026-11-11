@@ -33,11 +33,6 @@ interface SpotifyInterface
 
     public function obterFaixa(string $accessToken, string $idFaixa): FaixaSpotifyDTO;
 
-    /**
-     * @param list<string> $uris
-     */
-    public function tocarNoDispositivo(string $accessToken, string $codigoDispositivo, array $uris): void;
-
     public function obterArtista(string $accessToken, string $idArtista): ArtistaSpotifyDTO;
 
     /**

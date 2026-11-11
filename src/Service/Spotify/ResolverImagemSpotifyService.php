@@ -6,6 +6,7 @@ namespace App\Service\Spotify;
 
 use App\DataObject\Spotify\FaixaSpotifyDTO;
 use App\Entity\ImagemSpotify;
+use App\Enum\OrigemConsultaSpotify;
 use App\Enum\TipoImagemSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
@@ -20,6 +21,8 @@ final readonly class ResolverImagemSpotifyService
 {
     private const int PONTUACAO_MINIMA_CORRESPONDENCIA = 70;
     private const int PAUSA_ENTRE_REQUISICOES_MICROSEGUNDOS = 150000;
+    private const int CODIGO_LIMITE_REQUISICOES = 429;
+    private const int MICROSEGUNDOS_POR_SEGUNDO = 1000000;
 
     public function __construct(
         private ImagemSpotifyRepository $imagemRepository,
@@ -29,6 +32,7 @@ final readonly class ResolverImagemSpotifyService
         private SpotifyInterface $spotifyClient,
         private ClientInterface $httpClient,
         private LoggerInterface $logger,
+        private ControleLimiteSpotifyService $controleLimite,
     ) {
     }
 
@@ -48,7 +52,8 @@ final readonly class ResolverImagemSpotifyService
         }
 
         $accessToken = null;
-        if (null !== $message->usuarioId) {
+        $spotifyLiberado = !$this->controleLimite->estaBloqueado();
+        if ($spotifyLiberado && null !== $message->usuarioId) {
             $usuario = $this->usuarioRepository->find($message->usuarioId);
             if (null !== $usuario) {
                 $conta = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
@@ -62,8 +67,9 @@ final readonly class ResolverImagemSpotifyService
             }
         }
 
-        if (null === $accessToken || '' === trim($accessToken)) {
+        if ($spotifyLiberado && (null === $accessToken || '' === trim($accessToken))) {
             try {
+                $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Autorizacao);
                 $accessToken = $this->spotifyClient->obterTokenClientCredentials();
             } catch (\Throwable) {
                 $accessToken = null;
@@ -82,6 +88,7 @@ final readonly class ResolverImagemSpotifyService
 
                 usleep(self::PAUSA_ENTRE_REQUISICOES_MICROSEGUNDOS);
             } catch (SpotifyException $e) {
+                $this->registrarBloqueioSeLimite($e);
                 $this->logger->warning('Falha na API ao buscar imagem do Spotify.', [
                     'chave' => $imagem->chaveBusca(),
                     'codigo' => $e->getCode(),
@@ -103,6 +110,19 @@ final readonly class ResolverImagemSpotifyService
         }
 
         $this->imagemRepository->salvar($imagem);
+    }
+
+    private function registrarBloqueioSeLimite(SpotifyException $excecao): void
+    {
+        if (self::CODIGO_LIMITE_REQUISICOES !== $excecao->getCode()) {
+            return;
+        }
+
+        $this->controleLimite->registrarBloqueio(
+            $excecao->segundosEspera(),
+            OrigemConsultaSpotify::Capas,
+            intdiv(self::PAUSA_ENTRE_REQUISICOES_MICROSEGUNDOS, self::MICROSEGUNDOS_POR_SEGUNDO),
+        );
     }
 
     private function obterOuCriarImagem(BuscarImagemSpotifyMessage $message): ImagemSpotify
@@ -135,7 +155,8 @@ final readonly class ResolverImagemSpotifyService
         string $accessToken,
         BuscarImagemSpotifyMessage $message,
     ): void {
-        if ($message->codigoSpotify !== null && '' !== trim($message->codigoSpotify)) {
+        if (null !== $message->codigoSpotify && '' !== trim($message->codigoSpotify)) {
+            $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Capas);
             $faixa = $this->spotifyClient->obterFaixa($accessToken, trim($message->codigoSpotify));
             $imagem->marcarEncontrada(
                 $faixa->codigoFaixa,
@@ -150,9 +171,11 @@ final readonly class ResolverImagemSpotifyService
 
         $artista = $message->artista ?? '';
         $termoBusca = sprintf('track:%s artist:%s', $message->nome, $artista);
+        $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Capas);
         $busca = $this->spotifyClient->buscarFaixas($accessToken, $termoBusca, limite: 10);
 
         if (empty($busca->faixas)) {
+            $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Capas);
             $busca = $this->spotifyClient->buscarFaixas(
                 $accessToken,
                 sprintf('%s %s', $message->nome, $artista),
@@ -197,7 +220,8 @@ final readonly class ResolverImagemSpotifyService
         string $accessToken,
         BuscarImagemSpotifyMessage $message,
     ): void {
-        if ($message->codigoSpotify !== null && '' !== trim($message->codigoSpotify)) {
+        if (null !== $message->codigoSpotify && '' !== trim($message->codigoSpotify)) {
+            $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Capas);
             $artista = $this->spotifyClient->obterArtista($accessToken, trim($message->codigoSpotify));
             $imagem->marcarEncontrada(
                 $artista->codigoArtista,
@@ -210,6 +234,7 @@ final readonly class ResolverImagemSpotifyService
             return;
         }
 
+        $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Capas);
         $artistasBuscados = $this->spotifyClient->buscarArtistas($accessToken, $message->nome, limite: 5);
         if (empty($artistasBuscados)) {
             return;
@@ -233,7 +258,7 @@ final readonly class ResolverImagemSpotifyService
             }
         }
 
-        if (null !== $melhorCandidato && ($melhorCandidato->urlFoto !== null || $melhorCandidato->urlFotoMedia !== null)) {
+        if (null !== $melhorCandidato && (null !== $melhorCandidato->urlFoto || null !== $melhorCandidato->urlFotoMedia)) {
             $imagem->marcarEncontrada(
                 $melhorCandidato->codigoArtista,
                 $melhorCandidato->urlFoto,
@@ -334,10 +359,10 @@ final readonly class ResolverImagemSpotifyService
 
     private function resolverFaixaViaPublico(ImagemSpotify $imagem, BuscarImagemSpotifyMessage $message): bool
     {
-        if ($message->codigoSpotify !== null && '' !== trim($message->codigoSpotify)) {
+        if (null !== $message->codigoSpotify && '' !== trim($message->codigoSpotify)) {
             try {
                 $resposta = $this->httpClient->request('GET', 'https://open.spotify.com/oembed', [
-                    'query' => ['url' => 'https://open.spotify.com/track/' . trim($message->codigoSpotify)],
+                    'query' => ['url' => 'https://open.spotify.com/track/'.trim($message->codigoSpotify)],
                     'timeout' => 5,
                 ]);
 
@@ -345,7 +370,7 @@ final readonly class ResolverImagemSpotifyService
                 $corpo = json_decode($resposta->getBody()->getContents(), true);
                 if (is_array($corpo) && !empty($corpo['thumbnail_url']) && is_string($corpo['thumbnail_url'])) {
                     $url = $corpo['thumbnail_url'];
-                    $urlSpotify = 'https://open.spotify.com/track/' . trim($message->codigoSpotify);
+                    $urlSpotify = 'https://open.spotify.com/track/'.trim($message->codigoSpotify);
                     $imagem->marcarEncontrada(
                         trim($message->codigoSpotify),
                         $url,
@@ -361,7 +386,7 @@ final readonly class ResolverImagemSpotifyService
         }
 
         try {
-            $termo = trim(($message->artista ?? '') . ' ' . $message->nome);
+            $termo = trim(($message->artista ?? '').' '.$message->nome);
             $resposta = $this->httpClient->request('GET', 'https://api.deezer.com/search', [
                 'query' => ['q' => $termo, 'limit' => 5],
                 'timeout' => 5,
@@ -379,7 +404,7 @@ final readonly class ResolverImagemSpotifyService
                     $media = isset($album['cover_medium']) && is_string($album['cover_medium']) ? $album['cover_medium'] : null;
                     $pequena = isset($album['cover_small']) && is_string($album['cover_small']) ? $album['cover_small'] : null;
 
-                    if ($grande !== null || $media !== null) {
+                    if (null !== $grande || null !== $media) {
                         $urlSpotify = $imagem->urlSpotify() ?? ImagemSpotify::gerarUrlSpotifyFaixa($message->codigoSpotify, $message->artista ?? '', $message->nome);
                         $imagem->marcarEncontrada(
                             $message->codigoSpotify,
@@ -434,7 +459,7 @@ final readonly class ResolverImagemSpotifyService
             }
         }
 
-        if ($duracaoEsperadaMs !== null && $duracaoEsperadaMs > 0 && $candidato->duracaoMs > 0) {
+        if (null !== $duracaoEsperadaMs && $duracaoEsperadaMs > 0 && $candidato->duracaoMs > 0) {
             $diffMs = abs($candidato->duracaoMs - $duracaoEsperadaMs);
             if ($diffMs <= 15000) {
                 $pontuacao += 20;

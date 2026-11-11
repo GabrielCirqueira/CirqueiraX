@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\OrigemConsultaSpotify;
 use App\Repository\BloqueioSpotifyRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -24,8 +25,8 @@ class BloqueioSpotify
     #[ORM\Column(type: 'integer')]
     private int $segundosEspera;
 
-    #[ORM\Column(type: 'string', length: 40)]
-    private string $origem;
+    #[ORM\Column(type: 'string', length: 40, enumType: OrigemConsultaSpotify::class)]
+    private OrigemConsultaSpotify $origem;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $liberadoEm;
@@ -36,12 +37,22 @@ class BloqueioSpotify
     #[ORM\Column(type: 'integer')]
     private int $intervaloEntreConsultasSegundos;
 
+    /**
+     * @var array<string, int>|null
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $consultasPorOrigemUltimas24h = null;
+
+    /**
+     * @param array<string, int> $consultasPorOrigemUltimas24h
+     */
     public function __construct(
         int $segundosEspera,
         int $segundosAteLiberar,
-        string $origem,
+        OrigemConsultaSpotify $origem,
         int $consultasDesdeUltimoBloqueio,
         int $intervaloEntreConsultasSegundos,
+        array $consultasPorOrigemUltimas24h,
     ) {
         $this->ocorridoEm = new DateTimeImmutable();
         $this->liberadoEm = $this->ocorridoEm->modify(sprintf('+%d seconds', $segundosAteLiberar));
@@ -49,6 +60,12 @@ class BloqueioSpotify
         $this->origem = $origem;
         $this->consultasDesdeUltimoBloqueio = $consultasDesdeUltimoBloqueio;
         $this->intervaloEntreConsultasSegundos = $intervaloEntreConsultasSegundos;
+        $this->consultasPorOrigemUltimas24h = $consultasPorOrigemUltimas24h;
+    }
+
+    public function isAtivo(DateTimeImmutable $agora): bool
+    {
+        return $this->liberadoEm > $agora;
     }
 
     public function id(): ?int
@@ -71,7 +88,7 @@ class BloqueioSpotify
         return $this->liberadoEm;
     }
 
-    public function origem(): string
+    public function origem(): OrigemConsultaSpotify
     {
         return $this->origem;
     }
@@ -84,5 +101,13 @@ class BloqueioSpotify
     public function intervaloEntreConsultasSegundos(): int
     {
         return $this->intervaloEntreConsultasSegundos;
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function consultasPorOrigemUltimas24h(): array
+    {
+        return $this->consultasPorOrigemUltimas24h ?? [];
     }
 }

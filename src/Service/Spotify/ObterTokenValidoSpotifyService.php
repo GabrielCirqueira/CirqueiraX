@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Spotify;
 
 use App\Entity\ContaSpotify;
+use App\Enum\OrigemConsultaSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\CriptografiaInterface;
 use App\Interface\SpotifyInterface;
@@ -16,6 +17,7 @@ final readonly class ObterTokenValidoSpotifyService
         private SpotifyInterface $spotifyClient,
         private CriptografiaInterface $criptografia,
         private ContaSpotifyRepository $contaSpotifyRepository,
+        private ControleLimiteSpotifyService $controleLimite,
     ) {
     }
 
@@ -61,6 +63,8 @@ final readonly class ObterTokenValidoSpotifyService
             }
 
             $refreshToken = $this->criptografia->descriptografar($refreshTokenCripto);
+
+            $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Autorizacao);
 
             try {
                 $novosTokens = $this->spotifyClient->renovarToken($refreshToken);

@@ -223,29 +223,3 @@ export async function obterTocandoAgoraSpotify(): Promise<TocandoAgora> {
   const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/tocando-agora')
   return { ...TocandoAgoraSchema.parse(data.data), consultadoEm: Date.now() }
 }
-
-export interface TokenPlayerSpotify {
-  accessToken: string
-  permissaoReproducao: boolean
-  escoposFaltando: string[]
-}
-
-export interface MusicaTestePlayerSpotify {
-  nomeFaixa: string
-  artista: string
-}
-
-export async function obterTokenPlayerSpotify(): Promise<TokenPlayerSpotify> {
-  const { data } = await api.get<RespostaApi<TokenPlayerSpotify>>('/api/v1/spotify/player/token')
-  return data.data
-}
-
-export async function tocarMusicaTestePlayerSpotify(
-  deviceId: string
-): Promise<MusicaTestePlayerSpotify> {
-  const { data } = await api.post<RespostaApi<MusicaTestePlayerSpotify>>(
-    '/api/v1/spotify/player/tocar-teste',
-    { deviceId }
-  )
-  return data.data
-}

@@ -36,7 +36,7 @@
 ## Checklist
 
 - [x] **186. Preparação — decisões, limpeza do teste e verificações antes de construir**
-- [ ] **187. Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player**
+- [x] **187. Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player**
 - [ ] **188. Infra — cliente do YouTube Music com ytmusicapi por processo**
 - [ ] **189. Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration**
 - [ ] **190. Conexão do YouTube Music — serviços, endpoints e status no Dashboard**

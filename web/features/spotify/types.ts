@@ -8,6 +8,8 @@ export const StatusContaSpotifySchema = z.object({
   conectadoEm: z.string().nullable(),
   ultimaColetaEm: z.string().nullable(),
   coletaParada: z.boolean().optional(),
+  bloqueadoAte: z.string().nullable().optional(),
+  motivoBloqueio: z.string().nullable().optional(),
 })
 
 export type StatusContaSpotify = z.infer<typeof StatusContaSpotifySchema>

@@ -6,6 +6,7 @@ namespace App\Service\Spotify;
 
 use App\Entity\ContaSpotify;
 use App\Entity\Usuario;
+use App\Enum\OrigemConsultaSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\CriptografiaInterface;
 use App\Interface\SpotifyInterface;
@@ -21,6 +22,7 @@ final readonly class ConcluirAutorizacaoSpotifyService
         private ContaSpotifyRepository $contaSpotifyRepository,
         private EstadoAutorizacaoSpotifyService $estadoAutorizacao,
         private MessageBusInterface $messageBus,
+        private ControleLimiteSpotifyService $controleLimite,
     ) {
     }
 
@@ -28,7 +30,9 @@ final readonly class ConcluirAutorizacaoSpotifyService
     {
         $this->estadoAutorizacao->validar($usuario, $state);
 
+        $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Autorizacao);
         $tokens = $this->spotifyClient->trocarCodigoPorTokens($code);
+        $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Autorizacao);
         $perfil = $this->spotifyClient->buscarPerfil($tokens->accessToken);
 
         $this->validarConflitoConta($usuario, $perfil->id);

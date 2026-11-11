@@ -10,7 +10,9 @@ use App\Enum\StatusMediaItem;
 use App\Repository\CategoriaRepository;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\MediaItemRepository;
+use App\Serializer\ContaSpotifySerializer;
 use App\Serializer\MediaItemSerializer;
+use App\Service\Spotify\ControleLimiteSpotifyService;
 
 final readonly class DashboardService
 {
@@ -21,7 +23,10 @@ final readonly class DashboardService
         private CategoriaRepository $categoriaRepository,
         private MediaItemSerializer $mediaItemSerializer,
         private ContaSpotifyRepository $contaSpotifyRepository,
-    ) {}
+        private ControleLimiteSpotifyService $controleLimiteSpotify,
+        private ContaSpotifySerializer $contaSpotifySerializer,
+    ) {
+    }
 
     /**
      * @return array{
@@ -53,6 +58,8 @@ final readonly class DashboardService
      *         conectadoEm: string|null,
      *         ultimaColetaEm: string|null,
      *         coletaParada: bool,
+     *         bloqueadoAte: ?string,
+     *         motivoBloqueio: ?string,
      *         motivoErro: string|null
      *     }
      * }
@@ -102,6 +109,8 @@ final readonly class DashboardService
             }
         }
 
+        $bloqueioSpotify = null !== $contaSpotify && $contaSpotify->isConectada() ? $this->controleLimiteSpotify->buscarBloqueioAtivo() : null;
+
         $resumoSpotify = [
             'conectado' => $contaSpotify?->isConectada() ?? false,
             'status' => $contaSpotify?->status()->value ?? 'desconectada',
@@ -110,6 +119,7 @@ final readonly class DashboardService
             'ultimaColetaEm' => $contaSpotify?->ultimaColetaEm()?->format(\DateTimeInterface::ATOM),
             'coletaParada' => $isColetaParada,
             'motivoErro' => $contaSpotify?->erroMotivo(),
+            ...$this->contaSpotifySerializer->serializarBloqueio($bloqueioSpotify),
         ];
 
         return [

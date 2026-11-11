@@ -58,3 +58,13 @@ export function tempoRelativo(data: string | Date): string {
     return String(data)
   }
 }
+
+export function formatarHoraBrasilia(data: string | Date): string {
+  const d = typeof data === 'string' ? new Date(data) : data
+  if (Number.isNaN(d.getTime())) return String(data)
+  return d.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'America/Sao_Paulo',
+  })
+}

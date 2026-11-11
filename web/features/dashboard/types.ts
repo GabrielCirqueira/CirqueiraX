@@ -55,6 +55,8 @@ export interface ResumoSpotifyDashboard {
   conectadoEm: string | null
   ultimaColetaEm: string | null
   coletaParada: boolean
+  bloqueadoAte: string | null
+  motivoBloqueio: string | null
   motivoErro: string | null
 }
 

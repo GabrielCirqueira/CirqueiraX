@@ -6,6 +6,7 @@ namespace App\Service\Spotify;
 
 use App\DataObject\Spotify\FaixaSpotifyDTO;
 use App\Entity\ContaSpotify;
+use App\Enum\OrigemConsultaSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
 use App\Repository\ArtistaFaixaSpotifyRepository;
@@ -87,7 +88,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
      */
     private function buscarArtistas(string $token, string $codigoFaixa, string $artistaPrincipal, ?string $codigoArtistaPrincipal): ?array
     {
-        $this->controleLimite->registrarConsultaArtistas();
+        $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Artistas);
 
         try {
             return self::artistasDaFaixa($this->spotifyClient->obterFaixa($token, $codigoFaixa));
@@ -95,7 +96,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
             if (self::CODIGO_LIMITE_REQUISICOES === $excecao->getCode()) {
                 $this->controleLimite->registrarBloqueio(
                     $excecao->segundosEspera(),
-                    ControleLimiteSpotifyService::ORIGEM_ARTISTAS,
+                    OrigemConsultaSpotify::Artistas,
                     self::INTERVALO_ENTRE_REQUISICOES_SEGUNDOS,
                 );
 

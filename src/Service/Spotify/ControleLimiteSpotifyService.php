@@ -5,45 +5,73 @@ declare(strict_types=1);
 namespace App\Service\Spotify;
 
 use App\Entity\BloqueioSpotify;
+use App\Enum\OrigemConsultaSpotify;
 use App\Repository\BloqueioSpotifyRepository;
+use App\Repository\ConsultaSpotifyHoraRepository;
 use DateTimeImmutable;
+use DateTimeZone;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class ControleLimiteSpotifyService
 {
-    public const string ORIGEM_COLETA = 'coleta_historico';
-    public const string ORIGEM_ARTISTAS = 'busca_artistas';
+    public const int LIMITE_CONSULTAS_ARTISTAS_POR_DIA = 400;
     private const int FOLGA_SEGUNDOS = 60;
     private const int ESPERA_MINIMA_SEGUNDOS = 900;
     private const int VALIDADE_MARCADORES_SEGUNDOS = 2592000;
+    private const string JANELA_MEDICAO = '-24 hours';
+    private const string INICIO_DO_DIA = 'today';
+    private const string FUSO_BRASILIA = 'America/Sao_Paulo';
     private const string CHAVE_ULTIMA_COLETA = 'spotify_limite_ultima_coleta';
-    private const string CHAVE_CONSULTAS_ARTISTAS = 'spotify_limite_consultas_artistas';
+    private const string CHAVE_ULTIMA_FALHA_COLETA = 'spotify_limite_ultima_falha_coleta';
 
     public function __construct(
         private CacheItemPoolInterface $cache,
         private BloqueioSpotifyRepository $bloqueioRepository,
+        private ConsultaSpotifyHoraRepository $consultaHoraRepository,
         private LoggerInterface $logger,
     ) {
     }
 
+    public function registrarConsulta(OrigemConsultaSpotify $origem): void
+    {
+        $this->consultaHoraRepository->incrementar($origem, new DateTimeImmutable());
+    }
+
     public function estaBloqueado(): bool
     {
-        $ultimo = $this->bloqueioRepository->buscarUltimo();
+        return null !== $this->buscarBloqueioAtivo();
+    }
 
-        return null !== $ultimo && $ultimo->liberadoEm() > new DateTimeImmutable();
+    public function buscarBloqueioAtivo(): ?BloqueioSpotify
+    {
+        $ultimo = $this->bloqueioRepository->buscarUltimo();
+        if (null === $ultimo || !$ultimo->isAtivo(new DateTimeImmutable())) {
+            return null;
+        }
+
+        return $ultimo;
     }
 
     public function podeBuscarArtistas(): bool
     {
         $ultimo = $this->bloqueioRepository->buscarUltimo();
-        if (null !== $ultimo && $ultimo->liberadoEm() > new DateTimeImmutable()) {
+        if (null !== $ultimo && $ultimo->isAtivo(new DateTimeImmutable())) {
             return false;
         }
 
-        $inicioLiberado = null === $ultimo ? 0 : $ultimo->liberadoEm()->getTimestamp();
+        if (!$this->isUltimaColetaBemSucedida($ultimo)) {
+            return false;
+        }
 
-        return $this->lerInteiro(self::CHAVE_ULTIMA_COLETA) >= $inicioLiberado && $this->lerInteiro(self::CHAVE_ULTIMA_COLETA) > 0;
+        return $this->consultasArtistasHoje() < self::LIMITE_CONSULTAS_ARTISTAS_POR_DIA;
+    }
+
+    public function consultasArtistasHoje(): int
+    {
+        $inicioDoDia = new DateTimeImmutable(self::INICIO_DO_DIA, new DateTimeZone(self::FUSO_BRASILIA));
+
+        return $this->consultaHoraRepository->somarDaOrigemDesde(OrigemConsultaSpotify::Artistas, $inicioDoDia);
     }
 
     public function registrarColetaConcluida(): void
@@ -51,24 +79,47 @@ final readonly class ControleLimiteSpotifyService
         $this->gravarInteiro(self::CHAVE_ULTIMA_COLETA, time());
     }
 
-    public function registrarConsultaArtistas(): void
+    public function registrarColetaFalhou(): void
     {
-        $this->gravarInteiro(self::CHAVE_CONSULTAS_ARTISTAS, $this->lerInteiro(self::CHAVE_CONSULTAS_ARTISTAS) + 1);
+        $this->gravarInteiro(self::CHAVE_ULTIMA_FALHA_COLETA, time());
     }
 
-    public function registrarBloqueio(int $segundosEspera, string $origem, int $intervaloEntreConsultasSegundos): void
+    public function registrarBloqueio(int $segundosEspera, OrigemConsultaSpotify $origem, int $intervaloEntreConsultasSegundos): void
     {
-        $consultas = $this->lerInteiro(self::CHAVE_CONSULTAS_ARTISTAS);
+        $agora = new DateTimeImmutable();
+        $anterior = $this->bloqueioRepository->buscarUltimo();
+        $inicioContagem = $anterior?->ocorridoEm() ?? $agora->modify(self::JANELA_MEDICAO);
+        $consultasArtistas = $this->consultaHoraRepository->somarDaOrigemDesde(OrigemConsultaSpotify::Artistas, $inicioContagem);
+        $consultasPorOrigem = $this->consultaHoraRepository->somarPorOrigemDesde($agora->modify(self::JANELA_MEDICAO));
         $espera = max(self::ESPERA_MINIMA_SEGUNDOS, $segundosEspera + self::FOLGA_SEGUNDOS);
 
-        $this->gravarInteiro(self::CHAVE_CONSULTAS_ARTISTAS, 0);
-        $this->bloqueioRepository->salvar(new BloqueioSpotify($segundosEspera, $espera, $origem, $consultas, $intervaloEntreConsultasSegundos));
+        $this->bloqueioRepository->salvar(new BloqueioSpotify(
+            $segundosEspera,
+            $espera,
+            $origem,
+            $consultasArtistas,
+            $intervaloEntreConsultasSegundos,
+            $consultasPorOrigem,
+        ));
         $this->logger->warning('Spotify bloqueou as consultas do app (429).', [
-            'origem' => $origem,
+            'origem' => $origem->value,
             'retryAfterSegundos' => $segundosEspera,
-            'consultasArtistasDesdeUltimoBloqueio' => $consultas,
+            'consultasArtistasDesdeUltimoBloqueio' => $consultasArtistas,
+            'consultasPorOrigemUltimas24h' => $consultasPorOrigem,
             'intervaloEntreConsultasSegundos' => $intervaloEntreConsultasSegundos,
         ]);
+    }
+
+    private function isUltimaColetaBemSucedida(?BloqueioSpotify $ultimoBloqueio): bool
+    {
+        $ultimaColeta = $this->lerInteiro(self::CHAVE_ULTIMA_COLETA);
+        if (0 === $ultimaColeta || $ultimaColeta < $this->lerInteiro(self::CHAVE_ULTIMA_FALHA_COLETA)) {
+            return false;
+        }
+
+        $inicioLiberado = null === $ultimoBloqueio ? 0 : $ultimoBloqueio->liberadoEm()->getTimestamp();
+
+        return $ultimaColeta >= $inicioLiberado;
     }
 
     private function lerInteiro(string $chave): int

@@ -13,11 +13,6 @@ final readonly class GerarUrlAutorizacaoSpotifyService
         'user-read-recently-played',
         'user-read-currently-playing',
         'user-top-read',
-        'streaming',
-        'user-read-email',
-        'user-read-private',
-        'user-read-playback-state',
-        'user-modify-playback-state',
     ];
 
     public function __construct(

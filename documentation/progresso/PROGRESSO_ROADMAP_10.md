@@ -141,8 +141,29 @@
   - `documentation/funcionalidades/MUSICA.md`
   - `documentation/README.md`
 
-### ⏳ Tópico 187 — Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player
-- **Status**: Pendente
+### ✅ Tópico 187 — Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player
+- **Status**: Concluído
+- **O que foi feito**:
+  - **Medição por origem:** enum [`OrigemConsultaSpotify`](../../src/Enum/OrigemConsultaSpotify.php) (`coleta_historico`, `tocando_agora`, `capas`, `busca_artistas`, `autorizacao`) e entidade [`ConsultaSpotifyHora`](../../src/Entity/ConsultaSpotifyHora.php) (tabela `consulta_spotify_hora`, hora UTC + origem, único por par). [`ConsultaSpotifyHoraRepository`](../../src/Repository/ConsultaSpotifyHoraRepository.php) incrementa com `INSERT … ON DUPLICATE KEY UPDATE` e soma por origem numa janela.
+  - Todas as chamadas ao Spotify registram a origem antes de sair: coleta das recentes, tocando agora, capas e fotos (`ResolverImagemSpotifyService`), busca de artistas e troca/renovação de token.
+  - `BloqueioSpotify` passou a usar o enum na origem e ganhou `consultas_por_origem_ultimas24h` (JSON) com o total de cada origem nas 24 h anteriores ao 429. `consultas_desde_ultimo_bloqueio` agora vem do banco, não do cache.
+  - **Orçamento:** [`ControleLimiteSpotifyService`](../../src/Service/Spotify/ControleLimiteSpotifyService.php) com `LIMITE_CONSULTAS_ARTISTAS_POR_DIA = 400` (dia de Brasília, contado no banco). A busca de artistas só roda se não houver bloqueio, se a última coleta das recentes deu certo (falha de token ou de API marca a coleta como falha) e se o orçamento do dia não acabou.
+  - Tocando agora e capas não consultam o Spotify durante um bloqueio ativo e registram 429 próprios.
+  - **Aviso:** `GET /api/v1/spotify/status` (via `StatusSpotifyDTO`) e o resumo do Dashboard devolvem `bloqueadoAte` e `motivoBloqueio`. O `PainelConexaoSpotify` mostra o aviso âmbar com o horário de Brasília e o limite das 50 músicas; o Dashboard mostra o Spotify como **Bloqueado** (âmbar), separado de **Atrasado**.
+  - **Limpeza do teste do player:** removidos `PlayerSpotifyController`, `PlayerTesteSpotifyService`, a rota `/spotify/player-teste`, `PlayerTesteSpotify.tsx`, `usePlayerTesteSpotify.ts`, as funções de API, `tocarNoDispositivo` do cliente e da interface, as exceções do player e as permissões `streaming`, `user-read-email`, `user-read-private`, `user-read-playback-state` e `user-modify-playback-state`. Resultado do teste condensado no `SPOTIFY.md`.
+  - **Documentação:** `PROGRESSO_ROADMAP_9.md` deixou de mostrar 183, 184 e 185 como pendentes. `SPOTIFY.md` explica a contagem, o orçamento e o aviso.
+  - Migration `Version20261111141619` gerada pelo diff contra o esquema da produção.
+- **A confirmar com o Gabriel:** o valor de `LIMITE_CONSULTAS_ARTISTAS_POR_DIA` depois de ver a medição por origem no próximo bloqueio.
+- **Arquivos**:
+  - `src/Enum/OrigemConsultaSpotify.php`, `src/Entity/ConsultaSpotifyHora.php`, `src/Repository/ConsultaSpotifyHoraRepository.php`
+  - `src/Entity/BloqueioSpotify.php`, `src/Service/Spotify/ControleLimiteSpotifyService.php`
+  - `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `ObterTocandoAgoraSpotifyService.php`, `ResolverImagemSpotifyService.php`, `SincronizarArtistasFaixasSpotifyService.php`, `ObterTokenValidoSpotifyService.php`, `ConcluirAutorizacaoSpotifyService.php`, `ObterStatusSpotifyService.php`, `GerarUrlAutorizacaoSpotifyService.php`
+  - `src/DataObject/Spotify/StatusSpotifyDTO.php`, `src/Serializer/ContaSpotifySerializer.php`, `src/Controller/Spotify/SpotifyController.php`, `src/Service/Dashboard/DashboardService.php`
+  - `src/Infra/Spotify/SpotifyClient.php`, `src/Interface/SpotifyInterface.php`, `src/Exception/Spotify/SpotifyException.php`
+  - `web/features/spotify/components/PainelConexaoSpotify.tsx`, `web/features/spotify/utils/formatadoresSpotify.ts`, `web/features/spotify/types.ts`, `web/features/spotify/api.ts`, `web/features/spotify/hooks/index.ts`, `web/App.tsx`
+  - `web/features/dashboard/utils/metricasDashboard.ts`, `web/features/dashboard/types.ts`, `web/shared/utils/formatarData.ts`
+  - `migrations/Version20261111141619.php`
+  - `documentation/funcionalidades/SPOTIFY.md`, `documentation/progresso/PROGRESSO_ROADMAP_9.md`
 
 ### ⏳ Tópico 188 — Infra — cliente do YouTube Music com ytmusicapi por processo
 - **Status**: Pendente

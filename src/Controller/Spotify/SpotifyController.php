@@ -85,9 +85,9 @@ final class SpotifyController extends DefaultController
     #[Route('/status', name: 'status', methods: ['GET'])]
     public function status(#[CurrentUser] Usuario $usuario): Response
     {
-        $conta = $this->obterStatusService->executar($usuario);
+        $status = $this->obterStatusService->executar($usuario);
 
-        return $this->success($this->contaSpotifySerializer->serializar($conta));
+        return $this->success($this->contaSpotifySerializer->serializarStatus($status));
     }
 
     #[Route('/sincronizar', name: 'sincronizar', methods: ['POST'])]

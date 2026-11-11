@@ -1,3 +1,4 @@
+import { formatarHoraBrasilia } from '@/shared/utils/formatarData'
 import type {
   CategoriaMetrica,
   MetricasVideosDashboard,
@@ -278,6 +279,14 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: spotify.motivoErro ?? 'Autorização expirada. Clique para reconectar.',
       estado: 'Reconectar',
       tom: 'erro',
+      rota: '/spotify',
+    })
+  } else if (spotify?.conectado && spotify.bloqueadoAte) {
+    servicos.push({
+      nome: 'Spotify',
+      detalhe: `Bloqueado pelo Spotify até ${formatarHoraBrasilia(spotify.bloqueadoAte)} · coleta pausada`,
+      estado: 'Bloqueado',
+      tom: 'alerta',
       rota: '/spotify',
     })
   } else if (spotify?.conectado) {

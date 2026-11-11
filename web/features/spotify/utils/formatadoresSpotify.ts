@@ -1,3 +1,4 @@
+import { formatarHoraBrasilia } from '@/shared/utils/formatarData'
 import axios from 'axios'
 import type { CapsulaMensal, ItemRankingArtistaCapsula, ItemRankingMusicaCapsula } from '../types'
 
@@ -204,4 +205,8 @@ export function baixarArquivoCsv(conteudo: string, nomeArquivo: string): void {
   link.click()
   document.body.removeChild(link)
   URL.revokeObjectURL(url)
+}
+
+export function mensagemBloqueioSpotify(bloqueadoAte: string): string {
+  return `O Spotify bloqueou o app até ${formatarHoraBrasilia(bloqueadoAte)} (horário de Brasília). A coleta está pausada. O Spotify só guarda as últimas 50 músicas, então o que passar disso nesse período pode não ser coletado.`
 }

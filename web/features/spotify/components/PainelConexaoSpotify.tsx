@@ -19,7 +19,7 @@ import {
   useSincronizarSpotify,
   useStatusSpotify,
 } from '../hooks'
-import { formatarDataHoraPtBr } from '../utils'
+import { formatarDataHoraPtBr, mensagemBloqueioSpotify } from '../utils'
 import { ModalConfirmarDesconexao } from './ModalConfirmarDesconexao'
 
 export interface PainelConexaoSpotifyProps {
@@ -180,6 +180,22 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
                     ? 'O token de autorização expirou ou foi revogado. Reconecte para continuar a coleta automática.'
                     : 'Acompanhe seu tempo ouvido, rankings e acesse a sua Cápsula Sonora mensal.'}
               </Text>
+              {isConectada && status.bloqueadoAte && (
+                <HStack
+                  gap={2}
+                  align="start"
+                  px={3}
+                  py={2}
+                  borderRadius="lg"
+                  borderWidth="1px"
+                  borderColor="cirqueira.spotify.amarelo"
+                  color="cirqueira.spotify.amarelo"
+                  fontSize="xs"
+                >
+                  <AlertCircle size={14} />
+                  <Text>{mensagemBloqueioSpotify(status.bloqueadoAte)}</Text>
+                </HStack>
+              )}
             </VStack>
           </HStack>
 

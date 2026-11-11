@@ -9,6 +9,7 @@ use App\DataObject\Spotify\ResultadoColetaHistoricoSpotifyDTO;
 use App\Entity\ContaSpotify;
 use App\Entity\ReproducaoSpotify;
 use App\Enum\FonteReproducaoSpotify;
+use App\Enum\OrigemConsultaSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
 use App\Repository\ArtistaFaixaSpotifyRepository;
@@ -45,6 +46,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         try {
             $accessToken = $this->obterTokenValidoSpotifyService->executar($conta);
         } catch (SpotifyException $e) {
+            $this->controleLimite->registrarColetaFalhou();
             $this->logger->warning('Falha ao obter token válido para coleta do Spotify.', [
                 'conta' => $conta->uuid()->toRfc4122(),
                 'usuario' => $conta->usuario()->getId(),
@@ -56,6 +58,8 @@ final readonly class ColetarHistoricoRecenteSpotifyService
 
         $cursorAtual = $conta->cursorUltimaReproducaoMs();
 
+        $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::Coleta);
+
         try {
             $lista = $this->spotifyClient->listarReproducoesRecentes(
                 $accessToken,
@@ -63,8 +67,9 @@ final readonly class ColetarHistoricoRecenteSpotifyService
                 self::LIMITE_PADRAO_COLETA,
             );
         } catch (SpotifyException $e) {
+            $this->controleLimite->registrarColetaFalhou();
             if (self::CODIGO_LIMITE_REQUISICOES === $e->getCode()) {
-                $this->controleLimite->registrarBloqueio($e->segundosEspera(), ControleLimiteSpotifyService::ORIGEM_COLETA, self::INTERVALO_COLETA_SEGUNDOS);
+                $this->controleLimite->registrarBloqueio($e->segundosEspera(), OrigemConsultaSpotify::Coleta, self::INTERVALO_COLETA_SEGUNDOS);
             }
             $this->logger->warning('Erro retornado pela API do Spotify durante a coleta do histórico.', [
                 'conta' => $conta->uuid()->toRfc4122(),

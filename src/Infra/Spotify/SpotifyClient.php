@@ -327,25 +327,6 @@ final class SpotifyClient extends Client implements SpotifyInterface
         );
     }
 
-    public function tocarNoDispositivo(string $accessToken, string $codigoDispositivo, array $uris): void
-    {
-        $this->executarComRetry(function () use ($accessToken, $codigoDispositivo, $uris) {
-            return $this->request(
-                'PUT',
-                $this->resolverUrl('/me/player/play?device_id='.rawurlencode($codigoDispositivo)),
-                [
-                    'timeout' => self::TIMEOUT_SEGUNDOS,
-                    'headers' => [
-                        'Authorization' => 'Bearer '.$accessToken,
-                        'Content-Type' => 'application/json',
-                    ],
-                    'json' => ['uris' => $uris],
-                ],
-                throw: static fn (RequestException $e): \Throwable => $e,
-            );
-        });
-    }
-
     public function obterFaixa(string $accessToken, string $idFaixa): FaixaSpotifyDTO
     {
         $dados = $this->executarComRetry(function () use ($accessToken, $idFaixa) {
@@ -745,7 +726,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
             return $externalUrls['spotify'];
         }
 
-        return 'https://open.spotify.com/' . $tipo . '/' . rawurlencode($codigo);
+        return 'https://open.spotify.com/'.$tipo.'/'.rawurlencode($codigo);
     }
 
     private function extrairPrimeiraImagem(mixed $imagens): ?string

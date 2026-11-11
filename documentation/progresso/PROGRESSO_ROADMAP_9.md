@@ -478,11 +478,11 @@
 ### ✅ Tópico 182 — Frontend — importação do arquivo de histórico
 - **Status**: Concluído (detalhes em [PROGRESSO_ROADMAP_10.md](PROGRESSO_ROADMAP_10.md))
 
-### ⏳ Tópico 183 — Frontend — página /spotify com Hoje, Semana e Curiosidades
-- **Status**: Pendente
+### ✅ Tópico 183 — Frontend — página /spotify com Hoje, Semana e Curiosidades
+- **Status**: Concluído (detalhes em [PROGRESSO_ROADMAP_10.md](PROGRESSO_ROADMAP_10.md))
 
-### ⏳ Tópico 184 — Frontend — seção Cápsula Sonora com seletor de mês
-- **Status**: Pendente
+### ✅ Tópico 184 — Frontend — seção Cápsula Sonora com seletor de mês
+- **Status**: Concluído (detalhes em [PROGRESSO_ROADMAP_10.md](PROGRESSO_ROADMAP_10.md))
 
-### ⏳ Tópico 185 — Calibração com os prints, teste end-to-end e documentação atualizada
-- **Status**: Pendente
+### ✅ Tópico 185 — Calibração com os prints, teste end-to-end e documentação atualizada
+- **Status**: Concluído (detalhes em [PROGRESSO_ROADMAP_10.md](PROGRESSO_ROADMAP_10.md))
