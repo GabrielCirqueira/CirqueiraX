@@ -62,7 +62,7 @@ final readonly class RegistrarReproducoesYoutubeService
 
         foreach ($itens as $item) {
             $video = $videos[$item->videoId] ?? new VideoYoutube($usuario, $item->videoId, $item->titulo, $item->textoArtistas);
-            $video->atualizarDadosColetados($item->titulo, $item->textoArtistas, $item->duracaoMs, $item->urlCapa);
+            $video->atualizarDadosColetados($item->titulo, $item->textoArtistas, $item->duracaoMs, $item->urlCapa, $item->tipoVideo);
             $this->videoRepository->salvar($video, flush: false);
             $videos[$item->videoId] = $video;
         }

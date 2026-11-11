@@ -63,14 +63,29 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
             throw $invalida;
         }
 
-        $resultados = $this->mapearResultados(is_array($json) && is_array($json['resultados'] ?? null) ? $json['resultados'] : [], $invalida);
-        foreach ($entradas as $entrada) {
-            if (!isset($resultados[$entrada->id])) {
-                throw $invalida;
-            }
+        if (!is_array($json) || !is_array($json['resultados'] ?? null)) {
+            throw $invalida;
         }
 
-        return new ResultadoLoteIdentificacaoDTO($resultados, $modelo, $tokensEntrada, $tokensSaida);
+        $idsEsperados = array_flip(array_map(static fn (EntradaIdentificacaoDTO $entrada): string => $entrada->id, $entradas));
+        $resultados = [];
+        $idsInvalidos = [];
+        foreach ($json['resultados'] as $item) {
+            $id = is_array($item) && is_string($item['id'] ?? null) ? $item['id'] : null;
+            if (null === $id || !isset($idsEsperados[$id])) {
+                continue;
+            }
+
+            $resultado = $this->mapearResultadoValido($item);
+            if (null === $resultado) {
+                $idsInvalidos[] = $id;
+
+                continue;
+            }
+            $resultados[$id] = $resultado;
+        }
+
+        return new ResultadoLoteIdentificacaoDTO($resultados, $modelo, $tokensEntrada, $tokensSaida, array_values(array_unique($idsInvalidos)));
     }
 
     /**
@@ -138,34 +153,28 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
     }
 
     /**
-     * @param array<mixed> $itens
-     *
-     * @return array<string, ResultadoIdentificacaoDTO>
+     * @param array<mixed> $item
      */
-    private function mapearResultados(array $itens, IdentificacaoException $invalida): array
+    private function mapearResultadoValido(array $item): ?ResultadoIdentificacaoDTO
     {
-        $resultados = [];
-
-        foreach ($itens as $item) {
-            $resultado = $this->mapearResultado(is_array($item) ? $item : [], $invalida);
-            if (count($this->validator->validate($resultado)) > 0) {
-                throw $invalida;
-            }
-            $resultados[$resultado->id] = $resultado;
+        try {
+            $resultado = $this->mapearResultado($item);
+        } catch (IdentificacaoException) {
+            return null;
         }
 
-        return $resultados;
+        return count($this->validator->validate($resultado)) > 0 ? null : $resultado;
     }
 
     /**
      * @param array<mixed> $item
      */
-    private function mapearResultado(array $item, IdentificacaoException $invalida): ResultadoIdentificacaoDTO
+    private function mapearResultado(array $item): ResultadoIdentificacaoDTO
     {
         $tipo = TipoIdentificacaoMusica::tryFrom((string) ($item['tipo'] ?? ''));
         $versao = TipoVersaoMusica::tryFrom((string) ($item['versao'] ?? ''));
         if (!is_string($item['id'] ?? null) || null === $tipo || null === $versao || !is_int($item['confianca'] ?? null)) {
-            throw $invalida;
+            throw IdentificacaoException::respostaInvalida($this->modelo, 0, 0);
         }
 
         return new ResultadoIdentificacaoDTO(
@@ -173,25 +182,25 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
             $tipo,
             $item['confianca'],
             $versao,
-            $this->mapearComponentes($item['componentes'] ?? null, $invalida),
+            $this->mapearComponentes($item['componentes'] ?? null),
             true === ($item['ambiguo'] ?? false),
-            array_slice($this->mapearComponentes($item['alternativas'] ?? null, $invalida), 0, ResultadoIdentificacaoDTO::LIMITE_ALTERNATIVAS),
+            array_slice($this->mapearComponentes($item['alternativas'] ?? null), 0, ResultadoIdentificacaoDTO::LIMITE_ALTERNATIVAS),
         );
     }
 
     /**
      * @return list<ComponenteIdentificadoDTO>
      */
-    private function mapearComponentes(mixed $lista, IdentificacaoException $invalida): array
+    private function mapearComponentes(mixed $lista): array
     {
         if (!is_array($lista)) {
-            throw $invalida;
+            throw IdentificacaoException::respostaInvalida($this->modelo, 0, 0);
         }
 
         $componentes = [];
         foreach ($lista as $componente) {
             if (!is_array($componente) || !is_string($componente['titulo'] ?? null) || !is_array($componente['artistas'] ?? null)) {
-                throw $invalida;
+                throw IdentificacaoException::respostaInvalida($this->modelo, 0, 0);
             }
             $artistas = array_values(array_filter(array_map(static fn (mixed $nome): string => is_string($nome) ? trim($nome) : '', $componente['artistas']), static fn (string $nome): bool => '' !== $nome));
             $componentes[] = new ComponenteIdentificadoDTO(trim($componente['titulo']), $artistas);

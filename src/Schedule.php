@@ -5,6 +5,7 @@ namespace App;
 use App\Message\AtualizarDetalhesVideosYoutubeMessage;
 use App\Message\ColetarHistoricoYoutubeMusicMessage;
 use App\Message\ExpirarAudiosAntigosMessage;
+use App\Message\IdentificarVideosYoutubeMessage;
 use App\Message\ExpirarAudiosTranscricaoMessage;
 use App\Message\LimparVideosAntigosMessage;
 use App\Message\SincronizarArtistasFaixasSpotifyMessage;
@@ -32,6 +33,7 @@ class Schedule implements ScheduleProviderInterface
                 RecurringMessage::every('5 minutes', new SincronizarHistoricoSpotifyMessage()),
                 RecurringMessage::every('1 minute', new SincronizarArtistasFaixasSpotifyMessage()),
                 RecurringMessage::every('30 seconds', new RedispatchMessage(new ColetarHistoricoYoutubeMusicMessage(), 'youtube_coleta')),
+                RecurringMessage::every('1 minute', new RedispatchMessage(new IdentificarVideosYoutubeMessage(), 'youtube_identificacao')),
                 RecurringMessage::every('1 hour', new RedispatchMessage(new AtualizarDetalhesVideosYoutubeMessage(), 'async')),
                 RecurringMessage::every('1 day', new LimparVideosAntigosMessage(7)),
                 RecurringMessage::every('1 day', new ExpirarAudiosAntigosMessage()),

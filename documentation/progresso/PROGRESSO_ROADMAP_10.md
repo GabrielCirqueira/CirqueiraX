@@ -300,8 +300,27 @@
   - `migrations/Version20261111164509.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 195 — Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão
-- **Status**: Pendente
+### ✅ Tópico 195 — Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão
+- **Status**: Concluído
+- **O que foi feito**:
+  - `IdentificarVideosYoutubeService`: pula decisão manual, aplica a regra de canal, o atalho de faixa oficial ("- Topic" ou `MUSIC_VIDEO_TYPE_ATV`) sem IA, enriquece pela YouTube Data API quando falta duração ou categoria, chama a IA em lotes de 10 com pausa de 1 s, grava o custo e trata falhas (item malformado → `revisar`, item esquecido pela IA → continua pendente, falha da busca → continua pendente).
+  - `AplicarIdentificacaoVideoYoutubeService` (`LIMITE_CONFIANCA_REVISAO = 70`, `LIMITE_COMPONENTES_MASHUP = 5`): não música, compilação, revisão, música confirmada, colaboração, mashup pela chave do conjunto de componentes e agrupamento de versões pela chave normalizada.
+  - `ConfirmarMusicaYoutubeService`: busca no YouTube Music com a pontuação do `ResolverImagemSpotifyService` (limiar 70), com a duração pesando só na versão original.
+  - Catálogo: `NormalizarTextoMusicaService` (normalização, chave de música, chave de mashup, separação de artistas), `ObterArtistaCatalogoService` (alias, nome ou criação) e `ObterMusicaCatalogoService` (música e mashup).
+  - `VideoYoutube` ganhou `tipoVideo` (vem da coleta) e `isFaixaOficial()`; migration `Version20261111170331`.
+  - `IdentificarPendentesYoutubeService`, `IdentificarVideosYoutubeMessage` agendada a cada minuto na fila `youtube_identificacao` (1 worker, 192 MB, nos dois supervisord) e comando `app:youtube:identificar --pendentes|--todos --usuario --limite`. `VideoYoutubeRepository` ganhou `listarPendentesDeTodos` e `listarParaReidentificar`.
+  - O cliente da IA passou a devolver os resultados que vieram e os ids malformados, em vez de descartar o lote inteiro quando a IA esquece um item.
+  - Teste real no banco de produção dentro de uma transação desfeita, com IA e busca de verdade, cobrindo os casos do roadmap; resultado em `MUSICA.md`.
+- **Diferença do roadmap**: sem testes automatizados (regra do projeto); os casos reais foram conferidos com o script descartável descrito acima. O aviso para a projeção das reproduções entra no tópico 199, que cria a projeção. A coleta não dispara a identificação diretamente: a rodada de cada minuto já pega os vídeos novos.
+- **Arquivos**:
+  - `src/Service/IdentificacaoMusica/IdentificarVideosYoutubeService.php`, `AplicarIdentificacaoVideoYoutubeService.php`, `ConfirmarMusicaYoutubeService.php`, `IdentificarPendentesYoutubeService.php`
+  - `src/Service/Musica/NormalizarTextoMusicaService.php`, `ObterArtistaCatalogoService.php`, `ObterMusicaCatalogoService.php`
+  - `src/Message/IdentificarVideosYoutubeMessage.php`, `src/MessageHandler/IdentificarVideosYoutubeMessageHandler.php`, `src/Command/IdentificarVideosYoutubeCommand.php`
+  - `src/Entity/VideoYoutube.php`, `src/Repository/VideoYoutubeRepository.php`, `src/Service/YoutubeMusic/RegistrarReproducoesYoutubeService.php`
+  - `src/Infra/OpenAi/OpenAiIdentificadorMusicaClient.php`, `src/DataObject/IdentificacaoMusica/ResultadoLoteIdentificacaoDTO.php`
+  - `src/Schedule.php`, `config/packages/messenger.yaml`, `devops/supervisord.conf`, `devops/php/supervisord-prod.conf`
+  - `migrations/Version20261111170331.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 196 — Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints
 - **Status**: Pendente

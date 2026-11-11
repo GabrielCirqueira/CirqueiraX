@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
+use App\Enum\OrigemClassificacao;
 use App\Enum\StatusClassificacaoVideo;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -131,6 +132,44 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
             ->setParameter('limite', $atualizadosAntesDe)
             ->orderBy('e.detalhesAtualizadosEm', 'ASC')
             ->addOrderBy('e.criadoEm', 'ASC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $videos;
+    }
+
+    /**
+     * @return list<VideoYoutube>
+     */
+    public function listarPendentesDeTodos(int $limite): array
+    {
+        /** @var list<VideoYoutube> $videos */
+        $videos = $this->createQueryBuilder('e')
+            ->andWhere('e.status = :status')
+            ->setParameter('status', StatusClassificacaoVideo::Pendente)
+            ->orderBy('e.criadoEm', 'ASC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $videos;
+    }
+
+    /**
+     * @return list<VideoYoutube>
+     */
+    public function listarParaReidentificar(Usuario $usuario, int $limite): array
+    {
+        /** @var list<VideoYoutube> $videos */
+        $videos = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.origemClassificacao IS NULL OR e.origemClassificacao != :manual')
+            ->andWhere('e.status != :indisponivel')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('manual', OrigemClassificacao::Manual)
+            ->setParameter('indisponivel', StatusClassificacaoVideo::Indisponivel)
+            ->orderBy('e.classificadoEm', 'ASC')
             ->setMaxResults($limite)
             ->getQuery()
             ->getResult();

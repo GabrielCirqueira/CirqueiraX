@@ -149,6 +149,28 @@ Comparação com os 14 títulos reais disponíveis (os 9 do teste anterior e 5 d
 
 Decisão: `low` como padrão (`OPENAI_ESFORCO_IDENTIFICACAO`). Custa o dobro, mas o ponto fraco do teste era justamente a confiança alta em título ambíguo, e só o `low` acertou isso. Em 10.000 vídeos do Takeout, o `low` sai por volta de US$ 8,60. A comparação com 100 títulos fica para o tópico 205, quando houver histórico coletado e Takeout importado.
 
+## Identificação dos vídeos (tópico 195)
+
+`IdentificarVideosYoutubeService` recebe vídeos de um usuário e segue esta ordem:
+
+1. **Decisão manual** nunca é sobrescrita: o vídeo é pulado.
+2. **Regra de canal** (`RegraCanalYoutube` pelo canal normalizado): `nao_musica` encerra sem chamar a IA; `musica` segue.
+3. **Faixa oficial** (canal terminado em " - Topic" ou tipo `MUSIC_VIDEO_TYPE_ATV` vindo da coleta): vira música original com título e artistas do próprio item, confiança 100, origem `regra`, sem IA.
+4. **Enriquecimento** pela YouTube Data API quando faltam duração ou categoria e o vídeo nunca foi consultado. Vídeo que não existe mais e ainda estava pendente sai da fila como `indisponivel`.
+5. **IA** em lotes de 10, com 1 s de pausa entre lotes. Cada chamada grava o custo em `consumo_ia`.
+6. `AplicarIdentificacaoVideoYoutubeService` aplica o resultado:
+   - `nao_musica` → `nao_musica`. `compilacao` ou mais de 5 componentes (`LIMITE_COMPONENTES_MASHUP`) → `compilacao`, sem crédito de artista.
+   - Sem componentes, `ambiguo` ou confiança abaixo de 70 (`LIMITE_CONFIANCA_REVISAO`) → `revisar`, guardando as alternativas em `respostaIa`.
+   - **Música:** confirmada pela busca do YouTube Music (`ConfirmarMusicaYoutubeService`, mesma pontuação do `ResolverImagemSpotifyService`: artista 50/35, título 30/20, duração 20/10, limiar 70). A duração só pesa quando a versão é a original, porque slowed e sped up mudam a duração. Confirmada, usa título, álbum, capa e `videoOficialId` oficiais. Os artistas vêm da IA quando o artista principal dela aparece no texto oficial (o YouTube Music às vezes escreve "Jigulina, Vika"); senão, os oficiais. Não confirmada → `revisar`.
+   - **Colaboração:** um componente com vários artistas é uma música só, com os artistas na ordem.
+   - **Mashup (2 a 5):** cada componente precisa ter artista e ser confirmado; senão `revisar`. A `MusicaCatalogo` do mashup é achada pela chave do conjunto de componentes (ordenado), então a mesma mistura postada por outro canal cai no mesmo mashup. Artistas = união dos componentes; capa = miniatura do vídeo.
+   - **Versões:** a música é achada ou criada pela `chaveNormalizada` (título sem "feat./with" + artista principal, sem acentos e pontuação), e o vídeo guarda o `tipoVersao`.
+7. Resposta da IA malformada para um item → `revisar`. Item que a IA esqueceu de devolver (acontece em cerca de 1 a cada 4 lotes) continua pendente e volta na próxima rodada. Falha da busca do YouTube Music deixa o vídeo pendente.
+
+**Execução:** o agendador dispara `IdentificarVideosYoutubeMessage` a cada minuto na fila `youtube_identificacao` (1 worker, 192 MB), que pega até 50 vídeos pendentes de todos os usuários e processa cada usuário separadamente. Os vídeos novos da coleta entram por aí. Comando manual: `php bin/console app:youtube:identificar [--pendentes] [--todos --usuario=ID] [--limite=N]`; `--todos` reidentifica tudo do usuário, menos o que foi corrigido à mão.
+
+**Teste com os casos reais** (banco de produção, transação desfeita no fim): as 4 versões de "Little Dark Age" (oficial, "- Topic", slowed, sped up) caíram na mesma música; "Let Down + Choir" virou música única; "one of the girls" virou colaboração de 3 artistas; os mashups de 2 e de 4 músicas saíram certos; "Renegade" sozinho foi para `revisar`; o canal "- Topic" não chamou a IA. 18 vídeos custaram cerca de US$ 0,013. A IA varia entre execuções: num mashup de 4 músicas ela listou só 3 uma vez, e o mashup com "renegade" foi marcado ambíguo numa execução e não na outra. Os limiares são revistos com dados reais no tópico 205.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.

@@ -22,6 +22,9 @@ use Symfony\Component\Uid\Uuid;
 class VideoYoutube
 {
     public const int TAMANHO_MAXIMO_DESCRICAO = 1000;
+    public const string CATEGORIA_MUSICA = '10';
+    private const string TIPO_FAIXA_OFICIAL = 'MUSIC_VIDEO_TYPE_ATV';
+    private const string SUFIXO_CANAL_TOPIC = ' - Topic';
     private const int TAMANHO_MAXIMO_TITULO = 500;
     private const int TAMANHO_MAXIMO_CANAL = 255;
     private const int CONFIANCA_MINIMA = 0;
@@ -52,6 +55,9 @@ class VideoYoutube
 
     #[ORM\Column(type: 'string', length: 1024, nullable: true)]
     private ?string $urlCapa = null;
+
+    #[ORM\Column(type: 'string', length: 40, nullable: true)]
+    private ?string $tipoVideo = null;
 
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $categoriaYoutube = null;
@@ -114,8 +120,9 @@ class VideoYoutube
         $this->atualizadoEm = new DateTimeImmutable();
     }
 
-    public function atualizarDadosColetados(string $titulo, string $canal, ?int $duracaoMs, ?string $urlCapa): self
+    public function atualizarDadosColetados(string $titulo, string $canal, ?int $duracaoMs, ?string $urlCapa, ?string $tipoVideo = null): self
     {
+        $this->tipoVideo = $tipoVideo ?? $this->tipoVideo;
         $this->titulo = mb_substr($titulo, 0, self::TAMANHO_MAXIMO_TITULO);
         $this->canal = mb_substr($canal, 0, self::TAMANHO_MAXIMO_CANAL);
         $this->duracaoMs = $duracaoMs ?? $this->duracaoMs;
@@ -226,6 +233,16 @@ class VideoYoutube
     public function urlCapa(): ?string
     {
         return $this->urlCapa;
+    }
+
+    public function tipoVideo(): ?string
+    {
+        return $this->tipoVideo;
+    }
+
+    public function isFaixaOficial(): bool
+    {
+        return self::TIPO_FAIXA_OFICIAL === $this->tipoVideo || str_ends_with($this->canal, self::SUFIXO_CANAL_TOPIC);
     }
 
     public function categoriaYoutube(): ?string
