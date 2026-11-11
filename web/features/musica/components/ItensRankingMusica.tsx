@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Badge,
   Box,
   Center,
   Collapsible,
@@ -15,115 +16,183 @@ import type { PeriodoMusicasItem } from '../api'
 import type { AlbumAnalise, ItemRankingArtista, ItemRankingMusica } from '../types'
 import { gerarRotaArtista, gerarRotaMusica } from '../utils'
 import { CapaMusica } from './CapaMusica'
+import { GrupoIconesFonte } from './IconeFonteMusica'
 import { LinkMusica } from './LinkMusica'
 import { ListaMusicasItem } from './ListaMusicasItem'
 import { MinutosMusica } from './MinutosMusica'
+import { VersoesItemRanking } from './VersoesItemRanking'
 
 export interface ItemRankingFaixaProps {
   item: ItemRankingMusica
   corPosicao?: string
   imagemUrlResolvida?: string | null
+  periodo?: PeriodoMusicasItem | null
 }
 
 export const ItemRankingFaixa = memo(function ItemRankingFaixa({
   item,
   corPosicao = 'cirqueira.musica.amarelo',
   imagemUrlResolvida,
+  periodo = null,
 }: ItemRankingFaixaProps) {
+  const [expandido, setExpandido] = useState(false)
   const foto = item.imagemUrl || imagemUrlResolvida
+  const expansivel = Boolean(item.musicaUuid)
+  const linkExterno = item.urlSpotify ?? item.urlYoutubeMusic ?? null
 
   return (
-    <Flex
-      align="center"
-      justify="space-between"
-      p={{ base: 2, sm: 2.5 }}
-      borderRadius="8px"
-      bg="cirqueira.musica.cartao"
-      border="1px solid"
-      borderColor="border.subtle"
-      _hover={{ bg: 'cirqueira.musica.cartaoElevado', borderColor: 'border.muted' }}
-      transition="all 0.15s ease"
-      gap={{ base: 2, sm: 3 }}
-      w="full"
-      minW={0}
-    >
-      <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
-        <Center
-          boxSize={{ base: 6, sm: 7 }}
-          borderRadius="8px"
-          fontWeight="black"
-          fontSize={{ base: 'xs', sm: 'sm' }}
-          color={corPosicao}
-          flexShrink={0}
+    <Collapsible.Root open={expandido} unmountOnExit>
+      <Box
+        borderRadius="8px"
+        bg="cirqueira.musica.cartao"
+        border="1px solid"
+        borderColor={expandido ? 'cirqueira.musica.amarelo' : 'border.subtle'}
+        transition="border-color 0.15s ease"
+        overflow="hidden"
+        w="full"
+        minW={0}
+      >
+        <Flex
+          align="center"
+          justify="space-between"
+          p={{ base: 2, sm: 2.5 }}
+          cursor={expansivel ? 'pointer' : 'default'}
+          _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
+          transition="background-color 0.15s ease"
+          onClick={() => expansivel && setExpandido((anterior) => !anterior)}
+          gap={{ base: 2, sm: 3 }}
+          w="full"
+          minW={0}
         >
-          {item.posicao}
-        </Center>
-
-        <Box
-          boxSize={{ base: 10, sm: 11 }}
-          borderRadius="6px"
-          overflow="hidden"
-          border="1px solid"
-          borderColor="border.subtle"
-          bg="cirqueira.musica.cartaoElevado"
-          flexShrink={0}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          {foto ? (
-            <Box as="img" src={foto} alt={item.nomeFaixa} w="full" h="full" objectFit="cover" />
-          ) : (
-            <Music2 size={16} color="var(--chakra-colors-cirqueira-musica-textoDesabilitado)" />
-          )}
-        </Box>
-
-        <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
-          <HStack gap={1.5} maxW="full">
-            <Link
-              asChild
+          <HStack gap={{ base: 2, sm: 3 }} flex={1} minW={0} align="center">
+            <Center
+              boxSize={{ base: 6, sm: 7 }}
+              borderRadius="8px"
+              fontWeight="black"
               fontSize={{ base: 'xs', sm: 'sm' }}
-              fontWeight="semibold"
-              color="cirqueira.musica.textoPrincipal"
-              truncate
-              display="block"
-              _hover={{ textDecoration: 'underline' }}
+              color={corPosicao}
+              flexShrink={0}
             >
-              <LinkMusica to={gerarRotaMusica(item.nomeFaixa, item.artistaPrincipal)}>
-                {item.nomeFaixa}
-              </LinkMusica>
-            </Link>
-            {item.urlSpotify && (
-              <Box
-                as="a"
-                href={item.urlSpotify}
-                target="_blank"
-                rel="noopener noreferrer"
-                color="cirqueira.musica.textoSecundario"
-                _hover={{ color: 'cirqueira.musica.verde' }}
-                flexShrink={0}
-                display="inline-flex"
-                alignItems="center"
+              {item.posicao}
+            </Center>
+
+            <Box
+              boxSize={{ base: 10, sm: 11 }}
+              borderRadius="6px"
+              overflow="hidden"
+              border="1px solid"
+              borderColor="border.subtle"
+              bg="cirqueira.musica.cartaoElevado"
+              flexShrink={0}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              {foto ? (
+                <Box as="img" src={foto} alt={item.nomeFaixa} w="full" h="full" objectFit="cover" />
+              ) : (
+                <Music2 size={16} color="var(--chakra-colors-cirqueira-musica-textoDesabilitado)" />
+              )}
+            </Box>
+
+            <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
+              <HStack gap={1.5} maxW="full">
+                <Link
+                  asChild
+                  fontSize={{ base: 'xs', sm: 'sm' }}
+                  fontWeight="semibold"
+                  color="cirqueira.musica.textoPrincipal"
+                  truncate
+                  display="block"
+                  _hover={{ textDecoration: 'underline' }}
+                  onClick={(evento) => evento.stopPropagation()}
+                >
+                  <LinkMusica
+                    to={gerarRotaMusica(item.nomeFaixa, item.artistaPrincipal, item.musicaUuid)}
+                  >
+                    {item.nomeFaixa}
+                  </LinkMusica>
+                </Link>
+                {item.mashup && (
+                  <Badge
+                    size="xs"
+                    variant="subtle"
+                    bg="cirqueira.musica.cartaoElevado"
+                    color="cirqueira.musica.azul"
+                    flexShrink={0}
+                  >
+                    Mashup
+                  </Badge>
+                )}
+                {linkExterno && (
+                  <Box
+                    as="a"
+                    href={linkExterno}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    color="cirqueira.musica.textoSecundario"
+                    _hover={{ color: 'cirqueira.musica.verde' }}
+                    flexShrink={0}
+                    onClick={(evento) => evento.stopPropagation()}
+                    display="inline-flex"
+                    alignItems="center"
+                  >
+                    <ExternalLink size={12} />
+                  </Box>
+                )}
+              </HStack>
+              <HStack gap={1.5} maxW="full" minW={0}>
+                <GrupoIconesFonte fontes={item.fontes} tamanho={11} />
+                <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
+                  {(item.artistas ?? [item.artistaPrincipal]).join(', ')}
+                  {item.album ? ` • ${item.album}` : ''}
+                </Text>
+              </HStack>
+            </VStack>
+          </HStack>
+
+          <HStack gap={{ base: 1.5, sm: 2 }} flexShrink={0} align="center">
+            <VStack align="flex-end" gap={0}>
+              <Text
+                fontSize={{ base: 'xs', sm: 'sm' }}
+                fontWeight="bold"
+                color="cirqueira.musica.verde"
               >
-                <ExternalLink size={12} />
+                <MinutosMusica
+                  minutos={item.totalMinutos}
+                  porFonte={item.porFonte}
+                  estimado={item.estimado}
+                />
+              </Text>
+              <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
+                {item.totalStreams} {item.totalStreams === 1 ? 'stream' : 'streams'}
+              </Text>
+            </VStack>
+            {expansivel && (
+              <Box
+                color="cirqueira.musica.textoSecundario"
+                transition="transform 0.2s ease"
+                transform={expandido ? 'rotate(180deg)' : 'none'}
+              >
+                <ChevronDown size={16} />
               </Box>
             )}
           </HStack>
-          <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
-            {item.artistaPrincipal} • {item.album}
-          </Text>
-        </VStack>
-      </HStack>
+        </Flex>
 
-      <VStack align="flex-end" gap={0} flexShrink={0}>
-        <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight="bold" color="cirqueira.musica.verde">
-          <MinutosMusica minutos={item.totalMinutos} />
-        </Text>
-        <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
-          {item.totalStreams} {item.totalStreams === 1 ? 'stream' : 'streams'}
-        </Text>
-      </VStack>
-    </Flex>
+        <Collapsible.Content>
+          <Box
+            px={{ base: 2, sm: 3 }}
+            pb={{ base: 2, sm: 3 }}
+            pt={2}
+            borderTop="1px solid"
+            borderColor="cirqueira.musica.cartaoElevado"
+          >
+            <VersoesItemRanking musicaUuid={item.musicaUuid} periodo={periodo} aberto={expandido} />
+          </Box>
+        </Collapsible.Content>
+      </Box>
+    </Collapsible.Root>
   )
 })
 
@@ -229,7 +298,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                   _hover={{ textDecoration: 'underline' }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <LinkMusica to={gerarRotaArtista(item.nomeArtista)}>
+                  <LinkMusica to={gerarRotaArtista(item.nomeArtista, item.artistaUuid)}>
                     {item.nomeArtista}
                   </LinkMusica>
                 </Link>
@@ -250,9 +319,12 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                   </Box>
                 )}
               </HStack>
-              <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
-                {item.totalStreams} reproduções
-              </Text>
+              <HStack gap={1.5}>
+                <GrupoIconesFonte fontes={item.fontes} tamanho={11} />
+                <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
+                  {item.totalStreams} reproduções
+                </Text>
+              </HStack>
             </VStack>
           </HStack>
 
@@ -263,7 +335,11 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                 fontWeight="bold"
                 color="cirqueira.musica.verde"
               >
-                <MinutosMusica minutos={item.totalMinutos} />
+                <MinutosMusica
+                  minutos={item.totalMinutos}
+                  porFonte={item.porFonte}
+                  estimado={item.estimado}
+                />
               </Text>
             </VStack>
             <Box
@@ -286,6 +362,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
           >
             <ListaMusicasItem
               artista={item.nomeArtista}
+              artistaUuid={item.artistaUuid}
               periodo={periodo}
               rotuloPeriodo={rotuloPeriodo}
               aberto={expandido}

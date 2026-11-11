@@ -42,8 +42,23 @@
   - `web/features/dashboard/types.ts`, `web/features/dashboard/utils/metricasDashboard.ts`, `web/features/dashboard/components/StatusIntegracoes.tsx`
   - `src/Controller/YoutubeMusic/YoutubeImportacaoController.php`, `src/Service/YoutubeMusic/Importacao/CancelarClassificacaoImportacaoYoutubeService.php`, `src/Entity/ImportacaoYoutube.php`
 
-### ⏳ Tópico 203 — Frontend — rankings, Cápsula e detalhes unificados com versões e mashups
-- **Status**: Pendente
+### ✅ Tópico 203 — Frontend — rankings, Cápsula e detalhes unificados com versões e mashups
+- **Status**: Concluído
+- **O que foi feito**:
+  - Detalhes por uuid: `/musica/artista?uuid=` e `/musica/faixa?uuid=` (links antigos por `?nome=` continuam valendo e são resolvidos por `GET /api/v1/musica/artistas/resolver` e `/musicas/resolver`). `gerarRotaArtista` e `gerarRotaMusica` aceitam o uuid; `lerAlvoDetalhe` lê a URL. Os aliases antigos de análise em `/api/v1/spotify` saíram; ficaram só os de conexão, importação, tocando agora e capas.
+  - Detalhe da música: resumo por fonte (`ResumoPorFonteDetalhe`, com minutos do YouTube Music marcados como estimados), link "Abrir no YouTube Music", bloco "Versões que você ouviu" (`ListaVersoesMusica`, com tipo da versão, fonte, canal e reproduções) e, em mashups, o bloco "Contém" com as músicas que compõem. Artista vinculado pelo uuid.
+  - Detalhe do artista: resumo por fonte e "Mashups em que aparece".
+  - Evolução mensal nos detalhes empilhada por fonte (`GraficoMensalPorFonte`, cores `fonteSpotify`/`fonteYoutubeMusic` da paleta) quando há reprodução do YouTube Music; o backend passou a mandar `porFonte` em cada mês.
+  - Linhas do ranking de músicas: ícones de origem, artistas creditados, selo "Mashup", minutos com o tooltip por fonte e linha expansível com "Versões ouvidas neste período" (`GET /api/v1/musica/musicas/{uuid}/versoes` com o período do ranking) ou "Contém" para mashups. Linhas de artista com ícones de origem e lista de músicas pelo uuid do artista.
+  - Efeitos da fonte: pulos e aleatório mostram "Indisponível para o YouTube Music" com a fonte YouTube Music (Hábitos e detalhes); o cartão "Tocando agora" do Spotify some com a fonte YouTube Music e, em Todos e YouTube Music, aparece "Última detectada: título · canal, há cerca de X min" vindo do status do YouTube Music (`ultimaDetectada`), sem prometer horário exato.
+  - Cápsula: nota "Calibrada com o Spotify. Os minutos do YouTube Music são estimados." quando a fonte inclui o YouTube Music; PNG e CSV com a atribuição da fonte escolhida (só Spotify, só YouTube Music ou os dois), arquivo CSV renomeado para `capsula-musica-AAAA-MM.csv`.
+- **Diferença do roadmap**: sem teste no navegador com dados do YouTube Music, que ainda não foram importados em produção; fica para o tópico 205.
+- **Verificação**: `tsc` sem erros novos, Biome, build do Vite, PHPStan e `lint:container`.
+- **Arquivos**:
+  - `web/features/musica/` (detalhes, `components/BlocoDetalhe.tsx`, `GraficoMensalPorFonte.tsx`, `ListaVersoesMusica.tsx`, `ResumoPorFonteDetalhe.tsx`, `VersoesItemRanking.tsx`, `ItensRankingMusica.tsx`, `SecaoHabitos.tsx`, `SecaoCapsulaSonora.tsx`, `ModalImagemCapsula.tsx`, hooks, utils, api e types)
+  - `web/features/youtube-music/components/UltimaDetectadaYoutubeMusic.tsx`, `web/features/youtube-music/types.ts`, `web/features/youtube-music/utils/conexaoYoutubeMusic.ts`
+  - `src/Controller/Musica/MusicaAnaliseController.php`, `src/Controller/Musica/MusicaController.php`, `src/Service/Musica/Analise/ResolverPeriodoAnaliseMusicaService.php`, `src/Service/Musica/Analise/ListarVersoesMusicaService.php`, `src/Service/Musica/Analise/ObterTopMusicasArtistaService.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`
+  - `src/Service/YoutubeMusic/ObterStatusYoutubeMusicService.php`, `src/Serializer/ContaYoutubeMusicSerializer.php`
 
 ### ⏳ Tópico 204 — Frontend — tela de revisão e correções do catálogo
 - **Status**: Pendente

@@ -23,10 +23,14 @@ import {
   PainelEvolucaoDetalhe,
   TemaMusica,
 } from './components'
+import { BlocoDetalhe } from './components/BlocoDetalhe'
 import { LinkMusica } from './components/LinkMusica'
-import { useDetalheMusica, useImagensItensMusica } from './hooks'
+import { ListaComponentesMashup, ListaVersoesMusica } from './components/ListaVersoesMusica'
+import { ResumoPorFonteDetalhe } from './components/ResumoPorFonteDetalhe'
+import { useDetalheMusica, useFonteMusica, useImagensItensMusica } from './hooks'
 import type { DetalheMusica } from './types'
 import {
+  TEXTO_INDISPONIVEL_YOUTUBE,
   extrairMensagemErroApi,
   formatarDataExtensa,
   formatarDuracaoMs,
@@ -35,16 +39,17 @@ import {
   formatarTempoRelativo,
   gerarRotaArtista,
   gerarRotaMusica,
+  lerAlvoDetalhe,
 } from './utils'
 
 export function DetalheMusicaMusica() {
   const [parametros] = useSearchParams()
-  const nome = parametros.get('nome') ?? ''
-  const artista = parametros.get('artista') ?? ''
-  const { data, isLoading, error } = useDetalheMusica(nome, artista)
+  const alvo = lerAlvoDetalhe(parametros)
+  const { data, isLoading, error } = useDetalheMusica(alvo)
+  const titulo = data?.musica.nomeFaixa ?? alvo.nome
 
   useSEO({
-    title: nome ? `${nome} · Música` : 'Música',
+    title: titulo ? `${titulo} · Música` : 'Música',
     description: 'Seu histórico com esta música.',
   })
 
@@ -74,6 +79,8 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
   const agora = useRelogioSpotify()
   const imagemDe = useImagensItensMusica([dados.musica, dados.artista, ...dados.outrasDoArtista])
   const { comportamento, musica } = dados
+  const { fonte } = useFonteMusica()
+  const soYoutube = fonte === 'youtube_music'
   const mediaPorStream =
     musica.streams > 0 && dados.duracaoMs
       ? (musica.minutos * 60_000) / musica.streams / dados.duracaoMs
@@ -88,15 +95,20 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
         subtitulo={
           <>
             <Link asChild color="cirqueira.musica.textoPrincipal" fontWeight="bold">
-              <LinkMusica to={gerarRotaArtista(musica.artista)}>{musica.artista}</LinkMusica>
+              <LinkMusica to={gerarRotaArtista(musica.artista, dados.artista.artistaUuid)}>
+                {musica.artista}
+              </LinkMusica>
             </Link>
             {` · ${musica.album}`}
           </>
         }
         imagemUrl={imagemDe(musica)}
         urlSpotify={musica.urlSpotify}
+        urlYoutubeMusic={musica.urlYoutubeMusic}
         posicaoGeral={dados.posicaoGeral}
       />
+
+      <ResumoPorFonteDetalhe porFonte={dados.porFonte} />
 
       <SimpleGrid columns={{ base: 2, lg: 4 }} gap={{ base: 2, md: 3 }}>
         <CartaoMetricaMusica
@@ -109,7 +121,13 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
           icone={Headphones}
           cor="cirqueira.musica.azul"
           rotulo="Tempo ouvido"
-          valor={<MinutosMusica minutos={musica.minutos} />}
+          valor={
+            <MinutosMusica
+              minutos={musica.minutos}
+              porFonte={musica.porFonte}
+              estimado={musica.estimado}
+            />
+          }
           detalhe={`Em ${formatarNumeroPtBr(dados.diasOuvidos)} dias diferentes`}
         />
         <CartaoMetricaMusica
@@ -146,22 +164,26 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
         <CartaoMetricaMusica
           icone={SkipForward}
           rotulo="Taxa de pulos"
-          valor={formatarPercentualSimples(comportamento.taxaPulos)}
+          valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaPulos)}
           detalhe={
-            comportamento.comDadoPulo > 0
-              ? `${comportamento.puladas} de ${comportamento.comDadoPulo} puladas`
-              : 'Disponível com o histórico estendido'
+            soYoutube
+              ? TEXTO_INDISPONIVEL_YOUTUBE
+              : comportamento.comDadoPulo > 0
+                ? `${comportamento.puladas} de ${comportamento.comDadoPulo} puladas`
+                : 'Disponível com o histórico estendido'
           }
         />
         <CartaoMetricaMusica
           icone={Shuffle}
           cor="cirqueira.musica.azul"
           rotulo="No aleatório"
-          valor={formatarPercentualSimples(comportamento.taxaAleatorio)}
+          valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaAleatorio)}
           detalhe={
-            comportamento.comDadoAleatorio > 0
-              ? `${comportamento.aleatorias} vezes com aleatório ligado`
-              : 'Disponível com o histórico estendido'
+            soYoutube
+              ? TEXTO_INDISPONIVEL_YOUTUBE
+              : comportamento.comDadoAleatorio > 0
+                ? `${comportamento.aleatorias} vezes com aleatório ligado`
+                : 'Disponível com o histórico estendido'
           }
         />
       </SimpleGrid>
@@ -171,6 +193,19 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
         mesesNoTopo={dados.mesesNoTopo}
         descricaoTopo="de músicas do mês"
       />
+
+      {dados.componentes.length > 0 && (
+        <BlocoDetalhe titulo="Contém">
+          <ListaComponentesMashup
+            componentes={dados.componentes}
+            artistas={musica.artistas ?? []}
+          />
+        </BlocoDetalhe>
+      )}
+
+      <BlocoDetalhe titulo="Versões que você ouviu">
+        <ListaVersoesMusica variantes={dados.variantes} />
+      </BlocoDetalhe>
 
       {dados.outrasDoArtista.length > 0 && (
         <VStack
@@ -200,7 +235,7 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
                 _hover={{ textDecoration: 'none' }}
                 display="block"
               >
-                <LinkMusica to={gerarRotaMusica(outra.nomeFaixa, outra.artista)}>
+                <LinkMusica to={gerarRotaMusica(outra.nomeFaixa, outra.artista, outra.musicaUuid)}>
                   <HStack
                     gap={3}
                     p={2}

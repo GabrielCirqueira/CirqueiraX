@@ -11,6 +11,7 @@ const QUANTIDADE_PREVIA = 5
 
 export interface ListaMusicasItemProps {
   artista: string
+  artistaUuid?: string | null
   album?: string | null
   periodo?: PeriodoMusicasItem | null
   rotuloPeriodo?: string
@@ -19,6 +20,7 @@ export interface ListaMusicasItemProps {
 
 export const ListaMusicasItem = memo(function ListaMusicasItem({
   artista,
+  artistaUuid,
   album,
   periodo,
   rotuloPeriodo,
@@ -29,7 +31,10 @@ export const ListaMusicasItem = memo(function ListaMusicasItem({
     data: musicas,
     isLoading,
     isError,
-  } = useMusicasItem({ artista, album, periodo, limite: QUANTIDADE_PREVIA + 1 }, aberto)
+  } = useMusicasItem(
+    { artista, artistaUuid, album, periodo, limite: QUANTIDADE_PREVIA + 1 },
+    aberto
+  )
 
   if (isLoading) {
     return (
@@ -89,6 +94,7 @@ export const ListaMusicasItem = memo(function ListaMusicasItem({
           aberto={modalAberto}
           onFechar={() => setModalAberto(false)}
           artista={artista}
+          artistaUuid={artistaUuid}
           album={album}
           periodo={periodo}
           rotuloPeriodo={rotuloPeriodo}

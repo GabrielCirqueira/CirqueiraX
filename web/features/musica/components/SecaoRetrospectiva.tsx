@@ -182,7 +182,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
 
           {artistaDoAno && (
             <Link asChild _hover={{ textDecoration: 'none' }} display="block">
-              <LinkMusica to={gerarRotaArtista(artistaDoAno.nome)}>
+              <LinkMusica to={gerarRotaArtista(artistaDoAno.nome, artistaDoAno.artistaUuid)}>
                 <VStack gap={3} align={{ base: 'flex-start', md: 'center' }}>
                   <CapaMusica
                     url={imagemDe(artistaDoAno)}
@@ -228,7 +228,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
             <ItemTopo
               key={artista.nome}
               posicao={indice + 1}
-              rota={gerarRotaArtista(artista.nome)}
+              rota={gerarRotaArtista(artista.nome, artista.artistaUuid)}
               capa={
                 <CapaMusica
                   url={imagemDe(artista)}
@@ -252,7 +252,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
             <ItemTopo
               key={`${musica.nomeFaixa}-${musica.artista}`}
               posicao={indice + 1}
-              rota={gerarRotaMusica(musica.nomeFaixa, musica.artista)}
+              rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
               capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="44px" />}
               titulo={musica.nomeFaixa}
               subtitulo={`${musica.artista} · ${musica.streams}x`}

@@ -181,7 +181,7 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
       <SimpleGrid columns={{ base: 3, sm: 4, md: 6 }} gap={{ base: 3, md: 4 }}>
         {dados.artistasNovos.map(({ artista, primeiraVezEm }) => (
           <Link key={artista.nome} asChild _hover={{ textDecoration: 'none' }} display="block">
-            <LinkMusica to={gerarRotaArtista(artista.nome)}>
+            <LinkMusica to={gerarRotaArtista(artista.nome, artista.artistaUuid)}>
               <VStack
                 gap={1.5}
                 p={2}
@@ -225,7 +225,7 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
         {dados.musicasNovas.map(({ musica, primeiraVezEm }) => (
           <LinhaMusica
             key={`${musica.nomeFaixa}-${musica.artista}`}
-            rota={gerarRotaMusica(musica.nomeFaixa, musica.artista)}
+            rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
             capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="44px" />}
             titulo={musica.nomeFaixa}
             subtitulo={`${musica.artista} · primeira vez ${formatarDataExtensa(primeiraVezEm)}`}
@@ -244,7 +244,7 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
         {dados.redescobertas.map(({ artista, diasAusente, ultimaVezAntes }) => (
           <LinhaMusica
             key={artista.nome}
-            rota={gerarRotaArtista(artista.nome)}
+            rota={gerarRotaArtista(artista.nome, artista.artistaUuid)}
             capa={
               <CapaMusica
                 url={imagemDe(artista)}
@@ -269,7 +269,7 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
       {dados.obsessoes.map(({ musica, vezesNaJanela, inicioJanela, fimJanela }) => (
         <LinhaMusica
           key={`${musica.nomeFaixa}-${musica.artista}`}
-          rota={gerarRotaMusica(musica.nomeFaixa, musica.artista)}
+          rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
           capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="44px" />}
           titulo={musica.nomeFaixa}
           subtitulo={`${musica.artista} · ${formatarDataExtensa(inicioJanela)} a ${formatarDataExtensa(fimJanela)}`}

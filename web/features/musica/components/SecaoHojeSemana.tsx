@@ -771,6 +771,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                       key={`${musica.nomeFaixa}-${musica.artistaPrincipal}`}
                       item={musica}
                       imagemUrlResolvida={mapaImagensCompleto?.[chave]?.imagemUrl}
+                      periodo={periodoMusicasItem}
                     />
                   )
                 })}
@@ -934,6 +935,7 @@ function ModalRankingHojeSemana({
               key={`${musica.posicao}-${musica.nomeFaixa}-${musica.artistaPrincipal}`}
               item={musica}
               imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
+              periodo={periodo}
             />
           )
         })}

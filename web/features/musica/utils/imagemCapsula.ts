@@ -1,4 +1,5 @@
-import type { CapsulaMensal } from '../types'
+import type { CapsulaMensal, FonteMusica } from '../types'
+import { atribuicaoFonteMusica } from './fonteMusica'
 import { formatarMinutos } from './formatadoresMusica'
 
 const LARGURA = 1080
@@ -101,7 +102,8 @@ function desenharIconeSpotify(
 
 export async function gerarImagemCapsula(
   capsula: CapsulaMensal,
-  imagens: ImagensCapsula
+  imagens: ImagensCapsula,
+  fonte: FonteMusica
 ): Promise<Blob> {
   await document.fonts.ready
   const canvas = document.createElement('canvas')
@@ -192,10 +194,11 @@ export async function gerarImagemCapsula(
     contexto.fillText(`${musica.totalStreams} streams`, xTexto, y + 136)
   })
 
-  desenharIconeSpotify(contexto, MARGEM + 28, ALTURA - 110, 28)
+  const xAtribuicao = fonte === 'youtube_music' ? MARGEM : MARGEM + 74
+  if (fonte !== 'youtube_music') desenharIconeSpotify(contexto, MARGEM + 28, ALTURA - 110, 28)
   contexto.fillStyle = CORES.branco
   contexto.font = `600 30px ${FONTE}`
-  contexto.fillText('Dados do Spotify e do YouTube Music', MARGEM + 74, ALTURA - 100)
+  contexto.fillText(atribuicaoFonteMusica(fonte), xAtribuicao, ALTURA - 100)
   contexto.fillStyle = CORES.apagado
   contexto.font = `500 26px ${FONTE}`
   const assinatura = 'CirqueiraX'

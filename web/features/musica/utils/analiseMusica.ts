@@ -63,11 +63,17 @@ export function chaveImagemItem(item: ItemComImagemMusica): string {
   return gerarChaveArtista(item.codigoArtista, item.nome)
 }
 
-export function gerarRotaArtista(nomeArtista: string): string {
+export function gerarRotaArtista(nomeArtista: string, artistaUuid?: string | null): string {
+  if (artistaUuid) return `/musica/artista?uuid=${artistaUuid}`
   return `/musica/artista?nome=${encodeURIComponent(nomeArtista)}`
 }
 
-export function gerarRotaMusica(nomeFaixa: string, artista: string): string {
+export function gerarRotaMusica(
+  nomeFaixa: string,
+  artista: string,
+  musicaUuid?: string | null
+): string {
+  if (musicaUuid) return `/musica/faixa?uuid=${musicaUuid}`
   return `/musica/faixa?nome=${encodeURIComponent(nomeFaixa)}&artista=${encodeURIComponent(artista)}`
 }
 
@@ -170,6 +176,51 @@ export const CORES_GRAFICO_MUSICA = {
   eixo: '#B3B3B3',
   apagado: '#3E3E3E',
   cartao: '#1F1F1F',
+  fonteSpotify: '#1ED760',
+  fonteYoutubeMusic: '#FF0033',
+}
+
+export interface PontoMensalPorFonte extends PontoMensal {
+  rotulo: string
+  spotify: number
+  youtube_music: number
+}
+
+export function separarPontosPorFonte(
+  pontos: PontoMensal[],
+  metrica: 'minutos' | 'streams'
+): PontoMensalPorFonte[] {
+  return pontos.map((ponto) => {
+    const youtube = ponto.porFonte?.youtube_music?.[metrica] ?? 0
+    const spotify = ponto.porFonte?.spotify?.[metrica] ?? ponto[metrica] - youtube
+    return { ...ponto, rotulo: formatarRotuloMesCurto(ponto), spotify, youtube_music: youtube }
+  })
+}
+
+export function temReproducoesYoutube(pontos: PontoMensal[]): boolean {
+  return pontos.some((ponto) => (ponto.porFonte?.youtube_music?.streams ?? 0) > 0)
+}
+
+const ROTULOS_TIPO_VERSAO: Record<string, string> = {
+  original: 'Original',
+  slowed: 'Slowed',
+  sped_up: 'Sped up',
+  reverb: 'Reverb',
+  oito_d: '8D',
+  nightcore: 'Nightcore',
+  lyrics: 'Lyrics',
+  video_oficial: 'Vídeo oficial',
+  traducao: 'Tradução',
+  remix: 'Remix',
+  cover: 'Cover',
+  instrumental: 'Instrumental',
+  ao_vivo: 'Ao vivo',
+  outro: 'Outra versão',
+}
+
+export function rotuloTipoVersao(tipo: string | null): string {
+  if (!tipo) return 'Faixa'
+  return ROTULOS_TIPO_VERSAO[tipo] ?? tipo.replaceAll('_', ' ')
 }
 
 export function listarChavesImagensResumo(resumo: ResumoGeralMusica | undefined): string[] {

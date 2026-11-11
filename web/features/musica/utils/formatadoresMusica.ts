@@ -141,11 +141,12 @@ function escaparCampoCsv(valor: string | number | null | undefined): string {
   return `"${stringValor}"`
 }
 
-export function exportarResumoCapsulaParaCsv(capsula: CapsulaMensal): string {
+export function exportarResumoCapsulaParaCsv(capsula: CapsulaMensal, atribuicao: string): string {
   const linhas: string[] = []
 
   linhas.push('SEÇÃO;MÉTRICA;VALOR')
   linhas.push(`Resumo Geral;Período;${escaparCampoCsv(capsula.rotulo)}`)
+  linhas.push(`Resumo Geral;Fonte;${escaparCampoCsv(atribuicao)}`)
   linhas.push(`Resumo Geral;Total de Minutos;${escaparCampoCsv(capsula.totalMinutos)}`)
   linhas.push(`Resumo Geral;Total de Streams;${escaparCampoCsv(capsula.totalStreams)}`)
   linhas.push(`Resumo Geral;Faixas Distintas;${escaparCampoCsv(capsula.faixasDistintas)}`)

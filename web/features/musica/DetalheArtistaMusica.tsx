@@ -23,25 +23,30 @@ import {
   PainelEvolucaoDetalhe,
   TemaMusica,
 } from './components'
+import { BlocoDetalhe, ListaMashupsArtista } from './components/BlocoDetalhe'
 import { LinkMusica } from './components/LinkMusica'
-import { useDetalheArtistaMusica, useImagensItensMusica } from './hooks'
+import { ResumoPorFonteDetalhe } from './components/ResumoPorFonteDetalhe'
+import { useDetalheArtistaMusica, useFonteMusica, useImagensItensMusica } from './hooks'
 import type { DetalheArtista } from './types'
 import {
+  TEXTO_INDISPONIVEL_YOUTUBE,
   extrairMensagemErroApi,
   formatarDataExtensa,
   formatarNumeroPtBr,
   formatarPercentualSimples,
   formatarTempoRelativo,
   gerarRotaMusica,
+  lerAlvoDetalhe,
 } from './utils'
 
 export function DetalheArtistaMusica() {
   const [parametros] = useSearchParams()
-  const nome = parametros.get('nome') ?? ''
-  const { data, isLoading, error } = useDetalheArtistaMusica(nome)
+  const alvo = lerAlvoDetalhe(parametros)
+  const { data, isLoading, error } = useDetalheArtistaMusica(alvo)
+  const titulo = data?.artista.nome ?? alvo.nome
 
   useSEO({
-    title: nome ? `${nome} · Música` : 'Artista · Música',
+    title: titulo ? `${titulo} · Música` : 'Artista · Música',
     description: 'Seu histórico com este artista.',
   })
 
@@ -71,6 +76,8 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
   const agora = useRelogioSpotify()
   const imagemDe = useImagensItensMusica([dados.artista, ...dados.topMusicas, ...dados.topAlbuns])
   const { comportamento } = dados
+  const { fonte } = useFonteMusica()
+  const soYoutube = fonte === 'youtube_music'
 
   return (
     <VStack align="stretch" gap={{ base: 5, md: 7 }}>
@@ -81,8 +88,12 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
         subtitulo={
           <>
             {formatarNumeroPtBr(dados.artista.streams)} streams ·{' '}
-            <MinutosMusica minutos={dados.artista.minutos} /> ·{' '}
-            {formatarPercentualSimples(dados.percentualDoTempoTotal)} de todo o seu tempo ouvindo
+            <MinutosMusica
+              minutos={dados.artista.minutos}
+              porFonte={dados.artista.porFonte}
+              estimado={dados.artista.estimado}
+            />{' '}
+            · {formatarPercentualSimples(dados.percentualDoTempoTotal)} de todo o seu tempo ouvindo
             música
           </>
         }
@@ -90,6 +101,8 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
         urlSpotify={dados.artista.urlSpotify}
         posicaoGeral={dados.posicaoGeral}
       />
+
+      <ResumoPorFonteDetalhe porFonte={dados.porFonte} />
 
       <SimpleGrid columns={{ base: 2, lg: 4 }} gap={{ base: 2, md: 3 }}>
         <CartaoMetricaMusica
@@ -139,11 +152,13 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
         <CartaoMetricaMusica
           icone={SkipForward}
           rotulo="Taxa de pulos"
-          valor={formatarPercentualSimples(comportamento.taxaPulos)}
+          valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaPulos)}
           detalhe={
-            comportamento.comDadoPulo > 0
-              ? `${comportamento.puladas} de ${comportamento.comDadoPulo} puladas`
-              : 'Disponível com o histórico estendido'
+            soYoutube
+              ? TEXTO_INDISPONIVEL_YOUTUBE
+              : comportamento.comDadoPulo > 0
+                ? `${comportamento.puladas} de ${comportamento.comDadoPulo} puladas`
+                : 'Disponível com o histórico estendido'
           }
         />
         <CartaoMetricaMusica
@@ -160,6 +175,12 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
         mesesNoTopo={dados.mesesNoTopo}
         descricaoTopo="de artistas do mês"
       />
+
+      {dados.mashups.length > 0 && (
+        <BlocoDetalhe titulo="Mashups em que aparece">
+          <ListaMashupsArtista mashups={dados.mashups} />
+        </BlocoDetalhe>
+      )}
 
       <SimpleGrid columns={{ base: 1, lg: 5 }} gap={4}>
         <VStack
@@ -191,7 +212,9 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
                 _hover={{ textDecoration: 'none' }}
                 display="block"
               >
-                <LinkMusica to={gerarRotaMusica(musica.nomeFaixa, musica.artista)}>
+                <LinkMusica
+                  to={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
+                >
                   <HStack
                     gap={3}
                     p={1.5}

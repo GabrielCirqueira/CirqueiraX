@@ -11,10 +11,12 @@ export const MUSICA_QUERY_KEYS = {
     ['musica', fonte, 'musicas-item', filtro] as const,
   rankingIntervalo: (fonte: FonteMusica, params: object) =>
     ['musica', fonte, 'ranking-intervalo', params] as const,
-  detalheArtista: (fonte: FonteMusica, artista: string) =>
-    ['musica', fonte, 'detalhe-artista', artista] as const,
-  detalheMusica: (fonte: FonteMusica, nome: string, artista: string) =>
-    ['musica', fonte, 'detalhe-musica', nome, artista] as const,
+  detalheArtista: (fonte: FonteMusica, alvo: object) =>
+    ['musica', fonte, 'detalhe-artista', alvo] as const,
+  detalheMusica: (fonte: FonteMusica, alvo: object) =>
+    ['musica', fonte, 'detalhe-musica', alvo] as const,
+  versoes: (fonte: FonteMusica, musicaUuid: string, periodo: object) =>
+    ['musica', fonte, 'versoes', musicaUuid, periodo] as const,
   habitos: (fonte: FonteMusica, filtro: object) => ['musica', fonte, 'habitos', filtro] as const,
   recordes: (fonte: FonteMusica) => ['musica', fonte, 'recordes'] as const,
   evolucao: (fonte: FonteMusica, meses: number) => ['musica', fonte, 'evolucao', meses] as const,

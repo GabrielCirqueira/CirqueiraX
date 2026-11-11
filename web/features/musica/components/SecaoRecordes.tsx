@@ -176,7 +176,7 @@ function DestaqueMusica({ icone: Icone, rotulo, musica, imagemUrl, valor }: Dest
       _focusVisible={{ outline: '2px solid', outlineColor: 'cirqueira.musica.verde' }}
       _hover={{ bg: 'cirqueira.musica.cartaoElevado', textDecoration: 'none' }}
     >
-      <LinkMusica to={gerarRotaMusica(musica.nomeFaixa, musica.artista)}>
+      <LinkMusica to={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}>
         <HStack gap={3}>
           <CapaMusica url={imagemUrl} alt={musica.album} boxSize="64px" />
           <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
@@ -223,7 +223,7 @@ function DestaqueArtista({
       borderColor="cirqueira.musica.cartaoElevado"
       _hover={{ bg: 'cirqueira.musica.cartaoElevado', textDecoration: 'none' }}
     >
-      <LinkMusica to={gerarRotaArtista(artista.nome)}>
+      <LinkMusica to={gerarRotaArtista(artista.nome, artista.artistaUuid)}>
         <HStack gap={3}>
           <CapaMusica url={imagemUrl} alt={artista.nome} tipo="artista" boxSize="64px" />
           <VStack align="flex-start" gap={0.5} minW={0} flex={1}>

@@ -251,6 +251,11 @@ export const ItemTopMusicaArtistaSchema = z.object({
   totalMinutos: z.number(),
   urlSpotify: z.string().nullable().optional(),
   imagemUrl: z.string().nullable().optional(),
+  musicaUuid: z.string().nullable().optional(),
+  artistas: z.array(z.string()).optional(),
+  mashup: z.boolean().optional(),
+  urlYoutubeMusic: z.string().nullable().optional(),
+  ...CamposFonteSchema,
 })
 
 export type ItemTopMusicaArtista = z.infer<typeof ItemTopMusicaArtistaSchema>
@@ -280,6 +285,7 @@ export const PontoMensalSchema = z.object({
   mes: z.number(),
   streams: z.number(),
   minutos: z.number(),
+  porFonte: PorFonteSchema.optional(),
 })
 
 export type PontoMensal = z.infer<typeof PontoMensalSchema>
@@ -311,6 +317,58 @@ export const ComportamentoReproducaoSchema = z.object({
 
 export type ComportamentoReproducao = z.infer<typeof ComportamentoReproducaoSchema>
 
+export const DivisaoFonteDetalheSchema = z.object({
+  streams: z.number(),
+  minutos: z.number(),
+  primeira: z.string().nullable().optional(),
+  ultima: z.string().nullable().optional(),
+})
+
+export type DivisaoFonteDetalhe = z.infer<typeof DivisaoFonteDetalheSchema>
+
+export const PorFonteDetalheSchema = z.preprocess(
+  (valor) => (Array.isArray(valor) ? {} : valor),
+  z.object({
+    spotify: DivisaoFonteDetalheSchema.optional(),
+    youtube_music: DivisaoFonteDetalheSchema.optional(),
+  })
+)
+
+export type PorFonteDetalhe = z.infer<typeof PorFonteDetalheSchema>
+
+export const VarianteMusicaSchema = z.object({
+  fonte: FonteReproducaoSchema,
+  titulo: z.string(),
+  canal: z.string(),
+  codigo: z.string().nullable(),
+  tipoVersao: z.string().nullable(),
+  urlCapa: z.string().nullable(),
+  url: z.string().nullable(),
+  streams: z.number(),
+  minutos: z.number(),
+})
+
+export type VarianteMusica = z.infer<typeof VarianteMusicaSchema>
+
+export const ComponenteMashupSchema = z.object({
+  texto: z.string(),
+  musicaUuid: z.string().nullable(),
+  titulo: z.string().nullable(),
+})
+
+export type ComponenteMashup = z.infer<typeof ComponenteMashupSchema>
+
+export const VersoesMusicaSchema = z.object({
+  mashup: z.boolean(),
+  variantes: z.array(VarianteMusicaSchema),
+  componentes: z.array(ComponenteMashupSchema),
+  artistas: z.array(z.string()),
+})
+
+export type VersoesMusica = z.infer<typeof VersoesMusicaSchema>
+
+export const UuidResolvidoSchema = z.object({ uuid: z.string() })
+
 export const DetalheArtistaSchema = z.object({
   artista: ArtistaAnaliseSchema,
   reproducoes: z.number(),
@@ -327,6 +385,9 @@ export const DetalheArtistaSchema = z.object({
   topAlbuns: z.array(AlbumAnaliseSchema),
   maiorRepeticaoDiaria: RepeticaoDiariaSchema.nullable(),
   comportamento: ComportamentoReproducaoSchema,
+  porFonte: PorFonteDetalheSchema.optional(),
+  minutosEstimados: z.number().optional(),
+  mashups: z.array(MusicaAnaliseSchema).default([]),
 })
 
 export type DetalheArtista = z.infer<typeof DetalheArtistaSchema>
@@ -345,6 +406,10 @@ export const DetalheMusicaSchema = z.object({
   recordeDiario: RepeticaoDiariaSchema.nullable(),
   comportamento: ComportamentoReproducaoSchema,
   outrasDoArtista: z.array(MusicaAnaliseSchema),
+  porFonte: PorFonteDetalheSchema.optional(),
+  minutosEstimados: z.number().optional(),
+  variantes: z.array(VarianteMusicaSchema).default([]),
+  componentes: z.array(ComponenteMashupSchema).default([]),
 })
 
 export type DetalheMusica = z.infer<typeof DetalheMusicaSchema>

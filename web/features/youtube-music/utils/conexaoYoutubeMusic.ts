@@ -28,3 +28,17 @@ export function situacaoPainelYoutubeMusic(
   if (!status) return 'desconectado'
   return SITUACAO_POR_ESTADO[status.status]
 }
+
+const MINUTO_MS = 60_000
+const HORA_MS = 3_600_000
+const DIA_MS = 86_400_000
+
+export function descreverDeteccaoAproximada(dataIso: string | null, agora: number): string {
+  if (!dataIso) return ''
+  const diferenca = Math.max(0, agora - new Date(dataIso).getTime())
+  if (diferenca < HORA_MS)
+    return `há cerca de ${Math.max(1, Math.round(diferenca / MINUTO_MS))} min`
+  if (diferenca < DIA_MS) return `há cerca de ${Math.round(diferenca / HORA_MS)} h`
+  const dias = Math.round(diferenca / DIA_MS)
+  return dias === 1 ? 'há cerca de 1 dia' : `há cerca de ${dias} dias`
+}

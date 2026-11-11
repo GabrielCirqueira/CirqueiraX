@@ -1,5 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
+  type AlvoDetalheMusica,
+  type PeriodoMusicasItem,
   obterDescobertasMusica,
   obterDetalheArtistaMusica,
   obterDetalheMusica,
@@ -7,6 +9,7 @@ import {
   obterHabitosMusica,
   obterRecordesMusica,
   obterRetrospectivaMusica,
+  obterVersoesMusica,
 } from '../api'
 import type { FiltroPeriodoAnalise } from '../types'
 import { MUSICA_QUERY_KEYS } from './chavesQueryMusica'
@@ -14,23 +17,23 @@ import { useFonteMusica } from './useFonteMusica'
 
 const TEMPO_DADOS_FRESCOS = 5 * 60_000
 
-export function useDetalheArtistaMusica(artista: string) {
+export function useDetalheArtistaMusica(alvo: AlvoDetalheMusica) {
   const { fonte } = useFonteMusica()
   return useQuery({
-    queryKey: MUSICA_QUERY_KEYS.detalheArtista(fonte, artista),
-    queryFn: () => obterDetalheArtistaMusica(artista, fonte),
-    enabled: artista.trim().length > 0,
+    queryKey: MUSICA_QUERY_KEYS.detalheArtista(fonte, alvo),
+    queryFn: () => obterDetalheArtistaMusica(alvo, fonte),
+    enabled: Boolean(alvo.uuid) || alvo.nome.trim().length > 0,
     staleTime: TEMPO_DADOS_FRESCOS,
     retry: false,
   })
 }
 
-export function useDetalheMusica(nome: string, artista: string) {
+export function useDetalheMusica(alvo: AlvoDetalheMusica) {
   const { fonte } = useFonteMusica()
   return useQuery({
-    queryKey: MUSICA_QUERY_KEYS.detalheMusica(fonte, nome, artista),
-    queryFn: () => obterDetalheMusica(nome, artista, fonte),
-    enabled: nome.trim().length > 0 && artista.trim().length > 0,
+    queryKey: MUSICA_QUERY_KEYS.detalheMusica(fonte, alvo),
+    queryFn: () => obterDetalheMusica(alvo, fonte),
+    enabled: Boolean(alvo.uuid) || alvo.nome.trim().length > 0,
     staleTime: TEMPO_DADOS_FRESCOS,
     retry: false,
   })
@@ -87,5 +90,19 @@ export function useRetrospectivaMusica(ano: number, habilitado = true) {
     enabled: habilitado,
     staleTime: TEMPO_DADOS_FRESCOS,
     placeholderData: keepPreviousData,
+  })
+}
+
+export function useVersoesMusica(
+  musicaUuid: string | null | undefined,
+  periodo: PeriodoMusicasItem | null,
+  habilitado: boolean
+) {
+  const { fonte } = useFonteMusica()
+  return useQuery({
+    queryKey: MUSICA_QUERY_KEYS.versoes(fonte, musicaUuid ?? '', periodo ?? {}),
+    queryFn: () => obterVersoesMusica(musicaUuid ?? '', periodo, fonte),
+    enabled: habilitado && Boolean(musicaUuid),
+    staleTime: TEMPO_DADOS_FRESCOS,
   })
 }

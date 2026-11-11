@@ -30,10 +30,13 @@ import {
   ResumoMesCapsulaSchema,
   type RetrospectivaAnual,
   RetrospectivaAnualSchema,
+  UuidResolvidoSchema,
+  type VersoesMusica,
+  VersoesMusicaSchema,
 } from './types'
 
 const PREFIXO_MUSICA = '/api/v1/musica'
-const PREFIXO_ALIAS_SPOTIFY = '/api/v1/spotify'
+const PREFIXO_SPOTIFY = '/api/v1/spotify'
 
 export async function listarCapsulasMusica(fonte: FonteMusica): Promise<ResumoMesCapsula[]> {
   const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_MUSICA}/capsula`, {
@@ -61,10 +64,9 @@ export async function obterResumoMusica(fonte: FonteMusica): Promise<ResumoGeral
 }
 
 export async function consultarImagensSpotify(chaves: string[]): Promise<RespostaConsultaImagens> {
-  const { data } = await api.post<RespostaApi<unknown>>(
-    `${PREFIXO_ALIAS_SPOTIFY}/imagens/consultar`,
-    { chaves }
-  )
+  const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO_SPOTIFY}/imagens/consultar`, {
+    chaves,
+  })
   return RespostaConsultaImagensSchema.parse(data.data)
 }
 
@@ -82,6 +84,7 @@ export type PeriodoMusicasItem = Omit<FiltroIntervaloRankingParams, 'limite'>
 
 export interface FiltroMusicasItem {
   artista: string
+  artistaUuid?: string | null
   album?: string | null
   periodo?: PeriodoMusicasItem | null
   limite: number
@@ -99,23 +102,49 @@ function montarParametrosPeriodo(
   return params
 }
 
+export async function resolverArtistaMusica(nome: string): Promise<string> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_MUSICA}/artistas/resolver`, {
+    params: { nome },
+  })
+  return UuidResolvidoSchema.parse(data.data).uuid
+}
+
+export async function resolverMusicaPorNome(nome: string, artista: string): Promise<string> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_MUSICA}/musicas/resolver`, {
+    params: { nome, artista },
+  })
+  return UuidResolvidoSchema.parse(data.data).uuid
+}
+
 export async function obterMusicasItem(
   filtro: FiltroMusicasItem,
   fonte: FonteMusica
 ): Promise<ItemTopMusicaArtista[]> {
+  const artistaUuid = filtro.artistaUuid ?? (await resolverArtistaMusica(filtro.artista))
   const params: Record<string, string | number> = {
     ...montarParametrosPeriodo(filtro.periodo),
-    artista: filtro.artista,
     limite: filtro.limite,
     fonte,
   }
   if (filtro.album) params.album = filtro.album
 
   const { data } = await api.get<RespostaApi<unknown>>(
-    `${PREFIXO_ALIAS_SPOTIFY}/artistas/top-musicas`,
+    `${PREFIXO_MUSICA}/artistas/${artistaUuid}/top-musicas`,
     { params }
   )
   return z.array(ItemTopMusicaArtistaSchema).parse(data.data)
+}
+
+export async function obterVersoesMusica(
+  musicaUuid: string,
+  periodo: PeriodoMusicasItem | null,
+  fonte: FonteMusica
+): Promise<VersoesMusica> {
+  const { data } = await api.get<RespostaApi<unknown>>(
+    `${PREFIXO_MUSICA}/musicas/${musicaUuid}/versoes`,
+    { params: { ...montarParametrosPeriodo(periodo), fonte } }
+  )
+  return VersoesMusicaSchema.parse(data.data)
 }
 
 export async function obterRankingIntervaloMusica(
@@ -131,24 +160,30 @@ export async function obterRankingIntervaloMusica(
   return RankingIntervaloSchema.parse(data.data)
 }
 
+export interface AlvoDetalheMusica {
+  uuid: string | null
+  nome: string
+  artista?: string
+}
+
 export async function obterDetalheArtistaMusica(
-  artista: string,
+  alvo: AlvoDetalheMusica,
   fonte: FonteMusica
 ): Promise<DetalheArtista> {
-  const { data } = await api.get<RespostaApi<unknown>>(
-    `${PREFIXO_ALIAS_SPOTIFY}/artistas/detalhe`,
-    { params: { artista, fonte } }
-  )
+  const uuid = alvo.uuid ?? (await resolverArtistaMusica(alvo.nome))
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_MUSICA}/artistas/${uuid}`, {
+    params: { fonte },
+  })
   return DetalheArtistaSchema.parse(data.data)
 }
 
 export async function obterDetalheMusica(
-  nome: string,
-  artista: string,
+  alvo: AlvoDetalheMusica,
   fonte: FonteMusica
 ): Promise<DetalheMusica> {
-  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_ALIAS_SPOTIFY}/musicas/detalhe`, {
-    params: { nome, artista, fonte },
+  const uuid = alvo.uuid ?? (await resolverMusicaPorNome(alvo.nome, alvo.artista ?? ''))
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_MUSICA}/musicas/${uuid}`, {
+    params: { fonte },
   })
   return DetalheMusicaSchema.parse(data.data)
 }

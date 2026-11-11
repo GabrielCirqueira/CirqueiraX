@@ -11,9 +11,10 @@ import {
 } from '@chakra-ui/react'
 import { Fingerprint, Repeat1, Shuffle, SkipForward, Sparkle, Target } from 'lucide-react'
 import { memo, useState } from 'react'
-import { useHabitosMusica, useImagensItensMusica } from '../hooks'
+import { useFonteMusica, useHabitosMusica, useImagensItensMusica } from '../hooks'
 import type { HabitosMusica } from '../types'
 import {
+  TEXTO_INDISPONIVEL_YOUTUBE,
   criarOpcoesPeriodoAnalise,
   descreverPerfilGosto,
   formatarNumeroPtBr,
@@ -66,6 +67,8 @@ export const SecaoHabitos = memo(function SecaoHabitos({ habilitado }: SecaoHabi
 
 function ConteudoHabitos({ dados }: { dados: HabitosMusica }) {
   const { concentracao, comportamento } = dados
+  const { fonte } = useFonteMusica()
+  const soYoutube = fonte === 'youtube_music'
   const perfil = descreverPerfilGosto(
     concentracao.percentualTopArtistas,
     concentracao.percentualUmaVez
@@ -141,7 +144,7 @@ function ConteudoHabitos({ dados }: { dados: HabitosMusica }) {
                     _hover={{ textDecoration: 'none' }}
                     display="block"
                   >
-                    <LinkMusica to={gerarRotaArtista(artista.nome)}>
+                    <LinkMusica to={gerarRotaArtista(artista.nome, artista.artistaUuid)}>
                       <HStack gap={2.5}>
                         <CapaMusica
                           url={imagemDe(artista)}
@@ -220,22 +223,26 @@ function ConteudoHabitos({ dados }: { dados: HabitosMusica }) {
             icone={SkipForward}
             cor="cirqueira.musica.amarelo"
             rotulo="Taxa de pulos"
-            valor={formatarPercentualSimples(comportamento.taxaPulos)}
+            valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaPulos)}
             detalhe={
-              comportamento.comDadoPulo > 0
-                ? `${formatarNumeroPtBr(comportamento.puladas)} de ${formatarNumeroPtBr(comportamento.comDadoPulo)} reproduções puladas`
-                : 'Importe o histórico estendido para ver'
+              soYoutube
+                ? TEXTO_INDISPONIVEL_YOUTUBE
+                : comportamento.comDadoPulo > 0
+                  ? `${formatarNumeroPtBr(comportamento.puladas)} de ${formatarNumeroPtBr(comportamento.comDadoPulo)} reproduções puladas`
+                  : 'Importe o histórico estendido para ver'
             }
           />
           <CartaoMetricaMusica
             icone={Shuffle}
             cor="cirqueira.musica.azul"
             rotulo="No modo aleatório"
-            valor={formatarPercentualSimples(comportamento.taxaAleatorio)}
+            valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaAleatorio)}
             detalhe={
-              comportamento.comDadoAleatorio > 0
-                ? `${formatarNumeroPtBr(comportamento.aleatorias)} reproduções com aleatório ligado`
-                : 'Importe o histórico estendido para ver'
+              soYoutube
+                ? TEXTO_INDISPONIVEL_YOUTUBE
+                : comportamento.comDadoAleatorio > 0
+                  ? `${formatarNumeroPtBr(comportamento.aleatorias)} reproduções com aleatório ligado`
+                  : 'Importe o histórico estendido para ver'
             }
           />
         </SimpleGrid>

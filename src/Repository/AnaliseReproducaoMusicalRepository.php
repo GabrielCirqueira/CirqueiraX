@@ -400,7 +400,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{ano: int, mes: int, streams: int, minutos: int}>
+     * @return list<array{ano: int, mes: int, streams: int, minutos: int, porFonte: array<string, array{streams: int, minutos: int}>}>
      */
     public function calcularEvolucaoMensal(
         Usuario $usuario,
@@ -411,13 +411,14 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro, $alvo);
 
         $linhas = $this->consultar(sprintf(
-            'SELECT YEAR(%1$s) AS ano, MONTH(%1$s) AS mes, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
+            'SELECT YEAR(%1$s) AS ano, MONTH(%1$s) AS mes, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %3$s
             FROM reproducao_musical r
             WHERE r.usuario_id = :usuarioId%2$s
             GROUP BY ano, mes
             ORDER BY ano ASC, mes ASC',
             $periodo->expressaoData(),
             $filtros,
+            self::COLUNAS_POR_FONTE,
         ), $parametros, $tipos);
 
         return array_map(fn (array $linha): array => [
@@ -425,6 +426,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
             'mes' => (int) $linha['mes'],
             'streams' => (int) $linha['streams'],
             'minutos' => $this->paraMinutos($linha['ms']),
+            'porFonte' => $this->dividirPorFonte($linha),
         ], $linhas);
     }
 
@@ -556,9 +558,9 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     /**
      * @return list<array{fonte: string, titulo: string, canal: string, codigo: ?string, tipoVersao: ?string, urlCapa: ?string, url: ?string, streams: int, minutos: int}>
      */
-    public function listarVariantesMusica(Usuario $usuario, FiltroFonteMusica $filtro, Uuid $musica): array
+    public function listarVariantesMusica(Usuario $usuario, FiltroFonteMusica $filtro, Uuid $musica, ?PeriodoAnaliseSpotifyDTO $periodo = null): array
     {
-        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, PeriodoAnaliseSpotifyDTO::todos(), $filtro, AlvoAnaliseMusicaDTO::daMusica($musica));
+        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo ?? PeriodoAnaliseSpotifyDTO::todos(), $filtro, AlvoAnaliseMusicaDTO::daMusica($musica));
 
         $linhas = $this->consultar(sprintf(
             "SELECT 'youtube_music' AS fonte, MAX(v.titulo) AS titulo, MAX(v.canal) AS canal, v.video_id AS codigo, MAX(v.tipo_versao) AS tipo_versao,

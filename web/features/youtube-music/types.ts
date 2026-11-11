@@ -19,6 +19,14 @@ export const StatusYoutubeMusicSchema = z.object({
   ultimaNovidadeEm: z.string().nullable(),
   erroMotivo: z.string().nullable(),
   totalReproducoesColetadas: z.number(),
+  ultimaDetectada: z
+    .object({
+      titulo: z.string(),
+      canal: z.string(),
+      tocadaEm: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
 })
 
 export type StatusYoutubeMusic = z.infer<typeof StatusYoutubeMusicSchema>

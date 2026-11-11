@@ -11,6 +11,7 @@ export interface ModalMusicasItemProps {
   aberto: boolean
   onFechar: () => void
   artista: string
+  artistaUuid?: string | null
   album?: string | null
   periodo?: PeriodoMusicasItem | null
   rotuloPeriodo?: string
@@ -20,12 +21,13 @@ export const ModalMusicasItem = memo(function ModalMusicasItem({
   aberto,
   onFechar,
   artista,
+  artistaUuid,
   album,
   periodo,
   rotuloPeriodo,
 }: ModalMusicasItemProps) {
   const { data: musicas, isLoading } = useMusicasItem(
-    { artista, album, periodo, limite: LIMITE_COMPLETO },
+    { artista, artistaUuid, album, periodo, limite: LIMITE_COMPLETO },
     aberto
   )
   const total = musicas?.length ?? 0

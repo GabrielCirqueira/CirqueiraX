@@ -15,7 +15,6 @@ use App\Service\Musica\Analise\ObterDetalheCapsulaService;
 use App\Service\Musica\Analise\ObterResumoHojeSemanaCuriosidadesService;
 use App\Service\Musica\Analise\ObterResumoIntervaloPersonalizadoService;
 use App\Service\Musica\Analise\ObterTopMusicasArtistaService;
-use App\Service\Musica\Analise\ResolverAlvoPorNomeService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -24,8 +23,6 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 final class MusicaController extends DefaultController
 {
     private const string PREFIXO = '/api/v1/musica';
-    private const string PREFIXO_ALIAS = '/api/v1/spotify';
-    private const array PADRAO_ALIAS = [FiltroFonteRequisicaoDTO::PARAMETRO => 'spotify'];
     private const int LIMITE_RANKING_PADRAO = 50;
     private const string TIPO_PADRAO = 'dias';
 
@@ -35,13 +32,11 @@ final class MusicaController extends DefaultController
         private readonly ObterResumoHojeSemanaCuriosidadesService $obterResumoService,
         private readonly ObterResumoIntervaloPersonalizadoService $obterResumoIntervaloService,
         private readonly ObterTopMusicasArtistaService $obterTopMusicasArtistaService,
-        private readonly ResolverAlvoPorNomeService $resolverAlvoService,
         private readonly SpotifyCapsulaSerializer $capsulaSerializer,
         private readonly SpotifyResumoSerializer $resumoSerializer,
     ) {}
 
     #[Route(self::PREFIXO.'/capsula', name: 'api_musica_listar_capsulas', methods: ['GET'])]
-    #[Route(self::PREFIXO_ALIAS.'/capsula', name: 'api_spotify_listar_capsulas', defaults: self::PADRAO_ALIAS, methods: ['GET'])]
     public function listarCapsulas(Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $meses = $this->listarMesesCapsulaService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request));
@@ -50,7 +45,6 @@ final class MusicaController extends DefaultController
     }
 
     #[Route(self::PREFIXO.'/capsula/{ano<\d{4}>}/{mes<\d{1,2}>}', name: 'api_musica_obter_capsula', methods: ['GET'])]
-    #[Route(self::PREFIXO_ALIAS.'/capsula/{ano<\d{4}>}/{mes<\d{1,2}>}', name: 'api_spotify_obter_capsula', defaults: self::PADRAO_ALIAS, methods: ['GET'])]
     public function obterCapsula(int $ano, int $mes, Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $detalhe = $this->obterDetalheCapsulaService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $ano, $mes);
@@ -59,7 +53,6 @@ final class MusicaController extends DefaultController
     }
 
     #[Route(self::PREFIXO.'/resumo', name: 'api_musica_obter_resumo', methods: ['GET'])]
-    #[Route(self::PREFIXO_ALIAS.'/resumo', name: 'api_spotify_obter_resumo', defaults: self::PADRAO_ALIAS, methods: ['GET'])]
     public function obterResumo(Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $resumo = $this->obterResumoService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request));
@@ -68,7 +61,6 @@ final class MusicaController extends DefaultController
     }
 
     #[Route(self::PREFIXO.'/ranking', name: 'api_musica_obter_ranking_intervalo', methods: ['GET'])]
-    #[Route(self::PREFIXO_ALIAS.'/ranking', name: 'api_spotify_obter_ranking_intervalo', defaults: self::PADRAO_ALIAS, methods: ['GET'])]
     public function obterRankingIntervalo(Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $resultado = $this->obterResumoIntervaloService->executar(
@@ -97,17 +89,6 @@ final class MusicaController extends DefaultController
     public function obterTopMusicasArtista(string $uuid, Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         return $this->responderTopMusicas($uuid, $request, $usuario);
-    }
-
-    #[Route(self::PREFIXO_ALIAS.'/artistas/top-musicas', name: 'api_spotify_obter_top_musicas_artista', defaults: self::PADRAO_ALIAS, methods: ['GET'])]
-    public function obterTopMusicasArtistaPorNome(Request $request, #[CurrentUser] Usuario $usuario): Response
-    {
-        $artista = trim((string) $request->query->get('artista', ''));
-        if ('' === $artista) {
-            return $this->error('O parâmetro "artista" é obrigatório.');
-        }
-
-        return $this->responderTopMusicas($this->resolverAlvoService->resolverArtista($usuario, $artista), $request, $usuario);
     }
 
     private function responderTopMusicas(string $artistaUuid, Request $request, Usuario $usuario): Response

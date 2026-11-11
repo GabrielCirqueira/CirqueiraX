@@ -6,7 +6,6 @@ namespace App\Service\Musica\Analise;
 
 use App\DataObject\Musica\AlvoAnaliseMusicaDTO;
 use App\DataObject\Spotify\Analise\MusicaAnaliseSpotifyDTO;
-use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\DataObject\Spotify\ItemTopMusicaArtistaDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
@@ -19,14 +18,12 @@ final readonly class ObterTopMusicasArtistaService
 {
     public const int LIMITE_PADRAO = 5;
     private const int LIMITE_MAXIMO = 500;
-    private const string TIPO_TODOS = 'todos';
-    private const string TIPO_MES = 'mes';
 
     public function __construct(
         private AnaliseReproducaoMusicalRepository $analiseRepository,
         private ArtistaCatalogoRepository $artistaRepository,
         private AplicarImagensAnaliseSpotifyService $aplicarImagensService,
-        private ObterResumoIntervaloPersonalizadoService $obterResumoIntervaloService,
+        private ResolverPeriodoAnaliseMusicaService $resolverPeriodoService,
     ) {}
 
     /**
@@ -47,8 +44,7 @@ final readonly class ObterTopMusicasArtistaService
     ): array {
         $artista = $this->artistaRepository->buscarDoUsuario($usuario, $artistaUuid)?->artistaEfetivo()
             ?? throw MusicaCatalogoException::artistaNaoEncontrado();
-        $tipoFinal = $tipo ?? (null !== $ano && null !== $mes ? self::TIPO_MES : self::TIPO_TODOS);
-        $periodo = $this->resolverPeriodo($tipoFinal, $dias, $ano, $mes, $inicio, $fim);
+        $periodo = $this->resolverPeriodoService->executar($tipo, $dias, $ano, $mes, $inicio, $fim);
 
         $musicas = $this->analiseRepository->listarRankingMusicas(
             $usuario,
@@ -64,16 +60,5 @@ final readonly class ObterTopMusicasArtistaService
             static fn (MusicaAnaliseSpotifyDTO $musica): ItemTopMusicaArtistaDTO => ItemTopMusicaArtistaDTO::daAnalise($musica),
             $this->aplicarImagensService->aplicar($musicas, $mapa),
         );
-    }
-
-    private function resolverPeriodo(string $tipo, ?int $dias, ?int $ano, ?int $mes, ?string $inicio, ?string $fim): PeriodoAnaliseSpotifyDTO
-    {
-        if (self::TIPO_TODOS === $tipo) {
-            return PeriodoAnaliseSpotifyDTO::todos();
-        }
-
-        [$inicioLocal, $fimLocal, , , $rotulo] = $this->obterResumoIntervaloService->resolverIntervalo($tipo, $dias, $ano, $mes, $inicio, $fim);
-
-        return PeriodoAnaliseSpotifyDTO::entre($inicioLocal, $fimLocal, $rotulo);
     }
 }

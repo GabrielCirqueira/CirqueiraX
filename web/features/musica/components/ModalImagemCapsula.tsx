@@ -13,8 +13,15 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import { Download, ImageIcon, Share2, X } from 'lucide-react'
 import { memo, useState } from 'react'
+import { useFonteMusica } from '../hooks'
 import type { CapsulaMensal } from '../types'
-import { type ImagensCapsula, baixarImagem, compartilharImagem, gerarImagemCapsula } from '../utils'
+import {
+  type ImagensCapsula,
+  atribuicaoFonteMusica,
+  baixarImagem,
+  compartilharImagem,
+  gerarImagemCapsula,
+} from '../utils'
 
 export interface BotaoImagemCapsulaProps {
   capsula: CapsulaMensal | undefined
@@ -26,6 +33,7 @@ export const BotaoImagemCapsula = memo(function BotaoImagemCapsula({
   imagens,
 }: BotaoImagemCapsulaProps) {
   const [previa, setPrevia] = useState<{ url: string; blob: Blob } | null>(null)
+  const { fonte } = useFonteMusica()
   const nomeArquivo = capsula
     ? `capsula-sonora-${capsula.ano}-${String(capsula.mes).padStart(2, '0')}.png`
     : 'capsula-sonora.png'
@@ -33,7 +41,7 @@ export const BotaoImagemCapsula = memo(function BotaoImagemCapsula({
   const gerar = useMutation({
     mutationFn: async () => {
       if (!capsula) throw new Error('Cápsula indisponível')
-      return gerarImagemCapsula(capsula, imagens)
+      return gerarImagemCapsula(capsula, imagens, fonte)
     },
     onSuccess: (blob) => setPrevia({ url: URL.createObjectURL(blob), blob }),
     onError: () => addToast({ type: 'error', title: 'Não foi possível gerar a imagem.' }),
@@ -116,8 +124,8 @@ export const BotaoImagemCapsula = memo(function BotaoImagemCapsula({
                   </Center>
                 )}
                 <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
-                  As capas aparecem inteiras e a imagem leva a atribuição ao Spotify e ao YouTube
-                  Music, como pedem as regras das marcas.
+                  As capas aparecem inteiras e a imagem leva a atribuição da fonte (
+                  {atribuicaoFonteMusica(fonte)}), como pedem as regras das marcas.
                 </Text>
                 <HStack gap={2}>
                   <Button

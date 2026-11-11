@@ -1,4 +1,9 @@
-import { type FonteMusica, FonteMusicaSchema, type FonteReproducao } from '../types'
+import {
+  type FonteMusica,
+  FonteMusicaSchema,
+  type FonteReproducao,
+  type PorFonteDetalhe,
+} from '../types'
 
 export const FONTE_MUSICA_PADRAO: FonteMusica = 'todas'
 
@@ -88,4 +93,42 @@ export function rolarParaConexaoYoutubeMusic(): void {
   document
     .getElementById(ID_CONEXAO_YOUTUBE_MUSIC)
     ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+export function listarFontesDetalhe(porFonte: PorFonteDetalhe | undefined) {
+  const fontes: { fonte: FonteReproducao; dados: NonNullable<PorFonteDetalhe['spotify']> }[] = []
+  for (const fonte of ['spotify', 'youtube_music'] as const) {
+    const dados = porFonte?.[fonte]
+    if (dados && dados.streams + dados.minutos > 0) fontes.push({ fonte, dados })
+  }
+  return fontes
+}
+
+export const TEXTO_INDISPONIVEL_YOUTUBE = 'Indisponível para o YouTube Music'
+
+export interface AlvoDetalheUrl {
+  uuid: string | null
+  nome: string
+  artista: string
+}
+
+export function lerAlvoDetalhe(parametros: URLSearchParams): AlvoDetalheUrl {
+  return {
+    uuid: parametros.get('uuid'),
+    nome: parametros.get('nome') ?? '',
+    artista: parametros.get('artista') ?? '',
+  }
+}
+
+export const NOTA_CALIBRACAO_CAPSULA =
+  'Calibrada com o Spotify. Os minutos do YouTube Music são estimados.'
+
+const ATRIBUICAO_POR_FONTE: Record<FonteMusica, string> = {
+  todas: 'Dados do Spotify e do YouTube Music',
+  spotify: 'Dados do Spotify',
+  youtube_music: 'Dados do YouTube Music',
+}
+
+export function atribuicaoFonteMusica(fonte: FonteMusica): string {
+  return ATRIBUICAO_POR_FONTE[fonte]
 }

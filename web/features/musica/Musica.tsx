@@ -5,6 +5,7 @@ import { useStatusSpotify } from '@/features/spotify/hooks/useStatusSpotify'
 import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
 import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
 import { SeloRevisaoMusica } from '@/features/youtube-music/components/SeloRevisaoMusica'
+import { UltimaDetectadaYoutubeMusic } from '@/features/youtube-music/components/UltimaDetectadaYoutubeMusic'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
 import { Container, Flex, HStack, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
@@ -107,7 +108,8 @@ export function Musica() {
               />
             ) : (
               <>
-                <CartaoTocandoAgora conectada={conectada} />
+                {fonte !== 'youtube_music' && <CartaoTocandoAgora conectada={conectada} />}
+                {fonte !== 'spotify' && <UltimaDetectadaYoutubeMusic />}
 
                 <SecaoHojeSemana
                   resumo={resumo}

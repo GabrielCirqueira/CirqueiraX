@@ -39,6 +39,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import {
   useCapsulasMusica,
   useDetalheCapsulaMusica,
+  useFonteMusica,
   useImagensMusica,
   useMesCapsulaUrl,
 } from '../hooks'
@@ -49,6 +50,8 @@ import type {
   RespostaConsultaImagens,
 } from '../types'
 import {
+  NOTA_CALIBRACAO_CAPSULA,
+  atribuicaoFonteMusica,
   baixarArquivoCsv,
   exportarResumoCapsulaParaCsv,
   formatarDataPtBr,
@@ -59,6 +62,7 @@ import {
   formatarRotuloMesAno,
   gerarChaveArtista,
   gerarChaveFaixa,
+  incluiYoutubeMusic,
 } from '../utils'
 import { ListaMusicasItem } from './ListaMusicasItem'
 import { MinutosMusica, TooltipMusica } from './MinutosMusica'
@@ -72,6 +76,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
   conectada,
 }: SecaoCapsulaSonoraProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
+  const { fonte } = useFonteMusica()
   const { data: mesesDisponiveis, isLoading: carregandoMeses } = useCapsulasMusica(conectada)
   const { anoSelecionado, mesSelecionado, selecionarMes } = useMesCapsulaUrl()
 
@@ -137,8 +142,8 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
 
   function handleExportarCsv() {
     if (!capsula) return
-    const csv = exportarResumoCapsulaParaCsv(capsula)
-    const nomeArquivo = `capsula-spotify-${capsula.ano}-${String(capsula.mes).padStart(2, '0')}.csv`
+    const csv = exportarResumoCapsulaParaCsv(capsula, atribuicaoFonteMusica(fonte))
+    const nomeArquivo = `capsula-musica-${capsula.ano}-${String(capsula.mes).padStart(2, '0')}.csv`
     baixarArquivoCsv(csv, nomeArquivo)
   }
 
@@ -331,6 +336,12 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
           </Button>
         </HStack>
       </Flex>
+
+      {incluiYoutubeMusic(fonte) && (
+        <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+          {NOTA_CALIBRACAO_CAPSULA}
+        </Text>
+      )}
 
       {carregandoCapsula || !capsula ? (
         <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>

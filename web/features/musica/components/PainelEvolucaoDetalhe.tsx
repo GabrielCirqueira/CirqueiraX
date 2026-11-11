@@ -2,8 +2,9 @@ import { Box, Button, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { Crown } from 'lucide-react'
 import { memo, useState } from 'react'
 import type { MesNoTopo, PontoMensal } from '../types'
-import { formatarRotuloMesCurto, preencherMesesEntre } from '../utils'
+import { formatarRotuloMesCurto, preencherMesesEntre, temReproducoesYoutube } from '../utils'
 import { GraficoMensalMusica } from './GraficoMensalMusica'
+import { GraficoMensalPorFonte } from './GraficoMensalPorFonte'
 
 export interface PainelEvolucaoDetalheProps {
   evolucao: PontoMensal[]
@@ -60,12 +61,16 @@ export const PainelEvolucaoDetalhe = memo(function PainelEvolucaoDetalhe({
         </HStack>
       </Flex>
 
-      <GraficoMensalMusica
-        pontos={pontos}
-        metrica={metrica}
-        destacarUltimo={false}
-        altura="220px"
-      />
+      {temReproducoesYoutube(evolucao) ? (
+        <GraficoMensalPorFonte pontos={pontos} metrica={metrica} altura="240px" />
+      ) : (
+        <GraficoMensalMusica
+          pontos={pontos}
+          metrica={metrica}
+          destacarUltimo={false}
+          altura="220px"
+        />
+      )}
 
       <VStack align="stretch" gap={2}>
         <HStack gap={1.5} color="cirqueira.musica.amarelo">
