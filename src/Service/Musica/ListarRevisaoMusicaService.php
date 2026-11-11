@@ -40,6 +40,23 @@ final readonly class ListarRevisaoMusicaService
     }
 
     /**
+     * @return array<string, int>
+     */
+    public function contar(Usuario $usuario): array
+    {
+        $contagens = [];
+        foreach (TipoRevisaoMusica::cases() as $tipo) {
+            $contagens[$tipo->value] = match ($tipo) {
+                TipoRevisaoMusica::CanalNovo => count($this->filtrarCanaisSemRegra($usuario)),
+                TipoRevisaoMusica::PossivelDuplicata => count($this->sugerirDuplicatas->executar($usuario)),
+                default => $this->videoRepository->contarParaRevisao($usuario, $tipo),
+            };
+        }
+
+        return $contagens;
+    }
+
+    /**
      * @return array{0: list<array<string, mixed>>, 1: int}
      */
     private function listarVideos(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro): array
@@ -55,13 +72,22 @@ final readonly class ListarRevisaoMusicaService
      */
     private function listarCanais(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro): array
     {
+        $canais = $this->filtrarCanaisSemRegra($usuario);
+
+        return [array_slice($canais, $filtro->deslocamento(), $filtro->porPagina), count($canais)];
+    }
+
+    /**
+     * @return list<array{canal: string, total: int, exemplo: string}>
+     */
+    private function filtrarCanaisSemRegra(Usuario $usuario): array
+    {
         $comRegra = $this->regraRepository->listarCanaisComRegra($usuario);
-        $canais = array_values(array_filter(
+
+        return array_values(array_filter(
             $this->videoRepository->listarCanaisEmAberto($usuario),
             fn (array $canal): bool => !isset($comRegra[$this->normalizador->normalizar($canal['canal'])]),
         ));
-
-        return [array_slice($canais, $filtro->deslocamento(), $filtro->porPagina), count($canais)];
     }
 
     /**

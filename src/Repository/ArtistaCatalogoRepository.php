@@ -85,4 +85,24 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
 
         return array_map(static fn (array $linha): string => $linha['uuid']->toRfc4122(), $linhas);
     }
+
+    /**
+     * @return list<ArtistaCatalogo>
+     */
+    public function buscarPorTexto(Usuario $usuario, string $termoNormalizado, int $limite): array
+    {
+        /** @var list<ArtistaCatalogo> $artistas */
+        $artistas = $this->createQueryBuilder('a')
+            ->andWhere('a.usuario = :usuario')
+            ->andWhere('a.unidoA IS NULL')
+            ->andWhere('a.nomeNormalizado LIKE :termo')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('termo', '%'.addcslashes($termoNormalizado, '%_').'%')
+            ->orderBy('a.nome', 'ASC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $artistas;
+    }
 }

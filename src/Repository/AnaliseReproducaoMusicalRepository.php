@@ -556,7 +556,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{fonte: string, titulo: string, canal: string, codigo: ?string, tipoVersao: ?string, urlCapa: ?string, url: ?string, streams: int, minutos: int}>
+     * @return list<array{fonte: string, titulo: string, canal: string, codigo: ?string, videoUuid: ?string, tipoVersao: ?string, urlCapa: ?string, url: ?string, streams: int, minutos: int}>
      */
     public function listarVariantesMusica(Usuario $usuario, FiltroFonteMusica $filtro, Uuid $musica, ?PeriodoAnaliseSpotifyDTO $periodo = null): array
     {
@@ -564,14 +564,14 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             "SELECT 'youtube_music' AS fonte, MAX(v.titulo) AS titulo, MAX(v.canal) AS canal, v.video_id AS codigo, MAX(v.tipo_versao) AS tipo_versao,
-                MAX(v.url_capa) AS url_capa, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
+                MAX(v.url_capa) AS url_capa, MAX(BIN_TO_UUID(v.uuid)) AS video_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
             FROM reproducao_musical r
             INNER JOIN reproducao_youtube ry ON ry.uuid = UUID_TO_BIN(r.origem_id)
             INNER JOIN video_youtube v ON v.uuid = ry.video_uuid
             WHERE r.usuario_id = :usuarioId AND r.fonte = 'youtube_music'%1\$s
             GROUP BY v.video_id
             UNION ALL
-            SELECT 'spotify', rs.nome_faixa, rs.artista_principal, MAX(rs.codigo_faixa), NULL, NULL,
+            SELECT 'spotify', rs.nome_faixa, rs.artista_principal, MAX(rs.codigo_faixa), NULL, NULL, NULL,
                 SUM(r.ms_reproduzidos >= :corte), SUM(r.ms_reproduzidos)
             FROM reproducao_musical r
             INNER JOIN reproducao_spotify rs ON rs.uuid = UUID_TO_BIN(r.origem_id)
@@ -586,6 +586,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
             'titulo' => (string) $linha['titulo'],
             'canal' => (string) $linha['canal'],
             'codigo' => is_string($linha['codigo']) && '' !== $linha['codigo'] ? $linha['codigo'] : null,
+            'videoUuid' => is_string($linha['video_uuid']) ? $linha['video_uuid'] : null,
             'tipoVersao' => is_string($linha['tipo_versao']) ? $linha['tipo_versao'] : null,
             'urlCapa' => is_string($linha['url_capa']) ? $linha['url_capa'] : null,
             'url' => $this->montarUrlVariante((string) $linha['fonte'], is_string($linha['codigo']) ? $linha['codigo'] : null),

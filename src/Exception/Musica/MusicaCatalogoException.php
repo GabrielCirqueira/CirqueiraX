@@ -66,4 +66,9 @@ final class MusicaCatalogoException extends DomainException
     {
         return new self('Informe a música para desfazer a união ou o vídeo para separar.', self::CODIGO_INVALIDO);
     }
+
+    public static function componentesDoMashupAusentes(): self
+    {
+        return new self('Informe pelo menos duas músicas para o mashup.', self::CODIGO_INVALIDO);
+    }
 }

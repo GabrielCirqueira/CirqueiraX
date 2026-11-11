@@ -7,6 +7,7 @@ namespace App\Enum;
 enum AcaoRevisaoVideo: string
 {
     case DefinirMusica = 'definir_musica';
+    case DefinirMashup = 'definir_mashup';
     case NaoMusica = 'nao_musica';
     case ManterCompilacao = 'manter_compilacao';
 
@@ -14,6 +15,7 @@ enum AcaoRevisaoVideo: string
     {
         return match ($this) {
             self::DefinirMusica => 'Definir a música',
+            self::DefinirMashup => 'Definir como mashup',
             self::NaoMusica => 'Não é música',
             self::ManterCompilacao => 'Manter como compilação',
         };

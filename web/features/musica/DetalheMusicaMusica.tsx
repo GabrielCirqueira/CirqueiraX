@@ -1,3 +1,7 @@
+import {
+  BotaoSepararVersao,
+  BotaoUnirMusica,
+} from '@/features/revisao-musica/components/AcoesCatalogo'
 import { useRelogioSpotify } from '@/features/spotify/hooks/useTocandoAgoraSpotify'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
@@ -108,6 +112,12 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
         posicaoGeral={dados.posicaoGeral}
       />
 
+      {musica.musicaUuid && (
+        <HStack gap={2} wrap="wrap">
+          <BotaoUnirMusica musicaUuid={musica.musicaUuid} titulo={musica.nomeFaixa} />
+        </HStack>
+      )}
+
       <ResumoPorFonteDetalhe porFonte={dados.porFonte} />
 
       <SimpleGrid columns={{ base: 2, lg: 4 }} gap={{ base: 2, md: 3 }}>
@@ -204,7 +214,14 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
       )}
 
       <BlocoDetalhe titulo="Versões que você ouviu">
-        <ListaVersoesMusica variantes={dados.variantes} />
+        <ListaVersoesMusica
+          variantes={dados.variantes}
+          acaoVariante={(variante) =>
+            variante.videoUuid && dados.variantes.length > 1 ? (
+              <BotaoSepararVersao videoUuid={variante.videoUuid} />
+            ) : null
+          }
+        />
       </BlocoDetalhe>
 
       {dados.outrasDoArtista.length > 0 && (

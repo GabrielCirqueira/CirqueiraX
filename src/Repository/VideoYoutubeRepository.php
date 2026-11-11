@@ -201,12 +201,7 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
      */
     public function listarParaRevisao(Usuario $usuario, TipoRevisaoMusica $tipo, int $deslocamento, int $limite): array
     {
-        $condicao = match ($tipo) {
-            TipoRevisaoMusica::Ambiguo => "status = 'revisar' AND JSON_EXTRACT(resposta_ia, '$.ambiguo') = true",
-            TipoRevisaoMusica::Compilacao => "status = 'compilacao' AND (origem_classificacao IS NULL OR origem_classificacao <> 'manual')",
-            TipoRevisaoMusica::Indisponivel => "status = 'indisponivel'",
-            default => "status = 'revisar' AND (resposta_ia IS NULL OR JSON_EXTRACT(resposta_ia, '$.ambiguo') IS NULL OR JSON_EXTRACT(resposta_ia, '$.ambiguo') = false)",
-        };
+        $condicao = $this->condicaoRevisao($tipo);
         $conexao = $this->getEntityManager()->getConnection();
         $parametros = ['usuarioId' => $usuario->getId(), 'deslocamento' => $deslocamento, 'limite' => $limite];
         $tipos = ['deslocamento' => PDO::PARAM_INT, 'limite' => PDO::PARAM_INT];
@@ -394,5 +389,25 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     public function limparCache(): void
     {
         $this->getEntityManager()->clear();
+    }
+
+    public function contarParaRevisao(Usuario $usuario, TipoRevisaoMusica $tipo): int
+    {
+        $condicao = $this->condicaoRevisao($tipo);
+
+        return (int) $this->getEntityManager()->getConnection()->fetchOne(
+            "SELECT COUNT(*) FROM video_youtube WHERE usuario_id = :usuarioId AND {$condicao}",
+            ['usuarioId' => $usuario->getId()],
+        );
+    }
+
+    private function condicaoRevisao(TipoRevisaoMusica $tipo): string
+    {
+        return match ($tipo) {
+            TipoRevisaoMusica::Ambiguo => "status = 'revisar' AND JSON_EXTRACT(resposta_ia, '$.ambiguo') = true",
+            TipoRevisaoMusica::Compilacao => "status = 'compilacao' AND (origem_classificacao IS NULL OR origem_classificacao <> 'manual')",
+            TipoRevisaoMusica::Indisponivel => "status = 'indisponivel'",
+            default => "(status = 'pendente' OR (status = 'revisar' AND (resposta_ia IS NULL OR JSON_EXTRACT(resposta_ia, '$.ambiguo') IS NULL OR JSON_EXTRACT(resposta_ia, '$.ambiguo') = false)))",
+        };
     }
 }

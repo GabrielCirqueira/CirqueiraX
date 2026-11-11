@@ -6,12 +6,14 @@ namespace App\DataObject\Musica;
 
 use App\Enum\AcaoRevisaoVideo;
 use App\Enum\TipoVersaoMusica;
+use App\Service\IdentificacaoMusica\AplicarIdentificacaoVideoYoutubeService;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class DefinirMusicaVideoDTO
 {
     /**
-     * @param list<string> $artistas
+     * @param list<string>                     $artistas
+     * @param list<ComponenteMashupEntradaDTO> $componentes
      */
     public function __construct(
         public AcaoRevisaoVideo $acao = AcaoRevisaoVideo::DefinirMusica,
@@ -23,6 +25,9 @@ final readonly class DefinirMusicaVideoDTO
         #[Assert\Count(max: 20)]
         public array $artistas = [],
         public TipoVersaoMusica $versao = TipoVersaoMusica::Original,
+        #[Assert\Count(max: AplicarIdentificacaoVideoYoutubeService::LIMITE_COMPONENTES_MASHUP)]
+        #[Assert\Valid]
+        public array $componentes = [],
     ) {
     }
 }

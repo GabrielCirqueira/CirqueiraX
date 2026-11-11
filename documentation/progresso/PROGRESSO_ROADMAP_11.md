@@ -60,8 +60,26 @@
   - `src/Controller/Musica/MusicaAnaliseController.php`, `src/Controller/Musica/MusicaController.php`, `src/Service/Musica/Analise/ResolverPeriodoAnaliseMusicaService.php`, `src/Service/Musica/Analise/ListarVersoesMusicaService.php`, `src/Service/Musica/Analise/ObterTopMusicasArtistaService.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`
   - `src/Service/YoutubeMusic/ObterStatusYoutubeMusicService.php`, `src/Serializer/ContaYoutubeMusicSerializer.php`
 
-### ⏳ Tópico 204 — Frontend — tela de revisão e correções do catálogo
-- **Status**: Pendente
+### ✅ Tópico 204 — Frontend — tela de revisão e correções do catálogo
+- **Status**: Concluído
+- **O que foi feito**:
+  - Nova feature `web/features/revisao-musica/` (types com Zod, api, hooks com TanStack Query, utils e componentes) e rota `/musica/revisao` (`RevisaoMusica`), com link "Revisão e correções" no topo da página de Música, além do selo do tópico 202.
+  - Abas Sem vínculo, Ambíguos, Compilações, Canais novos, Possíveis duplicadas e Indisponíveis, cada uma com a contagem (`GET /api/v1/musica/revisao/contagens`), a aba na URL (`?aba=`) e paginação.
+  - `CartaoVideoRevisao`: miniatura, título e canal originais, duração, "Abrir no YouTube", sugestão da IA com a confiança e as outras leituras como botões (as duas leituras de "Renegade", por exemplo). Ações: Confirmar sugestão, Escolher música (busca no catálogo ou criar nova com título, artistas e versão), Marcar como mashup (editor de até 5 componentes), Não é música e "Este canal é sempre música / nunca é música". Em Compilações aparecem Informar artistas, Marcar como mashup, Manter como compilação e Não é música.
+  - Canais novos: lista em ordem de quantos vídeos em aberto cada canal tem, com Sempre música e Nunca música.
+  - Possíveis duplicadas: as duas músicas lado a lado, com "Manter esta e unir".
+  - Ação em lote: caixa de seleção em cada vídeo e barra fixa "Definir a mesma música" (`POST /api/v1/musica/revisao/videos/lote`).
+  - Detalhes: "Unir com outra música…" na música, "Separar esta versão" em cada versão do YouTube Music e "Unir com outro artista" no artista (cria o apelido). Depois de unir, a página vai para a música ou o artista que ficou.
+  - Atualização otimista (o item sai da lista e a contagem cai na hora, com volta se der erro) e invalidação das consultas de música, do resumo da identificação e do Dashboard depois de cada correção. `JanelaRevisaoMusica` abre `Dialog` no desktop e `Drawer` no celular, uma de cada vez, sem modal sobre modal; foco inicial na busca e rótulos acessíveis nos botões e caixas de seleção.
+  - Backend: `AcaoRevisaoVideo::DefinirMashup` (componentes no `DefinirMusicaVideoDTO`, mashup criado por `ObterMusicaCatalogoService::obterMashup` e confirmado à mão), `DefinirMusicaDoVideoService::executarEmLote`, `BuscarCatalogoMusicaService` (`GET /api/v1/musica/catalogo/musicas?busca=` e `/catalogo/artistas?busca=`), `ListarRevisaoMusicaService::contar` e `VideoYoutubeRepository::contarParaRevisao`. A aba Sem vínculo passou a incluir os vídeos pendentes (os que ficaram sem IA ao cancelar a importação). As versões do detalhe trazem o `videoUuid` para a separação.
+- **Diferença do roadmap**: a aba Canais novos conta vídeos em aberto, não reproduções, porque é o que a consulta do tópico 196 entrega. Nada é apagado: unir pode ser desfeito e separar manda o vídeo de volta para a revisão. As consultas novas de busca e contagem não foram rodadas contra o banco antes do deploy.
+- **Verificação**: `tsc` sem erros novos, Biome, build do Vite, PHPStan e `lint:container`.
+- **Arquivos**:
+  - `web/features/revisao-musica/` (todos), `web/App.tsx`
+  - `web/features/musica/DetalheMusicaMusica.tsx`, `web/features/musica/DetalheArtistaMusica.tsx`, `web/features/musica/Musica.tsx`, `web/features/musica/components/ListaVersoesMusica.tsx`, `web/features/musica/types.ts`, `web/features/youtube-music/components/SeloRevisaoMusica.tsx`
+  - `src/Controller/Musica/MusicaCorrecaoController.php`, `src/Service/Musica/Correcao/DefinirMusicaDoVideoService.php`, `src/Service/Musica/Correcao/BuscarCatalogoMusicaService.php`, `src/Service/Musica/ListarRevisaoMusicaService.php`
+  - `src/DataObject/Musica/DefinirMusicaVideoDTO.php`, `src/DataObject/Musica/DefinirMusicaVideosEmLoteDTO.php`, `src/DataObject/Musica/BuscaCatalogoMusicaDTO.php`, `src/Enum/AcaoRevisaoVideo.php`, `src/Exception/Musica/MusicaCatalogoException.php`
+  - `src/Repository/VideoYoutubeRepository.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Repository/ArtistaCatalogoRepository.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`
 
 ### ⏳ Tópico 205 — Teste end-to-end com dados reais, calibração e documentação
 - **Status**: Pendente

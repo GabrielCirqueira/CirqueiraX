@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Musica\Correcao;
 
+use App\DataObject\IdentificacaoMusica\ComponenteIdentificadoDTO;
+use App\DataObject\Musica\ComponenteMashupEntradaDTO;
 use App\DataObject\Musica\DefinirMusicaVideoDTO;
+use App\DataObject\Musica\DefinirMusicaVideosEmLoteDTO;
 use App\Entity\MusicaCatalogo;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
@@ -21,6 +24,7 @@ use App\Service\Spotify\CacheAnaliseSpotifyService;
 final readonly class DefinirMusicaDoVideoService
 {
     private const int CONFIANCA_MANUAL = 100;
+    private const int MINIMO_COMPONENTES_MASHUP = 2;
 
     public function __construct(
         private VideoYoutubeRepository $videoRepository,
@@ -39,6 +43,7 @@ final readonly class DefinirMusicaDoVideoService
             AcaoRevisaoVideo::NaoMusica => $video->classificar(StatusClassificacaoVideo::NaoMusica, OrigemClassificacao::Manual, self::CONFIANCA_MANUAL, null, null),
             AcaoRevisaoVideo::ManterCompilacao => $video->classificar(StatusClassificacaoVideo::Compilacao, OrigemClassificacao::Manual, self::CONFIANCA_MANUAL, null, null),
             AcaoRevisaoVideo::DefinirMusica => $this->definirMusica($usuario, $video, $dto),
+            AcaoRevisaoVideo::DefinirMashup => $this->definirMashup($usuario, $video, $dto),
         };
 
         $this->videoRepository->flush();
@@ -46,6 +51,39 @@ final readonly class DefinirMusicaDoVideoService
         $this->cacheAnalise->invalidar($usuario);
 
         return $video;
+    }
+
+    public function executarEmLote(Usuario $usuario, DefinirMusicaVideosEmLoteDTO $dto): int
+    {
+        $musica = $this->musicaRepository->buscarDoUsuario($usuario, $dto->musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $musica = $musica->musicaEfetiva()->confirmarManualmente();
+        $status = $musica->isMashup() ? StatusClassificacaoVideo::Mashup : StatusClassificacaoVideo::Musica;
+        $videos = $this->videoRepository->buscarPorUuidsOrdenados($usuario, array_values(array_unique($dto->videoUuids)));
+
+        foreach ($videos as $video) {
+            $video->classificar($status, OrigemClassificacao::Manual, self::CONFIANCA_MANUAL, $video->tipoVersao(), $musica);
+        }
+
+        $this->videoRepository->flush();
+        $this->projetarYoutube->projetarVideos($usuario, $videos);
+        $this->cacheAnalise->invalidar($usuario);
+
+        return count($videos);
+    }
+
+    private function definirMashup(Usuario $usuario, VideoYoutube $video, DefinirMusicaVideoDTO $dto): VideoYoutube
+    {
+        if (count($dto->componentes) < self::MINIMO_COMPONENTES_MASHUP) {
+            throw MusicaCatalogoException::componentesDoMashupAusentes();
+        }
+
+        $partes = array_map(fn (ComponenteMashupEntradaDTO $componente): array => [
+            'componente' => new ComponenteIdentificadoDTO(trim($componente->titulo), $componente->artistas),
+            'musica' => $this->obterMusica->obterMusica($usuario, $componente->titulo, $componente->artistas),
+        ], $dto->componentes);
+        $mashup = $this->obterMusica->obterMashup($usuario, $partes, null)->confirmarManualmente();
+
+        return $video->classificar(StatusClassificacaoVideo::Mashup, OrigemClassificacao::Manual, self::CONFIANCA_MANUAL, $dto->versao, $mashup);
     }
 
     private function definirMusica(Usuario $usuario, VideoYoutube $video, DefinirMusicaVideoDTO $dto): VideoYoutube

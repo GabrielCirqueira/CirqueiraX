@@ -121,4 +121,27 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
 
         return $mapa;
     }
+
+    /**
+     * @return list<MusicaCatalogo>
+     */
+    public function buscarPorTexto(Usuario $usuario, string $termoNormalizado, int $limite): array
+    {
+        /** @var list<MusicaCatalogo> $musicas */
+        $musicas = $this->createQueryBuilder('m')
+            ->distinct()
+            ->leftJoin('m.artistas', 'ma')
+            ->leftJoin('ma.artista', 'a')
+            ->andWhere('m.usuario = :usuario')
+            ->andWhere('m.unidaA IS NULL')
+            ->andWhere('m.chaveNormalizada LIKE :termo OR a.nomeNormalizado LIKE :termo')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('termo', '%'.addcslashes($termoNormalizado, '%_').'%')
+            ->orderBy('m.titulo', 'ASC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $musicas;
+    }
 }

@@ -1,3 +1,4 @@
+import { BotaoUnirArtista } from '@/features/revisao-musica/components/AcoesCatalogo'
 import { useRelogioSpotify } from '@/features/spotify/hooks/useTocandoAgoraSpotify'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
@@ -101,6 +102,12 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
         urlSpotify={dados.artista.urlSpotify}
         posicaoGeral={dados.posicaoGeral}
       />
+
+      {dados.artista.artistaUuid && (
+        <HStack gap={2} wrap="wrap">
+          <BotaoUnirArtista artistaUuid={dados.artista.artistaUuid} nome={dados.artista.nome} />
+        </HStack>
+      )}
 
       <ResumoPorFonteDetalhe porFonte={dados.porFonte} />
 

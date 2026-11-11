@@ -82,6 +82,10 @@ const router = createBrowserRouter(
             path="musica/faixa"
             lazy={() => lazyWithRetry(() => import('@/features/musica/DetalheMusicaMusica'))}
           />
+          <Route
+            path="musica/revisao"
+            lazy={() => lazyWithRetry(() => import('@/features/revisao-musica/RevisaoMusica'))}
+          />
           <Route path="spotify/artista" loader={redirecionarComBusca('/musica/artista')} />
           <Route path="spotify/musica" loader={redirecionarComBusca('/musica/faixa')} />
           <Route

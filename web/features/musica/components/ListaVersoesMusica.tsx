@@ -1,6 +1,6 @@
 import { Badge, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { ExternalLink } from 'lucide-react'
-import { memo } from 'react'
+import { type ReactNode, memo } from 'react'
 import type { ComponenteMashup, VarianteMusica } from '../types'
 import { formatarNumeroPtBr, gerarRotaMusica, rotuloTipoVersao } from '../utils'
 import { IconeFonteMusica } from './IconeFonteMusica'
@@ -9,10 +9,12 @@ import { MinutosMusica } from './MinutosMusica'
 
 export interface ListaVersoesMusicaProps {
   variantes: VarianteMusica[]
+  acaoVariante?: (variante: VarianteMusica) => ReactNode
 }
 
 export const ListaVersoesMusica = memo(function ListaVersoesMusica({
   variantes,
+  acaoVariante,
 }: ListaVersoesMusicaProps) {
   if (variantes.length === 0) {
     return (
@@ -51,6 +53,7 @@ export const ListaVersoesMusica = memo(function ListaVersoesMusica({
               <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate>
                 {variante.canal}
               </Text>
+              {acaoVariante?.(variante)}
             </HStack>
           </VStack>
           <VStack

@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Controller\Musica;
 
 use App\Controller\Common\DefaultController;
+use App\DataObject\Musica\BuscaCatalogoMusicaDTO;
 use App\DataObject\Musica\ClassificarCanalDTO;
 use App\DataObject\Musica\DefinirArtistasMusicaDTO;
 use App\DataObject\Musica\DefinirComponentesMashupDTO;
 use App\DataObject\Musica\DefinirMusicaVideoDTO;
+use App\DataObject\Musica\DefinirMusicaVideosEmLoteDTO;
 use App\DataObject\Musica\FiltroRevisaoMusicaDTO;
 use App\DataObject\Musica\SepararMusicaDTO;
 use App\DataObject\Musica\UnirArtistasDTO;
@@ -16,6 +18,7 @@ use App\DataObject\Musica\UnirMusicasDTO;
 use App\Entity\Usuario;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Serializer\MusicaCatalogoSerializer;
+use App\Service\Musica\Correcao\BuscarCatalogoMusicaService;
 use App\Service\Musica\Correcao\ClassificarCanalYoutubeService;
 use App\Service\Musica\Correcao\DefinirArtistasMusicaService;
 use App\Service\Musica\Correcao\DefinirComponentesMashupService;
@@ -45,6 +48,7 @@ final class MusicaCorrecaoController extends DefaultController
         private readonly DefinirComponentesMashupService $definirComponentes,
         private readonly DefinirArtistasMusicaService $definirArtistas,
         private readonly MusicaCatalogoSerializer $serializer,
+        private readonly BuscarCatalogoMusicaService $buscarCatalogo,
     ) {
     }
 
@@ -52,6 +56,30 @@ final class MusicaCorrecaoController extends DefaultController
     public function revisao(#[CurrentUser] Usuario $usuario, #[MapQueryString] FiltroRevisaoMusicaDTO $filtro = new FiltroRevisaoMusicaDTO()): Response
     {
         return $this->success($this->listarRevisao->executar($usuario, $filtro));
+    }
+
+    #[Route('/revisao/contagens', name: 'revisao_contagens', methods: ['GET'])]
+    public function contagensRevisao(#[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->listarRevisao->contar($usuario));
+    }
+
+    #[Route('/revisao/videos/lote', name: 'definir_musica_lote', methods: ['POST'])]
+    public function definirMusicaEmLote(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] DefinirMusicaVideosEmLoteDTO $dto): Response
+    {
+        return $this->success(['videosAfetados' => $this->definirMusicaDoVideo->executarEmLote($usuario, $dto)]);
+    }
+
+    #[Route('/catalogo/musicas', name: 'buscar_musicas', methods: ['GET'])]
+    public function buscarMusicas(#[CurrentUser] Usuario $usuario, #[MapQueryString] BuscaCatalogoMusicaDTO $dto = new BuscaCatalogoMusicaDTO()): Response
+    {
+        return $this->success($this->buscarCatalogo->buscarMusicas($usuario, $dto));
+    }
+
+    #[Route('/catalogo/artistas', name: 'buscar_artistas', methods: ['GET'])]
+    public function buscarArtistas(#[CurrentUser] Usuario $usuario, #[MapQueryString] BuscaCatalogoMusicaDTO $dto = new BuscaCatalogoMusicaDTO()): Response
+    {
+        return $this->success($this->buscarCatalogo->buscarArtistas($usuario, $dto));
     }
 
     #[Route('/revisao/videos/{uuid}/musica', name: 'definir_musica_video', methods: ['POST'])]

@@ -4,7 +4,10 @@ import { PainelConexaoSpotify } from '@/features/spotify/components/PainelConexa
 import { useStatusSpotify } from '@/features/spotify/hooks/useStatusSpotify'
 import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
 import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
-import { SeloRevisaoMusica } from '@/features/youtube-music/components/SeloRevisaoMusica'
+import {
+  LinkRevisaoMusica,
+  SeloRevisaoMusica,
+} from '@/features/youtube-music/components/SeloRevisaoMusica'
 import { UltimaDetectadaYoutubeMusic } from '@/features/youtube-music/components/UltimaDetectadaYoutubeMusic'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
@@ -93,6 +96,7 @@ export function Musica() {
               </VStack>
               <HStack gap={3} wrap="wrap">
                 <SeloRevisaoMusica />
+                <LinkRevisaoMusica />
                 <SeletorFonteMusica />
               </HStack>
             </Flex>

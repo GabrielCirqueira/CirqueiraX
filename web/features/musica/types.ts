@@ -341,6 +341,7 @@ export const VarianteMusicaSchema = z.object({
   titulo: z.string(),
   canal: z.string(),
   codigo: z.string().nullable(),
+  videoUuid: z.string().nullable().optional(),
   tipoVersao: z.string().nullable(),
   urlCapa: z.string().nullable(),
   url: z.string().nullable(),
