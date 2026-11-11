@@ -206,9 +206,9 @@
 | 185 | Calibração com os prints, teste end-to-end e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 186 | Preparação — decisões, limpeza do teste e verificações antes de construir | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 187 | Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
-| 188 | Infra — cliente do YouTube Music com ytmusicapi por processo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
-| 189 | Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
-| 190 | Conexão do YouTube Music — serviços, endpoints e status no Dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 188 | Infra — cliente do YouTube Music com ytmusicapi por processo | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 189 | Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 190 | Conexão do YouTube Music — serviços, endpoints e status no Dashboard | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 191 | Entidades — vídeo, reprodução, catálogo canônico e regra de canal | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
 | 192 | Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
 | 193 | Infra — YouTube Data API em lote para categoria, duração e descrição | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |

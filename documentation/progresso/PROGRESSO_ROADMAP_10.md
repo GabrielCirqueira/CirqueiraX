@@ -165,14 +165,57 @@
   - `migrations/Version20261111141619.php`
   - `documentation/funcionalidades/SPOTIFY.md`, `documentation/progresso/PROGRESSO_ROADMAP_9.md`
 
-### ⏳ Tópico 188 — Infra — cliente do YouTube Music com ytmusicapi por processo
-- **Status**: Pendente
+### ✅ Tópico 188 — Infra — cliente do YouTube Music com ytmusicapi por processo
+- **Status**: Concluído
+- **O que foi feito**:
+  - Script [`bin/ytmusic.py`](../../bin/ytmusic.py) com os subcomandos `validar`, `historico` e `buscar`. As credenciais (cabeçalhos do navegador) chegam como JSON pela entrada padrão e viram autenticação em memória com `setup_browser(filepath=None)`, sem arquivo, argumento ou variável de ambiente. A saída é JSON. Códigos de saída: 0 sucesso, 2 credenciais inválidas, 3 serviço indisponível ou limite, 4 formato inesperado.
+  - Tratamento do `YTMusicServerError: None` visto no teste: o script faz uma busca sem login para decidir entre sessão expirada (2) e falha passageira (3). Testado com o cookie expirado do coletor de teste (saiu com código 2) e com uma busca real (`kavinsky nightcall`, código 0).
+  - `ytmusicapi` fixada em **1.12.3** (`ARG YTMUSICAPI_VERSAO`) no `Dockerfile.prod` e no `Dockerfile` de desenvolvimento.
+  - [`YoutubeMusicInterface`](../../src/Interface/YoutubeMusicInterface.php) (`validarCredenciais`, `listarHistorico`, `buscarMusica`) e [`YoutubeMusicClient`](../../src/Infra/YoutubeMusic/YoutubeMusicClient.php) com `Process`, tempo limite de 30 s, mapeamento dos códigos de saída para exceções e sem log da saída bruta. Registrado no `services.yaml` com `$projectDir`.
+  - DTOs em `src/DataObject/YoutubeMusic/`: `CredenciaisYoutubeMusicDTO` (cabeçalhos com `#[SensitiveParameter]`), `ItemHistoricoYoutubeMusicDTO` (`videoId`, `titulo`, `textoArtistas`, `album`, `urlCapa`, `duracaoMs`, `secao`, `posicao`, `tipoVideo`), `ListaHistoricoYoutubeMusicDTO`, `ResultadoBuscaYoutubeMusicDTO` e `ContaValidadaYoutubeMusicDTO` (nome da conta e canal, para mostrar na conexão).
+  - [`YoutubeMusicException`](../../src/Exception/YoutubeMusic/YoutubeMusicException.php) com `credenciaisInvalidas()`, `servicoIndisponivel()`, `respostaInesperada()` e o predicado `isCredenciaisInvalidas()`.
+  - Seção "Cliente do YouTube Music" no `MUSICA.md`, com o formato mínimo de cabeçalhos aceito (`cookie` e `x-goog-authuser`).
+- **Diferença do roadmap**: os testes de parsing com fixtures não foram criados, porque a regra do projeto (`PARA-IA.md`) proíbe criar testes. O parsing fica no script Python, que já entrega o JSON normalizado.
+- **Arquivos**:
+  - `bin/ytmusic.py`
+  - `src/Interface/YoutubeMusicInterface.php`, `src/Infra/YoutubeMusic/YoutubeMusicClient.php`
+  - `src/DataObject/YoutubeMusic/*.php`, `src/Exception/YoutubeMusic/YoutubeMusicException.php`
+  - `config/services.yaml`, `devops/php/Dockerfile.prod`, `devops/php/Dockerfile`
+  - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 189 — Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration
-- **Status**: Pendente
+### ✅ Tópico 189 — Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration
+- **Status**: Concluído
+- **O que foi feito**:
+  - Enum [`StatusContaYoutubeMusic`](../../src/Enum/StatusContaYoutubeMusic.php) (`conectada`, `reconectar`, `desconectada`) com `descricao()`, `isConectada()`, `isReconectar()` e `isDesconectada()`.
+  - Entidade [`ContaYoutubeMusic`](../../src/Entity/ContaYoutubeMusic.php) (tabela `conta_youtube_music`): UUID v7, uma por `Usuario` (`UNIQ_CONTA_YOUTUBE_MUSIC_USUARIO`, exclusão em cascata), índice em `status` + `proximaConsultaEm`. Campos: `credenciaisCriptografadas` (texto, só cifrado), `nomeConta` (nome devolvido pela validação, para a tela), `status`, `conectadoEm`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `proximaConsultaEm`, `errosSeguidos`, `erroMotivo`, `snapshotTopo` (JSON com os `videoId` do topo), `criadoEm` e `atualizadoEm` (atualizado no `PreUpdate`).
+  - Métodos de intenção: `conectar`, `registrarConsulta` (grava o snapshot, zera erros e marca `ultimaNovidadeEm` quando houve música nova), `registrarErro`, `marcarComoReconectar`, `desconectar` (apaga credenciais e snapshot) e `definirProximaConsulta`. Predicados `isConectada()` (status + credencial presente), `isReconectar()`, `isDesconectada()` e `isPrimeiraConsulta()`.
+  - [`ContaYoutubeMusicRepository`](../../src/Repository/ContaYoutubeMusicRepository.php) com `salvar`, `remover`, `flush`, `buscarDoUsuario` e `listarComConsultaVencida` (conectadas, com credencial e `proximaConsultaEm` nula ou no passado, mais antigas primeiro).
+  - Migration `Version20261111143842` gerada pelo diff contra o esquema da produção e validada (`schema:validate` em sincronia).
+- **Arquivos**:
+  - `src/Enum/StatusContaYoutubeMusic.php`, `src/Entity/ContaYoutubeMusic.php`, `src/Repository/ContaYoutubeMusicRepository.php`
+  - `migrations/Version20261111143842.php`
 
-### ⏳ Tópico 190 — Conexão do YouTube Music — serviços, endpoints e status no Dashboard
-- **Status**: Pendente
+### ✅ Tópico 190 — Conexão do YouTube Music — serviços, endpoints e status no Dashboard
+- **Status**: Concluído
+- **O que foi feito**:
+  - [`YoutubeMusicController`](../../src/Controller/YoutubeMusic/YoutubeMusicController.php) (JWT, `DefaultController`): `POST /api/v1/youtube-music/conectar`, `GET /api/v1/youtube-music/status` e `POST /api/v1/youtube-music/desconectar`.
+  - `ConectarYoutubeMusicDTO` com `NotBlank` e tamanho máximo de 32.768 caracteres (`TAMANHO_MAXIMO_CABECALHOS`), parâmetro marcado como sensível.
+  - [`InterpretadorCabecalhosNavegadorService`](../../src/Service/YoutubeMusic/InterpretadorCabecalhosNavegadorService.php): aceita "Nome: valor", o formato do Chrome em linhas separadas e "Copiar como cURL"; mantém só `cookie`, `x-goog-authuser` (padrão 0), `x-goog-visitor-id`, `user-agent` e `accept-language`; recusa sem `cookie` ou sem `__Secure-3PAPISID` com mensagens em português. Testado com os cabeçalhos do teste, com texto sem cookie, com cookie deslogado e com cURL.
+  - [`ConectarYoutubeMusicService`](../../src/Service/YoutubeMusic/ConectarYoutubeMusicService.php): limite de 5 tentativas por minuto (`youtube_music_conexao`), interpreta, valida na biblioteca, criptografa, grava, guarda o retrato do topo (50 `videoId`, sem gerar reproduções) e agenda a primeira coleta para 1 minuto depois.
+  - `ObterStatusYoutubeMusicService` e `DesconectarYoutubeMusicService` (apaga credencial e retrato, mantém as reproduções; 404 se não houver conta).
+  - [`ContaYoutubeMusicSerializer`](../../src/Serializer/ContaYoutubeMusicSerializer.php): `conectada`, `status`, `statusDescricao`, `nomeConta`, `conectadoEm`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `erroMotivo`. Nunca as credenciais.
+  - Novas exceções em `YoutubeMusicException`: `cabecalhosSemCookie`, `cookieSemSessaoLogada`, `muitasTentativasDeConexao` (429) e `contaNaoConectada` (404).
+  - **Dashboard:** o resumo das integrações de música saiu do `DashboardService` para [`ResumoIntegracoesMusicaService`](../../src/Service/Dashboard/ResumoIntegracoesMusicaService.php), que devolve `spotify` (igual a antes) e o novo `youtubeMusic` com `estado` (`nao_configurado`, `conectado`, `reconectar`), `nomeConta`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `motivoErro` e `rota` `/musica`.
+  - Passo a passo de copiar os cabeçalhos (janela anônima, DevTools, requisição `browse`, fechar sem sair) no `MUSICA.md`.
+- **Pendente**: `totalReproducoesColetadas` entra no serializer quando as reproduções existirem (tópico 192). A duração do cookie da janela anônima ainda precisa ser medida.
+- **Arquivos**:
+  - `src/Controller/YoutubeMusic/YoutubeMusicController.php`
+  - `src/DataObject/YoutubeMusic/ConectarYoutubeMusicDTO.php`
+  - `src/Service/YoutubeMusic/InterpretadorCabecalhosNavegadorService.php`, `ConectarYoutubeMusicService.php`, `ObterStatusYoutubeMusicService.php`, `DesconectarYoutubeMusicService.php`
+  - `src/Serializer/ContaYoutubeMusicSerializer.php`, `src/Exception/YoutubeMusic/YoutubeMusicException.php`
+  - `src/Service/Dashboard/ResumoIntegracoesMusicaService.php`, `src/Service/Dashboard/DashboardService.php`, `src/Entity/ContaYoutubeMusic.php`
+  - `config/packages/rate_limiter.yaml`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 191 — Entidades — vídeo, reprodução, catálogo canônico e regra de canal
 - **Status**: Pendente

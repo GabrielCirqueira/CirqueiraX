@@ -19,3 +19,8 @@ framework:
             policy: 'token_bucket'
             limit: 180
             rate: { interval: '1 minute' }
+
+        youtube_music_conexao:
+            policy: 'token_bucket'
+            limit: 5
+            rate: { interval: '1 minute' }

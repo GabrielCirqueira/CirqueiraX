@@ -37,9 +37,9 @@
 
 - [x] **186. Preparação — decisões, limpeza do teste e verificações antes de construir**
 - [x] **187. Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player**
-- [ ] **188. Infra — cliente do YouTube Music com ytmusicapi por processo**
-- [ ] **189. Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration**
-- [ ] **190. Conexão do YouTube Music — serviços, endpoints e status no Dashboard**
+- [x] **188. Infra — cliente do YouTube Music com ytmusicapi por processo**
+- [x] **189. Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration**
+- [x] **190. Conexão do YouTube Music — serviços, endpoints e status no Dashboard**
 - [ ] **191. Entidades — vídeo, reprodução, catálogo canônico e regra de canal**
 - [ ] **192. Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler**
 - [ ] **193. Infra — YouTube Data API em lote para categoria, duração e descrição**
