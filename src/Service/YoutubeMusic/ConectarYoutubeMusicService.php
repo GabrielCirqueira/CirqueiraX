@@ -13,7 +13,7 @@ use App\Interface\CriptografiaInterface;
 use App\Interface\YoutubeMusicInterface;
 use App\Repository\ContaYoutubeMusicRepository;
 use DateTimeImmutable;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 final readonly class ConectarYoutubeMusicService
 {
@@ -24,7 +24,7 @@ final readonly class ConectarYoutubeMusicService
         private YoutubeMusicInterface $youtubeMusic,
         private CriptografiaInterface $criptografia,
         private InterpretadorCabecalhosNavegadorService $interpretador,
-        private RateLimiterFactory $youtubeMusicConexaoLimiter,
+        private RateLimiterFactoryInterface $youtubeMusicConexaoLimiter,
     ) {
     }
 

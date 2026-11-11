@@ -9,6 +9,7 @@ use App\Entity\ContaYoutubeMusic;
 use App\Entity\Usuario;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\ContaYoutubeMusicRepository;
+use App\Repository\ReproducaoYoutubeRepository;
 use App\Serializer\ContaSpotifySerializer;
 use App\Service\Spotify\ControleLimiteSpotifyService;
 use DateTimeImmutable;
@@ -25,6 +26,7 @@ final readonly class ResumoIntegracoesMusicaService
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
         private ContaYoutubeMusicRepository $contaYoutubeMusicRepository,
+        private ReproducaoYoutubeRepository $reproducaoYoutubeRepository,
         private ControleLimiteSpotifyService $controleLimiteSpotify,
         private ContaSpotifySerializer $contaSpotifySerializer,
     ) {
@@ -37,7 +39,7 @@ final readonly class ResumoIntegracoesMusicaService
     {
         return [
             'spotify' => $this->resumoSpotify($this->contaSpotifyRepository->buscarDoUsuario($usuario)),
-            'youtubeMusic' => $this->resumoYoutubeMusic($this->contaYoutubeMusicRepository->buscarDoUsuario($usuario)),
+            'youtubeMusic' => $this->resumoYoutubeMusic($usuario, $this->contaYoutubeMusicRepository->buscarDoUsuario($usuario)),
         ];
     }
 
@@ -74,7 +76,7 @@ final readonly class ResumoIntegracoesMusicaService
     /**
      * @return array<string, mixed>
      */
-    private function resumoYoutubeMusic(?ContaYoutubeMusic $conta): array
+    private function resumoYoutubeMusic(Usuario $usuario, ?ContaYoutubeMusic $conta): array
     {
         return [
             'estado' => $this->estadoYoutubeMusic($conta),
@@ -82,6 +84,7 @@ final readonly class ResumoIntegracoesMusicaService
             'ultimaConsultaEm' => $conta?->ultimaConsultaEm()?->format(DateTimeInterface::ATOM),
             'ultimaNovidadeEm' => $conta?->ultimaNovidadeEm()?->format(DateTimeInterface::ATOM),
             'motivoErro' => $conta?->erroMotivo(),
+            'totalReproducoesColetadas' => $this->reproducaoYoutubeRepository->contarDoUsuario($usuario),
             'rota' => self::ROTA_MUSICA,
         ];
     }

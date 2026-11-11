@@ -39,6 +39,14 @@ framework:
                 retry_strategy:
                     max_retries: 1
                     multiplier: 2
+            youtube_coleta:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: youtube_coleta
+                    use_notify: true
+                    check_delayed_interval: 60000
+                retry_strategy:
+                    max_retries: 0
             failed: 'doctrine://default?queue_name=failed'
 
         default_bus: messenger.bus.default
@@ -53,6 +61,7 @@ framework:
             'App\Message\GerarAudioBlocoVozMessage': livro_audio
             'App\Message\ImportarHistoricoSpotifyMessage': spotify_importacao
             'App\Message\TranscreverAudioMessage': transcricao
+            'App\Message\ColetarHistoricoYoutubeMusicMessage': youtube_coleta
             'App\Message\*': async
 
 

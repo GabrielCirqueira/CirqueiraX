@@ -38,7 +38,10 @@ final class YoutubeMusicController extends DefaultController
     #[Route('/status', name: 'status', methods: ['GET'])]
     public function status(#[CurrentUser] Usuario $usuario): Response
     {
-        return $this->success($this->serializer->serializar($this->obterStatusService->executar($usuario)));
+        return $this->success($this->serializer->serializar(
+            $this->obterStatusService->executar($usuario),
+            $this->obterStatusService->contarReproducoesColetadas($usuario),
+        ));
     }
 
     #[Route('/desconectar', name: 'desconectar', methods: ['POST'])]

@@ -14,7 +14,7 @@ final class ContaYoutubeMusicSerializer
     /**
      * @return array<string, mixed>
      */
-    public function serializar(?ContaYoutubeMusic $conta): array
+    public function serializar(?ContaYoutubeMusic $conta, int $totalReproducoesColetadas = 0): array
     {
         if (null === $conta) {
             return [
@@ -26,6 +26,7 @@ final class ContaYoutubeMusicSerializer
                 'ultimaConsultaEm' => null,
                 'ultimaNovidadeEm' => null,
                 'erroMotivo' => null,
+                'totalReproducoesColetadas' => $totalReproducoesColetadas,
             ];
         }
 
@@ -38,6 +39,7 @@ final class ContaYoutubeMusicSerializer
             'ultimaConsultaEm' => $conta->ultimaConsultaEm()?->format(DateTimeInterface::ATOM),
             'ultimaNovidadeEm' => $conta->ultimaNovidadeEm()?->format(DateTimeInterface::ATOM),
             'erroMotivo' => $conta->erroMotivo(),
+            'totalReproducoesColetadas' => $totalReproducoesColetadas,
         ];
     }
 }

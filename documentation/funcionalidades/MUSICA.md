@@ -99,6 +99,23 @@ A dica da janela anônima é comum em outras ferramentas que usam a mesma biblio
 
 As tabelas do Spotify (`reproducao_spotify`, `artista_faixa_spotify`) não mudaram.
 
+## Coleta contínua do YouTube Music (tópico 192)
+
+- O agendador dispara `ColetarHistoricoYoutubeMusicMessage` a cada 30 s na fila própria `youtube_coleta`, consumida por 1 worker (`messenger-youtube-coleta`, limite de 128 MB). O handler só consulta contas conectadas com `proximaConsultaEm` vencida.
+- **Intervalo adaptativo**: 30 s enquanto houve novidade nos últimos 10 minutos, 120 s quando parado. Nunca menos de 15 s entre duas consultas da mesma conta.
+- **Sem consultas sobrepostas**: antes de consultar, a conta recebe `proximaConsultaEm` daqui a 2 minutos e é gravada. Com um único worker na fila, as consultas da mesma conta ficam em série. Se um dia houver mais workers, essa reserva evita a maioria das sobreposições, mas não é um bloqueio rigoroso (o projeto não tem o componente Lock).
+- **Detecção**: o histórico vem em ordem, sem horário. A consulta é comparada com o `snapshotTopo` (50 primeiros `videoId`) e conta como novo cada item que aparece antes do alinhamento com a lista anterior. A primeira consulta só grava o snapshot (a conexão já faz isso).
+- **Gravação**: cria ou atualiza o `VideoYoutube` (título, canal, duração, capa) e cria a `ReproducaoYoutube` com `fonte = coletor`. A mais recente recebe o horário em que foi vista; quando várias aparecem de uma vez, cada anterior começa a duração dela antes da seguinte. Duplicatas são descartadas pela `chaveDeduplicacao`.
+- **Tempo ouvido estimado**: ao criar, `msReproduzidos` = duração. Quando chega a seguinte, a anterior passa a `min(intervalo, duração)`. Sem seguinte, fica com a duração.
+- **Erros**: falha passageira espera 1, 2, 5 e 15 minutos. No terceiro erro seguido a sessão é validada de novo; se for recusada, ou se o YouTube Music recusar a sessão a qualquer momento, a conta vai para `reconectar`, a coleta para e o motivo fica gravado. Os logs só levam o id da conta, o código e as contagens, nunca o conteúdo das respostas.
+- Novas reproduções invalidam o cache das análises do usuário. A identificação dos vídeos sem classificação entra no tópico 195.
+- O status (`/api/v1/youtube-music/status`) e o resumo do dashboard trazem `totalReproducoesColetadas`.
+
+### Limites conhecidos
+
+- Repetir a mesma música em seguida não muda o topo do histórico, então a segunda reprodução é perdida.
+- O horário é o momento em que a reprodução foi vista, não o início real. O atraso entre tocar e aparecer no histórico ainda precisa ser medido (Pendências do Gabriel).
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.

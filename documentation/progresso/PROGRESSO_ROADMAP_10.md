@@ -233,8 +233,27 @@
   - `src/Repository/` com um repositório para cada entidade acima
   - `migrations/Version20261111145156.php`
 
-### ⏳ Tópico 192 — Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler
-- **Status**: Pendente
+### ✅ Tópico 192 — Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler
+- **Status**: Concluído
+- **O que foi feito**:
+  - `DetectarNovasReproducoesYoutubeService`: compara a consulta com o `snapshotTopo` procurando o alinhamento numa janela de 15 itens, com reserva que conta até o primeiro item conhecido. Conferido nos cenários do roadmap (música nova, várias de uma vez, repetição não seguida, repetição seguida, lista vazia, snapshot vazio, mudança de rótulo das seções).
+  - `EstimarTempoReproduzidoYoutubeService`: ajusta a reprodução anterior para `min(intervalo, duração)`.
+  - `RegistrarReproducoesYoutubeService`: cria ou atualiza os `VideoYoutube`, cria as `ReproducaoYoutube` com `fonte = coletor`, retroage o horário quando várias chegam juntas, descarta duplicatas pela chave e encadeia o tempo estimado com a última reprodução anterior. Conferido no banco de produção dentro de uma transação desfeita no final.
+  - `TratarErroColetaYoutubeMusicService`: espera de 1, 2, 5 e 15 minutos; sessão recusada ou três erros seguidos com validação recusada marcam `reconectar` e gravam o motivo; logs sem dados do usuário.
+  - `ColetarHistoricoYoutubeMusicService`: descriptografa a sessão só na memória, reserva a próxima consulta antes de chamar o YouTube Music, intervalo de 30 s com novidade nos últimos 10 minutos e 120 s sem, mínimo de 15 s, primeira consulta só grava o snapshot, invalida o cache das análises quando há reprodução nova.
+  - `ColetarHistoricoYoutubeMusicMessage` + handler, `RecurringMessage::every('30 seconds')` com `RedispatchMessage` para a fila `youtube_coleta` (sem novas tentativas automáticas), worker em `devops/supervisord.conf` e `devops/php/supervisord-prod.conf` com 128 MB.
+  - `totalReproducoesColetadas` no status do YouTube Music e no resumo do dashboard.
+  - `ConectarYoutubeMusicService` passou a usar `RateLimiterFactoryInterface` (o alias antigo está depreciado).
+  - Seção "Coleta contínua do YouTube Music" e limites conhecidos em `MUSICA.md`.
+- **Diferença do roadmap**: sem testes automatizados (regra do projeto); os cenários foram conferidos com scripts descartáveis. O bloqueio por conta é a reserva de `proximaConsultaEm` com um único worker, porque o projeto não tem o componente Lock. O disparo da identificação fica para o tópico 195, que cria o serviço.
+- **Pendente**: conectar a conta com um cookie novo pela rota de conexão, confirmar a coleta em produção e então desligar o coletor de teste.
+- **Arquivos**:
+  - `src/Service/YoutubeMusic/DetectarNovasReproducoesYoutubeService.php`, `EstimarTempoReproduzidoYoutubeService.php`, `RegistrarReproducoesYoutubeService.php`, `TratarErroColetaYoutubeMusicService.php`, `ColetarHistoricoYoutubeMusicService.php`, `ObterStatusYoutubeMusicService.php`, `ConectarYoutubeMusicService.php`
+  - `src/Message/ColetarHistoricoYoutubeMusicMessage.php`, `src/MessageHandler/ColetarHistoricoYoutubeMusicMessageHandler.php`
+  - `src/Schedule.php`, `config/packages/messenger.yaml`
+  - `devops/supervisord.conf`, `devops/php/supervisord-prod.conf`
+  - `src/Serializer/ContaYoutubeMusicSerializer.php`, `src/Controller/YoutubeMusic/YoutubeMusicController.php`, `src/Service/Dashboard/ResumoIntegracoesMusicaService.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 193 — Infra — YouTube Data API em lote para categoria, duração e descrição
 - **Status**: Pendente
