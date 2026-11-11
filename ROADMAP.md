@@ -1,539 +1,564 @@
-# Roadmap — Spotify e Cápsula Sonora
+# Roadmap — Música unificada, YouTube Music e importação do passado
 
 > Substitua este arquivo na raiz (`ROADMAP.md`) a cada novo lote.
 > O histórico concluído não fica aqui — ele vive em `documentation/progresso/`.
-> Lote anterior: Livros em Áudio (tópicos 141–160), concluído.
+> Lote anterior: Spotify e Cápsula Sonora (tópicos 161–185), concluído. O roadmap da extensão de navegador para o YouTube Music (186–200) foi descartado e este o substitui.
 > Spec: [documentation/progresso/README.md](documentation/progresso/README.md) · depois de preencher: `make progresso`
 > Leia primeiro a seção "Premissas e decisões da conversa" no início do Detalhamento. Ela vale para todos os tópicos.
 
-**Numeração:** tópicos 161–185.
+**Numeração:** tópicos 186–205.
 
 ## Índice
 
 | # | Tópico |
 |---|---|
-| 161 | Preparação do app no painel do Spotify e variáveis de ambiente |
-| 162 | Infra — SpotifyClient com tratamento de limite de requisições |
-| 163 | Entidade ContaSpotify, enum de status e migration |
-| 164 | Serviço de tokens — troca do code e renovação com lock |
-| 165 | Endpoints de conexão — url, concluir, status e desconectar |
-| 166 | Entidade ReproducaoSpotify, enum de fonte e migration |
-| 167 | Coleta do histórico recente com cursor e deduplicação |
-| 168 | Rotina de coleta no Scheduler a cada 30 minutos |
-| 169 | Spotify no status das integrações e alerta de coleta parada |
-| 170 | Importação do histórico — leitura dos arquivos básico e estendido |
-| 171 | Importação — deduplicação com tolerância e prioridade sobre a API |
-| 172 | Endpoint e processamento assíncrono da importação |
-| 173 | Agregações por mês no Repository |
-| 174 | Regras da Cápsula — streams, fuso de Brasília e comparação com o mês anterior |
-| 175 | Endpoints da Cápsula Sonora e Serializer |
-| 176 | Endpoints de Hoje, Semana e Curiosidades |
-| 177 | Catálogo de capas e fotos — entidade e busca por código |
-| 178 | Busca de capa por nome e preenchimento em segundo plano |
-| 179 | Frontend — estrutura da feature spotify (types, api, hooks) |
-| 180 | Frontend — paleta spotify, tokens e wrapper da página |
-| 181 | Frontend — vincular, retornar do Spotify, reconectar e desconectar |
-| 182 | Frontend — importação do arquivo de histórico |
-| 183 | Frontend — página /spotify com Hoje, Semana e Curiosidades |
-| 184 | Frontend — seção Cápsula Sonora com seletor de mês |
-| 185 | Calibração com os prints, teste end-to-end e documentação atualizada |
+| 186 | Preparação — decisões, limpeza do teste e verificações antes de construir |
+| 187 | Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player |
+| 188 | Infra — cliente do YouTube Music com ytmusicapi por processo |
+| 189 | Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration |
+| 190 | Conexão do YouTube Music — serviços, endpoints e status no Dashboard |
+| 191 | Entidades — vídeo, reprodução, catálogo canônico e regra de canal |
+| 192 | Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler |
+| 193 | Infra — YouTube Data API em lote para categoria, duração e descrição |
+| 194 | Infra — identificador de músicas por IA com resposta estruturada e registro de custo |
+| 195 | Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão |
+| 196 | Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints |
+| 197 | Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta |
+| 198 | Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido |
+| 199 | Leitura unificada — projeção das reproduções e paridade com os números do Spotify |
+| 200 | Endpoints unificados /api/v1/musica com filtro de fonte |
+| 201 | Frontend — renomear a página, tema, seletor de fonte e ícones de origem |
+| 202 | Frontend — conexão do YouTube Music, importação do Takeout e status no Dashboard |
+| 203 | Frontend — rankings, Cápsula e detalhes unificados com versões e mashups |
+| 204 | Frontend — tela de revisão e correções do catálogo |
+| 205 | Teste end-to-end com dados reais, calibração e documentação |
 
 ## Checklist
 
-- [x] **161. Preparação do app no painel do Spotify e variáveis de ambiente**
-- [x] **162. Infra — SpotifyClient com tratamento de limite de requisições**
-- [x] **163. Entidade ContaSpotify, enum de status e migration**
-- [x] **164. Serviço de tokens — troca do code e renovação com lock**
-- [x] **165. Endpoints de conexão — url, concluir, status e desconectar**
-- [x] **166. Entidade ReproducaoSpotify, enum de fonte e migration**
-- [x] **167. Coleta do histórico recente com cursor e deduplicação**
-- [x] **168. Rotina de coleta no Scheduler a cada 30 minutos**
-- [x] **169. Spotify no status das integrações e alerta de coleta parada**
-- [x] **170. Importação do histórico — leitura dos arquivos básico e estendido**
-- [x] **171. Importação — deduplicação com tolerância e prioridade sobre a API**
-- [x] **172. Endpoint e processamento assíncrono da importação**
-- [x] **173. Agregações por mês no Repository**
-- [x] **174. Regras da Cápsula — streams, fuso de Brasília e comparação com o mês anterior**
-- [x] **175. Endpoints da Cápsula Sonora e Serializer**
-- [x] **176. Endpoints de Hoje, Semana e Curiosidades**
-- [x] **177. Catálogo de capas e fotos — entidade e busca por código**
-- [x] **178. Busca de capa por nome e preenchimento em segundo plano**
-- [x] **179. Frontend — estrutura da feature spotify (types, api, hooks)**
-- [x] **180. Frontend — paleta spotify, tokens e wrapper da página**
-- [x] **181. Frontend — vincular, retornar do Spotify, reconectar e desconectar**
-- [x] **182. Frontend — importação do arquivo de histórico**
-- [x] **183. Frontend — página /spotify com Hoje, Semana e Curiosidades**
-- [x] **184. Frontend — seção Cápsula Sonora com seletor de mês**
-- [x] **185. Calibração com os prints, teste end-to-end e documentação atualizada**
+- [x] **186. Preparação — decisões, limpeza do teste e verificações antes de construir**
+- [ ] **187. Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player**
+- [ ] **188. Infra — cliente do YouTube Music com ytmusicapi por processo**
+- [ ] **189. Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration**
+- [ ] **190. Conexão do YouTube Music — serviços, endpoints e status no Dashboard**
+- [ ] **191. Entidades — vídeo, reprodução, catálogo canônico e regra de canal**
+- [ ] **192. Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler**
+- [ ] **193. Infra — YouTube Data API em lote para categoria, duração e descrição**
+- [ ] **194. Infra — identificador de músicas por IA com resposta estruturada e registro de custo**
+- [ ] **195. Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão**
+- [ ] **196. Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints**
+- [ ] **197. Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta**
+- [ ] **198. Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido**
+- [ ] **199. Leitura unificada — projeção das reproduções e paridade com os números do Spotify**
+- [ ] **200. Endpoints unificados /api/v1/musica com filtro de fonte**
+- [ ] **201. Frontend — renomear a página, tema, seletor de fonte e ícones de origem**
+- [ ] **202. Frontend — conexão do YouTube Music, importação do Takeout e status no Dashboard**
+- [ ] **203. Frontend — rankings, Cápsula e detalhes unificados com versões e mashups**
+- [ ] **204. Frontend — tela de revisão e correções do catálogo**
+- [ ] **205. Teste end-to-end com dados reais, calibração e documentação**
 
 ## Detalhamento
 
 ### Premissas e decisões da conversa (valem para todos os tópicos)
 
-**Objetivo.** A Cápsula Sonora saiu do aplicativo do Spotify. O CirqueiraX vai se vincular à conta do Spotify e reproduzir o que ela mostrava: tempo ouvido no mês em minutos, músicas e artistas mais ouvidos, quantidade de músicas diferentes e comparação com o mês anterior, para o mês atual e os meses passados.
+**Objetivo do lote.** Transformar a página do Spotify em uma página de música que reúne **Spotify e YouTube Music**. O Gabriel passa a ver tudo junto (padrão) ou filtrado por serviço. O YouTube Music passa a ser coletado automaticamente pelo servidor, o passado do YouTube vem do Google Takeout, e uma IA identifica a música, o artista e as versões de cada vídeo para que tudo se combine com o que já existe do Spotify.
 
-**Página.** Uma página nova, `/spotify`, com três partes: (1) métricas de hoje e da semana, (2) curiosidades, (3) a seção "Cápsula Sonora", com o mês atual e os anteriores. Só essa página tem o visual do aplicativo do Spotify (escuro, verde, cartões, botões em pílula). Sidebar e Header continuam sendo os do sistema.
+**Decisões já tomadas pelo Gabriel (não reabrir).**
+- A página ganha um nome mais abrangente e **mantém o visual do Spotify** (fundo `#121212`, verde, cartões, formas), porque é o visual que ele prefere para ler os dados.
+- Um seletor escolhe a fonte: Spotify, YouTube Music ou Todos. O padrão é **Todos**, combinando as duas plataformas. Cada música ou artista mostra um ícone pequeno da origem. Uma música ouvida nos dois serviços aparece **uma vez**, com os dois ícones.
+- O YouTube Music é coletado **pelo servidor, sem extensão de navegador** (instalar extensão no navegador do trabalho é ruim). Isso cobre também o celular, porque o histórico pertence à conta. Daqui para frente o Gabriel ouve só no YouTube Music. O passado dele foi no **YouTube comum**, misturado com vídeos que não são música.
+- **Versões da mesma música ficam juntas** na música principal: slowed, reverb, sped up, 8D, nightcore, lyrics, vídeo oficial, tradução, **remix, cover e instrumental**. No Dashboard aparece o título principal e a capa, como no Spotify. Ao abrir, mostra as versões ouvidas no período filtrado.
+- **Mashup é uma música própria.** Aparece no Dashboard como ele mesmo (ex.: "renegade x under the influence x i was never there"), e não como três músicas separadas. Mas **cada artista dos componentes recebe o crédito completo**.
+- **Músicas com vários artistas** (colaborações) contam para todos eles, como já vale no Spotify (M128).
+- A identificação dos títulos é feita por **IA** (modelo `gpt-5.4-mini`, o mesmo já usado na M129, com a chave `OPENAI_API_KEY` do `.env`). Os dados originais (título, canal) são sempre guardados.
 
-**Vínculo.** Botão "Vincular ao Spotify", que leva à tela de permissões do Spotify. O usuário clica em "Aceito" e volta sozinho ao CirqueiraX. Não há copiar e colar código: esse fluxo manual existe só no Google Fotos, porque foi feito para `localhost`. O login do CirqueiraX continua sendo usuário e senha, e o Spotify é só um vínculo. Os escopos são mínimos e só de leitura. O sistema nunca pede permissão para controlar o player, mexer em playlists ou na biblioteca (o app "I Love This Song", que o usuário mostrou, pede tudo isso, e o CirqueiraX não deve).
+**Evidências dos testes (fundamentam as decisões).**
+- A biblioteca `ytmusicapi` com login pelo código de TV deu erro 400 em tudo. Com os **dados de sessão do navegador (cookie e cabeçalhos)** funcionou: 197 músicas no histórico, 47 playlists e 149 curtidas.
+- O histórico do YouTube Music **não tem horário** (só "Today", "Yesterday" e o mês), **não tem tempo ouvido**, mostra cada música uma vez (repetição seguida conta como uma; repetição não seguida sobe a música ao topo) e em cerca de 64% dos itens o "artista" é o canal que postou o upload (slowed e semelhantes), não o artista real.
+- Coletor de teste consultando a cada 60 s funcionou. Cada consulta leva cerca de 0,8 s e devolve uns 1,9 MB sem compactar. O primeiro cookie durou **menos de um dia** e o coletor só mostrou `YTMusicServerError: None`, sem dizer que era o cookie.
+- Teste da IA com 9 títulos reais: todos separados corretamente (mashups de 2 e de 4 músicas, colaboração de 3 artistas, título com letras espaçadas, "+ Choir" tratado como modificador). Média de 155 tokens de entrada e 102 de saída, de 2 a 4 s por chamada, cerca de US$ 0,0006 por vídeo pelo preço de tabela (preço tirado de sites agregadores, **não confirmado** na página oficial). Ponto fraco: título ambíguo ("Renegade" foi atribuído a Big Red Machine e Taylor Swift, mas em edits slowed costuma ser outra música). A IA não avisou da dúvida.
+- Spotify hoje: o app é bloqueado (429) depois de cerca de 600 consultas de artistas, com esperas de 6h43 e 22h53, mesmo com 6 s entre consultas. O bloqueio é do app inteiro e **para também a coleta das músicas recentes**, que só guarda as últimas 50.
 
-**Duas fontes de dados.** (a) Coleta pela API, que só vale a partir do dia da conexão. (b) Arquivos exportados da conta do Spotify, que trazem o passado. A API devolve só as últimas 50 faixas e não informa o tempo realmente ouvido, então o sistema estima pela duração da faixa. O arquivo exportado traz o tempo exato tocado. Quando as duas fontes cobrem o mesmo período, o arquivo prevalece.
+**Regras de dados (valem para todos os tópicos).**
+- **Identidade da música.** Chave normalizada = título normalizado + artista principal normalizado (a mesma regra do Spotify, `SPOTIFY.md` seção 7). Mashup: chave = conjunto ordenado das chaves dos componentes. Nunca depender do código de faixa do Spotify nem do `videoId`.
+- **Horário.** `tocadaEm` em UTC. No YouTube Music coletado, é o momento em que o coletor viu a música aparecer (erro de até um intervalo de consulta). No Takeout, é o horário do arquivo. Nada disso é horário exato, e as reproduções do YouTube ficam marcadas com `tempoExato = false`.
+- **Tempo ouvido estimado.** Para cada reprodução do YouTube: `min(intervalo até o início da reprodução seguinte, duração do vídeo)`. Pausas e intervalos longos acabam limitados à duração. É a mesma filosofia do `EstimarTempoReproduzidoSpotifyService`. Tudo que vem do YouTube é "estimado" na tela.
+- **Stream.** Continua 30 s ou mais, constante `30.000 ms`, aplicado na leitura, nunca na gravação. No YouTube vale sobre o tempo estimado.
+- **Contagem.** Cada reprodução conta 1 para a música. Minutos totais contam uma vez só. Cada artista recebe stream e minutos completos. Mês e ano em UTC, "Hoje", hora do dia e "Últimos N dias" no horário de Brasília (`America/Sao_Paulo`), igual ao Spotify (M120).
+- **Compilações.** Vídeo com mais de `LIMITE_COMPONENTES_MASHUP` (padrão 5) músicas é "compilação" e **não credita artistas** sem confirmação manual.
+- **Ordem dos rankings.** Músicas, artistas e álbuns por streams, com minutos como desempate (M128).
 
-**Retroativo.** O usuário já tem o histórico até julho de 2026 e pediu "Dados da conta" no Spotify. Esse pacote inclui o histórico de streams do último ano, com prazo de cerca de 5 dias, e cobre de agosto até a data do pedido. Por isso o "Histórico ampliado de streams" (até 30 dias) não é necessário, nem as "Informações técnicas de registro". Os arquivos antigos, até julho, também podem ser importados, e o que se repetir é ignorado.
+**Segurança da credencial do YouTube Music.** O cookie é a sessão inteira da conta Google (Gmail e Drive incluídos). Regras: fica **criptografado** no banco com a `CriptografiaInterface` que o projeto já tem; entra no script Python **pela entrada padrão**, nunca por argumento nem variável de ambiente; nunca vai para log, Sentry, resposta de API, repositório ou chat; ao desconectar, é apagado. A sessão pode ser invalidada pelo Google a qualquer momento, e o sistema tem que perceber isso e avisar (tópicos 192 e 202).
 
-**Buracos.** Os dias entre a data do pedido do arquivo e o dia em que a coleta pela API começar só se fecham com um segundo pedido de dados, um ou dois meses depois. Reimportar nunca duplica.
+**Multiusuário (M131).** Toda tabela nova tem dono (`usuario_id`). Todas as rotas filtram pela conta logada; item de outra pessoa responde 404. O catálogo (músicas, artistas, regras de canal) é **por usuário**.
 
-**Regras do Spotify para o modo de desenvolvimento.** O dono do app precisa ter Premium ativo (se a assinatura vencer, o app para até reassinar). Até 5 usuários podem ser cadastrados. As consultas de histórico recente e de itens mais ouvidos continuam disponíveis depois das mudanças de fevereiro de 2026. A busca em lote de faixas e artistas foi removida, então cada item exige uma consulta. O limite de resultados da busca caiu para 10. Campos como popularidade de faixa e seguidores de artista foram removidos das respostas, e nenhuma tela pode depender deles.
+**Fora do escopo deste lote.** Player próprio dentro do CirqueiraX (a M134 mostrou que o player embutido do YouTube abre e toca no trabalho, falta testar músicas reais; fica para um lote seguinte); extensão de navegador (descartada, pode voltar como complemento); "tocando agora" do YouTube Music (não existe na biblioteca); gêneros; podcasts; YouTube comum depois da troca de hábito; relatórios de TV e outros aparelhos.
 
-**Regras de marca e política do Spotify.** O nome do app não pode começar com "Spotify" nem ser parecido, e o logo do CirqueiraX não pode lembrar o do Spotify. Todo conteúdo do Spotify exibido leva atribuição com o logo e um link de volta ("Abrir no Spotify"). Capas de álbum não podem ser cortadas, borradas, distorcidas nem receber texto, logo ou controles por cima, e usam cantos de 4px (8px em tela grande). Deve existir um jeito simples de desconectar, e ao desconectar os dados pessoais coletados pela API são apagados. A política proíbe replicar uma experiência central do Spotify sem permissão e exige valor próprio, o que estatísticas pessoais dentro de um sistema pessoal atendem. Uma cláusula sobre "métricas derivadas" não teve o alcance confirmado, e a decisão fica no tópico 161. Os arquivos exportados são dados pessoais do próprio usuário e ficam fora da política da API.
-
-**Design.** Os tokens foram medidos nos prints da Cápsula e conferidos com referências de terceiros: fundo `#121212`, cartão `#1F1F1F`, cartão elevado `#252525`, texto `#FFFFFF`, texto secundário `#B3B3B3`, verde `#1ED760` (números de minutos e ações), azul `#539DF5` (artista mais ouvido) e amarelo `#FEE44F` (música mais ouvida, títulos e posições do ranking). A fonte do Spotify (Circular) é proprietária, então a substituta é a Inter. O `DESIGN.md` veta estilos únicos por página e hex, então esta página entra como exceção documentada, com paleta própria gerada e zero hex nos componentes. O `DESIGN.md` ainda cita HeroUI e `className`, mas os documentos mais novos (`FRONTEND.md` e `PARA-IA.md`) mandam usar Chakra. Seguir os mais novos.
-
-**Regras do projeto que valem em todos os tópicos (PARA-IA.md).** Nomes em português. Zero comentários no código. O Controller é criado primeiro e só chama Service. Toda consulta fica no Repository. HTTP externo e disco só em `src/Infra/`. DTO só carrega dados. Exceções por contexto, com métodos estáticos e mensagens completas em português. Constantes em vez de valores soltos. Dependências por injeção, sem `$_ENV` no código. Migration só via `make doctrine-diff`. Serializer sempre, nunca entidade crua. No frontend: sem `useEffect`, sem `<div>` cru, sem hex, sem `any`. Rodar `make lint-all` antes de fechar cada tópico. Commit e push só com `make push`, sem assinatura de IA.
-
----
-
-### Tópico 161 — Preparação do app no painel do Spotify e variáveis de ambiente
-
-**O que existe hoje:** o CirqueiraX não tem nenhuma integração com o Spotify. A Cápsula Sonora saiu do aplicativo e os meses antigos não podem mais ser consultados lá. Só existe a integração com o Google Fotos como referência de OAuth.
-
-**Por que importa:** sem o app registrado não há OAuth. As regras do modo de desenvolvimento (dono Premium, até 5 usuários) e os termos do Spotify definem o que pode ser construído e como. Descobrir isso depois de implementar custa retrabalho.
-
-**O que precisa acontecer:**
-- Criar o app no painel de desenvolvedores do Spotify com a conta do usuário. O nome não pode começar com "Spotify" nem ser parecido (sugestão: CirqueiraX Stats). Tipo de uso: Web API.
-- Cadastrar os endereços de retorno: em produção, `https://x.cirqueira.com/spotify/callback`; em desenvolvimento, o loopback com IP, `http://127.0.0.1:4012/spotify/callback` (porta do Vite). Pelo que se sabe, o Spotify não aceita mais `localhost` nem HTTP fora do loopback, mas conferir a regra vigente no painel.
-- Em "User Management" do app, cadastrar o e-mail do usuário (limite de 5).
-- Definir `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` e `SPOTIFY_REDIRECT_URI` no `.env` e no `.env.local` de produção, injetadas pelo `services.yaml`. O segredo nunca vai para o frontend nem para logs. Passar as variáveis também pelo `docker-compose.prod.yaml`, se for o caso.
-- Fixar os escopos: `user-read-recently-played` é obrigatório. `user-top-read` e `user-read-currently-playing` só entram se algum cartão realmente usar (a Cápsula é calculada pelo banco, então o top do Spotify não é necessário; o "tocando agora" é opcional no tópico 183). Documentar a lista final e o motivo de cada escopo.
-- Ler os Developer Terms completos e a política do desenvolvedor e registrar aqui duas decisões: (a) pode-se guardar cópia das capas e fotos, ou só o endereço da imagem? (b) a cláusula sobre "métricas derivadas" alcança estatísticas pessoais de um único usuário? Na dúvida, vale o plano mais conservador: guardar só o endereço das imagens.
-
-**Não fazer:** pedir permissões de controle do player, playlists ou biblioteca. Usar o Spotify como forma de login do CirqueiraX.
-
-**A confirmar:** se a conta do Spotify do usuário é Premium. Sem Premium o app não funciona no modo de desenvolvimento.
+**Regras do projeto que valem em todos os tópicos (PARA-IA.md).** Nomes em português. Zero comentários no código. O Controller é criado primeiro e só chama Service, estendendo `DefaultController` com o envelope `{ success, data }`. Services atômicos com `executar()`. Toda consulta fica no Repository. Clientes externos em `src/Infra/` com interface em `src/Interface/`. DTO só carrega dados. Exceções por contexto em `src/Exception/{Contexto}/`, com métodos estáticos e mensagens completas em português. Constantes em vez de valores soltos. Dependências por injeção no `services.yaml`, sem `$_ENV` no código. Migration só via `make doctrine-diff` e `make migrate`, validada com `make doctrine-validate`. Serializer sempre, nunca entidade crua. No frontend: sem `useEffect` (usar `useMountEffect`), sem `<div>` cru, sem hex fora do script de paleta, sem `any`, primitivos Chakra, filtros na URL com `useFiltrosUrl` e `useSEO` nas páginas. Rodar `make lint-all` antes de fechar cada tópico. Commit e push só com `make push`, sem assinatura de IA.
 
 ---
 
-### Tópico 162 — Infra — SpotifyClient com tratamento de limite de requisições
+### Tópico 186 — Preparação — decisões, limpeza do teste e verificações antes de construir
 
-**O que existe hoje:** `src/Infra/` tem clientes para Google Fotos, Syncthing, yt-dlp e armazenamento, mas nenhum para o Spotify.
+**O que existe hoje:** o coletor de teste roda num contêiner chamado `ytmusic_teste_coletor` (reinicia sozinho) e grava um log em `/root/ytmusic_teste`, onde também está o cookie do Gabriel. O Client ID e o Client secret do teste anterior (OAuth do Google) estão no `.env` do servidor como `YTMUSIC_CLIENT_ID` e `YTMUSIC_CLIENT_SECRET`, e o secret chegou a ser colado numa conversa. Existe um cliente OAuth criado no Google Cloud só para esse teste. Nada disso entra no sistema.
 
-**Por que importa:** pela regra do projeto, chamada HTTP externa só vive na camada de Infra. O Spotify responde 429 com `Retry-After` quando o limite é excedido, e o modo de desenvolvimento tem limites mais baixos.
+**Por que importa:** o lote depende de dados que ainda não foram medidos (atraso do histórico, volume do Takeout, quanto da história antiga ainda existe) e de quatro decisões que ficaram abertas. Credenciais de teste espalhadas são risco sem benefício.
 
 **O que precisa acontecer:**
-- `SpotifyClient` em `src/Infra/Spotify/`, estendendo o `Client` base (Guzzle), com contrato em `src/Interface/` por ser fronteira de integração externa. Os endereços (autorização `https://accounts.spotify.com/authorize`, token `https://accounts.spotify.com/api/token`, API `https://api.spotify.com/v1`) entram como parâmetros do `services.yaml`.
-- Fluxo de autorização por código (Authorization Code) com o segredo do app, sempre no servidor.
-- Métodos: trocar o code por tokens; renovar o token; buscar o perfil (`GET /me`, só nome e foto); listar reproduções recentes (`GET /me/player/recently-played`, até 50 itens, com o cursor `after` em milissegundos Unix; conferir os parâmetros na documentação); obter faixa por código (`GET /tracks/{id}`); obter artista por código (`GET /artists/{id}`); buscar faixas por texto (`GET /search`, no máximo 10 resultados).
-- DTOs de resposta que mapeiam o JSON externo antes de entrar no negócio: reprodução recente (momento, faixa, artistas, álbum e imagens, duração), faixa, artista e tokens.
-- Limite de requisições: em resposta 429, respeitar o `Retry-After` (em segundos) com no máximo N tentativas (constante) e espera progressiva, no padrão do `GoogleFotosAPI`. Esgotadas as tentativas, lançar exceção de contexto.
-- `SpotifyException` em `src/Exception/Spotify/`, com métodos estáticos descritivos em português para: limite excedido, token inválido ou expirado (401), conta fora da lista do modo de desenvolvimento (403), falha temporária do Spotify (5xx) e resposta inesperada. A mensagem bruta do Spotify nunca vai para a resposta HTTP.
-- Timeouts e número de tentativas como constantes no topo da classe.
+- Criar o esqueleto de `documentation/funcionalidades/MUSICA.md` com as premissas desta seção (objetivo, decisões, regras de dados, fora do escopo).
+- **Tarefas do Gabriel, registradas num bloco "Pendências do Gabriel" no documento:**
+  1. Pedir o Google Takeout: em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music, em "Todos os dados do YouTube incluídos" deixar só o **histórico**, trocar o formato do histórico para **JSON** e exportar uma vez. Opcional: agendar a exportação a cada 2 meses por 1 ano.
+  2. Conferir em `myactivity.google.com` se o histórico do YouTube estava ligado e se há **exclusão automática**. Se o prazo for menor que 13 meses, outubro de 2025 já foi apagado e o Takeout não o traz.
+  3. Ler as diretrizes de marca e a política de desenvolvedor do Spotify para confirmar se dados do Spotify podem aparecer misturados com os de outro serviço sob o visual do Spotify. Registrar a conclusão no documento.
+- **Medir o atraso real do coletor de teste:** o Gabriel dá play em 5 músicas novas anotando o horário de cada play, e o Claude Code compara com a hora em que o coletor viu cada uma. Registrar a mediana e o máximo. Esse número define se `tocadaEm` precisa de correção (tópico 192).
+- **Limpar o que é só do teste**, mas **só depois do tópico 192** estar em produção coletando: parar e remover o contêiner `ytmusic_teste_coletor`, apagar `/root/ytmusic_teste`. **Já agora:** remover `YTMUSIC_CLIENT_ID` e `YTMUSIC_CLIENT_SECRET` do `.env`, apagar o cliente OAuth do teste no Google Cloud e revogar o acesso em myaccount.google.com, Segurança, Apps de terceiros.
+- Obter e registrar as **quatro decisões abertas**, com as propostas abaixo como padrão:
+  1. Tempo ouvido no modo "Todos": **somar** medido e estimado, com a marca "inclui estimativas" e um tooltip que separa os dois.
+  2. Limite de componentes para uma compilação: **5**.
+  3. A Cápsula Sonora **acompanha o seletor** de fonte, com um aviso de que a calibração é do Spotify.
+  4. Ao desconectar o YouTube Music: apagar só a credencial e **manter as reproduções** (não há exigência de apagar como no Spotify).
+- Registrar o nome da página. Proposta: **Música**, na rota `/musica`.
 
-**Não fazer:** usar endpoints removidos (busca em lote de faixas e artistas, top tracks do artista, navegação por categorias, perfil de outros usuários). Depender de campos removidos (popularidade, seguidores do artista, país e e-mail do usuário).
+**Não fazer:** apagar o contêiner de teste antes de o tópico 192 estar coletando. Colar qualquer cookie, token ou chave em conversa, issue ou repositório.
+
+**A confirmar:** as quatro decisões e o nome da página com o Gabriel.
 
 ---
 
-### Tópico 163 — Entidade ContaSpotify, enum de status e migration
+### Tópico 187 — Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player
 
-**O que existe hoje:** só existe `ContaGoogleFotos`, que é de conta única e fica fora do vínculo com o usuário.
+**O que existe hoje:** a tabela `bloqueio_spotify` registra cada 429 (espera, hora de liberação, origem, consultas feitas desde o bloqueio anterior, ritmo). Houve dois bloqueios em 10/11: 24.179 s (13h33) e 82.402 s (21h25, libera em 11/11 às 20h20), ambos perto de 600 consultas de artistas, com 6 s entre elas no segundo. Enquanto o app está bloqueado, a coleta das músicas recentes também não roda, e o recently-played só guarda as últimas 50 músicas. A tela mostrou "Última coleta: 10/11, 21:24" horas depois, sem aviso claro do motivo. A busca de artistas (M133) só considera músicas com 3 ou mais streams (3.522) e tem 2.140 músicas mapeadas no total. A conexão pede, desde a M130, permissões de reprodução (`streaming`, `user-read-email`, `user-read-private`, `user-read-playback-state`, `user-modify-playback-state`) só para a página `/spotify/player-teste`, que não virou player.
 
-**Por que importa:** os tokens precisam ficar guardados com segurança, e a conta precisa estar ligada ao usuário do CirqueiraX, como `Audio` e `LivroAudio` já fazem. Cada pessoa vê só os próprios dados.
+**Por que importa:** a busca de artistas é opcional; a coleta das músicas novas é o dado principal. Hoje a primeira pode derrubar a segunda por quase um dia. Além disso, o limite pode estar somando **todas** as chamadas do app, e a tabela só mede as de artistas.
 
 **O que precisa acontecer:**
-- Entidade `ContaSpotify` com UUID v7, uma por `Usuario` (índice único), com: código e nome de exibição da conta Spotify, foto do perfil (opcional), tokens protegidos pelo mesmo serviço de criptografia usado no refresh token do Google Fotos, validade do access token, escopos concedidos, `conectadoEm`, `ultimaColetaEm`, cursor da última reprodução lida (milissegundos) e `erroMotivo`.
-- Enum `StatusContaSpotify` com `conectada`, `reconectar` e `desconectada`, com predicados `is*` (`isConectada`, `isReconectar`, `isDesconectada`).
-- Métodos de intenção de domínio na entidade: conectar, renovar tokens, marcar como reconectar, desconectar (limpa os tokens), registrar coleta (atualiza o cursor e a data). Mais o predicado `isTokenExpirado`, com margem em constante.
-- `ContaSpotifyRepository` com `salvar`, `remover`, `flush`, `buscarDoUsuario` e `listarConectadas`.
-- Migration gerada por `make doctrine-diff`, revisada e validada com `make doctrine-validate`.
-- Getters sem o prefixo `get`, como nas demais entidades.
+- **Medir tudo antes de ajustar:** `ControleLimiteSpotifyService` passa a contar cada chamada ao Spotify por origem (coleta, tocando agora, capas, artistas, player) em janela móvel, e cada novo bloqueio grava o total por origem. Nova coluna ou tabela filha de `bloqueio_spotify`, com migration via `make doctrine-diff`.
+- **Orçamento da busca de artistas:** constante `LIMITE_CONSULTAS_ARTISTAS_POR_DIA` (proposta: 400), contada no banco (não no cache, para sobreviver a deploy). Ao atingir, a busca para até o dia seguinte. A busca nunca roda se a última coleta das músicas recentes falhou. Qualquer 429 continua parando a busca na hora.
+- **Aviso na tela e no Dashboard:** `GET /api/v1/spotify/status` e o resumo do Dashboard passam a devolver `bloqueadoAte` e o motivo. O painel do Spotify mostra "O Spotify bloqueou o app até HH:mm (horário de Brasília). A coleta está pausada. O Spotify só guarda as últimas 50 músicas, então o que passar disso nesse período pode não ser coletado." O `StatusIntegracoes` ganha o estado âmbar `bloqueado`, distinto de `coletaParada`.
+- **Limpeza do teste do player (decisão do Gabriel, ver "A confirmar"):** remover `PlayerSpotifyController`, `PlayerTesteSpotifyService`, a rota `/spotify/player-teste`, `PlayerTesteSpotify.tsx`, `usePlayerTesteSpotify.ts` e as permissões extras em `GerarUrlAutorizacaoSpotifyService`. A conta conectada continua funcionando com o token antigo; reconectar uma vez é opcional. Condensar o resultado do teste (proxy do trabalho bloqueia o Spotify) numa nota curta no `SPOTIFY.md`.
+- **Corrigir a documentação:** o arquivo de progresso dos tópicos 161–185 ainda mostra 183, 184 e 185 como pendentes, enquanto o de 181–200 os mostra concluídos.
 
-**Não fazer:** devolver tokens em qualquer Serializer. Guardar a senha ou outros dados pessoais da conta Spotify.
+**Não fazer:** acelerar a busca de artistas. Consultar o Spotify enquanto houver janela de bloqueio ativa.
+
+**A confirmar:** se a página de teste do player sai agora ou fica até o lote do player; o valor de `LIMITE_CONSULTAS_ARTISTAS_POR_DIA` depois de ver a medição por origem.
 
 ---
 
-### Tópico 164 — Serviço de tokens — troca do code e renovação com lock
+### Tópico 188 — Infra — cliente do YouTube Music com ytmusicapi por processo
 
-**O que existe hoje:** não há fluxo OAuth do Spotify no sistema. O Google Fotos tem `GoogleFotosOAuthService` e o lock de arquivo nas escritas.
+**O que existe hoje:** nada do YouTube Music no código do projeto. Há precedente de Python chamado pelo PHP: `bin/sintetizar-voz.py` e `bin/sintetizar-voz-piper.py`, usados por `SintetizadorVozPorProcesso`, e a imagem de produção já tem Python. A `ytmusicapi` só existe no ambiente do teste, fora do repositório.
 
-**Por que importa:** o access token dura 1 hora, dois workers podem tentar renová-lo ao mesmo tempo, e o Spotify pode devolver um novo refresh token na renovação. Sem cuidado, a conta se desconecta sozinha.
+**Por que importa:** a biblioteca é Python e o sistema é Symfony. A integração precisa seguir as regras do projeto (interface mais cliente de Infra) e manter o cookie fora de linha de comando, log e variável de ambiente.
 
 **O que precisa acontecer:**
-- `GerarUrlAutorizacaoSpotifyService`: monta a URL de consentimento com os escopos do tópico 161 e um `state` aleatório de uso único, guardado em cache com validade curta (da ordem de 10 minutos) e amarrado ao usuário logado.
-- `ConcluirAutorizacaoSpotifyService`: valida o `state` (existe, não expirou, pertence ao usuário e é consumido), troca o code pelos tokens no servidor com o segredo do app, busca o perfil e grava a `ContaSpotify`. Dispara a primeira coleta ao concluir.
-- `ObterTokenValidoSpotifyService`: garante um token válido antes de cada chamada. Renova quando faltar menos que a margem em constante, usando lock (como o do Google Fotos) para impedir renovação simultânea. Se o Spotify devolver um novo refresh token, grava-o.
-- Quando a renovação falhar de forma definitiva (acesso revogado, Premium vencido, `invalid_grant`), marcar a conta como `reconectar`, com o motivo, e não tentar de novo até o usuário reconectar.
-- Exceções de contexto para `state` inválido ou expirado, autorização negada e falha na troca de tokens.
+- Interface `YoutubeMusicInterface` em `src/Interface/` com `validarCredenciais`, `listarHistorico` e `buscarMusica`.
+- Script `bin/ytmusic.py` com três subcomandos (`validar`, `historico`, `buscar`). As credenciais chegam **por entrada padrão em JSON**. A saída é JSON na saída padrão. Códigos de saída distintos: 0 sucesso, 2 credenciais inválidas, 3 serviço indisponível ou limite, 4 formato inesperado.
+- Fixar a versão da `ytmusicapi` no `Dockerfile.prod` e no ambiente de desenvolvimento, para uma atualização da biblioteca não quebrar a coleta sem aviso.
+- Cliente `YoutubeMusicClient` em `src/Infra/YoutubeMusic/`, chamando o script com o componente Process do Symfony, com tempo limite de 30 s e mapeamento dos códigos de saída para exceções.
+- DTOs em `src/DataObject/YoutubeMusic/`: `CredenciaisYoutubeMusicDTO`, `ItemHistoricoYoutubeMusicDTO` (`videoId`, `titulo`, `textoArtistas` como veio, `album`, `urlCapa`, `duracaoMs`, `secao`, `posicao`), `ListaHistoricoYoutubeMusicDTO` e `ResultadoBuscaYoutubeMusicDTO`.
+- `YoutubeMusicException` em `src/Exception/YoutubeMusic/` com `credenciaisInvalidas()`, `servicoIndisponivel()` e `respostaInesperada()`.
+- Tratar o caso visto no teste: quando o cookie morre, a biblioteca devolve `YTMusicServerError: None` em todas as chamadas. O script deve, ao receber esse erro, rodar uma chamada de validação e então decidir entre "credencial inválida" e "falha passageira".
+- Testes do parsing em PHP com respostas reais **anonimizadas** gravadas como fixtures, para não depender de rede.
 
-**A confirmar:** o que fazer se o usuário reconectar com outra conta Spotify. Proposta: bloquear e pedir que desconecte antes, para não misturar históricos de contas diferentes.
+**Não fazer:** passar cookie por argumento, variável de ambiente ou arquivo temporário. Registrar a saída bruta do script (ela contém o histórico do usuário).
+
+**A confirmar:** a versão da `ytmusicapi` a fixar e o formato mínimo de cabeçalhos que ela aceita.
 
 ---
 
-### Tópico 165 — Endpoints de conexão — url, concluir, status e desconectar
+### Tópico 189 — Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration
 
-**O que existe hoje:** o Google Fotos tem `oauth/url`, `oauth/concluir`, `status` e `desconectar`. O Spotify não tem nada.
+**O que existe hoje:** `ContaSpotify` é o modelo de conta externa do projeto (status, tokens criptografados, última coleta). Não existe equivalente para o YouTube Music, e a `CriptografiaInterface` já está disponível.
 
-**Por que importa:** é o que faz o botão "Vincular ao Spotify" funcionar de ponta a ponta, e atende à exigência da política de permitir desconectar a conta a qualquer momento.
+**Por que importa:** a credencial precisa de um lugar seguro, e o estado da coleta (quando consultar de novo, quantos erros seguidos, o que foi visto da última vez) precisa persistir entre execuções.
 
 **O que precisa acontecer:**
-- `SpotifyController` em `src/Controller/Spotify/`, criado primeiro, estendendo `DefaultController`. Todas as rotas exigem JWT.
-- `GET /api/v1/spotify/oauth/url` devolve `{ url }`.
-- `POST /api/v1/spotify/oauth/concluir` recebe `{ code, state }`, conclui e devolve o status da conexão. Erros previstos: `state` inválido ou expirado, autorização negada pelo usuário, conta fora da lista do modo de desenvolvimento.
-- `GET /api/v1/spotify/status` devolve se está conectada, o status, nome de exibição, foto, `conectadoEm`, `ultimaColetaEm` e escopos.
-- `POST /api/v1/spotify/desconectar` remove os tokens e apaga as reproduções de fonte `api` do usuário (as importadas do arquivo permanecem). O que fazer com o catálogo de imagens segue a decisão do tópico 161.
-- DTOs validados com `#[Assert]`, Serializer próprio que nunca devolve tokens, e exceções de contexto com mensagens completas em português.
+- Enum `StatusContaYoutubeMusic` em `src/Enum/` com `conectada`, `reconectar` e `desconectada`, com os predicados `isConectada()`, `isReconectar()` e `isDesconectada()`.
+- Entidade `ContaYoutubeMusic` em `src/Entity/`, UUID v7, única por `Usuario` (exclusão em cascata). Campos: `credenciaisCriptografadas`, `status`, `conectadoEm`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `proximaConsultaEm`, `errosSeguidos`, `erroMotivo`, `snapshotTopo` (JSON com os `videoId` do topo do histórico, na ordem, usados para comparar a consulta seguinte), `criadoEm` e `atualizadoEm`.
+- Métodos de intenção: `conectar`, `registrarConsulta`, `registrarErro`, `marcarComoReconectar`, `desconectar` (apaga as credenciais e o snapshot) e `definirProximaConsulta`. Getters sem o prefixo `get`.
+- `ContaYoutubeMusicRepository` com `salvar`, `remover`, `flush`, `buscarDoUsuario` e `listarComConsultaVencida` (conectadas com `proximaConsultaEm` no passado).
+- Migration via `make doctrine-diff`, aplicada com `make migrate`, validada com `make doctrine-validate`.
 
-**Não fazer:** expor o segredo do app, os tokens ou a mensagem bruta do Spotify na resposta.
+**Não fazer:** expor as credenciais em qualquer Serializer. Guardar o cookie fora do campo criptografado.
 
 ---
 
-### Tópico 166 — Entidade ReproducaoSpotify, enum de fonte e migration
+### Tópico 190 — Conexão do YouTube Music — serviços, endpoints e status no Dashboard
 
-**O que existe hoje:** nenhum histórico de reprodução é guardado. A API só devolve as últimas 50 faixas tocadas.
+**O que existe hoje:** o Spotify conecta por OAuth, com `SpotifyController`. O YouTube Music não tem conexão: o teste usou cookies colados à mão numa pasta do servidor.
 
-**Por que importa:** minutos por mês, rankings e comparações só existem se o histórico ficar no banco. É a base de toda a Cápsula.
+**Por que importa:** é por aqui que o Gabriel entrega ao sistema a sessão do YouTube Music (e a troca quando ela expira). A entrada precisa ser tolerante (ele cola o texto copiado do navegador) e a saída nunca pode revelar a credencial.
 
 **O que precisa acontecer:**
-- Entidade `ReproducaoSpotify` com UUID v7 e `Usuario`. Campos: código da faixa (opcional, pois o arquivo básico não traz), nome da faixa, artista principal, código do artista principal (opcional), demais artistas, álbum, `duracaoMs` (opcional), `msReproduzidos`, `tocadaEm` em UTC, fonte e chave de deduplicação.
-- A chave de deduplicação é o código da faixa quando houver, ou o nome da faixa e do artista normalizados (minúsculas, sem acentos, espaços normalizados, sem remover sufixos como "Remix"), combinada com o `tocadaEm`. Índice único por usuário e chave, para impedir duplicidade dentro da mesma fonte.
-- Enum `FonteReproducaoSpotify` com `api`, `importacao_basica` e `importacao_estendida`. Métodos: `isTempoExato()` (verdadeiro nas importações) e uma prioridade (estendida, depois básica, depois api), usada na reconciliação do tópico 171.
-- Índices por (usuário, `tocadaEm`), por (usuário, artista principal) e por (usuário, faixa).
-- `ReproducaoSpotifyRepository` com `salvar`, `flush` em lote e consulta de chaves já existentes. As agregações ficam no tópico 173.
-- Migration por `make doctrine-diff`, revisada e validada.
+- Controller criado primeiro: `YoutubeMusicController` em `src/Controller/YoutubeMusic/`, estendendo `DefaultController`, todas as rotas com JWT:
+  - `POST /api/v1/youtube-music/conectar` com `{ cabecalhos }`, o texto bruto dos cabeçalhos copiados do navegador (tamanho máximo em constante).
+  - `GET /api/v1/youtube-music/status`.
+  - `POST /api/v1/youtube-music/desconectar`.
+- `ConectarYoutubeMusicDTO` com `#[Assert]`. `InterpretadorCabecalhosNavegadorService` converte o texto colado na estrutura mínima aceita pela biblioteca e recusa o que não tiver o cookie essencial, com mensagem clara em português.
+- `ConectarYoutubeMusicService`: interpreta, valida chamando `YoutubeMusicInterface::validarCredenciais`, criptografa, grava, tira o primeiro snapshot do histórico (sem gerar reproduções) e agenda a coleta. Limite de 5 tentativas por minuto com o rate limiter do projeto.
+- `ObterStatusYoutubeMusicService` e `DesconectarYoutubeMusicService` (apaga a credencial; **mantém as reproduções**, salvo outra decisão do tópico 186).
+- `ContaYoutubeMusicSerializer`: `status`, `conectadoEm`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `erroMotivo` e `totalReproducoesColetadas`. Nunca credenciais.
+- Documentar o passo a passo de obter os cabeçalhos (abrir `music.youtube.com` numa **janela anônima**, entrar na conta, copiar os cabeçalhos de uma requisição `browse` no DevTools e **fechar a janela sem clicar em Sair**). A dica da janela anônima é prática comum com outras ferramentas e precisa ser confirmada aqui medindo quanto o cookie dura.
+- **Dashboard:** `DashboardService` e `GET /api/v1/dashboard/resumo` ganham o bloco `youtubeMusic` com os estados `nao_configurado`, `conectado` e `reconectar`, a data da última novidade e o link para `/musica`.
 
-**Decidido na conversa:** o artista de cada reprodução é o principal, porque o arquivo exportado só traz um nome de artista por faixa. Se a calibração mostrar que a Cápsula contava todos os artistas, ajustar no tópico 174.
+**Não fazer:** devolver, registrar ou guardar o texto colado depois de interpretado. Aceitar cookie por URL.
+
+**A confirmar:** quanto dura o cookie obtido pela janela anônima, comparado ao obtido na janela normal.
 
 ---
 
-### Tópico 167 — Coleta do histórico recente com cursor e deduplicação
+### Tópico 191 — Entidades — vídeo, reprodução, catálogo canônico e regra de canal
 
-**O que existe hoje:** não há coleta. O que for ouvido e não for coletado não pode ser recuperado depois pela API.
+**O que existe hoje:** as reproduções do Spotify vivem em `reproducao_spotify`, identificadas por nome e artista principal, com os artistas extras em `artista_faixa_spotify`. Não há conceito de "música principal" com versões, nem de mashup, nem de artista único entre serviços.
 
-**Por que importa:** é a fonte de tudo que vem daqui para frente. A API não informa o tempo realmente ouvido, só a faixa e o momento.
+**Por que importa:** é o modelo que permite juntar versões, separar mashups e combinar Spotify com YouTube Music. Sem ele, cada serviço continua sendo uma ilha. As tabelas do Spotify **não mudam**.
 
 **O que precisa acontecer:**
-- Service de coleta (um caso de uso coeso), que para cada conta conectada: obtém um token válido (tópico 164), pede as reproduções após o cursor guardado (na primeira vez, sem cursor, vêm as últimas 50), converte cada item para `ReproducaoSpotify` com a fonte `api`, grava só as novas e atualiza o cursor para o momento da mais recente.
-- O tempo reproduzido é estimado pela duração da faixa. Documentar a limitação: faixas puladas cedo podem superestimar os minutos, e o arquivo exportado corrige isso depois.
-- Verificação de duplicidade em lote, com uma única consulta de chaves existentes (sem uma consulta por item). Gravação em lote com um único `flush` ao final.
-- A capa que já vem na resposta do Spotify deve ser aproveitada pelo catálogo de imagens (tópico 177), sem consulta extra.
-- Falhas esperadas tratadas por exceções de contexto, e erros de programação falham rápido, sem `catch` genérico. Se o token falhar, a conta vira `reconectar` e a coleta daquela conta é pulada. Se vier 429, deixar para a próxima rodada.
-- Retornar um DTO de saída com a contagem de novas, ignoradas e o novo cursor, em vez de array solto.
+- Enums em `src/Enum/`:
+  - `FonteReproducaoYoutube` (`coletor`, `takeout`).
+  - `StatusClassificacaoVideo` (`pendente`, `musica`, `mashup`, `compilacao`, `nao_musica`, `revisar`, `indisponivel`).
+  - `OrigemClassificacao` (`regra`, `regra_canal`, `ia`, `manual`).
+  - `TipoVersaoMusica` (`original`, `slowed`, `sped_up`, `reverb`, `oito_d`, `nightcore`, `lyrics`, `video_oficial`, `traducao`, `remix`, `cover`, `instrumental`, `ao_vivo`, `outro`).
+  - `TipoMusicaCatalogo` (`original`, `mashup`).
+  - `ClassificacaoCanal` (`musica`, `nao_musica`).
+- `VideoYoutube`: `videoId`, `titulo`, `canal`, `canalId` (opcional), `duracaoMs` (opcional), `urlCapa`, `categoriaYoutube` (opcional), `descricaoResumo` (até 1.000 caracteres), `disponivel`, `status`, `origemClassificacao`, `confianca` (0 a 100), `respostaIa` (JSON), `classificadoEm`, `tipoVersao`, vínculo opcional com `MusicaCatalogo`. Único por usuário e `videoId`.
+- `ReproducaoYoutube`: vínculo com `VideoYoutube`, `tocadaEm` (UTC), `msReproduzidos`, `tempoExato` (sempre falso no YouTube), `fonte`, `chaveDeduplicacao`. Único por usuário e chave. Índices em `(usuario, tocadaEm)` e `(video)`.
+- `MusicaCatalogo`: `titulo`, `tipo`, `chaveNormalizada`, `album` e `urlCapa` (opcionais), `videoOficialId` (opcional), `confirmadaManualmente`. Única por usuário e chave.
+- `ArtistaCatalogo`: `nome`, `nomeNormalizado`, `urlFoto` (opcional). Único por usuário e nome normalizado. `AliasArtistaCatalogo` (`aliasNormalizado` único por usuário) para casos como "lana", "Lana Del Rey" e "JENNIE" e "Jennie".
+- `MusicaArtistaCatalogo` (música, artista, `posicao`, 0 = principal). `ComponenteMashup` (mashup, texto do componente, música componente opcional, `posicao`), porque o segundo componente pode ficar sem identificação.
+- `VinculoMusicaSpotify`: liga a identidade do Spotify (nome e artista principal normalizados) a uma `MusicaCatalogo`.
+- `RegraCanalYoutube`: `canalNormalizado`, `classificacao`. Única por usuário e canal.
+- Repositórios para cada entidade com `salvar`, `remover`, `flush` e as buscas usadas nos tópicos seguintes (por chave normalizada, por `videoId`, pendentes em lote, por canal).
+- Duas migrations geradas por `make doctrine-diff` (vídeos e reproduções; catálogo), aplicadas e validadas com `make doctrine-validate`.
 
-**Não fazer:** coletar podcasts ou de outras contas. Tocar ou controlar qualquer coisa no Spotify.
+**Não fazer:** alterar `reproducao_spotify` ou `artista_faixa_spotify`. Fazer o catálogo depender do `videoId` ou do código de faixa do Spotify.
+
+**A confirmar:** índices adicionais depois de medir as consultas dos tópicos 199 e 200.
 
 ---
 
-### Tópico 168 — Rotina de coleta no Scheduler a cada 30 minutos
+### Tópico 192 — Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler
 
-**O que existe hoje:** o `Schedule.php` só roda tarefas diárias (limpar vídeos antigos e expirar áudios). O processo `scheduler_default` já está no Supervisor de desenvolvimento e produção.
+**O que existe hoje:** o coletor de teste (Python, fora do repositório) consulta o histórico a cada 60 s e só grava um log. Ele mostrou que o histórico traz as músicas em ordem, sem horário.
 
-**Por que importa:** com 50 faixas por consulta, um intervalo de 30 minutos não perde reproduções (50 faixas equivalem a algumas horas de escuta). O cursor também cobre o caso de o servidor ficar desligado por um tempo, desde que não passe de 50 faixas.
+**Por que importa:** é o coração da coleta contínua. Os erros aqui são silenciosos: perder uma reprodução, contar a mesma duas vezes ou deixar a coleta parar com o cookie vencido sem ninguém notar.
 
 **O que precisa acontecer:**
-- Mensagem `SincronizarHistoricoSpotifyMessage` e handler que só delega ao service do tópico 167, sem regra de negócio.
-- Entrada `RecurringMessage::every('30 minutes', ...)` no `Schedule.php`. O schedule já é `stateful` e usa `processOnlyLastMissedRun(true)`.
-- A mensagem processa todas as contas conectadas, ignora as marcadas como `reconectar` e registra `ultimaColetaEm`.
-- Decidir em qual fila a mensagem roda: a regra atual envia toda `App\Message\*` para `async`, e isso é suficiente para a coleta. A importação do tópico 172 é que pode pedir fila própria.
+- **Detectar reproduções novas** comparando a consulta com o `snapshotTopo` da conta:
+  - Itens que aparecem **antes** do antigo primeiro item da lista são reproduções novas.
+  - Itens que não existiam no snapshot também são novos.
+  - Repetição **seguida** da mesma música não aparece e é perdida (limite conhecido, documentar).
+  - Repetição não seguida sobe a música ao topo e conta como nova.
+  - A **primeira** consulta só grava o snapshot e não gera reproduções.
+  - Cobrir com testes: música nova, várias de uma vez, repetição não seguida, repetição seguida, lista vazia, snapshot vazio, mudança de rótulo das seções ("Today", "Yesterday" e meses).
+- **Gravação:** para cada item novo, criar ou atualizar o `VideoYoutube` com título, canal (o "artista" que o YouTube Music mostra em uploads é o canal), duração e capa, e criar a `ReproducaoYoutube` com `tocadaEm` = momento em que foi vista, `fonte = coletor`. Se o tópico 186 medir um atraso estável, aplicar a correção medida. Disparar a identificação dos vídeos ainda sem classificação (tópico 195) e invalidar o cache das análises do usuário.
+- **Tempo ouvido estimado:** `EstimarTempoReproduzidoYoutubeService` (atômico). Ao criar, `msReproduzidos` provisório = duração. Quando a próxima reprodução chega, ajustar a anterior para `min(intervalo, duração)`. A reprodução sem seguinte, depois de 20 min, fica com a duração.
+- **Intervalo adaptativo:** `RecurringMessage::every('30 seconds', ...)` em `src/Schedule.php` dispara `ColetarHistoricoYoutubeMusicMessage`. O handler só consulta contas com `proximaConsultaEm` vencido. Constantes: `INTERVALO_ATIVO_SEGUNDOS = 30` enquanto houve novidade nos últimos 10 minutos, `INTERVALO_OCIOSO_SEGUNDOS = 120` caso contrário, e um mínimo absoluto de 15 s que nunca é quebrado. Um bloqueio por conta evita duas consultas sobrepostas.
+- **Erros:** falha passageira → espera 1, 2, 5 e 15 minutos. Três erros seguidos → rodar a validação de credenciais. Se inválidas, marcar `reconectar`, parar de consultar e gravar o motivo. Registrar o contador `errosSeguidos` e logs estruturados sem dados do usuário.
+- Fila própria `youtube_coleta` com 1 worker no `messenger.yaml`, em `devops/supervisord.conf` e `devops/php/supervisord-prod.conf`, com limite de memória.
+- Quando esta coleta estiver em produção e confirmada, desligar o coletor de teste (tópico 186).
+
+**Não fazer:** gerar reproduções na primeira consulta. Consultar com menos de 15 s de intervalo. Registrar o conteúdo das respostas.
+
+**A confirmar:** o atraso entre tocar e aparecer no histórico (medido no tópico 186), e se 30 s é suficiente ou se vale 20 s enquanto ativo.
 
 ---
 
-### Tópico 169 — Spotify no status das integrações e alerta de coleta parada
+### Tópico 193 — Infra — YouTube Data API em lote para categoria, duração e descrição
 
-**O que existe hoje:** o card `StatusIntegracoes` do Dashboard mostra Syncthing, Pipeline, Google Fotos e Armazenamento.
+**O que existe hoje:** o Takeout só traz título, canal e horário, sem duração, categoria ou descrição. A coleta pela `ytmusicapi` traz duração e capa, mas não a categoria. O projeto já usa a API do YouTube só no teste do player.
 
-**Por que importa:** se a coleta parar por algumas horas durante uma escuta longa, faixas se perdem, e hoje ninguém seria avisado. O mesmo vale para uma conta que pediu para reconectar.
+**Por que importa:** a duração é necessária para estimar o tempo ouvido e para separar uma música de uma compilação de uma hora. A categoria "Música" e a descrição (onde quem posta mashup costuma listar as músicas usadas) melhoram muito a identificação. A API aceita 50 vídeos por chamada, então enriquecer milhares custa quase nada.
 
 **O que precisa acontecer:**
-- Incluir o Spotify em `GET /api/v1/dashboard/resumo` e no card: estado da conexão (conectada, reconectar, desconectada), data da última coleta e um alerta quando passar do limite sem coletar, definido em constante (da ordem de 3 horas).
-- Quando a conta estiver em `reconectar`, o card leva ao botão de reconectar da página `/spotify`.
-- Seguir o padrão visual das demais integrações do card (as cores do sistema, não as do Spotify).
+- Interface `YoutubeDataInterface` e cliente `YoutubeDataClient` em `src/Infra/YoutubeData/`, com um cliente Guzzle dedicado no `services.yaml`.
+- Nova chave `YOUTUBE_API_KEY` (restrita à YouTube Data API v3, **separada** do cliente OAuth do teste que será apagado), no `.env`, injetada por parâmetro.
+- `buscarVideos(array $videoIds)` com `videos.list` (`snippet` e `contentDetails`), em lotes de 50. Devolve `VideoYoutubeDataDTO`: `videoId`, `titulo`, `canal`, `canalId`, `categoriaId`, `duracaoMs` (convertendo o formato `PT#M#S`), `descricao` (cortada em 1.000 caracteres) e `urlCapa`. Os `videoId` que não voltam são marcados como indisponíveis.
+- Controle de cota: constante de orçamento diário (proposta: 5.000 unidades, cada chamada custa 1) contada no banco. Ao receber `quotaExceeded`, pausar o enriquecimento até o dia seguinte. `YoutubeDataException` com `cotaExcedida()`, `chaveInvalida()` e `respostaInesperada()`.
+- Testes de conversão de duração e do parsing com fixtures.
+- Registrar no documento a **política de dados** da API do YouTube: pelo que sei, dados vindos da API não podem ficar guardados sem atualização por muito tempo. Ler a política e decidir se o catálogo precisa de reatualização periódica.
+
+**Não fazer:** usar o cliente OAuth do teste. Enviar a chave em URL de log.
+
+**A confirmar:** a regra exata de retenção da API do YouTube e o horário em que a cota diária reinicia.
 
 ---
 
-### Tópico 170 — Importação do histórico — leitura dos arquivos básico e estendido
+### Tópico 194 — Infra — identificador de músicas por IA com resposta estruturada e registro de custo
 
-**O que existe hoje:** não há leitura de arquivos do Spotify. O usuário tem histórico até julho de 2026 e pediu os "Dados da conta" (último ano, cerca de 5 dias). O histórico ampliado leva até 30 dias e cobre a vida toda da conta.
+**O que existe hoje:** a M129 criou `OpenAiCorretorTextoClient` (modelo `gpt-5.4-mini` por `OPENAI_MODELO_TEXTO`, chave `OPENAI_API_KEY`). O teste de identificação mostrou que o modelo separa mashups, colaborações e títulos bagunçados com boa qualidade, gastando em média 155 tokens de entrada e 102 de saída por título, cerca de 60% da saída sendo raciocínio.
 
-**Por que importa:** é o único jeito de recuperar os meses passados, e traz o tempo exato tocado de cada faixa, que a API não dá.
+**Por que importa:** a IA é a primeira etapa da identificação. A resposta precisa ser estruturada e validada, nunca texto solto, e o custo precisa ser visível, porque o Takeout pode ter milhares de vídeos.
 
 **O que precisa acontecer:**
-- Cliente de Infra (com contrato em `src/Interface/`) que lê o ZIP ou o JSON em fluxo, sem carregar tudo na memória.
-- Formato básico ("Dados da conta"): histórico de streams do último ano, com nome da faixa, artista, momento em UTC (provavelmente com precisão de minuto) e tempo tocado. Não traz código de faixa. Formato estendido: momento em UTC, tempo tocado, nome da faixa, artista, álbum e código da faixa, além de dados de podcast. Os nomes exatos dos arquivos e dos campos devem ser confirmados com o arquivo real do usuário.
-- Cada linha vira um DTO de saída dedicado, sem acesso a disco no DTO.
-- Descartar episódios de podcast.
-- Privacidade: o ZIP "Dados da conta" contém muitos outros arquivos (pagamentos, buscas, dados pessoais). O leitor deve abrir só os arquivos de histórico de streams e nunca ler nem guardar os demais. Não persistir endereço de IP, país, plataforma nem user agent, mesmo que o arquivo estendido os traga.
-- Aceitar também um arquivo JSON avulso e os arquivos antigos do usuário (até julho de 2026).
-- Exceção de contexto para arquivo inválido, sem histórico de streams e formato desconhecido.
+- Interface `IdentificadorMusicaInterface` e cliente `OpenAiIdentificadorMusicaClient` em `src/Infra/OpenAi/`, reaproveitando a configuração HTTP do cliente existente (extrair uma base comum se houver duplicação).
+- Entrada por vídeo (`EntradaIdentificacaoDTO`): `id`, `titulo`, `canal`, `duracaoMs`, `categoriaId` e `descricao` cortada em 500 caracteres. Lotes de até `TAMANHO_LOTE_IDENTIFICACAO` (proposta: 10), cada item com seu `id`.
+- Saída por **resposta estruturada** (esquema JSON): `id`, `tipo` (`musica`, `mashup`, `compilacao`, `nao_musica`), `confianca` (0 a 100), `versao` (valores de `TipoVersaoMusica`), `componentes` (lista de `{ titulo, artistas[] }`; um componente para música, dois ou mais para mashup), `ambiguo` e `alternativas` (até 2 interpretações quando o título é ambíguo, como "Renegade").
+- Instruções do modelo numa classe de constantes `InstrucoesIdentificacaoMusica`: remover rótulos (slowed, reverb, sped up, 8D, lyrics, tradução, TikTok version e semelhantes); remix, cover e instrumental são versões da **mesma** música; distinguir colaboração (uma música, vários artistas) de mashup (várias músicas); aceitar "Artista - Título" e "Título - Artista"; entender letras espaçadas, caixa baixa e títulos em português; **não inventar**: na dúvida, baixar a confiança e marcar `ambiguo`.
+- Validar a resposta com o Validator do Symfony num `ResultadoIdentificacaoDTO`. JSON inválido ou item faltando → `IdentificacaoException::respostaInvalida()`, tratado como `revisar`.
+- **Registro de custo:** entidade `ConsumoIa` (`finalidade`, `modelo`, `tokensEntrada`, `tokensSaida`, `criadoEm`, usuário) com migration, gravada a cada chamada. Parâmetros de preço por milhão de tokens no `services.yaml`. A M129 pode passar a gravar também.
+- Tempo limite de 30 s, 2 tentativas com espera crescente, tratamento de 429.
+- **Comparar esforço de raciocínio:** rodar os mesmos 100 títulos reais com esforço "low" e "minimal", medir custo e acertos, e registrar a escolha no `MUSICA.md`.
 
-**Não fazer:** gravar qualquer dado que não seja necessário para a Cápsula. Guardar o ZIP original depois de processar.
+**Não fazer:** mandar a descrição inteira ou dados do usuário além do necessário. Registrar a chave ou o conteúdo completo das respostas em log.
+
+**A confirmar:** os preços oficiais por milhão de tokens, o tamanho de lote e o nível de esforço.
 
 ---
 
-### Tópico 171 — Importação — deduplicação com tolerância e prioridade sobre a API
+### Tópico 195 — Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão
 
-**O que existe hoje:** não existe importação nem regra de reconciliação entre fontes.
+**O que existe hoje:** nada classifica vídeos nem vincula versões a uma música. Os testes mostraram que 64% do histórico do YouTube Music são edits de canais pequenos, e que o "artista" desses itens é o canal.
 
-**Por que importa:** um arquivo novo repete meses já importados e já coletados pela API. O horário da API e o do arquivo podem diferir por alguns segundos (ou, no formato básico, por até um minuto), mesmo para a mesma reprodução. Sem tolerância, o mesmo play seria contado em dobro.
+**Por que importa:** é o serviço que decide o que aparece no Dashboard: qual é a música principal, quais são as versões, quando é mashup e quem recebe crédito. A IA sozinha chuta com confiança, então a confirmação por busca e a fila de revisão são parte do serviço, não enfeite.
 
 **O que precisa acontecer:**
-- Comparar cada linha importada com as reproduções já existentes da mesma faixa (pelo código, ou por nome e artista normalizados no formato básico) dentro de uma janela de tempo definida em constante. Os valores iniciais da janela (por exemplo, 90 segundos no formato estendido e alguns minutos no básico) devem ser ajustados na calibração do tópico 185, comparando um arquivo e a coleta do mesmo dia.
-- Regra de prioridade: estendida vence básica, que vence api. Se a reprodução existente for da API e a importada for exata, atualiza o tempo e a fonte e mantém o mesmo registro (substitui a estimativa). Se for igual ou de menor prioridade, ignora.
-- Reimportar o mesmo arquivo é idempotente: nada muda.
-- Processar em lotes, com `flush` por lote (tamanho em constante), para não estourar a memória em arquivos grandes.
-- Devolver um DTO de saída com os totais: lidos, novos, ignorados e substituídos.
-- Não apagar reproduções de fora do período coberto pelo arquivo.
-- Documentar o limite conhecido: duas reproduções legítimas da mesma faixa dentro da janela de tolerância podem ser tratadas como uma. É raro e aceitável.
+- `IdentificarVideoYoutubeService::executar` (atômico), na ordem:
+  1. **Regra de canal:** se `RegraCanalYoutube` existe, `nao_musica` encerra; `musica` segue para identificar. Decisões `manual` nunca são sobrescritas.
+  2. **Atalho de canal "- Topic":** canal oficial gerado pelo YouTube vale como música original, com título e artista tirados do próprio item, sem chamar a IA.
+  3. **Enriquecimento** pelo `YoutubeDataInterface` quando faltar duração ou categoria.
+  4. **IA** (tópico 194).
+  5. **Música (um componente):** confirmar com `YoutubeMusicInterface::buscarMusica` com título e artista. Aceitar o resultado oficial só com similaridade mínima (mesma abordagem e limiar 70 de `ResolverImagemSpotifyService`) e duração dentro da tolerância. Confirmada, usar título, artistas, álbum, capa e `videoOficialId` oficiais. Não confirmada, ou confiança abaixo de `LIMITE_CONFIANCA_REVISAO` (proposta: 70), ou `ambiguo` → status `revisar`, guardando as alternativas da IA.
+  6. **Colaboração:** um componente com vários artistas é uma música só, com os artistas em ordem de posição.
+  7. **Mashup (2 a `LIMITE_COMPONENTES_MASHUP`):** criar ou achar a `MusicaCatalogo` do tipo `mashup` pela chave do conjunto de componentes (assim a mesma mistura postada por outro canal cai na mesma música), com `ComponenteMashup`, artistas = união dos artistas dos componentes e capa = miniatura do vídeo. Artistas incertos → `revisar`.
+  8. **Compilação** (mais componentes que o limite, ou a IA assim indica): status `compilacao`, sem crédito de artista, aparece na fila de revisão.
+  9. **Agrupar versões:** achar ou criar a `MusicaCatalogo` por `chaveNormalizada`, vincular o `VideoYoutube` e gravar o `tipoVersao`.
+- Fila Messenger `youtube_identificacao` (1 worker, com pausa entre chamadas). Um handler agendado a cada minuto pega até 50 vídeos pendentes e os manda para a IA em lotes. Comando `app:youtube:identificar --pendentes|--todos --limite=N`.
+- Depois de classificar, avisar a projeção (tópico 199) para criar, atualizar ou apagar as linhas das reproduções daquele vídeo.
+- Testes com os casos reais: as 5 versões de "Little Dark Age" caindo na mesma música; `Let Down + Choir` como música única; "one of the girls" como colaboração de 3 artistas; os mashups de 2 e de 4 músicas; "Renegade" indo para `revisar`; um canal "- Topic" sem chamada à IA.
 
-**A confirmar:** se o momento da API (`played_at`) é o início ou o fim da reprodução. A calibração responde, e a janela cobre os dois casos.
+**Não fazer:** sobrescrever decisão manual. Creditar artistas de compilação sem confirmação. Chamar a IA de novo para vídeo já classificado, salvo reclassificação pedida.
+
+**A confirmar:** o limiar de confiança, o limite de componentes e o limiar de similaridade, ajustados com dados reais no tópico 205.
 
 ---
 
-### Tópico 172 — Endpoint e processamento assíncrono da importação
+### Tópico 196 — Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints
 
-**O que existe hoje:** não há endpoint de upload de histórico. O padrão de upload multipart e de processamento em fila existe no Upload Manual e nos Livros em Áudio.
+**O que existe hoje:** as 9.907 músicas distintas do Spotify (62.851 streams de 30 s ou mais) existem só como linhas de `reproducao_spotify`, identificadas por nome e artista principal, com 2.140 músicas tendo todos os artistas em `artista_faixa_spotify`. Não há como corrigir uma identificação, unir duas músicas ou dizer que um canal nunca é música.
 
-**Por que importa:** arquivos de histórico podem ser pesados e não podem travar a requisição. Importações grandes também não devem atrasar a fila de mídias.
+**Por que importa:** é aqui que Spotify e YouTube Music passam a falar do mesmo catálogo. E, como a identificação automática erra, as correções manuais têm que existir desde o início e valer para sempre.
 
 **O que precisa acontecer:**
-- `POST /api/v1/spotify/importacoes` recebe o arquivo (ZIP ou JSON, multipart, tamanho máximo em constante), usando `fromRequest()` como nos outros uploads com arquivo. `GET /api/v1/spotify/importacoes/{uuid}` informa o progresso e o resultado.
-- Entidade `ImportacaoSpotify` (UUID v7, usuário, status, contagens de lidos, novos, ignorados e substituídos, `erroMotivo`, datas) com enum `StatusImportacaoSpotify` (`enviada`, `processando`, `concluida`, `erro`), repositório e migration por `make doctrine-diff`.
-- `ImportarHistoricoSpotifyMessage` com handler que só delega. Avaliar uma fila dedicada (como a `livro_audio`): transporte novo em `messenger.yaml`, roteamento da mensagem, worker nos dois Supervisors (desenvolvimento e produção) com limite de memória e reinício automático.
-- O arquivo enviado fica numa pasta temporária, escrita e removida por um cliente de Infra de armazenamento (sem `mkdir`, `copy` ou `unlink` no service), e é apagado ao final, com sucesso ou erro.
-- Uma importação por vez por usuário, para evitar corrida na deduplicação.
-- Serializer próprio e exceções de contexto.
+- `NormalizadorTextoMusicaService`: minúsculas, sem acentos, sem pontuação, juntando letras espaçadas (`s t e r e o` → `stereo`), `&` e `and` iguais, hífen interno tratado (`Lily-Rose`), sem rótulos de versão. Usado pelas chaves e pelos aliases. Testes com casos reais.
+- `VincularFaixasSpotifyAoCatalogoService`: para cada música distinta do Spotify, cria ou acha a `MusicaCatalogo` (título, artista principal, álbum e capa de `imagem_spotify`), cria os `ArtistaCatalogo` a partir de `artista_faixa_spotify` (todos os creditados; só o principal quando ainda não houver), e grava o `VinculoMusicaSpotify`. Comando `app:musica:vincular-spotify` em lotes, com progresso e idempotente. Depois, a coleta e a importação do Spotify chamam o vínculo para cada música nova.
+- Quando a busca de artistas (M133) gravar mais artistas de uma música já vinculada, atualizar os `MusicaArtistaCatalogo`.
+- `SugerirDuplicatasCatalogoService`: sugere (sem aplicar) músicas com título normalizado igual e artista parecido, ou título igual e duração próxima. As sugestões entram na fila de revisão como "possível duplicata".
+- **Serviços de correção atômicos:** `UnirMusicasCatalogoService`, `SepararVideoDaMusicaService`, `DefinirMusicaDoVideoService`, `DefinirComponentesMashupService`, `ClassificarCanalYoutubeService` (cria a regra e aplica em todos os vídeos pendentes ou em revisão daquele canal), `ResolverCompilacaoService`, `UnirArtistasCatalogoService` e `DefinirArtistasMusicaService`. Toda correção marca `confirmadaManualmente`, nunca apaga os dados originais e dispara a atualização da projeção e do cache.
+- **Controller primeiro:** `MusicaCorrecaoController` em `src/Controller/Musica/`:
+  - `GET /api/v1/musica/revisao` (paginado, filtro por `tipo`: `sem_vinculo`, `ambiguo`, `compilacao`, `canal_novo`, `possivel_duplicata`, `indisponivel`).
+  - `POST /api/v1/musica/revisao/videos/{uuid}/musica`.
+  - `POST /api/v1/musica/catalogo/unir` e `POST /api/v1/musica/catalogo/separar`.
+  - `POST /api/v1/musica/canais/classificar`.
+  - `POST /api/v1/musica/artistas/unir`.
+  - `PUT /api/v1/musica/mashups/{uuid}/componentes`.
+  - Item de outro usuário responde 404.
+- Serializers para a fila (com a sugestão da IA, as alternativas, a confiança e a miniatura) e para o catálogo.
+
+**Não fazer:** apagar títulos, canais ou respostas da IA ao corrigir. Aplicar sugestão de duplicata sozinho. Unir de forma que não dê para separar depois.
+
+**A confirmar:** quão agressiva é a sugestão de duplicatas, medida na amostra de 30 músicas do tópico 205.
 
 ---
 
-### Tópico 173 — Agregações por mês no Repository
+### Tópico 197 — Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta
 
-**O que existe hoje:** o repositório de reproduções ainda não tem consultas de agregação.
+**O que existe hoje:** o passado do YouTube não está no sistema. A importação do Spotify (`ImportacaoSpotify`, fila `spotify_importacao`, leitor em streaming, deduplicação) é o modelo, e a M118 deixou lições: reanexar o usuário a cada lote, comparar horários em UTC e reabrir o EntityManager para gravar o motivo do erro.
 
-**Por que importa:** pelas regras do projeto, toda consulta vive no Repository. É daqui que saem todos os números da Cápsula.
+**Por que importa:** o Gabriel ouvia no YouTube comum, então o Takeout tem anos de dados misturados com tudo o que ele assistiu. A leitura precisa ser robusta, não pode depender do nome dos arquivos (que o Google traduz) e não pode duplicar o que a coleta já guardou.
 
 **O que precisa acontecer:**
-- Métodos no `ReproducaoSpotifyRepository` para: soma de milissegundos por mês e por dia; contagem de reproduções por faixa no mês (com o corte de stream do tópico 174); soma por artista; número de faixas distintas por mês; lista dos meses que têm dados; e a posição de cada faixa e artista nos meses anteriores (para movimento e "meses no top 5").
-- Todas as consultas filtram pelo usuário e cortam o mês e o dia no fuso `America/Sao_Paulo` (os dados ficam em UTC). A conversão de fuso vive em um lugar só.
-- Atenção ao desempenho: com cerca de 1.500 a 1.800 músicas diferentes por mês, conferir os índices do tópico 166 e usar agregação no banco, nunca carregar as reproduções em memória.
-- Retornos estruturados em DTOs ou arrays tipados por contrato, sem arrays anônimos.
+- Enum `StatusImportacaoYoutube` (`enviada`, `processando`, `aguardando_confirmacao`, `classificando`, `concluida`, `erro`) e entidade `ImportacaoYoutube` (arquivo temporário, nome original, tamanho, contadores, motivo do erro, datas), com migration.
+- **Leitor** `LeitorArquivoTakeoutYoutube` em `src/Infra/YoutubeMusic/`, com interface em `src/Interface/`, em streaming (um objeto por vez, memória constante, como o do Spotify). Aceita ZIP ou JSON. **Localiza o arquivo do histórico pelo conteúdo** (lista de objetos com `header`, `title`, `titleUrl` e `time`), nunca pelo nome, porque o Takeout em português traduz pastas e arquivos.
+- Campos lidos: `header` ("YouTube Music" ou "YouTube"), `title` (removendo o prefixo no idioma da conta, como "Assistiu a "), `titleUrl` (extrai o `videoId` do `v=` ou de `youtu.be`), `subtitles[0].name` (canal) e `time` (UTC). Entradas sem `videoId` (posts e semelhantes) e anúncios (`details` de anúncio) são ignoradas. Vídeos apagados vêm só com o endereço, viram candidatos a `indisponivel`.
+- **Privacidade:** ler só o histórico de exibição. Buscas, comentários, inscrições e o resto do ZIP são ignorados. Nada de endereço IP.
+- **Gravação em lotes de 500:** cria `VideoYoutube` (pendente) para cada `videoId` novo e `ReproducaoYoutube` com `fonte = takeout` e chave de deduplicação = hash de usuário, `videoId` e `tocadaEm` ao segundo. Reimportar o mesmo arquivo não cria nada.
+- **Deduplicação com a coleta:** se existir reprodução da coleta do mesmo `videoId` dentro de `JANELA_TOLERANCIA_TAKEOUT_SEGUNDOS` (proposta: 600), mantém **uma** só, com o horário do Takeout, e a fonte passa a `takeout`. Só entre fontes diferentes; dentro do Takeout, só a chave exata conta como repetida.
+- Fila `youtube_importacao`, `ImportarHistoricoYoutubeMessage` e handler, em `messenger.yaml` e nos dois supervisores. `IniciarImportacaoYoutubeService` valida o arquivo (ZIP ou JSON, limite em constante, proposta 200 MB), impede duas importações simultâneas do mesmo usuário, grava em `var/tmp/youtube_importacoes` por um cliente de armazenamento (sem `mkdir` ou `unlink` nos services) e remove o arquivo no `finally`.
+- **Controller primeiro:** `YoutubeImportacaoController` com `POST /api/v1/youtube-music/importacoes` (multipart, 201) e `GET /api/v1/youtube-music/importacoes/{uuid}`.
+
+**Não fazer:** ler arquivos fora do histórico de exibição. Decidir o arquivo pelo nome. Deduplicar por título.
+
+**A confirmar:** o formato real do arquivo, assim que o Takeout chegar. O Gabriel deve enviar uma amostra das primeiras entradas, e as regras de leitura são ajustadas antes de seguir. Também o valor da janela de 600 s.
 
 ---
 
-### Tópico 174 — Regras da Cápsula — streams, fuso de Brasília e comparação com o mês anterior
+### Tópico 198 — Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido
 
-**O que existe hoje:** só restam os prints da Cápsula que o usuário guardou, de abril, maio e junho de 2026.
+**O que existe hoje:** depois da leitura (tópico 197), os vídeos ficam `pendente`, sem duração, categoria ou classificação, e as reproduções ficam sem tempo ouvido. Misturados com músicas há vídeos de todo tipo.
 
-**Por que importa:** é a regra que faz os números baterem com o que o Spotify mostrava. Sem ela, os meses antigos parecem plausíveis mas errados.
+**Por que importa:** é aqui que se descobre, em meio a todos os vídeos assistidos, quais são música, e se evita gastar IA à toa. O Gabriel precisa ver o tamanho e o custo estimado **antes** de a IA rodar.
 
 **O que precisa acontecer:**
-- `CalcularCapsulaMensalService` devolvendo um DTO de saída com:
-  - Tempo ouvindo, em minutos.
-  - Artista mais ouvido e a música mais ouvida.
-  - Quantidade de músicas diferentes no mês e a variação percentual sobre o mês anterior (por exemplo, "1.824 músicas diferentes, +17% sobre março").
-  - Top 5 de músicas, com o número de streams de cada uma, e top de artistas.
-  - Movimento de posição de cada item sobre o mês anterior (a seta para cima ou para baixo que a Cápsula mostrava) e há quantos meses a música está no top 5.
-- Um stream é uma reprodução com pelo menos 30 segundos tocados (constante). Esse é o ponto de partida, a ser ajustado na calibração do tópico 185.
-- O mês corrente é calculado em andamento, com a data do cálculo informada.
-- Os prints mostram empates no ranking (30 e 30 streams em abril; 19 e 19, 18 e 18 em junho), então a regra de desempate precisa ser definida na calibração (por exemplo, por minutos ouvidos ou pela reprodução mais recente).
+- **Etapa 1 — enriquecer** todos os `VideoYoutube` pendentes pelo `YoutubeDataInterface` em lotes de 50, respeitando o orçamento de cota. Os que não voltam viram `indisponivel`.
+- **Etapa 2 — descartar o que claramente não é música, sem IA**, com regras em constantes:
+  - Categoria em `CATEGORIAS_NAO_MUSICA_DIRETAS` (Gaming 20, News 25, Howto e Style 26, Education 27, Science e Tech 28).
+  - Duração acima de `DURACAO_MAXIMA_SEM_CATEGORIA_MUSICA_MS` (proposta: 20 min) quando a categoria não é Música (10).
+  - `RegraCanalYoutube` existente.
+  - Vídeo descartado fica guardado como `nao_musica` (nunca apagado). Categorias de upload de edits como Entretenimento (24) e Pessoas e Blogs (22) **vão para a IA**.
+- **Etapa 3 — prévia:** a importação vai para `aguardando_confirmacao` com os números: reproduções lidas, vídeos únicos, descartados por regra, indisponíveis e **quantos irão para a IA com o custo estimado** (preços do tópico 194). Abaixo de `LIMITE_CUSTO_AUTOMATICO_USD` (proposta: 2) segue sozinha. Acima, espera `POST /api/v1/youtube-music/importacoes/{uuid}/confirmar`.
+- **Etapa 4 — classificar** em lotes pelo `IdentificarVideoYoutubeService` (tópico 195), com progresso gravado e retomável. Comando `app:youtube:continuar-importacao {uuid}`.
+- **Etapa 5 — tempo ouvido:** estimar para todas as reproduções do Takeout com `EstimarTempoReproduzidoYoutubeService`, ordenando **todas** as reproduções do usuário (inclusive as de vídeos que não são música), porque o intervalo até o próximo vídeo assistido é o que limita o tempo. Em blocos por mês.
+- **Relatório final** no retorno da importação: reproduções lidas, vídeos únicos, músicas, mashups, compilações, não música, a revisar, indisponíveis, período coberto, meses com dados, tokens e custo estimado versus real.
+- Cada etapa é idempotente, para continuar de onde parou depois de um erro ou reinício.
 
-**Não fazer:** gêneros, popularidade e qualquer dado que o histórico não tenha.
+**Não fazer:** chamar a IA antes da prévia quando acima do limite. Apagar vídeo classificado como `nao_musica`.
 
-**A confirmar na calibração:** se os minutos somam todas as reproduções ou só as que contam como stream; se o artista é contado só pelo principal; se a Cápsula incluía podcasts nos minutos.
+**A confirmar:** as categorias e a regra dos 20 minutos, com a distribuição real do arquivo; o limite de custo automático.
 
 ---
 
-### Tópico 175 — Endpoints da Cápsula Sonora e Serializer
+### Tópico 199 — Leitura unificada — projeção das reproduções e paridade com os números do Spotify
 
-**O que existe hoje:** nenhuma rota expõe os dados mensais.
+**O que existe hoje:** as análises do Spotify (cerca de 16 endpoints, `ReproducaoSpotifyRepository` e `AnaliseReproducaoSpotifyRepository`) leem `reproducao_spotify`, agrupam por nome e artista principal e usam `artista_faixa_spotify` para os artistas extras. Os números estão calibrados contra o app do Spotify (abril, maio e junho de 2026: 15.392, 10.786 e 10.957 minutos contra 15.387, 10.766 e 10.956 do Spotify).
 
-**Por que importa:** é o contrato que o frontend consome, e o Serializer protege a tela de mudanças internas no banco.
+**Por que importa:** colocar o YouTube Music dentro de cada uma dessas consultas, uma a uma, duplicaria regras e arriscaria quebrar a calibração. Uma camada de leitura única resolve uma vez só. O risco real é mudar os números do Spotify sem perceber.
 
 **O que precisa acontecer:**
-- `GET /api/v1/spotify/capsula` com os meses disponíveis, com um resumo de cada (minutos, artista e música mais ouvidos), do mais recente para o mais antigo.
-- `GET /api/v1/spotify/capsula/{ano}/{mes}` com o detalhe do mês: minutos, artista e música mais ouvidos, músicas diferentes e variação, top 5 de músicas com streams, movimento e meses no top 5, top de artistas e os minutos por dia (para o gráfico).
-- `SpotifyCapsulaSerializer` com JSON estável, sem entidade crua, com chaves em português no padrão camelCase (como em `LivroAudio`) dentro do envelope `{ success, data }`. Itens sem imagem devolvem `imagemUrl` nulo enquanto o tópico 177 busca a imagem.
-- Mês sem dados devolve um resultado vazio explícito em vez de erro. O mês corrente indica que está em andamento.
-- Cada faixa e artista devolve também o endereço de "Abrir no Spotify", exigido pela atribuição.
-- Controller só chama o service e o Serializer.
+- **Decisão técnica, medida antes de implementar:** comparar (a) tabela de projeção `reproducao_musical` e (b) view com UNION, num banco descartável com 100 mil reproduções do Spotify e uma amostra grande de YouTube. Registrar a escolha no `MUSICA.md`. A recomendação é a tabela.
+- **Tabela `reproducao_musical`:** usuário, `musica` (catálogo), `fonte` (`spotify`, `youtube_music`), `tocadaEm`, `msReproduzidos`, `tempoExato`, `pulada` e `aleatorio` (só Spotify, nulos no YouTube), `origemId` e `criadoEm`. Única por fonte e origem. Índices em `(usuario, tocadaEm)`, `(usuario, musica)` e `(usuario, fonte, tocadaEm)`. Migration pelo fluxo padrão.
+- **Alimentação:**
+  - Spotify: comando `app:musica:projetar-spotify` (carga inicial, em lotes) mais uma mensagem após cada coleta e importação, respeitando a regra de substituição da M118 (quando o arquivo substitui uma reprodução da API, a linha da projeção acompanha).
+  - YouTube: quando um vídeo vira `musica` ou `mashup`, todas as suas reproduções entram; `nao_musica`, `compilacao`, `revisar` e `indisponivel` não entram (e saem, se já estavam).
+  - Qualquer correção manual ou unificação reprojeta só as músicas afetadas.
+- **Repository unificado** (`ReproducaoMusicalRepository` e `AnaliseReproducaoMusicalRepository`), com as mesmas regras do `SPOTIFY.md` seção 3: stream a partir de 30 s sobre `msReproduzidos`; minutos somando tudo; mês e ano em UTC; hora, dia da semana e "Hoje" em Brasília; artistas creditados pela música inteira via `MusicaArtistaCatalogo`; mashup conta 1 para a música mashup e crédito completo para cada artista dos componentes; totais nunca duplicam.
+- **Dimensão de fonte:** toda agregação aceita `fontes` e devolve a divisão por fonte (streams, minutos e a parte estimada), para os tooltips.
+- **Prova de paridade:** comando `app:musica:comparar-paridade` roda as consultas antigas e as novas para `fonte = spotify` e imprime as diferenças. Deve dar **zero diferença** em: minutos de abril, maio e junho de 2026, streams e músicas distintas por mês, top 20 de músicas e de artistas em cinco períodos diferentes, e o resumo do ano. Só depois disso as consultas antigas são removidas.
+- Desempenho: manter o cache por usuário (6 h, virando no dia seguinte) com a chave incluindo a fonte, e medir a primeira consulta contra os 0,5 a 6 s de hoje.
+
+**Não fazer:** alterar `reproducao_spotify` ou as regras de cálculo. Apagar as consultas antigas antes de a paridade dar zero.
+
+**A confirmar:** tabela de projeção ou view, depois da medição.
 
 ---
 
-### Tópico 176 — Endpoints de Hoje, Semana e Curiosidades
+### Tópico 200 — Endpoints unificados /api/v1/musica com filtro de fonte
 
-**O que existe hoje:** não há métricas de curto prazo.
+**O que existe hoje:** as análises estão sob `/api/v1/spotify/` (`capsula`, `resumo`, `artistas/top-musicas`, as rotas de `SpotifyAnaliseController` e os detalhes de artista e de música por nome). O frontend lê essas rotas e todas as telas assumem uma fonte só.
 
-**Por que importa:** é a parte "ao vivo" da página, que dá motivo para abrir o sistema fora do fim do mês.
+**Por que importa:** é a API que a página unificada passa a consumir. Manter os números iguais para `fonte = spotify` e acrescentar a fonte, as versões e os mashups sem duplicar serviços é o que evita retrabalho.
 
 **O que precisa acontecer:**
-- `GET /api/v1/spotify/resumo` devolvendo:
-  - Hoje: minutos ouvidos desde as 00:00 no fuso de Brasília, músicas e artistas que mais tocaram.
-  - Semana: o mesmo para a semana, com comparação com a semana anterior.
-  - Curiosidades.
-- Curiosidades da lista inicial, todas calculadas do próprio histórico: horário do dia com mais escuta; dia da semana mais ouvido; dia mais longo do mês (data e minutos); faixa mais repetida em um único dia; artistas descobertos no mês (sem nenhuma reprodução antes do mês); média diária de minutos e comparação com o mês anterior.
-- A referência visual de "Hoje | Semana" e "Músicas | Artistas" vem do site de estatísticas que o usuário mostrou, só como inspiração de composição.
+- **Controllers primeiro**, em `src/Controller/Musica/`: `MusicaController` (resumo, Cápsula, rankings) e `MusicaAnaliseController` (recordes, evolução, hábitos, descobertas, retrospectiva, detalhes). Rotas sob `/api/v1/musica/`, espelhando as atuais, com o parâmetro `fonte` (`todas` padrão, `spotify`, `youtube_music`) validado pelo enum `FiltroFonteMusica`.
+- Os Services existentes (`ObterDetalheCapsulaService`, `ObterResumoHojeSemanaCuriosidadesService`, `ObterRetrospectivaAnualSpotifyService` e os demais) passam a depender do repositório unificado, renomeados para nomes neutros. **Sem duplicar** serviços.
+- Itens dos rankings passam a trazer: `fontes` (de onde veio), `mashup`, `estimado`, capa, artistas e o link externo (`urlSpotify` para itens do Spotify e `urlYoutubeMusic`, no formato `https://music.youtube.com/watch?v=<videoId>`, da versão mais ouvida ou do vídeo oficial).
+- **Detalhe da música:** lista de `variantes` (vídeo, título, canal, `tipoVersao`, streams e minutos no período) e, em mashups, os `componentes`. **Detalhe do artista:** inclui os mashups em que ele aparece, marcados como tal. Ambos com a divisão por fonte e a primeira e a última vez de cada fonte. Os detalhes passam a usar o `uuid` do catálogo.
+- **Capas e fotos:** capas de músicas do YouTube vêm do catálogo (capa oficial confirmada ou miniatura do vídeo). Fotos de artistas: reaproveitar as de `imagem_spotify` quando existirem e, para artistas só do YouTube, buscar uma única vez pela `ytmusicapi`, em fila, gravando em `ArtistaCatalogo.urlFoto`. Sem usar o Spotify para isso, para não gastar a cota.
+- `GET /api/v1/musica/identificacao/resumo` (contagem por status: pendentes, em revisão, compilações) e `GET /api/v1/musica/identificacao/consumo` (tokens e custo estimado por dia e total, usando `ConsumoIa`).
+- As rotas de **conexão, importação, status, sincronizar, desconectar e imagens** do Spotify continuam em `/api/v1/spotify/`, sem mudar. As rotas antigas de análise ficam como alias por um período e são removidas quando o frontend estiver migrado (tópico 203).
+- Cache com a fonte na chave, invalidado por novas reproduções, importações, correções e reclassificações.
+- Serializers estendem os existentes, sem duplicar.
 
-**Não fazer:** a aba "Gêneros" (o histórico não traz gênero) e qualquer curiosidade que dependa de popularidade ou de dados removidos da API.
+**Não fazer:** mudar as regras de cálculo. Criar serviços paralelos por fonte.
 
-**A confirmar:** a definição de "semana" (proposta: últimos 7 dias incluindo hoje, comparados aos 7 dias anteriores; alternativa: semana de segunda a domingo). A lista de curiosidades também é uma proposta inicial.
+**A confirmar:** nomes exatos das rotas novas.
 
 ---
 
-### Tópico 177 — Catálogo de capas e fotos — entidade e busca por código
+### Tópico 201 — Frontend — renomear a página, tema, seletor de fonte e ícones de origem
 
-**O que existe hoje:** o histórico guarda nomes e códigos, mas nenhuma imagem. A Cápsula original mostrava foto do artista e capas.
+**O que existe hoje:** a página `/spotify` (`web/features/spotify/`) tem o visual do Spotify isolado no wrapper `TemaSpotify` e nos tokens `cirqueira.spotify.*`, gerados por `scripts/gerar-paleta-brand.mjs`. O menu, o cabeçalho e o Dashboard apontam para "Spotify". Os textos, o rodapé e a imagem da Cápsula falam só do Spotify. A rota `/spotify/callback` está cadastrada no painel do Spotify e no `.env` (`SPOTIFY_REDIRECT_URI`).
 
-**Por que importa:** a API removeu a busca em lote, então cada imagem custa uma consulta. Só o que aparece na tela precisa ser buscado, e cada item deve ser consultado uma única vez.
+**Por que importa:** a página passa a ser de música, não do Spotify. A aparência não muda, mas o nome, a organização e a identificação da fonte precisam mudar, sem quebrar o retorno do login do Spotify.
 
 **O que precisa acontecer:**
-- Entidade `ImagemSpotify` com UUID v7: tipo (faixa ou artista), código Spotify (ou nome normalizado quando não houver código), nome, endereços de imagem nos três tamanhos que o Spotify devolve (grande, média e miniatura), endereço de "Abrir no Spotify", `buscadaEm` e status (enum com `pendente`, `encontrada` e `nao_encontrada`). Migration por `make doctrine-diff`.
-- Service que obtém a capa pela consulta da faixa (a capa está no álbum) e a foto pela consulta do artista, só para os itens exibidos: top 5 ou 10, artista em destaque e itens de Hoje e Semana. Guardar o endereço da imagem e não o arquivo, conforme a decisão do tópico 161. O front carrega a imagem direto do Spotify.
-- Na coleta pela API a capa já vem na resposta e entra no catálogo sem consulta extra. A foto do artista exige a consulta do artista.
-- Quando um endpoint de leitura (tópicos 175 e 176) encontrar item sem imagem, ele devolve nulo e dispara o preenchimento em segundo plano (tópico 178). A tela atualiza quando a imagem chegar.
-- Endereço de "Abrir no Spotify" montado pelo código (faixa e artista). Sem código, cai numa busca no Spotify pelo nome.
-- Opcional: cor dominante da capa, calculada no servidor ao buscar a imagem, para o tom do cartão. Não depender de CORS no navegador. Só fazer se não pesar.
+- **Nome e rota:** a página vira **Música** em `/musica` (nome a confirmar). `/spotify` redireciona para `/musica`. As rotas de detalhe passam para `/musica/artista` e `/musica/faixa`, com redirecionamento das antigas. **A rota `/spotify/callback` NÃO muda**, porque o Spotify devolve o login para esse endereço.
+- **Organização do código:** criar `web/features/musica/` com a página e as seções compartilhadas. `web/features/spotify/` mantém a conexão, a importação e o callback do Spotify. Ajustar `App.tsx`, `Sidebar.tsx` (ícone e rótulo), `Header.tsx` e o atalho "Spotify" da `BarraAcoesRapidas` do Dashboard.
+- **Tema:** `TemaSpotify` → `TemaMusica`, tokens `cirqueira.spotify.*` → `cirqueira.musica.*`, atualizando `gerar-paleta-brand.mjs`, `theme.ts` e a seção 24 do `DESIGN.md` ("visual inspirado no Spotify aplicado à página de música"). **Os valores das cores não mudam.** Acrescentar tokens de marca para os ícones de origem (`cirqueira.musica.fonteSpotify` e `cirqueira.musica.fonteYoutubeMusic`), com os hexadecimais só no script.
+- **Seletor de fonte:** `SeletorFonteMusica` em pílulas (Todos, Spotify, YouTube Music), ao lado do seletor de período, com o estado na URL por `useFiltrosUrl` (`?fonte=`), padrão `todas`, mantido ao navegar para os detalhes. Hook `useFonteMusica`; todas as chaves de query passam a incluir a fonte.
+- **Ícones de origem:** `IconeFonteMusica` e `GrupoIconesFonte` (um ou dois ícones, com tooltip "Spotify" e "YouTube Music" e rótulo acessível), cada um na cor da própria marca, dentro das regras de marca.
+- **Marca de estimado:** `MarcaEstimado` ("est." com tooltip "inclui tempo estimado do YouTube Music") e `MinutosSpotify` → `MinutosMusica`, cujo tooltip, além das horas por extenso, separa "Spotify X min · YouTube Music Y min (estimado)".
+- **Textos neutros:** `RodapeSpotify` → `RodapeMusica` creditando os dois serviços, "Abrir no Spotify" só em itens do Spotify e "Abrir no YouTube Music" nos do YouTube, `EstadoVazioMusica` com os dois caminhos (conectar o Spotify, conectar o YouTube Music), esqueletos adaptados, e a atribuição da imagem PNG da Cápsula citando os dois serviços.
+- `useSEO` com o novo título. `make lint-all`, `tsc` e o build do Vite sem erros.
 
-**Não fazer:** cortar, borrar ou editar as capas. Usar imagens que não tenham vindo do Spotify.
+**Não fazer:** mudar valores de cor, forma ou tipografia. Renomear `/spotify/callback`. Usar `useEffect`.
+
+**A confirmar:** o nome "Música" e a rota `/musica`.
 
 ---
 
-### Tópico 178 — Busca de capa por nome e preenchimento em segundo plano
+### Tópico 202 — Frontend — conexão do YouTube Music, importação do Takeout e status no Dashboard
 
-**O que existe hoje:** o arquivo básico não traz código de faixa, só nomes.
+**O que existe hoje:** o painel do Spotify (`PainelConexaoSpotify`) tem três estados (desconectada, conectada, reconectar), o modal de importação (`ModalUploadHistoricoSpotify`, com polling a cada 2,5 s) e o `StatusIntegracoes` do Dashboard mostra o Spotify. Nada disso existe para o YouTube Music.
 
-**Por que importa:** sem código, achar a capa exige busca por nome, que pode errar em remixes e títulos repetidos. E o preenchimento não pode travar a tela nem estourar o limite de requisições.
+**Por que importa:** é a porta de entrada do usuário para o novo serviço. Como a sessão do YouTube Music expira, a tela precisa deixar muito claro quando é preciso colar de novo, senão a coleta para sem aviso.
 
 **O que precisa acontecer:**
-- Busca por nome e artista (no máximo 10 resultados) conferindo o artista e a duração para escolher o resultado certo. Descartar quando nenhum resultado for convincente, em vez de aceitar o primeiro.
-- `BuscarImagemSpotifyMessage` com handler que só delega, novas tentativas com espera crescente e respeito ao `Retry-After`. Os pedidos devem ser espaçados para não esgotar o limite do modo de desenvolvimento.
-- Priorização: primeiro o que está na tela (mês aberto e Hoje e Semana), depois o resto do top, nunca todas as faixas do histórico.
-- Item não encontrado fica marcado (`nao_encontrada`) para não repetir a busca, e a tela mostra um placeholder neutro.
-- Aproveitar o código da faixa assim que ele aparecer (por exemplo, depois da coleta pela API ou de uma importação estendida) para trocar o resultado por busca de código.
+- **Painéis de conexão lado a lado:** dois cartões compactos no topo da página (Spotify e YouTube Music), mais o aviso de bloqueio do Spotify (tópico 187).
+- `PainelConexaoYoutubeMusic`:
+  - **Não conectado:** passo a passo para obter os cabeçalhos (janela anônima, entrar, copiar de uma requisição `browse`, fechar sem clicar em Sair), um campo grande de texto para colar e o aviso "Isto dá acesso à sua conta Google. Fica criptografado no servidor e não aparece de novo. Sair da conta no navegador invalida."
+  - **Conectado:** status, última consulta, última novidade e uma nota sobre a margem de erro do horário.
+  - **Reconectar:** alerta em destaque explicando que a sessão expirou, com o campo para colar uma nova.
+  - **Desconectar** com modal de confirmação dizendo o que é apagado (credencial) e o que fica (reproduções).
+- O campo colado **não é guardado** no navegador (nem em `localStorage`) e é limpo depois do envio.
+- **Modal do Takeout** (`ModalImportarTakeoutYoutube`, Dialog no desktop e Drawer no celular, via `useMediaQuery`): instruções em acordeão (como pedir só o histórico em JSON, quanto demora, conferir a exclusão automática), área de soltar `.zip` ou `.json`, aviso de privacidade (só o histórico é lido) e o acompanhamento por etapas: Lendo → **Aguardando confirmação** (números e custo estimado, botões Confirmar e Cancelar) → Classificando (progresso) → Concluída (relatório com músicas, mashups, compilações, não música, a revisar, período coberto e custo). Reaproveitar o aprendizado da M119: ao concluir, invalidar as consultas da página **menos** a de status da importação.
+- **Dashboard:** `StatusIntegracoes`, `types.ts` e `metricasDashboard.ts` ganham o item YouTube Music (neutro `nao_configurado`, verde `conectado`, vermelho `reconectar`) e o estado âmbar `bloqueado` do Spotify, com link para `/musica`.
+- **Selo de revisão:** na página, um selo "N itens para revisar" levando à tela do tópico 204, alimentado por `GET /api/v1/musica/identificacao/resumo`.
+- Hooks `useStatusYoutubeMusic`, `useConectarYoutubeMusic`, `useDesconectarYoutubeMusic`, `useImportacaoYoutube` e `useConfirmarImportacaoYoutube`, com funções em `api.ts`, esquemas Zod, toasts por `addToast` e erros por `extrairMensagemErroApi`.
+
+**Não fazer:** mostrar ou guardar o cookie. Disparar a IA sem a confirmação quando o custo passar do limite.
 
 ---
 
-### Tópico 179 — Frontend — estrutura da feature spotify (types, api, hooks)
+### Tópico 203 — Frontend — rankings, Cápsula e detalhes unificados com versões e mashups
 
-**O que existe hoje:** não há feature `spotify` em `web/features/`.
+**O que existe hoje:** as seções da página (`SecaoHojeSemana`, `SecaoCapsulaSonora`, `SecaoRecordes`, `SecaoEvolucaoMensal`, `SecaoHabitos`, `SecaoDescobertas`, `SecaoRetrospectiva`, `ItensRankingSpotify`) e as páginas de detalhe leem `/api/v1/spotify/...`. Cada linha do ranking mostra capa, título, artista, minutos e streams, e abre as músicas do artista ou do álbum.
 
-**Por que importa:** segue o padrão das demais features e mantém a página limpa de lógica.
+**Por que importa:** é aqui que o Gabriel vê o resultado: uma lista só, com o visual que ele gosta, onde cada música mostra de onde veio e, ao abrir, quais versões ouviu.
 
 **O que precisa acontecer:**
-- `web/features/spotify/` com `types.ts` (esquemas Zod para status, resumo, Cápsula, itens de ranking, importação e imagens), `api.ts` usando `@/config/api` (único cliente HTTP), `hooks/`, `components/`, `utils/` e `index.ts`.
-- Hooks TanStack Query: status da conexão, URL de autorização (mutation), concluir autorização (mutation), desconectar (mutation), resumo de Hoje e Semana, lista de meses da Cápsula, detalhe do mês, importações e envio do arquivo. Toasts de sucesso e erro dentro dos hooks, não no JSX.
-- Atualização automática: acompanhamento da importação a cada poucos segundos enquanto estiver processando (como o polling de 2,5 s do Downloads MP3), e novo carregamento das imagens enquanto houver itens sem capa.
-- O mês selecionado na Cápsula fica na URL, com o hook `useFiltrosUrl` (por exemplo `?mes=2026-06`), e a página usa `useSEO`.
-- `utils/`: formatação de minutos (horas e minutos), datas em português, nome do mês, montagem do CSV do resumo mensal. Nenhuma lógica pesada dentro de `.tsx`.
-- Sem `useEffect` e sem erros no Biome (`npm run check`).
+- Todas as seções passam a ler `/api/v1/musica/...` com a fonte do seletor. As rotas antigas de análise do Spotify são removidas do front.
+- **Linha do ranking** (`ItensRankingMusica`): capa, título principal, artistas, `GrupoIconesFonte`, minutos com `MinutosMusica` e streams, etiqueta "Mashup" quando for o caso. **Linha expansível** (`Collapsible`):
+  - Músicas: "Versões ouvidas neste período", cada uma com o tipo (slowed, lyrics, vídeo oficial e outros), o canal, streams, minutos e link para abrir.
+  - Mashups: "Contém", com os componentes, e os artistas creditados.
+  - Artistas e álbuns: as músicas mais ouvidas, como hoje, com o popup "Ver todas as músicas".
+- **Páginas de detalhe** de artista e de música (`DetalheArtistaMusica`, `DetalheMusicaMusica`), por `uuid`: gráfico de evolução mensal **empilhado por fonte**, lista de versões, mashups em que o artista aparece, e primeira e última vez por fonte.
+- **Efeito do seletor:** com `fonte = spotify` nada do YouTube aparece. Com `youtube_music`, o que só existe no Spotify (pulos e aleatório em Hábitos, "Tocando agora") mostra "indisponível para o YouTube Music". Com Todos, "Tocando agora" continua do Spotify e o YouTube Music ganha uma linha "Última detectada: título, há X min", sem prometer tempo real.
+- **Cápsula Sonora:** acompanha o seletor (padrão Todos), com a nota "Calibrada com o Spotify. Os minutos do YouTube Music são estimados." quando incluir o YouTube. O CSV e a imagem PNG seguem a mesma regra.
+- **Estados vazios por fonte:** por exemplo, "Nenhuma música do YouTube Music neste período" com o caminho para conectar ou importar.
+- **Imagens:** o polling de capas e fotos (`useImagensItensSpotify`) passa a aceitar URLs do catálogo para o YouTube e as fotos de artistas em fila.
+- Conferir no celular (390×844) sem rolagem horizontal. `make lint-all`, `tsc` e o build sem erros.
+
+**Não fazer:** cores fora da paleta nos gráficos. Prometer horário ou tempo exatos para o YouTube Music.
 
 ---
 
-### Tópico 180 — Frontend — paleta spotify, tokens e wrapper da página
+### Tópico 204 — Frontend — tela de revisão e correções do catálogo
 
-**O que existe hoje:** o `DESIGN.md` veta estilos únicos por página e hex, e restringe `full` a círculos e avatares.
+**O que existe hoje:** nenhuma tela de correção. Se a IA errar uma música, um artista ou uma versão, o dado errado fica nos relatórios.
 
-**Por que importa:** a página precisa ter a sensação do aplicativo do Spotify sem espalhar hex pelos componentes nem quebrar o tema do resto do sistema.
+**Por que importa:** a identificação automática vai errar em alguns itens (músicas obscuras, mashups ambíguos, canais novos). Sem uma forma simples de corrigir, a confiança nos números cai. O trabalho manual precisa ser pequeno e valer para sempre.
 
 **O que precisa acontecer:**
-- Escopo de tema só desta página, sem alterar os tokens globais. Estender o gerador de paleta (`scripts/gerar-paleta-brand.mjs`) com uma escala `spotify` com: fundo `#121212`, cartão `#1F1F1F`, cartão elevado e hover `#252525`, texto principal `#FFFFFF`, texto secundário `#B3B3B3`, texto desabilitado `#6A6A6A`, verde `#1ED760`, azul `#539DF5` e amarelo `#FEE44F`. Os hex só existem no gerador.
-- Uso das cores, como na Cápsula original: números de minutos e ações em verde; "Artista mais ouvido" em azul; "Música mais ouvida", títulos de seção e posições do ranking em amarelo; rótulos pequenos em cinza.
-- Tipografia: Inter, carregada só nesta página. Escala de partida: títulos 24 e 32 em peso 700, corpo 14 ou 16, legendas 11 ou 12 em maiúsculas, números de destaque grandes em peso 800 ou 900.
-- Formas: botões em pílula; cartões com 8px; capas com 4px (8px em tela grande); foto de artista circular. Essas são exceções ao guia de arredondamento do sistema e devem ser documentadas.
-- A página é sempre escura, independente do tema claro ou escuro do sistema. Sidebar e Header continuam do sistema.
-- Interações: hover dos cartões de `#1F1F1F` para `#252525`, foco visível e transições de cor, como exige o guia.
-- Contraste conferido: todas as cores de texto passam de 5:1 sobre os fundos escuros, exceto o cinza desabilitado, que só serve para itens desabilitados.
-- Wrapper `TemaSpotify` aplicado só na página. Registrar a exceção no `DESIGN.md`, explicando que a paleta é gerada e escopada.
+- Rota `/musica/revisao` (com link na página e o selo do tópico 202), página `RevisaoMusica` com abas: **Sem vínculo**, **Ambíguos**, **Compilações**, **Canais novos**, **Possíveis duplicadas** e **Indisponíveis**, cada uma com a contagem.
+- **Cartão de item:** miniatura, título e canal originais, duração, link "Abrir no YouTube", a sugestão da IA com a confiança e as alternativas (por exemplo, as duas leituras de "Renegade"). Ações: **Confirmar sugestão**, **Escolher música** (busca no catálogo ou criar nova com título e artista), **Marcar como mashup** (editor de componentes com título e artistas), **Não é música**, e **Este canal é sempre música / nunca é música**.
+- **Aba Canais novos:** lista de canais ainda sem regra, em ordem de quantas reproduções têm ("37 reproduções neste canal"), para que um clique resolva muitos vídeos.
+- **Compilações:** escolher entre tratar como "não é música", como mashup ou informar os artistas.
+- **Unir e separar:** a partir do detalhe da música, as ações "Unir com outra música…" (com busca) e "Separar esta versão". Nos artistas, "Unir com outro artista" (cria o alias).
+- **Ação em lote:** selecionar vários itens e definir a mesma música.
+- Atualização otimista e invalidação das consultas de música depois de cada correção. Teclado e foco tratados. No celular, os modais viram `Drawer`, sem modal dentro de modal.
+- Visual do tema da página de música. Hooks de revisão com TanStack Query e esquemas Zod.
 
-**Não fazer:** hex fora do gerador, `className`, o logo do Spotify como se fosse do CirqueiraX, e imitar a identidade do Spotify no logo e no nome do sistema.
-
-**A confirmar:** a página ser sempre escura (proposta) e o mecanismo exato de escopo de tema, olhando `web/config/theme/`.
+**Não fazer:** apagar dados originais. Abrir modal sobre modal.
 
 ---
 
-### Tópico 181 — Frontend — vincular, retornar do Spotify, reconectar e desconectar
+### Tópico 205 — Teste end-to-end com dados reais, calibração e documentação
 
-**O que existe hoje:** o Google Fotos usa um modal com copia-e-cola do código, feito para `localhost`.
+**O que existe hoje:** o lote inteiro só foi validado com fixtures e bancos descartáveis. Muitas constantes (janela de 600 s, limiar de confiança, limite de componentes, categorias, regra dos 20 minutos, intervalo da coleta) são propostas.
 
-**Por que importa:** com o sistema em HTTPS o retorno pode ser direto, e o vínculo vira um botão simples, igual ao de sites de estatísticas do Spotify.
-
-**O que precisa acontecer:**
-- Botão "Vincular ao Spotify" que chama `oauth/url` e redireciona a janela inteira para o Spotify. Depois do "Aceito", o Spotify devolve o usuário para `/spotify/callback?code=...&state=...`.
-- Rota protegida `/spotify/callback` registrada em `App.tsx`, que conclui sozinha com `useMountEffect` (sem `useEffect`) chamando `oauth/concluir`, e então leva a `/spotify`, já conectada. Sem copiar nem colar nada.
-- Tratamento de retorno com erro: o usuário clicou em "Cancelar" na tela do Spotify (parâmetro de erro na URL), `state` inválido ou expirado, e conta fora da lista de usuários do modo de desenvolvimento. Cada caso com mensagem clara e botão para tentar de novo.
-- Estados da conexão: desconectada (só o botão), conectada (nome e foto da conta e data da conexão) e "reconectar" (aviso e botão). Reconectar usa o mesmo fluxo.
-- Botão "Desconectar" com confirmação explicando que os dados coletados pela API serão apagados, que os importados do arquivo permanecem, e lembrando que o acesso também pode ser removido nas configurações da conta do Spotify.
-- O botão e o estado de conexão seguem o visual da página (tópico 180). A referência de composição do botão verde com brilho vem do site de estatísticas que o usuário mostrou, só como inspiração.
-
-**Não fazer:** modal de copia-e-cola. Pedir escopos além dos do tópico 161.
-
----
-
-### Tópico 182 — Frontend — importação do arquivo de histórico
-
-**O que existe hoje:** não há tela para enviar o histórico exportado.
-
-**Por que importa:** é o que traz os meses passados para dentro do sistema, e é a única forma de corrigir os minutos estimados pela API.
+**Por que importa:** todos os números do lote dependem do comportamento real do YouTube e dos dados do Gabriel. Fechar sem testar com dados reais seria entregar um relatório bonito com números sem prova.
 
 **O que precisa acontecer:**
-- Modal de upload (arrastar ou escolher o ZIP ou JSON), no padrão do `ModalUploadLivro`, que vira Drawer no celular.
-- Instruções de como pedir os dados na conta do Spotify: em Privacidade da conta, "Dados da conta" (prazo de cerca de 5 dias, inclui o histórico do último ano) e, se quiser a vida toda da conta, "Histórico ampliado de streams" (prazo de até 30 dias). Informar que as "Informações técnicas de registro" não são necessárias.
-- Aviso de privacidade: o ZIP contém outros dados pessoais, e o sistema lê só o histórico de streams e descarta o resto.
-- Barra de progresso e resumo do resultado quando concluir: lidos, novos, ignorados e substituídos. Se houver erro, mostrar o motivo.
-- Aviso de que o arquivo pode repetir meses já importados e que isso não duplica.
-- Lembrete discreto de que os dias entre o pedido do arquivo e a conexão da coleta só se fecham com um segundo pedido depois.
+- **Coleta ao vivo:** o Gabriel toca de 5 a 10 músicas, incluindo versões slowed da mesma música, um mashup, uma repetição e uma pulada. Conferir o que entrou, a margem do horário, o agrupamento das versões, o mashup como música própria e os artistas creditados.
+- **Takeout real:** importar o arquivo, conferir o relatório (lidos, únicos, músicas, mashups, compilações, não música, a revisar, indisponíveis), o tamanho da fila de revisão, o custo real contra o estimado, e ajustar as constantes. Registrar a taxa de acerto da IA numa amostra de **100 títulos reais** (inclusive português e gospel) e a de confirmação pela busca.
+- **Mistura entre serviços:** amostra de 30 músicas ouvidas nos dois serviços, verificando duplicatas falsas e uniões erradas.
+- **Paridade:** com `fonte = spotify`, os números do Spotify permanecem idênticos aos de antes (abril, maio e junho de 2026 e o comando de paridade do tópico 199 com zero diferença).
+- **Outubro de 2025:** ver o mês combinado (Spotify mais YouTube), se o histórico do Google ainda o tiver.
+- **Rede do trabalho:** a página abre e a coleta do YouTube Music continua sendo do servidor.
+- **Cookie vencido:** invalidar a sessão de propósito e conferir que o estado `reconectar` aparece no painel e no Dashboard em poucos minutos, e que colar uma nova retoma a coleta sem perder reproduções.
+- **Bloqueio do Spotify:** simular um bloqueio e conferir o aviso e a pausa da coleta e da busca de artistas.
+- **Celular:** a página, o seletor, o modal do Takeout e a revisão.
+- **Documentação:** `MUSICA.md` (página unificada, fontes, regras, estimativas, revisão) e `YOUTUBE_MUSIC.md` (coleta, cookie, Takeout, limites); atualizar `SPOTIFY.md`, `FUNCIONALIDADES_DO_SISTEMA.md`, `CIRQUEIRAX.md`, `DASHBOARD.md`, `MULTIUSUARIO.md`, `DESIGN.md` (seção 24), `stack/BACKEND.md`, `stack/FRONTEND.md`, `stack/MESSENGER.md`, `stack/AUTH.md` e `stack/DOCUMENTACAO_TECNICA.md` (`YOUTUBE_API_KEY` e os parâmetros de preço). Depois, `make progresso`.
+- **Fechamento:** `make lint-all`, `make doctrine-validate`, `tsc`, Biome e o build. Confirmar que o coletor de teste, a pasta `/root/ytmusic_teste` e as credenciais do teste (`.env`, Google Cloud e acesso de terceiros) foram removidos.
 
----
-
-### Tópico 183 — Frontend — página /spotify com Hoje, Semana e Curiosidades
-
-**O que existe hoje:** não há página nem item no menu para o Spotify.
-
-**Por que importa:** é a porta de entrada da funcionalidade e a parte que muda todo dia.
-
-**O que precisa acontecer:**
-- `Spotify.tsx` em `web/features/spotify/`, com rota lazy em `App.tsx` (via `lazyWithRetry`), item "Spotify" na `Sidebar.tsx` e título da rota no `Header.tsx`. A página usa o `AppContainer` e não monta Header nem Footer próprios.
-- Estrutura da página, de cima para baixo: estado da conexão e ações (vincular, importar, desconectar); Hoje e Semana; Curiosidades; seção "Cápsula Sonora" (tópico 184).
-- Hoje e Semana: alternância "Hoje | Semana" e abas "Músicas | Artistas" (sem "Gêneros"), com lista de posição, capa ou foto, nome, artista e valor (minutos ou reproduções), mais o gráfico de minutos por dia em Recharts nas cores da paleta.
-- Curiosidades em cartões pequenos, com os itens do tópico 176.
-- Cartão "Tocando agora" só se o escopo opcional for ativado no tópico 161.
-- Estados de carregamento com `Subflow` que replica a estrutura do conteúdo (nunca spinner isolado). Estado vazio quando não conectada ou sem dados, com o botão de vincular e de importar.
-- Rodapé de atribuição com o logo do Spotify, em tamanho e área de respiro conforme as diretrizes de marca, e o link "Abrir no Spotify". As capas aparecem inteiras, sem texto nem controles por cima.
-- Mobile-first: uma coluna no celular.
-- Nenhuma lógica de cálculo ou parsing dentro do `.tsx`: tudo em `utils/`.
-
----
-
-### Tópico 184 — Frontend — seção Cápsula Sonora com seletor de mês
-
-**O que existe hoje:** a Cápsula não existe mais no aplicativo do Spotify. Só restam os prints do usuário, que servem de modelo visual.
-
-**Por que importa:** é o objetivo central da funcionalidade: rever o mês atual e os anteriores como antes, inclusive meses que o usuário perdeu.
-
-**O que precisa acontecer:**
-- Título "Sua Cápsula sonora", com o mês em destaque e o ano em cinza (por exemplo, "junho 2026"), e um seletor de mês com o mês atual e os anteriores. O mês escolhido fica na URL (tópico 179). O mês atual aparece como "em andamento".
-- Cartões como nos prints:
-  - Tempo ouvindo: o número de minutos em verde e grande (por exemplo, "10.956 minutos").
-  - Artista mais ouvido: o nome em azul, com a foto do artista em círculo e o selo de movimento quando existir.
-  - Música mais ouvida: o título em amarelo, com a capa inteira.
-  - Um cartão visual com as capas do top ou a foto grande do artista, como nos prints de maio e junho.
-- Cada cartão leva a um detalhe, como a Cápsula original (a seta no canto do cartão): "Músicas mais ouvidas" com o título "Você ouviu N músicas diferentes esse mês" e a comparação com o mês anterior (por exemplo, "em comparação a 1.303 músicas em maio, +29%"), o ranking com posição em amarelo, capa, nome, artistas e número de streams, a seta de subida ou descida e "N meses no top 5"; a lista de artistas; e o tempo ouvindo com os minutos por dia em gráfico.
-- Capas sem recorte, sem texto, logo ou controles por cima, com cantos de 4px (8px em tela grande). Link "Abrir no Spotify" em cada faixa e artista.
-- Botão para exportar o resumo do mês em CSV (mês, minutos, músicas diferentes, top músicas com streams e top artistas), gerado no frontend por utilitário.
-- Mobile-first. Estado vazio para mês sem dados. Imagens que ainda estão sendo buscadas aparecem com placeholder e atualizam sozinhas.
-- Segue os tokens e as exceções do tópico 180.
-
-**Não fazer:** o botão de compartilhar da Cápsula original (fora do escopo). Alterar as capas de qualquer forma.
-
----
-
-### Tópico 185 — Calibração com os prints, teste end-to-end e documentação atualizada
-
-**O que existe hoje:** os cálculos não foram comparados com nenhum número real.
-
-**Por que importa:** os prints da Cápsula são o gabarito. Se o cálculo reproduzir esses números, os meses sem print (agosto em diante) merecem confiança.
-
-**O que precisa acontecer:**
-- Importar os arquivos do usuário e comparar com os prints:
-  - Abril de 2026: 15.387 minutos; 1.824 músicas diferentes (março teve 1.555, +17%); artista mais ouvido Yasuharu Takanashi. Top 5: "You're Somebody Else - Nikodem Milewski Remix" (flora cash) 56 streams; "Ao Vivo E A Cores" (Matheus & Kauan, Anitta) 35; "Fourth of July" (Sufjan Stevens) 30, com "1 mês no top 5"; "Her" (The American Dawn) 30; "Hot Blooded" (New Constellations) 29.
-  - Maio de 2026: 10.766 minutos; artista mais ouvido Alan Walker (com o selo de subida de 2 posições); música mais ouvida "Friends" (Chase Atlantic).
-  - Junho de 2026: 10.956 minutos; 1.677 músicas diferentes (maio teve 1.303, +29%); artista mais ouvido Hans Zimmer. Top 5: "You Don't Own Me (feat. G-Eazy)" (SAYGRACE, G-Eazy) 43 streams; "You Are Not Alone" (Michael Jackson) 19; "All For Us" (Labrinth, Zendaya) 19; "Nostalgia - Slowed" (plenka) 18; "Heaven Can Wait" (Michael Jackson) 18.
-- Critério de aceite proposto: minutos e contagens iguais ou com diferença pequena e explicada (por exemplo, até 1%), mesmo top 5 (empates podem trocar de ordem até a regra de desempate estar definida) e mesmos artistas mais ouvidos.
-- Ajustar o corte de stream (30 s), o fuso, o desempate, a contagem de artistas e a janela de tolerância da deduplicação se divergir, registrando o motivo de cada ajuste no tópico 174.
-- Validar os fluxos de ponta a ponta: vincular, voltar do Spotify, coleta de 30 em 30 minutos, importação do arquivo básico, reimportação sem duplicar, substituição das estimativas pelos tempos exatos, reconectar, desconectar com limpeza dos dados da API, capas e fotos, página e exportação em CSV, no desktop e no celular.
-- Rodar `make lint-all`, `make doctrine-validate` e o build do frontend sem erros.
-- Documentar: `documentation/funcionalidades/SPOTIFY.md` (novo: o que faz, como conectar, como pedir e importar os dados, limitações, regras do Spotify e calibração), `FUNCIONALIDADES_DO_SISTEMA.md` (descrição para o usuário final), `CIRQUEIRAX.md` (185 tópicos concluídos), `BACKEND.md` (rotas, entidades, enums e comandos), `FRONTEND.md` (rotas `/spotify` e `/spotify/callback`), `MESSENGER.md` (novas mensagens e fila), `AUTH.md` (OAuth do Spotify na tabela de mecanismos), `DOCUMENTACAO_TECNICA.md` (variáveis de ambiente) e `DESIGN.md` (a exceção da página do Spotify).
+**Não fazer:** marcar o lote como concluído sem as verificações com dados reais. Alterar constantes sem registrar o motivo no `MUSICA.md`.

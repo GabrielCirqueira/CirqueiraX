@@ -127,3 +127,58 @@
   - `documentation/stack/MESSENGER.md`
   - `documentation/stack/AUTH.md`
   - `documentation/stack/DOCUMENTACAO_TECNICA.md`
+
+### ✅ Tópico 186 — Preparação — decisões, limpeza do teste e verificações antes de construir
+- **Status**: Concluído (com pendências do Gabriel registradas no documento)
+- **O que foi feito**:
+  - Criação de [`MUSICA.md`](../funcionalidades/MUSICA.md) com objetivo do lote, tabela de decisões, regras de dados, segurança da credencial, evidências dos testes, pendências do Gabriel, plano de limpeza e fora do escopo. Link adicionado em `documentation/README.md`.
+  - Decisões abertas registradas com a proposta padrão do roadmap: página **Música** em `/musica`; tempo ouvido em "Todos" soma medido e estimado com a marca "inclui estimativas"; `LIMITE_COMPONENTES_MASHUP = 5`; Cápsula acompanha o seletor de fonte; desconectar o YouTube Music apaga só a credencial e mantém as reproduções.
+  - Remoção de `YTMUSIC_CLIENT_ID` e `YTMUSIC_CLIENT_SECRET` do `.env` do servidor (arquivo fora do Git; nenhuma referência no código).
+  - Nova evidência registrada: o segundo cookie do teste funcionou das 07h46 até cerca de 08h10 e depois o coletor só recebeu `YTMusicServerError: None`. O tópico 192 precisa tratar esse erro repetido como sessão expirada.
+- **Pendências do Gabriel** (bloco no `MUSICA.md`): pedir o Google Takeout em JSON; conferir a exclusão automática no `myactivity.google.com`; ler as diretrizes de marca do Spotify; medir o atraso do histórico com 5 plays anotados (precisa de cookie válido no coletor de teste); apagar o cliente OAuth do teste no Google Cloud e revogar o acesso de terceiros; confirmar as decisões padrão.
+- **Limpeza adiada**: o contêiner `ytmusic_teste_coletor` e `/root/ytmusic_teste` só saem depois do tópico 192 em produção.
+- **Arquivos**:
+  - `documentation/funcionalidades/MUSICA.md`
+  - `documentation/README.md`
+
+### ⏳ Tópico 187 — Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player
+- **Status**: Pendente
+
+### ⏳ Tópico 188 — Infra — cliente do YouTube Music com ytmusicapi por processo
+- **Status**: Pendente
+
+### ⏳ Tópico 189 — Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration
+- **Status**: Pendente
+
+### ⏳ Tópico 190 — Conexão do YouTube Music — serviços, endpoints e status no Dashboard
+- **Status**: Pendente
+
+### ⏳ Tópico 191 — Entidades — vídeo, reprodução, catálogo canônico e regra de canal
+- **Status**: Pendente
+
+### ⏳ Tópico 192 — Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler
+- **Status**: Pendente
+
+### ⏳ Tópico 193 — Infra — YouTube Data API em lote para categoria, duração e descrição
+- **Status**: Pendente
+
+### ⏳ Tópico 194 — Infra — identificador de músicas por IA com resposta estruturada e registro de custo
+- **Status**: Pendente
+
+### ⏳ Tópico 195 — Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão
+- **Status**: Pendente
+
+### ⏳ Tópico 196 — Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints
+- **Status**: Pendente
+
+### ⏳ Tópico 197 — Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta
+- **Status**: Pendente
+
+### ⏳ Tópico 198 — Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido
+- **Status**: Pendente
+
+### ⏳ Tópico 199 — Leitura unificada — projeção das reproduções e paridade com os números do Spotify
+- **Status**: Pendente
+
+### ⏳ Tópico 200 — Endpoints unificados /api/v1/musica com filtro de fonte
+- **Status**: Pendente

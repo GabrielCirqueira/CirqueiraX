@@ -15,6 +15,7 @@
 > - **Tópicos 141+** → [PROGRESSO_ROADMAP_8.md](PROGRESSO_ROADMAP_8.md)
 > - **Tópicos 161+** → [PROGRESSO_ROADMAP_9.md](PROGRESSO_ROADMAP_9.md)
 > - **Tópicos 181+** → [PROGRESSO_ROADMAP_10.md](PROGRESSO_ROADMAP_10.md)
+> - **Tópicos 201+** → [PROGRESSO_ROADMAP_11.md](PROGRESSO_ROADMAP_11.md)
 
 | ID | Tarefa | Status | Documentação |
 |---|---|---|---|
@@ -203,3 +204,23 @@
 | 183 | Frontend — página /spotify com Hoje, Semana e Curiosidades | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 184 | Frontend — seção Cápsula Sonora com seletor de mês | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 185 | Calibração com os prints, teste end-to-end e documentação atualizada | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 186 | Preparação — decisões, limpeza do teste e verificações antes de construir | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
+| 187 | Spotify — proteger a coleta dos bloqueios 429 e remover o que sobrou do teste do player | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 188 | Infra — cliente do YouTube Music com ytmusicapi por processo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 189 | Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 190 | Conexão do YouTube Music — serviços, endpoints e status no Dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 191 | Entidades — vídeo, reprodução, catálogo canônico e regra de canal | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 192 | Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 193 | Infra — YouTube Data API em lote para categoria, duração e descrição | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 194 | Infra — identificador de músicas por IA com resposta estruturada e registro de custo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 195 | Serviço de identificação — música, mashup, compilação, confirmação pela busca e revisão | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 196 | Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 197 | Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 198 | Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 199 | Leitura unificada — projeção das reproduções e paridade com os números do Spotify | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 200 | Endpoints unificados /api/v1/musica com filtro de fonte | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 201 | Frontend — renomear a página, tema, seletor de fonte e ícones de origem | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_11.md) |
+| 202 | Frontend — conexão do YouTube Music, importação do Takeout e status no Dashboard | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_11.md) |
+| 203 | Frontend — rankings, Cápsula e detalhes unificados com versões e mashups | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_11.md) |
+| 204 | Frontend — tela de revisão e correções do catálogo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_11.md) |
+| 205 | Teste end-to-end com dados reais, calibração e documentação | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_11.md) |
