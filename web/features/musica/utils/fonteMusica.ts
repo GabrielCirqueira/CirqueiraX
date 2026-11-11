@@ -81,3 +81,11 @@ export function textosEstadoVazioMusica(
     mostrarImportacaoSpotify: true,
   }
 }
+
+const ID_CONEXAO_YOUTUBE_MUSIC = 'conexao-youtube-music'
+
+export function rolarParaConexaoYoutubeMusic(): void {
+  document
+    .getElementById(ID_CONEXAO_YOUTUBE_MUSIC)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}

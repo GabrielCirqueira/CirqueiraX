@@ -25,10 +25,12 @@ import { ModalConfirmarDesconexao } from './ModalConfirmarDesconexao'
 
 export interface PainelConexaoSpotifyProps {
   onAbrirModalImportacao?: () => void
+  compacto?: boolean
 }
 
 export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
   onAbrirModalImportacao,
+  compacto = false,
 }: PainelConexaoSpotifyProps) {
   const { data: status, isLoading } = useStatusSpotify()
   const obterUrlMutation = useObterUrlAutorizacaoSpotify()
@@ -84,10 +86,11 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
         borderColor="cirqueira.musica.cartaoElevado"
         transition="all 0.2s ease"
         boxShadow="0 4px 20px rgba(0, 0, 0, 0.3)"
+        h="full"
       >
         <Flex
-          direction={{ base: 'column', md: 'row' }}
-          align={{ base: 'flex-start', md: 'center' }}
+          direction={compacto ? 'column' : { base: 'column', md: 'row' }}
+          align={compacto ? 'flex-start' : { base: 'flex-start', md: 'center' }}
           justify="space-between"
           gap={4}
         >
@@ -204,8 +207,8 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
             wrap="wrap"
             align="center"
             gap={3}
-            w={{ base: 'full', md: 'auto' }}
-            justify={{ base: 'flex-start', md: 'flex-end' }}
+            w={compacto ? 'full' : { base: 'full', md: 'auto' }}
+            justify={compacto ? 'flex-start' : { base: 'flex-start', md: 'flex-end' }}
           >
             {onAbrirModalImportacao && (
               <Button
@@ -224,7 +227,7 @@ export const PainelConexaoSpotify = memo(function PainelConexaoSpotify({
               >
                 <HStack gap={2}>
                   <Upload size={14} />
-                  <Text as="span">Importar histórico</Text>
+                  <Text as="span">Importar histórico do Spotify</Text>
                 </HStack>
               </Button>
             )}

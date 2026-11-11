@@ -2,9 +2,12 @@ import { CartaoTocandoAgora } from '@/features/spotify/components/CartaoTocandoA
 import { ModalUploadHistoricoSpotify } from '@/features/spotify/components/ModalUploadHistoricoSpotify'
 import { PainelConexaoSpotify } from '@/features/spotify/components/PainelConexaoSpotify'
 import { useStatusSpotify } from '@/features/spotify/hooks/useStatusSpotify'
+import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
+import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
+import { SeloRevisaoMusica } from '@/features/youtube-music/components/SeloRevisaoMusica'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
-import { Container, Flex, Heading, Text, VStack } from '@chakra-ui/react'
+import { Container, Flex, HStack, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import {
   EsqueletoPaginaMusica,
@@ -22,7 +25,12 @@ import {
   TemaMusica,
 } from './components'
 import { useFonteMusica, useImagensMusica, useResumoMusica } from './hooks'
-import { deveMostrarEstadoVazioMusica, listarChavesImagensResumo, resumoTemDados } from './utils'
+import {
+  deveMostrarEstadoVazioMusica,
+  listarChavesImagensResumo,
+  resumoTemDados,
+  rolarParaConexaoYoutubeMusic,
+} from './utils'
 
 export function Musica() {
   useSEO({
@@ -32,6 +40,7 @@ export function Musica() {
   })
 
   const [modalImportacaoAberto, setModalImportacaoAberto] = useState(false)
+  const [modalTakeoutAberto, setModalTakeoutAberto] = useState(false)
   const { fonte } = useFonteMusica()
 
   const { data: status, isLoading: carregandoStatus } = useStatusSpotify()
@@ -52,7 +61,15 @@ export function Musica() {
       <AppContainer>
         <Container maxW="6xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
           <VStack gap={{ base: 6, md: 10 }} align="stretch" w="full">
-            <PainelConexaoSpotify onAbrirModalImportacao={() => setModalImportacaoAberto(true)} />
+            <SimpleGrid columns={{ base: 1, lg: 2 }} gap={4} alignItems="stretch">
+              <PainelConexaoSpotify
+                compacto
+                onAbrirModalImportacao={() => setModalImportacaoAberto(true)}
+              />
+              <PainelConexaoYoutubeMusic
+                onAbrirModalImportacao={() => setModalTakeoutAberto(true)}
+              />
+            </SimpleGrid>
 
             <Flex
               justify="space-between"
@@ -73,7 +90,10 @@ export function Musica() {
                   Spotify e YouTube Music no mesmo lugar.
                 </Text>
               </VStack>
-              <SeletorFonteMusica />
+              <HStack gap={3} wrap="wrap">
+                <SeloRevisaoMusica />
+                <SeletorFonteMusica />
+              </HStack>
             </Flex>
 
             {carregandoStatus ? (
@@ -83,6 +103,7 @@ export function Musica() {
                 conectada={conectada}
                 fonte={fonte}
                 onAbrirModalImportacao={() => setModalImportacaoAberto(true)}
+                onConectarYoutubeMusic={rolarParaConexaoYoutubeMusic}
               />
             ) : (
               <>
@@ -118,6 +139,11 @@ export function Musica() {
       <ModalUploadHistoricoSpotify
         aberto={modalImportacaoAberto}
         onFechar={() => setModalImportacaoAberto(false)}
+      />
+
+      <ModalImportarTakeoutYoutube
+        aberto={modalTakeoutAberto}
+        onFechar={() => setModalTakeoutAberto(false)}
       />
     </TemaMusica>
   )

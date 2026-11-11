@@ -6,6 +6,7 @@ import type {
   OrigemMedia,
   ResumoDashboard,
   ResumoSpotifyDashboard,
+  ResumoYoutubeMusicDashboard,
   StatusMediaItem,
 } from '../types'
 
@@ -241,6 +242,7 @@ export interface EstadoServicos {
   totalCategorias: number
   tamanhoTotal: string
   spotify?: ResumoSpotifyDashboard | null
+  youtubeMusic?: ResumoYoutubeMusicDashboard | null
 }
 
 export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[] {
@@ -313,7 +315,41 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
     })
   }
 
+  servicos.push(montarServicoYoutubeMusic(estado.youtubeMusic))
+
   return servicos
+}
+
+function montarServicoYoutubeMusic(youtube?: ResumoYoutubeMusicDashboard | null): LinhaServico {
+  if (youtube?.estado === 'reconectar') {
+    return {
+      nome: 'YouTube Music',
+      detalhe: youtube.motivoErro ?? 'A sessão expirou. Cole os cabeçalhos de novo.',
+      estado: 'Reconectar',
+      tom: 'erro',
+      rota: youtube.rota,
+    }
+  }
+
+  if (youtube?.estado === 'conectado') {
+    return {
+      nome: 'YouTube Music',
+      detalhe: youtube.ultimaConsultaEm
+        ? `Última consulta ${tempoRelativoCurto(youtube.ultimaConsultaEm)}`
+        : 'Aguardando a primeira consulta',
+      estado: 'Conectado',
+      tom: 'sucesso',
+      rota: youtube.rota,
+    }
+  }
+
+  return {
+    nome: 'YouTube Music',
+    detalhe: 'Conecte para registrar o que você ouve',
+    estado: 'Não configurado',
+    tom: 'neutro',
+    rota: '/musica',
+  }
 }
 
 export function filtrarCategorias(

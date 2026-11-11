@@ -8,6 +8,7 @@ use App\Controller\Common\DefaultController;
 use App\DataObject\YoutubeMusic\UploadImportacaoYoutubeDTO;
 use App\Entity\Usuario;
 use App\Serializer\ImportacaoYoutubeSerializer;
+use App\Service\YoutubeMusic\Importacao\CancelarClassificacaoImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\ConfirmarImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\ConsultarImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\IniciarImportacaoYoutubeService;
@@ -23,6 +24,7 @@ final class YoutubeImportacaoController extends DefaultController
         private readonly IniciarImportacaoYoutubeService $iniciarService,
         private readonly ConsultarImportacaoYoutubeService $consultarService,
         private readonly ConfirmarImportacaoYoutubeService $confirmarService,
+        private readonly CancelarClassificacaoImportacaoYoutubeService $cancelarService,
         private readonly ImportacaoYoutubeSerializer $serializer,
     ) {
     }
@@ -45,5 +47,11 @@ final class YoutubeImportacaoController extends DefaultController
     public function confirmar(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
         return $this->success($this->serializer->serializar($this->confirmarService->executar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/cancelar', name: 'cancelar', methods: ['POST'])]
+    public function cancelar(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->serializer->serializar($this->cancelarService->executar($uuid, $usuario)));
     }
 }

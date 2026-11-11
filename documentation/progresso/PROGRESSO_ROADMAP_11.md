@@ -23,8 +23,24 @@
   - `web/features/dashboard/components/BarraAcoesRapidas.tsx`, `web/features/dashboard/utils/metricasDashboard.ts`
   - `web/config/theme/theme.ts`, `scripts/gerar-paleta-brand.mjs`, `documentation/guias/DESIGN.md`
 
-### ⏳ Tópico 202 — Frontend — conexão do YouTube Music, importação do Takeout e status no Dashboard
-- **Status**: Pendente
+### ✅ Tópico 202 — Frontend — conexão do YouTube Music, importação do Takeout e status no Dashboard
+- **Status**: Concluído
+- **O que foi feito**:
+  - Nova feature `web/features/youtube-music/` (types com Zod, api, hooks `useStatusYoutubeMusic`, `useConectarYoutubeMusic`, `useDesconectarYoutubeMusic`, `useIniciarImportacaoYoutube`/`useImportacaoYoutube`, `useConfirmarImportacaoYoutube`/`useCancelarClassificacaoYoutube`, `useResumoIdentificacao`; toasts por `addToast` e erros por `extrairMensagemErroApi`).
+  - Topo da página com os dois cartões lado a lado (Spotify em modo compacto, com o aviso de bloqueio do tópico 187, e YouTube Music).
+  - `PainelConexaoYoutubeMusic` com os três estados: não conectado (passo a passo, campo grande para colar e o aviso sobre a conta Google), conectado (reproduções registradas, última consulta, última novidade e a nota da margem do horário) e reconectar (alerta em destaque e o campo de novo). O texto colado fica só no estado do componente, é limpo no envio e nunca vai para `localStorage`. Desconectar abre `ModalDesconectarYoutubeMusic`, que diz o que é apagado (credencial) e o que fica (reproduções).
+  - `ModalImportarTakeoutYoutube` (Dialog no desktop, Drawer no celular por `useMediaQuery`): instruções em acordeão, área de soltar `.zip`/`.json`, aviso de privacidade e as etapas Lendo → Aguardando confirmação (números, custo estimado, Confirmar e Cancelar) → Classificando (progresso) → Concluída (relatório com músicas, mashups, compilações, não música, a revisar, indisponíveis, período coberto e custo). Ao concluir invalida as consultas de música, status, identificação e Dashboard, menos a da própria importação.
+  - Backend: `POST /api/v1/youtube-music/importacoes/{uuid}/cancelar` (`CancelarClassificacaoImportacaoYoutubeService`, `ImportacaoYoutube::pularClassificacao`): só vale com a importação aguardando confirmação, pula a IA, calcula o tempo e conclui; os vídeos sem identificação ficam pendentes para a revisão.
+  - Dashboard: `StatusIntegracoes`, `types.ts` e `metricasDashboard.ts` com o item YouTube Music (neutro `nao_configurado`, verde `conectado`, vermelho `reconectar`), link para `/musica`. O estado âmbar `Bloqueado` do Spotify já existia e agora leva a `/musica`.
+  - `SeloRevisaoMusica` ("N itens para revisar") ao lado do seletor de fonte, alimentado por `GET /api/v1/musica/identificacao/resumo`, com link para `/musica/revisao` (tela do tópico 204).
+  - O estado vazio ganhou o botão "Conectar o YouTube Music", que rola até o cartão.
+- **Diferença do roadmap**: o "Cancelar" da confirmação não apaga a importação; pula a IA e deixa os vídeos para a revisão, para não perder as reproduções lidas. Sem teste no navegador, porque o login não é automatizado aqui.
+- **Verificação**: `tsc` sem erros novos, Biome, build do Vite, PHPStan e `lint:container`.
+- **Arquivos**:
+  - `web/features/youtube-music/` (todos)
+  - `web/features/musica/Musica.tsx`, `web/features/musica/utils/fonteMusica.ts`, `web/features/spotify/components/PainelConexaoSpotify.tsx`
+  - `web/features/dashboard/types.ts`, `web/features/dashboard/utils/metricasDashboard.ts`, `web/features/dashboard/components/StatusIntegracoes.tsx`
+  - `src/Controller/YoutubeMusic/YoutubeImportacaoController.php`, `src/Service/YoutubeMusic/Importacao/CancelarClassificacaoImportacaoYoutubeService.php`, `src/Entity/ImportacaoYoutube.php`
 
 ### ⏳ Tópico 203 — Frontend — rankings, Cápsula e detalhes unificados com versões e mashups
 - **Status**: Pendente

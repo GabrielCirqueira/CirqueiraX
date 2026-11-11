@@ -60,6 +60,16 @@ export interface ResumoSpotifyDashboard {
   motivoErro: string | null
 }
 
+export interface ResumoYoutubeMusicDashboard {
+  estado: 'nao_configurado' | 'conectado' | 'reconectar'
+  nomeConta: string | null
+  ultimaConsultaEm: string | null
+  ultimaNovidadeEm: string | null
+  motivoErro: string | null
+  totalReproducoesColetadas: number
+  rota: string
+}
+
 export interface ResumoDashboard {
   status?: Record<StatusMediaItem, number>
   porStatus?: Record<StatusMediaItem, number>
@@ -74,6 +84,7 @@ export interface ResumoDashboard {
   ultimasMidias?: MidiaRecenteDashboard[]
   metricasVideos?: MetricasVideosDashboard
   spotify?: ResumoSpotifyDashboard
+  youtubeMusic?: ResumoYoutubeMusicDashboard
 }
 
 export interface CategoriaMetrica {

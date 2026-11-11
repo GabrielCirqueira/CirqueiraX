@@ -19,11 +19,11 @@ export interface StatusIntegracoesProps {
 
 const COR_INDICADOR: Record<TomMetrica, string> = {
   neutro: 'fg.subtle',
-  sucesso: 'cirqueira.spotify.verde',
-  alerta: 'cirqueira.spotify.amarelo',
+  sucesso: 'cirqueira.musica.verde',
+  alerta: 'cirqueira.musica.amarelo',
   erro: 'cirqueira.red.500',
   destaque: 'cirqueira.brand.400',
-  info: 'cirqueira.spotify.azul',
+  info: 'cirqueira.musica.azul',
 }
 
 export const StatusIntegracoes = memo(function StatusIntegracoes({
@@ -43,6 +43,7 @@ export const StatusIntegracoes = memo(function StatusIntegracoes({
     totalCategorias,
     tamanhoTotal: resumo?.tamanhoTotalFormatado ?? '0 B',
     spotify: resumo?.spotify,
+    youtubeMusic: resumo?.youtubeMusic,
   })
 
   return (

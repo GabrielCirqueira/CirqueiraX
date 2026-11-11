@@ -219,6 +219,11 @@ class ImportacaoYoutube
         return $this->iniciarClassificacao();
     }
 
+    public function pularClassificacao(): self
+    {
+        return $this->iniciarTempoOuvido();
+    }
+
     public function registrarClassificados(int $quantidade, int $tokensEntrada, int $tokensSaida, int $custoMicrodolares): self
     {
         $this->totalClassificados += $quantidade;
