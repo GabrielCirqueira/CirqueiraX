@@ -9,6 +9,7 @@ final readonly class VincularSpotifyAoCatalogoMessage
     public function __construct(
         public int $usuarioId,
         public ?int $tocadasDesdeTimestamp = null,
+        public ?int $tocadasAteTimestamp = null,
     ) {
     }
 }

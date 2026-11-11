@@ -238,6 +238,19 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 
 `app:youtube:continuar-importacao {uuid}` roda as etapas no terminal até terminar ou precisar esperar; se a importação estiver em erro depois da leitura, retoma da etapa onde parou.
 
+## Projeção única das reproduções (tópico 199)
+
+- **Tabela, não view:** a ligação das reproduções do Spotify ao catálogo depende da normalização feita em PHP (`vinculo_musica_spotify` por nome e artista normalizados). Não existe chave em SQL para uma view juntar as duas fontes sem mexer em `reproducao_spotify`, o que o roadmap proíbe. A escolha é a tabela `reproducao_musical`.
+- **Colunas:** usuário, música efetiva (`musica_uuid`, já seguindo as uniões), música de origem (`musica_origem_uuid`, a do vínculo ou do vídeo), fonte (`spotify`, `youtube_music`), `tocada_em`, `ms_reproduzidos`, `tempo_exato`, `pulada` e `aleatorio` (só Spotify), `origem_id` (uuid da reprodução original) e `criado_em`. Única por fonte e origem; índices em `(usuario, tocada_em)`, `(usuario, musica)`, `(usuario, fonte, tocada_em)` e na música de origem.
+- **Alimentação:** `app:musica:projetar-spotify [-u id]` faz a carga (vínculo, projeção em lotes de 2000 com `INSERT … ON DUPLICATE KEY UPDATE`, remoção de órfãs e reprojeção do YouTube). Depois de cada coleta e lote importado do Spotify, a `VincularSpotifyAoCatalogoMessage` liga e projeta só a janela de tempo afetada; a substituição da M118 atualiza a mesma linha. No YouTube, entram só vídeos `musica` e `mashup`, reprojetados após a identificação, cada coleta, as correções de vídeo e o fim da importação do Takeout. Uniões e desfazer união só atualizam a música efetiva das linhas que mudaram (CTE recursiva).
+- **Leitura:** `AnaliseReproducaoMusicalRepository` (totais, ranking de músicas e de artistas) com `FiltroFonteMusica` (`todas`, `spotify`, `youtube_music`), divisão por fonte e minutos estimados. Mesmas regras do `SPOTIFY.md` seção 3; artistas creditados pela música inteira e, em mashup, pelos componentes, sem contar duas vezes o mesmo artista na mesma reprodução. O cache de análise aceita a fonte na chave e é invalidado a cada projeção.
+- **Paridade (`app:musica:comparar-paridade -u id`)**, rodada numa cópia dos dados de produção (101.015 reproduções, todas projetadas, nenhuma sem vínculo), em abril, maio e junho de 2026, ano de 2026, ano de 2025, últimos 30 dias e desde sempre:
+  - **Zero diferença** em minutos, streams, reproduções e dias, em todos os períodos.
+  - **Diferenças esperadas pelo catálogo:** o catálogo junta versões que o Spotify conta separado (14.121 faixas viram 12.935 músicas, 867 grupos: acústica, slowed, remaster, "feat."). Isso muda a contagem de músicas distintas e o top de músicas (ex.: "Let Down" 139 + "Let Down - Remastered" 20 = 159). Nos artistas a diferença fica abaixo de 2%: as versões juntadas emprestam os créditos umas às outras.
+  - A paridade achou um defeito do tópico 196, corrigido: o vínculo usava um só código de faixa e às vezes pegava um sem lista de artistas ("Unity" ficava sem Alan Walker). Agora junta os artistas de todos os códigos da faixa.
+  - Consulta: a paridade inteira (7 períodos, totais e dois tops cada) roda em 24 s nas duas consultas somadas.
+- **Decisão pendente do Gabriel:** com `fonte = spotify`, agrupar por música do catálogo (versões juntas, como acima) ou por faixa (números iguais ao app do Spotify). As consultas antigas continuam até essa decisão.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.
@@ -248,7 +261,8 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 6. **Chave da YouTube Data API:** no Google Cloud, num projeto separado do cliente OAuth do teste, ativar a YouTube Data API v3, criar uma chave de API restrita só a essa API e colocar em `YOUTUBE_API_KEY` no `.env` do servidor. Sem ela, os detalhes dos vídeos não são buscados.
 7. **Preço da OpenAI:** conferir na página de preços o valor por milhão de tokens do modelo em `OPENAI_MODELO_TEXTO` e ajustar `OPENAI_PRECO_ENTRADA_POR_MILHAO` e `OPENAI_PRECO_SAIDA_POR_MILHAO` se for diferente de 0,75 e 4,50.
 8. **Amostra do Takeout:** quando o arquivo chegar, enviar só as primeiras entradas do histórico de exibição para conferir o formato real (prefixo do título em português, campo de anúncio) e a janela de 600 s.
-9. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
+9. **Agrupamento com fonte Spotify:** decidir se o filtro só Spotify agrupa por música do catálogo ou por faixa (seção do tópico 199).
+10. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
 
 ## Limpeza do teste
 

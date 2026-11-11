@@ -162,7 +162,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
         $this->reproducaoRepository->flush();
         $this->reproducaoRepository->limparCache();
         $this->cacheAnalise->invalidar($usuario);
-        $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $usuario->getId()));
+        $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $usuario->getId(), $minTimestamp - self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS, $maxTimestamp + self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS));
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Entity\MusicaCatalogo;
 use App\Entity\Usuario;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Repository\MusicaCatalogoRepository;
+use App\Service\Musica\Projecao\AtualizarMusicasEfetivasProjecaoService;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
 
 final readonly class UnirMusicasCatalogoService
@@ -16,6 +17,7 @@ final readonly class UnirMusicasCatalogoService
     public function __construct(
         private MusicaCatalogoRepository $musicaRepository,
         private CacheAnaliseSpotifyService $cacheAnalise,
+        private AtualizarMusicasEfetivasProjecaoService $atualizarProjecao,
     ) {
     }
 
@@ -35,6 +37,7 @@ final readonly class UnirMusicasCatalogoService
         $origem->unirA($destino);
         $destino->confirmarManualmente();
         $this->musicaRepository->flush();
+        $this->atualizarProjecao->executar($usuario);
         $this->cacheAnalise->invalidar($usuario);
 
         return $destino;

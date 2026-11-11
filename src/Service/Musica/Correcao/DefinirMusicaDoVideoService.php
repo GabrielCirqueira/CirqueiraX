@@ -15,6 +15,7 @@ use App\Exception\Musica\MusicaCatalogoException;
 use App\Repository\MusicaCatalogoRepository;
 use App\Repository\VideoYoutubeRepository;
 use App\Service\Musica\ObterMusicaCatalogoService;
+use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
 
 final readonly class DefinirMusicaDoVideoService
@@ -26,6 +27,7 @@ final readonly class DefinirMusicaDoVideoService
         private MusicaCatalogoRepository $musicaRepository,
         private ObterMusicaCatalogoService $obterMusica,
         private CacheAnaliseSpotifyService $cacheAnalise,
+        private ProjetarReproducoesYoutubeService $projetarYoutube,
     ) {
     }
 
@@ -40,6 +42,7 @@ final readonly class DefinirMusicaDoVideoService
         };
 
         $this->videoRepository->flush();
+        $this->projetarYoutube->projetarVideos($usuario, [$video]);
         $this->cacheAnalise->invalidar($usuario);
 
         return $video;

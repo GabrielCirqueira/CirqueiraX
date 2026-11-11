@@ -85,4 +85,22 @@ final class VinculoMusicaSpotifyRepository extends ServiceEntityRepository
 
         return $vinculos;
     }
+
+    /**
+     * @return array<string, string>
+     */
+    public function mapearMusicasPorIdentidade(Usuario $usuario, string $separador): array
+    {
+        $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            'SELECT nome_normalizado, artista_normalizado, musica_uuid FROM vinculo_musica_spotify WHERE usuario_id = :usuarioId',
+            ['usuarioId' => $usuario->getId()],
+        );
+
+        $mapa = [];
+        foreach ($linhas as $linha) {
+            $mapa[$linha['nome_normalizado'].$separador.$linha['artista_normalizado']] = (string) $linha['musica_uuid'];
+        }
+
+        return $mapa;
+    }
 }

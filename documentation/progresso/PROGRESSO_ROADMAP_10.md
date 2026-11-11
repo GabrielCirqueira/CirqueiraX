@@ -395,8 +395,27 @@
   - `migrations/Version20261111180215.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 199 — Leitura unificada — projeção das reproduções e paridade com os números do Spotify
-- **Status**: Pendente
+### ✅ Tópico 199 — Leitura unificada — projeção das reproduções e paridade com os números do Spotify
+- **Status**: Concluído (com decisão pendente sobre o agrupamento com fonte Spotify)
+- **O que foi feito**:
+  - Tabela `reproducao_musical` (entidade `ReproducaoMusical`, enums `FonteReproducaoMusical` e `FiltroFonteMusica`), migration `Version20261111181335`. View descartada: o vínculo do Spotify ao catálogo depende de normalização em PHP, sem chave em SQL.
+  - `ReproducaoMusicalRepository` (gravação em lote do Spotify, reprojeção do YouTube, órfãs, música efetiva por CTE recursiva) e `AnaliseReproducaoMusicalRepository` (totais, ranking de músicas e de artistas, com filtro e divisão por fonte e minutos estimados).
+  - Serviços em `src/Service/Musica/Projecao/`: `ProjetarReproducoesSpotifyService`, `ProjetarReproducoesYoutubeService`, `AtualizarMusicasEfetivasProjecaoService` e `CompararParidadeSpotifyService`; comandos `app:musica:projetar-spotify` e `app:musica:comparar-paridade`.
+  - Alimentação ligada à coleta e à importação do Spotify (a mensagem passou a levar a janela de tempo), à identificação e à coleta do YouTube, às correções (definir música do vídeo, separar, unir e desfazer união) e ao fim da importação do Takeout.
+  - Cache de análise com a fonte na chave e invalidado a cada projeção.
+  - Correção do tópico 196 achada pela paridade: o vínculo agora junta os artistas de todos os códigos da faixa.
+  - Paridade numa cópia dos dados de produção: zero diferença em minutos, streams, reproduções e dias nos 7 períodos; diferenças restantes só no top de músicas e na contagem de músicas distintas (versões juntadas pelo catálogo) e abaixo de 2% nos artistas. Detalhes no `MUSICA.md`.
+- **Diferença do roadmap**: a paridade não dá zero no top de músicas e nas músicas distintas porque o catálogo junta versões. As consultas antigas não foram removidas, como manda o roadmap. O repositório unificado cobre totais e rankings; as demais consultas (recordes, hábitos, evolução, descobertas) entram no tópico 200, junto com a troca dos serviços. Sem testes automatizados (regra do projeto).
+- **Pendente**: decisão do Gabriel sobre o agrupamento com `fonte = spotify`; rodar `app:musica:projetar-spotify` em produção depois do deploy final (substitui o `app:musica:vincular-spotify`, cerca de 13 minutos).
+- **Arquivos**:
+  - `src/Entity/ReproducaoMusical.php`, `src/Enum/FonteReproducaoMusical.php`, `src/Enum/FiltroFonteMusica.php`
+  - `src/Repository/ReproducaoMusicalRepository.php`, `AnaliseReproducaoMusicalRepository.php`, `VinculoMusicaSpotifyRepository.php`, `ReproducaoSpotifyRepository.php`
+  - `src/Service/Musica/Projecao/`, `src/Service/Musica/VincularFaixasSpotifyAoCatalogoService.php`, `src/Service/Musica/Correcao/` (4 serviços)
+  - `src/Command/ProjetarReproducoesMusicaCommand.php`, `CompararParidadeMusicaCommand.php`
+  - `src/Message/VincularSpotifyAoCatalogoMessage.php`, `src/MessageHandler/VincularSpotifyAoCatalogoMessageHandler.php`, `src/Service/Spotify/DeduplicarEImportarHistoricoSpotifyService.php`, `CacheAnaliseSpotifyService.php`
+  - `src/Service/IdentificacaoMusica/IdentificarVideosYoutubeService.php`, `src/Service/YoutubeMusic/RegistrarReproducoesYoutubeService.php`, `src/Service/YoutubeMusic/Importacao/CalcularTempoOuvidoImportacaoYoutubeService.php`
+  - `migrations/Version20261111181335.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 200 — Endpoints unificados /api/v1/musica com filtro de fonte
 - **Status**: Pendente

@@ -10,6 +10,7 @@ use App\Enum\OrigemClassificacao;
 use App\Enum\StatusClassificacaoVideo;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Repository\VideoYoutubeRepository;
+use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
 
 final readonly class SepararVideoDaMusicaService
@@ -17,6 +18,7 @@ final readonly class SepararVideoDaMusicaService
     public function __construct(
         private VideoYoutubeRepository $videoRepository,
         private CacheAnaliseSpotifyService $cacheAnalise,
+        private ProjetarReproducoesYoutubeService $projetarYoutube,
     ) {
     }
 
@@ -26,6 +28,7 @@ final readonly class SepararVideoDaMusicaService
 
         $video->classificar(StatusClassificacaoVideo::Revisar, OrigemClassificacao::Manual, null, $video->tipoVersao(), null);
         $this->videoRepository->flush();
+        $this->projetarYoutube->projetarVideos($usuario, [$video]);
         $this->cacheAnalise->invalidar($usuario);
 
         return $video;

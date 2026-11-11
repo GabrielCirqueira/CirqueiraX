@@ -6,6 +6,7 @@ namespace App\Service\Spotify;
 
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
+use App\Enum\FiltroFonteMusica;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
@@ -25,8 +26,9 @@ final readonly class CacheAnaliseSpotifyService
      *
      * @return T
      */
-    public function lembrar(Usuario $usuario, string $chave, callable $calcular): mixed
+    public function lembrar(Usuario $usuario, string $chave, callable $calcular, ?FiltroFonteMusica $fonte = null): mixed
     {
+        $chave = null === $fonte ? $chave : $chave.'|'.$fonte->value;
         $chaveCompleta = sprintf(
             '%s_%d_%s',
             self::PREFIXO,

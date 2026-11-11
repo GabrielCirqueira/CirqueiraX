@@ -11,6 +11,7 @@ use App\Entity\VideoYoutube;
 use App\Enum\FonteReproducaoYoutube;
 use App\Repository\ReproducaoYoutubeRepository;
 use App\Repository\VideoYoutubeRepository;
+use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
 use DateTimeImmutable;
 
 final readonly class RegistrarReproducoesYoutubeService
@@ -22,6 +23,7 @@ final readonly class RegistrarReproducoesYoutubeService
         private VideoYoutubeRepository $videoRepository,
         private ReproducaoYoutubeRepository $reproducaoRepository,
         private EstimarTempoReproduzidoYoutubeService $estimarTempo,
+        private ProjetarReproducoesYoutubeService $projetarYoutube,
     ) {
     }
 
@@ -42,11 +44,13 @@ final readonly class RegistrarReproducoesYoutubeService
         ));
         $novas = array_values(array_filter($reproducoes, static fn (ReproducaoYoutube $reproducao): bool => !isset($existentes[$reproducao->chaveDeduplicacao()])));
 
-        $this->encadearTempos($usuario, $novas);
+        $anterior = $this->encadearTempos($usuario, $novas);
         foreach ($novas as $reproducao) {
             $this->reproducaoRepository->salvar($reproducao, flush: false);
         }
         $this->reproducaoRepository->flush();
+        $afetadas = null === $anterior ? $novas : [$anterior, ...$novas];
+        $this->projetarYoutube->projetarVideos($usuario, array_map(static fn (ReproducaoYoutube $reproducao): VideoYoutube => $reproducao->video(), $afetadas));
 
         return count($novas);
     }
@@ -96,18 +100,21 @@ final readonly class RegistrarReproducoesYoutubeService
     /**
      * @param list<ReproducaoYoutube> $novasEmOrdemCronologica
      */
-    private function encadearTempos(Usuario $usuario, array $novasEmOrdemCronologica): void
+    private function encadearTempos(Usuario $usuario, array $novasEmOrdemCronologica): ?ReproducaoYoutube
     {
         if ([] === $novasEmOrdemCronologica) {
-            return;
+            return null;
         }
 
         $anterior = $this->reproducaoRepository->buscarUltimaAntesDe($usuario, $novasEmOrdemCronologica[0]->tocadaEm());
+        $anteriorExistente = $anterior;
         foreach ($novasEmOrdemCronologica as $reproducao) {
             if (null !== $anterior) {
                 $this->estimarTempo->executar($anterior, $reproducao);
             }
             $anterior = $reproducao;
         }
+
+        return $anteriorExistente;
     }
 }

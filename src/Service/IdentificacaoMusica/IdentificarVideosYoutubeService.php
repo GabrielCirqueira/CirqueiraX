@@ -20,6 +20,7 @@ use App\Repository\VideoYoutubeRepository;
 use App\Service\Ia\RegistrarConsumoIaService;
 use App\Service\Musica\NormalizarTextoMusicaService;
 use App\Service\Musica\ObterMusicaCatalogoService;
+use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
 use App\Service\YoutubeData\AtualizarDetalhesVideosYoutubeService;
 use Psr\Log\LoggerInterface;
 
@@ -39,6 +40,7 @@ final readonly class IdentificarVideosYoutubeService
         private RegraCanalYoutubeRepository $regraCanalRepository,
         private VideoYoutubeRepository $videoRepository,
         private RegistrarConsumoIaService $registrarConsumo,
+        private ProjetarReproducoesYoutubeService $projetarYoutube,
         private LoggerInterface $logger,
     ) {
     }
@@ -83,6 +85,8 @@ final readonly class IdentificarVideosYoutubeService
                 $contagem[$status] = ($contagem[$status] ?? 0) + $quantidade;
             }
         }
+
+        $this->projetarYoutube->projetarVideos($usuario, array_values(array_filter($videos, static fn (VideoYoutube $video): bool => $video->usuario() === $usuario)));
 
         return $contagem;
     }

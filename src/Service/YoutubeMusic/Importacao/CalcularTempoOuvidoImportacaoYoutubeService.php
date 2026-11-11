@@ -10,6 +10,7 @@ use App\Enum\ResultadoEtapaImportacaoYoutube;
 use App\Repository\ImportacaoYoutubeRepository;
 use App\Repository\ReproducaoYoutubeRepository;
 use App\Repository\VideoYoutubeRepository;
+use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
 use App\Service\YoutubeMusic\EstimarTempoReproduzidoYoutubeService;
 use DateTimeImmutable;
 
@@ -26,6 +27,7 @@ final readonly class CalcularTempoOuvidoImportacaoYoutubeService
         private ImportacaoYoutubeRepository $importacaoRepository,
         private EstimarTempoReproduzidoYoutubeService $estimarTempo,
         private GerarRelatorioImportacaoYoutubeService $gerarRelatorio,
+        private ProjetarReproducoesYoutubeService $projetarYoutube,
     ) {
     }
 
@@ -95,6 +97,7 @@ final readonly class CalcularTempoOuvidoImportacaoYoutubeService
     private function concluir(ImportacaoYoutube $importacao): ResultadoEtapaImportacaoYoutube
     {
         $this->videoRepository->liberarTodosReservados($importacao->usuario());
+        $this->projetarYoutube->projetarTudo($importacao->usuario());
         $importacao->concluir($this->gerarRelatorio->executar($importacao));
         $this->importacaoRepository->salvar($importacao);
 

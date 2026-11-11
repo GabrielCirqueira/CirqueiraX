@@ -64,7 +64,7 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
     }
 
     /**
-     * @param list<array{nome: string, artista: string, album: ?string, codigo: ?string, duracao: ?int}> $faixas
+     * @param list<array{nome: string, artista: string, album: ?string, codigo: ?string, codigos: list<string>, duracao: ?int}> $faixas
      * @param array<string, true>                                                                      $identidades
      */
     private function vincularLote(Usuario $usuario, array $faixas, array &$identidades): int
@@ -74,7 +74,7 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
             return 0;
         }
 
-        $codigos = array_values(array_filter(array_map(static fn (array $faixa): ?string => $faixa['codigo'], $novas)));
+        $codigos = array_values(array_unique(array_merge(...array_map(static fn (array $faixa): array => $faixa['codigos'], $novas))));
         $artistasPorFaixa = $this->artistaFaixaRepository->listarNomesPorFaixas($codigos);
         $imagens = $this->imagemRepository->buscarMapeamentoPorCodigos(TipoImagemSpotify::Faixa, $codigos);
 
@@ -86,7 +86,7 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
             }
 
             $codigo = $faixa['codigo'] ?? '';
-            $artistas = $artistasPorFaixa[$codigo] ?? [$faixa['artista']];
+            $artistas = $this->juntarArtistas($faixa['artista'], $faixa['codigos'], $artistasPorFaixa);
             $musica = $this->obterMusica->obterMusica($usuario, $faixa['nome'], $artistas, $faixa['album'], isset($imagens[$codigo]) ? $imagens[$codigo]->imagemMediaUrl() : null);
             $this->vinculoRepository->salvar(new VinculoMusicaSpotify($usuario, $this->normalizador->normalizar($faixa['nome']), $this->normalizador->normalizar($faixa['artista']), $musica));
             $identidades[$identidade] = true;
@@ -99,5 +99,23 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
     private function identidade(string $nome, string $artista): string
     {
         return $this->normalizador->normalizar($nome).self::SEPARADOR_IDENTIDADE.$this->normalizador->normalizar($artista);
+    }
+
+    /**
+     * @param list<string>                $codigos
+     * @param array<string, list<string>> $artistasPorFaixa
+     *
+     * @return list<string>
+     */
+    private function juntarArtistas(string $artistaPrincipal, array $codigos, array $artistasPorFaixa): array
+    {
+        $artistas = [$this->normalizador->normalizar($artistaPrincipal) => $artistaPrincipal];
+        foreach ($codigos as $codigo) {
+            foreach ($artistasPorFaixa[$codigo] ?? [] as $nome) {
+                $artistas[$this->normalizador->normalizar($nome)] ??= $nome;
+            }
+        }
+
+        return array_values($artistas);
     }
 }

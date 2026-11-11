@@ -824,7 +824,7 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{nome: string, artista: string, album: ?string, codigo: ?string, duracao: ?int}>
+     * @return list<array{nome: string, artista: string, album: ?string, codigo: ?string, codigos: list<string>, duracao: ?int}>
      */
     public function listarFaixasDistintas(Usuario $usuario, ?DateTimeImmutable $tocadasDesde, int $deslocamento, int $limite): array
     {
@@ -834,9 +834,10 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             $parametros['desde'] = $tocadasDesde->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
         }
 
-        /** @var list<array{nome: string, artista: string, album: ?string, codigo: ?string, duracao: int|string|null}> $linhas */
+        /** @var list<array{nome: string, artista: string, album: ?string, codigo: ?string, codigos: ?string, duracao: int|string|null}> $linhas */
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
-            "SELECT nome_faixa AS nome, artista_principal AS artista, MAX(album) AS album, MAX(codigo_faixa) AS codigo, MAX(duracao_ms) AS duracao
+            "SELECT nome_faixa AS nome, artista_principal AS artista, MAX(album) AS album, MAX(codigo_faixa) AS codigo,
+                GROUP_CONCAT(DISTINCT codigo_faixa ORDER BY codigo_faixa SEPARATOR ',') AS codigos, MAX(duracao_ms) AS duracao
             FROM reproducao_spotify
             WHERE usuario_id = :usuarioId {$filtroData}
             GROUP BY nome_faixa, artista_principal
@@ -851,7 +852,47 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
             'artista' => $linha['artista'],
             'album' => $linha['album'],
             'codigo' => $linha['codigo'],
+            'codigos' => null === $linha['codigos'] ? [] : explode(',', $linha['codigos']),
             'duracao' => null === $linha['duracao'] ? null : (int) $linha['duracao'],
         ], $linhas);
+    }
+
+    /**
+     * @return list<array{uuid: string, nome: string, artista: string}>
+     */
+    public function listarParaProjecao(Usuario $usuario, ?string $depoisDeUuidBinario, ?DateTimeImmutable $desde, ?DateTimeImmutable $ate, int $limite): array
+    {
+        $filtros = '';
+        $parametros = ['usuarioId' => $usuario->getId(), 'limite' => $limite];
+        $tipos = ['limite' => PDO::PARAM_INT];
+
+        if (null !== $depoisDeUuidBinario) {
+            $filtros .= ' AND uuid > :depoisDe';
+            $parametros['depoisDe'] = $depoisDeUuidBinario;
+            $tipos['depoisDe'] = PDO::PARAM_LOB;
+        }
+
+        if (null !== $desde) {
+            $filtros .= ' AND tocada_em >= :desde';
+            $parametros['desde'] = $desde->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+        }
+
+        if (null !== $ate) {
+            $filtros .= ' AND tocada_em <= :ate';
+            $parametros['ate'] = $ate->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+        }
+
+        /** @var list<array{uuid: string, nome: string, artista: string}> $linhas */
+        $linhas = $this->getEntityManager()->getConnection()->executeQuery(
+            "SELECT uuid, nome_faixa AS nome, artista_principal AS artista
+            FROM reproducao_spotify
+            WHERE usuario_id = :usuarioId{$filtros}
+            ORDER BY uuid
+            LIMIT :limite",
+            $parametros,
+            $tipos,
+        )->fetchAllAssociative();
+
+        return $linhas;
     }
 }
