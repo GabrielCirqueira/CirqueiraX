@@ -14,9 +14,9 @@ use App\DataObject\Spotify\TotaisMesDTO;
 use App\Entity\ReproducaoSpotify;
 use App\Entity\Usuario;
 use App\Enum\FonteReproducaoSpotify;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use DateTimeImmutable;
 use DateTimeZone;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use PDO;
 
@@ -823,4 +823,35 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         );
     }
 
+    /**
+     * @return list<array{nome: string, artista: string, album: ?string, codigo: ?string, duracao: ?int}>
+     */
+    public function listarFaixasDistintas(Usuario $usuario, ?DateTimeImmutable $tocadasDesde, int $deslocamento, int $limite): array
+    {
+        $filtroData = null === $tocadasDesde ? '' : 'AND tocada_em >= :desde';
+        $parametros = ['usuarioId' => $usuario->getId(), 'deslocamento' => $deslocamento, 'limite' => $limite];
+        if (null !== $tocadasDesde) {
+            $parametros['desde'] = $tocadasDesde->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+        }
+
+        /** @var list<array{nome: string, artista: string, album: ?string, codigo: ?string, duracao: int|string|null}> $linhas */
+        $linhas = $this->getEntityManager()->getConnection()->executeQuery(
+            "SELECT nome_faixa AS nome, artista_principal AS artista, MAX(album) AS album, MAX(codigo_faixa) AS codigo, MAX(duracao_ms) AS duracao
+            FROM reproducao_spotify
+            WHERE usuario_id = :usuarioId {$filtroData}
+            GROUP BY nome_faixa, artista_principal
+            ORDER BY MIN(tocada_em)
+            LIMIT :deslocamento, :limite",
+            $parametros,
+            ['deslocamento' => PDO::PARAM_INT, 'limite' => PDO::PARAM_INT],
+        )->fetchAllAssociative();
+
+        return array_map(static fn (array $linha): array => [
+            'nome' => $linha['nome'],
+            'artista' => $linha['artista'],
+            'album' => $linha['album'],
+            'codigo' => $linha['codigo'],
+            'duracao' => null === $linha['duracao'] ? null : (int) $linha['duracao'],
+        ], $linhas);
+    }
 }

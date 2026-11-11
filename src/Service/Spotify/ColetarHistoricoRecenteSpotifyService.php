@@ -12,16 +12,20 @@ use App\Enum\FonteReproducaoSpotify;
 use App\Enum\OrigemConsultaSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
+use App\Message\VincularSpotifyAoCatalogoMessage;
 use App\Repository\ArtistaFaixaSpotifyRepository;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\ReproducaoSpotifyRepository;
+use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class ColetarHistoricoRecenteSpotifyService
 {
     private const int LIMITE_PADRAO_COLETA = 50;
     private const int CODIGO_LIMITE_REQUISICOES = 429;
     private const int INTERVALO_COLETA_SEGUNDOS = 300;
+    private const string JANELA_VINCULO_CATALOGO = '-1 day';
 
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
@@ -34,6 +38,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         private ArtistaFaixaSpotifyRepository $artistaFaixaRepository,
         private LoggerInterface $logger,
         private ControleLimiteSpotifyService $controleLimite,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -187,6 +192,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
 
         if ($totalNovas > 0) {
             $this->cacheAnalise->invalidar($conta->usuario());
+            $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $conta->usuario()->getId(), (new DateTimeImmutable(self::JANELA_VINCULO_CATALOGO))->getTimestamp()));
         }
 
         return new ResultadoColetaHistoricoSpotifyDTO(

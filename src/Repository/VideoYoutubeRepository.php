@@ -8,9 +8,12 @@ use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
 use App\Enum\OrigemClassificacao;
 use App\Enum\StatusClassificacaoVideo;
+use App\Enum\TipoRevisaoMusica;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use PDO;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<VideoYoutube>
@@ -173,6 +176,82 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
             ->setMaxResults($limite)
             ->getQuery()
             ->getResult();
+
+        return $videos;
+    }
+
+    public function buscarDoUsuario(Usuario $usuario, string $uuid): ?VideoYoutube
+    {
+        if (!Uuid::isValid($uuid)) {
+            return null;
+        }
+
+        /** @var VideoYoutube|null $video */
+        $video = $this->findOneBy(['usuario' => $usuario, 'uuid' => Uuid::fromString($uuid)]);
+
+        return $video;
+    }
+
+    /**
+     * @return array{uuids: list<string>, total: int}
+     */
+    public function listarParaRevisao(Usuario $usuario, TipoRevisaoMusica $tipo, int $deslocamento, int $limite): array
+    {
+        $condicao = match ($tipo) {
+            TipoRevisaoMusica::Ambiguo => "status = 'revisar' AND JSON_EXTRACT(resposta_ia, '$.ambiguo') = true",
+            TipoRevisaoMusica::Compilacao => "status = 'compilacao' AND (origem_classificacao IS NULL OR origem_classificacao <> 'manual')",
+            TipoRevisaoMusica::Indisponivel => "status = 'indisponivel'",
+            default => "status = 'revisar' AND (resposta_ia IS NULL OR JSON_EXTRACT(resposta_ia, '$.ambiguo') IS NULL OR JSON_EXTRACT(resposta_ia, '$.ambiguo') = false)",
+        };
+        $conexao = $this->getEntityManager()->getConnection();
+        $parametros = ['usuarioId' => $usuario->getId(), 'deslocamento' => $deslocamento, 'limite' => $limite];
+        $tipos = ['deslocamento' => PDO::PARAM_INT, 'limite' => PDO::PARAM_INT];
+
+        $total = (int) $conexao->fetchOne("SELECT COUNT(*) FROM video_youtube WHERE usuario_id = :usuarioId AND {$condicao}", $parametros, $tipos);
+        $linhas = $conexao->fetchFirstColumn(
+            "SELECT uuid FROM video_youtube WHERE usuario_id = :usuarioId AND {$condicao} ORDER BY atualizado_em DESC LIMIT :deslocamento, :limite",
+            $parametros,
+            $tipos,
+        );
+
+        return ['uuids' => array_map(static fn (mixed $uuid): string => Uuid::fromBinary((string) $uuid)->toRfc4122(), $linhas), 'total' => $total];
+    }
+
+    /**
+     * @return list<array{canal: string, total: int, exemplo: string}>
+     */
+    public function listarCanaisEmAberto(Usuario $usuario): array
+    {
+        $linhas = $this->getEntityManager()->getConnection()->executeQuery(
+            "SELECT canal, COUNT(*) AS total, MAX(titulo) AS exemplo
+            FROM video_youtube
+            WHERE usuario_id = :usuarioId
+                AND status IN ('pendente', 'revisar', 'compilacao')
+                AND (origem_classificacao IS NULL OR origem_classificacao <> 'manual')
+                AND canal <> ''
+            GROUP BY canal
+            ORDER BY total DESC, canal",
+            ['usuarioId' => $usuario->getId()],
+        )->fetchAllAssociative();
+
+        return array_map(static fn (array $linha): array => ['canal' => (string) $linha['canal'], 'total' => (int) $linha['total'], 'exemplo' => (string) $linha['exemplo']], $linhas);
+    }
+
+    /**
+     * @param list<string> $uuids
+     *
+     * @return list<VideoYoutube>
+     */
+    public function buscarPorUuidsOrdenados(Usuario $usuario, array $uuids): array
+    {
+        if ([] === $uuids) {
+            return [];
+        }
+
+        /** @var list<VideoYoutube> $videos */
+        $videos = $this->findBy(['usuario' => $usuario, 'uuid' => array_map(static fn (string $uuid): Uuid => Uuid::fromString($uuid), $uuids)]);
+        $ordem = array_flip($uuids);
+        usort($videos, static fn (VideoYoutube $a, VideoYoutube $b): int => $ordem[$a->uuid()->toRfc4122()] <=> $ordem[$b->uuid()->toRfc4122()]);
 
         return $videos;
     }

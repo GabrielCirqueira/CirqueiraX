@@ -39,6 +39,13 @@ class MusicaArtistaCatalogo
         $this->posicao = $posicao;
     }
 
+    public function reposicionar(int $posicao): self
+    {
+        $this->posicao = $posicao;
+
+        return $this;
+    }
+
     public function isPrincipal(): bool
     {
         return self::POSICAO_PRINCIPAL === $this->posicao;

@@ -8,6 +8,7 @@ use App\Entity\ArtistaCatalogo;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<ArtistaCatalogo>
@@ -52,5 +53,17 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
 
         return $resultado;
+    }
+
+    public function buscarDoUsuario(Usuario $usuario, string $uuid): ?ArtistaCatalogo
+    {
+        if (!Uuid::isValid($uuid)) {
+            return null;
+        }
+
+        /** @var ArtistaCatalogo|null $artista */
+        $artista = $this->findOneBy(['usuario' => $usuario, 'uuid' => Uuid::fromString($uuid)]);
+
+        return $artista;
     }
 }

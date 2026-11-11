@@ -11,6 +11,7 @@ use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
 use App\Repository\ArtistaFaixaSpotifyRepository;
 use App\Repository\ContaSpotifyRepository;
+use App\Service\Musica\AtualizarArtistasMusicaSpotifyService;
 use Psr\Log\LoggerInterface;
 
 final readonly class SincronizarArtistasFaixasSpotifyService
@@ -29,6 +30,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         private CacheAnaliseSpotifyService $cacheAnalise,
         private ControleLimiteSpotifyService $controleLimite,
         private LoggerInterface $logger,
+        private AtualizarArtistasMusicaSpotifyService $atualizarArtistasMusica,
     ) {
     }
 
@@ -73,6 +75,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
             }
 
             $this->artistaFaixaRepository->registrarArtistasDaFaixa($faixa['codigo_faixa'], $artistas);
+            $this->atualizarArtistasMusica->executar($conta->usuario(), $faixa['nome'], $faixa['artista'], array_map(static fn (array $artista): string => $artista['nome'], $artistas));
             ++$processadas;
         }
 

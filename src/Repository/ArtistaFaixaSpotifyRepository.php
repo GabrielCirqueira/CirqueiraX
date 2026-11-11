@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\ArtistaFaixaSpotify;
 use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 use PDO;
 
@@ -62,13 +63,13 @@ final class ArtistaFaixaSpotifyRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{codigo_faixa: string, artista: string, codigo_artista: ?string}>
+     * @return list<array{codigo_faixa: string, nome: string, artista: string, codigo_artista: ?string}>
      */
     public function listarFaixasSemArtistas(Usuario $usuario, int $minimoStreams, int $limite): array
     {
-        /** @var list<array{codigo_faixa: string, artista: string, codigo_artista: ?string}> $linhas */
+        /** @var list<array{codigo_faixa: string, nome: string, artista: string, codigo_artista: ?string}> $linhas */
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
-            'SELECT r.codigo_faixa, MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista
+            'SELECT r.codigo_faixa, MAX(r.nome_faixa) AS nome, MAX(r.artista_principal) AS artista, MAX(r.codigo_artista_principal) AS codigo_artista
             FROM reproducao_spotify r
             LEFT JOIN artista_faixa_spotify af ON af.codigo_faixa = r.codigo_faixa
             WHERE r.usuario_id = :usuarioId AND r.codigo_faixa IS NOT NULL AND r.codigo_faixa <> \'\' AND af.id IS NULL
@@ -97,5 +98,30 @@ final class ArtistaFaixaSpotifyRepository extends ServiceEntityRepository
             ['usuarioId' => $usuario->getId(), 'msStream' => self::MS_MINIMO_STREAM, 'minimoStreams' => $minimoStreams],
             ['minimoStreams' => PDO::PARAM_INT, 'msStream' => PDO::PARAM_INT],
         );
+    }
+
+    /**
+     * @param list<string> $codigosFaixa
+     *
+     * @return array<string, list<string>>
+     */
+    public function listarNomesPorFaixas(array $codigosFaixa): array
+    {
+        if ([] === $codigosFaixa) {
+            return [];
+        }
+
+        $linhas = $this->getEntityManager()->getConnection()->executeQuery(
+            'SELECT codigo_faixa, nome_artista FROM artista_faixa_spotify WHERE codigo_faixa IN (:codigos) ORDER BY codigo_faixa, posicao',
+            ['codigos' => array_values(array_unique($codigosFaixa))],
+            ['codigos' => ArrayParameterType::STRING],
+        )->fetchAllAssociative();
+
+        $mapa = [];
+        foreach ($linhas as $linha) {
+            $mapa[(string) $linha['codigo_faixa']][] = (string) $linha['nome_artista'];
+        }
+
+        return $mapa;
     }
 }

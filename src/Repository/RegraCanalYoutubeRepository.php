@@ -53,4 +53,17 @@ final class RegraCanalYoutubeRepository extends ServiceEntityRepository
 
         return $resultado;
     }
+
+    /**
+     * @return array<string, true>
+     */
+    public function listarCanaisComRegra(Usuario $usuario): array
+    {
+        $canais = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            'SELECT canal_normalizado FROM regra_canal_youtube WHERE usuario_id = :usuarioId',
+            ['usuarioId' => $usuario->getId()],
+        );
+
+        return array_fill_keys(array_map('strval', $canais), true);
+    }
 }

@@ -16,6 +16,7 @@ use Symfony\Component\Uid\Uuid;
 class ArtistaCatalogo
 {
     private const int TAMANHO_MAXIMO_NOME = 255;
+    private const int PROFUNDIDADE_MAXIMA_UNIAO = 10;
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -34,6 +35,10 @@ class ArtistaCatalogo
     #[ORM\Column(type: 'string', length: 1024, nullable: true)]
     private ?string $urlFoto = null;
 
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(name: 'unido_a_uuid', referencedColumnName: 'uuid', nullable: true, onDelete: 'SET NULL')]
+    private ?ArtistaCatalogo $unidoA = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
@@ -51,6 +56,35 @@ class ArtistaCatalogo
         $this->urlFoto = $urlFoto;
 
         return $this;
+    }
+
+    public function unirA(self $destino): self
+    {
+        $this->unidoA = $destino;
+
+        return $this;
+    }
+
+    public function desfazerUniao(): self
+    {
+        $this->unidoA = null;
+
+        return $this;
+    }
+
+    public function artistaEfetivo(): self
+    {
+        $atual = $this;
+        for ($passo = 0; null !== $atual->unidoA && $passo < self::PROFUNDIDADE_MAXIMA_UNIAO; ++$passo) {
+            $atual = $atual->unidoA;
+        }
+
+        return $atual;
+    }
+
+    public function unidoA(): ?self
+    {
+        return $this->unidoA;
     }
 
     public function uuid(): Uuid

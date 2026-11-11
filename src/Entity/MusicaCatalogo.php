@@ -20,6 +20,7 @@ use Symfony\Component\Uid\Uuid;
 class MusicaCatalogo
 {
     private const int TAMANHO_MAXIMO_TITULO = 500;
+    private const int PROFUNDIDADE_MAXIMA_UNIAO = 10;
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -49,6 +50,10 @@ class MusicaCatalogo
 
     #[ORM\Column(type: 'boolean')]
     private bool $confirmadaManualmente = false;
+
+    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(name: 'unida_a_uuid', referencedColumnName: 'uuid', nullable: true, onDelete: 'SET NULL')]
+    private ?MusicaCatalogo $unidaA = null;
 
     /**
      * @var Collection<int, MusicaArtistaCatalogo>
@@ -133,6 +138,83 @@ class MusicaCatalogo
         return $this;
     }
 
+    /**
+     * @param list<ArtistaCatalogo> $artistas
+     */
+    public function definirArtistas(array $artistas): self
+    {
+        $existentes = [];
+        foreach ($this->artistas as $vinculo) {
+            $existentes[$vinculo->artista()->uuid()->toRfc4122()] = $vinculo;
+        }
+
+        $mantidos = [];
+        foreach (array_values($artistas) as $posicao => $artista) {
+            $chave = $artista->uuid()->toRfc4122();
+            if (isset($mantidos[$chave])) {
+                continue;
+            }
+            $vinculo = $existentes[$chave] ?? new MusicaArtistaCatalogo($this, $artista, $posicao);
+            $vinculo->reposicionar($posicao);
+            if (!isset($existentes[$chave])) {
+                $this->artistas->add($vinculo);
+            }
+            $mantidos[$chave] = true;
+        }
+
+        foreach ($existentes as $chave => $vinculo) {
+            if (!isset($mantidos[$chave])) {
+                $this->artistas->removeElement($vinculo);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param list<array{texto: string, musica: ?MusicaCatalogo}> $componentes
+     */
+    public function definirComponentes(array $componentes, string $chaveNormalizada, string $titulo): self
+    {
+        $this->componentes->clear();
+        foreach ($componentes as $componente) {
+            $this->adicionarComponente($componente['texto'], $componente['musica']);
+        }
+        $this->chaveNormalizada = $chaveNormalizada;
+        $this->titulo = mb_substr($titulo, 0, self::TAMANHO_MAXIMO_TITULO);
+
+        return $this;
+    }
+
+    public function unirA(self $destino): self
+    {
+        $this->unidaA = $destino;
+
+        return $this;
+    }
+
+    public function desfazerUniao(): self
+    {
+        $this->unidaA = null;
+
+        return $this;
+    }
+
+    public function musicaEfetiva(): self
+    {
+        $atual = $this;
+        for ($passo = 0; null !== $atual->unidaA && $passo < self::PROFUNDIDADE_MAXIMA_UNIAO; ++$passo) {
+            $atual = $atual->unidaA;
+        }
+
+        return $atual;
+    }
+
+    public function unidaA(): ?self
+    {
+        return $this->unidaA;
+    }
+
     public function isMashup(): bool
     {
         return $this->tipo->isMashup();
@@ -188,7 +270,10 @@ class MusicaCatalogo
      */
     public function artistas(): array
     {
-        return array_values(array_map(static fn (MusicaArtistaCatalogo $vinculo): ArtistaCatalogo => $vinculo->artista(), $this->artistas->toArray()));
+        $vinculos = $this->artistas->toArray();
+        usort($vinculos, static fn (MusicaArtistaCatalogo $a, MusicaArtistaCatalogo $b): int => $a->posicao() <=> $b->posicao());
+
+        return array_values(array_map(static fn (MusicaArtistaCatalogo $vinculo): ArtistaCatalogo => $vinculo->artista(), $vinculos));
     }
 
     /**

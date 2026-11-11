@@ -25,7 +25,13 @@ final readonly class ObterMusicaCatalogoService
     public function obterMusica(Usuario $usuario, string $titulo, array $artistas, ?string $album = null, ?string $urlCapa = null, ?string $videoOficialId = null): MusicaCatalogo
     {
         $chave = $this->normalizador->chaveMusica($titulo, $artistas[0] ?? '');
-        $musica = $this->musicaRepository->buscarPorChave($usuario, $chave) ?? new MusicaCatalogo($usuario, trim($titulo), TipoMusicaCatalogo::Original, $chave);
+        $existente = $this->musicaRepository->buscarPorChave($usuario, $chave);
+        if (null !== $existente && null !== $existente->unidaA()) {
+            return $existente->musicaEfetiva();
+        }
+
+        $musica = $existente ?? new MusicaCatalogo($usuario, trim($titulo), TipoMusicaCatalogo::Original, $chave);
+        $this->preferirTituloLimpo($musica, $titulo);
 
         foreach ($artistas as $nome) {
             $musica->adicionarArtista($this->obterArtista->executar($usuario, $nome));
@@ -44,7 +50,7 @@ final readonly class ObterMusicaCatalogoService
         $chave = $this->normalizador->chaveMashup(array_map(static fn (array $parte): string => $parte['musica']->chaveNormalizada(), $partes));
         $existente = $this->musicaRepository->buscarPorChave($usuario, $chave);
         if (null !== $existente) {
-            return $existente->completarDados(null, $urlCapa, null);
+            return $existente->musicaEfetiva()->completarDados(null, $urlCapa, null);
         }
 
         $titulo = implode(' + ', array_map(static fn (array $parte): string => $parte['musica']->titulo(), $partes));
@@ -59,5 +65,15 @@ final readonly class ObterMusicaCatalogoService
         $this->musicaRepository->salvar($mashup);
 
         return $mashup;
+    }
+
+    private function preferirTituloLimpo(MusicaCatalogo $musica, string $titulo): void
+    {
+        $tituloDaChave = $this->normalizador->tituloDaChave($musica->chaveNormalizada());
+        if ($musica->confirmadaManualmente() || $this->normalizador->normalizar($titulo) !== $tituloDaChave || $this->normalizador->normalizar($musica->titulo()) === $tituloDaChave) {
+            return;
+        }
+
+        $musica->renomear(trim($titulo), $musica->chaveNormalizada());
     }
 }

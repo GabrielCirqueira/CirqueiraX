@@ -24,12 +24,12 @@ final readonly class ObterArtistaCatalogoService
 
         $alias = $this->aliasRepository->buscarPorAlias($usuario, $normalizado);
         if (null !== $alias) {
-            return $alias->artista();
+            return $alias->artista()->artistaEfetivo();
         }
 
         $artista = $this->artistaRepository->buscarPorNomeNormalizado($usuario, $normalizado);
         if (null !== $artista) {
-            return $artista;
+            return $artista->artistaEfetivo();
         }
 
         $artista = new ArtistaCatalogo($usuario, trim($nome), $normalizado);

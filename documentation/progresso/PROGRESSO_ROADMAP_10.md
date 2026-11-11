@@ -322,8 +322,29 @@
   - `migrations/Version20261111170331.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 196 — Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints
-- **Status**: Pendente
+### ✅ Tópico 196 — Ligação entre Spotify e catálogo, e correções manuais — serviços e endpoints
+- **Status**: Concluído
+- **O que foi feito**:
+  - `NormalizarTextoMusicaService` reforçado: forma de compatibilidade Unicode, acentos removidos por decomposição (o `iconv` do servidor transformava "Beyoncé" em "beyonc e"), letras espaçadas juntadas, `&` = `and`, hífen interno e remoção de rótulos de versão na chave do título.
+  - `VincularFaixasSpotifyAoCatalogoService` (lotes de 200, idempotente) e comando `app:musica:vincular-spotify`; `VincularSpotifyAoCatalogoMessage` disparada pela coleta e pela importação do Spotify; `AtualizarArtistasMusicaSpotifyService` chamado pela busca de artistas (M133). `ObterMusicaCatalogoService` passou a preferir o título limpo e a seguir uniões.
+  - União reversível: `MusicaCatalogo.unidaA` e `ArtistaCatalogo.unidoA`, com `musicaEfetiva()` e `artistaEfetivo()`; `definirArtistas`, `definirComponentes` e `MusicaArtistaCatalogo::reposicionar`; `VideoYoutube::voltarParaPendente`. Migration `Version20261111173332`.
+  - Serviços de correção em `src/Service/Musica/Correcao/`: unir e desfazer união de músicas, separar vídeo, definir música do vídeo (inclui não música e manter compilação), definir componentes de mashup, definir artistas, unir artistas (com alias) e classificar canal.
+  - `SugerirDuplicatasCatalogoService`, `ListarRevisaoMusicaService` (seis tipos de fila, paginada), `MusicaCatalogoSerializer` e `MusicaCorrecaoController` com as rotas do roadmap e mais `PUT /catalogo/{uuid}/artistas`.
+  - Enums `TipoRevisaoMusica` e `AcaoRevisaoVideo`, `MusicaCatalogoException` e os DTOs de entrada em `src/DataObject/Musica/`.
+  - Conferido no banco de produção dentro de transações desfeitas: vínculo de 400 músicas reais, sugestão e união de duplicata, união desfeita, 404 para música de outro usuário, redefinição de artistas, as seis filas de revisão, regra de canal, definição manual preservando a resposta da IA, separação de vídeo e união de artistas com alias.
+- **Diferença do roadmap**: o normalizador manteve o nome `NormalizarTextoMusicaService`, criado no tópico 195. `ResolverCompilacaoService` virou as ações `nao_musica` e `manter_compilacao` de `DefinirMusicaDoVideoService`. A sugestão de duplicatas não usa duração (o catálogo não guarda) e ainda não tem como dispensar uma sugestão. Sem testes automatizados (regra do projeto).
+- **Pendente**: rodar `app:musica:vincular-spotify` em produção depois do deploy final (cerca de 12 minutos para as 14 mil músicas).
+- **Arquivos**:
+  - `src/Service/Musica/NormalizarTextoMusicaService.php`, `ObterMusicaCatalogoService.php`, `ObterArtistaCatalogoService.php`, `VincularFaixasSpotifyAoCatalogoService.php`, `AtualizarArtistasMusicaSpotifyService.php`, `SugerirDuplicatasCatalogoService.php`, `ListarRevisaoMusicaService.php`
+  - `src/Service/Musica/Correcao/` (8 serviços)
+  - `src/Controller/Musica/MusicaCorrecaoController.php`, `src/Serializer/MusicaCatalogoSerializer.php`
+  - `src/DataObject/Musica/`, `src/Enum/TipoRevisaoMusica.php`, `src/Enum/AcaoRevisaoVideo.php`, `src/Exception/Musica/MusicaCatalogoException.php`
+  - `src/Message/VincularSpotifyAoCatalogoMessage.php`, `src/MessageHandler/VincularSpotifyAoCatalogoMessageHandler.php`, `src/Command/VincularSpotifyAoCatalogoCommand.php`
+  - `src/Entity/MusicaCatalogo.php`, `ArtistaCatalogo.php`, `MusicaArtistaCatalogo.php`, `VideoYoutube.php`
+  - `src/Repository/` (música, artista, vídeo, regra de canal, vínculo Spotify, reprodução Spotify, artistas das faixas)
+  - `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `DeduplicarEImportarHistoricoSpotifyService.php`, `SincronizarArtistasFaixasSpotifyService.php`
+  - `migrations/Version20261111173332.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 197 — Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta
 - **Status**: Pendente

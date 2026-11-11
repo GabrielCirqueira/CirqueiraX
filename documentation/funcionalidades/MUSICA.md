@@ -171,6 +171,49 @@ Decisão: `low` como padrão (`OPENAI_ESFORCO_IDENTIFICACAO`). Custa o dobro, ma
 
 **Teste com os casos reais** (banco de produção, transação desfeita no fim): as 4 versões de "Little Dark Age" (oficial, "- Topic", slowed, sped up) caíram na mesma música; "Let Down + Choir" virou música única; "one of the girls" virou colaboração de 3 artistas; os mashups de 2 e de 4 músicas saíram certos; "Renegade" sozinho foi para `revisar`; o canal "- Topic" não chamou a IA. 18 vídeos custaram cerca de US$ 0,013. A IA varia entre execuções: num mashup de 4 músicas ela listou só 3 uma vez, e o mashup com "renegade" foi marcado ambíguo numa execução e não na outra. Os limiares são revistos com dados reais no tópico 205.
 
+## Catálogo único e correções manuais (tópico 196)
+
+### Normalização
+
+`NormalizarTextoMusicaService` é a base de todas as chaves: forma de compatibilidade Unicode (letras largas como "ｓｔｅｒｅｏ" viram "stereo"), minúsculas, sem acentos, sem pontuação, letras espaçadas juntadas ("s t e r e o" → "stereo"), `&` igual a `and` e hífen interno como espaço ("Lily-Rose" → "lily rose"). Na chave da música, o título também perde participações e rótulos de versão entre parênteses ou depois de " - " (slowed, reverb, sped up, remaster, live, remix, lyrics, official video e afins), então "Here Comes The Sun - Remastered 2009" e "Little Dark Age (Slowed + Reverb)" caem na música original.
+
+### Spotify no catálogo
+
+- `VincularFaixasSpotifyAoCatalogoService` percorre as músicas distintas do Spotify (nome + artista principal) em lotes de 200, cria ou acha a `MusicaCatalogo` (álbum, capa da `imagem_spotify`, todos os artistas de `artista_faixa_spotify` ou só o principal), e grava o `VinculoMusicaSpotify`. É idempotente: só vincula identidades ainda sem vínculo.
+- Comando: `php bin/console app:musica:vincular-spotify [--usuario=ID]`, com progresso por lote. No teste com 400 músicas reais: cerca de 11 s por lote de 200, versões juntas ("Birds", "Birds feat. Elisa" e "Birds - Live in Vegas" na mesma música), colaborações com todos os artistas, e a segunda execução não vinculou nada de novo.
+- A coleta do Spotify (quando há reprodução nova, olhando o último dia) e a importação do histórico disparam `VincularSpotifyAoCatalogoMessage` na fila `async`, para não mexer na memória do Doctrine no meio da coleta.
+- Quando a busca de artistas (M133) grava os artistas de uma música, `AtualizarArtistasMusicaSpotifyService` acrescenta os que faltam na música do catálogo, a não ser que ela tenha sido corrigida à mão.
+- O título exibido passa para a forma limpa quando ela aparece ("Birds - Live in Vegas" vira "Birds").
+
+### Correções manuais
+
+Toda correção marca a música como `confirmadaManualmente` (ou o vídeo com origem `manual`), nunca apaga título, canal ou resposta da IA, e invalida o cache das análises. A projeção das reproduções (tópico 199) vai reagir a essas mudanças.
+
+| Serviço | O que faz |
+|---|---|
+| `UnirMusicasCatalogoService` | A origem passa a apontar para o destino (`unidaA`). Nada é apagado; quem lê usa `musicaEfetiva()`. Música e mashup não se unem. |
+| `DesfazerUniaoMusicaService` | Tira o apontamento, e as duas voltam a ser separadas. |
+| `SepararVideoDaMusicaService` | Tira o vídeo da música e o devolve para a revisão como decisão manual. |
+| `DefinirMusicaDoVideoService` | Define a música (do catálogo ou por título e artistas), ou marca "não é música", ou mantém como compilação (a resolução de compilação do roadmap ficou aqui). |
+| `DefinirComponentesMashupService` | Troca os componentes, recalcula a chave, o título e os artistas. Se já existir outro mashup com as mesmas músicas, responde 409 para usar a união. |
+| `DefinirArtistasMusicaService` | Redefine e reordena os artistas. A chave da música não muda. |
+| `UnirArtistasCatalogoService` | O artista de origem aponta para o destino (`unidoA`) e vira alias dele, então as próximas identificações já usam o destino. |
+| `ClassificarCanalYoutubeService` | Cria ou troca a regra do canal. "Não música" classifica na hora os vídeos pendentes, em revisão ou compilação desse canal; "música" devolve esses vídeos para a fila de identificação. |
+
+`SugerirDuplicatasCatalogoService` sugere pares com o mesmo título normalizado e artista parecido (contido ou similaridade de 75%), sem aplicar nada. O critério de duração próxima ficou de fora porque o catálogo não guarda duração.
+
+### Endpoints (`MusicaCorrecaoController`)
+
+- `GET /api/v1/musica/revisao?tipo=&pagina=&porPagina=`, com `tipo` = `sem_vinculo`, `ambiguo`, `compilacao`, `canal_novo`, `possivel_duplicata` ou `indisponivel`. Vídeos vêm com miniatura, status, confiança, versão, sugestão da IA (com as alternativas) e a música atual; canais vêm com total e um título de exemplo; duplicatas vêm em pares.
+- `POST /api/v1/musica/revisao/videos/{uuid}/musica` — corpo `{acao: definir_musica|nao_musica|manter_compilacao, musicaUuid?, titulo?, artistas?, versao?}`.
+- `POST /api/v1/musica/catalogo/unir` — `{origemUuid, destinoUuid}`.
+- `POST /api/v1/musica/catalogo/separar` — `{musicaUuid}` desfaz uma união; `{videoUuid}` tira o vídeo da música.
+- `PUT /api/v1/musica/catalogo/{uuid}/artistas` — `{artistas: []}` (a mais do roadmap, para a tela do tópico 202).
+- `POST /api/v1/musica/canais/classificar` — `{canal, classificacao: musica|nao_musica}`.
+- `POST /api/v1/musica/artistas/unir` — `{origemUuid, destinoUuid}`.
+- `PUT /api/v1/musica/mashups/{uuid}/componentes` — `{componentes: [{titulo, artistas}]}` (2 a 5).
+- Item de outro usuário responde 404, porque toda busca filtra pelo usuário logado.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.

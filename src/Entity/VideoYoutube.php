@@ -180,6 +180,16 @@ class VideoYoutube
         return $this;
     }
 
+    public function voltarParaPendente(): self
+    {
+        $this->status = StatusClassificacaoVideo::Pendente;
+        $this->origemClassificacao = null;
+        $this->musica = null;
+        $this->classificadoEm = null;
+
+        return $this;
+    }
+
     public function isPendente(): bool
     {
         return $this->status->isPendente();

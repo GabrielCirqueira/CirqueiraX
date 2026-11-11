@@ -9,9 +9,11 @@ use App\DataObject\Spotify\ResultadoImportacaoHistoricoSpotifyDTO;
 use App\Entity\ReproducaoSpotify;
 use App\Entity\Usuario;
 use App\Interface\LeitorArquivoHistoricoSpotifyInterface;
+use App\Message\VincularSpotifyAoCatalogoMessage;
 use App\Repository\ReproducaoSpotifyRepository;
 use DateTimeImmutable;
 use DateTimeZone;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class DeduplicarEImportarHistoricoSpotifyService
 {
@@ -24,6 +26,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
         private LeitorArquivoHistoricoSpotifyInterface $leitorArquivo,
         private ReproducaoSpotifyRepository $reproducaoRepository,
         private CacheAnaliseSpotifyService $cacheAnalise,
+        private MessageBusInterface $messageBus,
     ) {}
 
     public function executar(string $caminhoArquivo, Usuario $usuario): ResultadoImportacaoHistoricoSpotifyDTO
@@ -159,6 +162,7 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
         $this->reproducaoRepository->flush();
         $this->reproducaoRepository->limparCache();
         $this->cacheAnalise->invalidar($usuario);
+        $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $usuario->getId()));
     }
 
     /**
