@@ -217,8 +217,21 @@
   - `config/packages/rate_limiter.yaml`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 191 — Entidades — vídeo, reprodução, catálogo canônico e regra de canal
-- **Status**: Pendente
+### ✅ Tópico 191 — Entidades — vídeo, reprodução, catálogo canônico e regra de canal
+- **Status**: Concluído
+- **O que foi feito**:
+  - Enums em `src/Enum/`: `FonteReproducaoYoutube` (`coletor`, `takeout`), `StatusClassificacaoVideo` (`pendente`, `musica`, `mashup`, `compilacao`, `nao_musica`, `revisar`, `indisponivel`, com `isContaComoMusica()` e `isFinal()`), `OrigemClassificacao` (`regra`, `regra_canal`, `ia`, `manual`), `TipoVersaoMusica` (14 tipos, de `original` a `outro`), `TipoMusicaCatalogo` (`original`, `mashup`) e `ClassificacaoCanal` (`musica`, `nao_musica`). Todos com `descricao()` e predicados `is*`.
+  - `VideoYoutube` (`video_youtube`): único por usuário e `videoId`, índice `(usuario, status)`. Guarda título, canal, `canalId`, duração, capa, categoria do YouTube, descrição resumida (até 1.000 caracteres), disponibilidade, status, origem da classificação, confiança (0–100), resposta da IA (JSON), data da classificação, tipo de versão e vínculo opcional com `MusicaCatalogo` (`SET NULL`). Métodos `atualizarDadosColetados`, `registrarDetalhesYoutube`, `marcarIndisponivel` e `classificar`.
+  - `ReproducaoYoutube` (`reproducao_youtube`): vídeo, `tocadaEm` em UTC, `msReproduzidos`, `tempoExato` sempre falso, fonte e `chaveDeduplicacao` (sha256 de `videoId` + horário UTC). Único por usuário e chave, índices `(usuario, tocadaEm)` e no vídeo. `ajustarMsReproduzidos` para o tempo estimado.
+  - Catálogo por usuário: `MusicaCatalogo` (título, tipo, `chaveNormalizada` única por usuário, álbum, capa, `videoOficialId`, `confirmadaManualmente`, coleções ordenadas de artistas e componentes), `ArtistaCatalogo` (único por nome normalizado), `AliasArtistaCatalogo` (alias único por usuário), `MusicaArtistaCatalogo` (posição 0 = principal), `ComponenteMashup` (texto do componente e música opcional, `SET NULL`), `VinculoMusicaSpotify` (nome + artista principal normalizados do Spotify → música do catálogo, com marca de vínculo manual) e `RegraCanalYoutube` (canal normalizado → `musica`/`nao_musica`).
+  - Repositórios com `salvar`, `remover`, `flush` e as buscas dos próximos tópicos: vídeo por `videoId`, vários `videoId` de uma vez, pendentes em lote e por canal; chaves de reprodução já existentes, última reprodução antes de um momento e total do usuário; música por chave; artista por nome normalizado; alias; vínculo do Spotify por identidade; regra por canal.
+  - Migration `Version20261111145156` gerada pelo diff contra o esquema da produção e validada.
+- **Diferença do roadmap**: uma migration em vez de duas. `video_youtube` depende de `musica_catalogo`, e o diff é gerado contra a produção, então separar exigiria editar a migration à mão, o que a regra do projeto proíbe. As tabelas do Spotify não mudaram.
+- **Arquivos**:
+  - `src/Enum/FonteReproducaoYoutube.php`, `StatusClassificacaoVideo.php`, `OrigemClassificacao.php`, `TipoVersaoMusica.php`, `TipoMusicaCatalogo.php`, `ClassificacaoCanal.php`
+  - `src/Entity/VideoYoutube.php`, `ReproducaoYoutube.php`, `MusicaCatalogo.php`, `ArtistaCatalogo.php`, `AliasArtistaCatalogo.php`, `MusicaArtistaCatalogo.php`, `ComponenteMashup.php`, `VinculoMusicaSpotify.php`, `RegraCanalYoutube.php`
+  - `src/Repository/` com um repositório para cada entidade acima
+  - `migrations/Version20261111145156.php`
 
 ### ⏳ Tópico 192 — Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler
 - **Status**: Pendente

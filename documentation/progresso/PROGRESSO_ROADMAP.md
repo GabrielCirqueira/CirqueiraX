@@ -209,7 +209,7 @@
 | 188 | Infra — cliente do YouTube Music com ytmusicapi por processo | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 189 | Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 190 | Conexão do YouTube Music — serviços, endpoints e status no Dashboard | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
-| 191 | Entidades — vídeo, reprodução, catálogo canônico e regra de canal | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
+| 191 | Entidades — vídeo, reprodução, catálogo canônico e regra de canal | ✅ Concluído | [ver](PROGRESSO_ROADMAP_10.md) |
 | 192 | Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
 | 193 | Infra — YouTube Data API em lote para categoria, duração e descrição | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |
 | 194 | Infra — identificador de músicas por IA com resposta estruturada e registro de custo | ⏳ Pendente | [ver](PROGRESSO_ROADMAP_10.md) |

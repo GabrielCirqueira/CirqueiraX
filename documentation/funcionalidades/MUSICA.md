@@ -84,6 +84,21 @@ A dica da janela anônima é comum em outras ferramentas que usam a mesma biblio
 - `POST /api/v1/youtube-music/desconectar` apaga a credencial e o retrato e **mantém as reproduções**.
 - Dashboard: o resumo (`GET /api/v1/dashboard/resumo`) ganhou o bloco `youtubeMusic` com `estado` (`nao_configurado`, `conectado`, `reconectar`), `nomeConta`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `motivoErro` e `rota` (`/musica`). O resumo das integrações de música saiu do `DashboardService` para `ResumoIntegracoesMusicaService`.
 
+## Modelo de dados (tópico 191)
+
+| Tabela | Para que serve |
+|---|---|
+| `video_youtube` | Cada vídeo visto (título e canal como vieram, duração, capa, classificação, versão e música do catálogo). Único por usuário e `videoId` |
+| `reproducao_youtube` | Cada reprodução do YouTube (`tocadaEm` UTC, tempo estimado, fonte `coletor` ou `takeout`). Chave de deduplicação = sha256(`videoId` + horário UTC) |
+| `musica_catalogo` | A música principal, igual entre serviços. Chave = título + artista principal normalizados; mashup = conjunto ordenado das chaves dos componentes |
+| `artista_catalogo` e `alias_artista_catalogo` | Artista único por nome normalizado, com apelidos ("lana" → Lana Del Rey) |
+| `musica_artista_catalogo` | Artistas de cada música (posição 0 = principal) |
+| `componente_mashup` | Partes de um mashup; a parte pode ficar sem música identificada |
+| `vinculo_musica_spotify` | Liga nome + artista principal do Spotify a uma música do catálogo |
+| `regra_canal_youtube` | Canal que sempre é música ou nunca é |
+
+As tabelas do Spotify (`reproducao_spotify`, `artista_faixa_spotify`) não mudaram.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.

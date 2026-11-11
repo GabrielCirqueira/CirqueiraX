@@ -40,7 +40,7 @@
 - [x] **188. Infra — cliente do YouTube Music com ytmusicapi por processo**
 - [x] **189. Entidade ContaYoutubeMusic, enum de status, credenciais criptografadas e migration**
 - [x] **190. Conexão do YouTube Music — serviços, endpoints e status no Dashboard**
-- [ ] **191. Entidades — vídeo, reprodução, catálogo canônico e regra de canal**
+- [x] **191. Entidades — vídeo, reprodução, catálogo canônico e regra de canal**
 - [ ] **192. Coleta do histórico do YouTube Music — novas reproduções, intervalo adaptativo e Scheduler**
 - [ ] **193. Infra — YouTube Data API em lote para categoria, duração e descrição**
 - [ ] **194. Infra — identificador de músicas por IA com resposta estruturada e registro de custo**
