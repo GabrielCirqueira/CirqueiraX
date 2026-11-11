@@ -256,13 +256,61 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 - **Parâmetro `fonte`:** `todas` (padrão), `spotify` ou `youtube_music`, validado pelo enum `FiltroFonteMusica` (`FiltroFonteRequisicaoDTO`). Valor inválido devolve 422.
 - **`MusicaController`:** `GET /musica/resumo`, `/musica/capsula`, `/musica/capsula/{ano}/{mes}`, `/musica/ranking` (mesmos parâmetros de antes: `tipo`, `dias`, `ano`, `mes`, `inicio`, `fim`, `limite`) e `/musica/artistas/{uuid}/top-musicas`.
 - **`MusicaAnaliseController`:** `GET /musica/habitos`, `/recordes`, `/evolucao`, `/descobertas`, `/retrospectiva/{ano}`, `/musicas/{uuid}`, `/artistas/{uuid}`, `/identificacao/resumo` (contagem por status: pendentes, em revisão, compilações e o total por status) e `/identificacao/consumo?dias=30` (tokens e custo por dia, mais o total, a partir de `ConsumoIa`).
-- **Alias:** as rotas antigas de análise em `/api/v1/spotify/` (`capsula`, `resumo`, `ranking`, `artistas/top-musicas`, `habitos`, `recordes`, `evolucao`, `descobertas`, `retrospectiva`, `artistas/detalhe`, `musicas/detalhe`) são uma segunda rota no mesmo método, com `fonte = spotify` como padrão. Os detalhes antigos por nome resolvem o nome para o uuid do catálogo (alias de artista, nome normalizado ou vínculo do Spotify) e chamam o mesmo serviço. Saem no tópico 203. Conexão, importação, status, sincronizar, desconectar, imagens e tocando agora continuam em `/api/v1/spotify/`, sem mudança.
+- **Alias (removido no tópico 203):** as rotas antigas de análise em `/api/v1/spotify/` saíram. Os links antigos por nome são resolvidos por `GET /musica/artistas/resolver?nome=` e `/musica/musicas/resolver?nome=&artista=` (alias de artista, nome normalizado ou vínculo do Spotify). Conexão, importação, status, sincronizar, desconectar, imagens e tocando agora continuam em `/api/v1/spotify/`.
 - **Serviços sem duplicação:** os serviços de análise saíram de `Service/Spotify` para `Service/Musica/Analise`, com nomes neutros (`ObterHabitosMusicaService`, `ObterRecordesMusicaService`, `ObterEvolucaoMensalMusicaService`, `ObterDescobertasMusicaService`, `ObterRetrospectivaAnualMusicaService`, `ObterDetalheMusicaService`, `ObterDetalheArtistaMusicaService`, Cápsula, resumo, ranking e top músicas do artista). Todos leem `AnaliseReproducaoMusicalRepository` e recebem a fonte. O `MontarResumoIntervaloMusicaService` monta totais e tops de um intervalo para o resumo e para o ranking.
 - **Itens dos rankings:** além dos campos de antes (`nomeFaixa`, `artista`, `codigoFaixa`, `album`, `streams`, `minutos`, `imagemUrl`, `urlSpotify`), trazem `musicaUuid` ou `artistaUuid`, `artistas`, `fontes`, `porFonte` (streams e minutos de cada fonte), `mashup`, `estimado` e `urlYoutubeMusic` (`https://music.youtube.com/watch?v=<videoId>` do vídeo oficial do catálogo ou do vídeo mais ouvido). `urlSpotify` só vem quando a música ou o artista tem reprodução no Spotify.
 - **Detalhe da música:** `variantes` (cada vídeo e cada faixa do Spotify ligados à música: fonte, título, canal ou artista, código, `tipoVersao`, capa, link, streams e minutos), `componentes` dos mashups e `porFonte` com primeira e última vez de cada fonte. **Detalhe do artista:** inclui `mashups` (marcados com `mashup: true`) e a mesma divisão por fonte. Ambos pelo `uuid` do catálogo; uuid de outro usuário dá 404.
 - **Capas e fotos:** capa da música vem da imagem do Spotify (quando a música tem Spotify), senão da capa do catálogo, senão da miniatura do vídeo. Itens só do YouTube **não** entram no enriquecimento de imagens do Spotify, para não gastar cota. Foto de artista: `imagem_spotify` quando existe; para os demais, uma única busca pela `ytmusicapi` (comando `foto_artista` do `bin/ytmusic.py`, sem login), na fila `async` (`BuscarFotoArtistaMessage`), gravando em `ArtistaCatalogo.urlFoto` e marcando `fotoBuscadaEm` (migration `Version20261111190918`), mesmo quando nada é achado. A busca é enfileirada ao abrir o detalhe do artista e pelo comando `app:musica:buscar-fotos-artistas [-u id]`.
 - **Cache:** a chave inclui a fonte; a Cápsula passou a ter cache da lista de meses. Tudo é invalidado a cada projeção (novas reproduções, importações, correções e reclassificações).
 - **Teste com a cópia dos dados de produção** (101.015 reproduções, sem cache): resumo 4,5 s, Cápsula de um mês 3,4 s, lista da Cápsula (24 meses) 22 s na primeira vez, ranking do ano 4,2 s, hábitos 2,2 s, recordes 4,6 s, descobertas 5,3 s, retrospectiva 8,2 s, detalhe da música 1,9 s, detalhe do artista 6 s. Com um vídeo de teste ligado a uma música do catálogo: a música passou a mostrar as duas fontes, a variante do vídeo com `tipoVersao`, o link do YouTube Music, minutos estimados e a primeira e a última vez de cada fonte; o ranking com `fonte = youtube_music` trouxe só os 7 minutos do vídeo. Fonte inválida dá 422 e uuid inexistente dá 404.
+
+## Página Música (tópicos 201 a 203)
+
+- **Rotas:** `/musica`, `/musica/artista?uuid=`, `/musica/faixa?uuid=` e `/musica/revisao`. `/spotify`, `/spotify/artista` e `/spotify/musica` redirecionam mantendo a busca; `/spotify/callback` continua sendo o retorno do OAuth.
+- **Tema:** tokens `cirqueira.musica.*` com os mesmos valores do antigo tema do Spotify, mais `fonteSpotify` (#1ED760) e `fonteYoutubeMusic` (#FF0033) para ícones e gráficos.
+- **Seletor de fonte:** pílulas Todos, Spotify e YouTube Music no topo, guardadas em `?fonte=`. Todas as consultas levam a fonte na chave e no parâmetro. Os links internos mantêm a fonte.
+- **Origem e estimativa:** cada item mostra os ícones das fontes; minutos com YouTube Music levam a marca "est." e o tooltip separa Spotify e YouTube Music.
+- **Topo:** cartões de conexão do Spotify e do YouTube Music lado a lado; selo "N itens para revisar" e o link "Revisão e correções".
+- **Rankings:** linhas de música com ícones, artistas creditados, selo Mashup e expansão "Versões ouvidas neste período" (`GET /musica/musicas/{uuid}/versoes`, com o período do ranking) ou "Contém" nos mashups.
+- **Detalhes:** resumo por fonte, evolução mensal empilhada por fonte (quando há YouTube Music), "Versões que você ouviu", "Contém" (mashup), "Mashups em que aparece" (artista), link do YouTube Music e as ações do tópico 204.
+- **Efeitos da fonte:** pulos e aleatório ficam "Indisponível para o YouTube Music" quando a fonte é só YouTube Music; o cartão "Tocando agora" é só do Spotify e some nessa fonte; em Todos e YouTube Music aparece "Última detectada: título · canal, há cerca de X min" (sem horário exato).
+- **Cápsula:** com YouTube Music na fonte, aparece "Calibrada com o Spotify. Os minutos do YouTube Music são estimados." A imagem PNG e o CSV levam a atribuição da fonte escolhida.
+- **Dashboard:** item YouTube Music no status das integrações (não configurado, conectado ou reconectar).
+
+## Revisão e correções (tópico 204)
+
+- **Tela `/musica/revisao`:** abas Sem vínculo (vídeos pendentes ou em revisão sem ambiguidade), Ambíguos, Compilações, Canais novos, Possíveis duplicadas e Indisponíveis, com contagem (`GET /musica/revisao/contagens`) e paginação de 20.
+- **Cartão do vídeo:** miniatura, título e canal originais, duração, link do YouTube, sugestão da IA com confiança e outras leituras. Ações: confirmar a sugestão, escolher música (busca no catálogo em `GET /musica/catalogo/musicas?busca=` ou criar nova com título, artistas e versão), marcar como mashup (`acao = definir_mashup` com `componentes`), não é música, manter compilação e regra do canal (sempre ou nunca música).
+- **Lote:** vários vídeos de uma vez para a mesma música do catálogo (`POST /musica/revisao/videos/lote`, até 100).
+- **Duplicadas:** "Manter esta e unir" chama `POST /musica/catalogo/unir`.
+- **Nos detalhes:** "Unir com outra música…", "Separar esta versão" (`POST /musica/catalogo/separar` com `videoUuid`; o vídeo volta para a revisão) e "Unir com outro artista" (`POST /musica/artistas/unir`, busca em `GET /musica/catalogo/artistas?busca=`).
+- **Nada é apagado:** unir pode ser desfeito (`separar` com `musicaUuid`) e os títulos e canais originais ficam guardados. A interface remove o item da lista na hora e desfaz se a API recusar.
+
+## Teste com dados reais (tópico 205)
+
+Lista do que só pode ser conferido com a conta e os arquivos do Gabriel. Cada constante alterada depois desses testes precisa do motivo registrado aqui.
+
+| Verificação | Situação |
+|---|---|
+| Coleta ao vivo com 5 a 10 músicas (slowed da mesma música, um mashup, uma repetição e uma pulada) | _pendente_ |
+| Takeout real: relatório, fila de revisão e custo real contra o estimado | _pendente_ |
+| Acerto da IA em 100 títulos reais (inclusive português e gospel) e confirmação pela busca | _pendente_ |
+| 30 músicas ouvidas nos dois serviços: duplicatas falsas e uniões erradas | _pendente_ |
+| Paridade com `fonte = spotify` (abril, maio e junho de 2026 e o comando de paridade do tópico 199) | _pendente_ |
+| Outubro de 2025 combinado (se o Google ainda tiver o histórico) | _pendente_ |
+| Rede do trabalho: a página abre e a coleta continua no servidor | _pendente_ |
+| Cookie vencido: `reconectar` no painel e no Dashboard e retomada sem perder reproduções | _pendente_ |
+| Bloqueio do Spotify: aviso e pausa da coleta e da busca de artistas | _pendente_ |
+| Celular: página, seletor, modal do Takeout e revisão | _pendente_ |
+
+### Constantes em observação
+
+| Constante | Valor | Onde |
+|---|---|---|
+| Janela do Takeout para tempo ouvido | 600 s | importação do Takeout (tópico 198) |
+| Componentes para compilação | `LIMITE_COMPONENTES_MASHUP = 5` | `AplicarIdentificacaoVideoYoutubeService` |
+| Intervalo da coleta | 30 s com novidade, 120 s parado, mínimo 15 s | tópico 192 |
+| Stream | 30.000 ms | regra do Spotify |
 
 ## Pendências do Gabriel
 
@@ -279,7 +327,7 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 
 ## Limpeza do teste
 
-Só depois do tópico 192 estar em produção coletando: parar e remover o contêiner `ytmusic_teste_coletor` e apagar `/root/ytmusic_teste`.
+Depois do deploy final, com o YouTube Music conectado pela página e coletando em produção: parar e remover o contêiner `ytmusic_teste_coletor` e apagar `/root/ytmusic_teste`. O cliente OAuth do teste e o acesso de terceiros ficam no item 5 das pendências.
 
 ## Fora do escopo
 

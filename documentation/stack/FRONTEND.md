@@ -47,7 +47,10 @@ web/
 │   ├── livros-audio/
 │   ├── not-found/
 │   ├── prints/
-│   ├── spotify/
+│   ├── musica/             Página Música, detalhes, rankings e Cápsula
+│   ├── revisao-musica/     Tela de revisão e correções do catálogo
+│   ├── spotify/            Conexão, importação, callback e tocando agora
+│   ├── youtube-music/      Conexão, importação do Takeout e selo de revisão
 │   ├── transcricoes/
 │   └── upload-manual/
 ├── layouts/                MainLayout, AuthLayout, AppContainer, Sidebar, Header e Footer
@@ -78,10 +81,12 @@ web/
 | `/google-fotos` | Google Fotos | Protegida |
 | `/livros-audio` | Livros em Áudio | Protegida |
 | `/livros-audio/:uuid` | Leitor de Livro em Áudio | Protegida |
-| `/spotify` | Spotify & Cápsula Sonora | Protegida |
+| `/musica` | Música (Spotify, YouTube Music e Cápsula Sonora) | Protegida |
+| `/musica/artista?uuid=` | Detalhe do artista | Protegida |
+| `/musica/faixa?uuid=` | Detalhe da música | Protegida |
+| `/musica/revisao?aba=` | Revisão e correções do catálogo | Protegida |
+| `/spotify`, `/spotify/artista`, `/spotify/musica` | Redirecionam para as rotas de Música | Protegida |
 | `/transcricoes` | Transcrições de Áudio | Protegida |
-| `/spotify/artista?nome=` | Detalhe de artista do Spotify | Protegida |
-| `/spotify/musica?nome=&artista=` | Detalhe de música do Spotify | Protegida |
 | `/spotify/callback` | Retorno OAuth do Spotify | Protegida |
 | `*` | NotFound | Pública |
 
@@ -103,7 +108,9 @@ A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainL
 | `editor-imagem` | [EDITOR_IMAGEM.md](../funcionalidades/EDITOR_IMAGEM.md) |
 | `upload-manual` | [UPLOAD_MANUAL.md](../funcionalidades/UPLOAD_MANUAL.md) |
 | `google-fotos` | [GOOGLE_FOTOS.md](../funcionalidades/GOOGLE_FOTOS.md) |
+| `musica`, `revisao-musica` | [MUSICA.md](../funcionalidades/MUSICA.md) |
 | `spotify` | [SPOTIFY.md](../funcionalidades/SPOTIFY.md) |
+| `youtube-music` | [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md) |
 
 ---
 

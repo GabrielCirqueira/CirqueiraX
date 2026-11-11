@@ -46,7 +46,7 @@ Rotinas diárias: limpeza de vídeos e expiração de áudios
 Módulos isolados: 
 ├── Downloads MP3 (entidade Audio)
 ├── Livros em Áudio (entidades LivroAudio, LivroAudioBloco, LivroAudioBlocoVoz, MarcacaoLivroAudio e EscutaLivroAudioDia)
-└── Spotify & Cápsula Sonora (entidades ContaSpotify, ReproducaoSpotify, ImagemSpotify e ImportacaoSpotify)
+└── Música: Spotify, YouTube Music e Cápsula Sonora (ContaSpotify, ReproducaoSpotify, ImagemSpotify, ImportacaoSpotify, ContaYoutubeMusic, VideoYoutube, ReproducaoYoutube, ImportacaoYoutube, MusicaCatalogo, ArtistaCatalogo e a projeção ReproducaoMusical)
 ```
 
 ### Stack

@@ -81,5 +81,13 @@
   - `src/DataObject/Musica/DefinirMusicaVideoDTO.php`, `src/DataObject/Musica/DefinirMusicaVideosEmLoteDTO.php`, `src/DataObject/Musica/BuscaCatalogoMusicaDTO.php`, `src/Enum/AcaoRevisaoVideo.php`, `src/Exception/Musica/MusicaCatalogoException.php`
   - `src/Repository/VideoYoutubeRepository.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Repository/ArtistaCatalogoRepository.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`
 
-### ⏳ Tópico 205 — Teste end-to-end com dados reais, calibração e documentação
-- **Status**: Pendente
+### 🔄 Tópico 205 — Teste end-to-end com dados reais, calibração e documentação
+- **Status**: Em andamento (falta a parte com os dados reais do Gabriel)
+- **O que foi feito**:
+  - Documentação: `MUSICA.md` ganhou as seções da página unificada (tópicos 201 a 203), da revisão (tópico 204), a tabela de testes com dados reais e as constantes em observação; o alias antigo foi marcado como removido. Novo `YOUTUBE_MUSIC.md` (conexão, cookie, coleta, Takeout, identificação, configuração e limites). Atualizados `SPOTIFY.md`, `FUNCIONALIDADES_DO_SISTEMA.md`, `CIRQUEIRAX.md`, `DASHBOARD.md`, `MULTIUSUARIO.md`, `DESIGN.md` (cores das fontes nos gráficos), `stack/BACKEND.md` (rotas de `/api/v1/musica`), `stack/FRONTEND.md` (features e rotas), `stack/MESSENGER.md` (mensagens e agendamento do YouTube Music), `stack/AUTH.md` (credencial do YouTube Music) e `stack/DOCUMENTACAO_TECNICA.md` (`YOUTUBE_API_KEY`, `OPENAI_MODELO_TEXTO` e os preços).
+  - Fechamento técnico: PHPStan sem erros nos arquivos do lote, `lint:container` ok, mapeamento do Doctrine ok (`doctrine:schema:validate --skip-sync`), `tsc` sem erros novos, Biome nos arquivos alterados e build do Vite.
+- **Pendente (precisa do Gabriel)**: coleta ao vivo com 5 a 10 músicas, Takeout real com o relatório e o custo, acerto da IA em 100 títulos, amostra de 30 músicas nos dois serviços, paridade com `fonte = spotify`, outubro de 2025, rede do trabalho, cookie vencido, bloqueio do Spotify e celular (tabela em `MUSICA.md`). Depois, remover o coletor de teste, `/root/ytmusic_teste` e as credenciais do teste OAuth.
+- **Observações**: o `php-cs-fixer` em modo de conferência aponta 378 arquivos do repositório só pela forma do construtor vazio (`{}` em vez de quebra de linha), inclusive arquivos antigos; não foi mexido para não espalhar diferença fora do lote. A validação do banco contra o mapeamento e as consultas novas de busca e contagem ficam para depois do deploy.
+- **Arquivos**:
+  - `documentation/funcionalidades/MUSICA.md`, `documentation/funcionalidades/YOUTUBE_MUSIC.md`, `documentation/funcionalidades/SPOTIFY.md`, `documentation/funcionalidades/FUNCIONALIDADES_DO_SISTEMA.md`, `documentation/funcionalidades/CIRQUEIRAX.md`, `documentation/funcionalidades/DASHBOARD.md`, `documentation/funcionalidades/MULTIUSUARIO.md`
+  - `documentation/guias/DESIGN.md`, `documentation/stack/BACKEND.md`, `documentation/stack/FRONTEND.md`, `documentation/stack/MESSENGER.md`, `documentation/stack/AUTH.md`, `documentation/stack/DOCUMENTACAO_TECNICA.md`

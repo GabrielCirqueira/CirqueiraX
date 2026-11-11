@@ -154,21 +154,22 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `DELETE` | `/transcricoes/{uuid}` | Apaga a transcrição e o áudio |
 | `GET` | `/transcricoes/{uuid}/audio` | Áudio original (aceita `?token=`) |
 
-### Spotify: análises
+### Música: análises e correções
 
-Períodos aceitos por `habitos` e `descobertas`: `periodo` = `todos`, `ano` (`ano`), `mes` (`ano`, `mes`), `dias` (`dias`) ou `intervalo`. Resultados ficam em cache por usuário (`CacheAnaliseSpotifyService`, tag `spotify_analise_{id}`), invalidado em coleta, importação e desconexão.
+As análises saíram de `/spotify` para `/api/v1/musica` (tópico 200) e aceitam `fonte` = `todas`, `spotify` ou `youtube_music`. Resultados ficam em cache por usuário (`CacheAnaliseSpotifyService`), invalidado a cada projeção de reproduções, importação e correção. Lista completa em [MUSICA.md](../funcionalidades/MUSICA.md).
 
 | Método | Rota | Descrição |
 | :--- | :--- | :--- |
-| `GET` | `/spotify/artistas/detalhe?artista=` | Detalhe do artista (404 sem reproduções) |
-| `GET` | `/spotify/musicas/detalhe?nome=&artista=` | Detalhe da música (404 sem reproduções) |
-| `GET` | `/spotify/habitos` | Mapa dia × hora, concentração, pulos e aleatório |
-| `GET` | `/spotify/recordes` | Sequências, recordes e totais de todos os tempos |
-| `GET` | `/spotify/evolucao?meses=` | Minutos e streams por mês (12, 24 ou 60) e comparação com o mesmo mês |
-| `GET` | `/spotify/descobertas` | Artistas e músicas novos, redescobertas e obsessões |
-| `GET` | `/spotify/retrospectiva/{ano}` | Resumo do ano |
-| `GET` | `/spotify/tocando-agora` | Faixa atual (sem cache) |
-| `GET` | `/spotify/ranking?tipo=todos` | Ranking de todos os tempos; a resposta traz também `topAlbuns` |
+| `GET` | `/musica/resumo`, `/musica/ranking`, `/musica/capsula` | Resumo, ranking e Cápsula |
+| `GET` | `/musica/habitos`, `/recordes`, `/evolucao`, `/descobertas`, `/retrospectiva/{ano}` | Análises |
+| `GET` | `/musica/musicas/{uuid}`, `/musica/artistas/{uuid}` | Detalhes pelo uuid do catálogo |
+| `GET` | `/musica/musicas/{uuid}/versoes` | Versões e componentes num período |
+| `GET` | `/musica/artistas/resolver?nome=`, `/musica/musicas/resolver?nome=&artista=` | Converte links antigos por nome |
+| `GET` | `/musica/revisao?tipo=`, `/musica/revisao/contagens` | Fila de revisão |
+| `POST` | `/musica/revisao/videos/{uuid}/musica`, `/musica/revisao/videos/lote` | Corrige vídeos |
+| `GET` | `/musica/catalogo/musicas?busca=`, `/musica/catalogo/artistas?busca=` | Busca no catálogo |
+| `POST` | `/musica/catalogo/unir`, `/musica/catalogo/separar`, `/musica/artistas/unir`, `/musica/canais/classificar` | Correções do catálogo |
+| `GET` | `/spotify/tocando-agora` | Faixa atual do Spotify (sem cache) |
 
 ### Categorias e regras
 

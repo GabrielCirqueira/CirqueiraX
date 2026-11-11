@@ -17,6 +17,7 @@ Cada usuário logado só vê e só mexe nos próprios dados. Uma mídia, categor
 | Histórico de envios ao Google Fotos | `registro_envio_google_fotos.usuario_id` |
 | Tokens de agente (PCs que mandam prints) | `token_agente.usuario_id` — o print entra na conta do dono do token |
 | Spotify, livros, transcrições, áudios | já eram por usuário |
+| YouTube Music, catálogo de músicas, revisão e projeção `reproducao_musical` | por usuário desde o lote 186–205; item de outra pessoa responde 404 |
 | Painel (dashboard) | números, últimas mídias, categorias, erros e Spotify da própria conta |
 | Sincronização (Syncthing) | só para administradores (`ROLE_ADMIN`) |
 

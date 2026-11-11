@@ -21,7 +21,7 @@ Sempre visíveis no topo:
 
 - `GraficosDashboard`: gráficos em Recharts.
 - `AtividadesRecentes`: as 6 últimas movimentações.
-- `StatusIntegracoes`: estado real de Syncthing, Pipeline, Google Fotos e Armazenamento.
+- `StatusIntegracoes`: estado real de Syncthing, Pipeline, Google Fotos, Armazenamento, Spotify (com o estado âmbar de bloqueio) e YouTube Music (não configurado, conectado ou reconectar). Os dois de música levam a `/musica`.
 
 ### Aba Categorias
 

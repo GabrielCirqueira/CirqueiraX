@@ -1,5 +1,7 @@
 # Spotify & Cápsula Sonora
 
+> Desde o lote 186–205 a página é **Música** (`/musica`), que junta Spotify e YouTube Music. As regras de cálculo do Spotify continuam as deste documento; a página unificada, o seletor de fonte e a revisão estão em [MUSICA.md](MUSICA.md), e a coleta do YouTube Music em [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md). Com `fonte = spotify`, os números são só do Spotify.
+
 Este documento descreve a funcionalidade do Spotify no CirqueiraX, incluindo a sincronização com a Spotify Web API, a importação retroativa do histórico completo de reproduções, as regras de agregação da Cápsula Sonora e os procedimentos de uso e calibração.
 
 ---

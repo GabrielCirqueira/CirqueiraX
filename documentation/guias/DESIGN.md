@@ -83,8 +83,8 @@ A página `/musica` (antiga `/spotify`, que agora redireciona) junta o Spotify e
   - `cirqueira.musica.verde`: `#1ED760` (números de minutos ouvidos, botões de ação e status conectados)
   - `cirqueira.musica.azul`: `#539DF5` (destaque para "Artista mais ouvido")
   - `cirqueira.musica.amarelo`: `#FEE44F` (destaque para "Música mais ouvida", títulos de ranking e posições)
-  - `cirqueira.musica.fonteSpotify`: `#1ED760` (só no ícone de origem do Spotify, `IconeFonteMusica`)
-  - `cirqueira.musica.fonteYoutubeMusic`: `#FF0033` (só no ícone de origem do YouTube Music e no contorno do botão "Abrir no YouTube Music")
+  - `cirqueira.musica.fonteSpotify`: `#1ED760` (ícone de origem do Spotify, `IconeFonteMusica`, e a parte do Spotify nos gráficos empilhados por fonte)
+  - `cirqueira.musica.fonteYoutubeMusic`: `#FF0033` (ícone de origem do YouTube Music, contorno do botão "Abrir no YouTube Music" e a parte do YouTube Music nos gráficos empilhados por fonte)
 
 - **Fonte e origem**: o seletor `SeletorFonteMusica` (Todos, Spotify, YouTube Music) usa o mesmo estilo de pílulas do seletor de período. Cada item mostra a origem por `GrupoIconesFonte`, com o logo de cada serviço na cor da própria marca, tooltip e rótulo acessível. Minutos que incluem tempo estimado do YouTube Music levam a marca "est." (`MarcaEstimado`).
 

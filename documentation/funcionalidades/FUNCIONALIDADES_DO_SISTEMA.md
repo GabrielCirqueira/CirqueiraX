@@ -90,7 +90,9 @@ Transforma vídeos em música para você ouvir ou baixar.
 
 > **Importante:** os arquivos MP3 ficam disponíveis por **7 dias**. Depois disso o arquivo é removido, mas você pode baixar de novo. Se quiser guardar uma música para sempre, baixe para o seu dispositivo.
 
-### Spotify & Cápsula Sonora
+### Música (Spotify, YouTube Music e Cápsula Sonora)
+
+A página **Música** junta o que você ouve no Spotify e no YouTube Music. Um seletor no topo mostra tudo junto ou só um dos serviços, e cada música e artista tem o ícone de onde foi ouvido. O YouTube Music é registrado pelo servidor, inclusive o que você ouve no celular, e o passado vem do Google Takeout. Versões como slowed e reverb contam para a mesma música, mashups são músicas próprias e uma tela de revisão deixa corrigir o que a identificação automática errar. Os minutos do YouTube Music são estimados.
 
 Conecte sua conta do Spotify e reviva a antiga **Cápsula Sonora** com o resumo de cada mês: minutos ouvidos, músicas e artistas mais tocados, variedade musical comparada com o mês anterior e histórico diário. Acompanhe também o resumo de hoje e dos últimos 7 dias com curiosidades musicais e exportação em planilha CSV.
 

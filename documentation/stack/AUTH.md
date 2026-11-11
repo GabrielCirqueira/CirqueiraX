@@ -14,6 +14,7 @@ O CirqueiraX usa autenticação sem sessão no servidor, com mecanismos diferent
 | Administração | JWT master | Gerado por `app:jwt:master` | Uso em linha de comando |
 | Google Fotos | OAuth 2.0 | Tokens em `ContaGoogleFotos` | Backup e álbuns |
 | Spotify | OAuth 2.0 PKCE | Tokens em `ContaSpotify` | Histórico de reproduções e perfil |
+| YouTube Music | Cabeçalhos da sessão do navegador | Cookie criptografado em `ContaYoutubeMusic` (`CriptografiaInterface`), só via entrada padrão para `bin/ytmusic.py` | Histórico do YouTube Music |
 
 ---
 

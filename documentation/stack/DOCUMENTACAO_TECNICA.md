@@ -200,6 +200,10 @@ Variáveis prefixadas com `VITE_` são expostas ao bundle via `import.meta.env`.
 | `SPOTIFY_CLIENT_ID` | `<client_id>` | Client ID do Spotify Developer Dashboard. |
 | `SPOTIFY_CLIENT_SECRET` | `<segredo>` | Client Secret do aplicativo Spotify. |
 | `SPOTIFY_REDIRECT_URI` | `https://x.cirqueira.com/spotify/callback` | URI de redirecionamento autorizada para OAuth 2.0 PKCE. |
+| `YOUTUBE_API_KEY` | `<chave>` | Chave da YouTube Data API v3 (detalhes dos vídeos do YouTube Music), restrita a essa API. |
+| `OPENAI_MODELO_TEXTO` | `gpt-5.4-mini` | Modelo da identificação de músicas. |
+| `OPENAI_PRECO_ENTRADA_POR_MILHAO` | `0.75` | Preço em US$ por milhão de tokens de entrada, usado na estimativa e no consumo. |
+| `OPENAI_PRECO_SAIDA_POR_MILHAO` | `4.5` | Preço em US$ por milhão de tokens de saída. |
 | `SYNCTHING_API_URL` | `http://localhost:8384` | REST API do Syncthing. |
 | `SYNCTHING_API_KEY` | `<chave>` | Chave da REST API do Syncthing. |
 
