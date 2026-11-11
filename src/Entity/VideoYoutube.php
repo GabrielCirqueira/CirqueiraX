@@ -68,6 +68,9 @@ class VideoYoutube
     #[ORM\Column(type: 'boolean')]
     private bool $disponivel = true;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $aguardandoImportacao = false;
+
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $detalhesAtualizadosEm = null;
 
@@ -122,6 +125,7 @@ class VideoYoutube
 
     public function atualizarDadosColetados(string $titulo, string $canal, ?int $duracaoMs, ?string $urlCapa, ?string $tipoVideo = null): self
     {
+        $this->aguardandoImportacao = false;
         $this->tipoVideo = $tipoVideo ?? $this->tipoVideo;
         $this->titulo = mb_substr($titulo, 0, self::TAMANHO_MAXIMO_TITULO);
         $this->canal = mb_substr($canal, 0, self::TAMANHO_MAXIMO_CANAL);
@@ -141,6 +145,25 @@ class VideoYoutube
         $this->detalhesAtualizadosEm = new DateTimeImmutable();
 
         return $this;
+    }
+
+    public function reservarParaImportacao(): self
+    {
+        $this->aguardandoImportacao = true;
+
+        return $this;
+    }
+
+    public function liberarDaImportacao(): self
+    {
+        $this->aguardandoImportacao = false;
+
+        return $this;
+    }
+
+    public function isAguardandoImportacao(): bool
+    {
+        return $this->aguardandoImportacao;
     }
 
     public function marcarIndisponivel(): self

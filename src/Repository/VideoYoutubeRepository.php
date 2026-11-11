@@ -100,6 +100,7 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
             ->setParameter('usuario', $usuario)
             ->setParameter('status', StatusClassificacaoVideo::Pendente)
             ->orderBy('e.criadoEm', 'ASC')
+            ->andWhere('e.aguardandoImportacao = false')
             ->setMaxResults($limite)
             ->getQuery()
             ->getResult();
@@ -135,6 +136,7 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
             ->setParameter('limite', $atualizadosAntesDe)
             ->orderBy('e.detalhesAtualizadosEm', 'ASC')
             ->addOrderBy('e.criadoEm', 'ASC')
+            ->andWhere('e.aguardandoImportacao = false')
             ->setMaxResults($limite)
             ->getQuery()
             ->getResult();
@@ -152,6 +154,7 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
             ->andWhere('e.status = :status')
             ->setParameter('status', StatusClassificacaoVideo::Pendente)
             ->orderBy('e.criadoEm', 'ASC')
+            ->andWhere('e.aguardandoImportacao = false')
             ->setMaxResults($limite)
             ->getQuery()
             ->getResult();

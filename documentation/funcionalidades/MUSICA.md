@@ -214,6 +214,17 @@ Toda correção marca a música como `confirmadaManualmente` (ou o vídeo com or
 - `PUT /api/v1/musica/mashups/{uuid}/componentes` — `{componentes: [{titulo, artistas}]}` (2 a 5).
 - Item de outro usuário responde 404, porque toda busca filtra pelo usuário logado.
 
+## Importação do Google Takeout (tópico 197)
+
+`POST /api/v1/youtube-music/importacoes` (multipart, campo `arquivo`, ZIP ou JSON até 200 MB) cria a `ImportacaoYoutube` e manda para a fila `youtube_importacao`. `GET /api/v1/youtube-music/importacoes/{uuid}` mostra o andamento e os contadores. Só uma importação por usuário de cada vez; a de outro usuário responde 404.
+
+- **Arquivo do histórico achado pelo conteúdo:** dentro do ZIP, cada `.json` é amostrado (até 50 objetos). Só vale o arquivo cujos objetos têm `header`, `title`, `titleUrl` e `time` com endereço de vídeo. O histórico de buscas (endereços `results?search_query`) e o resto do ZIP são ignorados. Se o histórico vier em HTML, a importação falha pedindo o formato JSON.
+- **Campos:** `videoId` do `v=` ou do `youtu.be`, título sem o prefixo do idioma ("Assistiu a ", "Watched "), canal de `subtitles[0].name`, horário em UTC e se veio do YouTube Music (`header`). Posts, entradas sem vídeo e anúncios (qualquer `details`) contam como descartados. Vídeo apagado (título igual ao endereço) entra sem título, para virar `indisponivel` no enriquecimento.
+- **Gravação:** lotes de 500, reanexando o usuário a cada lote. Cada `videoId` novo vira `VideoYoutube` pendente marcado com `aguardandoImportacao`, que o tira da identificação automática e da atualização de detalhes até a prévia de custo do tópico 198. Se a coleta encontra o mesmo vídeo, a marca sai. A reprodução entra com `fonte = takeout`, tempo 0 (estimado no tópico 198) e chave de usuário, vídeo e segundo; reimportar o mesmo arquivo não cria nada.
+- **Unificação com a coleta:** reprodução da coleta do mesmo vídeo a até `JANELA_TOLERANCIA_TAKEOUT_SEGUNDOS` (600) vira uma só, com o horário do Takeout, fonte `takeout` e o tempo estimado pela coleta. Cada reprodução da coleta é usada uma vez, a mais próxima primeiro.
+- **Arquivo temporário:** em `var/tmp/youtube_importacoes`, pelo `ArmazenamentoImportacaoYoutubeInterface`, apagado no fim do processamento com sucesso ou erro. Em erro, o EntityManager é reaberto para gravar o motivo.
+- O leitor de JSON em streaming saiu do leitor do Spotify para `LeitorStreamObjetosJson` e é usado pelos dois.
+
 ## Pendências do Gabriel
 
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.
@@ -223,7 +234,8 @@ Toda correção marca a música como `confirmadaManualmente` (ou o vídeo com or
 5. **Credenciais do teste OAuth:** apagar o cliente OAuth do teste no Google Cloud e revogar o acesso em myaccount.google.com → Segurança → Apps de terceiros. As variáveis `YTMUSIC_CLIENT_ID` e `YTMUSIC_CLIENT_SECRET` já foram removidas do `.env` do servidor.
 6. **Chave da YouTube Data API:** no Google Cloud, num projeto separado do cliente OAuth do teste, ativar a YouTube Data API v3, criar uma chave de API restrita só a essa API e colocar em `YOUTUBE_API_KEY` no `.env` do servidor. Sem ela, os detalhes dos vídeos não são buscados.
 7. **Preço da OpenAI:** conferir na página de preços o valor por milhão de tokens do modelo em `OPENAI_MODELO_TEXTO` e ajustar `OPENAI_PRECO_ENTRADA_POR_MILHAO` e `OPENAI_PRECO_SAIDA_POR_MILHAO` se for diferente de 0,75 e 4,50.
-8. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
+8. **Amostra do Takeout:** quando o arquivo chegar, enviar só as primeiras entradas do histórico de exibição para conferir o formato real (prefixo do título em português, campo de anúncio) e a janela de 600 s.
+9. **Confirmar as decisões** marcadas como proposta padrão na tabela acima.
 
 ## Limpeza do teste
 

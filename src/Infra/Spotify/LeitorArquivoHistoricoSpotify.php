@@ -8,6 +8,7 @@ use App\DataObject\Spotify\ItemHistoricoImportadoDTO;
 use App\Enum\FonteReproducaoSpotify;
 use App\Exception\Spotify\SpotifyException;
 use App\Interface\LeitorArquivoHistoricoSpotifyInterface;
+use App\Interface\LeitorStreamObjetosJsonInterface;
 use DateTimeImmutable;
 use DateTimeZone;
 use Generator;
@@ -15,7 +16,9 @@ use ZipArchive;
 
 final readonly class LeitorArquivoHistoricoSpotify implements LeitorArquivoHistoricoSpotifyInterface
 {
-    private const int TAMANHO_BLOCO_LEITURA = 65536;
+    public function __construct(
+        private LeitorStreamObjetosJsonInterface $leitorObjetosJson,
+    ) {}
 
     public function ler(string $caminhoArquivo): Generator
     {
@@ -161,76 +164,10 @@ final readonly class LeitorArquivoHistoricoSpotify implements LeitorArquivoHisto
      */
     private function processarStreamJson($stream): Generator
     {
-        $buffer = '';
-        $emString = false;
-        $escapado = false;
-        $nivelChaves = 0;
-
-        while (!feof($stream)) {
-            $bloco = fread($stream, self::TAMANHO_BLOCO_LEITURA);
-            if (false === $bloco || '' === $bloco) {
-                break;
-            }
-
-            $tamanho = strlen($bloco);
-
-            for ($i = 0; $i < $tamanho; ++$i) {
-                $caractere = $bloco[$i];
-
-                if ($emString) {
-                    $buffer .= $caractere;
-
-                    if ($escapado) {
-                        $escapado = false;
-                    } elseif ('\\' === $caractere) {
-                        $escapado = true;
-                    } elseif ('"' === $caractere) {
-                        $emString = false;
-                    }
-
-                    continue;
-                }
-
-                if ('"' === $caractere) {
-                    $emString = true;
-                    if ($nivelChaves > 0) {
-                        $buffer .= $caractere;
-                    }
-
-                    continue;
-                }
-
-                if ('{' === $caractere) {
-                    ++$nivelChaves;
-                    $buffer .= $caractere;
-
-                    continue;
-                }
-
-                if ('}' === $caractere) {
-                    --$nivelChaves;
-                    $buffer .= $caractere;
-
-                    if (0 === $nivelChaves) {
-                        /** @var mixed $dadosDecodificados */
-                        $dadosDecodificados = json_decode($buffer, true);
-                        $buffer = '';
-
-                        if (is_array($dadosDecodificados)) {
-                            /** @var array<string, mixed> $dadosDecodificados */
-                            $dto = $this->converterRegistroParaDTO($dadosDecodificados);
-                            if (null !== $dto) {
-                                yield $dto;
-                            }
-                        }
-                    }
-
-                    continue;
-                }
-
-                if ($nivelChaves > 0) {
-                    $buffer .= $caractere;
-                }
+        foreach ($this->leitorObjetosJson->ler($stream) as $registro) {
+            $dto = $this->converterRegistroParaDTO($registro);
+            if (null !== $dto) {
+                yield $dto;
             }
         }
     }

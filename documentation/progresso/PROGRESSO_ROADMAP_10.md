@@ -346,8 +346,32 @@
   - `migrations/Version20261111173332.php`
   - `documentation/funcionalidades/MUSICA.md`
 
-### ⏳ Tópico 197 — Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta
-- **Status**: Pendente
+### ✅ Tópico 197 — Importação do Takeout — leitura, filtros, fila e deduplicação com a coleta
+- **Status**: Concluído
+- **O que foi feito**:
+  - Enum `StatusImportacaoYoutube` (seis estados) e entidade `ImportacaoYoutube` (arquivo, nome, tamanho, contadores de lidos, descartados, novos, ignorados, unificados e vídeos novos, motivo do erro e datas). Migration `Version20261111175012`.
+  - `LeitorArquivoTakeoutYoutube` em `src/Infra/YoutubeMusic/` com interface: ZIP ou JSON, em streaming, acha o histórico de exibição pelo conteúdo (amostra de 50 objetos com `header`, `title`, `titleUrl`, `time` e endereço de vídeo), ignora buscas e o resto do ZIP, tira o prefixo do título, extrai o `videoId` de `v=` ou `youtu.be`, lê o canal e converte o horário para UTC. Anúncios, posts e entradas sem vídeo são descartados e contados.
+  - O parser de JSON em streaming do Spotify virou `LeitorStreamObjetosJson` (`src/Infra/Json/`, com interface), usado pelos dois leitores.
+  - `ImportarHistoricoTakeoutYoutubeService`: lotes de 500, vídeos novos pendentes e reservados (`VideoYoutube.aguardandoImportacao`), reprodução com `fonte = takeout`, chave exata para repetidas e unificação com a coleta dentro de `JANELA_TOLERANCIA_TAKEOUT_SEGUNDOS = 600` (horário do Takeout, fonte `takeout`, `ReproducaoYoutube::unificarComTakeout`).
+  - Vídeos reservados ficam fora da identificação automática e da atualização de detalhes até o tópico 198; a coleta libera a reserva quando vê o mesmo vídeo.
+  - `IniciarImportacaoYoutubeService` (ZIP ou JSON, 200 MB, uma por vez), `ProcessarImportacaoYoutubeService` (remove o arquivo no `finally`, reabre o EntityManager no erro), `ConsultarImportacaoYoutubeService`, `ArmazenamentoImportacaoYoutubeClient` em `var/tmp/youtube_importacoes`, `ImportacaoYoutubeException`.
+  - Fila `youtube_importacao`, `ImportarHistoricoYoutubeMessage` e handler, worker nos dois supervisord.
+  - `YoutubeImportacaoController`: `POST /api/v1/youtube-music/importacoes` (201) e `GET /api/v1/youtube-music/importacoes/{uuid}`.
+  - Conferido com um Takeout sintético em português num MySQL temporário com o esquema de produção: anúncio e post descartados, busca rejeitada, vídeo apagado sem título, reprodução da coleta a 2 minutos unificada, a de 3 horas mantida, reimportação sem nada novo, arquivo removido e erro gravado para arquivo sem histórico. O leitor do Spotify continuou lendo depois da extração do parser.
+- **Diferença do roadmap**: a importação termina em `concluida` neste tópico; os estados `aguardando_confirmacao` e `classificando` passam a ser usados no tópico 198. Foi criada a marca `aguardandoImportacao` no vídeo para a IA não rodar antes da prévia de custo. Sem testes automatizados (regra do projeto).
+- **A confirmar**: o formato real do arquivo com uma amostra do Takeout do Gabriel e a janela de 600 s.
+- **Arquivos**:
+  - `src/Infra/YoutubeMusic/LeitorArquivoTakeoutYoutube.php`, `ArmazenamentoImportacaoYoutubeClient.php`, `src/Infra/Json/LeitorStreamObjetosJson.php`, `src/Infra/Spotify/LeitorArquivoHistoricoSpotify.php`
+  - `src/Interface/LeitorArquivoTakeoutYoutubeInterface.php`, `LeitorStreamObjetosJsonInterface.php`, `ArmazenamentoImportacaoYoutubeInterface.php`
+  - `src/Service/YoutubeMusic/Importacao/` (4 serviços)
+  - `src/Entity/ImportacaoYoutube.php`, `VideoYoutube.php`, `ReproducaoYoutube.php`, `src/Enum/StatusImportacaoYoutube.php`
+  - `src/Repository/ImportacaoYoutubeRepository.php`, `VideoYoutubeRepository.php`, `ReproducaoYoutubeRepository.php`
+  - `src/DataObject/YoutubeMusic/ItemHistoricoTakeoutYoutubeDTO.php`, `ResultadoImportacaoTakeoutYoutubeDTO.php`, `UploadImportacaoYoutubeDTO.php`, `src/Exception/ImportacaoYoutube/ImportacaoYoutubeException.php`
+  - `src/Message/ImportarHistoricoYoutubeMessage.php`, `src/MessageHandler/ImportarHistoricoYoutubeMessageHandler.php`
+  - `src/Controller/YoutubeMusic/YoutubeImportacaoController.php`, `src/Serializer/ImportacaoYoutubeSerializer.php`
+  - `config/packages/messenger.yaml`, `config/services.yaml`, `devops/supervisord.conf`, `devops/php/supervisord-prod.conf`
+  - `migrations/Version20261111175012.php`
+  - `documentation/funcionalidades/MUSICA.md`
 
 ### ⏳ Tópico 198 — Importação do Takeout — enriquecimento, prévia de custo, classificação e tempo ouvido
 - **Status**: Pendente

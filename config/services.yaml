@@ -199,6 +199,13 @@ services:
             $diretorioBaseTranscricoes: '%kernel.project_dir%/var/transcricoes'
     App\Interface\LeitorArquivoHistoricoSpotifyInterface: '@App\Infra\Spotify\LeitorArquivoHistoricoSpotify'
     App\Interface\ArmazenamentoImportacaoSpotifyInterface: '@App\Infra\Spotify\ArmazenamentoImportacaoSpotifyClient'
+    App\Interface\LeitorStreamObjetosJsonInterface: '@App\Infra\Json\LeitorStreamObjetosJson'
+    App\Interface\LeitorArquivoTakeoutYoutubeInterface: '@App\Infra\YoutubeMusic\LeitorArquivoTakeoutYoutube'
+    App\Interface\ArmazenamentoImportacaoYoutubeInterface: '@App\Infra\YoutubeMusic\ArmazenamentoImportacaoYoutubeClient'
+
+    App\Infra\YoutubeMusic\ArmazenamentoImportacaoYoutubeClient:
+        arguments:
+            $diretorioTemporario: '%kernel.project_dir%/var/tmp/youtube_importacoes'
 
     App\Infra\Spotify\ArmazenamentoImportacaoSpotifyClient:
         arguments:

@@ -73,6 +73,15 @@ class ReproducaoYoutube
         return hash(self::ALGORITMO_CHAVE, $videoId.self::SEPARADOR_CHAVE.$momentoUtc->format(self::FORMATO_CHAVE));
     }
 
+    public function unificarComTakeout(DateTimeImmutable $tocadaEm): self
+    {
+        $this->tocadaEm = $tocadaEm->setTimezone(new DateTimeZone(self::FUSO_UTC));
+        $this->fonte = FonteReproducaoYoutube::Takeout;
+        $this->chaveDeduplicacao = self::gerarChaveDeduplicacao($this->video->videoId(), $this->tocadaEm);
+
+        return $this;
+    }
+
     public function ajustarMsReproduzidos(int $msReproduzidos): self
     {
         $this->msReproduzidos = max(0, $msReproduzidos);
