@@ -15,6 +15,8 @@ Grandes features, épicos e migrações estruturais **não** entram aqui — vã
 | [MELHORIAS_4.md](MELHORIAS_4.md) | Detalhamento das melhorias **M61–M80** |
 | [MELHORIAS_5.md](MELHORIAS_5.md) | Detalhamento das melhorias **M81–M100** |
 | [MELHORIAS_6.md](MELHORIAS_6.md) | Detalhamento das melhorias **M101–M120** |
+| [MELHORIAS_7.md](MELHORIAS_7.md) | Detalhamento das melhorias **M121–M140** |
+| [MELHORIAS_8.md](MELHORIAS_8.md) | Detalhamento das melhorias **M141–M160** |
 
 Cada arquivo sequencial agrupa **até 20 melhorias**.
 

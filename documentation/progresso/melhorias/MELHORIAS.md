@@ -12,7 +12,9 @@
 > - **M41–M60** → [MELHORIAS_3.md](MELHORIAS_3.md)
 > - **M61–M80** → [MELHORIAS_4.md](MELHORIAS_4.md)
 > - **M81–M100** → [MELHORIAS_5.md](MELHORIAS_5.md)
-> - **M101–M134** → [MELHORIAS_6.md](MELHORIAS_6.md)
+> - **M101–M120** → [MELHORIAS_6.md](MELHORIAS_6.md)
+> - **M121–M140** → [MELHORIAS_7.md](MELHORIAS_7.md)
+> - **M141–M160** → [MELHORIAS_8.md](MELHORIAS_8.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -136,17 +138,39 @@
 | M118 | Importação do Histórico Estendido Funcionando com Arquivos Grandes | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-118--importação-do-histórico-estendido-funcionando-com-arquivos-grandes) |
 | M119 | Tela de Importação do Spotify Presa em "Processando" | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-119--tela-de-importação-do-spotify-presa-em-processando) |
 | M120 | Métricas do Spotify Seguindo as Regras do Próprio Spotify | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-120--métricas-do-spotify-seguindo-as-regras-do-próprio-spotify) |
-| M121 | Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis) | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_6.md#melhoria-121--redesign-do-tema-escuro-e-design-system-inspirado-no-spotify-fundo-suave-cards-matte-profundo-badges-em-pílula-e-bordas-sutis) |
-| M122 | Redesign do Dashboard Geral (Cards Individuais Elevados com Ícones, Barra de Ações Rápidas Expandida e Painéis Modernizados) | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-122--redesign-do-dashboard-geral-cards-individuais-elevados-com-ícones-barra-de-ações-rápidas-expandida-e-painéis-modernizados) |
-| M123 | Página para Extrair Texto de Imagens | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-123--página-para-extrair-texto-de-imagens) |
-| M124 | Top Artistas do Spotify Ordenado por Minutos Ouvidos | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_6.md#melhoria-124--top-artistas-do-spotify-ordenado-por-minutos-ouvidos) |
-| M125 | Tempo do Spotify Exibido em Minutos com Horas no Tooltip | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-125--tempo-do-spotify-exibido-em-minutos-com-horas-no-tooltip) |
-| M126 | Músicas de Artistas e Álbuns no Ranking com Popup da Lista Completa | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-126--músicas-de-artistas-e-álbuns-no-ranking-com-popup-da-lista-completa) |
-| M127 | Sincronização do Spotify Mais Rápida e Sem Perder Músicas Atrasadas | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-127--sincronização-do-spotify-mais-rápida-e-sem-perder-músicas-atrasadas) |
-| M128 | Streams e Minutos Contam para Todos os Artistas da Música | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_6.md#melhoria-128--streams-e-minutos-contam-para-todos-os-artistas-da-música) |
-| M129 | Transcrição de Vídeos, Limite de 2 GB e Correção do Texto com IA | ✅ Concluído | 09/11/2026 | [ver](MELHORIAS_6.md#melhoria-129--transcrição-de-vídeos-limite-de-2-gb-e-correção-do-texto-com-ia) |
-| M130 | Página de Teste do Player do Spotify | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-130--página-de-teste-do-player-do-spotify) |
-| M131 | Cada Usuário com as Suas Mídias, Categorias e Google Fotos | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-131--cada-usuário-com-as-suas-mídias-categorias-e-google-fotos) |
-| M132 | Links Curtos `vt.tiktok.com` Aceitos no Download | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-132--links-curtos-vttiktokcom-aceitos-no-download) |
-| M133 | Busca de Artistas do Spotify pelas Músicas Mais Tocadas e Registro dos Bloqueios | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-133--busca-de-artistas-do-spotify-pelas-músicas-mais-tocadas-e-registro-dos-bloqueios) |
-| M134 | Página de Teste do Player do YouTube | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_6.md#melhoria-134--página-de-teste-do-player-do-youtube) |
+| M121 | Redesign do Tema Escuro e Design System Inspirado no Spotify (Fundo Suave, Cards Matte Profundo, Badges em Pílula e Bordas Sutis) | ✅ Concluído | 06/11/2026 | [ver](MELHORIAS_7.md#melhoria-121--redesign-do-tema-escuro-e-design-system-inspirado-no-spotify-fundo-suave-cards-matte-profundo-badges-em-pílula-e-bordas-sutis) |
+| M122 | Redesign do Dashboard Geral (Cards Individuais Elevados com Ícones, Barra de Ações Rápidas Expandida e Painéis Modernizados) | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_7.md#melhoria-122--redesign-do-dashboard-geral-cards-individuais-elevados-com-ícones-barra-de-ações-rápidas-expandida-e-painéis-modernizados) |
+| M123 | Página para Extrair Texto de Imagens | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_7.md#melhoria-123--página-para-extrair-texto-de-imagens) |
+| M124 | Top Artistas do Spotify Ordenado por Minutos Ouvidos | ✅ Concluído | 07/11/2026 | [ver](MELHORIAS_7.md#melhoria-124--top-artistas-do-spotify-ordenado-por-minutos-ouvidos) |
+| M125 | Tempo do Spotify Exibido em Minutos com Horas no Tooltip | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_7.md#melhoria-125--tempo-do-spotify-exibido-em-minutos-com-horas-no-tooltip) |
+| M126 | Músicas de Artistas e Álbuns no Ranking com Popup da Lista Completa | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_7.md#melhoria-126--músicas-de-artistas-e-álbuns-no-ranking-com-popup-da-lista-completa) |
+| M127 | Sincronização do Spotify Mais Rápida e Sem Perder Músicas Atrasadas | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_7.md#melhoria-127--sincronização-do-spotify-mais-rápida-e-sem-perder-músicas-atrasadas) |
+| M128 | Streams e Minutos Contam para Todos os Artistas da Música | ✅ Concluído | 08/11/2026 | [ver](MELHORIAS_7.md#melhoria-128--streams-e-minutos-contam-para-todos-os-artistas-da-música) |
+| M129 | Transcrição de Vídeos, Limite de 2 GB e Correção do Texto com IA | ✅ Concluído | 09/11/2026 | [ver](MELHORIAS_7.md#melhoria-129--transcrição-de-vídeos-limite-de-2-gb-e-correção-do-texto-com-ia) |
+| M130 | Página de Teste do Player do Spotify | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_7.md#melhoria-130--página-de-teste-do-player-do-spotify) |
+| M131 | Cada Usuário com as Suas Mídias, Categorias e Google Fotos | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_7.md#melhoria-131--cada-usuário-com-as-suas-mídias-categorias-e-google-fotos) |
+| M132 | Links Curtos `vt.tiktok.com` Aceitos no Download | ✅ Concluído | 10/11/2026 | [ver](MELHORIAS_7.md#melhoria-132--links-curtos-vttiktokcom-aceitos-no-download) |
+| M133 | Busca de Artistas do Spotify pelas Músicas Mais Tocadas e Registro dos Bloqueios | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_7.md#melhoria-133--busca-de-artistas-do-spotify-pelas-músicas-mais-tocadas-e-registro-dos-bloqueios) |
+| M134 | Página de Teste do Player do YouTube | 🟡 Publicado, falta validar | 10/11/2026 | [ver](MELHORIAS_7.md#melhoria-134--página-de-teste-do-player-do-youtube) |
+| M135 | Conectar o YouTube Music com os Cabeçalhos Copiados do Chrome ou do Firefox | ✅ Concluído | 11/11/2026 | [ver](MELHORIAS_7.md#melhoria-135--conectar-o-youtube-music-com-os-cabeçalhos-copiados-do-chrome-ou-do-firefox) |
+| M136 | Aviso de Cookie Cortado ao Conectar o YouTube Music | ✅ Concluído | 11/11/2026 | [ver](MELHORIAS_7.md#melhoria-136--aviso-de-cookie-cortado-ao-conectar-o-youtube-music) |
+| M137 | Coleta do YouTube Music Resistente a Respostas Vazias e a Cada 30 s de Verdade | ✅ Concluído | 11/11/2026 | [ver](MELHORIAS_7.md#melhoria-137--coleta-do-youtube-music-resistente-a-respostas-vazias-e-a-cada-30-s-de-verdade) |
+| M138 | Tempo Ouvido Correto na Música Tocando Agora e no Fuso Horário | ✅ Concluído | 11/11/2026 | [ver](MELHORIAS_7.md#melhoria-138--tempo-ouvido-correto-na-música-tocando-agora-e-no-fuso-horário) |
+| M139 | Limite da Busca de Artistas do Spotify em Janela de 24 Horas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_7.md#melhoria-139--limite-da-busca-de-artistas-do-spotify-em-janela-de-24-horas) |
+| M140 | Capas das Músicas Aparecendo (Servidas pelo Sistema) | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_7.md#melhoria-140--capas-das-músicas-aparecendo-servidas-pelo-sistema) |
+| M141 | Login Não Cai Mais a Cada Deploy | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-141--login-não-cai-mais-a-cada-deploy) |
+| M142 | Notificações de Atualização com Popup e Sino | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-142--notificações-de-atualização-com-popup-e-sino) |
+| M143 | Site Se Atualiza Sozinho Depois do Deploy | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-143--site-se-atualiza-sozinho-depois-do-deploy) |
+| M144 | Documentação do YouTube Music Reescrita | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-144--documentação-do-youtube-music-reescrita) |
+| M145 | Extensão do Navegador para o YouTube Music | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-145--extensão-do-navegador-para-o-youtube-music) |
+| M146 | Extensão Captura Abas do YouTube Music Já Abertas (1.1.0) | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-146--extensão-captura-abas-do-youtube-music-já-abertas-110) |
+| M147 | Página Música Só com Relatórios e Tela Gerenciar | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-147--página-música-só-com-relatórios-e-tela-gerenciar) |
+| M148 | Tocando Agora do YouTube Music Igual ao do Spotify | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-148--tocando-agora-do-youtube-music-igual-ao-do-spotify) |
+| M149 | Minutos por Plataforma nas Listas de Música | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-149--minutos-por-plataforma-nas-listas-de-música) |
+| M150 | Versões da Música Agrupadas e Critério "por Streams" no Topo | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-150--versões-da-música-agrupadas-e-critério-por-streams-no-topo) |
+| M151 | Rótulos Claros no Total da Retrospectiva | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-151--rótulos-claros-no-total-da-retrospectiva) |
+| M152 | Top 5 Artistas, Músicas e Álbuns do Mês na Cápsula Sonora | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-152--top-5-artistas-músicas-e-álbuns-do-mês-na-cápsula-sonora) |
+| M153 | Tela de Revisão de Música Refeita | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-153--tela-de-revisão-de-música-refeita) |
+| M154 | Capas e Atalhos para os Vídeos na Revisão | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-154--capas-e-atalhos-para-os-vídeos-na-revisão) |
+| M155 | Duplicadas: Botão "São Músicas Diferentes" e Detecção Mais Precisa | 🟡 Publicado, falta validar | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-155--duplicadas-botão-são-músicas-diferentes-e-detecção-mais-precisa) |
+| M156 | Spotify e YouTube Music Separados na Retrospectiva do Ano | 🟡 Publicado, falta validar | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-156--spotify-e-youtube-music-separados-na-retrospectiva-do-ano) |
