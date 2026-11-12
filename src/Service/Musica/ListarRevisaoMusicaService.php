@@ -5,16 +5,22 @@ declare(strict_types=1);
 namespace App\Service\Musica;
 
 use App\DataObject\Musica\FiltroRevisaoMusicaDTO;
+use App\Entity\ImagemSpotify;
+use App\Entity\MusicaCatalogo;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
 use App\Enum\TipoRevisaoMusica;
 use App\Repository\MusicaCatalogoRepository;
 use App\Repository\RegraCanalYoutubeRepository;
+use App\Repository\ReproducaoMusicalRepository;
 use App\Repository\VideoYoutubeRepository;
 use App\Serializer\MusicaCatalogoSerializer;
+use App\Service\Spotify\EnriquecerImagensSpotifyService;
 
 final readonly class ListarRevisaoMusicaService
 {
+    private const int PRIORIDADE_IMAGENS = 2;
+
     public function __construct(
         private VideoYoutubeRepository $videoRepository,
         private MusicaCatalogoRepository $musicaRepository,
@@ -22,6 +28,8 @@ final readonly class ListarRevisaoMusicaService
         private SugerirDuplicatasCatalogoService $sugerirDuplicatas,
         private NormalizarTextoMusicaService $normalizador,
         private MusicaCatalogoSerializer $serializer,
+        private ReproducaoMusicalRepository $reproducaoRepository,
+        private EnriquecerImagensSpotifyService $enriquecerImagens,
     ) {
     }
 
@@ -78,7 +86,7 @@ final readonly class ListarRevisaoMusicaService
     }
 
     /**
-     * @return list<array{canal: string, total: int, exemplo: string}>
+     * @return list<array{canal: string, canalId: string|null, total: int, exemplo: string, exemploVideoId: string|null}>
      */
     private function filtrarCanaisSemRegra(Usuario $usuario): array
     {
@@ -101,16 +109,71 @@ final readonly class ListarRevisaoMusicaService
         foreach ($paginaPares as $par) {
             $uuids = [...$uuids, ...$par];
         }
-        $musicas = $this->musicaRepository->buscarPorUuids($usuario, array_values(array_unique($uuids)));
+        $uuidsUnicos = array_values(array_unique($uuids));
+        $musicas = $this->musicaRepository->buscarPorUuids($usuario, $uuidsUnicos);
+        $videosPrincipais = $this->videoRepository->mapearVideoPrincipalPorMusica($usuario, $uuidsUnicos);
+        $faixasSpotify = $this->resolverFaixasSpotify($usuario, $uuidsUnicos);
 
         $itens = [];
         foreach ($paginaPares as [$primeira, $segunda]) {
             if (!isset($musicas[$primeira], $musicas[$segunda])) {
                 continue;
             }
-            $itens[] = ['musicas' => [$this->serializer->serializarMusica($musicas[$primeira]), $this->serializer->serializarMusica($musicas[$segunda])]];
+            $itens[] = ['musicas' => [
+                $this->serializarLadoDuplicata($musicas[$primeira], $videosPrincipais, $faixasSpotify),
+                $this->serializarLadoDuplicata($musicas[$segunda], $videosPrincipais, $faixasSpotify),
+            ]];
         }
 
         return [$itens, count($pares)];
+    }
+
+    /**
+     * @param array<string, array{videoId: string, titulo: string, canal: string, urlCapa: string|null, reproducoes: int}> $videosPrincipais
+     * @param array<string, array{urlSpotify: string|null, urlCapa: string|null, reproducoes: int}>                        $faixasSpotify
+     *
+     * @return array<string, mixed>
+     */
+    private function serializarLadoDuplicata(MusicaCatalogo $musica, array $videosPrincipais, array $faixasSpotify): array
+    {
+        $uuid = $musica->uuid()->toRfc4122();
+
+        return [
+            ...$this->serializer->serializarMusica($musica),
+            'videoPrincipal' => $videosPrincipais[$uuid] ?? null,
+            'spotify' => $faixasSpotify[$uuid] ?? null,
+        ];
+    }
+
+    /**
+     * @param list<string> $musicaUuids
+     *
+     * @return array<string, array{urlSpotify: string|null, urlCapa: string|null, reproducoes: int}>
+     */
+    private function resolverFaixasSpotify(Usuario $usuario, array $musicaUuids): array
+    {
+        $faixas = $this->reproducaoRepository->mapearFaixaSpotifyPorMusica($usuario, $musicaUuids);
+        if ([] === $faixas) {
+            return [];
+        }
+
+        $mapa = $this->enriquecerImagens->enriquecerEAgendar(
+            usuario: $usuario,
+            faixas: array_values(array_map(static fn (array $faixa): array => ['codigo' => $faixa['codigo'], 'nome' => $faixa['nome'], 'artista' => $faixa['artista']], $faixas)),
+            artistas: [],
+            prioridade: self::PRIORIDADE_IMAGENS,
+        );
+
+        $resultado = [];
+        foreach ($faixas as $uuid => $faixa) {
+            $chave = ImagemSpotify::gerarChaveFaixa($faixa['codigo'], $faixa['artista'], $faixa['nome']);
+            $resultado[$uuid] = [
+                'urlSpotify' => $mapa->obterUrlSpotify($chave, ImagemSpotify::gerarUrlSpotifyFaixa($faixa['codigo'], $faixa['artista'], $faixa['nome'])),
+                'urlCapa' => $mapa->obterImagem($chave),
+                'reproducoes' => $faixa['reproducoes'],
+            ];
+        }
+
+        return $resultado;
     }
 }

@@ -6,13 +6,11 @@ import {
   Flex,
   HStack,
   Heading,
-  Image,
-  Link,
   SimpleGrid,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Ban, Check, ExternalLink, Layers, ListMusic, Search, Sparkles, Tv } from 'lucide-react'
+import { Ban, Check, Layers, ListMusic, Search, Sparkles, Tv } from 'lucide-react'
 import { memo } from 'react'
 import type { ClassificacaoCanal, CorrecaoVideoPayload, TipoRevisao, VideoRevisao } from '../types'
 import {
@@ -22,8 +20,9 @@ import {
   nivelConfianca,
   opcoesLeituraVideo,
   rotuloVersao,
-  urlVideoYoutube,
 } from '../utils'
+import { AtalhosVideoRevisao } from './AtalhosVideoRevisao'
+import { MiniaturaVideoRevisao } from './MiniaturaVideoRevisao'
 
 export interface CartaoVideoRevisaoProps {
   video: VideoRevisao
@@ -86,16 +85,11 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
       minW={0}
     >
       <Flex gap={3} align="start" minW={0}>
-        <Box
-          w={{ base: '104px', sm: '144px' }}
-          flexShrink={0}
-          borderRadius="8px"
-          overflow="hidden"
-          bg="cirqueira.musica.cartaoElevado"
-          aspectRatio={16 / 9}
-        >
-          <Image src={video.miniatura} alt="" w="full" h="full" objectFit="cover" loading="lazy" />
-        </Box>
+        <MiniaturaVideoRevisao
+          imagem={video.miniatura}
+          videoId={video.videoId}
+          titulo={video.titulo}
+        />
         <VStack align="stretch" gap={1.5} minW={0} flex={1}>
           <Heading
             as="h3"
@@ -121,19 +115,6 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
                 Indisponível
               </Badge>
             )}
-            <Link
-              href={urlVideoYoutube(video.videoId)}
-              target="_blank"
-              rel="noopener noreferrer"
-              display="inline-flex"
-              alignItems="center"
-              gap={1}
-              fontSize="xs"
-              color="cirqueira.musica.textoSecundario"
-              _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-            >
-              <ExternalLink size={12} /> Ver vídeo
-            </Link>
           </HStack>
         </VStack>
         {aceitaLote(tipo) && (
@@ -150,6 +131,8 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
           </Checkbox.Root>
         )}
       </Flex>
+
+      <AtalhosVideoRevisao videoId={video.videoId} canal={video.canal} canalId={video.canalId} />
 
       <VStack align="stretch" gap={2}>
         <HStack justify="space-between" gap={2} wrap="wrap">

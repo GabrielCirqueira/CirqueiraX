@@ -9,12 +9,11 @@ use App\Entity\ReproducaoMusical;
 use App\Entity\Usuario;
 use App\Enum\FonteReproducaoMusical;
 use App\Enum\StatusClassificacaoVideo;
-use DateTimeImmutable;
-use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @extends ServiceEntityRepository<ReproducaoMusical>
@@ -70,6 +69,48 @@ final class ReproducaoMusicalRepository extends ServiceEntityRepository
             $parametros,
             $tipos,
         );
+    }
+
+    /**
+     * @param list<string> $musicaUuids
+     *
+     * @return array<string, array{codigo: string, nome: string, artista: string, reproducoes: int}>
+     */
+    public function mapearFaixaSpotifyPorMusica(Usuario $usuario, array $musicaUuids): array
+    {
+        if ([] === $musicaUuids) {
+            return [];
+        }
+
+        $linhas = $this->getEntityManager()->getConnection()->executeQuery(
+            'SELECT musica_uuid, codigo_faixa, nome_faixa, artista_principal, total_musica FROM (
+                SELECT rm.musica_uuid, r.codigo_faixa, r.nome_faixa, r.artista_principal,
+                    SUM(COUNT(*)) OVER (PARTITION BY rm.musica_uuid) AS total_musica,
+                    ROW_NUMBER() OVER (PARTITION BY rm.musica_uuid ORDER BY COUNT(*) DESC) AS posicao
+                FROM reproducao_musical rm
+                INNER JOIN reproducao_spotify r ON r.uuid = UUID_TO_BIN(rm.origem_id)
+                WHERE rm.usuario_id = :usuarioId AND rm.fonte = :fonte AND rm.musica_uuid IN (:musicas)
+                GROUP BY rm.musica_uuid, r.codigo_faixa, r.nome_faixa, r.artista_principal
+            ) faixas WHERE posicao = 1',
+            [
+                'usuarioId' => $usuario->getId(),
+                'fonte' => FonteReproducaoMusical::Spotify->value,
+                'musicas' => array_map(static fn (string $uuid): string => Uuid::fromString($uuid)->toBinary(), $musicaUuids),
+            ],
+            ['musicas' => ArrayParameterType::BINARY],
+        )->fetchAllAssociative();
+
+        $mapa = [];
+        foreach ($linhas as $linha) {
+            $mapa[Uuid::fromBinary((string) $linha['musica_uuid'])->toRfc4122()] = [
+                'codigo' => (string) $linha['codigo_faixa'],
+                'nome' => (string) $linha['nome_faixa'],
+                'artista' => (string) $linha['artista_principal'],
+                'reproducoes' => (int) $linha['total_musica'],
+            ];
+        }
+
+        return $mapa;
     }
 
     public function removerOrfasSpotify(Usuario $usuario): int
@@ -159,7 +200,7 @@ final class ReproducaoMusicalRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array{vezes: int, primeiraEm: ?DateTimeImmutable}
+     * @return array{vezes: int, primeiraEm: ?\DateTimeImmutable}
      */
     public function resumirHistoricoDaMusica(Usuario $usuario, MusicaCatalogo $musica): array
     {
@@ -176,7 +217,7 @@ final class ReproducaoMusicalRepository extends ServiceEntityRepository
 
         return [
             'vezes' => is_array($linha) ? (int) $linha['vezes'] : 0,
-            'primeiraEm' => null === $primeira ? null : new DateTimeImmutable($primeira, new DateTimeZone(self::FUSO_UTC)),
+            'primeiraEm' => null === $primeira ? null : new \DateTimeImmutable($primeira, new \DateTimeZone(self::FUSO_UTC)),
         ];
     }
 

@@ -63,6 +63,7 @@ export const VideoRevisaoSchema = z.object({
   videoId: z.string(),
   titulo: z.string(),
   canal: z.string(),
+  canalId: z.string().nullable().optional(),
   duracaoMs: z.number().nullable(),
   miniatura: z.string(),
   disponivel: z.boolean(),
@@ -80,14 +81,39 @@ export type VideoRevisao = z.infer<typeof VideoRevisaoSchema>
 
 export const CanalRevisaoSchema = z.object({
   canal: z.string(),
+  canalId: z.string().nullable().optional(),
   total: z.number(),
   exemplo: z.string(),
+  exemploVideoId: z.string().nullable().optional(),
 })
 
 export type CanalRevisao = z.infer<typeof CanalRevisaoSchema>
 
+export const VideoPrincipalMusicaSchema = z.object({
+  videoId: z.string(),
+  titulo: z.string(),
+  canal: z.string(),
+  urlCapa: z.string().nullable(),
+  reproducoes: z.number(),
+})
+
+export type VideoPrincipalMusica = z.infer<typeof VideoPrincipalMusicaSchema>
+
+export const FaixaSpotifyDuplicataSchema = z.object({
+  urlSpotify: z.string().nullable(),
+  urlCapa: z.string().nullable(),
+  reproducoes: z.number(),
+})
+
+export const MusicaDuplicataSchema = MusicaCatalogoSchema.extend({
+  videoPrincipal: VideoPrincipalMusicaSchema.nullable().optional(),
+  spotify: FaixaSpotifyDuplicataSchema.nullable().optional(),
+})
+
+export type MusicaDuplicata = z.infer<typeof MusicaDuplicataSchema>
+
 export const DuplicataRevisaoSchema = z.object({
-  musicas: z.tuple([MusicaCatalogoSchema, MusicaCatalogoSchema]),
+  musicas: z.tuple([MusicaDuplicataSchema, MusicaDuplicataSchema]),
 })
 
 export type DuplicataRevisao = z.infer<typeof DuplicataRevisaoSchema>

@@ -1,9 +1,11 @@
+import { urlCapaExibicao } from '@/features/musica/utils/capaMusica'
 import type {
   ComponenteMashupEntrada,
   ContagensRevisao,
   CorrecaoVideoPayload,
   LeituraIa,
   MusicaCatalogo,
+  MusicaDuplicata,
   PaginaRevisao,
   TipoRevisao,
   VideoRevisao,
@@ -79,6 +81,13 @@ export const OPCOES_VERSAO_MUSICA: { valor: string; rotulo: string }[] = [
 ]
 
 const MINIMO_BUSCA = 2
+const URL_VIDEO_YOUTUBE = 'https://www.youtube.com/watch?v='
+const URL_VIDEO_YOUTUBE_MUSIC = 'https://music.youtube.com/watch?v='
+const URL_CANAL_YOUTUBE = 'https://www.youtube.com/channel/'
+const URL_BUSCA_YOUTUBE = 'https://www.youtube.com/results?search_query='
+const URL_BUSCA_SPOTIFY = 'https://open.spotify.com/search/'
+const ROTA_DETALHE_MUSICA = '/musica/faixa?uuid='
+const FORMATO_MINIATURA_YOUTUBE = 'https://i.ytimg.com/vi/{id}/hqdefault.jpg'
 const MINIMO_COMPONENTES_MASHUP = 2
 const SEPARADOR_ARTISTAS = /[,;]/
 
@@ -116,7 +125,55 @@ export function formatarDuracaoVideo(ms: number | null): string {
 }
 
 export function urlVideoYoutube(videoId: string): string {
-  return `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`
+  return `${URL_VIDEO_YOUTUBE}${encodeURIComponent(videoId)}`
+}
+
+export function urlVideoYoutubeMusicRevisao(videoId: string): string {
+  return `${URL_VIDEO_YOUTUBE_MUSIC}${encodeURIComponent(videoId)}`
+}
+
+export function miniaturaVideoYoutube(videoId: string): string {
+  return FORMATO_MINIATURA_YOUTUBE.replace('{id}', encodeURIComponent(videoId))
+}
+
+export function urlCanalYoutube(canalId: string | null | undefined, canal: string): string {
+  if (canalId) return `${URL_CANAL_YOUTUBE}${encodeURIComponent(canalId)}`
+  return `${URL_BUSCA_YOUTUBE}${encodeURIComponent(canal)}`
+}
+
+export function urlSpotifyDuplicata(musica: MusicaDuplicata): string {
+  return musica.spotify?.urlSpotify ?? urlBuscaSpotify(musica)
+}
+
+export function descreverOuvidasDuplicata(musica: MusicaDuplicata): string | null {
+  const partes = [
+    musica.spotify ? `${musica.spotify.reproducoes}x no Spotify` : null,
+    musica.videoPrincipal ? `${musica.videoPrincipal.reproducoes}x no YouTube Music` : null,
+  ].filter((parte): parte is string => parte !== null)
+  return partes.length > 0 ? `Ouvida ${partes.join(' · ')}` : null
+}
+
+export function urlBuscaSpotify(musica: MusicaCatalogo): string {
+  const termo = `${musica.titulo} ${nomesArtistasCatalogo(musica)}`.trim()
+  return `${URL_BUSCA_SPOTIFY}${encodeURIComponent(termo)}`
+}
+
+export function rotaDetalheMusica(uuid: string): string {
+  return `${ROTA_DETALHE_MUSICA}${encodeURIComponent(uuid)}`
+}
+
+export function capaMusicaDuplicata(musica: MusicaDuplicata): string | null {
+  const videoId = musica.videoPrincipal?.videoId ?? musica.videoOficialId
+  return urlCapaExibicao(
+    musica.urlCapa ??
+      musica.spotify?.urlCapa ??
+      musica.videoPrincipal?.urlCapa ??
+      (videoId ? miniaturaVideoYoutube(videoId) : null)
+  )
+}
+
+export function videoDaMusicaDuplicata(musica: MusicaDuplicata): string | null {
+  return musica.videoPrincipal?.videoId ?? musica.videoOficialId
 }
 
 export function descreverLeitura(leitura: LeituraIa): string {

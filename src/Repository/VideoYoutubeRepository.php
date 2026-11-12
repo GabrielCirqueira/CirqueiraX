@@ -9,10 +9,9 @@ use App\Entity\VideoYoutube;
 use App\Enum\OrigemClassificacao;
 use App\Enum\StatusClassificacaoVideo;
 use App\Enum\TipoRevisaoMusica;
-use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\Persistence\ManagerRegistry;
-use PDO;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
@@ -21,6 +20,8 @@ use Symfony\Component\Uid\Uuid;
  */
 final class VideoYoutubeRepository extends ServiceEntityRepository
 {
+    private const string SEPARADOR_AGRUPAMENTO = "\x1F";
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, VideoYoutube::class);
@@ -129,7 +130,7 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     /**
      * @return list<VideoYoutube>
      */
-    public function listarComDetalhesVencidos(DateTimeImmutable $atualizadosAntesDe, int $limite): array
+    public function listarComDetalhesVencidos(\DateTimeImmutable $atualizadosAntesDe, int $limite): array
     {
         /** @var list<VideoYoutube> $videos */
         $videos = $this->createQueryBuilder('e')
@@ -204,7 +205,7 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
         $condicao = $this->condicaoRevisao($tipo);
         $conexao = $this->getEntityManager()->getConnection();
         $parametros = ['usuarioId' => $usuario->getId(), 'deslocamento' => $deslocamento, 'limite' => $limite];
-        $tipos = ['deslocamento' => PDO::PARAM_INT, 'limite' => PDO::PARAM_INT];
+        $tipos = ['deslocamento' => \PDO::PARAM_INT, 'limite' => \PDO::PARAM_INT];
 
         $total = (int) $conexao->fetchOne("SELECT COUNT(*) FROM video_youtube WHERE usuario_id = :usuarioId AND {$condicao}", $parametros, $tipos);
         $linhas = $conexao->fetchFirstColumn(
@@ -217,12 +218,14 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{canal: string, total: int, exemplo: string}>
+     * @return list<array{canal: string, canalId: string|null, total: int, exemplo: string, exemploVideoId: string|null}>
      */
     public function listarCanaisEmAberto(Usuario $usuario): array
     {
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
-            "SELECT canal, COUNT(*) AS total, MAX(titulo) AS exemplo
+            "SELECT canal, COUNT(*) AS total, MAX(canal_id) AS canal_id,
+                SUBSTRING_INDEX(GROUP_CONCAT(titulo ORDER BY atualizado_em DESC SEPARATOR :separador), :separador, 1) AS exemplo,
+                SUBSTRING_INDEX(GROUP_CONCAT(video_id ORDER BY atualizado_em DESC SEPARATOR :separador), :separador, 1) AS exemplo_video_id
             FROM video_youtube
             WHERE usuario_id = :usuarioId
                 AND status IN ('pendente', 'revisar', 'compilacao')
@@ -230,10 +233,58 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
                 AND canal <> ''
             GROUP BY canal
             ORDER BY total DESC, canal",
-            ['usuarioId' => $usuario->getId()],
+            ['usuarioId' => $usuario->getId(), 'separador' => self::SEPARADOR_AGRUPAMENTO],
         )->fetchAllAssociative();
 
-        return array_map(static fn (array $linha): array => ['canal' => (string) $linha['canal'], 'total' => (int) $linha['total'], 'exemplo' => (string) $linha['exemplo']], $linhas);
+        return array_map(static fn (array $linha): array => [
+            'canal' => (string) $linha['canal'],
+            'canalId' => null === $linha['canal_id'] || '' === $linha['canal_id'] ? null : (string) $linha['canal_id'],
+            'total' => (int) $linha['total'],
+            'exemplo' => (string) $linha['exemplo'],
+            'exemploVideoId' => null === $linha['exemplo_video_id'] ? null : (string) $linha['exemplo_video_id'],
+        ], $linhas);
+    }
+
+    /**
+     * @param list<string> $musicaUuids
+     *
+     * @return array<string, array{videoId: string, titulo: string, canal: string, urlCapa: string|null, reproducoes: int}>
+     */
+    public function mapearVideoPrincipalPorMusica(Usuario $usuario, array $musicaUuids): array
+    {
+        if ([] === $musicaUuids) {
+            return [];
+        }
+
+        $linhas = $this->getEntityManager()->getConnection()->executeQuery(
+            'SELECT musica_uuid, video_id, titulo, canal, url_capa, reproducoes FROM (
+                SELECT v.musica_catalogo_uuid AS musica_uuid, v.video_id, v.titulo, v.canal, v.url_capa,
+                    COUNT(r.uuid) AS reproducoes,
+                    ROW_NUMBER() OVER (PARTITION BY v.musica_catalogo_uuid ORDER BY COUNT(r.uuid) DESC, v.atualizado_em DESC) AS posicao
+                FROM video_youtube v
+                LEFT JOIN reproducao_youtube r ON r.video_uuid = v.uuid
+                WHERE v.usuario_id = :usuarioId AND v.musica_catalogo_uuid IN (:musicas)
+                GROUP BY v.uuid
+            ) ranqueados WHERE posicao = 1',
+            [
+                'usuarioId' => $usuario->getId(),
+                'musicas' => array_map(static fn (string $uuid): string => Uuid::fromString($uuid)->toBinary(), $musicaUuids),
+            ],
+            ['musicas' => ArrayParameterType::BINARY],
+        )->fetchAllAssociative();
+
+        $mapa = [];
+        foreach ($linhas as $linha) {
+            $mapa[Uuid::fromBinary((string) $linha['musica_uuid'])->toRfc4122()] = [
+                'videoId' => (string) $linha['video_id'],
+                'titulo' => (string) $linha['titulo'],
+                'canal' => (string) $linha['canal'],
+                'urlCapa' => null === $linha['url_capa'] ? null : (string) $linha['url_capa'],
+                'reproducoes' => (int) $linha['reproducoes'],
+            ];
+        }
+
+        return $mapa;
     }
 
     /**

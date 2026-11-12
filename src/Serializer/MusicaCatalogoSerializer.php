@@ -61,6 +61,7 @@ final class MusicaCatalogoSerializer
             'videoId' => $video->videoId(),
             'titulo' => $video->titulo(),
             'canal' => $video->canal(),
+            'canalId' => $video->canalId(),
             'duracaoMs' => $video->duracaoMs(),
             'miniatura' => $video->urlCapa() ?? sprintf(self::FORMATO_MINIATURA, $video->videoId()),
             'disponivel' => $video->disponivel(),

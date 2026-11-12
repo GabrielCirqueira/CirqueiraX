@@ -9,10 +9,12 @@ import {
   paraComponentesEntrada,
   separarArtistas,
 } from '../utils'
+import { AtalhosVideoRevisao } from './AtalhosVideoRevisao'
 import { BuscaMusicaCatalogo } from './BuscaCatalogo'
 import { CamposNovaMusica, type NovaMusicaRascunho } from './CamposNovaMusica'
 import { EditorComponentesMashup } from './EditorComponentesMashup'
 import { JanelaRevisaoMusica } from './JanelaRevisaoMusica'
+import { MiniaturaVideoRevisao } from './MiniaturaVideoRevisao'
 
 export type ModoCorrecaoVideo = 'escolher' | 'mashup'
 
@@ -143,23 +145,46 @@ export const PainelCorrecaoVideo = memo(function PainelCorrecaoVideo({
     <JanelaRevisaoMusica aberto titulo={titulo} onFechar={onFechar} rodape={rodape}>
       <VStack align="stretch" gap={4}>
         {primeiro && !lote && (
-          <VStack
-            align="stretch"
-            gap={0.5}
+          <HStack
+            align="start"
+            gap={3}
             px={3}
-            py={2}
+            py={2.5}
             borderRadius="8px"
             bg="cirqueira.musica.cartaoElevado"
           >
-            <Text fontSize="2xs" fontWeight="bold" color="cirqueira.musica.textoSecundario">
-              VÍDEO
-            </Text>
-            <Text fontSize="sm" color="cirqueira.musica.textoPrincipal" lineClamp={2}>
-              {primeiro.titulo}
-            </Text>
-            <Text fontSize="xs" color="cirqueira.musica.textoSecundario" truncate>
-              {primeiro.canal}
-            </Text>
+            <MiniaturaVideoRevisao
+              imagem={primeiro.miniatura}
+              videoId={primeiro.videoId}
+              titulo={primeiro.titulo}
+              largura={{ base: '96px', sm: '120px' }}
+            />
+            <VStack align="stretch" gap={1} minW={0} flex={1}>
+              <Text fontSize="sm" color="cirqueira.musica.textoPrincipal" lineClamp={2}>
+                {primeiro.titulo}
+              </Text>
+              <Text fontSize="xs" color="cirqueira.musica.textoSecundario" truncate>
+                {primeiro.canal}
+              </Text>
+              <AtalhosVideoRevisao videoId={primeiro.videoId} />
+            </VStack>
+          </HStack>
+        )}
+        {lote && (
+          <VStack align="stretch" gap={2}>
+            {videos.map((video) => (
+              <HStack key={video.uuid} gap={3} minW={0}>
+                <MiniaturaVideoRevisao
+                  imagem={video.miniatura}
+                  videoId={video.videoId}
+                  titulo={video.titulo}
+                  largura={{ base: '64px', sm: '80px' }}
+                />
+                <Text fontSize="xs" color="cirqueira.musica.textoPrincipal" lineClamp={2} minW={0}>
+                  {video.titulo}
+                </Text>
+              </HStack>
+            ))}
           </VStack>
         )}
         <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
