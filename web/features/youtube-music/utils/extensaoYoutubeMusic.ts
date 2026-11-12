@@ -18,6 +18,8 @@ export const PASSOS_INSTALAR_EXTENSAO = [
   'Clique em "Carregar sem compactação" e escolha a pasta descompactada.',
   'Dê um nome ao aparelho abaixo, gere o token e copie.',
   'Clique no ícone da extensão (quebra-cabeça → CirqueiraX), cole o token e clique em "Salvar e testar".',
+  'Toque uma música. No popup, "Aba do YouTube Music" deve mostrar "Lendo: nome da música". Se mostrar "Nenhuma aba sendo lida", recarregue a aba do YouTube Music (F5).',
+  'Para atualizar a extensão: baixe o arquivo de novo, substitua os arquivos da pasta e clique no botão de recarregar dela em chrome://extensions.',
 ]
 
 export const AVISO_TOKEN_UNICO =

@@ -1,4 +1,6 @@
 ;(() => {
+  if (window.__cirqueiraxPagina) return
+  window.__cirqueiraxPagina = true
   const ORIGEM = 'cirqueirax-youtube-music'
   const INTERVALO_MS = 1000
 

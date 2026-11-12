@@ -1,6 +1,15 @@
 const CHAVE_TOKEN = 'token'
 const CHAVE_ESTADO = 'estado'
+const CHAVE_ABA = 'aba'
 const PADRAO_TOKEN = /^cxyt_[a-f0-9]{64}$/
+const VALIDADE_PRESENCA_MS = 15000
+const TEXTO_SEM_ABA = 'Nenhuma aba sendo lida. Abra o YouTube Music ou recarregue a aba (F5).'
+const TEXTO_SITUACAO_ABA = {
+  tocando: (titulo) => `Lendo: ${titulo}`,
+  pausada: (titulo) => `Pausada: ${titulo}`,
+  anuncio: () => 'Anúncio (não conta)',
+  parada: () => 'Aberta, nada tocando',
+}
 
 const elementos = {
   situacao: document.getElementById('situacao'),
@@ -8,6 +17,7 @@ const elementos = {
   ultimoEnvio: document.getElementById('ultimo-envio'),
   ultimaMusica: document.getElementById('ultima-musica'),
   pendentes: document.getElementById('pendentes'),
+  aba: document.getElementById('aba'),
   formulario: document.getElementById('formulario'),
   token: document.getElementById('token'),
   remover: document.getElementById('remover'),
@@ -26,18 +36,29 @@ function mostrarSituacao(texto, tipo) {
   elementos.situacao.className = `situacao situacao--${tipo}`
 }
 
-function descreverEstado(temToken, estado) {
+function abaAtiva(aba) {
+  return Boolean(aba?.em) && Date.now() - aba.em < VALIDADE_PRESENCA_MS
+}
+
+function descreverAba(aba) {
+  if (!abaAtiva(aba)) return TEXTO_SEM_ABA
+  return (TEXTO_SITUACAO_ABA[aba.situacao] ?? TEXTO_SITUACAO_ABA.parada)(aba.titulo)
+}
+
+function descreverEstado(temToken, estado, aba) {
   if (!temToken) return { texto: 'Sem token. Cole o token gerado no CirqueiraX.', tipo: 'neutra' }
   if (estado.erro) return { texto: estado.erro, tipo: 'erro' }
-  if (estado.ultimoEnvioEm)
-    return { texto: 'Conectada. As músicas deste navegador estão sendo registradas.', tipo: 'ok' }
-  return { texto: 'Token salvo. Toque uma música no YouTube Music.', tipo: 'neutra' }
+  if (!abaAtiva(aba))
+    return { texto: 'Token ok, mas nenhuma aba do YouTube Music está sendo lida.', tipo: 'erro' }
+  return { texto: 'Conectada. As músicas desta aba estão sendo registradas.', tipo: 'ok' }
 }
 
 async function renderizar() {
-  const dados = await chrome.storage.local.get([CHAVE_TOKEN, CHAVE_ESTADO])
+  const dados = await chrome.storage.local.get([CHAVE_TOKEN, CHAVE_ESTADO, CHAVE_ABA])
   const estado = dados[CHAVE_ESTADO] ?? {}
-  const situacao = descreverEstado(Boolean(dados[CHAVE_TOKEN]), estado)
+  const aba = dados[CHAVE_ABA]
+  const situacao = descreverEstado(Boolean(dados[CHAVE_TOKEN]), estado, aba)
+  elementos.aba.textContent = descreverAba(aba)
   mostrarSituacao(situacao.texto, situacao.tipo)
   elementos.aparelho.textContent = estado.aparelho ?? '—'
   elementos.ultimoEnvio.textContent = formatarMomento(estado.ultimoEnvioEm)
@@ -71,4 +92,5 @@ elementos.remover.addEventListener('click', async () => {
 })
 
 chrome.storage.onChanged.addListener(renderizar)
+setInterval(renderizar, VALIDADE_PRESENCA_MS)
 renderizar()

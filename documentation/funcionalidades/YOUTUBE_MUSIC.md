@@ -310,7 +310,7 @@ A `ytmusicapi` vem instalada na imagem (`YTMUSICAPI_VERSAO = 1.12.3`). Atualizar
 | Minutos zerados numa música | Deveria subir a cada coleta enquanto toca; se ficou 0, conferir se a reprodução seguinte tem horário anterior (problema de fuso) |
 | Coleta parada sem erro | Worker `messenger-youtube-coleta` rodando? `proximaConsultaEm` da conta no futuro distante? |
 | Capa quebrada | A URL está no banco? `GET /api/v1/musica/capa?url=` responde 200? |
-| Extensão não registra | No popup da extensão, "Salvar e testar" (401 = token revogado ou errado). No cartão, "Último evento" do aparelho. A fila da extensão guarda os eventos até o servidor responder |
+| Extensão não registra | No popup, "Aba do YouTube Music": se diz "Nenhuma aba sendo lida", a aba foi aberta antes da extensão (versão 1.0.0) ou o script não rodou; recarregar a aba. "Eventos guardados" parado em 0 com música tocando = mesmo caso. "Salvar e testar" com 401 = token revogado ou errado. A fila guarda os eventos até o servidor responder |
 
 Logs relevantes: "Coleta do YouTube Music concluída." (itens novos e reproduções criadas), "Coleta do YouTube Music falhou; nova tentativa agendada." e "Sessão do YouTube Music recusada; conta marcada para reconectar.".
 
@@ -323,6 +323,10 @@ O coletor por cookie continua sendo a base (pega celular, TV e qualquer aparelho
 1. No cartão do YouTube Music, seção "Extensão do navegador", baixar o `.zip` (`/build/extensao/cirqueirax-youtube-music-<versão>.zip`, gerado no `npm run build` a partir de `extensao/youtube-music/`) e descompactar.
 2. Chrome/Edge/Brave: `chrome://extensions` → ligar "Modo do desenvolvedor" → "Carregar sem compactação" → escolher a pasta. Firefox: `about:debugging#/runtime/this-firefox` → "Carregar extensão temporária" → `manifest.json` (no Firefox some ao fechar o navegador).
 3. No cartão, dar um nome ao aparelho ("PC de casa") e gerar o token. O token aparece **uma vez**; copiar e colar no popup da extensão → "Salvar e testar".
+4. Tocar uma música e conferir no popup a linha "Aba do YouTube Music": "Lendo: título" quer dizer que a aba está sendo lida. "Nenhuma aba sendo lida" = recarregar a aba (F5).
+5. Atualizar: baixar o `.zip` de novo, substituir os arquivos da pasta e clicar em recarregar na extensão (`chrome://extensions`).
+
+Abas do YouTube Music que já estavam abertas antes de instalar ou atualizar não recebem o script sozinhas (regra do Chrome). Desde a versão 1.1.0, `fundo.js` injeta `pagina.js` e `conteudo.js` nessas abas na instalação, na atualização e quando o navegador abre (`chrome.scripting`, permissão `scripting`). Os dois scripts têm trava contra rodar duas vezes na mesma aba.
 
 ### Como a extensão mede
 
@@ -333,7 +337,7 @@ O coletor por cookie continua sendo a base (pega celular, TV e qualquer aparelho
 | `pagina.js` | Roda no contexto da página e lê `getVideoData()` do player (videoId, título, autor, anúncio) a cada 1 s |
 | `conteudo.js` | Soma o tempo tocado a cada 1 s (só com o vídeo rodando e sem anúncio), detecta troca de música e repetição |
 | `fundo.js` | Guarda os eventos em `chrome.storage.local` e envia a cada minuto para `POST /extensao/eventos` com `X-Extensao-Token` |
-| `popup.*` | Colar o token, testar e ver o estado do envio |
+| `popup.*` | Colar o token, testar, ver o estado do envio e se alguma aba está sendo lida (`conteudo.js` grava a presença da aba a cada 5 s em `chrome.storage.local`; vale por 15 s) |
 
 Eventos de uma reprodução (`idReproducao` gerado pela extensão):
 

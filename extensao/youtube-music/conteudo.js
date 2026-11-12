@@ -1,4 +1,6 @@
 ;(() => {
+  if (globalThis.__cirqueiraxConteudo) return
+  globalThis.__cirqueiraxConteudo = true
   const ORIGEM = 'cirqueirax-youtube-music'
   const INTERVALO_MS = 1000
   const INTERVALO_PROGRESSO_MS = 20000
@@ -9,6 +11,8 @@
   const MS_FINAL_DA_MUSICA = 5000
   const SEGUNDOS_INICIO_DA_MUSICA = 3
   const SEPARADOR_BYLINE = '•'
+  const CHAVE_ABA = 'aba'
+  const INTERVALO_PRESENCA_MS = 5000
   const PADRAO_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
   const PADRAO_CAPA =
     /^https:\/\/(lh3\.googleusercontent\.com|yt3\.googleusercontent\.com|yt3\.ggpht\.com|i\.ytimg\.com)\//
@@ -17,6 +21,7 @@
   let dadosPlayerEm = 0
   let atual = null
   let ultimoTick = Date.now()
+  let ultimaPresenca = 0
 
   window.addEventListener('message', (evento) => {
     if (evento.source !== window || evento.data?.origem !== ORIGEM) return
@@ -120,14 +125,24 @@
     enviar(reproducao, 'fim', !ouviuAteOFim(reproducao, repetiu))
   }
 
+  function registrarPresenca(agora, situacao, titulo) {
+    if (agora - ultimaPresenca < INTERVALO_PRESENCA_MS) return
+    ultimaPresenca = agora
+    chrome.storage.local
+      .set({ [CHAVE_ABA]: { em: agora, situacao, titulo } })
+      .catch(() => undefined)
+  }
+
   function tick() {
     const agora = Date.now()
     const delta = Math.min(Math.max(0, agora - ultimoTick), DELTA_MAXIMO_MS)
     ultimoTick = agora
     const video = document.querySelector('video')
-    if (!video || emAnuncio()) return
+    if (!video) return registrarPresenca(agora, 'parada', '')
+    if (emAnuncio()) return registrarPresenca(agora, 'anuncio', '')
     const musica = lerMusica(video)
-    if (!musica) return
+    if (!musica) return registrarPresenca(agora, 'parada', '')
+    registrarPresenca(agora, video.paused ? 'pausada' : 'tocando', musica.titulo)
 
     if (atual && atual.videoId !== musica.videoId) {
       encerrar(atual, false)

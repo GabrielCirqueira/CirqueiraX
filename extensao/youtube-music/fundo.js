@@ -21,12 +21,32 @@ function emSerie(tarefa) {
   return cadeia
 }
 
+const ENDERECO_YOUTUBE_MUSIC = 'https://music.youtube.com/*'
+
 function agendarEnvio() {
   chrome.alarms.create(ALARME_ENVIO, { periodInMinutes: MINUTOS_ENTRE_ENVIOS })
 }
 
-chrome.runtime.onInstalled.addListener(agendarEnvio)
-chrome.runtime.onStartup.addListener(agendarEnvio)
+async function injetarNasAbasAbertas() {
+  const abas = await chrome.tabs.query({ url: ENDERECO_YOUTUBE_MUSIC }).catch(() => [])
+  for (const aba of abas) {
+    const alvo = { tabId: aba.id }
+    await chrome.scripting
+      .executeScript({ target: alvo, files: ['pagina.js'], world: 'MAIN' })
+      .catch(() => undefined)
+    await chrome.scripting
+      .executeScript({ target: alvo, files: ['conteudo.js'] })
+      .catch(() => undefined)
+  }
+}
+
+function aoIniciar() {
+  agendarEnvio()
+  injetarNasAbasAbertas()
+}
+
+chrome.runtime.onInstalled.addListener(aoIniciar)
+chrome.runtime.onStartup.addListener(aoIniciar)
 
 chrome.alarms.onAlarm.addListener((alarme) => {
   if (alarme.name === ALARME_ENVIO) enviarFila(false)
