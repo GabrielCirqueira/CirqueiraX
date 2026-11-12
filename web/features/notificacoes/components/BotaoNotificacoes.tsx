@@ -65,14 +65,20 @@ export function BotaoNotificacoes() {
       <Dialog.Root
         open={aberto}
         onOpenChange={(e) => setAberto(e.open)}
-        size={{ base: 'full', sm: 'md' }}
+        size="md"
         placement="center"
         scrollBehavior="inside"
       >
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content bg="bg.canvas" borderRadius={{ base: 0, sm: '12px' }}>
+            <Dialog.Content
+              bg="bg.canvas"
+              borderRadius="12px"
+              mx={4}
+              maxH="min(80vh, 640px)"
+              h="auto"
+            >
               <Dialog.Header borderBottomWidth="1px" borderColor="border.subtle">
                 <Dialog.Title fontSize="md" color="fg">
                   Notificações
