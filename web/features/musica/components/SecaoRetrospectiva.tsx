@@ -164,7 +164,10 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
               </Heading>
             </TooltipMusica>
             <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight="bold">
-              minutos ouvidos
+              minutos ouvidos no total
+            </Text>
+            <Text fontSize="xs" fontWeight="semibold" opacity={0.85} mt={-2}>
+              Somando todas as músicas e artistas de {dados.ano}
             </Text>
             {dados.variacaoMinutosAnoAnterior !== null && (
               <Text fontSize="sm" fontWeight="semibold" opacity={0.85}>
@@ -212,7 +215,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                     </Text>
                     <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
                       <MinutosMusica minutos={artistaDoAno.minutos} /> ·{' '}
-                      {formatarNumeroPtBr(artistaDoAno.streams)} streams
+                      {formatarNumeroPtBr(artistaDoAno.streams)} streams só dele
                     </Text>
                   </VStack>
                 </VStack>
