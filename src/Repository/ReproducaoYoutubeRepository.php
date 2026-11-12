@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\ImportacaoYoutube;
 use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
@@ -11,6 +12,7 @@ use App\Enum\FonteReproducaoYoutube;
 use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -329,6 +331,48 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
         $meses = (int) $conexao->fetchOne("SELECT COUNT(DISTINCT DATE_FORMAT(r.tocada_em, '%Y-%m')) FROM reproducao_youtube r WHERE {$filtro}", $parametros);
 
         return ['videosPorStatus' => $porStatus, 'videosUnicos' => array_sum($porStatus), 'mesesComDados' => $meses];
+    }
+
+    /**
+     * @return array{porStatus: array<string, array{videos: int, reproducoes: int, streams: int, ms: int}>, porOrigem: array<string, int>, videosUnicos: int, mesesComDados: int}
+     */
+    public function resumirDaImportacao(ImportacaoYoutube $importacao, int $corteStreamMs): array
+    {
+        $conexao = $this->getEntityManager()->getConnection();
+        $parametros = ['usuarioId' => $importacao->usuario()->getId(), 'importacao' => $importacao->uuid()->toBinary(), 'corte' => $corteStreamMs];
+        $tipos = ['importacao' => ParameterType::BINARY];
+        $filtro = 'r.usuario_id = :usuarioId AND r.importacao_youtube_uuid = :importacao';
+
+        $porStatus = [];
+        $linhas = $conexao->fetchAllAssociative(
+            "SELECT v.status, COUNT(DISTINCT v.uuid) AS videos, COUNT(*) AS reproducoes, SUM(r.ms_reproduzidos >= :corte) AS streams, COALESCE(SUM(r.ms_reproduzidos), 0) AS ms
+            FROM reproducao_youtube r INNER JOIN video_youtube v ON v.uuid = r.video_uuid WHERE {$filtro} GROUP BY v.status",
+            $parametros,
+            $tipos,
+        );
+        foreach ($linhas as $linha) {
+            $porStatus[(string) $linha['status']] = ['videos' => (int) $linha['videos'], 'reproducoes' => (int) $linha['reproducoes'], 'streams' => (int) $linha['streams'], 'ms' => (int) $linha['ms']];
+        }
+
+        $porOrigem = [];
+        $linhas = $conexao->fetchAllAssociative(
+            "SELECT COALESCE(v.origem_classificacao, '') AS origem, COUNT(DISTINCT v.uuid) AS videos
+            FROM reproducao_youtube r INNER JOIN video_youtube v ON v.uuid = r.video_uuid WHERE {$filtro} AND v.status IN ('musica', 'mashup') GROUP BY origem",
+            $parametros,
+            $tipos,
+        );
+        foreach ($linhas as $linha) {
+            $porOrigem[(string) $linha['origem']] = (int) $linha['videos'];
+        }
+
+        $meses = (int) $conexao->fetchOne("SELECT COUNT(DISTINCT DATE_FORMAT(r.tocada_em, '%Y-%m')) FROM reproducao_youtube r WHERE {$filtro}", $parametros, $tipos);
+
+        return [
+            'porStatus' => $porStatus,
+            'porOrigem' => $porOrigem,
+            'videosUnicos' => array_sum(array_column($porStatus, 'videos')),
+            'mesesComDados' => $meses,
+        ];
     }
 
     private function emUtc(DateTimeImmutable $momento): DateTimeImmutable

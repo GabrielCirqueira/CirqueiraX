@@ -34,6 +34,10 @@ final readonly class ProcessarImportacaoYoutubeService
             return ResultadoEtapaImportacaoYoutube::Parar;
         }
 
+        if ($importacao->isEsperandoVez() && null !== $this->importacaoRepository->buscarAnteriorEmAndamento($importacao)) {
+            return ResultadoEtapaImportacaoYoutube::AguardarVez;
+        }
+
         try {
             return $this->executarEtapa($importacao);
         } catch (Throwable $erro) {

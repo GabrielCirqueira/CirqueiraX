@@ -1,6 +1,7 @@
 import { ModalAuth } from '@/features/auth/ModalAuth'
 import { useSincronizacaoOffline } from '@/features/livros-audio/hooks/useSincronizacaoOffline'
 import { PopupNotificacoesNovas } from '@/features/notificacoes'
+import { PopupRelatorioImportacaoYoutube } from '@/features/youtube-music/components/PopupRelatorioImportacaoYoutube'
 import { Box, Flex } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
@@ -73,6 +74,7 @@ export function MainLayout() {
 
       {modalAberto && <ModalAuth isOpen={true} onClose={() => setModalAberto(false)} />}
       <PopupNotificacoesNovas />
+      <PopupRelatorioImportacaoYoutube />
     </Flex>
   )
 }

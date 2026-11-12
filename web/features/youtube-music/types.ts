@@ -88,9 +88,35 @@ export const StatusImportacaoYoutubeSchema = z.enum([
 
 export type StatusImportacaoYoutube = z.infer<typeof StatusImportacaoYoutubeSchema>
 
+export const MusicaRelatorioImportacaoSchema = z.object({
+  uuid: z.string(),
+  titulo: z.string(),
+  artistas: z.string().default(''),
+  urlCapa: z.string().nullable().default(null),
+  streams: z.number().default(0),
+  minutos: z.number().default(0),
+})
+
+export type MusicaRelatorioImportacao = z.infer<typeof MusicaRelatorioImportacaoSchema>
+
+export const ArtistaRelatorioImportacaoSchema = z.object({
+  uuid: z.string(),
+  nome: z.string(),
+  urlFoto: z.string().nullable().default(null),
+  streams: z.number().default(0),
+  minutos: z.number().default(0),
+})
+
+export type ArtistaRelatorioImportacao = z.infer<typeof ArtistaRelatorioImportacaoSchema>
+
 export const RelatorioImportacaoYoutubeSchema = z.object({
   reproducoesLidas: z.number().default(0),
+  reproducoesNovas: z.number().default(0),
+  reproducoesJaExistiam: z.number().default(0),
+  reproducoesUnificadas: z.number().default(0),
+  reproducoesDescartadas: z.number().default(0),
   videosUnicos: z.number().default(0),
+  videosNovos: z.number().default(0),
   musicas: z.number().default(0),
   mashups: z.number().default(0),
   compilacoes: z.number().default(0),
@@ -98,6 +124,16 @@ export const RelatorioImportacaoYoutubeSchema = z.object({
   revisar: z.number().default(0),
   indisponiveis: z.number().default(0),
   pendentes: z.number().default(0),
+  identificadasPorRegra: z.number().default(0),
+  identificadasPelaIa: z.number().default(0),
+  identificadasPorVoce: z.number().default(0),
+  reproducoesDeMusica: z.number().default(0),
+  streamsDeMusica: z.number().default(0),
+  minutosDeMusica: z.number().default(0),
+  musicasDistintas: z.number().default(0),
+  artistasDistintos: z.number().default(0),
+  topMusicas: z.array(MusicaRelatorioImportacaoSchema).default([]),
+  topArtistas: z.array(ArtistaRelatorioImportacaoSchema).default([]),
   mesesComDados: z.number().default(0),
   custoEstimadoMicrodolares: z.number().default(0),
   custoRealMicrodolares: z.number().default(0),
@@ -140,6 +176,8 @@ export const ImportacaoYoutubeSchema = z.object({
     confirmadaEm: z.string().nullable(),
   }),
   relatorio: RelatorioImportacaoYoutubeSchema.nullable(),
+  relatorioVistoEm: z.string().nullable().default(null),
+  naFila: z.boolean().default(false),
   erroMotivo: z.string().nullable(),
   criadoEm: z.string(),
   iniciadoEm: z.string().nullable(),
@@ -149,6 +187,13 @@ export const ImportacaoYoutubeSchema = z.object({
 })
 
 export type ImportacaoYoutube = z.infer<typeof ImportacaoYoutubeSchema>
+
+export const ListaImportacoesYoutubeSchema = z.object({
+  recentes: z.array(ImportacaoYoutubeSchema),
+  relatoriosNaoVistos: z.array(ImportacaoYoutubeSchema),
+})
+
+export type ListaImportacoesYoutubeDados = z.infer<typeof ListaImportacoesYoutubeSchema>
 
 export const ResumoIdentificacaoSchema = z.object({
   pendentes: z.number(),

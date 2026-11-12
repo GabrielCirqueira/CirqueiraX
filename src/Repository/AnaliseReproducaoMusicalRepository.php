@@ -1215,6 +1215,69 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return array{musicas: list<array{uuid: string, titulo: string, artistas: string, urlCapa: ?string, streams: int, minutos: int}>, artistas: list<array{uuid: string, nome: string, urlFoto: ?string, streams: int, minutos: int}>, totalMusicas: int, totalArtistas: int}
+     */
+    public function resumirMusicasDaImportacao(Usuario $usuario, Uuid $importacao, int $limite): array
+    {
+        $parametros = ['usuarioId' => $usuario->getId(), 'importacao' => $importacao->toBinary(), 'corte' => self::CORTE_STREAM_MS, 'limite' => $limite];
+        $tipos = ['importacao' => ParameterType::BINARY, 'limite' => ParameterType::INTEGER];
+        $daImportacao = "SELECT r.musica_uuid, r.ms_reproduzidos FROM reproducao_musical r
+            INNER JOIN reproducao_youtube ry ON ry.uuid = UUID_TO_BIN(r.origem_id)
+            WHERE r.usuario_id = :usuarioId AND r.fonte = 'youtube_music' AND r.musica_uuid IS NOT NULL AND ry.importacao_youtube_uuid = :importacao";
+
+        $musicas = $this->consultar(
+            "SELECT BIN_TO_UUID(m.uuid) AS uuid, m.titulo, m.url_capa,
+                (SELECT GROUP_CONCAT(ac.nome ORDER BY ac.nome SEPARATOR ', ') FROM musica_artista_catalogo mac INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid WHERE mac.musica_uuid = m.uuid) AS artistas,
+                SUM(d.ms_reproduzidos >= :corte) AS streams, SUM(d.ms_reproduzidos) AS ms
+            FROM ({$daImportacao}) d INNER JOIN musica_catalogo m ON m.uuid = d.musica_uuid
+            GROUP BY m.uuid, m.titulo, m.url_capa
+            ORDER BY streams DESC, ms DESC
+            LIMIT :limite",
+            $parametros,
+            $tipos,
+        );
+
+        $artistas = $this->consultar(
+            self::CTE_CREDITOS.", daimportacao AS ({$daImportacao})
+            SELECT BIN_TO_UUID(a.uuid) AS uuid, a.nome, a.url_foto, SUM(d.ms_reproduzidos >= :corte) AS streams, SUM(d.ms_reproduzidos) AS ms
+            FROM daimportacao d INNER JOIN creditos c ON c.musica_uuid = d.musica_uuid INNER JOIN artista_catalogo a ON a.uuid = c.artista_uuid
+            GROUP BY a.uuid, a.nome, a.url_foto
+            ORDER BY streams DESC, ms DESC
+            LIMIT :limite",
+            $parametros,
+            $tipos,
+        );
+
+        $totais = $this->consultarLinha(
+            self::CTE_CREDITOS.", daimportacao AS ({$daImportacao})
+            SELECT (SELECT COUNT(DISTINCT d.musica_uuid) FROM daimportacao d) AS musicas,
+                (SELECT COUNT(DISTINCT c.artista_uuid) FROM daimportacao d INNER JOIN creditos c ON c.musica_uuid = d.musica_uuid) AS artistas",
+            $parametros,
+            $tipos,
+        );
+
+        return [
+            'musicas' => array_map(fn (array $linha): array => [
+                'uuid' => (string) $linha['uuid'],
+                'titulo' => (string) $linha['titulo'],
+                'artistas' => (string) ($linha['artistas'] ?? ''),
+                'urlCapa' => is_string($linha['url_capa']) ? $linha['url_capa'] : null,
+                'streams' => (int) $linha['streams'],
+                'minutos' => $this->paraMinutos($linha['ms']),
+            ], $musicas),
+            'artistas' => array_map(fn (array $linha): array => [
+                'uuid' => (string) $linha['uuid'],
+                'nome' => (string) $linha['nome'],
+                'urlFoto' => is_string($linha['url_foto']) ? $linha['url_foto'] : null,
+                'streams' => (int) $linha['streams'],
+                'minutos' => $this->paraMinutos($linha['ms']),
+            ], $artistas),
+            'totalMusicas' => (int) ($totais['musicas'] ?? 0),
+            'totalArtistas' => (int) ($totais['artistas'] ?? 0),
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $parametros
      * @param array<string, mixed> $tipos
      *

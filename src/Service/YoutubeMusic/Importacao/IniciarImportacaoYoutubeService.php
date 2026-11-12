@@ -17,6 +17,7 @@ use Symfony\Component\Uid\Uuid;
 final readonly class IniciarImportacaoYoutubeService
 {
     public const int TAMANHO_MAXIMO_BYTES = 209715200;
+    public const int LIMITE_FILA = 5;
     private const array EXTENSOES_VALIDAS = ['zip', 'json'];
 
     public function __construct(
@@ -42,8 +43,8 @@ final readonly class IniciarImportacaoYoutubeService
             throw ImportacaoYoutubeException::tipoNaoSuportado();
         }
 
-        if (null !== $this->importacaoRepository->buscarEmAndamento($usuario)) {
-            throw ImportacaoYoutubeException::importacaoEmAndamento();
+        if ($this->importacaoRepository->contarEmAndamento($usuario) >= self::LIMITE_FILA) {
+            throw ImportacaoYoutubeException::filaCheia(self::LIMITE_FILA);
         }
 
         $uuid = Uuid::v7();

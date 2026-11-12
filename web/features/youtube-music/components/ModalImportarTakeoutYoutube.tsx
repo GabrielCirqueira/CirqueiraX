@@ -19,6 +19,8 @@ import { useImportacaoYoutube, useIniciarImportacaoYoutube } from '../hooks'
 import {
   AVISO_PRIVACIDADE_TAKEOUT,
   INSTRUCOES_TAKEOUT,
+  descreverSituacaoImportacao,
+  formatarNumero,
   isArquivoTakeoutValido,
   passoDaImportacao,
   percentualClassificacao,
@@ -162,10 +164,18 @@ export const ModalImportarTakeoutYoutube = memo(function ModalImportarTakeoutYou
         <HStack gap={3}>
           <Spinner size="sm" color="cirqueira.musica.verde" />
           <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
-            {importacao.etapaDescricao} · {importacao.leitura.totalLidos.toLocaleString('pt-BR')}{' '}
-            lidas
+            {importacao.naFila
+              ? descreverSituacaoImportacao(importacao)
+              : `${importacao.etapaDescricao} · ${formatarNumero(importacao.leitura.totalLidos)} lidas`}
           </Text>
         </HStack>
+      )}
+      {(passo === 'lendo' || passo === 'classificando') && (
+        <Text fontSize="xs" color="cirqueira.musica.textoDesabilitado">
+          Pode fechar esta janela e até enviar outro arquivo: as importações rodam uma de cada vez,
+          em segundo plano, e quando cada uma terminar o relatório abre sozinho em qualquer página.
+          O andamento fica em Gerenciar, em "Importações do YouTube".
+        </Text>
       )}
       {passo === 'confirmacao' && <ConfirmacaoCustoImportacaoYoutube importacao={importacao} />}
       {passo === 'classificando' && (

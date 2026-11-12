@@ -242,6 +242,10 @@ O coletor só vê o que acontece depois da conexão. O passado vem do Takeout:
 3. Etapas: leitura → enriquecimento (YouTube Data API) → filtro sem IA (categorias que não são música, vídeos longos) → **prévia de custo** (até US$ 2 segue sozinha; acima, pede confirmação) → classificação → tempo ouvido → relatório.
 4. Só o histórico de exibição é lido; buscas, comentários e inscrições são ignorados.
 5. Reprodução do Takeout a até 600 s de uma do coletor (mesmo vídeo) vira uma só, com o horário do Takeout e o tempo do coletor.
+6. **Vários arquivos (várias contas ou aparelhos):** cada importação **soma** ao que já existe. Reprodução com o mesmo vídeo no mesmo segundo é reconhecida e não entra de novo ("já estavam no sistema"), e vídeo já conhecido não volta para a IA. Cada reprodução guarda de qual importação veio (`reproducao_youtube.importacao_youtube_uuid`).
+7. **Fila:** dá para enviar até 5 arquivos seguidos. Eles rodam um de cada vez, na ordem de envio (a próxima espera, verificando a cada 60 s, até a anterior terminar ou falhar). Se uma ficar esperando a confirmação de custo, as seguintes também esperam.
+8. **Relatório em popup:** quando uma importação termina, o relatório abre sozinho em qualquer página (`PopupRelatorioImportacaoYoutube`, no layout), um por vez, até ser fechado (`relatorio_visto_em`). Mostra músicas identificadas (pelo canal oficial, pela IA ou por você), o que foi para a revisão (sem certeza, compilações, indisponíveis), o que não era música, vídeos novos, reproduções lidas, novas, já existentes e juntadas com o coletor, minutos e streams de música, músicas e artistas diferentes, período, custo da IA e as 5 músicas e os 5 artistas mais ouvidos do arquivo. Em **Gerenciar → Importações do YouTube** ficam as 10 últimas, com a situação (na fila, lendo, identificando com %, esperando confirmação, concluída, erro) e "Ver relatório".
+9. **Proteções da identificação:** a IA recebe apelidos curtos (`v1`…`v10`) em vez dos UUIDs, porque UUIDs v7 criados juntos são quase iguais e ela trocava as respostas entre vídeos do lote. Uma música só é ligada ao vídeo se o título ou um artista dela aparecer no título, no canal ou na descrição do vídeo; senão o vídeo vai para a revisão. Quando a IA diz "não é música" para um vídeo da categoria Música ou com marcas de música no título (lyrics, slowed, official video, remix, feat…), ele também vai para a revisão.
 
 Detalhes em [MUSICA.md](MUSICA.md), tópicos 197 e 198.
 
@@ -262,7 +266,9 @@ Detalhes em [MUSICA.md](MUSICA.md), tópicos 197 e 198.
 | `GET` | `/api/v1/youtube-music/status` | `status` (`nao_configurado`, `conectada`, `reconectar`, `desconectada`), `nomeConta`, `conectadoEm`, `ultimaConsultaEm`, `ultimaNovidadeEm`, `erroMotivo`, `totalReproducoesColetadas` |
 | `POST` | `/api/v1/youtube-music/desconectar` | Apaga a credencial, mantém as reproduções |
 | `POST` | `/api/v1/youtube-music/importacoes` | Envia o Takeout (multipart, campo `arquivo`) |
-| `GET` | `/api/v1/youtube-music/importacoes/{uuid}` | Andamento e relatório |
+| `GET` | `/api/v1/youtube-music/importacoes` | As 10 últimas importações (`recentes`) e os relatórios ainda não vistos (`relatoriosNaoVistos`) |
+| `GET` | `/api/v1/youtube-music/importacoes/{uuid}` | Andamento e relatório (`naFila`, `relatorioVistoEm`) |
+| `POST` | `/api/v1/youtube-music/importacoes/{uuid}/relatorio-visto` | Fecha o popup do relatório |
 | `POST` | `/api/v1/youtube-music/importacoes/{uuid}/confirmar` | Confirma o custo da IA |
 | `POST` | `/api/v1/youtube-music/importacoes/{uuid}/cancelar` | Cancela na confirmação: pula a IA e deixa os vídeos na revisão |
 | `GET` | `/api/v1/youtube-music/extensao/tokens` | Aparelhos com a extensão ligada (sem o token) |

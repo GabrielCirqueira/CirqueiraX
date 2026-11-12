@@ -55,6 +55,8 @@ final readonly class ImportacaoYoutubeSerializer
                 'confirmadaEm' => $importacao->confirmadaEm()?->format(DateTimeInterface::ATOM),
             ],
             'relatorio' => $importacao->relatorio(),
+            'relatorioVistoEm' => $importacao->relatorioVistoEm()?->format(DateTimeInterface::ATOM),
+            'naFila' => $importacao->isEsperandoVez(),
             'erroMotivo' => $importacao->erroMotivo(),
             'criadoEm' => $importacao->criadoEm()->format(DateTimeInterface::ATOM),
             'iniciadoEm' => $importacao->iniciadoEm()?->format(DateTimeInterface::ATOM),

@@ -20,6 +20,11 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
     public const int LIMITE_CONFIANCA_REVISAO = 70;
     public const int LIMITE_COMPONENTES_MASHUP = 5;
     private const int MINIMO_COMPONENTES_MASHUP = 2;
+    private const string ESPACO = ' ';
+    private const array MARCAS_DE_MUSICA = [
+        'lyrics', 'lyric', 'letra', 'legendado', 'slowed', 'reverb', 'sped up', 'nightcore', 'official video', 'official music video',
+        'official audio', 'audio oficial', 'clipe oficial', 'videoclipe', 'remix', 'cover', 'acoustic', 'acustico', '8d', 'visualizer', 'feat', 'ft',
+    ];
 
     public function __construct(
         private ConfirmarMusicaYoutubeService $confirmarMusica,
@@ -33,7 +38,7 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
         $quantidade = count($resultado->componentes);
 
         if (TipoIdentificacaoMusica::NaoMusica === $resultado->tipo) {
-            return $this->classificar($video, $resultado, StatusClassificacaoVideo::NaoMusica, null);
+            return $this->classificar($video, $resultado, $this->pareceMusica($video) ? StatusClassificacaoVideo::Revisar : StatusClassificacaoVideo::NaoMusica, null);
         }
 
         if (TipoIdentificacaoMusica::Compilacao === $resultado->tipo || $quantidade > self::LIMITE_COMPONENTES_MASHUP) {
@@ -44,11 +49,50 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
             return $this->classificar($video, $resultado, StatusClassificacaoVideo::Revisar, null);
         }
 
+        if (!$this->isCoerenteComVideo($video, $resultado->componentes)) {
+            return $this->classificar($video, $resultado, StatusClassificacaoVideo::Revisar, null);
+        }
+
         if ($quantidade >= self::MINIMO_COMPONENTES_MASHUP) {
             return $this->aplicarMashup($video, $resultado);
         }
 
         return $this->aplicarMusica($video, $resultado, $resultado->componentes[0]);
+    }
+
+    private function pareceMusica(VideoYoutube $video): bool
+    {
+        if (VideoYoutube::CATEGORIA_MUSICA === $video->categoriaYoutube()) {
+            return true;
+        }
+
+        $titulo = self::ESPACO.$this->normalizador->normalizar($video->titulo()).self::ESPACO;
+        foreach (self::MARCAS_DE_MUSICA as $marca) {
+            if (str_contains($titulo, self::ESPACO.$marca.self::ESPACO)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param list<ComponenteIdentificadoDTO> $componentes
+     */
+    private function isCoerenteComVideo(VideoYoutube $video, array $componentes): bool
+    {
+        $textoVideo = self::ESPACO.$this->normalizador->normalizar(implode(self::ESPACO, [$video->titulo(), $video->canal(), $video->descricaoResumo() ?? ''])).self::ESPACO;
+
+        foreach ($componentes as $componente) {
+            $candidatos = [$this->normalizador->normalizarTitulo($componente->titulo), ...array_map($this->normalizador->normalizar(...), $componente->artistas)];
+            foreach ($candidatos as $candidato) {
+                if ('' !== $candidato && str_contains($textoVideo, self::ESPACO.$candidato.self::ESPACO)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private function aplicarMusica(VideoYoutube $video, ResultadoIdentificacaoDTO $resultado, ComponenteIdentificadoDTO $componente): StatusClassificacaoVideo

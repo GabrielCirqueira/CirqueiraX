@@ -18,6 +18,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\UniqueConstraint(name: 'UNIQ_REPRODUCAO_YOUTUBE_USUARIO_CHAVE', fields: ['usuario', 'chaveDeduplicacao'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_REPRODUCAO_YOUTUBE_USUARIO_EXTENSAO', fields: ['usuario', 'idExtensao'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_YOUTUBE_USUARIO_TOCADA', fields: ['usuario', 'tocadaEm'])]
+#[ORM\Index(name: 'IDX_REPRODUCAO_YOUTUBE_IMPORTACAO', fields: ['importacao'])]
 class ReproducaoYoutube
 {
     private const string ALGORITMO_CHAVE = 'sha256';
@@ -69,6 +70,10 @@ class ReproducaoYoutube
 
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
+
+    #[ORM\ManyToOne(targetEntity: ImportacaoYoutube::class)]
+    #[ORM\JoinColumn(name: 'importacao_youtube_uuid', referencedColumnName: 'uuid', nullable: true, onDelete: 'SET NULL')]
+    private ?ImportacaoYoutube $importacao = null;
 
     public function __construct(Usuario $usuario, VideoYoutube $video, DateTimeImmutable $tocadaEm, int $msReproduzidos, FonteReproducaoYoutube $fonte)
     {
@@ -163,6 +168,18 @@ class ReproducaoYoutube
         $this->chaveDeduplicacao = self::gerarChaveDeduplicacao($this->video->videoId(), $this->tocadaEm);
 
         return $this;
+    }
+
+    public function vincularImportacao(ImportacaoYoutube $importacao): self
+    {
+        $this->importacao = $importacao;
+
+        return $this;
+    }
+
+    public function importacao(): ?ImportacaoYoutube
+    {
+        return $this->importacao;
     }
 
     public function ajustarMsReproduzidos(int $msReproduzidos): self

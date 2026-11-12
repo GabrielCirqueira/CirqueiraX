@@ -29,6 +29,7 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
     private const int CODIGO_LIMITE = 429;
     private const int CODIGO_ERRO_SERVIDOR = 500;
     private const string NOME_ESQUEMA = 'identificacao_musicas';
+    private const string PREFIXO_APELIDO = 'v';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -46,7 +47,12 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
             throw IdentificacaoException::chaveAusente();
         }
 
-        $dados = $this->enviarComTentativas($entradas);
+        $idsPorApelido = [];
+        foreach ($entradas as $indice => $entrada) {
+            $idsPorApelido[self::PREFIXO_APELIDO.($indice + 1)] = $entrada->id;
+        }
+
+        $dados = $this->enviarComTentativas($entradas, array_flip($idsPorApelido));
         $tokensEntrada = (int) ($dados['usage']['prompt_tokens'] ?? 0);
         $tokensSaida = (int) ($dados['usage']['completion_tokens'] ?? 0);
         $modelo = is_string($dados['model'] ?? null) ? $dados['model'] : $this->modelo;
@@ -67,16 +73,16 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
             throw $invalida;
         }
 
-        $idsEsperados = array_flip(array_map(static fn (EntradaIdentificacaoDTO $entrada): string => $entrada->id, $entradas));
         $resultados = [];
         $idsInvalidos = [];
         foreach ($json['resultados'] as $item) {
-            $id = is_array($item) && is_string($item['id'] ?? null) ? $item['id'] : null;
-            if (null === $id || !isset($idsEsperados[$id])) {
+            $apelido = is_array($item) && is_string($item['id'] ?? null) ? $item['id'] : null;
+            $id = null === $apelido ? null : ($idsPorApelido[$apelido] ?? null);
+            if (null === $id || isset($resultados[$id])) {
                 continue;
             }
 
-            $resultado = $this->mapearResultadoValido($item);
+            $resultado = $this->mapearResultadoValido([...$item, 'id' => $id]);
             if (null === $resultado) {
                 $idsInvalidos[] = $id;
 
@@ -90,15 +96,16 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
 
     /**
      * @param list<EntradaIdentificacaoDTO> $entradas
+     * @param array<string, string>         $apelidosPorId
      *
      * @return array<string, mixed>
      */
-    private function enviarComTentativas(array $entradas): array
+    private function enviarComTentativas(array $entradas, array $apelidosPorId): array
     {
         $tentativa = 1;
 
         while (true) {
-            $resposta = $this->enviar($entradas);
+            $resposta = $this->enviar($entradas, $apelidosPorId);
             if (self::CODIGO_SUCESSO === $resposta['codigo']) {
                 return $resposta['dados'];
             }
@@ -119,10 +126,11 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
 
     /**
      * @param list<EntradaIdentificacaoDTO> $entradas
+     * @param array<string, string>         $apelidosPorId
      *
      * @return array{codigo: int, dados: array<string, mixed>, esperaSegundos: int|null}
      */
-    private function enviar(array $entradas): array
+    private function enviar(array $entradas, array $apelidosPorId): array
     {
         try {
             $resposta = $this->httpClient->request('POST', self::URL_CHAT, [
@@ -134,7 +142,7 @@ final readonly class OpenAiIdentificadorMusicaClient implements IdentificadorMus
                     'reasoning_effort' => $this->esforcoRaciocinio,
                     'messages' => [
                         ['role' => 'system', 'content' => InstrucoesIdentificacaoMusica::SISTEMA],
-                        ['role' => 'user', 'content' => json_encode(['itens' => array_map(static fn (EntradaIdentificacaoDTO $entrada): array => $entrada->paraPedido(), $entradas)], JSON_UNESCAPED_UNICODE)],
+                        ['role' => 'user', 'content' => json_encode(['itens' => array_map(static fn (EntradaIdentificacaoDTO $entrada): array => [...$entrada->paraPedido(), 'id' => $apelidosPorId[$entrada->id]], $entradas)], JSON_UNESCAPED_UNICODE)],
                     ],
                     'response_format' => ['type' => 'json_schema', 'json_schema' => ['name' => self::NOME_ESQUEMA, 'strict' => true, 'schema' => $this->esquema()]],
                 ],

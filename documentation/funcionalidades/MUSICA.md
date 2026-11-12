@@ -302,7 +302,7 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 3. **Prévia:** conta os pendentes, separa as faixas oficiais ("- Topic", classificadas sem IA) e estima o custo com `TOKENS_ENTRADA_ESTIMADOS_POR_VIDEO = 300` e `TOKENS_SAIDA_ESTIMADOS_POR_VIDEO = 170` (medição do tópico 194 com folga para a descrição) e os preços do tópico 194. Até `LIMITE_CUSTO_AUTOMATICO_MICRODOLARES` (US$ 2) segue sozinha; acima, fica em `aguardando_confirmacao` até `POST /api/v1/youtube-music/importacoes/{uuid}/confirmar`.
 4. **Classificação:** 100 vídeos por rodada pelo `IdentificarVideosYoutubeService`. Os classificados saem da reserva; tokens e custo reais vêm do `consumo_ia` desde o início da classificação. Rodada sem nenhum classificado (falha da IA) espera 1 hora.
 5. **Tempo ouvido:** 6 meses por rodada, com cursor gravado. Ordena todas as reproduções do usuário no mês (de qualquer fonte e de vídeos que não são música) e estima as do Takeout com `EstimarTempoReproduzidoYoutubeService`: o menor entre o intervalo até o próximo vídeo e a duração. Sem duração, 0; a última de todas fica com a duração.
-6. **Relatório:** ao concluir, libera qualquer vídeo que ainda estivesse reservado (o identificador de cada minuto assume) e grava o relatório: reproduções lidas, vídeos únicos, músicas, mashups, compilações, não música, a revisar, indisponíveis, pendentes, meses com dados e tokens e custo estimados contra reais.
+6. **Relatório:** ao concluir, libera qualquer vídeo que ainda estivesse reservado (o identificador de cada minuto assume) e grava o relatório, calculado só com as reproduções daquela importação (`importacao_youtube_uuid`): reproduções lidas, novas, já existentes, juntadas e descartadas; vídeos únicos e novos; músicas, mashups, compilações, não música, a revisar, indisponíveis e pendentes; identificadas por regra, IA ou manual; reproduções, streams e minutos de música; músicas e artistas diferentes com o top 5 de cada; meses com dados e tokens e custo estimados contra reais. Detalhes da fila, do popup e das proteções em [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md), seção 11.
 
 `app:youtube:continuar-importacao {uuid}` roda as etapas no terminal até terminar ou precisar esperar; se a importação estiver em erro depois da leitura, retoma da etapa onde parou.
 
@@ -364,6 +364,7 @@ Lista do que só pode ser conferido com a conta e os arquivos do Gabriel. Cada c
 | Verificação | Situação |
 |---|---|
 | Coleta ao vivo com 5 a 10 músicas (slowed da mesma música, um mashup, uma repetição e uma pulada) | Em andamento: de 11/11 22h11 a 12/11 09h47, 36 reproduções coletadas, 33 vídeos (30 músicas, 2 mashups, 1 em revisão), 0 erros. Falta o roteiro com slowed, repetição e pulada |
+| Takeout de teste (92 entradas, formato em português) em cópia do banco, em duas importações sobrepostas | 29 músicas e 3 mashups certos, 1 para revisão; a 2ª importação somou 30 reproduções novas e reconheceu 40 já existentes sem duplicar; custo estimado US$ 0,023 contra real US$ 0,018 |
 | Takeout real: relatório, fila de revisão e custo real contra o estimado | _pendente_ |
 | Acerto da IA em 100 títulos reais (inclusive português e gospel) e confirmação pela busca | _pendente_ |
 | 30 músicas ouvidas nos dois serviços: duplicatas falsas e uniões erradas | _pendente_ |

@@ -1,7 +1,14 @@
 import axios from 'axios'
-import type { ImportacaoYoutube, StatusImportacaoYoutube } from '../types'
+import type {
+  DadosRelatorioImportacaoYoutube,
+  ImportacaoYoutube,
+  ListaImportacoesYoutubeDados,
+  StatusImportacaoYoutube,
+} from '../types'
 
 const INTERVALO_CONSULTA_MS = 2_500
+const INTERVALO_LISTA_EM_ANDAMENTO_MS = 15_000
+const INTERVALO_LISTA_PARADA_MS = 120_000
 const MICRODOLARES_POR_DOLAR = 1_000_000
 const EXTENSOES_ACEITAS = ['.zip', '.json']
 const TIPOS_ACEITOS = ['application/zip', 'application/x-zip-compressed', 'application/json']
@@ -115,3 +122,146 @@ export const INSTRUCOES_TAKEOUT = [
 
 export const AVISO_PRIVACIDADE_TAKEOUT =
   'Só o arquivo de histórico de visualizações é lido. Pesquisas, comentários, inscrições e endereços IP são ignorados.'
+
+export function intervaloConsultaImportacoes(
+  lista: ListaImportacoesYoutubeDados | undefined
+): number {
+  const emAndamento = lista?.recentes.some((importacao) => !importacao.isFinalizada) ?? false
+  return emAndamento ? INTERVALO_LISTA_EM_ANDAMENTO_MS : INTERVALO_LISTA_PARADA_MS
+}
+
+export function descreverSituacaoImportacao(importacao: ImportacaoYoutube): string {
+  if (importacao.naFila) return 'Na fila: começa quando a importação anterior terminar'
+  if (importacao.aguardandoConfirmacao) return 'Esperando você confirmar o custo da IA'
+  if (importacao.status === 'concluida') return 'Concluída'
+  if (importacao.status === 'erro') return importacao.erroMotivo ?? 'A importação falhou'
+  if (importacao.status === 'classificando') {
+    return `Identificando as músicas · ${percentualClassificacao(importacao)}%`
+  }
+  return importacao.etapaDescricao
+}
+
+export function corSituacaoImportacao(importacao: ImportacaoYoutube): string {
+  if (importacao.status === 'concluida') return 'cirqueira.musica.verde'
+  if (importacao.status === 'erro') return 'cirqueira.red.300'
+  if (importacao.aguardandoConfirmacao || importacao.naFila) return 'cirqueira.musica.amarelo'
+  return 'cirqueira.musica.azul'
+}
+
+export function formatarDataImportacao(iso: string | null): string {
+  if (!iso) return ''
+  return new Date(iso).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+export function totalIdentificadas(relatorio: DadosRelatorioImportacaoYoutube): number {
+  return relatorio.musicas + relatorio.mashups
+}
+
+export function totalParaRevisao(relatorio: DadosRelatorioImportacaoYoutube): number {
+  return relatorio.revisar + relatorio.pendentes + relatorio.compilacoes + relatorio.indisponiveis
+}
+
+export interface ItemRelatorioImportacao {
+  rotulo: string
+  valor: string
+  detalhe?: string
+}
+
+export interface SecaoRelatorioImportacao {
+  titulo: string
+  itens: ItemRelatorioImportacao[]
+}
+
+function juntarDetalhes(partes: [number, string][]): string | undefined {
+  const texto = partes
+    .filter(([valor]) => valor > 0)
+    .map(([valor, rotulo]) => `${formatarNumero(valor)} ${rotulo}`)
+    .join(' · ')
+  return texto || undefined
+}
+
+export function montarSecoesRelatorio(
+  relatorio: DadosRelatorioImportacaoYoutube,
+  importacao: ImportacaoYoutube
+): SecaoRelatorioImportacao[] {
+  return [
+    {
+      titulo: 'Identificação',
+      itens: [
+        {
+          rotulo: 'Músicas identificadas',
+          valor: formatarNumero(totalIdentificadas(relatorio)),
+          detalhe: juntarDetalhes([
+            [relatorio.identificadasPorRegra, 'pelo canal oficial'],
+            [relatorio.identificadasPelaIa, 'pela IA'],
+            [relatorio.identificadasPorVoce, 'por você'],
+            [relatorio.mashups, 'delas são mashups'],
+          ]),
+        },
+        {
+          rotulo: 'Foram para a revisão',
+          valor: formatarNumero(totalParaRevisao(relatorio)),
+          detalhe: juntarDetalhes([
+            [relatorio.revisar + relatorio.pendentes, 'sem certeza'],
+            [relatorio.compilacoes, 'compilações'],
+            [relatorio.indisponiveis, 'indisponíveis'],
+          ]),
+        },
+        {
+          rotulo: 'Não eram música',
+          valor: formatarNumero(relatorio.naoMusica),
+          detalhe: 'podcasts, vídeos, tutoriais…',
+        },
+        {
+          rotulo: 'Vídeos no arquivo',
+          valor: formatarNumero(relatorio.videosUnicos),
+          detalhe: juntarDetalhes([[relatorio.videosNovos, 'novos no sistema']]),
+        },
+      ],
+    },
+    {
+      titulo: 'Reproduções do arquivo',
+      itens: [
+        { rotulo: 'Lidas', valor: formatarNumero(relatorio.reproducoesLidas) },
+        { rotulo: 'Novas no sistema', valor: formatarNumero(relatorio.reproducoesNovas) },
+        {
+          rotulo: 'Já estavam no sistema',
+          valor: formatarNumero(relatorio.reproducoesJaExistiam),
+          detalhe: 'de importações anteriores; não contam duas vezes',
+        },
+        {
+          rotulo: 'Juntadas com o coletor',
+          valor: formatarNumero(relatorio.reproducoesUnificadas),
+          detalhe: 'já capturadas ao vivo; viraram uma só',
+        },
+      ],
+    },
+    {
+      titulo: 'O que você ouviu',
+      itens: [
+        {
+          rotulo: 'Minutos de música',
+          valor: formatarNumero(relatorio.minutosDeMusica),
+          detalhe: 'estimados',
+        },
+        { rotulo: 'Streams', valor: formatarNumero(relatorio.streamsDeMusica) },
+        { rotulo: 'Músicas diferentes', valor: formatarNumero(relatorio.musicasDistintas) },
+        { rotulo: 'Artistas diferentes', valor: formatarNumero(relatorio.artistasDistintos) },
+        {
+          rotulo: 'Período',
+          valor: formatarPeriodoCoberto(
+            importacao.leitura.primeiraReproducaoEm,
+            importacao.leitura.ultimaReproducaoEm
+          ),
+          detalhe: `${formatarNumero(relatorio.mesesComDados)} meses com dados`,
+        },
+        { rotulo: 'Custo da IA', valor: formatarDolares(importacao.classificacao.custoRealUsd) },
+      ],
+    },
+  ]
+}

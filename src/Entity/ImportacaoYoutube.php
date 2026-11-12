@@ -108,6 +108,9 @@ class ImportacaoYoutube
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $tempoCalculadoAte = null;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $relatorioVistoEm = null;
+
     /**
      * @var array<string, mixed>|null
      */
@@ -393,6 +396,23 @@ class ImportacaoYoutube
     public function tempoCalculadoAte(): ?DateTimeImmutable
     {
         return $this->tempoCalculadoAte;
+    }
+
+    public function marcarRelatorioVisto(): self
+    {
+        $this->relatorioVistoEm ??= new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function relatorioVistoEm(): ?DateTimeImmutable
+    {
+        return $this->relatorioVistoEm;
+    }
+
+    public function isEsperandoVez(): bool
+    {
+        return StatusImportacaoYoutube::Enviada === $this->status && EtapaImportacaoYoutube::Leitura === $this->etapa;
     }
 
     /**

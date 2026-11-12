@@ -54,6 +54,10 @@ final class ContinuarImportacaoYoutubeCommand extends Command
             $io->writeln(sprintf('%s — %s', $importacao?->status()->descricao() ?? '', $importacao?->etapa()->descricao() ?? ''));
         } while (ResultadoEtapaImportacaoYoutube::Continuar === $resultado);
 
+        if (ResultadoEtapaImportacaoYoutube::AguardarVez === $resultado) {
+            $io->warning('Outra importação desta conta está em andamento. Esta começa quando ela terminar.');
+        }
+
         if (ResultadoEtapaImportacaoYoutube::Aguardar === $resultado) {
             $io->warning('A etapa atual precisa esperar (cota da YouTube Data API ou falha da IA). Rode de novo mais tarde.');
         }

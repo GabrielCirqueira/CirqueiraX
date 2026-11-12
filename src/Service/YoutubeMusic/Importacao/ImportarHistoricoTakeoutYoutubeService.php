@@ -6,11 +6,13 @@ namespace App\Service\YoutubeMusic\Importacao;
 
 use App\DataObject\YoutubeMusic\ItemHistoricoTakeoutYoutubeDTO;
 use App\DataObject\YoutubeMusic\ResultadoImportacaoTakeoutYoutubeDTO;
+use App\Entity\ImportacaoYoutube;
 use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
 use App\Enum\FonteReproducaoYoutube;
 use App\Interface\LeitorArquivoTakeoutYoutubeInterface;
+use App\Repository\ImportacaoYoutubeRepository;
 use App\Repository\ReproducaoYoutubeRepository;
 use App\Repository\VideoYoutubeRepository;
 use DateTimeImmutable;
@@ -28,11 +30,13 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
         private LeitorArquivoTakeoutYoutubeInterface $leitor,
         private VideoYoutubeRepository $videoRepository,
         private ReproducaoYoutubeRepository $reproducaoRepository,
+        private ImportacaoYoutubeRepository $importacaoRepository,
     ) {
     }
 
-    public function executar(string $caminhoArquivo, Usuario $usuario): ResultadoImportacaoTakeoutYoutubeDTO
+    public function executar(string $caminhoArquivo, ImportacaoYoutube $importacao): ResultadoImportacaoTakeoutYoutubeDTO
     {
+        $usuario = $importacao->usuario();
         $contadores = ['lidos' => 0, 'novos' => 0, 'ignorados' => 0, 'unificados' => 0, 'videosNovos' => 0];
         $lote = [];
         $primeira = null;
@@ -49,13 +53,14 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
                 continue;
             }
 
-            $this->processarLote($lote, $usuario, $contadores);
+            $this->processarLote($lote, $usuario, $importacao, $contadores);
             $usuario = $this->reproducaoRepository->obterReferenciaUsuario($usuario);
+            $importacao = $this->importacaoRepository->obterReferencia($importacao);
             $lote = [];
         }
 
         if ([] !== $lote) {
-            $this->processarLote($lote, $usuario, $contadores);
+            $this->processarLote($lote, $usuario, $importacao, $contadores);
         }
 
         return new ResultadoImportacaoTakeoutYoutubeDTO(
@@ -71,10 +76,10 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
     }
 
     /**
-     * @param list<ItemHistoricoTakeoutYoutubeDTO>                                                    $lote
+     * @param list<ItemHistoricoTakeoutYoutubeDTO>                                             $lote
      * @param array{lidos: int, novos: int, ignorados: int, unificados: int, videosNovos: int} $contadores
      */
-    private function processarLote(array $lote, Usuario $usuario, array &$contadores): void
+    private function processarLote(array $lote, Usuario $usuario, ImportacaoYoutube $importacao, array &$contadores): void
     {
         $videoIds = array_values(array_unique(array_map(static fn (ItemHistoricoTakeoutYoutubeDTO $item): string => $item->videoId, $lote)));
         $videos = $this->videoRepository->buscarPorVideoIds($usuario, $videoIds);
@@ -97,13 +102,14 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
             $candidato = $this->extrairCandidatoMaisProximo($candidatosColeta, $item);
 
             if (null !== $candidato && $candidato->isTempoExato()) {
+                $candidato->vincularImportacao($importacao);
                 ++$contadores['unificados'];
 
                 continue;
             }
 
             if (null !== $candidato) {
-                $candidato->unificarComTakeout($item->tocadaEm);
+                $candidato->unificarComTakeout($item->tocadaEm)->vincularImportacao($importacao);
                 ++$contadores['unificados'];
 
                 continue;
@@ -111,7 +117,7 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
 
             $video = $videos[$item->videoId] ?? $this->criarVideo($usuario, $item, $contadores);
             $videos[$item->videoId] = $video;
-            $this->reproducaoRepository->salvar(new ReproducaoYoutube($usuario, $video, $item->tocadaEm, self::MS_INICIAL_TAKEOUT, FonteReproducaoYoutube::Takeout), false);
+            $this->reproducaoRepository->salvar((new ReproducaoYoutube($usuario, $video, $item->tocadaEm, self::MS_INICIAL_TAKEOUT, FonteReproducaoYoutube::Takeout))->vincularImportacao($importacao), false);
             ++$contadores['novos'];
         }
 

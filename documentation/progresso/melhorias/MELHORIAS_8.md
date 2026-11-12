@@ -193,3 +193,31 @@
 - **Arquivos**: `src/Service/Musica/Analise/CompletarCapasVariantesService.php`, `src/Service/Musica/Analise/ListarVersoesMusicaService.php`, `src/Service/Musica/Analise/ObterDetalheMusicaService.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `web/features/musica/components/ListaVersoesMusica.tsx`, `documentation/funcionalidades/MUSICA.md`
 
 ---
+
+### 🟡 Melhoria 158 — Relatório da Importação do Takeout em Popup e Várias Importações em Fila
+
+- **Status**: Publicado, falta validar
+- **Data**: 12 de novembro de 2026
+- **Problema**: o relatório do Takeout só aparecia se a janela da importação continuasse aberta e trazia poucos números. Ele também contava todas as reproduções do Takeout no período, então uma 2ª ou 3ª importação misturaria os números das anteriores. Além disso, o sistema recusava um novo arquivo enquanto outro rodava, e o pedido era fazer umas 3 importações (de contas e aparelhos diferentes), sempre somando ao que já existe.
+- **Solução**:
+  - Cada reprodução guarda a importação que a trouxe (`reproducao_youtube.importacao_youtube_uuid`, migration `Version20261112180000`), e o relatório é calculado só com ela: músicas identificadas (canal oficial, IA, manual), o que foi para a revisão, o que não era música, vídeos novos, reproduções lidas, novas, já existentes e juntadas com o coletor, minutos e streams, músicas e artistas diferentes, período, custo e o top 5 de músicas e artistas.
+  - Popup global (`PopupRelatorioImportacaoYoutube`, no layout) que abre sozinho em qualquer página quando a importação termina, um relatório por vez, até ser fechado (`relatorio_visto_em`, `POST /importacoes/{uuid}/relatorio-visto`).
+  - Fila: até 5 arquivos seguidos, que rodam um de cada vez na ordem de envio (`ResultadoEtapaImportacaoYoutube::AguardarVez`, nova tentativa a cada 60 s). Em Gerenciar, "Importações do YouTube" lista as 10 últimas com a situação e "Ver relatório" (`GET /importacoes`).
+  - Concatenação conferida: numa cópia do banco, a 2ª importação de um arquivo que repetia metade do 1º somou só as 30 reproduções novas e reconheceu as 40 já existentes.
+- **Arquivos**: `migrations/Version20261112180000.php`, `src/Entity/ReproducaoYoutube.php`, `src/Entity/ImportacaoYoutube.php`, `src/Repository/ImportacaoYoutubeRepository.php`, `src/Repository/ReproducaoYoutubeRepository.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Service/YoutubeMusic/Importacao/` (`GerarRelatorioImportacaoYoutubeService`, `ImportarHistoricoTakeoutYoutubeService`, `IniciarImportacaoYoutubeService`, `ProcessarImportacaoYoutubeService`, `ListarImportacoesYoutubeService`, `MarcarRelatorioVistoImportacaoYoutubeService`), `src/Enum/ResultadoEtapaImportacaoYoutube.php`, `src/MessageHandler/ImportarHistoricoYoutubeMessageHandler.php`, `src/Command/ContinuarImportacaoYoutubeCommand.php`, `src/Controller/YoutubeMusic/YoutubeImportacaoController.php`, `src/Serializer/ImportacaoYoutubeSerializer.php`, `src/Exception/ImportacaoYoutube/ImportacaoYoutubeException.php`, `web/features/youtube-music/` (`RelatorioImportacaoYoutube`, `DialogRelatorioImportacaoYoutube`, `PopupRelatorioImportacaoYoutube`, `ListaImportacoesYoutube`, `ModalImportarTakeoutYoutube`, hooks, utils, types, api), `web/layouts/MainLayout.tsx`, `web/features/musica/GerenciarMusica.tsx`, `documentation/funcionalidades/YOUTUBE_MUSIC.md`, `documentation/funcionalidades/MUSICA.md`
+
+---
+
+### ✅ Melhoria 159 — IA Não Troca Mais as Músicas Entre Vídeos
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: no teste do Takeout, a IA trocou respostas entre vídeos do mesmo lote: "Imagine Dragons - Believer (Official Music Video)" virou "Alone — Marshmello" e "Marshmello - Alone (Official Music Video)" virou "Burn — Ellie Goulding". Os vídeos iam para ela identificados por UUID v7, e UUIDs criados juntos são quase iguais. Também marcou "Ellie Goulding - Burn (Lyrics)" como "não é música".
+- **Solução**:
+  - A IA recebe apelidos curtos (`v1`…`v10`), e o sistema converte de volta para o vídeo certo.
+  - A música só é ligada ao vídeo se o título ou um artista dela aparecer no título, no canal ou na descrição do vídeo; senão, o vídeo vai para a revisão com a sugestão.
+  - "Não é música" vindo da IA para vídeo da categoria Música ou com marcas de música no título (lyrics, slowed, official video, remix, feat…) vai para a revisão em vez de sumir.
+  - Rodando de novo o mesmo teste, todos os 29 vídeos de música e os 3 mashups ficaram certos. As 33 identificações já feitas pela IA em produção foram conferidas, e nenhuma estava trocada.
+- **Arquivos**: `src/Infra/OpenAi/OpenAiIdentificadorMusicaClient.php`, `src/Service/IdentificacaoMusica/AplicarIdentificacaoVideoYoutubeService.php`, `documentation/funcionalidades/YOUTUBE_MUSIC.md`
+
+---

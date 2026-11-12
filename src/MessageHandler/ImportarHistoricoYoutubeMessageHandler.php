@@ -15,6 +15,7 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 final readonly class ImportarHistoricoYoutubeMessageHandler
 {
     private const int ESPERA_PARA_TENTAR_DE_NOVO_MS = 3600000;
+    private const int ESPERA_PELA_VEZ_MS = 60000;
 
     public function __construct(
         private ProcessarImportacaoYoutubeService $processarService,
@@ -30,7 +31,12 @@ final readonly class ImportarHistoricoYoutubeMessageHandler
             return;
         }
 
-        $carimbos = ResultadoEtapaImportacaoYoutube::Aguardar === $resultado ? [new DelayStamp(self::ESPERA_PARA_TENTAR_DE_NOVO_MS)] : [];
+        $espera = match ($resultado) {
+            ResultadoEtapaImportacaoYoutube::Aguardar => self::ESPERA_PARA_TENTAR_DE_NOVO_MS,
+            ResultadoEtapaImportacaoYoutube::AguardarVez => self::ESPERA_PELA_VEZ_MS,
+            default => null,
+        };
+        $carimbos = null === $espera ? [] : [new DelayStamp($espera)];
         $this->messageBus->dispatch(new ImportarHistoricoYoutubeMessage($message->importacaoUuid), $carimbos);
     }
 }

@@ -12,6 +12,8 @@ use App\Service\YoutubeMusic\Importacao\CancelarClassificacaoImportacaoYoutubeSe
 use App\Service\YoutubeMusic\Importacao\ConfirmarImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\ConsultarImportacaoYoutubeService;
 use App\Service\YoutubeMusic\Importacao\IniciarImportacaoYoutubeService;
+use App\Service\YoutubeMusic\Importacao\ListarImportacoesYoutubeService;
+use App\Service\YoutubeMusic\Importacao\MarcarRelatorioVistoImportacaoYoutubeService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,8 +27,21 @@ final class YoutubeImportacaoController extends DefaultController
         private readonly ConsultarImportacaoYoutubeService $consultarService,
         private readonly ConfirmarImportacaoYoutubeService $confirmarService,
         private readonly CancelarClassificacaoImportacaoYoutubeService $cancelarService,
+        private readonly ListarImportacoesYoutubeService $listarService,
+        private readonly MarcarRelatorioVistoImportacaoYoutubeService $marcarRelatorioVistoService,
         private readonly ImportacaoYoutubeSerializer $serializer,
     ) {
+    }
+
+    #[Route('', name: 'listar', methods: ['GET'])]
+    public function listar(#[CurrentUser] Usuario $usuario): Response
+    {
+        $resultado = $this->listarService->executar($usuario);
+
+        return $this->success([
+            'recentes' => array_map($this->serializer->serializar(...), $resultado['recentes']),
+            'relatoriosNaoVistos' => array_map($this->serializer->serializar(...), $resultado['relatoriosNaoVistos']),
+        ]);
     }
 
     #[Route('', name: 'iniciar', methods: ['POST'])]
@@ -47,6 +62,12 @@ final class YoutubeImportacaoController extends DefaultController
     public function confirmar(string $uuid, #[CurrentUser] Usuario $usuario): Response
     {
         return $this->success($this->serializer->serializar($this->confirmarService->executar($uuid, $usuario)));
+    }
+
+    #[Route('/{uuid}/relatorio-visto', name: 'relatorio_visto', methods: ['POST'])]
+    public function marcarRelatorioVisto(string $uuid, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->serializer->serializar($this->marcarRelatorioVistoService->executar($uuid, $usuario)));
     }
 
     #[Route('/{uuid}/cancelar', name: 'cancelar', methods: ['POST'])]

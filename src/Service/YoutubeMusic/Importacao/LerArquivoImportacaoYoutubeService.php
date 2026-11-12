@@ -26,7 +26,7 @@ final readonly class LerArquivoImportacaoYoutubeService
         $this->importacaoRepository->salvar($importacao);
 
         try {
-            $resultado = $this->importarService->executar($caminhoArquivo, $importacao->usuario());
+            $resultado = $this->importarService->executar($caminhoArquivo, $importacao);
         } finally {
             $this->armazenamento->removerArquivo($caminhoArquivo);
         }

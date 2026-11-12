@@ -4,6 +4,8 @@ import {
   DesconectarYoutubeMusicSchema,
   type ImportacaoYoutube,
   ImportacaoYoutubeSchema,
+  type ListaImportacoesYoutubeDados,
+  ListaImportacoesYoutubeSchema,
   type ResumoIdentificacao,
   ResumoIdentificacaoSchema,
   type StatusYoutubeMusic,
@@ -42,6 +44,20 @@ export async function iniciarImportacaoYoutube(arquivo: File): Promise<Importaca
 
 export async function consultarImportacaoYoutube(uuid: string): Promise<ImportacaoYoutube> {
   const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO}/importacoes/${uuid}`)
+  return ImportacaoYoutubeSchema.parse(data.data)
+}
+
+export async function listarImportacoesYoutube(): Promise<ListaImportacoesYoutubeDados> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO}/importacoes`)
+  return ListaImportacoesYoutubeSchema.parse(data.data)
+}
+
+export async function marcarRelatorioVistoImportacaoYoutube(
+  uuid: string
+): Promise<ImportacaoYoutube> {
+  const { data } = await api.post<RespostaApi<unknown>>(
+    `${PREFIXO}/importacoes/${uuid}/relatorio-visto`
+  )
   return ImportacaoYoutubeSchema.parse(data.data)
 }
 

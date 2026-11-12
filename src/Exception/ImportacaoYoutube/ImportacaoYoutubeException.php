@@ -29,9 +29,9 @@ final class ImportacaoYoutubeException extends DomainException
         return new self('Formato não suportado. Envie o ZIP do Takeout ou o JSON do histórico de exibição.', self::CODIGO_REQUISICAO_INVALIDA);
     }
 
-    public static function importacaoEmAndamento(): self
+    public static function filaCheia(int $limite): self
     {
-        return new self('Já existe uma importação do YouTube em andamento nesta conta.', self::CODIGO_CONFLITO);
+        return new self(sprintf('Já há %d importações do YouTube na fila desta conta. Espere uma terminar para enviar outra.', $limite), self::CODIGO_CONFLITO);
     }
 
     public static function importacaoNaoEncontrada(): self
