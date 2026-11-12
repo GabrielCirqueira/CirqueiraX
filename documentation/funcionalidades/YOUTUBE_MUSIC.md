@@ -19,7 +19,7 @@ Registra o que a conta ouve no YouTube Music, no computador ou no celular, sem e
 ## 3. Coleta
 
 - A cada 30 s o agendador verifica as contas conectadas; a consulta da mesma conta acontece a cada 30 s enquanto há novidade e a cada 120 s quando parado (fila `youtube_coleta`, 1 worker).
-- O histórico do YouTube Music não tem horário nem tempo ouvido. O horário gravado é quando a música apareceu no histórico, com margem de alguns minutos, e o tempo ouvido é estimado pela duração e pelo intervalo até a seguinte.
+- O histórico do YouTube Music não tem horário nem tempo ouvido. O horário gravado é quando a música apareceu no histórico, com margem de alguns minutos, e o tempo ouvido é estimado: a música que está tocando conta só o tempo decorrido desde que apareceu (atualizado a cada coleta), e cada música é fechada pelo intervalo até a seguinte, sem passar da duração. Se você parar no meio, a última sobe até a duração.
 - Repetir a mesma música em seguida não muda o topo do histórico, então a segunda vez não é contada.
 
 ## 4. Passado pelo Google Takeout

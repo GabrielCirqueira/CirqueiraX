@@ -22,6 +22,7 @@ final readonly class ColetarHistoricoYoutubeMusicService
     private const int JANELA_ATIVIDADE_SEGUNDOS = 600;
     private const int RESERVA_CONSULTA_SEGUNDOS = 120;
     private const string FORMATO_SEGUNDOS_ADIANTE = '+%d seconds';
+    private const string FORMATO_SEGUNDOS_ATRAS = '-%d seconds';
 
     public function __construct(
         private ContaYoutubeMusicRepository $contaRepository,
@@ -29,6 +30,7 @@ final readonly class ColetarHistoricoYoutubeMusicService
         private CriptografiaInterface $criptografia,
         private DetectarNovasReproducoesYoutubeService $detectarNovas,
         private RegistrarReproducoesYoutubeService $registrarReproducoes,
+        private AtualizarReproducaoEmAndamentoYoutubeService $atualizarEmAndamento,
         private TratarErroColetaYoutubeMusicService $tratarErro,
         private CacheAnaliseSpotifyService $cacheAnalise,
         private LoggerInterface $logger,
@@ -81,7 +83,8 @@ final readonly class ColetarHistoricoYoutubeMusicService
         }
 
         $quantidadeNovas = $this->detectarNovas->executar($idsAtuais, $conta->snapshotTopo());
-        $criadas = $this->registrarReproducoes->executar($conta->usuario(), array_slice($historico->itens, 0, $quantidadeNovas), $vistoEm);
+        $criadas = $this->registrarReproducoes->executar($conta->usuario(), array_slice($historico->itens, 0, $quantidadeNovas), $this->estimarInicioDoMaisRecente($conta, $vistoEm));
+        $this->atualizarEmAndamento->executar($conta->usuario(), $idsAtuais, $vistoEm);
 
         $conta->registrarConsulta($snapshot, $quantidadeNovas > 0);
         $conta->definirProximaConsulta($this->adiante($this->calcularIntervalo($conta, $vistoEm)));
@@ -105,6 +108,18 @@ final readonly class ColetarHistoricoYoutubeMusicService
         }
 
         return max(self::INTERVALO_MINIMO_SEGUNDOS, self::INTERVALO_OCIOSO_SEGUNDOS);
+    }
+
+    private function estimarInicioDoMaisRecente(ContaYoutubeMusic $conta, DateTimeImmutable $vistoEm): DateTimeImmutable
+    {
+        $ultimaConsulta = $conta->ultimaConsultaEm();
+        if (null === $ultimaConsulta) {
+            return $vistoEm;
+        }
+
+        $intervalo = min(max(0, $vistoEm->getTimestamp() - $ultimaConsulta->getTimestamp()), self::INTERVALO_OCIOSO_SEGUNDOS);
+
+        return $vistoEm->modify(sprintf(self::FORMATO_SEGUNDOS_ATRAS, intdiv($intervalo, 2)));
     }
 
     private function isIntervaloMinimoRespeitado(ContaYoutubeMusic $conta): bool

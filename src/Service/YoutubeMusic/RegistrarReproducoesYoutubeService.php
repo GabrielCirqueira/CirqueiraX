@@ -30,14 +30,14 @@ final readonly class RegistrarReproducoesYoutubeService
     /**
      * @param list<ItemHistoricoYoutubeMusicDTO> $itensNovos
      */
-    public function executar(Usuario $usuario, array $itensNovos, DateTimeImmutable $vistoEm): int
+    public function executar(Usuario $usuario, array $itensNovos, DateTimeImmutable $inicioDoMaisRecente): int
     {
         if ([] === $itensNovos) {
             return 0;
         }
 
         $videos = $this->obterVideos($usuario, $itensNovos);
-        $reproducoes = $this->montarReproducoes($usuario, $itensNovos, $videos, $vistoEm);
+        $reproducoes = $this->montarReproducoes($usuario, $itensNovos, $videos, $inicioDoMaisRecente);
         $existentes = array_flip($this->reproducaoRepository->buscarChavesExistentes(
             $usuario,
             array_map(static fn (ReproducaoYoutube $reproducao): string => $reproducao->chaveDeduplicacao(), $reproducoes),
@@ -80,10 +80,10 @@ final readonly class RegistrarReproducoesYoutubeService
      *
      * @return list<ReproducaoYoutube>
      */
-    private function montarReproducoes(Usuario $usuario, array $itens, array $videos, DateTimeImmutable $vistoEm): array
+    private function montarReproducoes(Usuario $usuario, array $itens, array $videos, DateTimeImmutable $inicioDoMaisRecente): array
     {
         $reproducoes = [];
-        $inicio = $vistoEm;
+        $inicio = $inicioDoMaisRecente;
 
         foreach ($itens as $indice => $item) {
             if ($indice > 0) {
@@ -91,7 +91,8 @@ final readonly class RegistrarReproducoesYoutubeService
                 $inicio = $inicio->modify(sprintf(self::FORMATO_SEGUNDOS_ATRAS, $segundos));
             }
 
-            $reproducoes[] = new ReproducaoYoutube($usuario, $videos[$item->videoId], $inicio, $item->duracaoMs ?? 0, FonteReproducaoYoutube::Coletor);
+            $msReproduzidos = 0 === $indice ? 0 : $item->duracaoMs ?? 0;
+            $reproducoes[] = new ReproducaoYoutube($usuario, $videos[$item->videoId], $inicio, $msReproduzidos, FonteReproducaoYoutube::Coletor);
         }
 
         return array_reverse($reproducoes);
