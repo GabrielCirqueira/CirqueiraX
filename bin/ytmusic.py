@@ -16,6 +16,7 @@ TEXTO_VISUALIZACOES = re.compile(r"\b(views?|visualiza\w*)\b", re.IGNORECASE)
 TERMO_VERIFICACAO_SERVICO = "music"
 CABECALHOS_DESCARTADOS = {"accept-encoding", "content-encoding", "content-length", "priority"}
 FORMATO_CABECALHO = re.compile(r"^[A-Za-z0-9-]+: ")
+LINHA_REQUISICAO = re.compile(r"^[A-Z]+ \S+ HTTP/[0-9.]+$")
 TENTATIVAS_VERIFICACAO = 3
 ESPERA_ENTRE_TENTATIVAS_S = 2
 
@@ -44,7 +45,7 @@ def pares_cabecalhos(linhas):
 
 
 def normalizar_cabecalhos(texto):
-    linhas = [linha.strip() for linha in texto.splitlines() if linha.strip()]
+    linhas = [linha.strip() for linha in texto.splitlines() if linha.strip() and not LINHA_REQUISICAO.match(linha.strip())]
     pares = pares_cabecalhos(linhas)
     return "\n".join(
         f"{nome.strip().lower()}: {valor.strip()}"
