@@ -1,6 +1,6 @@
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
 import { Button, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { ExternalLink, Info, Merge } from 'lucide-react'
+import { ExternalLink, Info, Merge, Split } from 'lucide-react'
 import { memo } from 'react'
 import type { DuplicataRevisao, MusicaDuplicata } from '../types'
 import {
@@ -18,6 +18,7 @@ export interface CartaoDuplicataRevisaoProps {
   duplicata: DuplicataRevisao
   ocupado: boolean
   onUnir: (origemUuid: string, destinoUuid: string) => void
+  onDescartar: (primeiraUuid: string, segundaUuid: string) => void
 }
 
 const PROPS_ATALHO = {
@@ -112,7 +113,7 @@ function LadoDuplicata({ musica, outra, ocupado, onUnir }: LadoDuplicataProps) {
         disabled={ocupado}
         onClick={() => onUnir(outra.uuid, musica.uuid)}
       >
-        <Merge size={14} /> Manter esta
+        <Merge size={14} /> Iguais: ficar com este nome
       </Button>
     </VStack>
   )
@@ -122,6 +123,7 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
   duplicata,
   ocupado,
   onUnir,
+  onDescartar,
 }: CartaoDuplicataRevisaoProps) {
   const [primeira, segunda] = duplicata.musicas
 
@@ -140,17 +142,40 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
         Estas duas são a mesma música?
       </Text>
       <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-        Use os atalhos (Spotify, YouTube) para ouvir cada uma. Se forem a mesma, toque em “Manter
-        esta” na versão com o nome certo. Se forem diferentes, é só deixar como está.
+        Elas têm o mesmo nome e artistas parecidos. Ouça pelos atalhos e escolha uma das duas
+        respostas abaixo.
       </Text>
       <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
         <LadoDuplicata musica={primeira} outra={segunda} ocupado={ocupado} onUnir={onUnir} />
         <LadoDuplicata musica={segunda} outra={primeira} ocupado={ocupado} onUnir={onUnir} />
       </SimpleGrid>
-      <Text fontSize="2xs" color="cirqueira.musica.textoDesabilitado">
-        Unir não apaga nada: a outra música passa a contar para a escolhida e pode ser separada
-        depois.
-      </Text>
+      <Button
+        size="sm"
+        borderRadius="full"
+        variant="outline"
+        borderColor="cirqueira.musica.textoDesabilitado"
+        color="cirqueira.musica.textoPrincipal"
+        _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
+        disabled={ocupado}
+        onClick={() => onDescartar(primeira.uuid, segunda.uuid)}
+      >
+        <Split size={14} /> São músicas diferentes
+      </Button>
+      <VStack align="stretch" gap={1} fontSize="2xs" color="cirqueira.musica.textoDesabilitado">
+        <Text>
+          <Text as="strong" color="cirqueira.musica.textoSecundario">
+            Iguais:{' '}
+          </Text>
+          as duas viram uma só, com o nome que você escolheu, e as reproduções somam. Dá para
+          separar depois nos detalhes da música.
+        </Text>
+        <Text>
+          <Text as="strong" color="cirqueira.musica.textoSecundario">
+            Diferentes:{' '}
+          </Text>
+          nada muda nas músicas; o par só sai da revisão e não volta mais.
+        </Text>
+      </VStack>
     </VStack>
   )
 })

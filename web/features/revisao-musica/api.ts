@@ -95,6 +95,13 @@ export async function unirMusicas(
   return MusicaCatalogoSchema.parse(data.data)
 }
 
+export async function descartarDuplicata(primeiraUuid: string, segundaUuid: string): Promise<void> {
+  await api.post<RespostaApi<unknown>>(`${PREFIXO}/catalogo/duplicatas/descartar`, {
+    primeiraUuid,
+    segundaUuid,
+  })
+}
+
 export async function separarVideo(videoUuid: string): Promise<VideoRevisao> {
   const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/catalogo/separar`, {
     videoUuid,

@@ -15,6 +15,7 @@ import {
   classificarCanal,
   corrigirVideo,
   definirMusicaEmLote,
+  descartarDuplicata,
   listarRevisao,
   obterContagensRevisao,
   separarVideo,
@@ -276,6 +277,40 @@ export function useUnirMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
       })
     },
     onSettled: () => invalidarMusica(queryClient),
+  })
+}
+
+export function useDescartarDuplicata(pagina = 1) {
+  const queryClient = useQueryClient()
+  const tipo: TipoRevisao = 'possivel_duplicata'
+
+  return useMutation({
+    mutationFn: ({ origemUuid, destinoUuid }: UniaoVariaveis) =>
+      descartarDuplicata(origemUuid, destinoUuid),
+    onMutate: ({ origemUuid, destinoUuid }) =>
+      aplicarOtimista(
+        queryClient,
+        tipo,
+        pagina,
+        (atual) => removerDuplicataDaPagina(atual, [origemUuid, destinoUuid]),
+        1
+      ),
+    onError: (erro, _variaveis, instantaneo) => {
+      restaurar(queryClient, tipo, pagina, instantaneo)
+      addToast({
+        type: 'error',
+        title: 'Não foi possível salvar',
+        description: extrairMensagemErroApi(erro, 'Tente de novo em instantes.'),
+      })
+    },
+    onSuccess: () => {
+      addToast({
+        type: 'success',
+        title: 'Marcadas como diferentes',
+        description: 'As duas continuam separadas e este par não volta mais para a revisão.',
+      })
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: REVISAO_QUERY_KEYS.todas }),
   })
 }
 

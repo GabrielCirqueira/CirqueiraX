@@ -5,6 +5,7 @@ import {
   useClassificarCanal,
   useCorrigirVideo,
   useDefinirMusicaEmLote,
+  useDescartarDuplicata,
   useListaRevisao,
   useUnirMusicas,
 } from '../hooks'
@@ -40,6 +41,7 @@ export const ListaRevisao = memo(function ListaRevisao({
   const lote = useDefinirMusicaEmLote(tipo, pagina)
   const canal = useClassificarCanal(tipo, pagina)
   const unir = useUnirMusicas(tipo, pagina)
+  const descartar = useDescartarDuplicata(pagina)
 
   const paginas = totalPaginas(data)
   const videos = data?.videos ?? []
@@ -180,8 +182,9 @@ export const ListaRevisao = memo(function ListaRevisao({
         <CartaoDuplicataRevisao
           key={duplicata.musicas.map((musica) => musica.uuid).join('-')}
           duplicata={duplicata}
-          ocupado={unir.isPending}
+          ocupado={unir.isPending || descartar.isPending}
           onUnir={(origemUuid, destinoUuid) => unir.mutate({ origemUuid, destinoUuid })}
+          onDescartar={(origemUuid, destinoUuid) => descartar.mutate({ origemUuid, destinoUuid })}
         />
       ))}
 

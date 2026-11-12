@@ -50,7 +50,7 @@ export const ABAS_REVISAO: AbaRevisao[] = [
     rotulo: 'Possíveis duplicadas',
     descricao: 'Músicas com o mesmo título e artistas parecidos.',
     instrucao:
-      'Se forem a mesma música, escolha qual manter. As reproduções das duas passam a contar juntas.',
+      'Para cada par, diga se são a mesma música (as duas viram uma só e as reproduções somam) ou se são músicas diferentes (o par sai da lista e não volta).',
   },
   {
     tipo: 'indisponivel',

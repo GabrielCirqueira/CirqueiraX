@@ -168,7 +168,7 @@ As análises saíram de `/spotify` para `/api/v1/musica` (tópico 200) e aceitam
 | `GET` | `/musica/revisao?tipo=`, `/musica/revisao/contagens` | Fila de revisão |
 | `POST` | `/musica/revisao/videos/{uuid}/musica`, `/musica/revisao/videos/lote` | Corrige vídeos |
 | `GET` | `/musica/catalogo/musicas?busca=`, `/musica/catalogo/artistas?busca=` | Busca no catálogo |
-| `POST` | `/musica/catalogo/unir`, `/musica/catalogo/separar`, `/musica/artistas/unir`, `/musica/canais/classificar` | Correções do catálogo |
+| `POST` | `/musica/catalogo/unir`, `/musica/catalogo/duplicatas/descartar`, `/musica/catalogo/separar`, `/musica/artistas/unir`, `/musica/canais/classificar` | Correções do catálogo |
 | `GET` | `/spotify/tocando-agora` | Faixa atual do Spotify (sem cache) |
 | `GET` | `/musica/capa?url=` | **Público.** Serve capas e fotos do Google/YouTube, Spotify e Deezer já gravadas no banco, com cache em disco e `Cache-Control` de 30 dias |
 

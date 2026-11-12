@@ -11,6 +11,7 @@ use App\DataObject\Musica\DefinirArtistasMusicaDTO;
 use App\DataObject\Musica\DefinirComponentesMashupDTO;
 use App\DataObject\Musica\DefinirMusicaVideoDTO;
 use App\DataObject\Musica\DefinirMusicaVideosEmLoteDTO;
+use App\DataObject\Musica\DescartarDuplicataDTO;
 use App\DataObject\Musica\FiltroRevisaoMusicaDTO;
 use App\DataObject\Musica\SepararMusicaDTO;
 use App\DataObject\Musica\UnirArtistasDTO;
@@ -23,6 +24,7 @@ use App\Service\Musica\Correcao\ClassificarCanalYoutubeService;
 use App\Service\Musica\Correcao\DefinirArtistasMusicaService;
 use App\Service\Musica\Correcao\DefinirComponentesMashupService;
 use App\Service\Musica\Correcao\DefinirMusicaDoVideoService;
+use App\Service\Musica\Correcao\DescartarDuplicataCatalogoService;
 use App\Service\Musica\Correcao\DesfazerUniaoMusicaService;
 use App\Service\Musica\Correcao\SepararVideoDaMusicaService;
 use App\Service\Musica\Correcao\UnirArtistasCatalogoService;
@@ -49,6 +51,7 @@ final class MusicaCorrecaoController extends DefaultController
         private readonly DefinirArtistasMusicaService $definirArtistas,
         private readonly MusicaCatalogoSerializer $serializer,
         private readonly BuscarCatalogoMusicaService $buscarCatalogo,
+        private readonly DescartarDuplicataCatalogoService $descartarDuplicata,
     ) {
     }
 
@@ -92,6 +95,14 @@ final class MusicaCorrecaoController extends DefaultController
     public function unirMusicas(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] UnirMusicasDTO $dto): Response
     {
         return $this->success($this->serializer->serializarMusica($this->unirMusicas->executar($usuario, $dto)));
+    }
+
+    #[Route('/catalogo/duplicatas/descartar', name: 'descartar_duplicata', methods: ['POST'])]
+    public function descartarDuplicata(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] DescartarDuplicataDTO $dto): Response
+    {
+        $this->descartarDuplicata->executar($usuario, $dto);
+
+        return $this->success(['descartada' => true]);
     }
 
     #[Route('/catalogo/separar', name: 'separar', methods: ['POST'])]

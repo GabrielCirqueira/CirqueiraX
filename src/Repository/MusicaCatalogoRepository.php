@@ -74,12 +74,13 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{uuid: string, titulo: string, chave: string}>
+     * @return list<array{uuid: string, titulo: string, chave: string, totalArtistas: int}>
      */
     public function listarComTituloRepetido(Usuario $usuario): array
     {
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
-            "SELECT m.uuid, m.titulo, m.chave_normalizada AS chave
+            "SELECT m.uuid, m.titulo, m.chave_normalizada AS chave,
+                (SELECT COUNT(*) FROM musica_artista_catalogo mac WHERE mac.musica_uuid = m.uuid) AS total_artistas
             FROM musica_catalogo m
             JOIN (
                 SELECT SUBSTRING_INDEX(chave_normalizada, '|', 1) AS titulo_chave
@@ -97,6 +98,7 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
             'uuid' => Uuid::fromBinary((string) $linha['uuid'])->toRfc4122(),
             'titulo' => (string) $linha['titulo'],
             'chave' => (string) $linha['chave'],
+            'totalArtistas' => (int) $linha['total_artistas'],
         ], $linhas);
     }
 
