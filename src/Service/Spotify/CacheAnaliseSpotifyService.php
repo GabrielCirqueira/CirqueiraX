@@ -14,7 +14,7 @@ final readonly class CacheAnaliseSpotifyService
 {
     private const int VALIDADE_SEGUNDOS = 21600;
     private const string PREFIXO = 'spotify_analise';
-    private const string VERSAO_FORMATO = 'v4';
+    private const string VERSAO_FORMATO = 'v5';
 
     public function __construct(
         private TagAwareCacheInterface $cache,

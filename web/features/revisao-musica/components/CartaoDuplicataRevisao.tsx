@@ -123,7 +123,7 @@ function LadoDuplicata({ musica, outra, ocupado, onUnir }: LadoDuplicataProps) {
         disabled={ocupado}
         onClick={() => onUnir(outra.uuid, musica.uuid)}
       >
-        <Merge size={14} /> Iguais: ficar com este nome
+        <Merge size={14} /> Esta é a principal
       </Button>
     </VStack>
   )
@@ -150,7 +150,7 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
       opacity={ocupado ? 0.6 : 1}
     >
       <Text fontSize="sm" fontWeight="semibold" color="cirqueira.musica.textoPrincipal">
-        Estas duas são a mesma música?
+        Estas duas são a mesma música ou versões dela?
       </Text>
       <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
         Elas têm o mesmo nome e artistas parecidos. Ouça pelos atalhos e escolha uma das respostas
@@ -179,17 +179,18 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
       <VStack align="stretch" gap={1} fontSize="2xs" color="cirqueira.musica.textoDesabilitado">
         <Text>
           <Text as="strong" color="cirqueira.musica.textoSecundario">
-            Iguais:{' '}
+            Esta é a principal:{' '}
           </Text>
-          as duas viram uma só, com o nome que você escolheu, e as reproduções somam. Dá para
-          separar depois nos detalhes da música.
+          a escolhida fica como a música, e a outra vira uma versão dela. No ranking aparece a
+          principal com o total somado, e nos detalhes você vê cada versão com as próprias
+          reproduções. Dá para separar depois.
         </Text>
         <Text>
           <Text as="strong" color="cirqueira.musica.textoSecundario">
             Versões de outra música:{' '}
           </Text>
-          você escolhe a música oficial (ex.: um slowed + reverb da original) e as duas viram
-          versões dela.
+          quando nenhuma das duas é a oficial (ex.: dois slowed + reverb), você escolhe a música
+          oficial e as duas viram versões dela.
         </Text>
         <Text>
           <Text as="strong" color="cirqueira.musica.textoSecundario">

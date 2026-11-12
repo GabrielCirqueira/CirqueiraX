@@ -67,3 +67,15 @@
 - **Arquivos**: `src/DataObject/Musica/UnirVariasMusicasDTO.php`, `src/Service/Musica/Correcao/UnirMusicasCatalogoService.php`, `src/Controller/Musica/MusicaCorrecaoController.php`, `web/features/revisao-musica/components/JanelaVersoesDeOutraMusica.tsx`, `web/features/revisao-musica/components/CartaoDuplicataRevisao.tsx`, `web/features/revisao-musica/components/ListaRevisao.tsx`, `web/features/revisao-musica/components/BuscaCatalogo.tsx`, `web/features/revisao-musica/hooks/useRevisaoMusica.ts`, `web/features/revisao-musica/api.ts`, `web/features/revisao-musica/utils/revisaoMusica.ts`
 
 ---
+
+### ✅ Melhoria 166 — Cada Vídeo do YouTube Music Aparece Como Versão e Duplicadas Viram "Principal + Versão"
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: nas versões de uma música, os vídeos do YouTube Music eram agrupados pelo tipo de versão, e só o mais tocado aparecia. "MGMT- Little Dark Age (SLOWED + REVERB)" (cloud punk), "Little dark age - slowed" (Matthew) e "MGMT - Little Dark Age (slowed + reverb) / Johan Liebert" (Diprida) viravam uma linha só. Nas possíveis duplicadas, o texto "Iguais: as duas viram uma só" não deixava claro que a outra continua visível como versão.
+- **Solução**:
+  - `AnaliseReproducaoMusicalRepository::listarVariantesMusica` lista cada vídeo do YouTube Music separado, com as próprias reproduções e minutos, como já acontecia com cada faixa do Spotify. O cache das análises foi renovado (`VERSAO_FORMATO` 'v5').
+  - Nas possíveis duplicadas, o botão virou "Esta é a principal", e o texto explica que a outra vira uma versão dela, que o ranking mostra a principal com o total somado e que os detalhes mostram cada versão.
+- **Arquivos**: `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `web/features/revisao-musica/components/CartaoDuplicataRevisao.tsx`, `web/features/revisao-musica/utils/revisaoMusica.ts`, `web/features/revisao-musica/hooks/useRevisaoMusica.ts`
+
+---

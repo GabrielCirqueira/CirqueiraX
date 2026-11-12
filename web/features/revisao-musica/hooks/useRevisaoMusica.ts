@@ -273,8 +273,8 @@ export function useUnirMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
     onSuccess: (musica) => {
       addToast({
         type: 'success',
-        title: 'Músicas unidas',
-        description: `As reproduções agora contam para ${musica.titulo}.`,
+        title: 'Versão ligada',
+        description: `A outra agora é uma versão de ${musica.titulo}, e as reproduções somam.`,
       })
     },
     onSettled: () => invalidarMusica(queryClient),
