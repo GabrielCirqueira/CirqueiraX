@@ -18,6 +18,8 @@ CABECALHOS_DESCARTADOS = {"accept-encoding", "content-encoding", "content-length
 FORMATO_CABECALHO = re.compile(r"^[A-Za-z0-9-]+: ")
 LINHA_REQUISICAO = re.compile(r"^[A-Z]+ \S+ HTTP/[0-9.]+$")
 TENTATIVAS_VERIFICACAO = 3
+TENTATIVAS_RESPOSTA_VAZIA = 4
+ESPERA_RESPOSTA_VAZIA_S = 3
 ESPERA_ENTRE_TENTATIVAS_S = 2
 MARCA_AUTENTICACAO_NAVEGADOR = "SAPISIDHASH"
 
@@ -90,9 +92,19 @@ def classificar_formato_autenticado():
     return FalhaYoutubeMusic(FORMATO_INESPERADO, "A resposta do YouTube Music veio num formato inesperado.")
 
 
+def executar_com_novas_tentativas(operacao):
+    for tentativa in range(TENTATIVAS_RESPOSTA_VAZIA):
+        try:
+            return operacao()
+        except json.JSONDecodeError:
+            if tentativa == TENTATIVAS_RESPOSTA_VAZIA - 1:
+                raise FalhaYoutubeMusic(SERVICO_INDISPONIVEL, "O YouTube Music devolveu respostas vazias. Limite de consultas do servidor.")
+            time.sleep(ESPERA_RESPOSTA_VAZIA_S * (tentativa + 1))
+
+
 def executar_com_classificacao(operacao, autenticada=False):
     try:
-        return operacao()
+        return executar_com_novas_tentativas(operacao)
     except FalhaYoutubeMusic:
         raise
     except YTMusicUserError:
