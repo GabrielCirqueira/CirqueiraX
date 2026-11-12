@@ -9,19 +9,16 @@ use App\Enum\OrigemConsultaSpotify;
 use App\Repository\BloqueioSpotifyRepository;
 use App\Repository\ConsultaSpotifyHoraRepository;
 use DateTimeImmutable;
-use DateTimeZone;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class ControleLimiteSpotifyService
 {
-    public const int LIMITE_CONSULTAS_ARTISTAS_POR_DIA = 400;
+    public const int LIMITE_CONSULTAS_ARTISTAS_EM_24H = 300;
     private const int FOLGA_SEGUNDOS = 60;
     private const int ESPERA_MINIMA_SEGUNDOS = 900;
     private const int VALIDADE_MARCADORES_SEGUNDOS = 2592000;
     private const string JANELA_MEDICAO = '-24 hours';
-    private const string INICIO_DO_DIA = 'today';
-    private const string FUSO_BRASILIA = 'America/Sao_Paulo';
     private const string CHAVE_ULTIMA_COLETA = 'spotify_limite_ultima_coleta';
     private const string CHAVE_ULTIMA_FALHA_COLETA = 'spotify_limite_ultima_falha_coleta';
 
@@ -64,14 +61,12 @@ final readonly class ControleLimiteSpotifyService
             return false;
         }
 
-        return $this->consultasArtistasHoje() < self::LIMITE_CONSULTAS_ARTISTAS_POR_DIA;
+        return $this->consultasArtistasUltimas24h() < self::LIMITE_CONSULTAS_ARTISTAS_EM_24H;
     }
 
-    public function consultasArtistasHoje(): int
+    public function consultasArtistasUltimas24h(): int
     {
-        $inicioDoDia = new DateTimeImmutable(self::INICIO_DO_DIA, new DateTimeZone(self::FUSO_BRASILIA));
-
-        return $this->consultaHoraRepository->somarDaOrigemDesde(OrigemConsultaSpotify::Artistas, $inicioDoDia);
+        return $this->consultaHoraRepository->somarDaOrigemDesde(OrigemConsultaSpotify::Artistas, (new DateTimeImmutable())->modify(self::JANELA_MEDICAO));
     }
 
     public function registrarColetaConcluida(): void
