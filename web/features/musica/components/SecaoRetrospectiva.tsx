@@ -384,6 +384,8 @@ interface ListaTopoProps {
   children: ReactNode
 }
 
+const CRITERIO_ORDEM_TOPO = 'por streams'
+
 function ListaTopo({ titulo, icone, cor, children }: ListaTopoProps) {
   return (
     <VStack
@@ -399,6 +401,9 @@ function ListaTopo({ titulo, icone, cor, children }: ListaTopoProps) {
         {icone}
         <Text fontSize="xs" fontWeight="bold" textTransform="uppercase" letterSpacing="wide">
           {titulo}
+        </Text>
+        <Text fontSize="2xs" color="cirqueira.musica.textoDesabilitado" ml="auto">
+          {CRITERIO_ORDEM_TOPO}
         </Text>
       </HStack>
       {children}

@@ -563,13 +563,21 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo ?? PeriodoAnaliseSpotifyDTO::todos(), $filtro, AlvoAnaliseMusicaDTO::daMusica($musica));
 
         $linhas = $this->consultar(sprintf(
-            "SELECT 'youtube_music' AS fonte, MAX(v.titulo) AS titulo, MAX(v.canal) AS canal, v.video_id AS codigo, MAX(v.tipo_versao) AS tipo_versao,
-                MAX(v.url_capa) AS url_capa, MAX(BIN_TO_UUID(v.uuid)) AS video_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
-            FROM reproducao_musical r
-            INNER JOIN reproducao_youtube ry ON ry.uuid = UUID_TO_BIN(r.origem_id)
-            INNER JOIN video_youtube v ON v.uuid = ry.video_uuid
-            WHERE r.usuario_id = :usuarioId AND r.fonte = 'youtube_music'%1\$s
-            GROUP BY v.video_id
+            "SELECT 'youtube_music' AS fonte, MAX(CASE WHEN pv.ordem = 1 THEN pv.titulo END) AS titulo, MAX(CASE WHEN pv.ordem = 1 THEN pv.canal END) AS canal,
+                MAX(CASE WHEN pv.ordem = 1 THEN pv.video_id END) AS codigo, MAX(pv.tipo_versao) AS tipo_versao,
+                MAX(CASE WHEN pv.ordem = 1 THEN pv.url_capa END) AS url_capa, MAX(CASE WHEN pv.ordem = 1 THEN pv.video_uuid END) AS video_uuid,
+                SUM(pv.streams) AS streams, SUM(pv.ms) AS ms
+            FROM (
+                SELECT v.video_id, v.titulo, v.canal, v.tipo_versao, COALESCE(v.tipo_versao, '') AS versao, v.url_capa, BIN_TO_UUID(v.uuid) AS video_uuid,
+                    SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms,
+                    ROW_NUMBER() OVER (PARTITION BY COALESCE(v.tipo_versao, '') ORDER BY SUM(r.ms_reproduzidos >= :corte) DESC, SUM(r.ms_reproduzidos) DESC) AS ordem
+                FROM reproducao_musical r
+                INNER JOIN reproducao_youtube ry ON ry.uuid = UUID_TO_BIN(r.origem_id)
+                INNER JOIN video_youtube v ON v.uuid = ry.video_uuid
+                WHERE r.usuario_id = :usuarioId AND r.fonte = 'youtube_music'%1\$s
+                GROUP BY v.uuid, v.video_id, v.titulo, v.canal, v.tipo_versao, v.url_capa
+            ) pv
+            GROUP BY pv.versao
             UNION ALL
             SELECT 'spotify', rs.nome_faixa, rs.artista_principal, MAX(rs.codigo_faixa), NULL, NULL, NULL,
                 SUM(r.ms_reproduzidos >= :corte), SUM(r.ms_reproduzidos)
