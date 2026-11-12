@@ -8,6 +8,7 @@ use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
 use App\Enum\FonteReproducaoYoutube;
 use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,6 +18,8 @@ use Doctrine\Persistence\ManagerRegistry;
 final class ReproducaoYoutubeRepository extends ServiceEntityRepository
 {
     private const string FORMATO_MOMENTO_BANCO = 'Y-m-d H:i:s';
+
+    private const string FUSO_UTC = 'UTC';
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -116,7 +119,7 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
             ->andWhere('e.usuario = :usuario')
             ->andWhere('e.tocadaEm < :momento')
             ->setParameter('usuario', $usuario)
-            ->setParameter('momento', $momento)
+            ->setParameter('momento', $this->emUtc($momento))
             ->orderBy('e.tocadaEm', 'DESC')
             ->setMaxResults(1)
             ->getQuery()
@@ -201,5 +204,10 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
         $meses = (int) $conexao->fetchOne("SELECT COUNT(DISTINCT DATE_FORMAT(r.tocada_em, '%Y-%m')) FROM reproducao_youtube r WHERE {$filtro}", $parametros);
 
         return ['videosPorStatus' => $porStatus, 'videosUnicos' => array_sum($porStatus), 'mesesComDados' => $meses];
+    }
+
+    private function emUtc(DateTimeImmutable $momento): DateTimeImmutable
+    {
+        return $momento->setTimezone(new DateTimeZone(self::FUSO_UTC));
     }
 }
