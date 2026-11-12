@@ -19,6 +19,7 @@ FORMATO_CABECALHO = re.compile(r"^[A-Za-z0-9-]+: ")
 LINHA_REQUISICAO = re.compile(r"^[A-Z]+ \S+ HTTP/[0-9.]+$")
 TENTATIVAS_VERIFICACAO = 3
 ESPERA_ENTRE_TENTATIVAS_S = 2
+MARCA_AUTENTICACAO_NAVEGADOR = "SAPISIDHASH"
 
 
 class FalhaYoutubeMusic(Exception):
@@ -62,6 +63,7 @@ def criar_cliente(entrada):
         autenticacao = json.loads(setup_browser(filepath=None, headers_raw=normalizar_cabecalhos(cabecalhos)))
     except YTMusicError:
         raise FalhaYoutubeMusic(CREDENCIAIS_INVALIDAS, "Os cabeçalhos não têm cookie e x-goog-authuser de uma sessão logada.")
+    autenticacao["authorization"] = MARCA_AUTENTICACAO_NAVEGADOR
     return YTMusic(auth=autenticacao)
 
 
