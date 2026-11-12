@@ -9,6 +9,7 @@ Avisos do que mudou no sistema. Cada usuário tem as suas notificações; ao ent
 | Popup | Abre sozinho quando há notificações não lidas. Fechar (X, fora da janela ou Esc) ou clicar em **Ler tudo** marca como lidas as notificações exibidas |
 | Sino no topo | Mostra a quantidade de não lidas e abre o histórico completo (últimas 50, lidas e não lidas). **Marcar todas como lidas** zera o contador |
 | Verificação | O frontend consulta as não lidas a cada 60 s e ao voltar para a aba, então uma notificação criada depois de um deploy aparece sem recarregar a página |
+| Versão nova | Depois de um deploy, a página aberta se recarrega sozinha em até 60 s (mesma página, mesmo login), para já mostrar o código novo. Espera se houver áudio ou vídeo tocando ou se você estiver digitando (`web/shared/pwa/versaoApp.ts`) |
 | Tipos | `melhoria`, `correcao`, `novidade`, `aviso` |
 
 ## Cadastro

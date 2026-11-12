@@ -7,6 +7,7 @@ import { Provider } from './shared/components/ui/provider'
 import { Toaster } from './shared/components/ui/toaster'
 import './index.css'
 import { registrarServiceWorker } from './shared/pwa/serviceWorker'
+import { iniciarVerificacaoVersao } from './shared/pwa/versaoApp'
 import './stores/useInstalacaoAppStore'
 
 import '@fontsource/poppins/400.css'
@@ -27,6 +28,7 @@ window.addEventListener('vite:preloadError', (event) => {
 })
 
 registrarServiceWorker()
+iniciarVerificacaoVersao()
 
 const queryClient = new QueryClient({
   defaultOptions: {
