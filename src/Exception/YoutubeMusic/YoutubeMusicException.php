@@ -34,6 +34,11 @@ final class YoutubeMusicException extends DomainException
         return new self('O texto colado não tem o cabeçalho "cookie". Copie os cabeçalhos de uma requisição "browse" do music.youtube.com com a conta logada.', self::CODIGO_CREDENCIAIS_INVALIDAS);
     }
 
+    public static function cookieCortado(): self
+    {
+        return new self('O cookie colado está cortado (tem "…" no meio). No navegador, clique com o botão direito na requisição "browse" e use Copiar valor → Copiar cabeçalhos da requisição.', self::CODIGO_CREDENCIAIS_INVALIDAS);
+    }
+
     public static function cookieSemSessaoLogada(): self
     {
         return new self('O cookie colado não é de uma sessão logada (falta o valor __Secure-3PAPISID). Entre na conta no music.youtube.com e copie de novo.', self::CODIGO_CREDENCIAIS_INVALIDAS);

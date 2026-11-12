@@ -13,6 +13,7 @@ final readonly class InterpretadorCabecalhosNavegadorService
     private const string CABECALHO_CONTA = 'x-goog-authuser';
     private const string CONTA_PADRAO = '0';
     private const string COOKIE_ESSENCIAL = '__Secure-3PAPISID=';
+    private const string MARCA_TEXTO_CORTADO = '…';
     private const array CABECALHOS_ACEITOS = [
         self::CABECALHO_COOKIE,
         self::CABECALHO_CONTA,
@@ -31,6 +32,10 @@ final readonly class InterpretadorCabecalhosNavegadorService
 
         if ('' === $cookie) {
             throw YoutubeMusicException::cabecalhosSemCookie();
+        }
+
+        if (str_contains($cookie, self::MARCA_TEXTO_CORTADO)) {
+            throw YoutubeMusicException::cookieCortado();
         }
 
         if (!str_contains($cookie, self::COOKIE_ESSENCIAL)) {
