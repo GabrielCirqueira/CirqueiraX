@@ -2,12 +2,14 @@ import { TemaMusica } from '@/features/musica/components'
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
-import { Badge, Container, HStack, Heading, Link, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Container, HStack, Heading, Text, VStack } from '@chakra-ui/react'
 import { ArrowLeft } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
+import { ComoFuncionaRevisao } from './components/ComoFuncionaRevisao'
 import { ListaRevisao } from './components/ListaRevisao'
+import { SeletorCategoriaRevisao } from './components/SeletorCategoriaRevisao'
 import { useContagensRevisao } from './hooks'
-import { ABAS_REVISAO, lerTipoRevisao } from './utils'
+import { ABAS_REVISAO, lerTipoRevisao, totalPendentes } from './utils'
 
 export function RevisaoMusica() {
   useSEO({
@@ -19,6 +21,7 @@ export function RevisaoMusica() {
   const tipo = lerTipoRevisao(parametros.get('aba'))
   const { data: contagens } = useContagensRevisao()
   const abaAtual = ABAS_REVISAO.find((aba) => aba.tipo === tipo)
+  const pendentes = totalPendentes(contagens)
 
   function trocarAba(valor: string) {
     setParametros((anteriores) => {
@@ -32,79 +35,80 @@ export function RevisaoMusica() {
     <TemaMusica>
       <AppContainer>
         <Container maxW="4xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
-          <VStack align="stretch" gap={6}>
+          <VStack align="stretch" gap={5}>
             <VStack align="start" gap={2}>
-              <Link
-                asChild
-                fontSize="xs"
-                color="cirqueira.musica.textoSecundario"
-                _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-              >
-                <LinkMusica to="/musica/gerenciar">
-                  <ArrowLeft size={12} /> Voltar para Gerenciar
-                </LinkMusica>
-              </Link>
-              <Heading
-                as="h1"
-                fontSize={{ base: '2xl', md: '3xl' }}
-                fontWeight="black"
-                color="cirqueira.musica.textoPrincipal"
-              >
-                Revisão
-              </Heading>
+              <LinkMusica to="/musica/gerenciar">
+                <HStack
+                  gap={1.5}
+                  fontSize="xs"
+                  color="cirqueira.musica.textoSecundario"
+                  _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
+                >
+                  <ArrowLeft size={14} />
+                  <Text>Voltar para Gerenciar</Text>
+                </HStack>
+              </LinkMusica>
+              <HStack gap={3} align="baseline" wrap="wrap">
+                <Heading
+                  as="h1"
+                  fontSize={{ base: '2xl', md: '3xl' }}
+                  fontWeight="black"
+                  color="cirqueira.musica.textoPrincipal"
+                >
+                  Revisão do YouTube Music
+                </Heading>
+                {contagens && (
+                  <Text
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color={pendentes > 0 ? 'cirqueira.musica.amarelo' : 'cirqueira.musica.verde'}
+                  >
+                    {pendentes > 0
+                      ? `${pendentes} ${pendentes === 1 ? 'pendência' : 'pendências'}`
+                      : 'Tudo em dia'}
+                  </Text>
+                )}
+              </HStack>
               <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
-                Corrija o que a identificação automática errou. Cada correção vale para sempre e
-                nada do histórico original é apagado.
+                O sistema tenta descobrir sozinho qual música toca em cada vídeo. Quando ele não tem
+                certeza, o vídeo para aqui e espera você confirmar.
               </Text>
             </VStack>
 
-            <Tabs.Root
-              value={tipo}
-              onValueChange={(evento) => trocarAba(evento.value)}
-              variant="line"
-              size="sm"
-              w="full"
-            >
-              <Tabs.List
-                overflowX="auto"
-                overflowY="hidden"
-                borderColor="cirqueira.musica.cartaoElevado"
-              >
-                {ABAS_REVISAO.map((aba) => (
-                  <Tabs.Trigger
-                    key={aba.tipo}
-                    value={aba.tipo}
-                    flexShrink={0}
-                    color="cirqueira.musica.textoSecundario"
-                    _selected={{ color: 'cirqueira.musica.textoPrincipal' }}
-                  >
-                    <HStack gap={1.5}>
-                      <Text as="span">{aba.rotulo}</Text>
-                      <Badge
-                        size="xs"
-                        borderRadius="full"
-                        bg="cirqueira.musica.cartaoElevado"
-                        color={
-                          (contagens?.[aba.tipo] ?? 0) > 0
-                            ? 'cirqueira.musica.amarelo'
-                            : 'cirqueira.musica.textoDesabilitado'
-                        }
-                      >
-                        {contagens?.[aba.tipo] ?? '·'}
-                      </Badge>
-                    </HStack>
-                  </Tabs.Trigger>
-                ))}
-              </Tabs.List>
-            </Tabs.Root>
+            <ComoFuncionaRevisao />
+
+            <SeletorCategoriaRevisao atual={tipo} contagens={contagens} onEscolher={trocarAba} />
 
             {abaAtual && (
-              <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-                {abaAtual.descricao}
-              </Text>
+              <VStack
+                align="stretch"
+                gap={1}
+                px={4}
+                py={3}
+                borderRadius="10px"
+                bg="cirqueira.musica.cartao"
+                borderLeft="3px solid"
+                borderLeftColor="cirqueira.musica.verde"
+              >
+                <Heading
+                  as="h2"
+                  fontSize="md"
+                  fontWeight="bold"
+                  color="cirqueira.musica.textoPrincipal"
+                >
+                  {abaAtual.rotulo}
+                </Heading>
+                <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
+                  {abaAtual.descricao}
+                </Text>
+                <Text fontSize="sm" color="cirqueira.musica.textoPrincipal">
+                  <Text as="strong">O que fazer: </Text>
+                  {abaAtual.instrucao}
+                </Text>
+              </VStack>
             )}
 
-            <ListaRevisao key={tipo} tipo={tipo} />
+            <ListaRevisao key={tipo} tipo={tipo} contagens={contagens} onIrParaAba={trocarAba} />
           </VStack>
         </Container>
       </AppContainer>

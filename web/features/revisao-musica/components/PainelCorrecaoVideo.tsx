@@ -49,10 +49,10 @@ export const PainelCorrecaoVideo = memo(function PainelCorrecaoVideo({
 
   const titulo =
     modo === 'mashup'
-      ? 'Marcar como mashup'
+      ? 'Quais músicas formam este mashup?'
       : lote
-        ? `Definir a mesma música para ${videos.length} vídeos`
-        : 'Escolher música'
+        ? `Qual música toca nestes ${videos.length} vídeos?`
+        : 'Qual música toca neste vídeo?'
 
   const podeConfirmar =
     modo === 'mashup'
@@ -88,7 +88,14 @@ export const PainelCorrecaoVideo = memo(function PainelCorrecaoVideo({
 
   const rodape = (
     <HStack gap={3} justify="flex-end" w="full">
-      <Button variant="ghost" borderRadius="full" onClick={onFechar} disabled={salvando}>
+      <Button
+        variant="ghost"
+        borderRadius="full"
+        color="cirqueira.musica.textoSecundario"
+        _hover={{ bg: 'cirqueira.musica.cartaoElevado', color: 'cirqueira.musica.textoPrincipal' }}
+        onClick={onFechar}
+        disabled={salvando}
+      >
         Cancelar
       </Button>
       <Button
@@ -100,38 +107,68 @@ export const PainelCorrecaoVideo = memo(function PainelCorrecaoVideo({
         loading={salvando}
         onClick={confirmar}
       >
-        Salvar
+        Confirmar
       </Button>
     </HStack>
   )
 
   const seletorVersao = !lote && (
-    <NativeSelect.Root size="sm" maxW="220px">
-      <NativeSelect.Field
-        aria-label="Versão deste vídeo"
-        value={versao}
-        onChange={(evento) => setVersao(evento.target.value)}
-        bg="cirqueira.musica.fundo"
-        borderColor="cirqueira.musica.cartaoElevado"
-      >
-        {OPCOES_VERSAO_MUSICA.map((opcao) => (
-          <option key={opcao.valor} value={opcao.valor}>
-            {opcao.rotulo}
-          </option>
-        ))}
-      </NativeSelect.Field>
-      <NativeSelect.Indicator />
-    </NativeSelect.Root>
+    <VStack align="stretch" gap={1}>
+      <Text fontSize="xs" fontWeight="semibold" color="cirqueira.musica.textoSecundario">
+        Versão tocada no vídeo
+      </Text>
+      <NativeSelect.Root size="sm" maxW="240px">
+        <NativeSelect.Field
+          aria-label="Versão deste vídeo"
+          value={versao}
+          onChange={(evento) => setVersao(evento.target.value)}
+          bg="cirqueira.musica.fundo"
+          borderColor="cirqueira.musica.cartaoElevado"
+        >
+          {OPCOES_VERSAO_MUSICA.map((opcao) => (
+            <option key={opcao.valor} value={opcao.valor}>
+              {opcao.rotulo}
+            </option>
+          ))}
+        </NativeSelect.Field>
+        <NativeSelect.Indicator />
+      </NativeSelect.Root>
+      <Text fontSize="2xs" color="cirqueira.musica.textoDesabilitado">
+        Slowed, remix, ao vivo etc. contam para a música original, mas ficam separados nos detalhes.
+      </Text>
+    </VStack>
   )
 
   return (
     <JanelaRevisaoMusica aberto titulo={titulo} onFechar={onFechar} rodape={rodape}>
       <VStack align="stretch" gap={4}>
         {primeiro && !lote && (
-          <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-            Vídeo: {primeiro.titulo} · {primeiro.canal}
-          </Text>
+          <VStack
+            align="stretch"
+            gap={0.5}
+            px={3}
+            py={2}
+            borderRadius="8px"
+            bg="cirqueira.musica.cartaoElevado"
+          >
+            <Text fontSize="2xs" fontWeight="bold" color="cirqueira.musica.textoSecundario">
+              VÍDEO
+            </Text>
+            <Text fontSize="sm" color="cirqueira.musica.textoPrincipal" lineClamp={2}>
+              {primeiro.titulo}
+            </Text>
+            <Text fontSize="xs" color="cirqueira.musica.textoSecundario" truncate>
+              {primeiro.canal}
+            </Text>
+          </VStack>
         )}
+        <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+          {modo === 'mashup'
+            ? 'Informe cada música que aparece no mashup, com título e artistas.'
+            : origem === 'catalogo'
+              ? 'Procure pelo título ou artista e toque na música certa. Se ela ainda não existir, use “Criar nova”.'
+              : 'Escreva o título e os artistas (separados por vírgula). A música é criada e o vídeo passa a contar para ela.'}
+        </Text>
 
         {modo === 'mashup' ? (
           <VStack align="stretch" gap={3}>
@@ -150,12 +187,16 @@ export const PainelCorrecaoVideo = memo(function PainelCorrecaoVideo({
                     role="radio"
                     aria-checked={origem === opcao}
                     variant={origem === opcao ? 'solid' : 'outline'}
-                    bg={origem === opcao ? 'cirqueira.musica.cartaoElevado' : 'transparent'}
-                    color="cirqueira.musica.textoPrincipal"
-                    borderColor="cirqueira.musica.cartaoElevado"
+                    bg={origem === opcao ? 'cirqueira.musica.verde' : 'transparent'}
+                    color={
+                      origem === opcao
+                        ? 'cirqueira.musica.fundo'
+                        : 'cirqueira.musica.textoPrincipal'
+                    }
+                    borderColor="cirqueira.musica.textoDesabilitado"
                     onClick={() => setOrigem(opcao)}
                   >
-                    {opcao === 'catalogo' ? 'Buscar no catálogo' : 'Criar nova'}
+                    {opcao === 'catalogo' ? 'Buscar música existente' : 'Criar nova'}
                   </Button>
                 ))}
               </HStack>

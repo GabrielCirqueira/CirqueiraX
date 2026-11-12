@@ -18,7 +18,7 @@ export const CartaoCanalRevisao = memo(function CartaoCanalRevisao({
     <Flex
       gap={3}
       p={{ base: 3, sm: 4 }}
-      borderRadius="8px"
+      borderRadius="12px"
       bg="cirqueira.musica.cartao"
       border="1px solid"
       borderColor="cirqueira.musica.cartaoElevado"
@@ -40,21 +40,25 @@ export const CartaoCanalRevisao = memo(function CartaoCanalRevisao({
         <Text fontSize="xs" color="cirqueira.musica.verde" fontWeight="bold">
           {canal.total} {canal.total === 1 ? 'vídeo em aberto' : 'vídeos em aberto'} neste canal
         </Text>
-        <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
-          Ex.: {canal.exemplo}
+        <Text fontSize="xs" color="cirqueira.musica.textoSecundario" lineClamp={2} maxW="full">
+          Exemplo: {canal.exemplo}
+        </Text>
+        <Text fontSize="xs" fontWeight="semibold" color="cirqueira.musica.textoPrincipal" pt={1}>
+          Este canal só posta música?
         </Text>
       </VStack>
-      <HStack gap={2} flexShrink={0}>
+      <HStack gap={2} flexShrink={0} w={{ base: 'full', sm: 'auto' }}>
         <Button
           size="xs"
           borderRadius="full"
           bg="cirqueira.musica.verde"
           color="cirqueira.musica.fundo"
           _hover={{ bg: 'cirqueira.musica.verdeHover' }}
+          flex={{ base: 1, sm: 'none' }}
           disabled={ocupado}
           onClick={() => onClassificar(canal.canal, 'musica')}
         >
-          <Music size={12} /> Sempre música
+          <Music size={12} /> Sim, é música
         </Button>
         <Button
           size="xs"
@@ -62,10 +66,11 @@ export const CartaoCanalRevisao = memo(function CartaoCanalRevisao({
           borderRadius="full"
           borderColor="cirqueira.musica.cartaoElevado"
           color="cirqueira.musica.textoPrincipal"
+          flex={{ base: 1, sm: 'none' }}
           disabled={ocupado}
           onClick={() => onClassificar(canal.canal, 'nao_musica')}
         >
-          <Ban size={12} /> Nunca música
+          <Ban size={12} /> Não é música
         </Button>
       </HStack>
     </Flex>

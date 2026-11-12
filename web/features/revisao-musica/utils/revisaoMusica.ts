@@ -13,6 +13,7 @@ export interface AbaRevisao {
   tipo: TipoRevisao
   rotulo: string
   descricao: string
+  instrucao: string
 }
 
 export const ABAS_REVISAO: AbaRevisao[] = [
@@ -20,31 +21,41 @@ export const ABAS_REVISAO: AbaRevisao[] = [
     tipo: 'sem_vinculo',
     rotulo: 'Sem vínculo',
     descricao: 'Vídeos que ainda não estão ligados a nenhuma música.',
+    instrucao:
+      'Para cada vídeo, confirme a música sugerida ou escolha a certa. Se não for música, marque como "Não é música".',
   },
   {
     tipo: 'ambiguo',
     rotulo: 'Ambíguos',
-    descricao: 'O título pode ser de mais de uma música. Escolha a leitura certa.',
+    descricao: 'O título pode ser de mais de uma música.',
+    instrucao: 'Toque na leitura certa. Se nenhuma servir, busque a música ou crie uma nova.',
   },
   {
     tipo: 'compilacao',
     rotulo: 'Compilações',
-    descricao: 'Vídeos com várias músicas seguidas. Diga como tratar cada um.',
+    descricao: 'Vídeos com várias músicas seguidas.',
+    instrucao: 'Mantenha como compilação ou informe as músicas que tocam no vídeo.',
   },
   {
     tipo: 'canal_novo',
     rotulo: 'Canais novos',
-    descricao: 'Canais ainda sem regra. Um clique resolve todos os vídeos do canal.',
+    descricao: 'Canais que ainda não têm regra.',
+    instrucao:
+      'Diga se o canal só posta música. A regra vale para todos os vídeos dele, inclusive os próximos.',
   },
   {
     tipo: 'possivel_duplicata',
     rotulo: 'Possíveis duplicadas',
-    descricao: 'Músicas com o mesmo título e artistas parecidos. Una as que forem a mesma.',
+    descricao: 'Músicas com o mesmo título e artistas parecidos.',
+    instrucao:
+      'Se forem a mesma música, escolha qual manter. As reproduções das duas passam a contar juntas.',
   },
   {
     tipo: 'indisponivel',
     rotulo: 'Indisponíveis',
-    descricao: 'Vídeos removidos ou privados. Informe a música se souber qual era.',
+    descricao: 'Vídeos removidos ou privados no YouTube.',
+    instrucao:
+      'Se você lembrar qual música era, informe. Se não, marque como "Não é música" para tirar da lista.',
   },
 ]
 
@@ -247,3 +258,114 @@ export function totalPaginas(pagina: PaginaRevisao | undefined): number {
 export function aceitaLote(tipo: TipoRevisao): boolean {
   return tipo !== 'canal_novo' && tipo !== 'possivel_duplicata'
 }
+
+export interface NivelConfianca {
+  rotulo: string
+  cor: string
+}
+
+const CONFIANCA_ALTA = 80
+const CONFIANCA_MEDIA = 50
+
+export function nivelConfianca(confianca: number | null): NivelConfianca | null {
+  if (confianca === null) return null
+  if (confianca >= CONFIANCA_ALTA) {
+    return { rotulo: `Alta certeza · ${confianca}%`, cor: 'cirqueira.musica.verde' }
+  }
+  if (confianca >= CONFIANCA_MEDIA) {
+    return { rotulo: `Média certeza · ${confianca}%`, cor: 'cirqueira.musica.amarelo' }
+  }
+  return { rotulo: `Baixa certeza · ${confianca}%`, cor: 'cirqueira.red.400' }
+}
+
+export function rotuloVersao(versao: string | null | undefined): string | null {
+  if (!versao || versao === 'original') return null
+  return OPCOES_VERSAO_MUSICA.find((opcao) => opcao.valor === versao)?.rotulo ?? null
+}
+
+export interface OpcaoLeituraVideo {
+  chave: string
+  titulo: string
+  detalhe: string
+  sugerida: boolean
+  payload: CorrecaoVideoPayload
+}
+
+function descreverComponentes(leituras: LeituraIa[]): string {
+  return leituras.map((leitura) => leitura.titulo).join(' + ')
+}
+
+function descreverArtistasComponentes(leituras: LeituraIa[]): string {
+  return leituras.map((leitura) => juntarArtistas(leitura.artistas)).join(' + ')
+}
+
+export function opcoesLeituraVideo(video: VideoRevisao): OpcaoLeituraVideo[] {
+  const versao = video.sugestaoIa?.versao ?? video.tipoVersao
+  const opcoes: OpcaoLeituraVideo[] = []
+  const sugestao = payloadDaSugestao(video)
+  if (sugestao && video.musica) {
+    opcoes.push({
+      chave: `catalogo-${video.musica.uuid}`,
+      titulo: video.musica.titulo,
+      detalhe: nomesArtistasCatalogo(video.musica),
+      sugerida: true,
+      payload: sugestao,
+    })
+  }
+  if (sugestao && !video.musica) {
+    const leituras = leiturasSugeridas(video).filter((leitura) => leitura.artistas.length > 0)
+    const mashup = sugestao.acao === 'definir_mashup'
+    opcoes.push({
+      chave: `sugestao-${descreverComponentes(leituras)}`,
+      titulo: descreverComponentes(leituras),
+      detalhe: mashup
+        ? `Mashup · ${descreverArtistasComponentes(leituras)}`
+        : descreverArtistasComponentes(leituras),
+      sugerida: true,
+      payload: sugestao,
+    })
+  }
+  const vistas = new Set(opcoes.map((opcao) => `${opcao.titulo}|${opcao.detalhe}`))
+  for (const alternativa of alternativasSugeridas(video)) {
+    const detalhe = juntarArtistas(alternativa.artistas)
+    const chave = `${alternativa.titulo}|${detalhe}`
+    if (alternativa.artistas.length === 0 || vistas.has(chave)) continue
+    vistas.add(chave)
+    opcoes.push({
+      chave: `alternativa-${chave}`,
+      titulo: alternativa.titulo,
+      detalhe,
+      sugerida: false,
+      payload: payloadDaLeitura(alternativa, versao),
+    })
+  }
+  return opcoes
+}
+
+export function totalPendentes(contagens: ContagensRevisao | undefined): number {
+  if (!contagens) return 0
+  return ABAS_REVISAO.reduce((soma, aba) => soma + (contagens[aba.tipo] ?? 0), 0)
+}
+
+export function proximaAbaComPendencias(
+  contagens: ContagensRevisao | undefined,
+  atual: TipoRevisao
+): AbaRevisao | null {
+  return ABAS_REVISAO.find((aba) => aba.tipo !== atual && (contagens?.[aba.tipo] ?? 0) > 0) ?? null
+}
+
+export const PASSOS_REVISAO: { titulo: string; texto: string }[] = [
+  {
+    titulo: 'Escolha uma categoria',
+    texto: 'O número amarelo mostra quantos itens esperam por você em cada uma.',
+  },
+  {
+    titulo: 'Confirme ou corrija',
+    texto:
+      'Toque em “É esta” na música certa. Se nenhuma servir, busque, crie ou marque como não música.',
+  },
+  {
+    titulo: 'Pronto',
+    texto: 'O item sai da lista e as reproduções passam a contar nos seus relatórios.',
+  },
+]

@@ -5,22 +5,23 @@ import {
   Checkbox,
   Flex,
   HStack,
+  Heading,
   Image,
   Link,
+  SimpleGrid,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Ban, Check, ExternalLink, Layers, ListMusic, Search, Tv } from 'lucide-react'
+import { Ban, Check, ExternalLink, Layers, ListMusic, Search, Sparkles, Tv } from 'lucide-react'
 import { memo } from 'react'
 import type { ClassificacaoCanal, CorrecaoVideoPayload, TipoRevisao, VideoRevisao } from '../types'
 import {
-  alternativasSugeridas,
+  aceitaLote,
   confiancaVideo,
-  descreverLeitura,
   formatarDuracaoVideo,
-  leiturasSugeridas,
-  payloadDaLeitura,
-  payloadDaSugestao,
+  nivelConfianca,
+  opcoesLeituraVideo,
+  rotuloVersao,
   urlVideoYoutube,
 } from '../utils'
 
@@ -36,13 +37,22 @@ export interface CartaoVideoRevisaoProps {
   onClassificarCanal: (canal: string, classificacao: ClassificacaoCanal) => void
 }
 
-const PROPS_BOTAO_ACAO = {
-  size: 'xs',
+const PROPS_BOTAO_SECUNDARIO = {
+  size: 'sm',
   variant: 'outline',
   borderRadius: 'full',
-  borderColor: 'cirqueira.musica.cartaoElevado',
+  borderColor: 'cirqueira.musica.textoDesabilitado',
   color: 'cirqueira.musica.textoPrincipal',
+  justifyContent: 'center',
   _hover: { bg: 'cirqueira.musica.cartaoElevado' },
+} as const
+
+const PROPS_ROTULO_SECAO = {
+  fontSize: '2xs',
+  fontWeight: 'bold',
+  textTransform: 'uppercase',
+  letterSpacing: 'wide',
+  color: 'cirqueira.musica.textoSecundario',
 } as const
 
 export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
@@ -56,212 +66,270 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
   onMarcarMashup,
   onClassificarCanal,
 }: CartaoVideoRevisaoProps) {
-  const sugestao = payloadDaSugestao(video)
-  const leituras = leiturasSugeridas(video)
-  const alternativas = alternativasSugeridas(video)
-  const confianca = confiancaVideo(video)
-  const versao = video.sugestaoIa?.versao ?? video.tipoVersao
+  const opcoes = opcoesLeituraVideo(video)
+  const confianca = nivelConfianca(confiancaVideo(video))
+  const versao = rotuloVersao(video.sugestaoIa?.versao ?? video.tipoVersao)
+  const compilacao = tipo === 'compilacao'
 
   return (
     <VStack
+      as="article"
       align="stretch"
-      gap={3}
+      gap={4}
       p={{ base: 3, sm: 4 }}
-      borderRadius="8px"
+      borderRadius="12px"
       bg="cirqueira.musica.cartao"
       border="1px solid"
       borderColor={selecionado ? 'cirqueira.musica.verde' : 'cirqueira.musica.cartaoElevado'}
       opacity={ocupado ? 0.6 : 1}
       aria-busy={ocupado}
+      minW={0}
     >
-      <Flex gap={3} align="start">
-        <Checkbox.Root
-          checked={selecionado}
-          onCheckedChange={() => onAlternarSelecao(video.uuid)}
-          colorPalette="green"
-          mt={1}
-          aria-label={`Selecionar ${video.titulo}`}
-        >
-          <Checkbox.HiddenInput />
-          <Checkbox.Control />
-        </Checkbox.Root>
+      <Flex gap={3} align="start" minW={0}>
         <Box
-          w={{ base: '96px', sm: '128px' }}
+          w={{ base: '104px', sm: '144px' }}
           flexShrink={0}
-          borderRadius="6px"
+          borderRadius="8px"
           overflow="hidden"
           bg="cirqueira.musica.cartaoElevado"
           aspectRatio={16 / 9}
         >
           <Image src={video.miniatura} alt="" w="full" h="full" objectFit="cover" loading="lazy" />
         </Box>
-        <VStack align="start" gap={1} minW={0} flex={1}>
-          <Text
+        <VStack align="stretch" gap={1.5} minW={0} flex={1}>
+          <Heading
+            as="h3"
             fontSize="sm"
             fontWeight="semibold"
             color="cirqueira.musica.textoPrincipal"
             lineClamp={2}
+            wordBreak="break-word"
           >
             {video.titulo}
+          </Heading>
+          <Text fontSize="xs" color="cirqueira.musica.textoSecundario" truncate>
+            {video.canal || 'Canal desconhecido'} · {formatarDuracaoVideo(video.duracaoMs)}
           </Text>
-          <HStack gap={2} fontSize="2xs" color="cirqueira.musica.textoSecundario" wrap="wrap">
-            <Text>{video.canal || 'Canal desconhecido'}</Text>
-            <Text>· {formatarDuracaoVideo(video.duracaoMs)}</Text>
+          <HStack gap={2} wrap="wrap">
+            {versao && (
+              <Badge size="sm" bg="cirqueira.musica.cartaoElevado" color="cirqueira.musica.azul">
+                {versao}
+              </Badge>
+            )}
             {!video.disponivel && (
-              <Badge size="xs" bg="cirqueira.musica.cartaoElevado" color="cirqueira.musica.amarelo">
+              <Badge size="sm" bg="cirqueira.musica.cartaoElevado" color="cirqueira.musica.amarelo">
                 Indisponível
               </Badge>
             )}
+            <Link
+              href={urlVideoYoutube(video.videoId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              display="inline-flex"
+              alignItems="center"
+              gap={1}
+              fontSize="xs"
+              color="cirqueira.musica.textoSecundario"
+              _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
+            >
+              <ExternalLink size={12} /> Ver vídeo
+            </Link>
           </HStack>
-          <Link
-            href={urlVideoYoutube(video.videoId)}
-            target="_blank"
-            rel="noopener noreferrer"
-            fontSize="2xs"
-            color="cirqueira.musica.textoSecundario"
-            _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-          >
-            <ExternalLink size={11} /> Abrir no YouTube
-          </Link>
         </VStack>
+        {aceitaLote(tipo) && (
+          <Checkbox.Root
+            checked={selecionado}
+            onCheckedChange={() => onAlternarSelecao(video.uuid)}
+            colorPalette="green"
+            size="sm"
+            flexShrink={0}
+            aria-label={`Selecionar ${video.titulo} para resolver junto com outros`}
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control borderColor="cirqueira.musica.textoSecundario" />
+          </Checkbox.Root>
+        )}
       </Flex>
 
-      {(leituras.length > 0 || video.musica) && (
-        <VStack
-          align="stretch"
-          gap={1}
-          p={2.5}
-          borderRadius="6px"
-          bg="cirqueira.musica.cartaoElevado"
-        >
-          <HStack justify="space-between" gap={2}>
-            <Text
-              fontSize="2xs"
-              fontWeight="bold"
-              textTransform="uppercase"
-              color="cirqueira.musica.textoSecundario"
-            >
-              Sugestão
-            </Text>
-            {confianca !== null && (
-              <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
-                Confiança {confianca}%
-              </Text>
-            )}
-          </HStack>
-          {video.musica ? (
-            <Text fontSize="sm" color="cirqueira.musica.textoPrincipal">
-              {video.musica.titulo} —{' '}
-              {video.musica.artistas.map((artista) => artista.nome).join(', ')}
-            </Text>
-          ) : (
-            leituras.map((leitura) => (
-              <Text
-                key={descreverLeitura(leitura)}
-                fontSize="sm"
-                color="cirqueira.musica.textoPrincipal"
-              >
-                {descreverLeitura(leitura)}
-              </Text>
-            ))
-          )}
-        </VStack>
-      )}
-
-      {alternativas.length > 0 && (
-        <VStack align="stretch" gap={1.5}>
-          <Text
-            fontSize="2xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-            color="cirqueira.musica.textoSecundario"
-          >
-            Outras leituras
+      <VStack align="stretch" gap={2}>
+        <HStack justify="space-between" gap={2} wrap="wrap">
+          <Text {...PROPS_ROTULO_SECAO}>
+            {opcoes.length > 0 ? 'Qual música é esta?' : 'Não encontrei uma música provável'}
           </Text>
-          <HStack gap={2} wrap="wrap">
-            {alternativas.map((alternativa) => (
-              <Button
-                key={descreverLeitura(alternativa)}
-                {...PROPS_BOTAO_ACAO}
-                disabled={ocupado || alternativa.artistas.length === 0}
-                onClick={() => onCorrigir(video, payloadDaLeitura(alternativa, versao))}
-              >
-                {descreverLeitura(alternativa)}
-              </Button>
-            ))}
-          </HStack>
-        </VStack>
-      )}
+          {confianca && opcoes.length > 0 && (
+            <Text fontSize="2xs" fontWeight="semibold" color={confianca.cor}>
+              {confianca.rotulo}
+            </Text>
+          )}
+        </HStack>
 
-      <HStack gap={2} wrap="wrap">
-        {sugestao && (
-          <Button
-            size="xs"
-            borderRadius="full"
-            bg="cirqueira.musica.verde"
-            color="cirqueira.musica.fundo"
-            _hover={{ bg: 'cirqueira.musica.verdeHover' }}
-            disabled={ocupado}
-            onClick={() => onCorrigir(video, sugestao)}
-          >
-            <Check size={12} /> Confirmar sugestão
-          </Button>
+        {opcoes.length === 0 && (
+          <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+            Use “Buscar ou criar música” para dizer qual é, ou “Não é música” se for outra coisa
+            (podcast, vídeo, ruído).
+          </Text>
         )}
-        <Button {...PROPS_BOTAO_ACAO} disabled={ocupado} onClick={() => onEscolherMusica(video)}>
-          <Search size={12} /> {tipo === 'compilacao' ? 'Informar artistas' : 'Escolher música'}
-        </Button>
-        <Button {...PROPS_BOTAO_ACAO} disabled={ocupado} onClick={() => onMarcarMashup(video)}>
-          <Layers size={12} /> Marcar como mashup
-        </Button>
-        {tipo === 'compilacao' && (
+
+        {opcoes.map((opcao) => (
           <Button
-            {...PROPS_BOTAO_ACAO}
+            key={opcao.chave}
+            variant="plain"
             disabled={ocupado}
-            onClick={() => onCorrigir(video, { acao: 'manter_compilacao' })}
+            onClick={() => onCorrigir(video, opcao.payload)}
+            h="auto"
+            whiteSpace="normal"
+            justifyContent="stretch"
+            alignItems="center"
+            fontWeight="normal"
+            gap={3}
+            w="full"
+            px={3}
+            py={2.5}
+            borderRadius="8px"
+            textAlign="left"
+            bg="cirqueira.musica.cartaoElevado"
+            border="1px solid"
+            borderColor={
+              opcao.sugerida ? 'cirqueira.musica.verde' : 'cirqueira.musica.cartaoElevado'
+            }
+            cursor={ocupado ? 'not-allowed' : 'pointer'}
+            transition="border-color 0.15s"
+            _hover={{ borderColor: 'cirqueira.musica.verde' }}
+            aria-label={`Confirmar: ${opcao.titulo} — ${opcao.detalhe}`}
           >
-            <ListMusic size={12} /> Manter como compilação
+            <VStack align="start" gap={0} flex={1} minW={0}>
+              <Text
+                fontSize="sm"
+                fontWeight="semibold"
+                color="cirqueira.musica.textoPrincipal"
+                lineClamp={2}
+              >
+                {opcao.titulo}
+              </Text>
+              <Text fontSize="xs" color="cirqueira.musica.textoSecundario" lineClamp={1}>
+                {opcao.detalhe}
+              </Text>
+            </VStack>
+            {opcao.sugerida && (
+              <HStack
+                gap={1}
+                flexShrink={0}
+                fontSize="2xs"
+                fontWeight="bold"
+                color="cirqueira.musica.verde"
+                display={{ base: 'none', sm: 'flex' }}
+              >
+                <Sparkles size={12} />
+                <Text>Sugerida</Text>
+              </HStack>
+            )}
+            <HStack
+              gap={1}
+              flexShrink={0}
+              px={2.5}
+              py={1}
+              borderRadius="full"
+              fontSize="xs"
+              fontWeight="bold"
+              bg={opcao.sugerida ? 'cirqueira.musica.verde' : 'transparent'}
+              color={opcao.sugerida ? 'cirqueira.musica.fundo' : 'cirqueira.musica.textoPrincipal'}
+              border="1px solid"
+              borderColor={
+                opcao.sugerida ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoDesabilitado'
+              }
+            >
+              <Check size={12} />
+              <Text>É esta</Text>
+            </HStack>
           </Button>
-        )}
-        <Button
-          {...PROPS_BOTAO_ACAO}
-          disabled={ocupado}
-          onClick={() => onCorrigir(video, { acao: 'nao_musica' })}
-        >
-          <Ban size={12} /> Não é música
-        </Button>
-      </HStack>
+        ))}
+      </VStack>
+
+      <VStack align="stretch" gap={2}>
+        <Text {...PROPS_ROTULO_SECAO}>{opcoes.length > 0 ? 'Nenhuma delas?' : 'O que fazer'}</Text>
+        <SimpleGrid columns={{ base: 1, sm: compilacao ? 2 : 3 }} gap={2}>
+          <Button
+            {...PROPS_BOTAO_SECUNDARIO}
+            disabled={ocupado}
+            onClick={() => onEscolherMusica(video)}
+          >
+            <Search size={14} /> {compilacao ? 'Informar artistas' : 'Buscar ou criar música'}
+          </Button>
+          <Button
+            {...PROPS_BOTAO_SECUNDARIO}
+            disabled={ocupado}
+            onClick={() => onMarcarMashup(video)}
+          >
+            <Layers size={14} /> É um mashup
+          </Button>
+          {compilacao && (
+            <Button
+              {...PROPS_BOTAO_SECUNDARIO}
+              disabled={ocupado}
+              onClick={() => onCorrigir(video, { acao: 'manter_compilacao' })}
+            >
+              <ListMusic size={14} /> Manter como compilação
+            </Button>
+          )}
+          <Button
+            {...PROPS_BOTAO_SECUNDARIO}
+            color="cirqueira.musica.textoSecundario"
+            disabled={ocupado}
+            onClick={() => onCorrigir(video, { acao: 'nao_musica' })}
+          >
+            <Ban size={14} /> Não é música
+          </Button>
+        </SimpleGrid>
+      </VStack>
 
       {video.canal && (
-        <HStack
+        <Flex
           gap={2}
-          wrap="wrap"
-          pt={1}
+          pt={3}
           borderTop="1px solid"
           borderColor="cirqueira.musica.cartaoElevado"
+          direction={{ base: 'column', sm: 'row' }}
+          align={{ base: 'stretch', sm: 'center' }}
+          justify="space-between"
         >
-          <Tv size={12} color="var(--chakra-colors-cirqueira-musica-textoSecundario)" />
-          <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
-            Este canal
-          </Text>
-          <Button
-            size="2xs"
-            variant="ghost"
-            color="cirqueira.musica.verde"
-            disabled={ocupado}
-            onClick={() => onClassificarCanal(video.canal, 'musica')}
-          >
-            é sempre música
-          </Button>
-          <Button
-            size="2xs"
-            variant="ghost"
-            color="cirqueira.musica.textoSecundario"
-            disabled={ocupado}
-            onClick={() => onClassificarCanal(video.canal, 'nao_musica')}
-          >
-            nunca é música
-          </Button>
-        </HStack>
+          <HStack gap={2} align="start" minW={0}>
+            <Box color="cirqueira.musica.textoSecundario" pt={0.5} flexShrink={0}>
+              <Tv size={14} />
+            </Box>
+            <Text fontSize="xs" color="cirqueira.musica.textoSecundario" minW={0}>
+              Atalho: decidir para todos os vídeos de{' '}
+              <Text as="strong" color="cirqueira.musica.textoPrincipal" wordBreak="break-word">
+                {video.canal}
+              </Text>
+            </Text>
+          </HStack>
+          <HStack gap={2} flexShrink={0}>
+            <Button
+              size="xs"
+              variant="outline"
+              borderRadius="full"
+              borderColor="cirqueira.musica.cartaoElevado"
+              color="cirqueira.musica.verde"
+              flex={{ base: 1, sm: 'none' }}
+              disabled={ocupado}
+              onClick={() => onClassificarCanal(video.canal, 'musica')}
+            >
+              Sempre música
+            </Button>
+            <Button
+              size="xs"
+              variant="outline"
+              borderRadius="full"
+              borderColor="cirqueira.musica.cartaoElevado"
+              color="cirqueira.musica.textoSecundario"
+              flex={{ base: 1, sm: 'none' }}
+              disabled={ocupado}
+              onClick={() => onClassificarCanal(video.canal, 'nao_musica')}
+            >
+              Nunca música
+            </Button>
+          </HStack>
+        </Flex>
       )}
     </VStack>
   )

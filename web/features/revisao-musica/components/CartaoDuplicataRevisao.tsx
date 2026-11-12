@@ -22,12 +22,19 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
       align="stretch"
       gap={3}
       p={{ base: 3, sm: 4 }}
-      borderRadius="8px"
+      borderRadius="12px"
       bg="cirqueira.musica.cartao"
       border="1px solid"
       borderColor="cirqueira.musica.cartaoElevado"
       opacity={ocupado ? 0.6 : 1}
     >
+      <Text fontSize="sm" fontWeight="semibold" color="cirqueira.musica.textoPrincipal">
+        Estas duas são a mesma música?
+      </Text>
+      <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+        Se forem, toque em “Manter esta” na versão com o nome certo. Se forem músicas diferentes, é
+        só deixar como está.
+      </Text>
       <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
         {[
           { musica: primeira, outra: segunda },
@@ -65,7 +72,7 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
               disabled={ocupado}
               onClick={() => onUnir(outra.uuid, musica.uuid)}
             >
-              <Merge size={12} /> Manter esta e unir
+              <Merge size={12} /> Manter esta
             </Button>
           </VStack>
         ))}

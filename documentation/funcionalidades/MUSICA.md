@@ -347,10 +347,11 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 
 ## Revisão e correções (tópico 204)
 
-- **Tela `/musica/revisao`:** abas Sem vínculo (vídeos pendentes ou em revisão sem ambiguidade), Ambíguos, Compilações, Canais novos, Possíveis duplicadas e Indisponíveis, com contagem (`GET /musica/revisao/contagens`) e paginação de 20.
-- **Cartão do vídeo:** miniatura, título e canal originais, duração, link do YouTube, sugestão da IA com confiança e outras leituras. Ações: confirmar a sugestão, escolher música (busca no catálogo em `GET /musica/catalogo/musicas?busca=` ou criar nova com título, artistas e versão), marcar como mashup (`acao = definir_mashup` com `componentes`), não é música, manter compilação e regra do canal (sempre ou nunca música).
-- **Lote:** vários vídeos de uma vez para a mesma música do catálogo (`POST /musica/revisao/videos/lote`, até 100).
-- **Duplicadas:** "Manter esta e unir" chama `POST /musica/catalogo/unir`.
+- **Tela `/musica/revisao`:** título "Revisão do YouTube Music" com o total de pendências, bloco recolhível "Como funciona a revisão" (três passos), categorias em grade de botões com contagem (Sem vínculo, Ambíguos, Compilações, Canais novos, Possíveis duplicadas e Indisponíveis; `GET /musica/revisao/contagens`) e, abaixo, um quadro com o que a categoria contém e **O que fazer** (`ABAS_REVISAO.instrucao`). Paginação de 20. Categoria vazia mostra o atalho para a próxima com pendências.
+- **Cartão do vídeo:** miniatura, título, canal, duração, versão (slowed, remix…) e "Ver vídeo". A pergunta **Qual música é esta?** lista as opções em linhas clicáveis com "É esta": a sugerida vem primeiro, marcada em verde com a certeza (alta ≥ 80%, média ≥ 50%, baixa), e as alternativas da IA com artista vêm abaixo (`opcoesLeituraVideo`). Em **Nenhuma delas?**: buscar ou criar música (`GET /musica/catalogo/musicas?busca=` ou nova com título, artistas e versão), é um mashup (`acao = definir_mashup`), não é música e, em compilações, manter como compilação. No rodapé, o atalho para decidir todos os vídeos do canal (sempre ou nunca música).
+- **Lote:** a caixa no canto do cartão seleciona vídeos; a barra "São todos a mesma música" liga todos à mesma música do catálogo (`POST /musica/revisao/videos/lote`, até 100).
+- **Janela de correção:** pergunta "Qual música toca neste vídeo?", mostra o vídeo, explica o modo (buscar música existente ou criar nova) e tem o campo "Versão tocada no vídeo". No celular abre como gaveta de baixo.
+- **Duplicadas:** "Estas duas são a mesma música?" com "Manter esta" em cada uma, que chama `POST /musica/catalogo/unir`.
 - **Nos detalhes:** "Unir com outra música…", "Separar esta versão" (`POST /musica/catalogo/separar` com `videoUuid`; o vídeo volta para a revisão) e "Unir com outro artista" (`POST /musica/artistas/unir`, busca em `GET /musica/catalogo/artistas?busca=`).
 - **Nada é apagado:** unir pode ser desfeito (`separar` com `musicaUuid`) e os títulos e canais originais ficam guardados. A interface remove o item da lista na hora e desfaz se a API recusar.
 

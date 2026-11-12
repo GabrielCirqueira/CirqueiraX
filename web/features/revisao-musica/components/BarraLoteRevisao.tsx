@@ -1,4 +1,4 @@
-import { Button, HStack, Text } from '@chakra-ui/react'
+import { Button, Flex, HStack, Text } from '@chakra-ui/react'
 import { ListChecks, X } from 'lucide-react'
 import { memo } from 'react'
 
@@ -14,12 +14,14 @@ export const BarraLoteRevisao = memo(function BarraLoteRevisao({
   onLimpar,
 }: BarraLoteRevisaoProps) {
   return (
-    <HStack
+    <Flex
       position="sticky"
       top={2}
       zIndex={2}
       justify="space-between"
-      gap={3}
+      align={{ base: 'stretch', sm: 'center' }}
+      direction={{ base: 'column', sm: 'row' }}
+      gap={2}
       px={4}
       py={2.5}
       borderRadius="8px"
@@ -30,7 +32,7 @@ export const BarraLoteRevisao = memo(function BarraLoteRevisao({
       aria-label="Ações em lote"
     >
       <Text fontSize="sm" fontWeight="semibold" color="cirqueira.musica.textoPrincipal">
-        {quantidade} {quantidade === 1 ? 'selecionado' : 'selecionados'}
+        {quantidade} {quantidade === 1 ? 'vídeo selecionado' : 'vídeos selecionados'}
       </Text>
       <HStack gap={2}>
         <Button
@@ -42,7 +44,7 @@ export const BarraLoteRevisao = memo(function BarraLoteRevisao({
           disabled={quantidade === 0}
           onClick={onDefinirMusica}
         >
-          <ListChecks size={12} /> Definir a mesma música
+          <ListChecks size={12} /> São todos a mesma música
         </Button>
         <Button
           size="xs"
@@ -53,6 +55,6 @@ export const BarraLoteRevisao = memo(function BarraLoteRevisao({
           <X size={12} /> Limpar
         </Button>
       </HStack>
-    </HStack>
+    </Flex>
   )
 })
