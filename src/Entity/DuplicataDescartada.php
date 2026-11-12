@@ -11,6 +11,9 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: DuplicataDescartadaRepository::class)]
 #[ORM\Table(name: 'duplicata_descartada')]
+#[ORM\Index(name: 'IDX_DUPLICATA_DESCARTADA_USUARIO', columns: ['usuario_id'])]
+#[ORM\Index(name: 'IDX_DUPLICATA_DESCARTADA_PRIMEIRA', columns: ['primeira_musica_uuid'])]
+#[ORM\Index(name: 'IDX_DUPLICATA_DESCARTADA_SEGUNDA', columns: ['segunda_musica_uuid'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_DUPLICATA_DESCARTADA_PAR', fields: ['usuario', 'primeiraMusica', 'segundaMusica'])]
 class DuplicataDescartada
 {
