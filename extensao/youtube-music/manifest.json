@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "CirqueiraX — YouTube Music",
+  "short_name": "CirqueiraX YT",
+  "version": "1.0.0",
+  "description": "Registra no CirqueiraX o que você ouve no YouTube Music deste navegador, com horário, tempo ouvido e pulos exatos.",
+  "permissions": ["storage", "alarms"],
+  "host_permissions": ["https://music.youtube.com/*", "https://x.cirqueira.com/*"],
+  "background": {
+    "service_worker": "fundo.js",
+    "scripts": ["fundo.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://music.youtube.com/*"],
+      "js": ["pagina.js"],
+      "world": "MAIN",
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://music.youtube.com/*"],
+      "js": ["conteudo.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CirqueiraX — YouTube Music",
+    "default_icon": {
+      "16": "icones/icone-16.png",
+      "32": "icones/icone-32.png"
+    }
+  },
+  "icons": {
+    "16": "icones/icone-16.png",
+    "32": "icones/icone-32.png",
+    "128": "icones/icone-128.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "youtube-music@cirqueirax",
+      "strict_min_version": "128.0"
+    }
+  }
+}

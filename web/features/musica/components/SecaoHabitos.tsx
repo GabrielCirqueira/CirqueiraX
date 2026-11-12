@@ -20,6 +20,7 @@ import {
   formatarNumeroPtBr,
   formatarPercentualSimples,
   gerarRotaArtista,
+  isPuloIndisponivel,
 } from '../utils'
 import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
 import { CapaMusica } from './CapaMusica'
@@ -223,9 +224,13 @@ function ConteudoHabitos({ dados }: { dados: HabitosMusica }) {
             icone={SkipForward}
             cor="cirqueira.musica.amarelo"
             rotulo="Taxa de pulos"
-            valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaPulos)}
+            valor={
+              isPuloIndisponivel(soYoutube, comportamento.comDadoPulo)
+                ? '—'
+                : formatarPercentualSimples(comportamento.taxaPulos)
+            }
             detalhe={
-              soYoutube
+              isPuloIndisponivel(soYoutube, comportamento.comDadoPulo)
                 ? TEXTO_INDISPONIVEL_YOUTUBE
                 : comportamento.comDadoPulo > 0
                   ? `${formatarNumeroPtBr(comportamento.puladas)} de ${formatarNumeroPtBr(comportamento.comDadoPulo)} reproduções puladas`

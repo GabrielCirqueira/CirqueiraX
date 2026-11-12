@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>CirqueiraX — YouTube Music</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="painel">
+      <header class="topo">
+        <img src="icones/icone-32.png" alt="" width="24" height="24" />
+        <h1>CirqueiraX · YouTube Music</h1>
+      </header>
+
+      <section id="situacao" class="situacao situacao--neutra">Carregando…</section>
+
+      <dl class="detalhes">
+        <dt>Aparelho</dt>
+        <dd id="aparelho">—</dd>
+        <dt>Último envio</dt>
+        <dd id="ultimo-envio">—</dd>
+        <dt>Última música enviada</dt>
+        <dd id="ultima-musica">—</dd>
+        <dt>Eventos guardados</dt>
+        <dd id="pendentes">0</dd>
+      </dl>
+
+      <form id="formulario" class="formulario">
+        <label for="token">Token da extensão</label>
+        <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="cxyt_…" />
+        <p class="ajuda">Gere o token no CirqueiraX, na página Música → cartão YouTube Music → Extensão do navegador.</p>
+        <div class="acoes">
+          <button type="submit">Salvar e testar</button>
+          <button type="button" id="remover" class="secundario">Remover token</button>
+        </div>
+      </form>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

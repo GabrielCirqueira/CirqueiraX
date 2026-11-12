@@ -7,6 +7,7 @@ import { useDesconectarYoutubeMusic, useStatusYoutubeMusic } from '../hooks'
 import { NOTA_MARGEM_HORARIO, formatarNumero, situacaoPainelYoutubeMusic } from '../utils'
 import { CampoCabecalhosYoutubeMusic } from './CampoCabecalhosYoutubeMusic'
 import { ModalDesconectarYoutubeMusic } from './ModalDesconectarYoutubeMusic'
+import { SecaoExtensaoYoutubeMusic } from './SecaoExtensaoYoutubeMusic'
 
 export interface PainelConexaoYoutubeMusicProps {
   onAbrirModalImportacao: () => void
@@ -120,6 +121,8 @@ export const PainelConexaoYoutubeMusic = memo(function PainelConexaoYoutubeMusic
                 Conectar o YouTube Music
               </Button>
             ))}
+
+          <SecaoExtensaoYoutubeMusic resumo={status?.extensao} />
 
           <HStack gap={2} wrap="wrap">
             <Button

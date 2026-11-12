@@ -8,6 +8,10 @@ import {
   ResumoIdentificacaoSchema,
   type StatusYoutubeMusic,
   StatusYoutubeMusicSchema,
+  type TokenExtensaoGerado,
+  TokenExtensaoGeradoSchema,
+  type TokenExtensaoYoutube,
+  TokenExtensaoYoutubeSchema,
 } from './types'
 
 const PREFIXO = '/api/v1/youtube-music'
@@ -56,4 +60,22 @@ export async function cancelarClassificacaoImportacaoYoutube(
 export async function obterResumoIdentificacao(): Promise<ResumoIdentificacao> {
   const { data } = await api.get<RespostaApi<unknown>>('/api/v1/musica/identificacao/resumo')
   return ResumoIdentificacaoSchema.parse(data.data)
+}
+
+export async function listarTokensExtensaoYoutube(): Promise<TokenExtensaoYoutube[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO}/extensao/tokens`)
+  return TokenExtensaoYoutubeSchema.array().parse(data.data)
+}
+
+export async function gerarTokenExtensaoYoutube(
+  nomeAparelho: string
+): Promise<TokenExtensaoGerado> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/extensao/tokens`, {
+    nomeAparelho,
+  })
+  return TokenExtensaoGeradoSchema.parse(data.data)
+}
+
+export async function revogarTokenExtensaoYoutube(uuid: string): Promise<void> {
+  await api.delete(`${PREFIXO}/extensao/tokens/${uuid}`)
 }

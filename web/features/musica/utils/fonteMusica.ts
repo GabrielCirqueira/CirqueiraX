@@ -106,6 +106,10 @@ export function listarFontesDetalhe(porFonte: PorFonteDetalhe | undefined) {
 
 export const TEXTO_INDISPONIVEL_YOUTUBE = 'Indisponível para o YouTube Music'
 
+export function isPuloIndisponivel(soYoutube: boolean, comDadoPulo: number): boolean {
+  return soYoutube && comDadoPulo === 0
+}
+
 export interface AlvoDetalheUrl {
   uuid: string | null
   nome: string

@@ -9,6 +9,39 @@ export const EstadoContaYoutubeMusicSchema = z.enum([
 
 export type EstadoContaYoutubeMusic = z.infer<typeof EstadoContaYoutubeMusicSchema>
 
+export const TocandoAgoraExtensaoSchema = z.object({
+  titulo: z.string(),
+  canal: z.string(),
+  inicioEm: z.string(),
+  msOuvidos: z.number(),
+  duracaoMs: z.number().nullable(),
+})
+
+export type TocandoAgoraExtensao = z.infer<typeof TocandoAgoraExtensaoSchema>
+
+export const ResumoExtensaoYoutubeSchema = z.object({
+  aparelhosAtivos: z.number(),
+  ultimoEventoEm: z.string().nullable(),
+  tocandoAgora: TocandoAgoraExtensaoSchema.nullable(),
+})
+
+export type ResumoExtensaoYoutube = z.infer<typeof ResumoExtensaoYoutubeSchema>
+
+export const TokenExtensaoYoutubeSchema = z.object({
+  uuid: z.string(),
+  nomeAparelho: z.string(),
+  criadoEm: z.string(),
+  ultimoUsoEm: z.string().nullable(),
+})
+
+export type TokenExtensaoYoutube = z.infer<typeof TokenExtensaoYoutubeSchema>
+
+export const TokenExtensaoGeradoSchema = TokenExtensaoYoutubeSchema.extend({
+  token: z.string(),
+})
+
+export type TokenExtensaoGerado = z.infer<typeof TokenExtensaoGeradoSchema>
+
 export const StatusYoutubeMusicSchema = z.object({
   conectada: z.boolean(),
   status: EstadoContaYoutubeMusicSchema,
@@ -27,6 +60,7 @@ export const StatusYoutubeMusicSchema = z.object({
     })
     .nullable()
     .optional(),
+  extensao: ResumoExtensaoYoutubeSchema.optional(),
 })
 
 export type StatusYoutubeMusic = z.infer<typeof StatusYoutubeMusicSchema>

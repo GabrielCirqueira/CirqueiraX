@@ -12,6 +12,7 @@ use App\Enum\FonteReproducaoYoutube;
 use App\Repository\ReproducaoYoutubeRepository;
 use App\Repository\VideoYoutubeRepository;
 use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
+use App\Service\YoutubeMusic\Extensao\UnirReproducaoExtensaoComColetaService;
 use DateTimeImmutable;
 
 final readonly class RegistrarReproducoesYoutubeService
@@ -24,6 +25,7 @@ final readonly class RegistrarReproducoesYoutubeService
         private ReproducaoYoutubeRepository $reproducaoRepository,
         private EstimarTempoReproduzidoYoutubeService $estimarTempo,
         private ProjetarReproducoesYoutubeService $projetarYoutube,
+        private UnirReproducaoExtensaoComColetaService $unirComExtensao,
     ) {
     }
 
@@ -42,7 +44,10 @@ final readonly class RegistrarReproducoesYoutubeService
             $usuario,
             array_map(static fn (ReproducaoYoutube $reproducao): string => $reproducao->chaveDeduplicacao(), $reproducoes),
         ));
-        $novas = array_values(array_filter($reproducoes, static fn (ReproducaoYoutube $reproducao): bool => !isset($existentes[$reproducao->chaveDeduplicacao()])));
+        $novas = $this->unirComExtensao->descartarJaRegistradasPelaExtensao(
+            $usuario,
+            array_values(array_filter($reproducoes, static fn (ReproducaoYoutube $reproducao): bool => !isset($existentes[$reproducao->chaveDeduplicacao()]))),
+        );
 
         $anterior = $this->encadearTempos($usuario, $novas);
         foreach ($novas as $reproducao) {

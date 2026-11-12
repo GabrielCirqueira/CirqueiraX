@@ -96,6 +96,12 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
             $chavesExistentes[$chave] = true;
             $candidato = $this->extrairCandidatoMaisProximo($candidatosColeta, $item);
 
+            if (null !== $candidato && $candidato->isTempoExato()) {
+                ++$contadores['unificados'];
+
+                continue;
+            }
+
             if (null !== $candidato) {
                 $candidato->unificarComTakeout($item->tocadaEm);
                 ++$contadores['unificados'];
@@ -136,9 +142,9 @@ final readonly class ImportarHistoricoTakeoutYoutubeService
         $momentos = array_map(static fn (ItemHistoricoTakeoutYoutubeDTO $item): int => $item->tocadaEm->getTimestamp(), $lote);
         $fuso = new DateTimeZone(self::FUSO_UTC);
 
-        return $this->reproducaoRepository->listarDaFonteNoIntervalo(
+        return $this->reproducaoRepository->listarDasFontesNoIntervalo(
             $usuario,
-            FonteReproducaoYoutube::Coletor,
+            [FonteReproducaoYoutube::Coletor, FonteReproducaoYoutube::Extensao],
             $videoIds,
             (new DateTimeImmutable('@'.(min($momentos) - self::JANELA_TOLERANCIA_TAKEOUT_SEGUNDOS)))->setTimezone($fuso),
             (new DateTimeImmutable('@'.(max($momentos) + self::JANELA_TOLERANCIA_TAKEOUT_SEGUNDOS)))->setTimezone($fuso),

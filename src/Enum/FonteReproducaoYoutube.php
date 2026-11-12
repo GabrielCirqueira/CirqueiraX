@@ -8,12 +8,14 @@ enum FonteReproducaoYoutube: string
 {
     case Coletor = 'coletor';
     case Takeout = 'takeout';
+    case Extensao = 'extensao';
 
     public function descricao(): string
     {
         return match ($this) {
             self::Coletor => 'Coleta automática do YouTube Music',
             self::Takeout => 'Importação do Google Takeout',
+            self::Extensao => 'Extensão do navegador',
         };
     }
 
@@ -25,5 +27,10 @@ enum FonteReproducaoYoutube: string
     public function isTakeout(): bool
     {
         return self::Takeout === $this;
+    }
+
+    public function isExtensao(): bool
+    {
+        return self::Extensao === $this;
     }
 }

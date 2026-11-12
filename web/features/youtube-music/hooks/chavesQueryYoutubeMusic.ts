@@ -3,4 +3,5 @@ export const YOUTUBE_MUSIC_QUERY_KEYS = {
   status: ['youtube-music', 'status'] as const,
   importacao: (uuid: string) => ['youtube-music', 'importacao', uuid] as const,
   resumoIdentificacao: ['youtube-music', 'resumo-identificacao'] as const,
+  tokensExtensao: ['youtube-music', 'extensao', 'tokens'] as const,
 }

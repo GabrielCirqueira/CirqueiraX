@@ -11,6 +11,7 @@ O CirqueiraX usa autenticação sem sessão no servidor, com mecanismos diferent
 | Interface web | JWT RS256 | `Authorization: Bearer <token>` | API completa |
 | Stream, thumbnail e áudio | JWT na query | `?token=<token>` | Recursos abertos por tags de mídia |
 | Agente de prints | Token de agente | `X-Agent-Token: cx_ag_...` | `POST /api/v1/ingestao/print` |
+| Extensão do YouTube Music | Token por aparelho | `X-Extensao-Token: cxyt_...` | `POST /api/v1/youtube-music/extensao/eventos` |
 | Administração | JWT master | Gerado por `app:jwt:master` | Uso em linha de comando |
 | Google Fotos | OAuth 2.0 | Tokens em `ContaGoogleFotos` | Backup e álbuns |
 | Spotify | OAuth 2.0 PKCE | Tokens em `ContaSpotify` | Histórico de reproduções e perfil |
@@ -87,6 +88,10 @@ make agente-token ARGS="\"PC Pessoal\" print_pessoal"
 ```
 
 A chave em texto aberto aparece só na geração. No banco fica apenas o hash.
+
+### Extensão do YouTube Music
+
+`TokenExtensaoYoutubeMusicAuthenticator` só atua em `POST /api/v1/youtube-music/extensao/eventos`: lê `X-Extensao-Token`, calcula o SHA-256 e procura um registro ativo em `TokenExtensaoYoutubeMusic`. O usuário autenticado é `ExtensaoYoutubeMusicUser` (`ROLE_EXTENSAO_YOUTUBE_MUSIC`), que carrega o token e o dono; a rota exige esse papel, então o JWT normal recebe 403 nela e o token da extensão recebe 401 em qualquer outra rota. O próprio usuário gera (até 5 ativos) e revoga os tokens no cartão do YouTube Music. Detalhes na seção 18 de [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md).
 
 ---
 

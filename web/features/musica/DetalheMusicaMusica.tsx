@@ -43,6 +43,7 @@ import {
   formatarTempoRelativo,
   gerarRotaArtista,
   gerarRotaMusica,
+  isPuloIndisponivel,
   lerAlvoDetalhe,
 } from './utils'
 
@@ -174,9 +175,13 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
         <CartaoMetricaMusica
           icone={SkipForward}
           rotulo="Taxa de pulos"
-          valor={soYoutube ? '—' : formatarPercentualSimples(comportamento.taxaPulos)}
+          valor={
+            isPuloIndisponivel(soYoutube, comportamento.comDadoPulo)
+              ? '—'
+              : formatarPercentualSimples(comportamento.taxaPulos)
+          }
           detalhe={
-            soYoutube
+            isPuloIndisponivel(soYoutube, comportamento.comDadoPulo)
               ? TEXTO_INDISPONIVEL_YOUTUBE
               : comportamento.comDadoPulo > 0
                 ? `${comportamento.puladas} de ${comportamento.comDadoPulo} puladas`

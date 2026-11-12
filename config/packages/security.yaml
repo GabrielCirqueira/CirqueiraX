@@ -49,6 +49,7 @@ security:
             provider: app_chained_provider
             custom_authenticators:
                 - App\Security\TokenAgenteAuthenticator
+                - App\Security\TokenExtensaoYoutubeMusicAuthenticator
             jwt: ~
 
         main:
@@ -61,4 +62,5 @@ security:
         - { path: ^/api/v1/token/refresh,   roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/livros-audio-arquivos/, roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/musica/capa$,    roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/youtube-music/extensao/eventos$, roles: ROLE_EXTENSAO_YOUTUBE_MUSIC }
         - { path: ^/api,                    roles: IS_AUTHENTICATED_FULLY }

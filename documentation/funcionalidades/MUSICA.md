@@ -71,13 +71,16 @@ Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseRepr
 
 ### Diferenças que continuam entre as fontes
 
+O YouTube Music tem duas entradas: o **coletor por cookie** (todos os aparelhos, estimado) e a **extensão do navegador** (só o computador com a aba aberta, exato). Quando as duas veem a mesma reprodução, fica uma só com o dado da extensão. Detalhes na seção 18 de [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md).
+
 | Assunto | Spotify | YouTube Music |
 |---|---|---|
-| Horário | Exato (fim da reprodução informado pelo Spotify) | Estimado: meio do intervalo entre duas leituras do histórico |
-| Tempo ouvido | Exato (`ms_played`) | Estimado: `min(intervalo até a seguinte, duração)`; a que está tocando cresce a cada coleta |
-| Pulos e aleatório | Sim | Não existem |
-| Tocando agora | Sim (API) | Só "última detectada" |
-| Repetição seguida | Conta cada vez | A segunda não aparece no histórico |
+| Horário | Exato (fim da reprodução informado pelo Spotify) | Coletor: estimado, meio do intervalo entre duas leituras do histórico. Extensão: exato |
+| Tempo ouvido | Exato (`ms_played`) | Coletor: `min(intervalo até a seguinte, duração)`, a que está tocando cresce a cada coleta. Extensão: exato, sem pausa e sem anúncio |
+| Pulos | Sim | Só nas reproduções da extensão |
+| Aleatório | Sim | Não existe |
+| Tocando agora | Sim (API) | Com a extensão aberta; sem ela, "última detectada" |
+| Repetição seguida | Conta cada vez | Coletor não vê a segunda; a extensão conta |
 | Duração da conexão | Token renovado sozinho | Sessão do Google, que pode cair (status `reconectar`) |
 
 ## Regras de dados

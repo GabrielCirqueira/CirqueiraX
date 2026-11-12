@@ -1,0 +1,118 @@
+:root {
+  color-scheme: dark;
+  --fundo: #0c1110;
+  --cartao: #151d1b;
+  --borda: #24302d;
+  --texto: #e8f0ee;
+  --suave: #93a5a0;
+  --marca: #00ba9c;
+  --erro: #ff6b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  width: 340px;
+  background: var(--fundo);
+  color: var(--texto);
+  font: 13px / 1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.painel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topo h1 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.situacao {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: var(--cartao);
+}
+
+.situacao--ok {
+  border-color: var(--marca);
+  color: var(--marca);
+}
+
+.situacao--erro {
+  border-color: var(--erro);
+  color: var(--erro);
+}
+
+.detalhes {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  margin: 0;
+}
+
+.detalhes dt {
+  color: var(--suave);
+}
+
+.detalhes dd {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formulario input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: var(--cartao);
+  color: var(--texto);
+}
+
+.ajuda {
+  margin: 0;
+  color: var(--suave);
+  font-size: 12px;
+}
+
+.acoes {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  flex: 1;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--marca);
+  color: var(--fundo);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secundario {
+  background: transparent;
+  border: 1px solid var(--borda);
+  color: var(--texto);
+}

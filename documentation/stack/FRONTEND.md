@@ -50,7 +50,7 @@ web/
 │   ├── musica/             Página Música, detalhes, rankings e Cápsula
 │   ├── revisao-musica/     Tela de revisão e correções do catálogo
 │   ├── spotify/            Conexão, importação, callback e tocando agora
-│   ├── youtube-music/      Conexão, importação do Takeout e selo de revisão
+│   ├── youtube-music/      Conexão, extensão do navegador, importação do Takeout e selo de revisão
 │   ├── transcricoes/
 │   └── upload-manual/
 ├── layouts/                MainLayout, AuthLayout, AppContainer, Sidebar, Header e Footer

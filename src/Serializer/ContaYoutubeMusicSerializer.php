@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
+use App\DataObject\YoutubeMusic\ResumoExtensaoYoutubeDTO;
 use App\Entity\ContaYoutubeMusic;
 use App\Entity\ReproducaoYoutube;
 use DateTimeImmutable;
@@ -19,7 +20,7 @@ final class ContaYoutubeMusicSerializer
     /**
      * @return array<string, mixed>
      */
-    public function serializar(?ContaYoutubeMusic $conta, int $totalReproducoesColetadas = 0, ?ReproducaoYoutube $ultimaDetectada = null): array
+    public function serializar(?ContaYoutubeMusic $conta, int $totalReproducoesColetadas = 0, ?ReproducaoYoutube $ultimaDetectada = null, ?ResumoExtensaoYoutubeDTO $extensao = null): array
     {
         if (null === $conta) {
             return [
@@ -33,6 +34,7 @@ final class ContaYoutubeMusicSerializer
                 'erroMotivo' => null,
                 'totalReproducoesColetadas' => $totalReproducoesColetadas,
                 'ultimaDetectada' => $this->serializarUltimaDetectada($ultimaDetectada),
+                'extensao' => $this->serializarExtensao($extensao),
             ];
         }
 
@@ -47,6 +49,27 @@ final class ContaYoutubeMusicSerializer
             'erroMotivo' => $conta->erroMotivo(),
             'totalReproducoesColetadas' => $totalReproducoesColetadas,
             'ultimaDetectada' => $this->serializarUltimaDetectada($ultimaDetectada),
+            'extensao' => $this->serializarExtensao($extensao),
+        ];
+    }
+
+    /**
+     * @return array{aparelhosAtivos: int, ultimoEventoEm: ?string, tocandoAgora: array{titulo: string, canal: string, inicioEm: string, msOuvidos: int, duracaoMs: ?int}|null}
+     */
+    private function serializarExtensao(?ResumoExtensaoYoutubeDTO $extensao): array
+    {
+        $tocando = $extensao?->tocandoAgora;
+
+        return [
+            'aparelhosAtivos' => $extensao->aparelhosAtivos ?? 0,
+            'ultimoEventoEm' => $extensao?->ultimoEventoEm?->format(DateTimeInterface::ATOM),
+            'tocandoAgora' => null === $tocando ? null : [
+                'titulo' => $tocando->video()->titulo(),
+                'canal' => $tocando->video()->canal(),
+                'inicioEm' => $tocando->tocadaEm()->format(DateTimeInterface::ATOM),
+                'msOuvidos' => $tocando->msReproduzidos(),
+                'duracaoMs' => $tocando->video()->duracaoMs(),
+            ],
         ];
     }
 

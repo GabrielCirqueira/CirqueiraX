@@ -12,6 +12,10 @@ final readonly class EstimarTempoReproduzidoYoutubeService
 
     public function executar(ReproducaoYoutube $anterior, ReproducaoYoutube $seguinte): void
     {
+        if ($anterior->isTempoExato()) {
+            return;
+        }
+
         $intervaloMs = ($seguinte->tocadaEm()->getTimestamp() - $anterior->tocadaEm()->getTimestamp()) * self::MILISSEGUNDOS_POR_SEGUNDO;
         $duracaoMs = $anterior->video()->duracaoMs();
 

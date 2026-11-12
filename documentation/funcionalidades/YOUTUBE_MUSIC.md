@@ -1,6 +1,6 @@
 # YouTube Music
 
-> Parte da página **Música** (`/musica`). As regras gerais, as decisões, o catálogo único e o histórico de cada tópico ficam em [MUSICA.md](MUSICA.md). Este documento explica, do começo ao fim, como o CirqueiraX captura o que a conta ouve no YouTube Music usando a sessão (cookie) do navegador.
+> Parte da página **Música** (`/musica`). As regras gerais, as decisões, o catálogo único e o histórico de cada tópico ficam em [MUSICA.md](MUSICA.md). Este documento explica, do começo ao fim, como o CirqueiraX captura o que a conta ouve no YouTube Music usando a sessão (cookie) do navegador e, opcionalmente, a extensão do navegador (seção 18), que traz horário e tempo exatos.
 
 ---
 
@@ -24,7 +24,7 @@ O histórico de exibição do YouTube Music **não existe em nenhuma API oficial
 |---|---|
 | YouTube Data API v3 (oficial) | Não tem histórico de exibição. Serve só para detalhes de vídeos (duração, canal, categoria), usada na identificação |
 | OAuth por código de TV (`ytmusicapi`) com cliente próprio | O token sai e funciona na API oficial, mas a API interna do YouTube Music responde `HTTP 400: Request contains an invalid argument` (bloqueio do Google, discussão #682 da `ytmusicapi`). Testado duas vezes |
-| Extensão de navegador | Recusada: não cobre o celular nem a TV e obriga a ter o navegador aberto |
+| Extensão de navegador sozinha | Não cobre o celular nem a TV e obriga a ter o navegador aberto. Por isso não substitui o cookie: entrou depois como **complemento opcional** (seção 18), dando horário, tempo ouvido e pulos exatos no computador |
 | **Sessão do navegador (cookie)** | Funciona: a `ytmusicapi` usa os mesmos cabeçalhos que o site usa e lê o histórico da conta inteira, de qualquer aparelho |
 
 O custo dessa escolha é que o cookie é a **sessão inteira da conta Google** e o Google pode derrubar a sessão quando quiser. Por isso a seção 6 (segurança) e a seção 10 (reconexão).
@@ -247,10 +247,10 @@ Detalhes em [MUSICA.md](MUSICA.md), tópicos 197 e 198.
 
 ## 12. Nos relatórios
 
-- Tudo que vem do YouTube Music tem `tempoExato = false` e aparece como **estimado** ("est." e tooltip separando Spotify e YouTube Music).
+- O que vem só do coletor tem `tempoExato = false` e aparece como **estimado** ("est." e tooltip separando Spotify e YouTube Music). O que passou pela extensão tem `tempoExato = true`.
 - Stream = 30 s ou mais, como no Spotify.
-- Pulos e aleatório: "indisponível para o YouTube Music".
-- Sem "tocando agora": aparece "Última detectada: título · canal, há cerca de X min".
+- Pulos: contam só as reproduções da extensão (as do coletor e do Takeout ficam `pulada = NULL`). Sem nenhuma reprodução da extensão no período, aparece "indisponível para o YouTube Music". Aleatório continua indisponível.
+- "Tocando agora" aparece quando a extensão mandou evento nos últimos 75 s; sem extensão, aparece "Última detectada: título · canal, há cerca de X min".
 - **Capas:** as capas do YouTube (`yt3.googleusercontent.com`, `i.ytimg.com`...) e as do Spotify são servidas pelo próprio sistema em `GET /api/v1/musica/capa?url=` (cache de 30 dias), porque alguns navegadores e redes não abriam esses links direto. Ver "Capas servidas pelo sistema" em [MUSICA.md](MUSICA.md).
 
 ## 13. Rotas
@@ -264,6 +264,12 @@ Detalhes em [MUSICA.md](MUSICA.md), tópicos 197 e 198.
 | `GET` | `/api/v1/youtube-music/importacoes/{uuid}` | Andamento e relatório |
 | `POST` | `/api/v1/youtube-music/importacoes/{uuid}/confirmar` | Confirma o custo da IA |
 | `POST` | `/api/v1/youtube-music/importacoes/{uuid}/cancelar` | Cancela na confirmação: pula a IA e deixa os vídeos na revisão |
+| `GET` | `/api/v1/youtube-music/extensao/tokens` | Aparelhos com a extensão ligada (sem o token) |
+| `POST` | `/api/v1/youtube-music/extensao/tokens` | Gera o token de um aparelho (`nomeAparelho`); o token só aparece nessa resposta |
+| `DELETE` | `/api/v1/youtube-music/extensao/tokens/{uuid}` | Revoga o token do aparelho |
+| `POST` | `/api/v1/youtube-music/extensao/eventos` | Usada só pela extensão, com o cabeçalho `X-Extensao-Token` (não aceita o login normal) |
+
+O `status` também traz `extensao`: `aparelhosAtivos`, `ultimoEventoEm` e `tocandoAgora` (`titulo`, `canal`, `inicioEm`, `msOuvidos`, `duracaoMs`) ou `null`.
 
 ## 14. Comandos
 
@@ -288,8 +294,8 @@ A `ytmusicapi` vem instalada na imagem (`YTMUSICAPI_VERSAO = 1.12.3`). Atualizar
 
 ## 16. Limites
 
-- Sem horário exato e sem tempo ouvido real: tudo do YouTube Music é estimado. Se você pausa no meio, a música continua subindo até a duração, porque o histórico não informa pausa.
-- Repetir a mesma música em seguida não muda o topo do histórico, então a segunda vez não é contada.
+- Sem a extensão, não há horário exato nem tempo ouvido real: o que vem do coletor é estimado. Se você pausa no meio, a música continua subindo até a duração, porque o histórico não informa pausa.
+- Repetir a mesma música em seguida não muda o topo do histórico, então a segunda vez não é contada pelo coletor (a extensão conta).
 - O horário tem margem de até uma consulta (30 a 120 s) mais o atraso do próprio histórico do Google.
 - Música ouvida enquanto a conta está em `reconectar` só volta pelo Takeout.
 - A sessão pode cair a qualquer momento por decisão do Google.
@@ -304,5 +310,54 @@ A `ytmusicapi` vem instalada na imagem (`YTMUSICAPI_VERSAO = 1.12.3`). Atualizar
 | Minutos zerados numa música | Deveria subir a cada coleta enquanto toca; se ficou 0, conferir se a reprodução seguinte tem horário anterior (problema de fuso) |
 | Coleta parada sem erro | Worker `messenger-youtube-coleta` rodando? `proximaConsultaEm` da conta no futuro distante? |
 | Capa quebrada | A URL está no banco? `GET /api/v1/musica/capa?url=` responde 200? |
+| Extensão não registra | No popup da extensão, "Salvar e testar" (401 = token revogado ou errado). No cartão, "Último evento" do aparelho. A fila da extensão guarda os eventos até o servidor responder |
 
 Logs relevantes: "Coleta do YouTube Music concluída." (itens novos e reproduções criadas), "Coleta do YouTube Music falhou; nova tentativa agendada." e "Sessão do YouTube Music recusada; conta marcada para reconectar.".
+
+## 18. Extensão do navegador (opcional)
+
+O coletor por cookie continua sendo a base (pega celular, TV e qualquer aparelho). A extensão é um complemento para o computador: enquanto a aba do `music.youtube.com` está aberta, ela diz **quando** a música começou, **quanto** foi ouvido de verdade (pausa e anúncio não contam) e se ela foi **pulada**. Quando os dois veem a mesma reprodução, vale o dado da extensão.
+
+### Instalar
+
+1. No cartão do YouTube Music, seção "Extensão do navegador", baixar o `.zip` (`/build/extensao/cirqueirax-youtube-music-<versão>.zip`, gerado no `npm run build` a partir de `extensao/youtube-music/`) e descompactar.
+2. Chrome/Edge/Brave: `chrome://extensions` → ligar "Modo do desenvolvedor" → "Carregar sem compactação" → escolher a pasta. Firefox: `about:debugging#/runtime/this-firefox` → "Carregar extensão temporária" → `manifest.json` (no Firefox some ao fechar o navegador).
+3. No cartão, dar um nome ao aparelho ("PC de casa") e gerar o token. O token aparece **uma vez**; copiar e colar no popup da extensão → "Salvar e testar".
+
+### Como a extensão mede
+
+`extensao/youtube-music/`, Manifest V3:
+
+| Arquivo | Papel |
+|---|---|
+| `pagina.js` | Roda no contexto da página e lê `getVideoData()` do player (videoId, título, autor, anúncio) a cada 1 s |
+| `conteudo.js` | Soma o tempo tocado a cada 1 s (só com o vídeo rodando e sem anúncio), detecta troca de música e repetição |
+| `fundo.js` | Guarda os eventos em `chrome.storage.local` e envia a cada minuto para `POST /extensao/eventos` com `X-Extensao-Token` |
+| `popup.*` | Colar o token, testar e ver o estado do envio |
+
+Eventos de uma reprodução (`idReproducao` gerado pela extensão):
+
+- `inicio`: depois de 3 s ouvidos.
+- `progresso`: a cada 20 s, se o tempo mudou, e ao fechar a aba.
+- `fim`: ao trocar de música ou repetir. `pulada = true` quando parou antes de 90% e não chegou ao final.
+
+O horário de início é calculado no servidor: `recebidoEm − segundosDesdeInicio`, para não depender do relógio do computador. Reenviar o mesmo evento não duplica (chave `usuario + id_extensao`) e o tempo só cresce (`max`).
+
+### União com o coletor
+
+Janela de 600 s, mesmo vídeo, a mais próxima primeiro, uma para uma:
+
+- **Coletor primeiro:** a reprodução estimada vira a da extensão (fonte `extensao`, `tempo_exato = 1`, horário e tempo da extensão) e fica marcada `vista_pelo_coletor`.
+- **Extensão primeiro:** quando o coletor detecta a mesma música, a detecção é descartada e a reprodução da extensão é marcada `vista_pelo_coletor`. A estimativa de tempo não mexe numa reprodução com tempo exato.
+- **Takeout:** reprodução da extensão conta como já registrada (o Takeout não cria outra).
+
+### Segurança do token
+
+- Um token por aparelho, até 5 ativos por usuário. Guardado só o hash SHA-256 (`token_extensao_youtube_music`); o texto (`cxyt_` + 64 hex) só aparece na resposta da geração.
+- O token só autentica `POST /api/v1/youtube-music/extensao/eventos` (`TokenExtensaoYoutubeMusicAuthenticator`, papel `ROLE_EXTENSAO_YOUTUBE_MUSIC`). Não lê nada e não abre outras rotas; o login normal não entra nessa rota.
+- Limite de 60 lotes por minuto por token (`youtube_music_extensao`), 50 eventos por lote. Capa só de hosts do Google.
+- Quem roubar o token só consegue inserir reproduções falsas na conta dona do token. Revogar no cartão corta na hora (a extensão passa a receber 401).
+
+### Testes (12/11/2026)
+
+Ambiente isolado (MySQL e app temporários): geração e limite de 5 tokens, nome vazio (422), token de outro usuário (404 na revogação, lista vazia), token errado (401), token em outra rota (401), login normal na rota da extensão (403), `inicio` → "tocando agora", `progresso` e `fim` com pulo, `fim` repetido sem duplicar, `progresso` atrasado sem diminuir tempo, evento inválido (422), união com linha estimada do coletor (virou uma só, sem duplicar na projeção), detecção do coletor descartada depois da extensão, revogação (401). O `conteudo.js` foi testado numa página simulada: pausa e anúncio não contam, troca de música fecha a anterior com pulo, repetição abre nova reprodução.

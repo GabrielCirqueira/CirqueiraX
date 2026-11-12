@@ -42,6 +42,7 @@ final class YoutubeMusicController extends DefaultController
             $this->obterStatusService->executar($usuario),
             $this->obterStatusService->contarReproducoesColetadas($usuario),
             $this->obterStatusService->buscarUltimaDetectada($usuario),
+            $this->obterStatusService->resumirExtensao($usuario),
         ));
     }
 

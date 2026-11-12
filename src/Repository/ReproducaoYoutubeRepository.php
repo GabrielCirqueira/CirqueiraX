@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
+use App\Entity\VideoYoutube;
 use App\Enum\FonteReproducaoYoutube;
 use DateTimeImmutable;
 use DateTimeZone;
@@ -72,11 +73,80 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
     }
 
     /**
+     * @param list<FonteReproducaoYoutube> $fontes
+     * @param list<string>                 $videoIds
+     *
+     * @return list<ReproducaoYoutube>
+     */
+    public function listarDasFontesNoIntervalo(Usuario $usuario, array $fontes, array $videoIds, DateTimeImmutable $inicio, DateTimeImmutable $fim): array
+    {
+        if ([] === $videoIds) {
+            return [];
+        }
+
+        /** @var list<ReproducaoYoutube> $reproducoes */
+        $reproducoes = $this->createQueryBuilder('e')
+            ->innerJoin('e.video', 'v')
+            ->addSelect('v')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.fonte IN (:fontes)')
+            ->andWhere('v.videoId IN (:videoIds)')
+            ->andWhere('e.tocadaEm BETWEEN :inicio AND :fim')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('fontes', array_map(static fn (FonteReproducaoYoutube $fonte): string => $fonte->value, $fontes))
+            ->setParameter('videoIds', array_values(array_unique($videoIds)))
+            ->setParameter('inicio', $inicio)
+            ->setParameter('fim', $fim)
+            ->orderBy('e.tocadaEm', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $reproducoes;
+    }
+
+    public function buscarDaExtensao(Usuario $usuario, string $idExtensao): ?ReproducaoYoutube
+    {
+        /** @var ReproducaoYoutube|null $reproducao */
+        $reproducao = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.idExtensao = :idExtensao')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('idExtensao', $idExtensao)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $reproducao;
+    }
+
+    /**
+     * @return list<ReproducaoYoutube>
+     */
+    public function listarEstimadasDoVideoNoIntervalo(Usuario $usuario, VideoYoutube $video, DateTimeImmutable $inicio, DateTimeImmutable $fim): array
+    {
+        /** @var list<ReproducaoYoutube> $reproducoes */
+        $reproducoes = $this->createQueryBuilder('e')
+            ->innerJoin('e.video', 'v')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('v.videoId = :videoId')
+            ->andWhere('e.tempoExato = false')
+            ->andWhere('e.idExtensao IS NULL')
+            ->andWhere('e.tocadaEm BETWEEN :inicio AND :fim')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('videoId', $video->videoId())
+            ->setParameter('inicio', $this->emUtc($inicio))
+            ->setParameter('fim', $this->emUtc($fim))
+            ->getQuery()
+            ->getResult();
+
+        return $reproducoes;
+    }
+
+    /**
      * @param list<string> $videoIds
      *
      * @return list<ReproducaoYoutube>
      */
-    public function listarDaFonteNoIntervalo(Usuario $usuario, FonteReproducaoYoutube $fonte, array $videoIds, DateTimeImmutable $inicio, DateTimeImmutable $fim): array
+    public function listarDaExtensaoSemColetaNoIntervalo(Usuario $usuario, array $videoIds, DateTimeImmutable $inicio, DateTimeImmutable $fim): array
     {
         if ([] === $videoIds) {
             return [];
@@ -88,18 +158,49 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
             ->addSelect('v')
             ->andWhere('e.usuario = :usuario')
             ->andWhere('e.fonte = :fonte')
+            ->andWhere('e.vistaPeloColetor = false')
             ->andWhere('v.videoId IN (:videoIds)')
             ->andWhere('e.tocadaEm BETWEEN :inicio AND :fim')
             ->setParameter('usuario', $usuario)
-            ->setParameter('fonte', $fonte)
+            ->setParameter('fonte', FonteReproducaoYoutube::Extensao->value)
             ->setParameter('videoIds', array_values(array_unique($videoIds)))
-            ->setParameter('inicio', $inicio)
-            ->setParameter('fim', $fim)
-            ->orderBy('e.tocadaEm', 'ASC')
+            ->setParameter('inicio', $this->emUtc($inicio))
+            ->setParameter('fim', $this->emUtc($fim))
             ->getQuery()
             ->getResult();
 
         return $reproducoes;
+    }
+
+    public function buscarTocandoAgoraDaExtensao(Usuario $usuario, DateTimeImmutable $atualizadaDesde): ?ReproducaoYoutube
+    {
+        /** @var ReproducaoYoutube|null $reproducao */
+        $reproducao = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.fonte = :fonte')
+            ->andWhere('e.pulada IS NULL')
+            ->andWhere('e.extensaoAtualizadaEm >= :desde')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('fonte', FonteReproducaoYoutube::Extensao->value)
+            ->setParameter('desde', $atualizadaDesde)
+            ->orderBy('e.extensaoAtualizadaEm', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $reproducao;
+    }
+
+    public function buscarUltimoEventoDaExtensao(Usuario $usuario): ?DateTimeImmutable
+    {
+        $valor = $this->createQueryBuilder('e')
+            ->select('MAX(e.extensaoAtualizadaEm)')
+            ->andWhere('e.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return is_string($valor) ? new DateTimeImmutable($valor) : null;
     }
 
     public function limparCache(): void

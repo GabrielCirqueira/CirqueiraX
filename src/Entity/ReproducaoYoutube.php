@@ -16,6 +16,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Entity(repositoryClass: ReproducaoYoutubeRepository::class)]
 #[ORM\Table(name: 'reproducao_youtube')]
 #[ORM\UniqueConstraint(name: 'UNIQ_REPRODUCAO_YOUTUBE_USUARIO_CHAVE', fields: ['usuario', 'chaveDeduplicacao'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_REPRODUCAO_YOUTUBE_USUARIO_EXTENSAO', fields: ['usuario', 'idExtensao'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_YOUTUBE_USUARIO_TOCADA', fields: ['usuario', 'tocadaEm'])]
 class ReproducaoYoutube
 {
@@ -24,6 +25,7 @@ class ReproducaoYoutube
     private const string FUSO_UTC = 'UTC';
     private const string FORMATO_DATA_HORA = 'Y-m-d H:i:s';
     private const string SEPARADOR_CHAVE = '|';
+    private const string PREFIXO_CHAVE_EXTENSAO = 'extensao';
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -52,6 +54,18 @@ class ReproducaoYoutube
     #[ORM\Column(type: 'string', length: 64)]
     private string $chaveDeduplicacao;
 
+    #[ORM\Column(type: 'string', length: 64, nullable: true)]
+    private ?string $idExtensao = null;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private ?bool $pulada = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $vistaPeloColetor = false;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $extensaoAtualizadaEm = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
@@ -72,6 +86,61 @@ class ReproducaoYoutube
         $momentoUtc = DateTimeImmutable::createFromInterface($tocadaEm)->setTimezone(new DateTimeZone(self::FUSO_UTC));
 
         return hash(self::ALGORITMO_CHAVE, $videoId.self::SEPARADOR_CHAVE.$momentoUtc->format(self::FORMATO_CHAVE));
+    }
+
+    public static function gerarChaveExtensao(string $idExtensao): string
+    {
+        return hash(self::ALGORITMO_CHAVE, self::PREFIXO_CHAVE_EXTENSAO.self::SEPARADOR_CHAVE.$idExtensao);
+    }
+
+    public function assumirDadosDaExtensao(string $idExtensao, DateTimeImmutable $inicio, int $msOuvidos, ?bool $pulada): self
+    {
+        $this->idExtensao = $idExtensao;
+        $this->tocadaEm = $inicio->setTimezone(new DateTimeZone(self::FUSO_UTC));
+        $this->fonte = FonteReproducaoYoutube::Extensao;
+        $this->tempoExato = true;
+        $this->msReproduzidos = max(0, $msOuvidos);
+        $this->pulada = $pulada;
+        $this->chaveDeduplicacao = self::gerarChaveExtensao($idExtensao);
+        $this->extensaoAtualizadaEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function atualizarProgressoDaExtensao(int $msOuvidos, ?bool $pulada): self
+    {
+        $this->msReproduzidos = max($this->msReproduzidos, $msOuvidos);
+        $this->pulada = $pulada ?? $this->pulada;
+        $this->extensaoAtualizadaEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function marcarVistaPeloColetor(): self
+    {
+        $this->vistaPeloColetor = true;
+
+        return $this;
+    }
+
+    public function isDaExtensao(): bool
+    {
+        return $this->fonte->isExtensao();
+    }
+
+    public function isTempoExato(): bool
+    {
+        return $this->tempoExato;
+    }
+
+    public function isVistaPeloColetor(): bool
+    {
+        return $this->vistaPeloColetor;
+    }
+
+    public function isEncerradaPelaExtensao(): bool
+    {
+        return null !== $this->pulada;
     }
 
     public function unificarComTakeout(DateTimeImmutable $tocadaEm): self
@@ -128,6 +197,21 @@ class ReproducaoYoutube
     public function chaveDeduplicacao(): string
     {
         return $this->chaveDeduplicacao;
+    }
+
+    public function idExtensao(): ?string
+    {
+        return $this->idExtensao;
+    }
+
+    public function pulada(): ?bool
+    {
+        return $this->pulada;
+    }
+
+    public function extensaoAtualizadaEm(): ?DateTimeImmutable
+    {
+        return $this->extensaoAtualizadaEm;
     }
 
     public function criadoEm(): DateTimeImmutable

@@ -118,7 +118,7 @@ final class ReproducaoMusicalRepository extends ServiceEntityRepository
             sprintf(
                 'INSERT INTO reproducao_musical (usuario_id, musica_uuid, musica_origem_uuid, fonte, tocada_em, ms_reproduzidos, tempo_exato, pulada, aleatorio, origem_id, criado_em)
                 %s
-                SELECT r.usuario_id, e.raiz, v.musica_catalogo_uuid, :fonte, r.tocada_em, r.ms_reproduzidos, r.tempo_exato, NULL, NULL, BIN_TO_UUID(r.uuid), UTC_TIMESTAMP()
+                SELECT r.usuario_id, e.raiz, v.musica_catalogo_uuid, :fonte, r.tocada_em, r.ms_reproduzidos, r.tempo_exato, r.pulada, NULL, BIN_TO_UUID(r.uuid), UTC_TIMESTAMP()
                 FROM reproducao_youtube r
                 INNER JOIN video_youtube v ON v.uuid = r.video_uuid
                 INNER JOIN efetiva e ON e.uuid = v.musica_catalogo_uuid

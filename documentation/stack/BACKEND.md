@@ -184,6 +184,9 @@ Conexão pela sessão do navegador (cookie), coleta a cada 30 s e Takeout. Funci
 | `POST` | `/youtube-music/importacoes` | Envia o Google Takeout |
 | `GET` | `/youtube-music/importacoes/{uuid}` | Andamento e relatório |
 | `POST` | `/youtube-music/importacoes/{uuid}/confirmar`, `/cancelar` | Confirma ou cancela o custo da IA |
+| `GET`, `POST` | `/youtube-music/extensao/tokens` | Lista ou gera tokens da extensão (até 5 ativos) |
+| `DELETE` | `/youtube-music/extensao/tokens/{uuid}` | Revoga o token de um aparelho |
+| `POST` | `/youtube-music/extensao/eventos` | Eventos da extensão (`X-Extensao-Token`, 60 lotes por minuto, até 50 eventos) |
 
 ### Notificações
 
