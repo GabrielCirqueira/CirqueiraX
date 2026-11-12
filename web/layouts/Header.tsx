@@ -1,4 +1,5 @@
 import { useTheme } from '@/contexts'
+import { BotaoNotificacoes } from '@/features/notificacoes'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Badge, Box, Button, Center, HStack, IconButton, Text } from '@chakra-ui/react'
 import { CheckCircle2, Code2, LogIn, LogOut, Menu, Moon, Sun, User } from 'lucide-react'
@@ -134,6 +135,8 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
           >
             {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </IconButton>
+
+          {autenticado && <BotaoNotificacoes />}
 
           {autenticado ? (
             <HStack gap={2} align="center">

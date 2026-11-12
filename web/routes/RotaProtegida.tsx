@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores'
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 /**
  * Guarda de rota totalmente protegida.
@@ -14,9 +14,16 @@ import { Navigate, Outlet } from 'react-router-dom'
  */
 export function RotaProtegida() {
   const { autenticado } = useAuthStore()
+  const location = useLocation()
 
   if (!autenticado) {
-    return <Navigate to="/login" replace />
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ voltarPara: `${location.pathname}${location.search}` }}
+      />
+    )
   }
 
   return <Outlet />

@@ -62,7 +62,7 @@ api.interceptors.response.use(
     if (
       error.response?.status !== 401 ||
       originalRequest._retry ||
-      originalRequest.url?.includes('/api/token/refresh')
+      originalRequest.url?.includes('/api/v1/token/refresh')
     ) {
       if (error.response?.status === 401) {
         useAuthStore.getState().limpar()
@@ -91,7 +91,7 @@ api.interceptors.response.use(
 
     try {
       const { data } = await axios.post<RespostaRefresh>(
-        `${api.defaults.baseURL ?? ''}/api/token/refresh`,
+        `${api.defaults.baseURL ?? ''}/api/v1/token/refresh`,
         { refresh_token: refreshToken }
       )
 

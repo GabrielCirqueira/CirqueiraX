@@ -46,7 +46,7 @@ Content-Type: application/json
 | Access token (JWT) | `JWT_TTL`, padrão de 1 hora | Assinado com chave RSA |
 | Refresh token | 30 dias | Persistido no banco, com `ttl_update: true`, que renova o prazo a cada uso |
 
-As chaves ficam em `config/jwt/`. `private.pem` nunca deve ser exposta.
+As chaves ficam em `config/jwt/`. `private.pem` nunca deve ser exposta. Em produção a pasta é o volume `jwt_prod`, para as chaves sobreviverem aos deploys. Antes elas eram geradas de novo a cada container novo (`devops/bootstrap.sh`), o que invalidava todos os access tokens a cada deploy.
 
 ```bash
 php bin/console lexik:jwt:generate-keypair
@@ -65,13 +65,13 @@ Todas as demais rotas em `/api` exigem `IS_AUTHENTICATED_FULLY`.
 
 ### Renovação no frontend
 
-O interceptor em `web/config/api.ts`:
+O interceptor em `web/config/api.ts` (até 12/11/2026 ele chamava `/api/token/refresh`, rota que não existe; a renovação nunca funcionava e o usuário era deslogado quando o token vencia ou a chave mudava):
 
 1. Recebe a resposta `401`.
 2. Chama `POST /api/v1/token/refresh`.
 3. Atualiza o token.
 4. Refaz as requisições pendentes.
-5. Se o refresh for recusado (4xx), limpa a sessão e volta para o login. Falha de rede, 429 ou 5xx mantêm a sessão, para o app continuar funcionando sem internet.
+5. Se o refresh for recusado (4xx), limpa a sessão e volta para o login, guardando a página atual em `state.voltarPara` (`RotaProtegida`); depois do login, `destinoAposLogin` (`web/features/auth/utils.ts`) volta para ela. Falha de rede, 429 ou 5xx mantêm a sessão, para o app continuar funcionando sem internet.
 
 O estado fica em `useAuthStore`, com Zustand persistido. Como o token também é usado em URLs de mídia, ele aparece nessas requisições e pode constar em logs de acesso.
 

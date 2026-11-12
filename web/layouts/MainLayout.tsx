@@ -1,5 +1,6 @@
 import { ModalAuth } from '@/features/auth/ModalAuth'
 import { useSincronizacaoOffline } from '@/features/livros-audio/hooks/useSincronizacaoOffline'
+import { PopupNotificacoesNovas } from '@/features/notificacoes'
 import { Box, Flex } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
@@ -71,6 +72,7 @@ export function MainLayout() {
       </Flex>
 
       {modalAberto && <ModalAuth isOpen={true} onClose={() => setModalAberto(false)} />}
+      <PopupNotificacoesNovas />
     </Flex>
   )
 }

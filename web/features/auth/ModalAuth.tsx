@@ -2,7 +2,17 @@ import { api } from '@/config/api'
 import { addToast } from '@/shared/components/ui/toaster'
 import type { RespostaApi } from '@/shared/types/api'
 import { useAuthStore } from '@/stores'
-import { Button, Center, Dialog, Field, HStack, Input, Portal, Text, VStack } from '@chakra-ui/react'
+import {
+  Button,
+  Center,
+  Dialog,
+  Field,
+  HStack,
+  Input,
+  Portal,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { Code2, Eye, EyeOff, Lock } from 'lucide-react'
@@ -95,86 +105,60 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
       <Portal>
         <Dialog.Backdrop bg="rgba(0, 0, 0, 0.75)" />
         <Dialog.Positioner>
-        <Dialog.Content
-          bg="cirqueira.grey.950"
-          border="1px solid"
-          borderColor="cirqueira.grey.800"
-          color="cirqueira.grey.0"
-          borderRadius="8px"
-          p={0}
-          maxW="md"
-        >
-          <Dialog.Header
-            p={6}
-            borderBottom="1px solid"
-            borderColor="cirqueira.grey.900"
-            display="flex"
-            alignItems="center"
-            gap={3}
+          <Dialog.Content
+            bg="cirqueira.grey.950"
+            border="1px solid"
+            borderColor="cirqueira.grey.800"
+            color="cirqueira.grey.0"
+            borderRadius="8px"
+            p={0}
+            maxW="md"
           >
-            <Center
-              boxSize={9}
-              borderRadius="8px"
-              bg="cirqueira.brand.500"
-              color="cirqueira.grey.0"
-              shadow="lg"
+            <Dialog.Header
+              p={6}
+              borderBottom="1px solid"
+              borderColor="cirqueira.grey.900"
+              display="flex"
+              alignItems="center"
+              gap={3}
             >
-              <Code2 size={20} color="currentColor" strokeWidth={2.5} />
-            </Center>
-            <VStack alignItems="flex-start" gap={0.5}>
-              <Dialog.Title fontSize="lg" fontWeight="bold">
-                CirqueiraX Media
-              </Dialog.Title>
-              <Text fontSize="xs" color="cirqueira.grey.500">
-                Entre com seu e-mail e senha
-              </Text>
-            </VStack>
-          </Dialog.Header>
+              <Center
+                boxSize={9}
+                borderRadius="8px"
+                bg="cirqueira.brand.500"
+                color="cirqueira.grey.0"
+                shadow="lg"
+              >
+                <Code2 size={20} color="currentColor" strokeWidth={2.5} />
+              </Center>
+              <VStack alignItems="flex-start" gap={0.5}>
+                <Dialog.Title fontSize="lg" fontWeight="bold">
+                  CirqueiraX Media
+                </Dialog.Title>
+                <Text fontSize="xs" color="cirqueira.grey.500">
+                  Entre com seu e-mail e senha
+                </Text>
+              </VStack>
+            </Dialog.Header>
 
-          <Dialog.Body p={6}>
-            <form
-              onSubmit={handleSubmit}
-              noValidate
-              style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-            >
-              <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
-                  E-mail ou Usuário
-                </Field.Label>
-                <Input
-                  placeholder="usuario@cirqueira.com ou usuario"
-                  value={form.emailOuUsuario}
-                  onChange={(e) => {
-                    setForm((p) => ({ ...p, emailOuUsuario: e.target.value }))
-                    setErros((p) => ({ ...p, emailOuUsuario: '' }))
-                  }}
-                  autoFocus
-                  w="full"
-                  borderRadius="8px"
-                  bg="cirqueira.grey.900/40"
-                  borderColor="cirqueira.grey.800"
-                  color="cirqueira.grey.0"
-                  _placeholder={{ color: 'cirqueira.grey.500' }}
-                  h={10}
-                />
-                <Field.ErrorText fontSize="xs" color="cirqueira.red.500">
-                  {erros.emailOuUsuario}
-                </Field.ErrorText>
-              </Field.Root>
-
-              <Field.Root invalid={Boolean(erros.senha)}>
-                <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
-                  Senha
-                </Field.Label>
-                <HStack position="relative" w="full">
+            <Dialog.Body p={6}>
+              <form
+                onSubmit={handleSubmit}
+                noValidate
+                style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+              >
+                <Field.Root invalid={Boolean(erros.emailOuUsuario)}>
+                  <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
+                    E-mail ou Usuário
+                  </Field.Label>
                   <Input
-                    type={mostrarSenha ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={form.senha}
+                    placeholder="usuario@cirqueira.com ou usuario"
+                    value={form.emailOuUsuario}
                     onChange={(e) => {
-                      setForm((p) => ({ ...p, senha: e.target.value }))
-                      setErros((p) => ({ ...p, senha: '' }))
+                      setForm((p) => ({ ...p, emailOuUsuario: e.target.value }))
+                      setErros((p) => ({ ...p, emailOuUsuario: '' }))
                     }}
+                    autoFocus
                     w="full"
                     borderRadius="8px"
                     bg="cirqueira.grey.900/40"
@@ -182,54 +166,80 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
                     color="cirqueira.grey.0"
                     _placeholder={{ color: 'cirqueira.grey.500' }}
                     h={10}
-                    pr={9}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="xs"
-                    borderRadius="full"
-                    onClick={() => setMostrarSenha((v) => !v)}
-                    position="absolute"
-                    right={1.5}
-                    color="cirqueira.grey.500"
-                    _hover={{ color: 'cirqueira.grey.200' }}
-                    h={7}
-                    w={7}
-                    p={0}
-                    aria-label={mostrarSenha ? 'Ocultar senha' : 'Ver senha'}
-                  >
-                    {mostrarSenha ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </Button>
-                </HStack>
-                <Field.ErrorText fontSize="xs" color="cirqueira.red.500">
-                  {erros.senha}
-                </Field.ErrorText>
-              </Field.Root>
+                  <Field.ErrorText fontSize="xs" color="cirqueira.red.500">
+                    {erros.emailOuUsuario}
+                  </Field.ErrorText>
+                </Field.Root>
 
-              <Button
-                type="submit"
-                loading={loginMutation.isPending}
-                disabled={loginMutation.isPending}
-                mt={2}
-                h={10}
-                fontWeight="bold"
-                bg="cirqueira.brand.500"
-                _hover={{ bg: 'cirqueira.brand.600' }}
-                color="cirqueira.grey.0"
-                w="full"
-                borderRadius="full"
-                shadow="lg"
-              >
-                <Lock size={16} style={{ marginRight: '6px' }} />
-                <Text as="span">Entrar</Text>
-              </Button>
-            </form>
-          </Dialog.Body>
-          <Dialog.CloseTrigger />
-        </Dialog.Content>
-      </Dialog.Positioner>
-    </Portal>
-  </Dialog.Root>
-)
+                <Field.Root invalid={Boolean(erros.senha)}>
+                  <Field.Label fontSize="xs" fontWeight="semibold" color="cirqueira.grey.200">
+                    Senha
+                  </Field.Label>
+                  <HStack position="relative" w="full">
+                    <Input
+                      type={mostrarSenha ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      value={form.senha}
+                      onChange={(e) => {
+                        setForm((p) => ({ ...p, senha: e.target.value }))
+                        setErros((p) => ({ ...p, senha: '' }))
+                      }}
+                      w="full"
+                      borderRadius="8px"
+                      bg="cirqueira.grey.900/40"
+                      borderColor="cirqueira.grey.800"
+                      color="cirqueira.grey.0"
+                      _placeholder={{ color: 'cirqueira.grey.500' }}
+                      h={10}
+                      pr={9}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="xs"
+                      borderRadius="full"
+                      onClick={() => setMostrarSenha((v) => !v)}
+                      position="absolute"
+                      right={1.5}
+                      color="cirqueira.grey.500"
+                      _hover={{ color: 'cirqueira.grey.200' }}
+                      h={7}
+                      w={7}
+                      p={0}
+                      aria-label={mostrarSenha ? 'Ocultar senha' : 'Ver senha'}
+                    >
+                      {mostrarSenha ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </Button>
+                  </HStack>
+                  <Field.ErrorText fontSize="xs" color="cirqueira.red.500">
+                    {erros.senha}
+                  </Field.ErrorText>
+                </Field.Root>
+
+                <Button
+                  type="submit"
+                  loading={loginMutation.isPending}
+                  disabled={loginMutation.isPending}
+                  mt={2}
+                  h={10}
+                  fontWeight="bold"
+                  bg="cirqueira.brand.500"
+                  _hover={{ bg: 'cirqueira.brand.600' }}
+                  color="cirqueira.grey.0"
+                  w="full"
+                  borderRadius="full"
+                  shadow="lg"
+                >
+                  <Lock size={16} style={{ marginRight: '6px' }} />
+                  <Text as="span">Entrar</Text>
+                </Button>
+              </form>
+            </Dialog.Body>
+            <Dialog.CloseTrigger />
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
+  )
 })

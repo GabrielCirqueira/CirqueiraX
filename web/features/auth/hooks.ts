@@ -4,12 +4,14 @@ import type { RespostaApi } from '@/shared/types/api'
 import { useAuthStore } from '@/stores'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import type { LoginInput, RespostaLogin, RespostaMe } from './types'
+import { destinoAposLogin } from './utils'
 
 export function useLogin() {
   const { setAutenticado } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
 
   return useMutation({
     mutationFn: async (input: LoginInput): Promise<void> => {
@@ -38,7 +40,7 @@ export function useLogin() {
     },
     onSuccess: () => {
       addToast({ title: 'Bem-vindo ao CirqueiraX!', color: 'success' })
-      navigate('/dashboard')
+      navigate(destinoAposLogin(location.state), { replace: true })
     },
     onError: (err) => {
       if (axios.isAxiosError(err) && err.response?.status === 401) {

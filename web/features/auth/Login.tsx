@@ -1,4 +1,5 @@
 import { useLogin } from '@/features/auth'
+import { useSEO } from '@/shared/hooks'
 import {
   Badge,
   Box,
@@ -28,7 +29,6 @@ import {
 import { type FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
-import { useSEO } from '@/shared/hooks'
 
 const loginSchema = z.object({
   emailOuUsuario: z.string().min(1, 'Informe seu e-mail ou nome de usuário.'),
@@ -38,7 +38,8 @@ const loginSchema = z.object({
 export function Component() {
   useSEO({
     title: 'Acessar Conta',
-    description: 'Faça login com segurança na sua central inteligente de mídias e automação CirqueiraX.',
+    description:
+      'Faça login com segurança na sua central inteligente de mídias e automação CirqueiraX.',
     keywords: 'login, autenticacao, cirqueirax',
   })
 

@@ -23,6 +23,7 @@ services:
       - transcricoes_prod:/var/www/html/var/transcricoes
       - thumbnails_prod:/var/www/html/var/cache/thumbnails
       - ../var/cookies:/var/www/html/var/cookies
+      - jwt_prod:/var/www/html/config/jwt
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/api/v1/health"]
       interval: 30s
@@ -57,6 +58,7 @@ volumes:
   livros_prod:
   transcricoes_prod:
   thumbnails_prod:
+  jwt_prod:
 
 networks:
   app_net:

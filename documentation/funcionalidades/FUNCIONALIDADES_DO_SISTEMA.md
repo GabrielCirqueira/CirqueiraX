@@ -226,6 +226,10 @@ Assim que uma mídia recebe uma categoria com álbum, o sistema a envia para o G
 
 É um pequeno programa instalado no computador. No Windows, ele inicia junto com o sistema e funciona em segundo plano, sem janela. Ele percebe cada print novo e envia ao servidor. Se o agente estava desligado quando você tirou um print, o envio acontece assim que ele voltar a funcionar.
 
+### Notificações de atualização
+
+Quando o sistema ganha uma melhoria ou correção, aparece um popup com o que mudou. Fechar o popup ou clicar em **Ler tudo** marca como lido. O sino no topo guarda o histórico, inclusive as já lidas. Detalhes em [NOTIFICACOES.md](NOTIFICACOES.md).
+
 ### Proteção contra duplicados
 
 O sistema compara o conteúdo de cada arquivo com o que já existe, inclusive vídeos muito parecidos. Assim, você não guarda a mesma coisa duas vezes.
