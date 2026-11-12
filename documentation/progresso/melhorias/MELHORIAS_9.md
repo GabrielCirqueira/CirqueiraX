@@ -29,3 +29,29 @@
 - **Arquivos**: `src/Entity/VideoYoutube.php`, `migrations/Version20261112210000.php`, `src/Service/Musica/Analise/CompletarCapasVariantesService.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`
 
 ---
+
+### ✅ Melhoria 163 — Capa e Links nas Músicas Sugeridas da Revisão
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: na revisão, a música sugerida (ex.: "Caixão de Areia — 7 Minutoz" para o vídeo "Rap do Gaara (Naruto) - CAIXÃO DE AREIA") aparecia só como texto, sem imagem nem link, e não dava para saber qual música era antes de confirmar.
+- **Solução**:
+  - `MontarMidiaSugestoesRevisaoService` busca a capa e o link do Spotify de cada sugestão e alternativa da IA (pelo título e primeiro artista, com o cache de `ImagemSpotify` e a busca agendada em segundo plano), e a listagem da revisão manda isso em `midiaSugestoes`.
+  - Cada opção (`OpcaoSugestaoRevisao`) mostra a capa, os links "YouTube" (busca da música) e "Spotify" (faixa exata quando encontrada, senão a busca) e, quando a sugestão já é uma música do catálogo, "Ver música".
+  - A confirmação passou a ser só pelo botão "É esta", para clicar num link não confirmar a música sem querer. No celular o botão ocupa a largura toda embaixo.
+- **Arquivos**: `src/Service/Musica/MontarMidiaSugestoesRevisaoService.php`, `src/Service/Musica/ListarRevisaoMusicaService.php`, `web/features/revisao-musica/components/OpcaoSugestaoRevisao.tsx`, `web/features/revisao-musica/components/CartaoVideoRevisao.tsx`, `web/features/revisao-musica/types.ts`, `web/features/revisao-musica/utils/revisaoMusica.ts`
+
+---
+
+### ✅ Melhoria 164 — Horário Certo nas Reproduções da Extensão e Fim das Duplicadas
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: a extensão calculava o início de cada música como "agora menos `video.currentTime`", mas no YouTube Music o tempo do elemento `<video>` não volta a zero ao trocar de música na fila. Músicas ouvidas em sequência ficaram com o mesmo horário (16 delas às 16:59:17 UTC, ouvidas ao longo de 1h20). Com o horário errado, o coletor não reconhecia que era a mesma reprodução e gravava de novo: "Little dark age - slowed" e "Little Dark Age (tiktok remix)", entre outras, apareciam contadas em dobro.
+- **Solução**:
+  - Extensão 1.2.0: posição e duração vêm da API do player (`getCurrentTime`/`getDuration`), que são da faixa atual; se a posição passar da duração da música, o início é o momento em que ela começou a tocar.
+  - Servidor: se o início informado for mais antigo do que a duração da música permite (mais 1 minuto), usa o tempo ouvido no lugar, então os dados ficam certos mesmo com a extensão antiga.
+  - Migration `Version20261112220000`: corrigiu o horário das reproduções da extensão para o momento em que o servidor as recebeu (menos 3 s) e apagou as cópias do coletor da mesma música até 10 minutos de distância, uma para uma, pela mais próxima. Depois a projeção do YouTube foi recalculada.
+- **Arquivos**: `extensao/youtube-music/conteudo.js`, `extensao/youtube-music/pagina.js`, `extensao/youtube-music/manifest.json`, `src/Service/YoutubeMusic/Extensao/RegistrarEventosExtensaoYoutubeService.php`, `migrations/Version20261112220000.php`
+
+---

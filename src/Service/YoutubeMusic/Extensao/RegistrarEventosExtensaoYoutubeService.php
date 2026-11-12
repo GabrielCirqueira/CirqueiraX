@@ -23,6 +23,8 @@ final readonly class RegistrarEventosExtensaoYoutubeService
 {
     private const string FORMATO_SEGUNDOS_ATRAS = '-%d seconds';
     private const string JANELA_ENCERRAR_SEM_FIM = '-1 day';
+    private const int TOLERANCIA_INICIO_MS = 60000;
+    private const int MILISSEGUNDOS_POR_SEGUNDO = 1000;
 
     public function __construct(
         private ReproducaoYoutubeRepository $reproducaoRepository,
@@ -70,7 +72,7 @@ final readonly class RegistrarEventosExtensaoYoutubeService
 
         $video = $videos[$evento->videoId] ?? $this->obterVideo($usuario, $evento);
         $videos[$evento->videoId] = $video;
-        $inicio = $recebidoEm->modify(sprintf(self::FORMATO_SEGUNDOS_ATRAS, $evento->segundosDesdeInicio));
+        $inicio = $recebidoEm->modify(sprintf(self::FORMATO_SEGUNDOS_ATRAS, $this->segundosDesdeInicio($evento, $video)));
         $this->encerrarAnterioresSemFim($usuario, $inicio);
         $estimada = $this->unirComColeta->buscarEstimadaParaExtensao($usuario, $video, $inicio);
         $reproducao = $estimada?->marcarVistaPeloColetor() ?? new ReproducaoYoutube($usuario, $video, $inicio, 0, FonteReproducaoYoutube::Extensao);
@@ -78,6 +80,17 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         $this->reproducaoRepository->salvar($reproducao, flush: false);
 
         return $reproducao;
+    }
+
+    private function segundosDesdeInicio(EventoExtensaoYoutubeDTO $evento, VideoYoutube $video): int
+    {
+        $duracaoMs = $video->duracaoMs();
+        $informadoMs = $evento->segundosDesdeInicio * self::MILISSEGUNDOS_POR_SEGUNDO;
+        if (null === $duracaoMs || $informadoMs <= max($duracaoMs, $evento->msOuvidos) + self::TOLERANCIA_INICIO_MS) {
+            return $evento->segundosDesdeInicio;
+        }
+
+        return intdiv($evento->msOuvidos, self::MILISSEGUNDOS_POR_SEGUNDO);
     }
 
     private function encerrarAnterioresSemFim(Usuario $usuario, DateTimeImmutable $inicio): void

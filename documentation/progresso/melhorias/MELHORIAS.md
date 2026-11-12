@@ -181,3 +181,5 @@
 | M160 | Takeout Ignora o Histórico de Pesquisa | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-160--takeout-ignora-o-histórico-de-pesquisa) |
 | M161 | Importação do Takeout Não Quebra com Lives Muito Longas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-161--importação-do-takeout-não-quebra-com-lives-muito-longas) |
 | M162 | Capa nos Vídeos Vindos do Takeout | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-162--capa-nos-vídeos-vindos-do-takeout) |
+| M163 | Capa e Links nas Músicas Sugeridas da Revisão | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-163--capa-e-links-nas-músicas-sugeridas-da-revisão) |
+| M164 | Horário Certo nas Reproduções da Extensão e Fim das Duplicadas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-164--horário-certo-nas-reproduções-da-extensão-e-fim-das-duplicadas) |

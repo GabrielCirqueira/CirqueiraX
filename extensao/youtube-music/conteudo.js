@@ -61,22 +61,37 @@
     )
   }
 
+  function posicaoSegundos(video) {
+    const doPlayer = dadosPlayerRecentes()?.posicaoS
+    return Number.isFinite(doPlayer) ? doPlayer : video.currentTime
+  }
+
+  function duracaoSegundos(video) {
+    const doPlayer = dadosPlayerRecentes()?.duracaoS
+    if (Number.isFinite(doPlayer) && doPlayer > 0) return doPlayer
+    return Number.isFinite(video.duration) && video.duration > 0 ? video.duration : null
+  }
+
   function lerMusica(video) {
     const videoId = lerVideoId()
     const titulo = dadosPlayerRecentes()?.titulo || texto('ytmusic-player-bar .title')
     if (!videoId || !titulo) return null
-    const duracaoMs =
-      Number.isFinite(video.duration) && video.duration > 0
-        ? Math.round(video.duration * 1000)
-        : null
+    const duracao = duracaoSegundos(video)
+    const duracaoMs = duracao ? Math.round(duracao * 1000) : null
     return { videoId, titulo, canal: lerCanal(), urlCapa: lerCapa(), duracaoMs }
+  }
+
+  function posicaoInicial(musica, video) {
+    const posicao = posicaoSegundos(video)
+    const limite = musica.duracaoMs ? musica.duracaoMs / 1000 : null
+    return limite !== null && posicao > limite ? 0 : posicao
   }
 
   function novaReproducao(musica, video, agora) {
     return {
       ...musica,
       idReproducao: crypto.randomUUID(),
-      iniciadoEmMs: agora - Math.round(video.currentTime * 1000),
+      iniciadoEmMs: agora - Math.round(posicaoInicial(musica, video) * 1000),
       msOuvidos: 0,
       ultimaPosicaoMs: 0,
       terminou: false,
@@ -90,7 +105,7 @@
     return (
       Boolean(reproducao.duracaoMs) &&
       reproducao.ultimaPosicaoMs >= reproducao.duracaoMs - MS_FINAL_DA_MUSICA &&
-      video.currentTime < SEGUNDOS_INICIO_DA_MUSICA
+      posicaoSegundos(video) < SEGUNDOS_INICIO_DA_MUSICA
     )
   }
 
@@ -159,7 +174,7 @@
     atual.urlCapa = musica.urlCapa ?? atual.urlCapa
     atual.duracaoMs = musica.duracaoMs ?? atual.duracaoMs
     if (!video.paused && !video.ended) atual.msOuvidos += delta
-    atual.ultimaPosicaoMs = Math.round(video.currentTime * 1000)
+    atual.ultimaPosicaoMs = Math.round(posicaoSegundos(video) * 1000)
     if (video.ended) atual.terminou = true
 
     if (atual.msOuvidos < MS_MINIMO_PARA_REGISTRAR) return

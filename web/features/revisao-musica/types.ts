@@ -58,6 +58,15 @@ export const SugestaoIaSchema = z.object({
 
 export type SugestaoIa = z.infer<typeof SugestaoIaSchema>
 
+export const MidiaSugestaoSchema = z.object({
+  titulo: z.string(),
+  artista: z.string(),
+  urlCapa: z.string().nullable(),
+  urlSpotify: z.string(),
+})
+
+export type MidiaSugestao = z.infer<typeof MidiaSugestaoSchema>
+
 export const VideoRevisaoSchema = z.object({
   uuid: z.string(),
   videoId: z.string(),
@@ -75,6 +84,7 @@ export const VideoRevisaoSchema = z.object({
   sugestaoIa: SugestaoIaSchema.nullable(),
   classificadoEm: z.string().nullable(),
   musica: MusicaCatalogoSchema.nullable(),
+  midiaSugestoes: z.array(MidiaSugestaoSchema).default([]),
 })
 
 export type VideoRevisao = z.infer<typeof VideoRevisaoSchema>

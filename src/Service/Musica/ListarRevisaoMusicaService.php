@@ -30,6 +30,7 @@ final readonly class ListarRevisaoMusicaService
         private MusicaCatalogoSerializer $serializer,
         private ReproducaoMusicalRepository $reproducaoRepository,
         private EnriquecerImagensSpotifyService $enriquecerImagens,
+        private MontarMidiaSugestoesRevisaoService $montarMidiaSugestoes,
     ) {
     }
 
@@ -71,8 +72,12 @@ final readonly class ListarRevisaoMusicaService
     {
         $pagina = $this->videoRepository->listarParaRevisao($usuario, $filtro->tipo, $filtro->deslocamento(), $filtro->porPagina);
         $videos = $this->videoRepository->buscarPorUuidsOrdenados($usuario, $pagina['uuids']);
+        $midias = $this->montarMidiaSugestoes->executar($usuario, $videos);
 
-        return [array_map(fn (VideoYoutube $video): array => $this->serializer->serializarVideo($video), $videos), $pagina['total']];
+        return [array_map(fn (VideoYoutube $video): array => [
+            ...$this->serializer->serializarVideo($video),
+            'midiaSugestoes' => $midias[$video->uuid()->toRfc4122()] ?? [],
+        ], $videos), $pagina['total']];
     }
 
     /**

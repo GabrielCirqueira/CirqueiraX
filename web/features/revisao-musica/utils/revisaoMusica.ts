@@ -4,6 +4,7 @@ import type {
   ContagensRevisao,
   CorrecaoVideoPayload,
   LeituraIa,
+  MidiaSugestao,
   MusicaCatalogo,
   MusicaDuplicata,
   PaginaRevisao,
@@ -346,6 +347,56 @@ export interface OpcaoLeituraVideo {
   detalhe: string
   sugerida: boolean
   payload: CorrecaoVideoPayload
+  urlCapa: string | null
+  urlSpotify: string
+  urlYoutube: string
+  rotaMusica: string | null
+}
+
+function urlBuscaTermoYoutube(termo: string): string {
+  return `${URL_BUSCA_YOUTUBE}${encodeURIComponent(termo)}`
+}
+
+function urlBuscaTermoSpotify(termo: string): string {
+  return `${URL_BUSCA_SPOTIFY}${encodeURIComponent(termo)}`
+}
+
+function midiaDaLeitura(
+  video: VideoRevisao,
+  leitura: LeituraIa | undefined
+): Pick<OpcaoLeituraVideo, 'urlCapa' | 'urlSpotify' | 'urlYoutube' | 'rotaMusica'> {
+  const titulo = leitura?.titulo ?? ''
+  const artista = leitura?.artistas[0] ?? ''
+  const termo = `${titulo} ${artista}`.trim()
+  const midia: MidiaSugestao | undefined = video.midiaSugestoes.find(
+    (item) =>
+      item.titulo.toLowerCase() === titulo.trim().toLowerCase() &&
+      item.artista.toLowerCase() === artista.trim().toLowerCase()
+  )
+  return {
+    urlCapa: midia?.urlCapa ?? null,
+    urlSpotify: midia?.urlSpotify ?? urlBuscaTermoSpotify(termo),
+    urlYoutube: urlBuscaTermoYoutube(termo),
+    rotaMusica: null,
+  }
+}
+
+function midiaDoCatalogo(
+  musica: MusicaCatalogo
+): Pick<OpcaoLeituraVideo, 'urlCapa' | 'urlSpotify' | 'urlYoutube' | 'rotaMusica'> {
+  const termo = `${musica.titulo} ${nomesArtistasCatalogo(musica)}`.trim()
+  return {
+    urlCapa:
+      musica.urlCapa ??
+      (musica.videoOficialId
+        ? FORMATO_MINIATURA_YOUTUBE.replace('{id}', musica.videoOficialId)
+        : null),
+    urlSpotify: urlBuscaSpotify(musica),
+    urlYoutube: musica.videoOficialId
+      ? urlVideoYoutube(musica.videoOficialId)
+      : urlBuscaTermoYoutube(termo),
+    rotaMusica: rotaDetalheMusica(musica.uuid),
+  }
 }
 
 function descreverComponentes(leituras: LeituraIa[]): string {
@@ -367,6 +418,7 @@ export function opcoesLeituraVideo(video: VideoRevisao): OpcaoLeituraVideo[] {
       detalhe: nomesArtistasCatalogo(video.musica),
       sugerida: true,
       payload: sugestao,
+      ...midiaDoCatalogo(video.musica),
     })
   }
   if (sugestao && !video.musica) {
@@ -380,6 +432,7 @@ export function opcoesLeituraVideo(video: VideoRevisao): OpcaoLeituraVideo[] {
         : descreverArtistasComponentes(leituras),
       sugerida: true,
       payload: sugestao,
+      ...midiaDaLeitura(video, leituras[0]),
     })
   }
   const vistas = new Set(opcoes.map((opcao) => `${opcao.titulo}|${opcao.detalhe}`))
@@ -394,6 +447,7 @@ export function opcoesLeituraVideo(video: VideoRevisao): OpcaoLeituraVideo[] {
       detalhe,
       sugerida: false,
       payload: payloadDaLeitura(alternativa, versao),
+      ...midiaDaLeitura(video, alternativa),
     })
   }
   return opcoes

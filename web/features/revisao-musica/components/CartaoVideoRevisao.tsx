@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Ban, Check, Layers, ListMusic, Search, Sparkles, Tv } from 'lucide-react'
+import { Ban, Layers, ListMusic, Search, Tv } from 'lucide-react'
 import { memo } from 'react'
 import type { ClassificacaoCanal, CorrecaoVideoPayload, TipoRevisao, VideoRevisao } from '../types'
 import {
@@ -23,6 +23,7 @@ import {
 } from '../utils'
 import { AtalhosVideoRevisao } from './AtalhosVideoRevisao'
 import { MiniaturaVideoRevisao } from './MiniaturaVideoRevisao'
+import { OpcaoSugestaoRevisao } from './OpcaoSugestaoRevisao'
 
 export interface CartaoVideoRevisaoProps {
   video: VideoRevisao
@@ -153,79 +154,18 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
           </Text>
         )}
 
-        {opcoes.map((opcao) => (
-          <Button
-            key={opcao.chave}
-            variant="plain"
-            disabled={ocupado}
-            onClick={() => onCorrigir(video, opcao.payload)}
-            h="auto"
-            whiteSpace="normal"
-            justifyContent="stretch"
-            alignItems="center"
-            fontWeight="normal"
-            gap={3}
-            w="full"
-            px={3}
-            py={2.5}
-            borderRadius="8px"
-            textAlign="left"
-            bg="cirqueira.musica.cartaoElevado"
-            border="1px solid"
-            borderColor={
-              opcao.sugerida ? 'cirqueira.musica.verde' : 'cirqueira.musica.cartaoElevado'
-            }
-            cursor={ocupado ? 'not-allowed' : 'pointer'}
-            transition="border-color 0.15s"
-            _hover={{ borderColor: 'cirqueira.musica.verde' }}
-            aria-label={`Confirmar: ${opcao.titulo} — ${opcao.detalhe}`}
-          >
-            <VStack align="start" gap={0} flex={1} minW={0}>
-              <Text
-                fontSize="sm"
-                fontWeight="semibold"
-                color="cirqueira.musica.textoPrincipal"
-                lineClamp={2}
-              >
-                {opcao.titulo}
-              </Text>
-              <Text fontSize="xs" color="cirqueira.musica.textoSecundario" lineClamp={1}>
-                {opcao.detalhe}
-              </Text>
-            </VStack>
-            {opcao.sugerida && (
-              <HStack
-                gap={1}
-                flexShrink={0}
-                fontSize="2xs"
-                fontWeight="bold"
-                color="cirqueira.musica.verde"
-                display={{ base: 'none', sm: 'flex' }}
-              >
-                <Sparkles size={12} />
-                <Text>Sugerida</Text>
-              </HStack>
-            )}
-            <HStack
-              gap={1}
-              flexShrink={0}
-              px={2.5}
-              py={1}
-              borderRadius="full"
-              fontSize="xs"
-              fontWeight="bold"
-              bg={opcao.sugerida ? 'cirqueira.musica.verde' : 'transparent'}
-              color={opcao.sugerida ? 'cirqueira.musica.fundo' : 'cirqueira.musica.textoPrincipal'}
-              border="1px solid"
-              borderColor={
-                opcao.sugerida ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoDesabilitado'
-              }
-            >
-              <Check size={12} />
-              <Text>É esta</Text>
-            </HStack>
-          </Button>
-        ))}
+        {opcoes.length > 0 && (
+          <VStack as="ul" align="stretch" gap={2} m={0} p={0}>
+            {opcoes.map((opcao) => (
+              <OpcaoSugestaoRevisao
+                key={opcao.chave}
+                opcao={opcao}
+                ocupado={ocupado}
+                onConfirmar={() => onCorrigir(video, opcao.payload)}
+              />
+            ))}
+          </VStack>
+        )}
       </VStack>
 
       <VStack align="stretch" gap={2}>
