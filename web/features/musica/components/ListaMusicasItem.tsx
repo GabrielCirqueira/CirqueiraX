@@ -5,6 +5,7 @@ import type { PeriodoMusicasItem } from '../api'
 import { useMusicasItem } from '../hooks'
 import type { ItemTopMusicaArtista } from '../types'
 import { urlCapaExibicao } from '../utils/capaMusica'
+import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { MinutosMusica } from './MinutosMusica'
 import { ModalMusicasItem } from './ModalMusicasItem'
 
@@ -191,12 +192,17 @@ export const LinhaMusicaItemSpotify = memo(function LinhaMusicaItemSpotify({
           <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
             {musica.album}
           </Text>
+          <DivisaoFontesMusica porFonte={musica.porFonte} />
         </VStack>
       </HStack>
 
       <VStack align="flex-end" gap={0} flexShrink={0}>
         <Text fontSize={{ base: '2xs', sm: 'xs' }} fontWeight="bold" color="cirqueira.musica.verde">
-          <MinutosMusica minutos={musica.totalMinutos} />
+          <MinutosMusica
+            minutos={musica.totalMinutos}
+            porFonte={musica.porFonte}
+            estimado={musica.estimado}
+          />
         </Text>
         <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
           {musica.totalStreams} {musica.totalStreams === 1 ? 'stream' : 'streams'}

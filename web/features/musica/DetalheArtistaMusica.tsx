@@ -25,6 +25,7 @@ import {
   TemaMusica,
 } from './components'
 import { BlocoDetalhe, ListaMashupsArtista } from './components/BlocoDetalhe'
+import { DivisaoFontesMusica } from './components/DivisaoFontesMusica'
 import { LinkMusica } from './components/LinkMusica'
 import { ResumoPorFonteDetalhe } from './components/ResumoPorFonteDetalhe'
 import { useDetalheArtistaMusica, useFonteMusica, useImagensItensMusica } from './hooks'
@@ -271,6 +272,7 @@ function ConteudoArtista({ dados }: { dados: DetalheArtista }) {
                           opacity={0.7}
                         />
                       </Box>
+                      <DivisaoFontesMusica porFonte={musica.porFonte} />
                     </VStack>
                   </HStack>
                 </LinkMusica>

@@ -65,6 +65,7 @@ import {
   incluiYoutubeMusic,
 } from '../utils'
 import { urlCapaExibicao } from '../utils/capaMusica'
+import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { ListaMusicasItem } from './ListaMusicasItem'
 import { MinutosMusica, TooltipMusica } from './MinutosMusica'
 import { BotaoImagemCapsula } from './ModalImagemCapsula'
@@ -850,6 +851,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
               <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
                 {artista.totalStreams} reproduções
               </Text>
+              <DivisaoFontesMusica porFonte={artista.porFonte} />
             </VStack>
           </HStack>
 
@@ -1032,6 +1034,7 @@ function ModalDetalheCapsula({
                     >
                       {m.artistaPrincipal} • {m.album}
                     </Text>
+                    <DivisaoFontesMusica porFonte={m.porFonte} />
                   </VStack>
                 </HStack>
 
@@ -1399,6 +1402,7 @@ function ModalDetalheCapsula({
                       <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate>
                         {m.artistaPrincipal} • {m.album}
                       </Text>
+                      <DivisaoFontesMusica porFonte={m.porFonte} />
                     </VStack>
                   </HStack>
 

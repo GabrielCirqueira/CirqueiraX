@@ -2,6 +2,7 @@ import {
   type FonteMusica,
   FonteMusicaSchema,
   type FonteReproducao,
+  type PorFonte,
   type PorFonteDetalhe,
 } from '../types'
 
@@ -127,4 +128,21 @@ const ATRIBUICAO_POR_FONTE: Record<FonteMusica, string> = {
 
 export function atribuicaoFonteMusica(fonte: FonteMusica): string {
   return ATRIBUICAO_POR_FONTE[fonte]
+}
+
+const ORDEM_FONTES_REPRODUCAO: FonteReproducao[] = ['spotify', 'youtube_music']
+
+export interface ParcelaFonteMusica {
+  fonte: FonteReproducao
+  minutos: number
+  streams: number
+}
+
+export function listarParcelasPorFonte(porFonte: PorFonte | undefined): ParcelaFonteMusica[] {
+  if (!porFonte) return []
+  return ORDEM_FONTES_REPRODUCAO.flatMap((fonte) => {
+    const dados = porFonte[fonte]
+    if (!dados || (dados.minutos <= 0 && dados.streams <= 0)) return []
+    return [{ fonte, minutos: dados.minutos, streams: dados.streams }]
+  })
 }

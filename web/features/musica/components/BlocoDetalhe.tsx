@@ -2,6 +2,7 @@ import { HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { type ReactNode, memo } from 'react'
 import type { MusicaAnalise } from '../types'
 import { formatarNumeroPtBr, gerarRotaMusica } from '../utils'
+import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { GrupoIconesFonte } from './IconeFonteMusica'
 import { LinkMusica } from './LinkMusica'
 
@@ -67,6 +68,7 @@ export const ListaMashupsArtista = memo(function ListaMashupsArtista({
                 <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
                   {(mashup.artistas ?? [mashup.artista]).join(', ')}
                 </Text>
+                <DivisaoFontesMusica porFonte={mashup.porFonte} />
               </VStack>
               <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.verde">
                 {formatarNumeroPtBr(mashup.streams)}x

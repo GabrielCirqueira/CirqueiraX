@@ -13,10 +13,12 @@ import {
 import { ChevronDown, ExternalLink, Music2 } from 'lucide-react'
 import { memo, useState } from 'react'
 import type { PeriodoMusicasItem } from '../api'
+import { useFonteMusica } from '../hooks/useFonteMusica'
 import type { AlbumAnalise, ItemRankingArtista, ItemRankingMusica } from '../types'
 import { gerarRotaArtista, gerarRotaMusica } from '../utils'
 import { urlCapaExibicao } from '../utils/capaMusica'
 import { CapaMusica } from './CapaMusica'
+import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { GrupoIconesFonte } from './IconeFonteMusica'
 import { LinkMusica } from './LinkMusica'
 import { ListaMusicasItem } from './ListaMusicasItem'
@@ -36,6 +38,7 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
   imagemUrlResolvida,
   periodo = null,
 }: ItemRankingFaixaProps) {
+  const { fonte } = useFonteMusica()
   const [expandido, setExpandido] = useState(false)
   const foto = item.imagemUrl || imagemUrlResolvida
   const expansivel = Boolean(item.musicaUuid)
@@ -151,12 +154,13 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
                 )}
               </HStack>
               <HStack gap={1.5} maxW="full" minW={0}>
-                <GrupoIconesFonte fontes={item.fontes} tamanho={11} />
+                {fonte !== 'todas' && <GrupoIconesFonte fontes={item.fontes} tamanho={11} />}
                 <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
                   {(item.artistas ?? [item.artistaPrincipal]).join(', ')}
                   {item.album ? ` • ${item.album}` : ''}
                 </Text>
               </HStack>
+              <DivisaoFontesMusica porFonte={item.porFonte} />
             </VStack>
           </HStack>
 
@@ -220,6 +224,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
   rotuloPeriodo,
   imagemUrlResolvida,
 }: ItemRankingArtistaProps) {
+  const { fonte } = useFonteMusica()
   const [expandido, setExpandido] = useState(false)
   const [urlComErro, setUrlComErro] = useState<string | null>(null)
   const foto = item.imagemUrl || imagemUrlResolvida
@@ -330,11 +335,12 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                 )}
               </HStack>
               <HStack gap={1.5}>
-                <GrupoIconesFonte fontes={item.fontes} tamanho={11} />
+                {fonte !== 'todas' && <GrupoIconesFonte fontes={item.fontes} tamanho={11} />}
                 <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
                   {item.totalStreams} reproduções
                 </Text>
               </HStack>
+              <DivisaoFontesMusica porFonte={item.porFonte} />
             </VStack>
           </HStack>
 

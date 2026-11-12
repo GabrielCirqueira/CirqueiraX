@@ -172,6 +172,7 @@ export const ItemRankingMusicaCapsulaSchema = z.object({
   mesesNoTop5: z.number(),
   urlSpotify: z.string().nullable().optional(),
   imagemUrl: z.string().nullable().optional(),
+  ...CamposFonteSchema,
 })
 
 export type ItemRankingMusicaCapsula = z.infer<typeof ItemRankingMusicaCapsulaSchema>
@@ -186,6 +187,7 @@ export const ItemRankingArtistaCapsulaSchema = z.object({
   isEstreia: z.boolean(),
   urlSpotify: z.string().nullable().optional(),
   imagemUrl: z.string().nullable().optional(),
+  ...CamposFonteSchema,
 })
 
 export type ItemRankingArtistaCapsula = z.infer<typeof ItemRankingArtistaCapsulaSchema>

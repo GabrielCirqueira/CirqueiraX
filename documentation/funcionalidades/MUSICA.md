@@ -73,6 +73,10 @@ Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseRepr
 
 `/musica` mostra só os relatórios: tocando agora (Spotify e YouTube Music), hoje e semana, recordes, evolução, hábitos, descobertas, curiosidades, Cápsula e retrospectiva. Tudo que é configuração fica em `/musica/gerenciar`, aberto pelo botão **Gerenciar** ao lado do seletor de fonte: contas do Spotify e do YouTube Music (com a extensão do navegador), importação do histórico (Spotify e Google Takeout) e o cartão de **Revisão e correções**, que leva a `/musica/revisao`. O botão mostra um número quando há pendência (conta para reconectar ou itens na revisão). Os avisos de conexão do Dashboard também levam ao Gerenciar.
 
+### Quanto foi ouvido em cada plataforma
+
+Com o seletor em **Todas**, cada item das listas mostra uma linha com o ícone de cada plataforma e os minutos ouvidos nela (ex.: ícone do Spotify "42 min", ícone do YouTube Music "15 min"), usando o `porFonte` que a API já devolve. Aparece nos rankings de músicas e artistas (Hoje, Semana, períodos e expansões), na Cápsula (músicas e artistas), nas músicas e mashups da página do artista. Com o seletor num serviço só, a linha some (tudo é daquele serviço). Componente `DivisaoFontesMusica`, regra em `listarParcelasPorFonte`.
+
 ### Diferenças que continuam entre as fontes
 
 O YouTube Music tem duas entradas: o **coletor por cookie** (todos os aparelhos, estimado) e a **extensão do navegador** (só o computador com a aba aberta, exato). Quando as duas veem a mesma reprodução, fica uma só com o dado da extensão. Detalhes na seção 18 de [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md).
