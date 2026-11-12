@@ -221,3 +221,13 @@
 - **Arquivos**: `src/Infra/OpenAi/OpenAiIdentificadorMusicaClient.php`, `src/Service/IdentificacaoMusica/AplicarIdentificacaoVideoYoutubeService.php`, `documentation/funcionalidades/YOUTUBE_MUSIC.md`
 
 ---
+
+### ✅ Melhoria 160 — Takeout Ignora o Histórico de Pesquisa
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: conferindo a estrutura de um Takeout real (`Takeout/YouTube e YouTube Music/histórico/histórico de pesquisa.json` e `histórico-de-visualização.json`, mais os CSV de `metadados do vídeo/`), o arquivo de pesquisas também era tratado como histórico de exibição, porque traz anúncios com link de vídeo. Nenhuma reprodução errada entrava (anúncios e pesquisas já eram descartados), mas cada pesquisa somava em "reproduções descartadas" no relatório.
+- **Solução**: a detecção do histórico de exibição só aceita o arquivo quando encontra um vídeo assistido que não seja anúncio. Num zip com a mesma estrutura, as reproduções lidas ficaram iguais e as descartadas caíram de 51 para 11 (só os anúncios do próprio histórico de exibição).
+- **Arquivos**: `src/Infra/YoutubeMusic/LeitorArquivoTakeoutYoutube.php`
+
+---

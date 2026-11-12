@@ -153,7 +153,7 @@ final readonly class LeitorArquivoTakeoutYoutube implements LeitorArquivoTakeout
         $analisados = 0;
 
         foreach ($this->leitorObjetosJson->ler($stream) as $registro) {
-            if ($this->temCamposDoHistorico($registro) && null !== $this->extrairVideoId($registro['titleUrl'])) {
+            if ($this->temCamposDoHistorico($registro) && !$this->isAnuncio($registro) && null !== $this->extrairVideoId($registro['titleUrl'])) {
                 return true;
             }
 
