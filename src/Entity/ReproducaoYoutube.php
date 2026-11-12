@@ -28,6 +28,7 @@ class ReproducaoYoutube
     private const string SEPARADOR_CHAVE = '|';
     private const string PREFIXO_CHAVE_EXTENSAO = 'extensao';
     private const float FRACAO_OUVIDA_COMPLETA = 0.9;
+    public const int LIMITE_MS_POR_REPRODUCAO = 86400000;
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -81,7 +82,7 @@ class ReproducaoYoutube
         $this->usuario = $usuario;
         $this->video = $video;
         $this->tocadaEm = $tocadaEm->setTimezone(new DateTimeZone(self::FUSO_UTC));
-        $this->msReproduzidos = max(0, $msReproduzidos);
+        $this->msReproduzidos = self::limitarMs($msReproduzidos);
         $this->fonte = $fonte;
         $this->chaveDeduplicacao = self::gerarChaveDeduplicacao($video->videoId(), $this->tocadaEm);
         $this->criadoEm = new DateTimeImmutable();
@@ -92,6 +93,11 @@ class ReproducaoYoutube
         $momentoUtc = DateTimeImmutable::createFromInterface($tocadaEm)->setTimezone(new DateTimeZone(self::FUSO_UTC));
 
         return hash(self::ALGORITMO_CHAVE, $videoId.self::SEPARADOR_CHAVE.$momentoUtc->format(self::FORMATO_CHAVE));
+    }
+
+    private static function limitarMs(int $ms): int
+    {
+        return max(0, min($ms, self::LIMITE_MS_POR_REPRODUCAO));
     }
 
     public static function gerarChaveExtensao(string $idExtensao): string
@@ -105,7 +111,7 @@ class ReproducaoYoutube
         $this->tocadaEm = $inicio->setTimezone(new DateTimeZone(self::FUSO_UTC));
         $this->fonte = FonteReproducaoYoutube::Extensao;
         $this->tempoExato = true;
-        $this->msReproduzidos = max(0, $msOuvidos);
+        $this->msReproduzidos = self::limitarMs($msOuvidos);
         $this->pulada = $pulada;
         $this->chaveDeduplicacao = self::gerarChaveExtensao($idExtensao);
         $this->extensaoAtualizadaEm = new DateTimeImmutable();
@@ -115,7 +121,7 @@ class ReproducaoYoutube
 
     public function atualizarProgressoDaExtensao(int $msOuvidos, ?bool $pulada): self
     {
-        $this->msReproduzidos = max($this->msReproduzidos, $msOuvidos);
+        $this->msReproduzidos = self::limitarMs(max($this->msReproduzidos, $msOuvidos));
         $this->pulada = $pulada ?? $this->pulada;
         $this->extensaoAtualizadaEm = new DateTimeImmutable();
 
@@ -184,7 +190,7 @@ class ReproducaoYoutube
 
     public function ajustarMsReproduzidos(int $msReproduzidos): self
     {
-        $this->msReproduzidos = max(0, $msReproduzidos);
+        $this->msReproduzidos = self::limitarMs($msReproduzidos);
 
         return $this;
     }

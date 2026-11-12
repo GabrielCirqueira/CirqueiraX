@@ -15,6 +15,7 @@
 > - **M101–M120** → [MELHORIAS_6.md](MELHORIAS_6.md)
 > - **M121–M140** → [MELHORIAS_7.md](MELHORIAS_7.md)
 > - **M141–M160** → [MELHORIAS_8.md](MELHORIAS_8.md)
+> - **M161–M180** → [MELHORIAS_9.md](MELHORIAS_9.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -178,3 +179,4 @@
 | M158 | Relatório da Importação do Takeout em Popup e Várias Importações em Fila | 🟡 Publicado, falta validar | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-158--relatório-da-importação-do-takeout-em-popup-e-várias-importações-em-fila) |
 | M159 | IA Não Troca Mais as Músicas Entre Vídeos | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-159--ia-não-troca-mais-as-músicas-entre-vídeos) |
 | M160 | Takeout Ignora o Histórico de Pesquisa | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-160--takeout-ignora-o-histórico-de-pesquisa) |
+| M161 | Importação do Takeout Não Quebra com Lives Muito Longas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-161--importação-do-takeout-não-quebra-com-lives-muito-longas) |

@@ -50,7 +50,7 @@ class VideoYoutube
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
     private ?string $canalId = null;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(type: 'bigint', nullable: true)]
     private ?int $duracaoMs = null;
 
     #[ORM\Column(type: 'string', length: 1024, nullable: true)]
