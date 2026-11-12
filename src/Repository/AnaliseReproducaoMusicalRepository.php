@@ -149,13 +149,13 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             "WITH musicas AS (
-                SELECT r.musica_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
+                SELECT r.musica_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
                 FROM reproducao_musical r
                 WHERE r.usuario_id = :usuarioId%s
                 GROUP BY r.musica_uuid
                 HAVING streams > 0
             ), com_album AS (
-                SELECT mu.musica_uuid, mu.streams, mu.ms, LOWER(TRIM(m.album)) AS chave_album,
+                SELECT mu.*, LOWER(TRIM(m.album)) AS chave_album,
                     (SELECT COALESCE(ac.unido_a_uuid, ac.uuid) FROM musica_artista_catalogo mac
                         INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
                         WHERE mac.musica_uuid = mu.musica_uuid ORDER BY mac.posicao LIMIT 1) AS chave_artista
@@ -163,18 +163,27 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
                 INNER JOIN musica_catalogo m ON m.uuid = mu.musica_uuid
                 WHERE m.album IS NOT NULL AND m.album <> '' AND m.album <> 'Desconhecido'
             ), ranqueadas AS (
-                SELECT c.*,
+                SELECT c.musica_uuid, c.chave_album, c.chave_artista,
                     ROW_NUMBER() OVER (PARTITION BY chave_album, chave_artista ORDER BY streams DESC, ms DESC) AS ordem,
                     SUM(streams) OVER (PARTITION BY chave_album, chave_artista) AS total_streams,
                     SUM(ms) OVER (PARTITION BY chave_album, chave_artista) AS total_ms,
-                    COUNT(*) OVER (PARTITION BY chave_album, chave_artista) AS faixas_distintas
+                    COUNT(*) OVER (PARTITION BY chave_album, chave_artista) AS faixas_distintas,
+                    SUM(qtd_spotify) OVER (PARTITION BY chave_album, chave_artista) AS qtd_spotify,
+                    SUM(qtd_youtube_music) OVER (PARTITION BY chave_album, chave_artista) AS qtd_youtube_music,
+                    SUM(streams_spotify) OVER (PARTITION BY chave_album, chave_artista) AS streams_spotify,
+                    SUM(ms_spotify) OVER (PARTITION BY chave_album, chave_artista) AS ms_spotify,
+                    SUM(streams_youtube_music) OVER (PARTITION BY chave_album, chave_artista) AS streams_youtube_music,
+                    SUM(ms_youtube_music) OVER (PARTITION BY chave_album, chave_artista) AS ms_youtube_music,
+                    SUM(ms_estimado) OVER (PARTITION BY chave_album, chave_artista) AS ms_estimado
                 FROM com_album c
             )
-            SELECT musica_uuid, total_streams, total_ms, faixas_distintas
+            SELECT musica_uuid, total_streams, total_ms, faixas_distintas, qtd_spotify, qtd_youtube_music,
+                streams_spotify, ms_spotify, streams_youtube_music, ms_youtube_music, ms_estimado
             FROM ranqueadas
             WHERE ordem = 1
             ORDER BY total_streams DESC, total_ms DESC
             LIMIT %d",
+            self::COLUNAS_POR_FONTE,
             $filtros,
             $limite,
         ), $parametros, $tipos);

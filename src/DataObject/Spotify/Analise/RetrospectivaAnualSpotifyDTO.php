@@ -7,14 +7,14 @@ namespace App\DataObject\Spotify\Analise;
 final readonly class RetrospectivaAnualSpotifyDTO
 {
     /**
-     * @param list<int> $anosDisponiveis
-     * @param array{minutos: int, streams: int, reproducoes: int, artistas: int, faixas: int, dias: int, primeira: ?string, ultima: ?string} $totais
-     * @param list<ArtistaAnaliseSpotifyDTO> $topArtistas
-     * @param list<MusicaAnaliseSpotifyDTO> $topMusicas
-     * @param list<AlbumAnaliseSpotifyDTO> $topAlbuns
-     * @param list<array{ano: int, mes: int, streams: int, minutos: int}> $meses
-     * @param array{diaSemana: int, hora: int, minutos: int}|null $momentoFavorito
-     * @param array{data: string, minutos: int}|null $diaRecorde
+     * @param list<int>                                                                                                                      $anosDisponiveis
+     * @param array{minutos: int, streams: int, reproducoes: int, artistas: int, faixas: int, dias: int, primeira: ?string, ultima: ?string, porFonte?: array<string, array{streams: int, minutos: int}>} $totais
+     * @param list<ArtistaAnaliseSpotifyDTO>                                                                                                 $topArtistas
+     * @param list<MusicaAnaliseSpotifyDTO>                                                                                                  $topMusicas
+     * @param list<AlbumAnaliseSpotifyDTO>                                                                                                   $topAlbuns
+     * @param list<array{ano: int, mes: int, streams: int, minutos: int}>                                                                    $meses
+     * @param array{diaSemana: int, hora: int, minutos: int}|null                                                                            $momentoFavorito
+     * @param array{data: string, minutos: int}|null                                                                                         $diaRecorde
      */
     public function __construct(
         public int $ano,
@@ -34,7 +34,8 @@ final readonly class RetrospectivaAnualSpotifyDTO
         public ?MusicaAnaliseSpotifyDTO $primeiraMusica,
         public ?RepeticaoDiariaSpotifyDTO $maiorRepeticaoDiaria,
         public float $percentualTopArtistas,
-    ) {}
+    ) {
+    }
 
     /**
      * @return array<string, mixed>
@@ -50,6 +51,7 @@ final readonly class RetrospectivaAnualSpotifyDTO
             'artistasDistintos' => $this->totais['artistas'],
             'faixasDistintas' => $this->totais['faixas'],
             'diasOuvindo' => $this->totais['dias'],
+            'porFonte' => $this->totais['porFonte'] ?? [],
             'variacaoMinutosAnoAnterior' => $this->variacaoMinutosAnoAnterior,
             'topArtistas' => array_map(static fn (ArtistaAnaliseSpotifyDTO $item): array => $item->paraArray(), $this->topArtistas),
             'topMusicas' => array_map(static fn (MusicaAnaliseSpotifyDTO $item): array => $item->paraArray(), $this->topMusicas),

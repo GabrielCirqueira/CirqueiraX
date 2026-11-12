@@ -14,10 +14,12 @@ final readonly class CacheAnaliseSpotifyService
 {
     private const int VALIDADE_SEGUNDOS = 21600;
     private const string PREFIXO = 'spotify_analise';
+    private const string VERSAO_FORMATO = 'v2';
 
     public function __construct(
         private TagAwareCacheInterface $cache,
-    ) {}
+    ) {
+    }
 
     /**
      * @template T
@@ -33,7 +35,7 @@ final readonly class CacheAnaliseSpotifyService
             '%s_%d_%s',
             self::PREFIXO,
             (int) $usuario->getId(),
-            md5(PeriodoAnaliseSpotifyDTO::agoraLocal()->format('Y-m-d') . '|' . $chave),
+            md5(self::VERSAO_FORMATO.'|'.PeriodoAnaliseSpotifyDTO::agoraLocal()->format('Y-m-d').'|'.$chave),
         );
 
         return $this->cache->get($chaveCompleta, function (ItemInterface $item) use ($usuario, $calcular): mixed {

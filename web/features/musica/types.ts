@@ -115,6 +115,7 @@ export const AlbumAnaliseSchema = z.object({
   codigoFaixaReferencia: z.string().nullable(),
   imagemUrl: z.string().nullable(),
   urlSpotify: z.string().nullable(),
+  ...CamposFonteSchema,
 })
 
 export type AlbumAnalise = z.infer<typeof AlbumAnaliseSchema>
@@ -536,6 +537,7 @@ export const RetrospectivaAnualSchema = z.object({
   artistasDistintos: z.number(),
   faixasDistintas: z.number(),
   diasOuvindo: z.number(),
+  porFonte: PorFonteSchema.optional(),
   variacaoMinutosAnoAnterior: z.number().nullable(),
   topArtistas: z.array(ArtistaAnaliseSchema),
   topMusicas: z.array(MusicaAnaliseSchema),

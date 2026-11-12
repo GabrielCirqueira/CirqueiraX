@@ -38,6 +38,7 @@ import {
 } from '../utils'
 import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
 import { CapaMusica } from './CapaMusica'
+import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { GraficoMensalMusica } from './GraficoMensalMusica'
 import { LinkMusica } from './LinkMusica'
 import { MinutosMusica, TooltipMusica } from './MinutosMusica'
@@ -169,6 +170,11 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
             <Text fontSize="xs" fontWeight="semibold" opacity={0.85} mt={-2}>
               Somando todas as músicas e artistas de {dados.ano}
             </Text>
+            <DivisaoFontesMusica
+              porFonte={dados.porFonte}
+              destaque
+              cor="cirqueira.musica.textoPrincipal"
+            />
             {dados.variacaoMinutosAnoAnterior !== null && (
               <Text fontSize="sm" fontWeight="semibold" opacity={0.85}>
                 {formatarPercentualVariacao(dados.variacaoMinutosAnoAnterior)} em relação a{' '}
@@ -217,6 +223,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                       <MinutosMusica minutos={artistaDoAno.minutos} /> ·{' '}
                       {formatarNumeroPtBr(artistaDoAno.streams)} streams só dele
                     </Text>
+                    <DivisaoFontesMusica porFonte={artistaDoAno.porFonte} />
                   </VStack>
                 </VStack>
               </LinkMusica>
@@ -244,9 +251,10 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
               subtitulo={
                 <>
                   {formatarNumeroPtBr(artista.streams)} streams ·{' '}
-                  <MinutosMusica minutos={artista.minutos} />
+                  <MinutosMusica minutos={artista.minutos} porFonte={artista.porFonte} />
                 </>
               }
+              divisao={<DivisaoFontesMusica porFonte={artista.porFonte} />}
             />
           ))}
         </ListaTopo>
@@ -258,7 +266,13 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
               rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
               capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="44px" />}
               titulo={musica.nomeFaixa}
-              subtitulo={`${musica.artista} · ${musica.streams}x`}
+              subtitulo={
+                <>
+                  {musica.artista} · {formatarNumeroPtBr(musica.streams)} streams ·{' '}
+                  <MinutosMusica minutos={musica.minutos} porFonte={musica.porFonte} />
+                </>
+              }
+              divisao={<DivisaoFontesMusica porFonte={musica.porFonte} />}
             />
           ))}
         </ListaTopo>
@@ -272,7 +286,13 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
                 <CapaMusica url={imagemDe(album)} alt={album.album} tipo="album" boxSize="44px" />
               }
               titulo={album.album}
-              subtitulo={`${album.artista} · ${album.streams} streams`}
+              subtitulo={
+                <>
+                  {album.artista} · {formatarNumeroPtBr(album.streams)} streams ·{' '}
+                  <MinutosMusica minutos={album.minutos} porFonte={album.porFonte} />
+                </>
+              }
+              divisao={<DivisaoFontesMusica porFonte={album.porFonte} />}
             />
           ))}
         </ListaTopo>
@@ -420,9 +440,10 @@ interface ItemTopoProps {
   capa: ReactNode
   titulo: string
   subtitulo: ReactNode
+  divisao?: ReactNode
 }
 
-function ItemTopo({ posicao, rota, capa, titulo, subtitulo }: ItemTopoProps) {
+function ItemTopo({ posicao, rota, capa, titulo, subtitulo, divisao }: ItemTopoProps) {
   return (
     <Link asChild _hover={{ textDecoration: 'none' }} display="block">
       <LinkMusica to={rota}>
@@ -454,6 +475,7 @@ function ItemTopo({ posicao, rota, capa, titulo, subtitulo }: ItemTopoProps) {
             <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" truncate maxW="full">
               {subtitulo}
             </Text>
+            {divisao}
           </VStack>
         </HStack>
       </LinkMusica>

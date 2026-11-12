@@ -9,6 +9,10 @@ use App\Entity\ImagemSpotify;
 
 final readonly class AlbumAnaliseSpotifyDTO
 {
+    /**
+     * @param list<string>                                     $fontes
+     * @param array<string, array{streams: int, minutos: int}> $porFonte
+     */
     public function __construct(
         public string $album,
         public string $artista,
@@ -20,7 +24,10 @@ final readonly class AlbumAnaliseSpotifyDTO
         public ?string $imagemUrl = null,
         public ?string $urlSpotify = null,
         public ?string $musicaReferenciaUuid = null,
-    ) {}
+        public array $fontes = [],
+        public array $porFonte = [],
+    ) {
+    }
 
     /**
      * @param array<string, mixed> $linha
@@ -28,6 +35,10 @@ final readonly class AlbumAnaliseSpotifyDTO
     public static function daLinha(array $linha): self
     {
         $codigo = is_string($linha['codigo_faixa'] ?? null) && '' !== trim($linha['codigo_faixa']) ? trim($linha['codigo_faixa']) : null;
+        /** @var list<string> $fontes */
+        $fontes = $linha['fontes'] ?? [];
+        /** @var array<string, array{streams: int, minutos: int}> $porFonte */
+        $porFonte = $linha['por_fonte'] ?? [];
 
         return new self(
             (string) $linha['album'],
@@ -40,6 +51,8 @@ final readonly class AlbumAnaliseSpotifyDTO
             is_string($linha['url_capa'] ?? null) ? $linha['url_capa'] : null,
             null,
             is_string($linha['musica_uuid'] ?? null) ? $linha['musica_uuid'] : null,
+            $fontes,
+            $porFonte,
         );
     }
 
@@ -78,6 +91,8 @@ final readonly class AlbumAnaliseSpotifyDTO
                 ? $mapa->obterUrlSpotify($chave, ImagemSpotify::gerarUrlSpotifyFaixa($this->codigoFaixaReferencia, $this->artista, $this->faixaReferencia))
                 : null,
             $this->musicaReferenciaUuid,
+            $this->fontes,
+            $this->porFonte,
         );
     }
 
@@ -97,6 +112,8 @@ final readonly class AlbumAnaliseSpotifyDTO
             'imagemUrl' => $this->imagemUrl,
             'urlSpotify' => $this->urlSpotify,
             'musicaReferenciaUuid' => $this->musicaReferenciaUuid,
+            'fontes' => $this->fontes,
+            'porFonte' => $this->porFonte,
         ];
     }
 }

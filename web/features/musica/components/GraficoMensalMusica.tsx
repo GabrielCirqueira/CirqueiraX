@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react'
+import { Box, HStack, Text } from '@chakra-ui/react'
 import { memo } from 'react'
 import {
   Bar,
@@ -14,12 +14,15 @@ import {
 import type { PontoMensal } from '../types'
 import {
   CORES_GRAFICO_MUSICA,
+  ROTULOS_FONTE_REPRODUCAO,
   formatarMinutos,
   formatarMinutosEmHorasExtenso,
   formatarNomeMes,
   formatarNumeroPtBr,
   formatarRotuloMesCurto,
+  listarParcelasPorFonte,
 } from '../utils'
+import { IconeFonteMusica } from './IconeFonteMusica'
 
 export interface GraficoMensalMusicaProps {
   pontos: PontoMensal[]
@@ -95,6 +98,16 @@ export const GraficoMensalMusica = memo(function GraficoMensalMusica({
                   <Text color="cirqueira.musica.textoSecundario">
                     {formatarNumeroPtBr(ponto.streams)} streams
                   </Text>
+                  {listarParcelasPorFonte(ponto.porFonte).length > 1 &&
+                    listarParcelasPorFonte(ponto.porFonte).map((parcela) => (
+                      <HStack key={parcela.fonte} gap={1.5} pt={0.5}>
+                        <IconeFonteMusica fonte={parcela.fonte} tamanho={11} />
+                        <Text color="cirqueira.musica.textoSecundario">
+                          {ROTULOS_FONTE_REPRODUCAO[parcela.fonte]} ·{' '}
+                          {formatarMinutos(parcela.minutos)}
+                        </Text>
+                      </HStack>
+                    ))}
                 </Box>
               )
             }}
