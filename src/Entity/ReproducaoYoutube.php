@@ -22,6 +22,7 @@ class ReproducaoYoutube
     private const string ALGORITMO_CHAVE = 'sha256';
     private const string FORMATO_CHAVE = 'Y-m-d H:i:s';
     private const string FUSO_UTC = 'UTC';
+    private const string FORMATO_DATA_HORA = 'Y-m-d H:i:s';
     private const string SEPARADOR_CHAVE = '|';
 
     #[ORM\Id]
@@ -106,7 +107,7 @@ class ReproducaoYoutube
 
     public function tocadaEm(): DateTimeImmutable
     {
-        return $this->tocadaEm;
+        return new DateTimeImmutable($this->tocadaEm->format(self::FORMATO_DATA_HORA), new DateTimeZone(self::FUSO_UTC));
     }
 
     public function msReproduzidos(): int
