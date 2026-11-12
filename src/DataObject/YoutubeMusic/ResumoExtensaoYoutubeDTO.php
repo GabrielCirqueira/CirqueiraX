@@ -13,6 +13,8 @@ final readonly class ResumoExtensaoYoutubeDTO
         public int $aparelhosAtivos,
         public ?DateTimeImmutable $ultimoEventoEm,
         public ?ReproducaoYoutube $tocandoAgora,
+        public int $vezesOuvidaTocando = 0,
+        public ?DateTimeImmutable $primeiraVezTocandoEm = null,
     ) {
     }
 }

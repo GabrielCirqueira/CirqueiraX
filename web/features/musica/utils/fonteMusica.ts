@@ -87,14 +87,6 @@ export function textosEstadoVazioMusica(
   }
 }
 
-const ID_CONEXAO_YOUTUBE_MUSIC = 'conexao-youtube-music'
-
-export function rolarParaConexaoYoutubeMusic(): void {
-  document
-    .getElementById(ID_CONEXAO_YOUTUBE_MUSIC)
-    ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-}
-
 export function listarFontesDetalhe(porFonte: PorFonteDetalhe | undefined) {
   const fontes: { fonte: FonteReproducao; dados: NonNullable<PorFonteDetalhe['spotify']> }[] = []
   for (const fonte of ['spotify', 'youtube_music'] as const) {

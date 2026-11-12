@@ -69,6 +69,10 @@ Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseRepr
 | Análises | `src/Service/Musica/Analise/`, `AnaliseReproducaoMusicalRepository`, `MusicaController`, `MusicaAnaliseController` | `web/features/musica/` |
 | Capas | `src/Service/Musica/Capa/`, `CapaMusicaController` | `web/features/musica/utils/capaMusica.ts` |
 
+### Página principal e Gerenciar
+
+`/musica` mostra só os relatórios: tocando agora (Spotify e YouTube Music), hoje e semana, recordes, evolução, hábitos, descobertas, curiosidades, Cápsula e retrospectiva. Tudo que é configuração fica em `/musica/gerenciar`, aberto pelo botão **Gerenciar** ao lado do seletor de fonte: contas do Spotify e do YouTube Music (com a extensão do navegador), importação do histórico (Spotify e Google Takeout) e o cartão de **Revisão e correções**, que leva a `/musica/revisao`. O botão mostra um número quando há pendência (conta para reconectar ou itens na revisão). Os avisos de conexão do Dashboard também levam ao Gerenciar.
+
 ### Diferenças que continuam entre as fontes
 
 O YouTube Music tem duas entradas: o **coletor por cookie** (todos os aparelhos, estimado) e a **extensão do navegador** (só o computador com a aba aberta, exato). Quando as duas veem a mesma reprodução, fica uma só com o dado da extensão. Detalhes na seção 18 de [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md).
@@ -326,7 +330,7 @@ Depois da leitura, a importação anda por etapas (`EtapaImportacaoYoutube`), um
 
 ## Página Música (tópicos 201 a 203)
 
-- **Rotas:** `/musica`, `/musica/artista?uuid=`, `/musica/faixa?uuid=` e `/musica/revisao`. `/spotify`, `/spotify/artista` e `/spotify/musica` redirecionam mantendo a busca; `/spotify/callback` continua sendo o retorno do OAuth.
+- **Rotas:** `/musica`, `/musica/artista?uuid=`, `/musica/faixa?uuid=`, `/musica/gerenciar` e `/musica/revisao`. `/spotify`, `/spotify/artista` e `/spotify/musica` redirecionam mantendo a busca; `/spotify/callback` continua sendo o retorno do OAuth.
 - **Tema:** tokens `cirqueira.musica.*` com os mesmos valores do antigo tema do Spotify, mais `fonteSpotify` (#1ED760) e `fonteYoutubeMusic` (#FF0033) para ícones e gráficos.
 - **Seletor de fonte:** pílulas Todos, Spotify e YouTube Music no topo, guardadas em `?fonte=`. Todas as consultas levam a fonte na chave e no parâmetro. Os links internos mantêm a fonte.
 - **Origem e estimativa:** cada item mostra os ícones das fontes; minutos com YouTube Music levam a marca "est." e o tooltip separa Spotify e YouTube Music.

@@ -26,6 +26,7 @@ class ReproducaoYoutube
     private const string FORMATO_DATA_HORA = 'Y-m-d H:i:s';
     private const string SEPARADOR_CHAVE = '|';
     private const string PREFIXO_CHAVE_EXTENSAO = 'extensao';
+    private const float FRACAO_OUVIDA_COMPLETA = 0.9;
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -112,6 +113,18 @@ class ReproducaoYoutube
         $this->msReproduzidos = max($this->msReproduzidos, $msOuvidos);
         $this->pulada = $pulada ?? $this->pulada;
         $this->extensaoAtualizadaEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function encerrarSemFimDaExtensao(): self
+    {
+        $duracaoMs = $this->video->duracaoMs();
+        if (null !== $this->pulada || null === $duracaoMs || $duracaoMs <= 0) {
+            return $this;
+        }
+
+        $this->pulada = $this->msReproduzidos < $duracaoMs * self::FRACAO_OUVIDA_COMPLETA;
 
         return $this;
     }

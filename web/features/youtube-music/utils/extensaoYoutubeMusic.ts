@@ -36,16 +36,29 @@ export function descreverSinalExtensao(
   return `Último sinal da extensão: ${new Date(resumo.ultimoEventoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}.`
 }
 
-function formatarMinutosSegundos(milissegundos: number): string {
-  const totalSegundos = Math.max(0, Math.floor(milissegundos / SEGUNDO_MS))
-  const minutos = Math.floor(totalSegundos / 60)
-  const segundos = totalSegundos % 60
-  return `${minutos}:${String(segundos).padStart(2, '0')}`
+const LIMITE_SEM_EVENTO_TOCANDO_MS = 30 * SEGUNDO_MS
+const URL_VIDEO_YOUTUBE_MUSIC = 'https://music.youtube.com/watch?v='
+
+export interface ProgressoTocandoYoutube {
+  progressoMs: number
+  duracaoMs: number | null
+  percentual: number
+  emReproducao: boolean
 }
 
-export function descreverProgressoTocando(tocando: TocandoAgoraExtensao): string {
-  const ouvido = formatarMinutosSegundos(tocando.msOuvidos)
-  return tocando.duracaoMs
-    ? `${ouvido} de ${formatarMinutosSegundos(tocando.duracaoMs)} ouvidos`
-    : `${ouvido} ouvidos`
+export function calcularProgressoTocandoYoutube(
+  tocando: TocandoAgoraExtensao,
+  agora: number
+): ProgressoTocandoYoutube {
+  const atualizadoEm = tocando.atualizadoEm ? new Date(tocando.atualizadoEm).getTime() : agora
+  const decorrido = Math.max(0, agora - atualizadoEm)
+  const emReproducao = decorrido <= LIMITE_SEM_EVENTO_TOCANDO_MS
+  const somado = tocando.msOuvidos + (emReproducao ? decorrido : 0)
+  const progressoMs = tocando.duracaoMs ? Math.min(tocando.duracaoMs, somado) : somado
+  const percentual = tocando.duracaoMs ? (progressoMs / tocando.duracaoMs) * 100 : 0
+  return { progressoMs, duracaoMs: tocando.duracaoMs, percentual, emReproducao }
+}
+
+export function urlVideoYoutubeMusic(videoId: string): string | null {
+  return videoId ? `${URL_VIDEO_YOUTUBE_MUSIC}${videoId}` : null
 }

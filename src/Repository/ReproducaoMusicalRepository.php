@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\MusicaCatalogo;
 use App\Entity\ReproducaoMusical;
 use App\Entity\Usuario;
 use App\Enum\FonteReproducaoMusical;
 use App\Enum\StatusClassificacaoVideo;
+use DateTimeImmutable;
+use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\ParameterType;
@@ -18,6 +21,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class ReproducaoMusicalRepository extends ServiceEntityRepository
 {
+    private const string FUSO_UTC = 'UTC';
     private const string CTE_MUSICA_EFETIVA = 'WITH RECURSIVE efetiva (uuid, raiz) AS (
             SELECT mc.uuid, mc.uuid FROM musica_catalogo mc WHERE mc.usuario_id = :usuarioId AND mc.unida_a_uuid IS NULL
             UNION ALL
@@ -152,6 +156,28 @@ final class ReproducaoMusicalRepository extends ServiceEntityRepository
             'SELECT COUNT(*) FROM reproducao_musical WHERE usuario_id = :usuarioId AND fonte = :fonte',
             ['usuarioId' => $usuario->getId(), 'fonte' => $fonte->value],
         );
+    }
+
+    /**
+     * @return array{vezes: int, primeiraEm: ?DateTimeImmutable}
+     */
+    public function resumirHistoricoDaMusica(Usuario $usuario, MusicaCatalogo $musica): array
+    {
+        $linha = $this->getEntityManager()->getConnection()->fetchAssociative(
+            'SELECT COUNT(*) AS vezes, MIN(tocada_em) AS primeira FROM reproducao_musical
+            WHERE usuario_id = :usuarioId AND musica_uuid = :musica AND ms_reproduzidos >= :corte',
+            [
+                'usuarioId' => $usuario->getId(),
+                'musica' => $musica->uuid()->toBinary(),
+                'corte' => AnaliseReproducaoMusicalRepository::CORTE_STREAM_MS,
+            ],
+        );
+        $primeira = is_array($linha) && is_string($linha['primeira'] ?? null) ? $linha['primeira'] : null;
+
+        return [
+            'vezes' => is_array($linha) ? (int) $linha['vezes'] : 0,
+            'primeiraEm' => null === $primeira ? null : new DateTimeImmutable($primeira, new DateTimeZone(self::FUSO_UTC)),
+        ];
     }
 
     public function limparMemoria(): void

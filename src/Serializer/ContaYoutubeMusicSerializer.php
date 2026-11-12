@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Serializer;
 
 use App\DataObject\YoutubeMusic\ResumoExtensaoYoutubeDTO;
+use App\Entity\ArtistaCatalogo;
 use App\Entity\ContaYoutubeMusic;
 use App\Entity\ReproducaoYoutube;
 use DateTimeImmutable;
@@ -54,22 +55,45 @@ final class ContaYoutubeMusicSerializer
     }
 
     /**
-     * @return array{aparelhosAtivos: int, ultimoEventoEm: ?string, tocandoAgora: array{titulo: string, canal: string, inicioEm: string, msOuvidos: int, duracaoMs: ?int}|null}
+     * @return array<string, mixed>
      */
     private function serializarExtensao(?ResumoExtensaoYoutubeDTO $extensao): array
     {
-        $tocando = $extensao?->tocandoAgora;
-
         return [
             'aparelhosAtivos' => $extensao->aparelhosAtivos ?? 0,
             'ultimoEventoEm' => $extensao?->ultimoEventoEm?->format(DateTimeInterface::ATOM),
-            'tocandoAgora' => null === $tocando ? null : [
-                'titulo' => $tocando->video()->titulo(),
-                'canal' => $tocando->video()->canal(),
-                'inicioEm' => $tocando->tocadaEm()->format(DateTimeInterface::ATOM),
-                'msOuvidos' => $tocando->msReproduzidos(),
-                'duracaoMs' => $tocando->video()->duracaoMs(),
-            ],
+            'tocandoAgora' => null === $extensao ? null : $this->serializarTocandoAgora($extensao),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function serializarTocandoAgora(ResumoExtensaoYoutubeDTO $extensao): ?array
+    {
+        $tocando = $extensao->tocandoAgora;
+        if (null === $tocando) {
+            return null;
+        }
+
+        $video = $tocando->video();
+        $musica = $video->musica()?->musicaEfetiva();
+        $artistas = null === $musica ? [] : array_map(static fn (ArtistaCatalogo $artista): string => $artista->nome(), $musica->artistas());
+
+        return [
+            'titulo' => $musica?->titulo() ?? $video->titulo(),
+            'canal' => $video->canal(),
+            'artistas' => [] === $artistas ? array_values(array_filter([$video->canal()])) : $artistas,
+            'album' => $musica?->album(),
+            'urlCapa' => $musica?->urlCapa() ?? $video->urlCapa(),
+            'videoId' => $video->videoId(),
+            'identificada' => null !== $musica,
+            'inicioEm' => $tocando->tocadaEm()->format(DateTimeInterface::ATOM),
+            'msOuvidos' => $tocando->msReproduzidos(),
+            'duracaoMs' => $video->duracaoMs(),
+            'atualizadoEm' => $tocando->extensaoAtualizadaEm()?->format(DateTimeInterface::ATOM),
+            'vezesOuvida' => $extensao->vezesOuvidaTocando,
+            'primeiraVezEm' => $extensao->primeiraVezTocandoEm?->format(DateTimeInterface::ATOM),
         ];
     }
 

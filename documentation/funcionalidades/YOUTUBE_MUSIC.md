@@ -250,7 +250,8 @@ Detalhes em [MUSICA.md](MUSICA.md), tópicos 197 e 198.
 - O que vem só do coletor tem `tempoExato = false` e aparece como **estimado** ("est." e tooltip separando Spotify e YouTube Music). O que passou pela extensão tem `tempoExato = true`.
 - Stream = 30 s ou mais, como no Spotify.
 - Pulos: contam só as reproduções da extensão (as do coletor e do Takeout ficam `pulada = NULL`). Sem nenhuma reprodução da extensão no período, aparece "indisponível para o YouTube Music". Aleatório continua indisponível.
-- "Tocando agora" aparece quando a extensão mandou evento nos últimos 75 s; sem extensão, aparece "Última detectada: título · canal, há cerca de X min".
+- "Tocando agora" aparece quando a extensão mandou evento nos últimos 75 s, no mesmo cartão do Spotify: capa (com o fundo desfocado), título e artistas do catálogo quando a música já foi identificada (senão, título do vídeo e canal), barra de progresso que avança sozinha entre os eventos e vira "Pausado" se a extensão fica mais de 30 s sem mandar nada, quantas vezes você já ouviu e desde quando, e "Abrir no YouTube Music". Sem extensão, aparece "Última detectada: título · canal, há cerca de X min".
+- Se o evento de "fim" de uma música da extensão se perder (aba fechada, extensão atualizada no meio), ela é fechada quando chega a próxima: pulada se ficou abaixo de 90% da duração.
 - **Capas:** as capas do YouTube (`yt3.googleusercontent.com`, `i.ytimg.com`...) e as do Spotify são servidas pelo próprio sistema em `GET /api/v1/musica/capa?url=` (cache de 30 dias), porque alguns navegadores e redes não abriam esses links direto. Ver "Capas servidas pelo sistema" em [MUSICA.md](MUSICA.md).
 
 ## 13. Rotas

@@ -84,6 +84,7 @@ web/
 | `/musica` | Música (Spotify, YouTube Music e Cápsula Sonora) | Protegida |
 | `/musica/artista?uuid=` | Detalhe do artista | Protegida |
 | `/musica/faixa?uuid=` | Detalhe da música | Protegida |
+| `/musica/gerenciar` | Contas (Spotify e YouTube Music), extensão, importações e acesso à revisão | Protegida |
 | `/musica/revisao?aba=` | Revisão e correções do catálogo | Protegida |
 | `/spotify`, `/spotify/artista`, `/spotify/musica` | Redirecionam para as rotas de Música | Protegida |
 | `/transcricoes` | Transcrições de Áudio | Protegida |

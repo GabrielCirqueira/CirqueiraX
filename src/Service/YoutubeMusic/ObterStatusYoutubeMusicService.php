@@ -9,6 +9,7 @@ use App\Entity\ContaYoutubeMusic;
 use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
 use App\Repository\ContaYoutubeMusicRepository;
+use App\Repository\ReproducaoMusicalRepository;
 use App\Repository\ReproducaoYoutubeRepository;
 use App\Repository\TokenExtensaoYoutubeMusicRepository;
 use DateTimeImmutable;
@@ -21,6 +22,7 @@ final readonly class ObterStatusYoutubeMusicService
         private ContaYoutubeMusicRepository $contaRepository,
         private ReproducaoYoutubeRepository $reproducaoRepository,
         private TokenExtensaoYoutubeMusicRepository $tokenExtensaoRepository,
+        private ReproducaoMusicalRepository $reproducaoMusicalRepository,
     ) {
     }
 
@@ -36,10 +38,16 @@ final readonly class ObterStatusYoutubeMusicService
 
     public function resumirExtensao(Usuario $usuario): ResumoExtensaoYoutubeDTO
     {
+        $tocando = $this->reproducaoRepository->buscarTocandoAgoraDaExtensao($usuario, new DateTimeImmutable(self::JANELA_TOCANDO_AGORA));
+        $musica = $tocando?->video()->musica()?->musicaEfetiva();
+        $historico = null === $musica ? null : $this->reproducaoMusicalRepository->resumirHistoricoDaMusica($usuario, $musica);
+
         return new ResumoExtensaoYoutubeDTO(
             $this->tokenExtensaoRepository->contarAtivosDoUsuario($usuario),
             $this->reproducaoRepository->buscarUltimoEventoDaExtensao($usuario),
-            $this->reproducaoRepository->buscarTocandoAgoraDaExtensao($usuario, new DateTimeImmutable(self::JANELA_TOCANDO_AGORA)),
+            $tocando,
+            $historico['vezes'] ?? 0,
+            $historico['primeiraEm'] ?? null,
         );
     }
 

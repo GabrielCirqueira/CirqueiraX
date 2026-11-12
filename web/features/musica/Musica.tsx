@@ -1,19 +1,13 @@
 import { CartaoTocandoAgora } from '@/features/spotify/components/CartaoTocandoAgora'
-import { ModalUploadHistoricoSpotify } from '@/features/spotify/components/ModalUploadHistoricoSpotify'
-import { PainelConexaoSpotify } from '@/features/spotify/components/PainelConexaoSpotify'
 import { useStatusSpotify } from '@/features/spotify/hooks/useStatusSpotify'
-import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
-import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
-import {
-  LinkRevisaoMusica,
-  SeloRevisaoMusica,
-} from '@/features/youtube-music/components/SeloRevisaoMusica'
 import { UltimaDetectadaYoutubeMusic } from '@/features/youtube-music/components/UltimaDetectadaYoutubeMusic'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
-import { Container, Flex, HStack, Heading, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { useMemo, useState } from 'react'
+import { Container, Flex, HStack, Heading, Text, VStack } from '@chakra-ui/react'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
+  BotaoGerenciarMusica,
   EsqueletoPaginaMusica,
   EstadoVazioMusica,
   RodapeMusica,
@@ -30,10 +24,10 @@ import {
 } from './components'
 import { useFonteMusica, useImagensMusica, useResumoMusica } from './hooks'
 import {
+  ROTA_GERENCIAR_MUSICA,
   deveMostrarEstadoVazioMusica,
   listarChavesImagensResumo,
   resumoTemDados,
-  rolarParaConexaoYoutubeMusic,
 } from './utils'
 
 export function Musica() {
@@ -43,8 +37,7 @@ export function Musica() {
       'Acompanhe o que você ouve no Spotify e no YouTube Music, estatísticas diárias e sua Cápsula Sonora mensal.',
   })
 
-  const [modalImportacaoAberto, setModalImportacaoAberto] = useState(false)
-  const [modalTakeoutAberto, setModalTakeoutAberto] = useState(false)
+  const navigate = useNavigate()
   const { fonte } = useFonteMusica()
 
   const { data: status, isLoading: carregandoStatus } = useStatusSpotify()
@@ -65,16 +58,6 @@ export function Musica() {
       <AppContainer>
         <Container maxW="6xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
           <VStack gap={{ base: 6, md: 10 }} align="stretch" w="full">
-            <SimpleGrid columns={{ base: 1, lg: 2 }} gap={4} alignItems="stretch">
-              <PainelConexaoSpotify
-                compacto
-                onAbrirModalImportacao={() => setModalImportacaoAberto(true)}
-              />
-              <PainelConexaoYoutubeMusic
-                onAbrirModalImportacao={() => setModalTakeoutAberto(true)}
-              />
-            </SimpleGrid>
-
             <Flex
               justify="space-between"
               align={{ base: 'start', md: 'center' }}
@@ -95,9 +78,8 @@ export function Musica() {
                 </Text>
               </VStack>
               <HStack gap={3} wrap="wrap">
-                <SeloRevisaoMusica />
-                <LinkRevisaoMusica />
                 <SeletorFonteMusica />
+                <BotaoGerenciarMusica />
               </HStack>
             </Flex>
 
@@ -107,8 +89,8 @@ export function Musica() {
               <EstadoVazioMusica
                 conectada={conectada}
                 fonte={fonte}
-                onAbrirModalImportacao={() => setModalImportacaoAberto(true)}
-                onConectarYoutubeMusic={rolarParaConexaoYoutubeMusic}
+                onAbrirModalImportacao={() => navigate(ROTA_GERENCIAR_MUSICA)}
+                onConectarYoutubeMusic={() => navigate(ROTA_GERENCIAR_MUSICA)}
               />
             ) : (
               <>
@@ -141,16 +123,6 @@ export function Musica() {
           </VStack>
         </Container>
       </AppContainer>
-
-      <ModalUploadHistoricoSpotify
-        aberto={modalImportacaoAberto}
-        onFechar={() => setModalImportacaoAberto(false)}
-      />
-
-      <ModalImportarTakeoutYoutube
-        aberto={modalTakeoutAberto}
-        onFechar={() => setModalTakeoutAberto(false)}
-      />
     </TemaMusica>
   )
 }

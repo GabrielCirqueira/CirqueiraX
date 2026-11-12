@@ -281,7 +281,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: spotify.motivoErro ?? 'Autorização expirada. Clique para reconectar.',
       estado: 'Reconectar',
       tom: 'erro',
-      rota: '/musica',
+      rota: '/musica/gerenciar',
     })
   } else if (spotify?.conectado && spotify.bloqueadoAte) {
     servicos.push({
@@ -289,7 +289,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: `Bloqueado pelo Spotify até ${formatarHoraBrasilia(spotify.bloqueadoAte)} · coleta pausada`,
       estado: 'Bloqueado',
       tom: 'alerta',
-      rota: '/musica',
+      rota: '/musica/gerenciar',
     })
   } else if (spotify?.conectado) {
     servicos.push({
@@ -303,7 +303,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
           : 'Histórico ativo',
       estado: spotify.coletaParada ? 'Atrasado' : 'Conectado',
       tom: spotify.coletaParada ? 'alerta' : 'sucesso',
-      rota: '/musica',
+      rota: '/musica/gerenciar',
     })
   } else {
     servicos.push({
@@ -311,7 +311,7 @@ export function montarServicosIntegracao(estado: EstadoServicos): LinhaServico[]
       detalhe: 'Vincule sua conta para a Cápsula Sonora',
       estado: 'Desconectado',
       tom: 'neutro',
-      rota: '/musica',
+      rota: '/musica/gerenciar',
     })
   }
 
@@ -348,7 +348,7 @@ function montarServicoYoutubeMusic(youtube?: ResumoYoutubeMusicDashboard | null)
     detalhe: 'Conecte para registrar o que você ouve',
     estado: 'Não configurado',
     tom: 'neutro',
-    rota: '/musica',
+    rota: '/musica/gerenciar',
   }
 }
 

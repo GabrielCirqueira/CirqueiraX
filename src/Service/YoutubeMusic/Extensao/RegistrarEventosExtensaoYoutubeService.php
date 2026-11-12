@@ -22,6 +22,7 @@ use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 final readonly class RegistrarEventosExtensaoYoutubeService
 {
     private const string FORMATO_SEGUNDOS_ATRAS = '-%d seconds';
+    private const string JANELA_ENCERRAR_SEM_FIM = '-1 day';
 
     public function __construct(
         private ReproducaoYoutubeRepository $reproducaoRepository,
@@ -70,12 +71,21 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         $video = $videos[$evento->videoId] ?? $this->obterVideo($usuario, $evento);
         $videos[$evento->videoId] = $video;
         $inicio = $recebidoEm->modify(sprintf(self::FORMATO_SEGUNDOS_ATRAS, $evento->segundosDesdeInicio));
+        $this->encerrarAnterioresSemFim($usuario, $inicio);
         $estimada = $this->unirComColeta->buscarEstimadaParaExtensao($usuario, $video, $inicio);
         $reproducao = $estimada?->marcarVistaPeloColetor() ?? new ReproducaoYoutube($usuario, $video, $inicio, 0, FonteReproducaoYoutube::Extensao);
         $reproducao->assumirDadosDaExtensao($evento->idReproducao, $inicio, $evento->msOuvidos, $evento->puladaInformada());
         $this->reproducaoRepository->salvar($reproducao, flush: false);
 
         return $reproducao;
+    }
+
+    private function encerrarAnterioresSemFim(Usuario $usuario, DateTimeImmutable $inicio): void
+    {
+        $abertas = $this->reproducaoRepository->listarDaExtensaoSemFimAntesDe($usuario, $inicio, $inicio->modify(self::JANELA_ENCERRAR_SEM_FIM));
+        foreach ($abertas as $aberta) {
+            $this->reproducaoRepository->salvar($aberta->encerrarSemFimDaExtensao(), flush: false);
+        }
     }
 
     private function obterVideo(Usuario $usuario, EventoExtensaoYoutubeDTO $evento): VideoYoutube

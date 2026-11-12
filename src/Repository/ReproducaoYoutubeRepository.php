@@ -172,6 +172,30 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
         return $reproducoes;
     }
 
+    /**
+     * @return list<ReproducaoYoutube>
+     */
+    public function listarDaExtensaoSemFimAntesDe(Usuario $usuario, DateTimeImmutable $antes, DateTimeImmutable $desde): array
+    {
+        /** @var list<ReproducaoYoutube> $reproducoes */
+        $reproducoes = $this->createQueryBuilder('e')
+            ->innerJoin('e.video', 'v')
+            ->addSelect('v')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.fonte = :fonte')
+            ->andWhere('e.pulada IS NULL')
+            ->andWhere('e.tocadaEm >= :desde')
+            ->andWhere('e.tocadaEm < :antes')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('fonte', FonteReproducaoYoutube::Extensao->value)
+            ->setParameter('desde', $this->emUtc($desde))
+            ->setParameter('antes', $this->emUtc($antes))
+            ->getQuery()
+            ->getResult();
+
+        return $reproducoes;
+    }
+
     public function buscarTocandoAgoraDaExtensao(Usuario $usuario, DateTimeImmutable $atualizadaDesde): ?ReproducaoYoutube
     {
         /** @var ReproducaoYoutube|null $reproducao */

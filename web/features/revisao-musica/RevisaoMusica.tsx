@@ -40,8 +40,8 @@ export function RevisaoMusica() {
                 color="cirqueira.musica.textoSecundario"
                 _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
               >
-                <LinkMusica to="/musica">
-                  <ArrowLeft size={12} /> Voltar para Música
+                <LinkMusica to="/musica/gerenciar">
+                  <ArrowLeft size={12} /> Voltar para Gerenciar
                 </LinkMusica>
               </Link>
               <Heading

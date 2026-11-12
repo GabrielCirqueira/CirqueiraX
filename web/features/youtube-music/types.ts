@@ -12,9 +12,17 @@ export type EstadoContaYoutubeMusic = z.infer<typeof EstadoContaYoutubeMusicSche
 export const TocandoAgoraExtensaoSchema = z.object({
   titulo: z.string(),
   canal: z.string(),
+  artistas: z.array(z.string()).default([]),
+  album: z.string().nullable().default(null),
+  urlCapa: z.string().nullable().default(null),
+  videoId: z.string().default(''),
+  identificada: z.boolean().default(false),
   inicioEm: z.string(),
   msOuvidos: z.number(),
   duracaoMs: z.number().nullable(),
+  atualizadoEm: z.string().nullable().default(null),
+  vezesOuvida: z.number().default(0),
+  primeiraVezEm: z.string().nullable().default(null),
 })
 
 export type TocandoAgoraExtensao = z.infer<typeof TocandoAgoraExtensaoSchema>

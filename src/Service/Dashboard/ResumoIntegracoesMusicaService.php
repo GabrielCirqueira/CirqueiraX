@@ -18,7 +18,7 @@ use DateTimeInterface;
 final readonly class ResumoIntegracoesMusicaService
 {
     public const int LIMITE_ALERTA_COLETA_PARADA_SEGUNDOS = 10800;
-    private const string ROTA_MUSICA = '/musica';
+    private const string ROTA_GERENCIAR_MUSICA = '/musica/gerenciar';
     private const string ESTADO_NAO_CONFIGURADO = 'nao_configurado';
     private const string ESTADO_CONECTADO = 'conectado';
     private const string ESTADO_RECONECTAR = 'reconectar';
@@ -85,7 +85,7 @@ final readonly class ResumoIntegracoesMusicaService
             'ultimaNovidadeEm' => $conta?->ultimaNovidadeEm()?->format(DateTimeInterface::ATOM),
             'motivoErro' => $conta?->erroMotivo(),
             'totalReproducoesColetadas' => $this->reproducaoYoutubeRepository->contarDoUsuario($usuario),
-            'rota' => self::ROTA_MUSICA,
+            'rota' => self::ROTA_GERENCIAR_MUSICA,
         ];
     }
 
