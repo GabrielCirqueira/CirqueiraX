@@ -183,3 +183,13 @@
 - **Arquivos**: `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/DataObject/Spotify/Analise/AlbumAnaliseSpotifyDTO.php`, `src/DataObject/Spotify/Analise/RetrospectivaAnualSpotifyDTO.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `web/features/musica/components/SecaoRetrospectiva.tsx`, `web/features/musica/components/DivisaoFontesMusica.tsx`, `web/features/musica/components/GraficoMensalMusica.tsx`, `web/features/musica/types.ts`
 
 ---
+
+### ✅ Melhoria 157 — Capas nas Versões da Música
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: "Versões ouvidas neste período" (no ranking e no detalhe da música) mostrava só título, canal e o ícone da plataforma, sem imagem (ex.: Little Dark Age e a versão slowed + reverb).
+- **Solução**: cada versão mostra a capa à esquerda, com o ícone da plataforma ao lado do tipo de versão. O backend completa a capa de todas as versões (`CompletarCapasVariantesService`): vídeo do YouTube sem capa salva usa a miniatura do vídeo, e faixa do Spotify usa a capa do enriquecimento de imagens. A chave do cache das análises passou para `v3` para o detalhe já vir com as capas.
+- **Arquivos**: `src/Service/Musica/Analise/CompletarCapasVariantesService.php`, `src/Service/Musica/Analise/ListarVersoesMusicaService.php`, `src/Service/Musica/Analise/ObterDetalheMusicaService.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `web/features/musica/components/ListaVersoesMusica.tsx`, `documentation/funcionalidades/MUSICA.md`
+
+---

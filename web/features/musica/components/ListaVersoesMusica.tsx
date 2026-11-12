@@ -3,6 +3,7 @@ import { ExternalLink } from 'lucide-react'
 import { type ReactNode, memo } from 'react'
 import type { ComponenteMashup, VarianteMusica } from '../types'
 import { formatarNumeroPtBr, gerarRotaMusica, rotuloTipoVersao } from '../utils'
+import { CapaMusica } from './CapaMusica'
 import { IconeFonteMusica } from './IconeFonteMusica'
 import { LinkMusica } from './LinkMusica'
 import { MinutosMusica } from './MinutosMusica'
@@ -35,7 +36,12 @@ export const ListaVersoesMusica = memo(function ListaVersoesMusica({
           bg="cirqueira.musica.cartaoElevado"
           align="center"
         >
-          <IconeFonteMusica fonte={variante.fonte} />
+          <CapaMusica
+            url={variante.urlCapa}
+            alt={variante.titulo}
+            w={{ base: '40px', sm: '44px' }}
+            h={{ base: '40px', sm: '44px' }}
+          />
           <VStack align="start" gap={0} flex={1} minW={0}>
             <Text
               fontSize="xs"
@@ -47,6 +53,7 @@ export const ListaVersoesMusica = memo(function ListaVersoesMusica({
               {variante.titulo}
             </Text>
             <HStack gap={1.5} minW={0} maxW="full">
+              <IconeFonteMusica fonte={variante.fonte} tamanho={12} />
               <Badge size="xs" variant="subtle" colorPalette="gray" flexShrink={0}>
                 {rotuloTipoVersao(variante.tipoVersao)}
               </Badge>

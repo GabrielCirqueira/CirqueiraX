@@ -18,7 +18,9 @@ final readonly class ListarVersoesMusicaService
     public function __construct(
         private MusicaCatalogoRepository $musicaCatalogoRepository,
         private AnaliseReproducaoMusicalRepository $analiseRepository,
-    ) {}
+        private CompletarCapasVariantesService $completarCapas,
+    ) {
+    }
 
     /**
      * @return array{mashup: bool, variantes: list<array<string, mixed>>, componentes: list<array<string, mixed>>, artistas: list<string>}
@@ -30,7 +32,7 @@ final readonly class ListarVersoesMusicaService
 
         return [
             'mashup' => $musica->isMashup(),
-            'variantes' => $this->analiseRepository->listarVariantesMusica($usuario, $fonte, $musica->uuid(), $periodo),
+            'variantes' => $this->completarCapas->executar($usuario, $this->analiseRepository->listarVariantesMusica($usuario, $fonte, $musica->uuid(), $periodo)),
             'componentes' => array_map(static fn (ComponenteMashup $componente): array => [
                 'texto' => $componente->texto(),
                 'musicaUuid' => $componente->musicaComponente()?->musicaEfetiva()->uuid()->toRfc4122(),

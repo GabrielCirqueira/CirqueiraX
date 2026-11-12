@@ -174,3 +174,4 @@
 | M154 | Capas e Atalhos para os Vídeos na Revisão | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-154--capas-e-atalhos-para-os-vídeos-na-revisão) |
 | M155 | Duplicadas: Botão "São Músicas Diferentes" e Detecção Mais Precisa | 🟡 Publicado, falta validar | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-155--duplicadas-botão-são-músicas-diferentes-e-detecção-mais-precisa) |
 | M156 | Spotify e YouTube Music Separados na Retrospectiva do Ano | 🟡 Publicado, falta validar | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-156--spotify-e-youtube-music-separados-na-retrospectiva-do-ano) |
+| M157 | Capas nas Versões da Música | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-157--capas-nas-versões-da-música) |

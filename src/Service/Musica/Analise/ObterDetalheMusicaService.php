@@ -33,7 +33,9 @@ final readonly class ObterDetalheMusicaService
         private AnaliseReproducaoMusicalRepository $analiseRepository,
         private MusicaCatalogoRepository $musicaCatalogoRepository,
         private AplicarImagensAnaliseSpotifyService $aplicarImagensService,
-    ) {}
+        private CompletarCapasVariantesService $completarCapas,
+    ) {
+    }
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, string $uuid): DetalheMusicaSpotifyDTO
     {
@@ -85,7 +87,7 @@ final readonly class ObterDetalheMusicaService
             outrasDoArtista: $this->aplicarImagensService->aplicar($outras, $mapa),
             porFonte: $resumo['porFonte'],
             minutosEstimados: $resumo['minutosEstimados'],
-            variantes: $this->analiseRepository->listarVariantesMusica($usuario, $fonte, $catalogo->uuid()),
+            variantes: $this->completarCapas->executar($usuario, $this->analiseRepository->listarVariantesMusica($usuario, $fonte, $catalogo->uuid())),
             componentes: array_map(static fn (ComponenteMashup $componente): array => [
                 'texto' => $componente->texto(),
                 'musicaUuid' => $componente->musicaComponente()?->musicaEfetiva()->uuid()->toRfc4122(),
