@@ -12,7 +12,7 @@ use Throwable;
 
 final readonly class ObterCapaMusicaService
 {
-    private const string PADRAO_HOST_PERMITIDO = '/^(yt3\.googleusercontent\.com|lh3\.googleusercontent\.com|yt3\.ggpht\.com|i\.ytimg\.com)$/';
+    private const string PADRAO_HOST_PERMITIDO = '/^(yt3\.googleusercontent\.com|lh3\.googleusercontent\.com|yt3\.ggpht\.com|i\.ytimg\.com|www\.gstatic\.com|i\.scdn\.co|mosaic\.scdn\.co|image-cdn-[a-z]+\.spotifycdn\.com|cdn-images\.dzcdn\.net|e-cdns-images\.dzcdn\.net)$/';
     private const string ESQUEMA_PERMITIDO = 'https';
     private const string SUBDIRETORIO = '/var/cache/thumbnails/capas-musica';
     private const string PREFIXO_TIPO_IMAGEM = 'image/';

@@ -338,7 +338,7 @@ Player próprio dentro do CirqueiraX (M134); extensão de navegador; "tocando ag
 
 ## Capas servidas pelo sistema (12/11/2026)
 
-Capas hospedadas no Google/YouTube (`yt3.googleusercontent.com`, `lh3.googleusercontent.com`, `yt3.ggpht.com`, `i.ytimg.com`) não abriam em alguns navegadores e redes, mesmo com o link válido. O frontend (`urlCapaExibicao`, em `web/features/musica/utils/capaMusica.ts`) troca esses links por `GET /api/v1/musica/capa?url=...`.
+Capas hospedadas no Google/YouTube (`yt3.googleusercontent.com`, `lh3.googleusercontent.com`, `yt3.ggpht.com`, `i.ytimg.com`, `www.gstatic.com`), no Spotify (`i.scdn.co`, `mosaic.scdn.co`, `image-cdn-*.spotifycdn.com`) e no Deezer (`cdn-images.dzcdn.net`, `e-cdns-images.dzcdn.net`) não abriam em alguns navegadores e redes, mesmo com o link válido (caso real: todas as capas `image-cdn-*.spotifycdn.com` quebradas no navegador do Gabriel, abrindo normalmente no servidor). O frontend (`urlCapaExibicao`, em `web/features/musica/utils/capaMusica.ts`) troca esses links por `GET /api/v1/musica/capa?url=...`.
 
 - Rota pública (sem token, para o `<img>` funcionar e o navegador guardar em cache por 30 dias).
 - Só aceita `https` desses hosts e só URLs que já existem no banco (`musica_catalogo.url_capa`, `video_youtube.url_capa`, `artista_catalogo.url_foto`, `imagem_spotify`), então não serve de proxy aberto.

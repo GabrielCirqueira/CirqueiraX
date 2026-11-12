@@ -1,6 +1,7 @@
 import { Badge, Box, Button, Flex, HStack, Heading, Link, Text, VStack } from '@chakra-ui/react'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { type ReactNode, memo } from 'react'
+import { urlCapaExibicao } from '../utils/capaMusica'
 import { CapaMusica } from './CapaMusica'
 import { LinkMusica } from './LinkMusica'
 
@@ -31,7 +32,7 @@ export const HeroDetalheMusica = memo(function HeroDetalheMusica({
         <Box
           position="absolute"
           inset="-60px"
-          bgImage={`url("${imagemUrl}")`}
+          bgImage={`url("${urlCapaExibicao(imagemUrl)}")`}
           bgSize="cover"
           bgPos="center"
           filter="blur(60px) saturate(1.5)"

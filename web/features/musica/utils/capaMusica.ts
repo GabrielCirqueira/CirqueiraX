@@ -1,7 +1,7 @@
 import { api } from '@/config/api'
 
 const HOSTS_SERVIDOS_PELO_SISTEMA =
-  /^(yt3\.googleusercontent\.com|lh3\.googleusercontent\.com|yt3\.ggpht\.com|i\.ytimg\.com)$/
+  /^(yt3\.googleusercontent\.com|lh3\.googleusercontent\.com|yt3\.ggpht\.com|i\.ytimg\.com|www\.gstatic\.com|i\.scdn\.co|mosaic\.scdn\.co|image-cdn-[a-z]+\.spotifycdn\.com|cdn-images\.dzcdn\.net|e-cdns-images\.dzcdn\.net)$/
 const ROTA_CAPA = '/api/v1/musica/capa'
 
 export function urlCapaExibicao(url: string | null | undefined): string | null {
