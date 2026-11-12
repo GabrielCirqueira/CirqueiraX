@@ -15,6 +15,7 @@ import { memo, useState } from 'react'
 import type { PeriodoMusicasItem } from '../api'
 import type { AlbumAnalise, ItemRankingArtista, ItemRankingMusica } from '../types'
 import { gerarRotaArtista, gerarRotaMusica } from '../utils'
+import { urlCapaExibicao } from '../utils/capaMusica'
 import { CapaMusica } from './CapaMusica'
 import { GrupoIconesFonte } from './IconeFonteMusica'
 import { LinkMusica } from './LinkMusica'
@@ -92,7 +93,7 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
                 <Box
                   as="img"
                   referrerPolicy="no-referrer"
-                  src={foto}
+                  src={urlCapaExibicao(foto) ?? undefined}
                   alt={item.nomeFaixa}
                   w="full"
                   h="full"
@@ -275,7 +276,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
                 <Box
                   as="img"
                   referrerPolicy="no-referrer"
-                  src={foto as string}
+                  src={urlCapaExibicao(foto) ?? undefined}
                   alt={item.nomeArtista}
                   w="full"
                   h="full"

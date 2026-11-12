@@ -69,6 +69,10 @@ services:
     App\Interface\ExtratorTextoPdfInterface: '@App\Infra\Pdf\ExtratorTextoPdfClient'
     App\Interface\SintetizadorVozInterface: '@App\Infra\Audio\SintetizadorVozRoteador'
 
+    App\Service\Musica\Capa\ObterCapaMusicaService:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+
     App\Infra\YoutubeMusic\YoutubeMusicClient:
         arguments:
             $projectDir: '%kernel.project_dir%'

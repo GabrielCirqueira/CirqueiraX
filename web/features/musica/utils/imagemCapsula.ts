@@ -1,4 +1,5 @@
 import type { CapsulaMensal, FonteMusica } from '../types'
+import { urlCapaExibicao } from './capaMusica'
 import { atribuicaoFonteMusica } from './fonteMusica'
 import { formatarMinutos } from './formatadoresMusica'
 
@@ -29,7 +30,7 @@ function carregarImagem(url: string | null): Promise<HTMLImageElement | null> {
     imagem.crossOrigin = 'anonymous'
     imagem.onload = () => resolver(imagem)
     imagem.onerror = () => resolver(null)
-    imagem.src = url
+    imagem.src = urlCapaExibicao(url) ?? url
   })
 }
 

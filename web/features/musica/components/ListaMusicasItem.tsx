@@ -4,6 +4,7 @@ import { memo, useState } from 'react'
 import type { PeriodoMusicasItem } from '../api'
 import { useMusicasItem } from '../hooks'
 import type { ItemTopMusicaArtista } from '../types'
+import { urlCapaExibicao } from '../utils/capaMusica'
 import { MinutosMusica } from './MinutosMusica'
 import { ModalMusicasItem } from './ModalMusicasItem'
 
@@ -150,7 +151,7 @@ export const LinhaMusicaItemSpotify = memo(function LinhaMusicaItemSpotify({
           {musica.imagemUrl ? (
             <img
               referrerPolicy="no-referrer"
-              src={musica.imagemUrl}
+              src={urlCapaExibicao(musica.imagemUrl) ?? undefined}
               alt={musica.nomeFaixa}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />

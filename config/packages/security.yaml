@@ -60,4 +60,5 @@ security:
         - { path: ^/api/v1/auth/login,      roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/token/refresh,   roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/livros-audio-arquivos/, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/musica/capa$,    roles: PUBLIC_ACCESS }
         - { path: ^/api,                    roles: IS_AUTHENTICATED_FULLY }

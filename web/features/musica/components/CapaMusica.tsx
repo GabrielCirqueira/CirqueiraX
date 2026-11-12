@@ -1,6 +1,7 @@
 import { Box, type BoxProps, Center } from '@chakra-ui/react'
 import { Disc3, Music2, UserRound } from 'lucide-react'
 import { memo, useState } from 'react'
+import { urlCapaExibicao } from '../utils/capaMusica'
 
 export interface CapaMusicaProps extends Omit<BoxProps, 'children'> {
   url: string | null | undefined
@@ -33,7 +34,7 @@ export const CapaMusica = memo(function CapaMusica({
       {mostrarImagem && url ? (
         <Box
           as="img"
-          src={url}
+          src={urlCapaExibicao(url) ?? undefined}
           alt={alt}
           w="full"
           h="full"

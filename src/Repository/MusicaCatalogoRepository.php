@@ -144,4 +144,16 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
 
         return $musicas;
     }
+
+    public function isUrlCapaConhecida(string $url): bool
+    {
+        return false !== $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT 1 FROM musica_catalogo WHERE url_capa = :url
+            UNION ALL SELECT 1 FROM video_youtube WHERE url_capa = :url
+            UNION ALL SELECT 1 FROM artista_catalogo WHERE url_foto = :url
+            UNION ALL SELECT 1 FROM imagem_spotify WHERE :url IN (imagem_grande_url, imagem_media_url, imagem_pequena_url)
+            LIMIT 1',
+            ['url' => $url],
+        );
+    }
 }

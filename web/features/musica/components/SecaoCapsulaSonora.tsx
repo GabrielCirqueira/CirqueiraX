@@ -64,6 +64,7 @@ import {
   gerarChaveFaixa,
   incluiYoutubeMusic,
 } from '../utils'
+import { urlCapaExibicao } from '../utils/capaMusica'
 import { ListaMusicasItem } from './ListaMusicasItem'
 import { MinutosMusica, TooltipMusica } from './MinutosMusica'
 import { BotaoImagemCapsula } from './ModalImagemCapsula'
@@ -454,7 +455,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                       <Box
                         as="img"
                         referrerPolicy="no-referrer"
-                        src={fotoArtistaMaisOuvido}
+                        src={urlCapaExibicao(fotoArtistaMaisOuvido) ?? undefined}
                         alt={capsula.artistaMaisOuvido.nomeArtista}
                         w="full"
                         h="full"
@@ -550,7 +551,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                       <Box
                         as="img"
                         referrerPolicy="no-referrer"
-                        src={fotoMusicaMaisOuvida}
+                        src={urlCapaExibicao(fotoMusicaMaisOuvida) ?? undefined}
                         alt={capsula.musicaMaisOuvida.nomeFaixa}
                         w="full"
                         h="full"
@@ -678,7 +679,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                         <Box
                           as="img"
                           referrerPolicy="no-referrer"
-                          src={fotoPreview}
+                          src={urlCapaExibicao(fotoPreview) ?? undefined}
                           alt={m.nomeFaixa}
                           w="full"
                           h="full"
@@ -799,7 +800,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
                 <Box
                   as="img"
                   referrerPolicy="no-referrer"
-                  src={foto as string}
+                  src={urlCapaExibicao(foto) ?? undefined}
                   alt={artista.nomeArtista}
                   w="full"
                   h="full"
@@ -984,7 +985,7 @@ function ModalDetalheCapsula({
                       <Box
                         as="img"
                         referrerPolicy="no-referrer"
-                        src={fotoMusica}
+                        src={urlCapaExibicao(fotoMusica) ?? undefined}
                         alt={m.nomeFaixa}
                         w="full"
                         h="full"
@@ -1356,7 +1357,7 @@ function ModalDetalheCapsula({
                         <Box
                           as="img"
                           referrerPolicy="no-referrer"
-                          src={fotoMusica}
+                          src={urlCapaExibicao(fotoMusica) ?? undefined}
                           alt={m.nomeFaixa}
                           w="full"
                           h="full"
