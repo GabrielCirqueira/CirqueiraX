@@ -180,3 +180,4 @@
 | M159 | IA Não Troca Mais as Músicas Entre Vídeos | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-159--ia-não-troca-mais-as-músicas-entre-vídeos) |
 | M160 | Takeout Ignora o Histórico de Pesquisa | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_8.md#melhoria-160--takeout-ignora-o-histórico-de-pesquisa) |
 | M161 | Importação do Takeout Não Quebra com Lives Muito Longas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-161--importação-do-takeout-não-quebra-com-lives-muito-longas) |
+| M162 | Capa nos Vídeos Vindos do Takeout | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-162--capa-nos-vídeos-vindos-do-takeout) |

@@ -6,13 +6,13 @@ namespace App\Service\Musica\Analise;
 
 use App\Entity\ImagemSpotify;
 use App\Entity\Usuario;
+use App\Entity\VideoYoutube;
 use App\Service\Spotify\EnriquecerImagensSpotifyService;
 
 final readonly class CompletarCapasVariantesService
 {
     private const string FONTE_SPOTIFY = 'spotify';
     private const string FONTE_YOUTUBE_MUSIC = 'youtube_music';
-    private const string FORMATO_MINIATURA_YOUTUBE = 'https://i.ytimg.com/vi/%s/hqdefault.jpg';
     private const int PRIORIDADE_IMAGENS = 2;
 
     public function __construct(
@@ -49,7 +49,7 @@ final readonly class CompletarCapasVariantesService
 
             $codigo = is_string($variante['codigo']) ? $variante['codigo'] : null;
             if (self::FONTE_YOUTUBE_MUSIC === $variante['fonte'] && null !== $codigo) {
-                return [...$variante, 'urlCapa' => sprintf(self::FORMATO_MINIATURA_YOUTUBE, $codigo)];
+                return [...$variante, 'urlCapa' => VideoYoutube::gerarUrlMiniatura($codigo)];
             }
 
             if (self::FONTE_SPOTIFY !== $variante['fonte'] || null === $mapa) {

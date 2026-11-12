@@ -29,6 +29,7 @@ class VideoYoutube
     private const int TAMANHO_MAXIMO_CANAL = 255;
     private const int CONFIANCA_MINIMA = 0;
     private const int CONFIANCA_MAXIMA = 100;
+    private const string FORMATO_MINIATURA_YOUTUBE = 'https://i.ytimg.com/vi/%s/hqdefault.jpg';
 
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
@@ -112,9 +113,15 @@ class VideoYoutube
         $this->videoId = $videoId;
         $this->titulo = mb_substr($titulo, 0, self::TAMANHO_MAXIMO_TITULO);
         $this->canal = mb_substr($canal, 0, self::TAMANHO_MAXIMO_CANAL);
+        $this->urlCapa = self::gerarUrlMiniatura($videoId);
         $this->status = StatusClassificacaoVideo::Pendente;
         $this->criadoEm = new DateTimeImmutable();
         $this->atualizadoEm = new DateTimeImmutable();
+    }
+
+    public static function gerarUrlMiniatura(string $videoId): string
+    {
+        return sprintf(self::FORMATO_MINIATURA_YOUTUBE, $videoId);
     }
 
     #[ORM\PreUpdate]

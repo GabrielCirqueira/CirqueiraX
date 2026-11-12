@@ -16,3 +16,16 @@
 - **Arquivos**: `migrations/Version20261112200000.php`, `src/Entity/VideoYoutube.php`, `src/Entity/ReproducaoYoutube.php`
 
 ---
+
+### ✅ Melhoria 162 — Capa nos Vídeos Vindos do Takeout
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: na revisão do YouTube Music, todos os vídeos da importação do Takeout apareciam sem imagem. O Takeout não traz miniatura, e a busca de detalhes na YouTube Data API não grava capa, então os 296 vídeos importados ficaram com `url_capa` nulo (os 84 capturados pela extensão tinham capa).
+- **Solução**:
+  - Todo `VideoYoutube` novo já nasce com a miniatura padrão do YouTube (`VideoYoutube::gerarUrlMiniatura`, `https://i.ytimg.com/vi/<id>/hqdefault.jpg`); a extensão e o coletor continuam trocando pela capa que capturam.
+  - Migration `Version20261112210000` preenche a capa dos vídeos que estavam sem imagem.
+  - `CompletarCapasVariantesService` passou a usar o mesmo método, e o cache das análises de música foi renovado (`VERSAO_FORMATO` 'v4') para as músicas novas aparecerem com capa.
+- **Arquivos**: `src/Entity/VideoYoutube.php`, `migrations/Version20261112210000.php`, `src/Service/Musica/Analise/CompletarCapasVariantesService.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`
+
+---
