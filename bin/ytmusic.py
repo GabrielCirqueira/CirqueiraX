@@ -1,6 +1,7 @@
 import json
 import re
 import sys
+import time
 
 from ytmusicapi import YTMusic
 from ytmusicapi.exceptions import YTMusicError, YTMusicServerError, YTMusicUserError
@@ -13,6 +14,10 @@ FORMATO_INESPERADO = 4
 LIMITE_BUSCA_PADRAO = 5
 TEXTO_VISUALIZACOES = re.compile(r"\b(views?|visualiza\w*)\b", re.IGNORECASE)
 TERMO_VERIFICACAO_SERVICO = "music"
+CABECALHOS_DESCARTADOS = {"accept-encoding", "content-encoding", "content-length", "priority"}
+FORMATO_CABECALHO = re.compile(r"^[A-Za-z0-9-]+: ")
+TENTATIVAS_VERIFICACAO = 3
+ESPERA_ENTRE_TENTATIVAS_S = 2
 
 
 class FalhaYoutubeMusic(Exception):
@@ -32,23 +37,42 @@ def ler_entrada():
     return entrada
 
 
+def pares_cabecalhos(linhas):
+    if all(FORMATO_CABECALHO.match(linha) or linha.startswith(":") for linha in linhas):
+        return [tuple(linha.split(": ", 1)) for linha in linhas if not linha.startswith(":")]
+    return list(zip(linhas[0::2], linhas[1::2]))
+
+
+def normalizar_cabecalhos(texto):
+    linhas = [linha.strip() for linha in texto.splitlines() if linha.strip()]
+    pares = pares_cabecalhos(linhas)
+    return "\n".join(
+        f"{nome.strip().lower()}: {valor.strip()}"
+        for nome, valor in pares
+        if not nome.startswith(":") and nome.strip().lower() not in CABECALHOS_DESCARTADOS
+    )
+
+
 def criar_cliente(entrada):
     cabecalhos = entrada.get("cabecalhos")
     if not isinstance(cabecalhos, str) or not cabecalhos.strip():
         raise FalhaYoutubeMusic(CREDENCIAIS_INVALIDAS, "Os cabeçalhos da sessão não foram informados.")
     try:
-        autenticacao = json.loads(setup_browser(filepath=None, headers_raw=cabecalhos.strip()))
+        autenticacao = json.loads(setup_browser(filepath=None, headers_raw=normalizar_cabecalhos(cabecalhos)))
     except YTMusicError:
         raise FalhaYoutubeMusic(CREDENCIAIS_INVALIDAS, "Os cabeçalhos não têm cookie e x-goog-authuser de uma sessão logada.")
     return YTMusic(auth=autenticacao)
 
 
 def servico_responde_sem_login():
-    try:
-        YTMusic().search(TERMO_VERIFICACAO_SERVICO, filter="songs", limit=1)
-        return True
-    except Exception:
-        return False
+    for tentativa in range(TENTATIVAS_VERIFICACAO):
+        try:
+            YTMusic().search(TERMO_VERIFICACAO_SERVICO, filter="songs", limit=1)
+            return True
+        except Exception:
+            if tentativa < TENTATIVAS_VERIFICACAO - 1:
+                time.sleep(ESPERA_ENTRE_TENTATIVAS_S)
+    return False
 
 
 def classificar_falha_servidor():
@@ -57,7 +81,13 @@ def classificar_falha_servidor():
     return FalhaYoutubeMusic(SERVICO_INDISPONIVEL, "O YouTube Music não respondeu. Falha passageira ou limite de consultas.")
 
 
-def executar_com_classificacao(operacao):
+def classificar_formato_autenticado():
+    if servico_responde_sem_login():
+        return FalhaYoutubeMusic(CREDENCIAIS_INVALIDAS, "O YouTube Music tratou a sessão como deslogada. Copie os cabeçalhos de novo.")
+    return FalhaYoutubeMusic(FORMATO_INESPERADO, "A resposta do YouTube Music veio num formato inesperado.")
+
+
+def executar_com_classificacao(operacao, autenticada=False):
     try:
         return operacao()
     except FalhaYoutubeMusic:
@@ -67,6 +97,8 @@ def executar_com_classificacao(operacao):
     except YTMusicServerError:
         raise classificar_falha_servidor()
     except (KeyError, IndexError, TypeError, ValueError):
+        if autenticada:
+            raise classificar_formato_autenticado()
         raise FalhaYoutubeMusic(FORMATO_INESPERADO, "A resposta do YouTube Music veio num formato inesperado.")
     except Exception:
         raise FalhaYoutubeMusic(SERVICO_INDISPONIVEL, "Falha de rede ao consultar o YouTube Music.")
@@ -118,14 +150,21 @@ def mapear_item(item, posicao):
 
 def comando_validar(entrada):
     cliente = criar_cliente(entrada)
-    conta = executar_com_classificacao(cliente.get_account_info)
-    executar_com_classificacao(cliente.get_history)
+    executar_com_classificacao(cliente.get_history, autenticada=True)
+    conta = obter_conta_opcional(cliente)
     return {"nomeConta": conta.get("accountName"), "canal": conta.get("channelHandle")}
+
+
+def obter_conta_opcional(cliente):
+    try:
+        return cliente.get_account_info() or {}
+    except Exception:
+        return {}
 
 
 def comando_historico(entrada):
     cliente = criar_cliente(entrada)
-    historico = executar_com_classificacao(cliente.get_history)
+    historico = executar_com_classificacao(cliente.get_history, autenticada=True)
     itens = [item for item in historico if isinstance(item, dict) and item.get("videoId")]
     return {"itens": [mapear_item(item, posicao) for posicao, item in enumerate(itens)]}
 
