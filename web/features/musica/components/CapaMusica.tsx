@@ -39,6 +39,7 @@ export const CapaMusica = memo(function CapaMusica({
           h="full"
           objectFit="cover"
           loading="lazy"
+          referrerPolicy="no-referrer"
           onError={() => setUrlComErro(url)}
         />
       ) : (

@@ -21,6 +21,7 @@ final readonly class ColetarHistoricoYoutubeMusicService
     public const int INTERVALO_MINIMO_SEGUNDOS = 15;
     private const int JANELA_ATIVIDADE_SEGUNDOS = 600;
     private const int RESERVA_CONSULTA_SEGUNDOS = 120;
+    private const int TOLERANCIA_AGENDADOR_SEGUNDOS = 5;
     private const string FORMATO_SEGUNDOS_ADIANTE = '+%d seconds';
     private const string FORMATO_SEGUNDOS_ATRAS = '-%d seconds';
 
@@ -87,7 +88,7 @@ final readonly class ColetarHistoricoYoutubeMusicService
         $this->atualizarEmAndamento->executar($conta->usuario(), $idsAtuais, $vistoEm);
 
         $conta->registrarConsulta($snapshot, $quantidadeNovas > 0);
-        $conta->definirProximaConsulta($this->adiante($this->calcularIntervalo($conta, $vistoEm)));
+        $conta->definirProximaConsulta($vistoEm->modify(sprintf(self::FORMATO_SEGUNDOS_ADIANTE, $this->calcularIntervalo($conta, $vistoEm) - self::TOLERANCIA_AGENDADOR_SEGUNDOS)));
 
         if ($criadas > 0) {
             $this->cacheAnalise->invalidar($conta->usuario());

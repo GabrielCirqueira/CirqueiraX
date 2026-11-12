@@ -89,7 +89,15 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
               justifyContent="center"
             >
               {foto ? (
-                <Box as="img" src={foto} alt={item.nomeFaixa} w="full" h="full" objectFit="cover" />
+                <Box
+                  as="img"
+                  referrerPolicy="no-referrer"
+                  src={foto}
+                  alt={item.nomeFaixa}
+                  w="full"
+                  h="full"
+                  objectFit="cover"
+                />
               ) : (
                 <Music2 size={16} color="var(--chakra-colors-cirqueira-musica-textoDesabilitado)" />
               )}
@@ -266,6 +274,7 @@ export const ItemRankingArtistaLinha = memo(function ItemRankingArtistaLinha({
               {temFoto ? (
                 <Box
                   as="img"
+                  referrerPolicy="no-referrer"
                   src={foto as string}
                   alt={item.nomeArtista}
                   w="full"

@@ -111,6 +111,7 @@ export const BotaoImagemCapsula = memo(function BotaoImagemCapsula({
                 {previa ? (
                   <Box
                     as="img"
+                    referrerPolicy="no-referrer"
                     src={previa.url}
                     alt="Prévia da Cápsula Sonora"
                     w="full"

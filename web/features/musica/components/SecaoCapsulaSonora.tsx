@@ -453,6 +453,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                     {fotoArtistaMaisOuvido ? (
                       <Box
                         as="img"
+                        referrerPolicy="no-referrer"
                         src={fotoArtistaMaisOuvido}
                         alt={capsula.artistaMaisOuvido.nomeArtista}
                         w="full"
@@ -548,6 +549,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                     {fotoMusicaMaisOuvida ? (
                       <Box
                         as="img"
+                        referrerPolicy="no-referrer"
                         src={fotoMusicaMaisOuvida}
                         alt={capsula.musicaMaisOuvida.nomeFaixa}
                         w="full"
@@ -675,6 +677,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
                       {fotoPreview ? (
                         <Box
                           as="img"
+                          referrerPolicy="no-referrer"
                           src={fotoPreview}
                           alt={m.nomeFaixa}
                           w="full"
@@ -795,6 +798,7 @@ const LinhaArtistaRankingCapsula = memo(function LinhaArtistaRankingCapsula({
               {temFoto ? (
                 <Box
                   as="img"
+                  referrerPolicy="no-referrer"
                   src={foto as string}
                   alt={artista.nomeArtista}
                   w="full"
@@ -979,6 +983,7 @@ function ModalDetalheCapsula({
                     {fotoMusica ? (
                       <Box
                         as="img"
+                        referrerPolicy="no-referrer"
                         src={fotoMusica}
                         alt={m.nomeFaixa}
                         w="full"
@@ -1350,6 +1355,7 @@ function ModalDetalheCapsula({
                       {fotoMusica ? (
                         <Box
                           as="img"
+                          referrerPolicy="no-referrer"
                           src={fotoMusica}
                           alt={m.nomeFaixa}
                           w="full"

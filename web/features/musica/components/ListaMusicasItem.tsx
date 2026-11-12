@@ -149,6 +149,7 @@ export const LinhaMusicaItemSpotify = memo(function LinhaMusicaItemSpotify({
         >
           {musica.imagemUrl ? (
             <img
+              referrerPolicy="no-referrer"
               src={musica.imagemUrl}
               alt={musica.nomeFaixa}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
