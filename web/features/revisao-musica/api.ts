@@ -95,6 +95,17 @@ export async function unirMusicas(
   return MusicaCatalogoSchema.parse(data.data)
 }
 
+export async function unirVariasMusicas(
+  origemUuids: string[],
+  destinoUuid: string
+): Promise<MusicaCatalogo> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/catalogo/unir-varias`, {
+    origemUuids,
+    destinoUuid,
+  })
+  return MusicaCatalogoSchema.parse(data.data)
+}
+
 export async function descartarDuplicata(primeiraUuid: string, segundaUuid: string): Promise<void> {
   await api.post<RespostaApi<unknown>>(`${PREFIXO}/catalogo/duplicatas/descartar`, {
     primeiraUuid,

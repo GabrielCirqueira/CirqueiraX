@@ -480,3 +480,11 @@ export const PASSOS_REVISAO: { titulo: string; texto: string }[] = [
     texto: 'O item sai da lista e as reproduções passam a contar nos seus relatórios.',
   },
 ]
+
+const PADRAO_SUFIXO_VERSAO = /\s*(?:[-–—|•(\[]).*$/u
+
+export function tituloBaseVersoes(titulos: string[]): string {
+  const [primeiro = ''] = titulos
+  const base = primeiro.replace(PADRAO_SUFIXO_VERSAO, '').trim()
+  return base || primeiro.trim()
+}

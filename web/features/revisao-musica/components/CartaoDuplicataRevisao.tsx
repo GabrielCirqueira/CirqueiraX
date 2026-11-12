@@ -1,6 +1,6 @@
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
 import { Button, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { ExternalLink, Info, Merge, Split } from 'lucide-react'
+import { ExternalLink, GitBranch, Info, Merge, Split } from 'lucide-react'
 import { memo } from 'react'
 import type { DuplicataRevisao, MusicaDuplicata } from '../types'
 import {
@@ -19,7 +19,17 @@ export interface CartaoDuplicataRevisaoProps {
   ocupado: boolean
   onUnir: (origemUuid: string, destinoUuid: string) => void
   onDescartar: (primeiraUuid: string, segundaUuid: string) => void
+  onVersoesDeOutra: (duplicata: DuplicataRevisao) => void
 }
+
+const PROPS_BOTAO_RESPOSTA = {
+  size: 'sm',
+  borderRadius: 'full',
+  variant: 'outline',
+  borderColor: 'cirqueira.musica.textoDesabilitado',
+  color: 'cirqueira.musica.textoPrincipal',
+  _hover: { bg: 'cirqueira.musica.cartaoElevado' },
+} as const
 
 const PROPS_ATALHO = {
   display: 'inline-flex',
@@ -124,6 +134,7 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
   ocupado,
   onUnir,
   onDescartar,
+  onVersoesDeOutra,
 }: CartaoDuplicataRevisaoProps) {
   const [primeira, segunda] = duplicata.musicas
 
@@ -142,25 +153,29 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
         Estas duas são a mesma música?
       </Text>
       <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-        Elas têm o mesmo nome e artistas parecidos. Ouça pelos atalhos e escolha uma das duas
-        respostas abaixo.
+        Elas têm o mesmo nome e artistas parecidos. Ouça pelos atalhos e escolha uma das respostas
+        abaixo.
       </Text>
       <SimpleGrid columns={{ base: 1, md: 2 }} gap={3}>
         <LadoDuplicata musica={primeira} outra={segunda} ocupado={ocupado} onUnir={onUnir} />
         <LadoDuplicata musica={segunda} outra={primeira} ocupado={ocupado} onUnir={onUnir} />
       </SimpleGrid>
-      <Button
-        size="sm"
-        borderRadius="full"
-        variant="outline"
-        borderColor="cirqueira.musica.textoDesabilitado"
-        color="cirqueira.musica.textoPrincipal"
-        _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
-        disabled={ocupado}
-        onClick={() => onDescartar(primeira.uuid, segunda.uuid)}
-      >
-        <Split size={14} /> São músicas diferentes
-      </Button>
+      <SimpleGrid columns={{ base: 1, sm: 2 }} gap={2}>
+        <Button
+          {...PROPS_BOTAO_RESPOSTA}
+          disabled={ocupado}
+          onClick={() => onVersoesDeOutra(duplicata)}
+        >
+          <GitBranch size={14} /> São versões de outra música
+        </Button>
+        <Button
+          {...PROPS_BOTAO_RESPOSTA}
+          disabled={ocupado}
+          onClick={() => onDescartar(primeira.uuid, segunda.uuid)}
+        >
+          <Split size={14} /> São músicas diferentes
+        </Button>
+      </SimpleGrid>
       <VStack align="stretch" gap={1} fontSize="2xs" color="cirqueira.musica.textoDesabilitado">
         <Text>
           <Text as="strong" color="cirqueira.musica.textoSecundario">
@@ -168,6 +183,13 @@ export const CartaoDuplicataRevisao = memo(function CartaoDuplicataRevisao({
           </Text>
           as duas viram uma só, com o nome que você escolheu, e as reproduções somam. Dá para
           separar depois nos detalhes da música.
+        </Text>
+        <Text>
+          <Text as="strong" color="cirqueira.musica.textoSecundario">
+            Versões de outra música:{' '}
+          </Text>
+          você escolhe a música oficial (ex.: um slowed + reverb da original) e as duas viram
+          versões dela.
         </Text>
         <Text>
           <Text as="strong" color="cirqueira.musica.textoSecundario">

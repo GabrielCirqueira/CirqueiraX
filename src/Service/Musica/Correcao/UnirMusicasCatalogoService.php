@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Musica\Correcao;
 
 use App\DataObject\Musica\UnirMusicasDTO;
+use App\DataObject\Musica\UnirVariasMusicasDTO;
 use App\Entity\MusicaCatalogo;
 use App\Entity\Usuario;
 use App\Exception\Musica\MusicaCatalogoException;
@@ -30,11 +31,37 @@ final readonly class UnirMusicasCatalogoService
             throw MusicaCatalogoException::uniaoComElaMesma();
         }
 
+        $this->unir($origem, $destino);
+
+        return $this->concluir($usuario, $destino);
+    }
+
+    public function executarVarias(Usuario $usuario, UnirVariasMusicasDTO $dto): MusicaCatalogo
+    {
+        $destino = ($this->musicaRepository->buscarDoUsuario($usuario, $dto->destinoUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada())->musicaEfetiva();
+
+        foreach (array_unique($dto->origemUuids) as $origemUuid) {
+            $origem = $this->musicaRepository->buscarDoUsuario($usuario, $origemUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+            if ($origem === $destino || $origem->musicaEfetiva() === $destino) {
+                continue;
+            }
+            $this->unir($origem, $destino);
+        }
+
+        return $this->concluir($usuario, $destino);
+    }
+
+    private function unir(MusicaCatalogo $origem, MusicaCatalogo $destino): void
+    {
         if ($origem->tipo() !== $destino->tipo()) {
             throw MusicaCatalogoException::tiposDiferentes();
         }
 
         $origem->unirA($destino);
+    }
+
+    private function concluir(Usuario $usuario, MusicaCatalogo $destino): MusicaCatalogo
+    {
         $destino->confirmarManualmente();
         $this->musicaRepository->flush();
         $this->atualizarProjecao->executar($usuario);

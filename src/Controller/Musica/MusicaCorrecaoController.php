@@ -16,6 +16,7 @@ use App\DataObject\Musica\FiltroRevisaoMusicaDTO;
 use App\DataObject\Musica\SepararMusicaDTO;
 use App\DataObject\Musica\UnirArtistasDTO;
 use App\DataObject\Musica\UnirMusicasDTO;
+use App\DataObject\Musica\UnirVariasMusicasDTO;
 use App\Entity\Usuario;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Serializer\MusicaCatalogoSerializer;
@@ -95,6 +96,12 @@ final class MusicaCorrecaoController extends DefaultController
     public function unirMusicas(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] UnirMusicasDTO $dto): Response
     {
         return $this->success($this->serializer->serializarMusica($this->unirMusicas->executar($usuario, $dto)));
+    }
+
+    #[Route('/catalogo/unir-varias', name: 'unir_varias_musicas', methods: ['POST'])]
+    public function unirVariasMusicas(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] UnirVariasMusicasDTO $dto): Response
+    {
+        return $this->success($this->serializer->serializarMusica($this->unirMusicas->executarVarias($usuario, $dto)));
     }
 
     #[Route('/catalogo/duplicatas/descartar', name: 'descartar_duplicata', methods: ['POST'])]

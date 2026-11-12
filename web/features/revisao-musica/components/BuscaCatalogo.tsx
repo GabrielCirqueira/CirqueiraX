@@ -105,15 +105,19 @@ function ResultadoBusca<T>({
 export interface BuscaMusicaCatalogoProps {
   selecionada: MusicaCatalogo | null
   ignorarUuid?: string | null
+  ignorarUuids?: string[]
+  termoInicial?: string
   onEscolher: (musica: MusicaCatalogo) => void
 }
 
 export const BuscaMusicaCatalogo = memo(function BuscaMusicaCatalogo({
   selecionada,
   ignorarUuid = null,
+  ignorarUuids = [],
+  termoInicial = '',
   onEscolher,
 }: BuscaMusicaCatalogoProps) {
-  const [termo, setTermo] = useState('')
+  const [termo, setTermo] = useState(termoInicial)
   const { data, isFetching } = useBuscaMusicasCatalogo(termo)
 
   return (
@@ -130,7 +134,7 @@ export const BuscaMusicaCatalogo = memo(function BuscaMusicaCatalogo({
       <ResultadoBusca
         termo={termo}
         carregando={isFetching && !data}
-        itens={data}
+        itens={data?.filter((musica) => !ignorarUuids.includes(musica.uuid))}
         chave={(musica) => musica.uuid}
         titulo={(musica) => musica.titulo}
         detalhe={(musica) => nomesArtistasCatalogo(musica) || 'Sem artista'}

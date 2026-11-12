@@ -8,13 +8,21 @@ import {
   useDescartarDuplicata,
   useListaRevisao,
   useUnirMusicas,
+  useUnirVariasMusicas,
 } from '../hooks'
-import type { ContagensRevisao, CorrecaoVideoPayload, TipoRevisao, VideoRevisao } from '../types'
+import type {
+  ContagensRevisao,
+  CorrecaoVideoPayload,
+  MusicaDuplicata,
+  TipoRevisao,
+  VideoRevisao,
+} from '../types'
 import { aceitaLote, proximaAbaComPendencias, totalPaginas } from '../utils'
 import { BarraLoteRevisao } from './BarraLoteRevisao'
 import { CartaoCanalRevisao } from './CartaoCanalRevisao'
 import { CartaoDuplicataRevisao } from './CartaoDuplicataRevisao'
 import { CartaoVideoRevisao } from './CartaoVideoRevisao'
+import { JanelaVersoesDeOutraMusica } from './JanelaVersoesDeOutraMusica'
 import { type ModoCorrecaoVideo, PainelCorrecaoVideo } from './PainelCorrecaoVideo'
 
 interface AlvoPainel {
@@ -41,6 +49,8 @@ export const ListaRevisao = memo(function ListaRevisao({
   const lote = useDefinirMusicaEmLote(tipo, pagina)
   const canal = useClassificarCanal(tipo, pagina)
   const unir = useUnirMusicas(tipo, pagina)
+  const unirVarias = useUnirVariasMusicas(tipo, pagina)
+  const [versoesDe, setVersoesDe] = useState<MusicaDuplicata[] | null>(null)
   const descartar = useDescartarDuplicata(pagina)
 
   const paginas = totalPaginas(data)
@@ -182,9 +192,10 @@ export const ListaRevisao = memo(function ListaRevisao({
         <CartaoDuplicataRevisao
           key={duplicata.musicas.map((musica) => musica.uuid).join('-')}
           duplicata={duplicata}
-          ocupado={unir.isPending || descartar.isPending}
+          ocupado={unir.isPending || descartar.isPending || unirVarias.isPending}
           onUnir={(origemUuid, destinoUuid) => unir.mutate({ origemUuid, destinoUuid })}
           onDescartar={(origemUuid, destinoUuid) => descartar.mutate({ origemUuid, destinoUuid })}
+          onVersoesDeOutra={(alvo) => setVersoesDe(alvo.musicas)}
         />
       ))}
 
@@ -225,6 +236,16 @@ export const ListaRevisao = memo(function ListaRevisao({
           onConfirmarLote={confirmarLote}
         />
       )}
+
+      <JanelaVersoesDeOutraMusica
+        musicas={versoesDe}
+        ocupado={unirVarias.isPending}
+        onFechar={() => setVersoesDe(null)}
+        onConfirmar={(origemUuids, destinoUuid) => {
+          unirVarias.mutate({ origemUuids, destinoUuid })
+          setVersoesDe(null)
+        }}
+      />
     </VStack>
   )
 })

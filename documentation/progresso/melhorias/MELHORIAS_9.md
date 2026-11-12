@@ -55,3 +55,15 @@
 - **Arquivos**: `extensao/youtube-music/conteudo.js`, `extensao/youtube-music/pagina.js`, `extensao/youtube-music/manifest.json`, `src/Service/YoutubeMusic/Extensao/RegistrarEventosExtensaoYoutubeService.php`, `migrations/Version20261112220000.php`
 
 ---
+
+### ✅ Melhoria 165 — "São Versões de Outra Música" nas Possíveis Duplicadas
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: nas possíveis duplicadas, os pares eram muitas vezes duas versões (ex.: "Forever Young - Slowed + Reverb" de 3slow2 e "forever young - slowed + reverb" de slō) de uma terceira música, a oficial ("Forever Young — Alphaville"), que não aparecia no par. Só dava para dizer "iguais" (uma vira a outra) ou "diferentes", sem ligar as duas à música oficial.
+- **Solução**:
+  - Novo botão "São versões de outra música" em cada par. Ele abre uma janela com as duas músicas e a busca no catálogo, já preenchida com o título sem o sufixo da versão (`tituloBaseVersoes`); ao escolher a oficial, as duas são unidas a ela e passam a aparecer como versões, com as reproduções somadas. Dá para separar depois nos detalhes da música.
+  - Backend: `POST /api/v1/musica/catalogo/unir-varias` (`UnirVariasMusicasDTO`, até 10 origens), em `UnirMusicasCatalogoService::executarVarias`, que une todas numa operação só e atualiza a projeção uma vez.
+- **Arquivos**: `src/DataObject/Musica/UnirVariasMusicasDTO.php`, `src/Service/Musica/Correcao/UnirMusicasCatalogoService.php`, `src/Controller/Musica/MusicaCorrecaoController.php`, `web/features/revisao-musica/components/JanelaVersoesDeOutraMusica.tsx`, `web/features/revisao-musica/components/CartaoDuplicataRevisao.tsx`, `web/features/revisao-musica/components/ListaRevisao.tsx`, `web/features/revisao-musica/components/BuscaCatalogo.tsx`, `web/features/revisao-musica/hooks/useRevisaoMusica.ts`, `web/features/revisao-musica/api.ts`, `web/features/revisao-musica/utils/revisaoMusica.ts`
+
+---

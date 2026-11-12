@@ -275,6 +275,7 @@ Toda correção marca a música como `confirmadaManualmente` (ou o vídeo com or
 - `GET /api/v1/musica/revisao?tipo=&pagina=&porPagina=`, com `tipo` = `sem_vinculo`, `ambiguo`, `compilacao`, `canal_novo`, `possivel_duplicata` ou `indisponivel`. Vídeos vêm com miniatura, status, confiança, versão, sugestão da IA (com as alternativas) e a música atual; canais vêm com total e um título de exemplo; duplicatas vêm em pares.
 - `POST /api/v1/musica/revisao/videos/{uuid}/musica` — corpo `{acao: definir_musica|nao_musica|manter_compilacao, musicaUuid?, titulo?, artistas?, versao?}`.
 - `POST /api/v1/musica/catalogo/unir` — `{origemUuid, destinoUuid}`.
+- `POST /api/v1/musica/catalogo/unir-varias` — `{origemUuids: [..], destinoUuid}`: liga várias músicas a uma oficial de uma vez ("São versões de outra música" nas possíveis duplicadas).
 - `POST /api/v1/musica/catalogo/separar` — `{musicaUuid}` desfaz uma união; `{videoUuid}` tira o vídeo da música.
 - `PUT /api/v1/musica/catalogo/{uuid}/artistas` — `{artistas: []}` (a mais do roadmap, para a tela do tópico 202).
 - `POST /api/v1/musica/canais/classificar` — `{canal, classificacao: musica|nao_musica}`.

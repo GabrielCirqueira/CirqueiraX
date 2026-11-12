@@ -21,6 +21,7 @@ import {
   separarVideo,
   unirArtistas,
   unirMusicas,
+  unirVariasMusicas,
 } from '../api'
 import type {
   ClassificacaoCanal,
@@ -331,6 +332,46 @@ export function useSepararVideo() {
         type: 'success',
         title: 'Versão separada',
         description: 'O vídeo saiu desta música e foi para a revisão.',
+      })
+    },
+    onSettled: () => invalidarMusica(queryClient),
+  })
+}
+
+export interface UniaoVariasVariaveis {
+  origemUuids: string[]
+  destinoUuid: string
+}
+
+export function useUnirVariasMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ origemUuids, destinoUuid }: UniaoVariasVariaveis) =>
+      unirVariasMusicas(origemUuids, destinoUuid),
+    onMutate: ({ origemUuids }) =>
+      tipo === 'possivel_duplicata'
+        ? aplicarOtimista(
+            queryClient,
+            tipo,
+            pagina,
+            (atual) => removerDuplicataDaPagina(atual, origemUuids),
+            1
+          )
+        : undefined,
+    onError: (erro, _variaveis, instantaneo) => {
+      if (tipo) restaurar(queryClient, tipo, pagina, instantaneo)
+      addToast({
+        type: 'error',
+        title: 'Não foi possível ligar as versões',
+        description: extrairMensagemErroApi(erro, 'Tente de novo em instantes.'),
+      })
+    },
+    onSuccess: (musica) => {
+      addToast({
+        type: 'success',
+        title: 'Versões ligadas',
+        description: `As duas agora aparecem como versões de ${musica.titulo}, e as reproduções somam.`,
       })
     },
     onSettled: () => invalidarMusica(queryClient),
