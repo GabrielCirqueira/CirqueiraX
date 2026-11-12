@@ -170,6 +170,27 @@ As análises saíram de `/spotify` para `/api/v1/musica` (tópico 200) e aceitam
 | `GET` | `/musica/catalogo/musicas?busca=`, `/musica/catalogo/artistas?busca=` | Busca no catálogo |
 | `POST` | `/musica/catalogo/unir`, `/musica/catalogo/separar`, `/musica/artistas/unir`, `/musica/canais/classificar` | Correções do catálogo |
 | `GET` | `/spotify/tocando-agora` | Faixa atual do Spotify (sem cache) |
+| `GET` | `/musica/capa?url=` | **Público.** Serve capas e fotos do Google/YouTube, Spotify e Deezer já gravadas no banco, com cache em disco e `Cache-Control` de 30 dias |
+
+### YouTube Music
+
+Conexão pela sessão do navegador (cookie), coleta a cada 30 s e Takeout. Funcionamento completo em [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md).
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/youtube-music/conectar` | Conecta ou reconecta com os cabeçalhos colados (5 por minuto) |
+| `GET` | `/youtube-music/status` | Estado da conexão e da coleta (nunca devolve credenciais) |
+| `POST` | `/youtube-music/desconectar` | Apaga a credencial e mantém as reproduções |
+| `POST` | `/youtube-music/importacoes` | Envia o Google Takeout |
+| `GET` | `/youtube-music/importacoes/{uuid}` | Andamento e relatório |
+| `POST` | `/youtube-music/importacoes/{uuid}/confirmar`, `/cancelar` | Confirma ou cancela o custo da IA |
+
+### Notificações
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/notificacoes?naoLidas=&limite=` | Notificações do usuário logado e o total de não lidas |
+| `POST` | `/notificacoes/marcar-lidas` | `{uuids}` marca como lidas |
 
 ### Categorias e regras
 
@@ -243,6 +264,14 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `app:media:retentar` | Retenta mídias com erro |
 | `app:media:indexar-metadados` | Indexa metadados antigos |
 | `app:cron:heartbeat` | Teste de agendamento |
+| `app:notificacao:criar` | Cria notificação de atualização (`--tipo`, `--titulo`, `--mensagem`, `--usuario` opcional) |
+| `app:spotify:artistas-faixas` | Busca os artistas das faixas do Spotify (respeita o limite de 300 em 24 h) |
+| `app:musica:vincular-spotify` | Liga as faixas do Spotify ao catálogo (`--usuario`) |
+| `app:musica:projetar-spotify` | Refaz a projeção `reproducao_musical` (`-u`) |
+| `app:musica:comparar-paridade` | Compara a projeção com as consultas antigas do Spotify (`-u`) |
+| `app:musica:buscar-fotos-artistas` | Busca fotos de artistas sem Spotify pelo YouTube Music (`-u`) |
+| `app:youtube:identificar` | Identifica vídeos do YouTube (`--pendentes`, `--todos --usuario`, `--limite`) |
+| `app:youtube:continuar-importacao` | Roda as etapas de uma importação do Takeout |
 
 ## Regras de ouro
 

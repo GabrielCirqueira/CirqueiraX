@@ -104,6 +104,7 @@ Caso deseje carregar seus meses passados para a Cápsula:
 - O sistema cataloga e armazena em cache as capas e fotos de perfil de artistas na entidade `ImagemSpotify`.
 - Quando um registro do histórico antigo traz apenas os nomes de texto (sem código Spotify), um processo em segundo plano via Symfony Messenger (`BuscarImagemSpotifyMessage`) busca a capa na API com conferência de similaridade de strings (threshold 70) e tolerância de duração, evitando capas incorretas.
 - A interface exibe placeholders neutros e atualiza dinamicamente as capas via polling reativo sem necessidade de recarregar a tela.
+- As capas do Spotify (`i.scdn.co`, `mosaic.scdn.co`, `image-cdn-*.spotifycdn.com`) são exibidas através de `GET /api/v1/musica/capa?url=`, porque em algumas redes e navegadores os links `image-cdn-*.spotifycdn.com` não abriam (caso real de 12/11). Detalhes em [MUSICA.md](MUSICA.md), "Capas servidas pelo sistema".
 
 ---
 

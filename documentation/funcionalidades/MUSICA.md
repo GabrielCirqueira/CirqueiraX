@@ -1,7 +1,8 @@
 # Música — Spotify e YouTube Music juntos
 
 > Página **Música**, rota `/musica`. Reúne o histórico do Spotify e do YouTube Music numa leitura só.
-> Lote do roadmap: tópicos 186–205. Este documento cresce a cada tópico concluído.
+> Lote do roadmap: tópicos 186–205, mais as correções de 11 e 12/11/2026 (conexão pelo Firefox, coleta a cada 30 s de verdade, tempo da música tocando, fuso, capas servidas pelo sistema). Este documento cresce a cada tópico concluído.
+> Captura do YouTube Music por cookie, passo a passo e por dentro: [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md). Spotify: [SPOTIFY.md](SPOTIFY.md).
 
 ---
 
@@ -28,6 +29,57 @@ Transformar a página do Spotify numa página de música que reúne **Spotify e 
 
 As quatro últimas linhas são as propostas padrão do roadmap, adotadas até o Gabriel dizer o contrário.
 
+## Como está dividido
+
+A música passa por cinco camadas. Cada fonte tem a própria entrada e as próprias tabelas; a partir do catálogo, tudo é igual para as duas.
+
+```
+ ENTRADA                          DADOS DA FONTE                 LIGAÇÃO                      CATÁLOGO ÚNICO           LEITURA
+ ───────                          ──────────────                 ───────                      ──────────────           ───────
+ Spotify
+  ├ OAuth + API (30 min) ───────▶ reproducao_spotify   ─────▶ vinculo_musica_spotify  ─┐
+  └ importação do histórico ────▶ artista_faixa_spotify        (nome + artista          │
+                                  imagem_spotify                normalizados)           │
+                                                                                        ├─▶ musica_catalogo ──▶ reproducao_musical ──▶ /api/v1/musica?fonte=
+ YouTube Music                                                                          │   artista_catalogo     (projeção, uma        (rankings, Cápsula,
+  ├ cookie + coletor (30 s) ────▶ video_youtube        ─────▶ identificação           ─┘   componente_mashup     linha por               detalhes, Dashboard)
+  └ Google Takeout ─────────────▶ reproducao_youtube           (regra, IA, busca do                               reprodução)
+                                  importacao_youtube           YouTube Music, revisão)
+```
+
+| Camada | O que faz | Spotify | YouTube Music |
+|---|---|---|---|
+| 1. Entrada | Traz o que foi ouvido | API oficial com OAuth, coleta das últimas 50 a cada 30 min, importação do arquivo do Spotify ([SPOTIFY.md](SPOTIFY.md)) | Sessão do navegador (cookie) lida pelo servidor a cada 30 s, Google Takeout para o passado ([YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md)) |
+| 2. Dados da fonte | Guarda como veio, sem perder nada | `reproducao_spotify` (tempo exato, pulos, aleatório), `artista_faixa_spotify`, `imagem_spotify` | `video_youtube` (título e canal originais), `reproducao_youtube` (horário e tempo estimados) |
+| 3. Ligação | Diz qual música é | Vínculo por nome + artista principal normalizados (`VincularFaixasSpotifyAoCatalogoService`) | Faixa oficial direto, IA + confirmação na busca, regras de canal e a tela de Revisão (`IdentificarVideosYoutubeService`) |
+| 4. Catálogo único | A música e o artista, iguais entre serviços | `musica_catalogo`, `artista_catalogo` (com apelidos e uniões), `musica_artista_catalogo`, `componente_mashup` | (o mesmo) |
+| 5. Projeção e leitura | Uma linha por reprodução, com a música efetiva | `reproducao_musical` com `fonte = spotify` | `reproducao_musical` com `fonte = youtube_music` |
+
+Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseReproducaoMusicalRepository`) leem só `reproducao_musical` e recebem o filtro `fonte` (`todas`, `spotify`, `youtube_music`). Nenhuma análise lê as tabelas de uma fonte diretamente, a não ser para complementar o item com o que só existe nela (código da faixa do Spotify, `videoId` do vídeo mais ouvido, capa).
+
+### Onde fica cada parte no código
+
+| Parte | Backend | Frontend |
+|---|---|---|
+| Spotify (conexão, coleta, importação, limites, capas) | `src/Service/Spotify/`, `src/Controller/Spotify/` | `web/features/spotify/` |
+| YouTube Music (conexão por cookie, coleta, Takeout) | `src/Service/YoutubeMusic/`, `src/Infra/YoutubeMusic/`, `bin/ytmusic.py`, `src/Controller/YoutubeMusic/` | `web/features/youtube-music/` |
+| Identificação dos vídeos | `src/Service/IdentificacaoMusica/` (`IdentificarVideosYoutubeService`, `AplicarIdentificacaoVideoYoutubeService`, `ConfirmarMusicaYoutubeService`), `src/Infra/OpenAi/`, `src/Infra/YoutubeData/` | — |
+| Catálogo e correções | `src/Service/Musica/` (raiz e `Correcao/`), `MusicaCorrecaoController` | `web/features/revisao-musica/` |
+| Projeção | `src/Service/Musica/Projecao/` | — |
+| Análises | `src/Service/Musica/Analise/`, `AnaliseReproducaoMusicalRepository`, `MusicaController`, `MusicaAnaliseController` | `web/features/musica/` |
+| Capas | `src/Service/Musica/Capa/`, `CapaMusicaController` | `web/features/musica/utils/capaMusica.ts` |
+
+### Diferenças que continuam entre as fontes
+
+| Assunto | Spotify | YouTube Music |
+|---|---|---|
+| Horário | Exato (fim da reprodução informado pelo Spotify) | Estimado: meio do intervalo entre duas leituras do histórico |
+| Tempo ouvido | Exato (`ms_played`) | Estimado: `min(intervalo até a seguinte, duração)`; a que está tocando cresce a cada coleta |
+| Pulos e aleatório | Sim | Não existem |
+| Tocando agora | Sim (API) | Só "última detectada" |
+| Repetição seguida | Conta cada vez | A segunda não aparece no histórico |
+| Duração da conexão | Token renovado sozinho | Sessão do Google, que pode cair (status `reconectar`) |
+
 ## Regras de dados
 
 - **Identidade da música:** título normalizado + artista principal normalizado (mesma regra do `SPOTIFY.md`, seção 7). Mashup: conjunto ordenado das chaves dos componentes. Nunca depender do código de faixa do Spotify nem do `videoId`.
@@ -52,7 +104,9 @@ O cookie é a sessão inteira da conta Google. Ele fica criptografado no banco c
 - **OAuth por código de TV (12/11, refeito):** com cliente próprio, YouTube Data API ativada e app em teste, o token sai e funciona na API oficial (achou o canal), mas a API interna do YouTube Music responde `HTTP 400: Request contains an invalid argument`. O bloqueio é do Google (discussão #682 da `ytmusicapi`). A API oficial não tem o histórico de exibição.
 - **Cabeçalhos colados do Chrome (12/11):** o formato "nome numa linha, valor na outra" com `:authority`, `:path` etc. quebrava a leitura e aparecia como "formato inesperado"; o `bin/ytmusic.py` agora normaliza os dois formatos e descarta `accept-encoding`, `content-encoding`, `content-length` e `priority`. Corrigido isso, a mesma sessão, 28 minutos depois de copiada, já voltava "Faça login para acessar seu histórico". A duração bate com a do segundo cookie (cerca de 25 minutos). Hipótese não confirmada: o Chrome no Windows prende os cookies da sessão do Google ao aparelho (credenciais de sessão vinculadas ao dispositivo) e a cópia morre na primeira renovação. Teste sugerido: copiar de uma janela privada do Firefox.
 - **IP do servidor (12/11):** chamadas sem login ao YouTube Music recebem às vezes a página "Sorry" (tráfego incomum), cerca de 1 em 6. O coletor de teste passou o dia consultando com um cookie morto e foi parado. A verificação "o serviço responde sem login" agora tenta 3 vezes antes de concluir.
-- Spotify: o app é bloqueado (429) depois de cerca de 600 consultas de artistas; o bloqueio para também a coleta das músicas recentes.
+- **Cabeçalhos do Firefox (11/11 e 12/11):** a cópia pelo painel corta o cookie com "…" (agora a conexão avisa "cookie cortado"); "Copiar cabeçalhos da requisição" inclui a linha `POST /youtubei/... HTTP/3`, que o script passou a descartar; sem o cabeçalho `Authorization` a `ytmusicapi` 1.12 assumia OAuth, e o script agora força a autenticação de navegador (`SAPISIDHASH`). Com isso a conexão pela página funcionou: conta reconhecida e 199 itens no histórico. A sessão continuou válida a noite inteira.
+- **Respostas vazias (12/11):** cerca de 1 em cada 5 consultas autenticadas do servidor volta vazia; o script tenta até 4 vezes antes de dizer "serviço indisponível". Teste: 10 de 10 leituras com sucesso.
+- Spotify: o app é bloqueado (429) depois de cerca de 600 consultas de artistas; o bloqueio para também a coleta das músicas recentes. Desde 12/11 a busca de artistas fica em no máximo 300 consultas em 24 h (janela móvel).
 
 ## Cliente do YouTube Music (tópico 188)
 
@@ -69,14 +123,14 @@ O cookie é a sessão inteira da conta Google. Ele fica criptografado no banco c
 
 ### Como copiar os cabeçalhos
 
-1. Abra uma **janela anônima** no navegador do computador e entre em `music.youtube.com` com a sua conta.
+1. Abra uma **janela anônima** (no Firefox, janela privada) no computador e entre em `music.youtube.com` com a sua conta.
 2. Abra o DevTools (F12) → aba **Rede** (Network) e filtre por `browse`.
 3. Clique em qualquer página do YouTube Music (por exemplo, Biblioteca) para aparecer uma requisição `browse`.
-4. Clique na requisição → **Cabeçalhos** (Headers) → **Cabeçalhos da requisição** → copie tudo. No Chrome também serve botão direito → Copiar → **Copiar como cURL**.
+4. Copie os cabeçalhos da requisição: no **Firefox**, botão direito → **Copiar valor** → **Copiar cabeçalhos da requisição** (copiar o valor pelo painel corta o cookie com "…"); no **Chrome**, botão direito → Copiar → **Copiar como cURL (bash)**, ou a lista em Cabeçalhos → Cabeçalhos da requisição.
 5. Cole na tela de conexão do CirqueiraX.
 6. **Feche a janela anônima sem clicar em Sair.** Sair invalida a sessão copiada.
 
-A dica da janela anônima é comum em outras ferramentas que usam a mesma biblioteca: a sessão anônima não é usada depois, então o Google não troca os cookies dela. Ainda falta medir aqui quanto ela dura em comparação com a janela normal (no teste, a cópia da janela normal parou em cerca de 25 minutos).
+A dica da janela anônima é comum em outras ferramentas que usam a mesma biblioteca: a sessão anônima não é usada depois, então o Google não troca os cookies dela. Medições: cópias do Chrome em janela normal pararam em cerca de 25 minutos; a cópia do Firefox em janela normal, conectada pela página às 22h11 de 11/11, continuava funcionando na manhã seguinte (mais de 11 h, sem erro). O passo a passo completo, os erros comuns e o que acontece por dentro estão em [YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md).
 
 ### O que o sistema faz
 
@@ -105,7 +159,7 @@ As tabelas do Spotify (`reproducao_spotify`, `artista_faixa_spotify`) não mudar
 ## Coleta contínua do YouTube Music (tópico 192)
 
 - O agendador dispara `ColetarHistoricoYoutubeMusicMessage` a cada 30 s na fila própria `youtube_coleta`, consumida por 1 worker (`messenger-youtube-coleta`, limite de 128 MB). O handler só consulta contas conectadas com `proximaConsultaEm` vencida.
-- **Intervalo adaptativo**: 30 s enquanto houve novidade nos últimos 10 minutos, 120 s quando parado. Nunca menos de 15 s entre duas consultas da mesma conta.
+- **Intervalo adaptativo**: 30 s enquanto houve novidade nos últimos 10 minutos, 120 s quando parado. Nunca menos de 15 s entre duas consultas da mesma conta. A próxima consulta conta do **início** da consulta atual, com 5 s de folga (`TOLERANCIA_AGENDADOR_SEGUNDOS`); antes contava do fim e caía logo depois do disparo do agendador, então na prática a consulta acontecia a cada 60 s.
 - **Sem consultas sobrepostas**: antes de consultar, a conta recebe `proximaConsultaEm` daqui a 2 minutos e é gravada. Com um único worker na fila, as consultas da mesma conta ficam em série. Se um dia houver mais workers, essa reserva evita a maioria das sobreposições, mas não é um bloqueio rigoroso (o projeto não tem o componente Lock).
 - **Detecção**: o histórico vem em ordem, sem horário. A consulta é comparada com o `snapshotTopo` (50 primeiros `videoId`) e conta como novo cada item que aparece antes do alinhamento com a lista anterior. A primeira consulta só grava o snapshot (a conexão já faz isso).
 - **Gravação**: cria ou atualiza o `VideoYoutube` (título, canal, duração, capa) e cria a `ReproducaoYoutube` com `fonte = coletor`. A mais recente recebe o horário em que foi vista; quando várias aparecem de uma vez, cada anterior começa a duração dela antes da seguinte. Duplicatas são descartadas pela `chaveDeduplicacao`.
@@ -295,7 +349,7 @@ Lista do que só pode ser conferido com a conta e os arquivos do Gabriel. Cada c
 
 | Verificação | Situação |
 |---|---|
-| Coleta ao vivo com 5 a 10 músicas (slowed da mesma música, um mashup, uma repetição e uma pulada) | _pendente_ |
+| Coleta ao vivo com 5 a 10 músicas (slowed da mesma música, um mashup, uma repetição e uma pulada) | Em andamento: de 11/11 22h11 a 12/11 09h47, 36 reproduções coletadas, 33 vídeos (30 músicas, 2 mashups, 1 em revisão), 0 erros. Falta o roteiro com slowed, repetição e pulada |
 | Takeout real: relatório, fila de revisão e custo real contra o estimado | _pendente_ |
 | Acerto da IA em 100 títulos reais (inclusive português e gospel) e confirmação pela busca | _pendente_ |
 | 30 músicas ouvidas nos dois serviços: duplicatas falsas e uniões erradas | _pendente_ |
@@ -330,7 +384,7 @@ Lista do que só pode ser conferido com a conta e os arquivos do Gabriel. Cada c
 
 ## Limpeza do teste
 
-Depois do deploy final, com o YouTube Music conectado pela página e coletando em produção: parar e remover o contêiner `ytmusic_teste_coletor` e apagar `/root/ytmusic_teste`. O cliente OAuth do teste e o acesso de terceiros ficam no item 5 das pendências.
+Depois do deploy final, com o YouTube Music conectado pela página e coletando em produção: parar e remover o contêiner `ytmusic_teste_coletor` e apagar `/root/ytmusic_teste`. Situação em 12/11: a conta está conectada pela página desde 22h11 de 11/11 e coletando; o contêiner de teste está parado (não removido) e a pasta ainda existe, aguardando o OK do Gabriel para apagar. O cliente OAuth do teste e o acesso de terceiros ficam no item 5 das pendências.
 
 ## Fora do escopo
 
@@ -343,4 +397,6 @@ Capas hospedadas no Google/YouTube (`yt3.googleusercontent.com`, `lh3.googleuser
 - Rota pública (sem token, para o `<img>` funcionar e o navegador guardar em cache por 30 dias).
 - Só aceita `https` desses hosts e só URLs que já existem no banco (`musica_catalogo.url_capa`, `video_youtube.url_capa`, `artista_catalogo.url_foto`, `imagem_spotify`), então não serve de proxy aberto.
 - Baixa uma vez (até 5 MB, só `image/*`) e guarda em `var/cache/thumbnails/capas-musica/<sha256>`, no volume `thumbnails_prod`.
-- Capas do Spotify e do Deezer continuam direto do CDN deles.
+- Vale para todas as capas e fotos da música: `CapaMusica`, linhas dos rankings, lista de músicas, Cápsula (inclusive a imagem PNG gerada no navegador) e o fundo do topo do detalhe (`HeroDetalheMusica`).
+- Links de outros hosts continuam direto do endereço original.
+- Diagnóstico usado no caso real: gerar a resposta do ranking do usuário, separar as capas quebradas das que funcionam e comparar os hosts. As quebradas eram todas `image-cdn-ak/fa.spotifycdn.com`; as que abriam eram `i.scdn.co`. Do servidor, todas respondiam 200, e o log do Nginx não mostrava pedidos do navegador para as quebradas, sinal de bloqueio no próprio navegador ou na rede.

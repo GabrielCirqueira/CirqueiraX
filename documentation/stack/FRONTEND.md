@@ -111,6 +111,7 @@ A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainL
 | `musica`, `revisao-musica` | [MUSICA.md](../funcionalidades/MUSICA.md) |
 | `spotify` | [SPOTIFY.md](../funcionalidades/SPOTIFY.md) |
 | `youtube-music` | [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md) |
+| `notificacoes` | [NOTIFICACOES.md](../funcionalidades/NOTIFICACOES.md) |
 
 ---
 
@@ -128,6 +129,11 @@ A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainL
 - A página e `/build/` ficam no cache `cirqueirax-app-v1`. As consultas dos livros em áudio ficam em `cirqueirax-api-v1` e são servidas com o cabeçalho `X-Cirqueirax-Offline: 1` quando não há rede.
 - O plugin `recursosOffline` do Vite gera `build/sw-assets.json` e copia os recursos do pdf.js para `build/pdfjs/`.
 - O Nginx serve `/sw.js` e `/site.webmanifest` com `Cache-Control: no-cache`.
+- **Atualização automática:** `web/shared/pwa/versaoApp.ts` (`iniciarVerificacaoVersao`, chamado no `main.tsx`) compara a cada 60 s e ao voltar para a aba o script principal carregado (`/build/assets/app-*.js`) com o publicado em `/`. Se mudou, recarrega a mesma página sem perder o login; espera se houver áudio ou vídeo tocando ou se o usuário estiver digitando.
+
+### Imagens de música
+
+Capas e fotos da música passam por `urlCapaExibicao` (`web/features/musica/utils/capaMusica.ts`), que troca links do Google/YouTube, Spotify e Deezer por `/api/v1/musica/capa?url=`. Use sempre essa função ao exibir uma capa nova; as imagens levam `referrerPolicy="no-referrer"`.
 
 ### Polling
 
@@ -135,6 +141,8 @@ A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainL
 | :--- | :--- |
 | Downloads MP3, com item em andamento | 2,5 s |
 | Histórico de Envios do Google Fotos | 15 s |
+| Notificações (e ao voltar para a aba) | 60 s |
+| Versão publicada do site | 60 s |
 
 ---
 

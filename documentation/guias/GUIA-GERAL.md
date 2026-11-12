@@ -1326,7 +1326,7 @@
         
         try {
           const { refreshToken } = useAuthStore.getState();
-          const { data } = await axios.post('/api/token/refresh', { refresh_token: refreshToken });
+          const { data } = await axios.post('/api/v1/token/refresh', { refresh_token: refreshToken });
           
           useAuthStore.getState().setAutenticado(null, data.token); // ou useAuthStore.getState().setToken(...)
           processQueue(null, data.token);

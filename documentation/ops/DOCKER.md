@@ -30,7 +30,7 @@ Este documento explica como a stack Docker está configurada e como executar o p
 
 1. `db` sobe primeiro (healthcheck MySQL)
 2. `symfony` e `vite-react` aguardam `db` estar pronto
-3. `devops/bootstrap.sh` garante chaves RS256 para o JWT
+3. `devops/bootstrap.sh` garante chaves RS256 para o JWT. Em produção as chaves ficam no volume `jwt_prod` (`config/jwt`), então um deploy não troca as chaves e não derruba o login de ninguém; o bootstrap só gera chaves se o volume estiver vazio
 4. Volumes nomeados mantêm dados do banco e caches entre reinícios
 
 ## Gestão de Portas (`ports.env`)

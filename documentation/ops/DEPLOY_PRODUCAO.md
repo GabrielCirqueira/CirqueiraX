@@ -68,7 +68,8 @@ Para que o download automatizado de vídeos sociais (TikTok, Twitter/X, Instagra
 
 ### 2.2. Persistência do Cache de Miniaturas (`docker-compose.prod.yaml`)
 O endpoint `/api/v1/media-itens/{uuid}/thumbnail` grava miniaturas processadas em `var/cache/thumbnails/`. Para evitar que recreações de container (`docker compose up -d --force-recreate`) descartassem as capas em cache, foi criado o volume nomeado:
-- `thumbnails_prod:/var/www/html/var/cache/thumbnails`.
+- `thumbnails_prod:/var/www/html/var/cache/thumbnails`. Também guarda as capas de música servidas por `/api/v1/musica/capa` (`capas-musica/`).
+- `jwt_prod:/var/www/html/config/jwt` mantém as chaves do JWT entre deploys (antes cada container gerava chaves novas e todos eram deslogados).
 
 ### 2.2.1. Transcrições (`Dockerfile.prod` e `docker-compose.prod.yaml`)
 - O estágio `whisper-builder` compila o `whisper.cpp` v1.7.6 e baixa o modelo `ggml-small-q5_1`; a imagem final copia `/opt/whisper` e instala `libstdc++` e `libgomp`.

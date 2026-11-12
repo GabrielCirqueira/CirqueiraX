@@ -10,9 +10,10 @@ const SITUACAO_POR_ESTADO: Record<EstadoContaYoutubeMusic, SituacaoPainelYoutube
 }
 
 export const PASSOS_OBTER_CABECALHOS = [
-  'Abra uma janela anônima e entre em music.youtube.com com a sua conta Google.',
+  'Abra uma janela anônima (no Firefox, janela privada) e entre em music.youtube.com com a sua conta Google.',
   'Abra as ferramentas do desenvolvedor (F12) na aba Rede e filtre por "browse".',
-  'Clique em qualquer página do YouTube Music, escolha uma requisição "browse" e copie os cabeçalhos da requisição.',
+  'Clique em qualquer página do YouTube Music, como a Biblioteca, para aparecer uma requisição "browse".',
+  'No Firefox: botão direito na requisição → Copiar valor → Copiar cabeçalhos da requisição. No Chrome: botão direito → Copiar → Copiar como cURL (bash).',
   'Cole tudo no campo abaixo. Depois feche a janela anônima sem clicar em Sair.',
 ]
 

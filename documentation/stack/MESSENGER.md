@@ -61,7 +61,7 @@ ClassificarMediaItemService ◄─┘
 | `SincronizarHistoricoSpotifyMessage` | Scheduler (30 min) | Coleta últimas 50 faixas via API do Spotify |
 | `ImportarHistoricoSpotifyMessage` | Upload de arquivo | Processa assincronamente arquivo ZIP ou JSON de histórico do Spotify |
 | `BuscarImagemSpotifyMessage` | Visualização / enriquecimento | Busca capa ou foto de artista na API do Spotify em segundo plano |
-| `ColetarHistoricoYoutubeMusicMessage` | Scheduler (30 s), fila `youtube_coleta` | Consulta o histórico das contas do YouTube Music com consulta vencida |
+| `ColetarHistoricoYoutubeMusicMessage` | Scheduler (30 s), fila `youtube_coleta` (1 worker) | Consulta o histórico das contas do YouTube Music com consulta vencida (30 s com novidade, 120 s parado), grava as reproduções novas e atualiza o tempo da que está tocando. Ver [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md) |
 | `IdentificarVideosYoutubeMessage` | Scheduler (1 min), fila `youtube_identificacao` | Identifica com IA os vídeos ainda sem classificação |
 | `AtualizarDetalhesVideosYoutubeMessage` | Scheduler (1 hora) | Atualiza duração, canal e disponibilidade pela YouTube Data API |
 | `ImportarHistoricoYoutubeMessage` | Upload do Takeout | Lê o histórico de exibição do Google Takeout |
