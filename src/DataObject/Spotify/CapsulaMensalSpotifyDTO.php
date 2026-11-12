@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\DataObject\Spotify;
 
+use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
+
 final readonly class CapsulaMensalSpotifyDTO
 {
     /**
      * @param array<int, ItemRankingMusicaCapsulaDTO> $topMusicas
      * @param array<int, ItemRankingArtistaCapsulaDTO> $topArtistas
      * @param array<int, MinutosPorDiaDTO> $minutosPorDia
+     * @param list<AlbumAnaliseSpotifyDTO> $topAlbuns
      */
     public function __construct(
         private int $ano,
@@ -26,6 +29,7 @@ final readonly class CapsulaMensalSpotifyDTO
         private array $topMusicas,
         private array $topArtistas,
         private array $minutosPorDia,
+        private array $topAlbuns = [],
     ) {}
 
     public function ano(): int
@@ -105,6 +109,14 @@ final readonly class CapsulaMensalSpotifyDTO
     public function minutosPorDia(): array
     {
         return $this->minutosPorDia;
+    }
+
+    /**
+     * @return list<AlbumAnaliseSpotifyDTO>
+     */
+    public function topAlbuns(): array
+    {
+        return $this->topAlbuns;
     }
 }
 

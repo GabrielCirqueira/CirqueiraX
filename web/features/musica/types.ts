@@ -214,6 +214,7 @@ export const CapsulaMensalSchema = z.object({
   artistaMaisOuvido: ItemRankingArtistaCapsulaSchema.nullable(),
   topMusicas: z.array(ItemRankingMusicaCapsulaSchema),
   topArtistas: z.array(ItemRankingArtistaCapsulaSchema),
+  topAlbuns: z.array(AlbumAnaliseSchema).default([]),
   minutosPorDia: z.array(MinutosPorDiaCapsulaSchema),
 })
 

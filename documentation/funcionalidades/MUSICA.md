@@ -24,7 +24,7 @@ Transformar a página do Spotify numa página de música que reúne **Spotify e 
 | Identificação | IA (`OPENAI_MODELO_TEXTO`, hoje `gpt-5.4-mini`). Título e canal originais sempre guardados |
 | Tempo ouvido em "Todos" | **Soma** medido (Spotify) e estimado (YouTube), com a marca "inclui estimativas" e tooltip separando os dois |
 | Compilação | Vídeo com mais de `LIMITE_COMPONENTES_MASHUP = 5` músicas não credita artistas sem confirmação manual |
-| Cápsula Sonora | Acompanha o seletor de fonte, com aviso de que a calibração é do Spotify |
+| Cápsula Sonora | Acompanha o seletor de fonte, com aviso de que a calibração é do Spotify. Além dos cartões do mês, mostra direto na seção os top 5 artistas, músicas e álbuns do mês (por streams, com minutos e a divisão por plataforma); a API devolve `topAlbuns` junto com `topMusicas` e `topArtistas` |
 | Desconectar o YouTube Music | Apaga só a credencial e **mantém as reproduções** |
 
 As quatro últimas linhas são as propostas padrão do roadmap, adotadas até o Gabriel dizer o contrário.

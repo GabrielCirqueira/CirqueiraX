@@ -22,6 +22,7 @@ final readonly class CalcularCapsulaMensalService
 {
     private const int LIMITE_TOP_MUSICAS = 5;
     private const int LIMITE_TOP_ARTISTAS = 10;
+    private const int LIMITE_TOP_ALBUNS = 5;
     private const int MESES_RETROATIVOS_TOP5 = 6;
     private const int LIMITE_COMPARACAO = 50;
 
@@ -139,6 +140,7 @@ final readonly class CalcularCapsulaMensalService
             topMusicas: $topMusicasCapsula,
             topArtistas: $topArtistasCapsula,
             minutosPorDia: $minutosPorDia,
+            topAlbuns: $this->analiseRepository->listarRankingAlbuns($usuario, PeriodoAnaliseSpotifyDTO::doMes($ano, $mes), $fonte, self::LIMITE_TOP_ALBUNS),
         );
     }
 

@@ -69,6 +69,7 @@ import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { ListaMusicasItem } from './ListaMusicasItem'
 import { MinutosMusica, TooltipMusica } from './MinutosMusica'
 import { BotaoImagemCapsula } from './ModalImagemCapsula'
+import { TopsMesCapsula } from './TopsMesCapsula'
 
 export interface SecaoCapsulaSonoraProps {
   conectada: boolean
@@ -709,6 +710,10 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             </VStack>
           </Box>
         </SimpleGrid>
+      )}
+
+      {!carregandoCapsula && capsula && (
+        <TopsMesCapsula capsula={capsula} mapaImagens={mapaImagensConsultadas} />
       )}
 
       {modalDetalhe && capsula && (

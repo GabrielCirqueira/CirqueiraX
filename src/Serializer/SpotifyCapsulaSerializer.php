@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Serializer;
 
+use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
 use App\DataObject\Spotify\Analise\ArtistaAnaliseSpotifyDTO;
 use App\DataObject\Spotify\Analise\MusicaAnaliseSpotifyDTO;
 use App\DataObject\Spotify\CapsulaMensalSpotifyDTO;
@@ -65,6 +66,10 @@ final readonly class SpotifyCapsulaSerializer
             'topArtistas' => array_map(
                 fn (ItemRankingArtistaCapsulaDTO $item): array => $this->serializarItemArtista($item, $mapaImagens),
                 $capsula->topArtistas(),
+            ),
+            'topAlbuns' => array_map(
+                static fn (AlbumAnaliseSpotifyDTO $album): array => (null === $mapaImagens ? $album : $album->comImagem($mapaImagens))->paraArray(),
+                $capsula->topAlbuns(),
             ),
             'minutosPorDia' => array_map(static fn (MinutosPorDiaDTO $m): array => [
                 'data' => $m->data(),

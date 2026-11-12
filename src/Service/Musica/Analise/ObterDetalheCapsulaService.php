@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Musica\Analise;
 
+use App\DataObject\Spotify\Analise\AlbumAnaliseSpotifyDTO;
 use App\DataObject\Spotify\DetalheCapsulaComImagensDTO;
 use App\DataObject\Spotify\ItemRankingArtistaCapsulaDTO;
 use App\DataObject\Spotify\ItemRankingMusicaCapsulaDTO;
@@ -39,6 +40,10 @@ final readonly class ObterDetalheCapsulaService
                 'nome' => $item->nomeFaixa(),
                 'artista' => $item->artistaPrincipal(),
             ];
+        }
+
+        foreach (array_filter($capsula->topAlbuns(), static fn (AlbumAnaliseSpotifyDTO $album): bool => $album->temSpotify()) as $album) {
+            $faixas[] = $album->paraEnriquecimento();
         }
 
         $artistas = [];
