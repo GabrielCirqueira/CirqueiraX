@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Enum\FonteCapturaYoutubeMusic;
 use App\Repository\UsuarioRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -47,6 +48,9 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string', length: 150, nullable: true)]
     private ?string $pastaArmazenamento = null;
+
+    #[ORM\Column(type: 'string', length: 20, enumType: FonteCapturaYoutubeMusic::class, options: ['default' => 'coletor'])]
+    private FonteCapturaYoutubeMusic $fonteCapturaYoutubeMusic = FonteCapturaYoutubeMusic::Coletor;
 
     public function __construct(string $nomeCompleto, string $username, string $email)
     {
@@ -153,6 +157,19 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function isAdmin(): bool
     {
         return in_array('ROLE_ADMIN', $this->getRoles(), true);
+    }
+
+    public function fonteCapturaYoutubeMusic(): FonteCapturaYoutubeMusic
+    {
+        return $this->fonteCapturaYoutubeMusic;
+    }
+
+    public function definirFonteCapturaYoutubeMusic(FonteCapturaYoutubeMusic $fonte): static
+    {
+        $this->fonteCapturaYoutubeMusic = $fonte;
+        $this->atualizadoEm = new \DateTimeImmutable();
+
+        return $this;
     }
 
     public function getMetaEscutaMinutos(): int

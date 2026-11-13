@@ -43,6 +43,10 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         }
 
         $usuario = $token->usuario();
+        if (!$usuario->fonteCapturaYoutubeMusic()->isExtensao()) {
+            return 0;
+        }
+
         $recebidoEm = new DateTimeImmutable();
         $registradas = [];
         $videos = [];
@@ -67,7 +71,7 @@ final readonly class RegistrarEventosExtensaoYoutubeService
     {
         $existente = $doLote ?? $this->reproducaoRepository->buscarDaExtensao($usuario, $evento->idReproducao);
         if (null !== $existente) {
-            return $existente->atualizarProgressoDaExtensao($evento->msOuvidos, $evento->puladaInformada());
+            return $existente->atualizarProgressoDaExtensao($evento->msOuvidos, $evento->puladaInformada(), $evento->isPausada());
         }
 
         $video = $videos[$evento->videoId] ?? $this->obterVideo($usuario, $evento);
@@ -76,7 +80,7 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         $this->encerrarAnterioresSemFim($usuario, $inicio);
         $estimada = $this->unirComColeta->buscarEstimadaParaExtensao($usuario, $video, $inicio);
         $reproducao = $estimada?->marcarVistaPeloColetor() ?? new ReproducaoYoutube($usuario, $video, $inicio, 0, FonteReproducaoYoutube::Extensao);
-        $reproducao->assumirDadosDaExtensao($evento->idReproducao, $inicio, $evento->msOuvidos, $evento->puladaInformada());
+        $reproducao->assumirDadosDaExtensao($evento->idReproducao, $inicio, $evento->msOuvidos, $evento->puladaInformada(), $evento->isPausada());
         $this->reproducaoRepository->salvar($reproducao, flush: false);
 
         return $reproducao;

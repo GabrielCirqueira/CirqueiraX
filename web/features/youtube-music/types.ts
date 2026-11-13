@@ -21,6 +21,7 @@ export const TocandoAgoraExtensaoSchema = z.object({
   msOuvidos: z.number(),
   duracaoMs: z.number().nullable(),
   atualizadoEm: z.string().nullable().default(null),
+  pausada: z.boolean().default(false),
   vezesOuvida: z.number().default(0),
   primeiraVezEm: z.string().nullable().default(null),
 })
@@ -50,6 +51,14 @@ export const TokenExtensaoGeradoSchema = TokenExtensaoYoutubeSchema.extend({
 
 export type TokenExtensaoGerado = z.infer<typeof TokenExtensaoGeradoSchema>
 
+export const FonteCapturaYoutubeSchema = z.enum(['coletor', 'extensao'])
+
+export type FonteCapturaYoutube = z.infer<typeof FonteCapturaYoutubeSchema>
+
+export const DefinirFonteCapturaYoutubeSchema = z.object({
+  fonteCaptura: FonteCapturaYoutubeSchema,
+})
+
 export const StatusYoutubeMusicSchema = z.object({
   conectada: z.boolean(),
   status: EstadoContaYoutubeMusicSchema,
@@ -69,6 +78,7 @@ export const StatusYoutubeMusicSchema = z.object({
     .nullable()
     .optional(),
   extensao: ResumoExtensaoYoutubeSchema.optional(),
+  fonteCaptura: FonteCapturaYoutubeSchema.default('coletor'),
 })
 
 export type StatusYoutubeMusic = z.infer<typeof StatusYoutubeMusicSchema>

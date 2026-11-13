@@ -69,6 +69,9 @@ class ReproducaoYoutube
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $extensaoAtualizadaEm = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $extensaoPausada = false;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
@@ -105,8 +108,9 @@ class ReproducaoYoutube
         return hash(self::ALGORITMO_CHAVE, self::PREFIXO_CHAVE_EXTENSAO.self::SEPARADOR_CHAVE.$idExtensao);
     }
 
-    public function assumirDadosDaExtensao(string $idExtensao, DateTimeImmutable $inicio, int $msOuvidos, ?bool $pulada): self
+    public function assumirDadosDaExtensao(string $idExtensao, DateTimeImmutable $inicio, int $msOuvidos, ?bool $pulada, bool $pausada = false): self
     {
+        $this->extensaoPausada = $pausada;
         $this->idExtensao = $idExtensao;
         $this->tocadaEm = $inicio->setTimezone(new DateTimeZone(self::FUSO_UTC));
         $this->fonte = FonteReproducaoYoutube::Extensao;
@@ -119,8 +123,9 @@ class ReproducaoYoutube
         return $this;
     }
 
-    public function atualizarProgressoDaExtensao(int $msOuvidos, ?bool $pulada): self
+    public function atualizarProgressoDaExtensao(int $msOuvidos, ?bool $pulada, bool $pausada = false): self
     {
+        $this->extensaoPausada = $pausada;
         $this->msReproduzidos = self::limitarMs(max($this->msReproduzidos, $msOuvidos));
         $this->pulada = $pulada ?? $this->pulada;
         $this->extensaoAtualizadaEm = new DateTimeImmutable();
@@ -243,6 +248,11 @@ class ReproducaoYoutube
     public function pulada(): ?bool
     {
         return $this->pulada;
+    }
+
+    public function isExtensaoPausada(): bool
+    {
+        return $this->extensaoPausada;
     }
 
     public function extensaoAtualizadaEm(): ?DateTimeImmutable

@@ -8,6 +8,7 @@ import { NOTA_MARGEM_HORARIO, formatarNumero, situacaoPainelYoutubeMusic } from 
 import { CampoCabecalhosYoutubeMusic } from './CampoCabecalhosYoutubeMusic'
 import { ModalDesconectarYoutubeMusic } from './ModalDesconectarYoutubeMusic'
 import { SecaoExtensaoYoutubeMusic } from './SecaoExtensaoYoutubeMusic'
+import { SeletorFonteCapturaYoutube } from './SeletorFonteCapturaYoutube'
 
 export interface PainelConexaoYoutubeMusicProps {
   onAbrirModalImportacao: () => void
@@ -70,6 +71,8 @@ export const PainelConexaoYoutubeMusic = memo(function PainelConexaoYoutubeMusic
             </VStack>
           </HStack>
 
+          <SeletorFonteCapturaYoutube fonte={status?.fonteCaptura ?? 'coletor'} />
+
           {situacao === 'reconectar' && (
             <HStack
               gap={2}
@@ -93,6 +96,11 @@ export const PainelConexaoYoutubeMusic = memo(function PainelConexaoYoutubeMusic
 
           {situacao === 'conectado' && (
             <VStack align="stretch" gap={1} fontSize="xs" color="cirqueira.musica.textoSecundario">
+              {status?.fonteCaptura === 'extensao' && (
+                <Text color="cirqueira.musica.amarelo" fontWeight="semibold">
+                  Coleta por cookies pausada. O cookie continua guardado.
+                </Text>
+              )}
               <Text>Última consulta: {formatarDataHoraPtBr(status?.ultimaConsultaEm ?? null)}</Text>
               <Text>Última novidade: {formatarDataHoraPtBr(status?.ultimaNovidadeEm ?? null)}</Text>
               <HStack gap={1.5} align="start" color="cirqueira.musica.textoDesabilitado">

@@ -1,4 +1,4 @@
-import type { EstadoContaYoutubeMusic, StatusYoutubeMusic } from '../types'
+import type { EstadoContaYoutubeMusic, FonteCapturaYoutube, StatusYoutubeMusic } from '../types'
 
 export type SituacaoPainelYoutubeMusic = 'desconectado' | 'conectado' | 'reconectar'
 
@@ -42,4 +42,20 @@ export function descreverDeteccaoAproximada(dataIso: string | null, agora: numbe
   if (diferenca < DIA_MS) return `há cerca de ${Math.round(diferenca / HORA_MS)} h`
   const dias = Math.round(diferenca / DIA_MS)
   return dias === 1 ? 'há cerca de 1 dia' : `há cerca de ${dias} dias`
+}
+
+export const OPCOES_FONTE_CAPTURA_YOUTUBE: { valor: FonteCapturaYoutube; rotulo: string }[] = [
+  { valor: 'extensao', rotulo: 'Extensão' },
+  { valor: 'coletor', rotulo: 'Cookies' },
+]
+
+const EXPLICACAO_FONTE_CAPTURA: Record<FonteCapturaYoutube, string> = {
+  extensao:
+    'Só a extensão registra, com horário e tempo exatos do computador. A conexão por cookies fica pausada: o cookie continua guardado e dá para voltar quando quiser. O que tocar no celular ou na TV não entra enquanto isso.',
+  coletor:
+    'Só a conexão por cookies registra (computador, celular e TV, com horário estimado). A extensão pode continuar instalada, mas o que ela manda é ignorado.',
+}
+
+export function explicarFonteCapturaYoutube(fonte: FonteCapturaYoutube): string {
+  return EXPLICACAO_FONTE_CAPTURA[fonte]
 }

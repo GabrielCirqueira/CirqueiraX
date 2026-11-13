@@ -48,6 +48,12 @@ function descreverAba(aba) {
 function descreverEstado(temToken, estado, aba) {
   if (!temToken) return { texto: 'Sem token. Cole o token gerado no CirqueiraX.', tipo: 'neutra' }
   if (estado.erro) return { texto: estado.erro, tipo: 'erro' }
+  if (estado.desativada)
+    return {
+      texto:
+        'A extensão está desligada no CirqueiraX (a fonte ativa é a conexão por cookies). Para usar a extensão, ative em Música → Gerenciar.',
+      tipo: 'erro',
+    }
   if (!abaAtiva(aba))
     return { texto: 'Token ok, mas nenhuma aba do YouTube Music está sendo lida.', tipo: 'erro' }
   return { texto: 'Conectada. As músicas desta aba estão sendo registradas.', tipo: 'ok' }

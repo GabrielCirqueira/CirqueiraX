@@ -198,17 +198,18 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
         return $reproducoes;
     }
 
-    public function buscarTocandoAgoraDaExtensao(Usuario $usuario, DateTimeImmutable $atualizadaDesde): ?ReproducaoYoutube
+    public function buscarTocandoAgoraDaExtensao(Usuario $usuario, DateTimeImmutable $atualizadaDesde, DateTimeImmutable $pausadaDesde): ?ReproducaoYoutube
     {
         /** @var ReproducaoYoutube|null $reproducao */
         $reproducao = $this->createQueryBuilder('e')
             ->andWhere('e.usuario = :usuario')
             ->andWhere('e.fonte = :fonte')
             ->andWhere('e.pulada IS NULL')
-            ->andWhere('e.extensaoAtualizadaEm >= :desde')
+            ->andWhere('e.extensaoAtualizadaEm >= :desde OR (e.extensaoPausada = true AND e.extensaoAtualizadaEm >= :pausadaDesde)')
             ->setParameter('usuario', $usuario)
             ->setParameter('fonte', FonteReproducaoYoutube::Extensao->value)
             ->setParameter('desde', $atualizadaDesde)
+            ->setParameter('pausadaDesde', $pausadaDesde)
             ->orderBy('e.extensaoAtualizadaEm', 'DESC')
             ->setMaxResults(1)
             ->getQuery()

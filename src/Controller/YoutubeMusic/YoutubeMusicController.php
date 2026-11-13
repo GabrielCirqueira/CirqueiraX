@@ -6,9 +6,11 @@ namespace App\Controller\YoutubeMusic;
 
 use App\Controller\Common\DefaultController;
 use App\DataObject\YoutubeMusic\ConectarYoutubeMusicDTO;
+use App\DataObject\YoutubeMusic\DefinirFonteCapturaYoutubeMusicDTO;
 use App\Entity\Usuario;
 use App\Serializer\ContaYoutubeMusicSerializer;
 use App\Service\YoutubeMusic\ConectarYoutubeMusicService;
+use App\Service\YoutubeMusic\DefinirFonteCapturaYoutubeMusicService;
 use App\Service\YoutubeMusic\DesconectarYoutubeMusicService;
 use App\Service\YoutubeMusic\ObterStatusYoutubeMusicService;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +26,7 @@ final class YoutubeMusicController extends DefaultController
         private readonly ObterStatusYoutubeMusicService $obterStatusService,
         private readonly DesconectarYoutubeMusicService $desconectarService,
         private readonly ContaYoutubeMusicSerializer $serializer,
+        private readonly DefinirFonteCapturaYoutubeMusicService $definirFonteCapturaService,
     ) {
     }
 
@@ -43,7 +46,14 @@ final class YoutubeMusicController extends DefaultController
             $this->obterStatusService->contarReproducoesColetadas($usuario),
             $this->obterStatusService->buscarUltimaDetectada($usuario),
             $this->obterStatusService->resumirExtensao($usuario),
+            $usuario->fonteCapturaYoutubeMusic(),
         ));
+    }
+
+    #[Route('/fonte-captura', name: 'fonte_captura', methods: ['PATCH'])]
+    public function definirFonteCaptura(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] DefinirFonteCapturaYoutubeMusicDTO $dto): Response
+    {
+        return $this->success(['fonteCaptura' => $this->definirFonteCapturaService->executar($usuario, $dto->fonteEscolhida())->value]);
     }
 
     #[Route('/desconectar', name: 'desconectar', methods: ['POST'])]

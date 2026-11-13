@@ -51,7 +51,7 @@ final readonly class ColetarHistoricoYoutubeMusicService
     public function executar(ContaYoutubeMusic $conta): void
     {
         $credenciaisCriptografadas = $conta->credenciaisCriptografadas();
-        if (!$conta->isConectada() || null === $credenciaisCriptografadas || !$this->isIntervaloMinimoRespeitado($conta)) {
+        if (!$conta->isConectada() || null === $credenciaisCriptografadas || !$conta->usuario()->fonteCapturaYoutubeMusic()->isColetor() || !$this->isIntervaloMinimoRespeitado($conta)) {
             return;
         }
 

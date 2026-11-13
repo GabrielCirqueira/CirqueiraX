@@ -17,6 +17,7 @@ use DateTimeImmutable;
 final readonly class ObterStatusYoutubeMusicService
 {
     private const string JANELA_TOCANDO_AGORA = '-75 seconds';
+    private const string JANELA_PAUSADA = '-5 minutes';
 
     public function __construct(
         private ContaYoutubeMusicRepository $contaRepository,
@@ -38,7 +39,7 @@ final readonly class ObterStatusYoutubeMusicService
 
     public function resumirExtensao(Usuario $usuario): ResumoExtensaoYoutubeDTO
     {
-        $tocando = $this->reproducaoRepository->buscarTocandoAgoraDaExtensao($usuario, new DateTimeImmutable(self::JANELA_TOCANDO_AGORA));
+        $tocando = $this->reproducaoRepository->buscarTocandoAgoraDaExtensao($usuario, new DateTimeImmutable(self::JANELA_TOCANDO_AGORA), new DateTimeImmutable(self::JANELA_PAUSADA));
         $musica = $tocando?->video()->musica()?->musicaEfetiva();
         $historico = null === $musica ? null : $this->reproducaoMusicalRepository->resumirHistoricoDaMusica($usuario, $musica);
 

@@ -167,6 +167,15 @@ class ContaYoutubeMusic
         return $this->status->isDesconectada();
     }
 
+    public function reiniciarReferenciaDoHistorico(): self
+    {
+        $this->snapshotTopo = null;
+        $this->proximaConsultaEm = null;
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
     public function isPrimeiraConsulta(): bool
     {
         return null === $this->snapshotTopo;

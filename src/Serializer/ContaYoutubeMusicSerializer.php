@@ -8,6 +8,7 @@ use App\DataObject\YoutubeMusic\ResumoExtensaoYoutubeDTO;
 use App\Entity\ArtistaCatalogo;
 use App\Entity\ContaYoutubeMusic;
 use App\Entity\ReproducaoYoutube;
+use App\Enum\FonteCapturaYoutubeMusic;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
@@ -21,7 +22,7 @@ final class ContaYoutubeMusicSerializer
     /**
      * @return array<string, mixed>
      */
-    public function serializar(?ContaYoutubeMusic $conta, int $totalReproducoesColetadas = 0, ?ReproducaoYoutube $ultimaDetectada = null, ?ResumoExtensaoYoutubeDTO $extensao = null): array
+    public function serializar(?ContaYoutubeMusic $conta, int $totalReproducoesColetadas = 0, ?ReproducaoYoutube $ultimaDetectada = null, ?ResumoExtensaoYoutubeDTO $extensao = null, FonteCapturaYoutubeMusic $fonteCaptura = FonteCapturaYoutubeMusic::Coletor): array
     {
         if (null === $conta) {
             return [
@@ -36,6 +37,7 @@ final class ContaYoutubeMusicSerializer
                 'totalReproducoesColetadas' => $totalReproducoesColetadas,
                 'ultimaDetectada' => $this->serializarUltimaDetectada($ultimaDetectada),
                 'extensao' => $this->serializarExtensao($extensao),
+                'fonteCaptura' => $fonteCaptura->value,
             ];
         }
 
@@ -51,6 +53,7 @@ final class ContaYoutubeMusicSerializer
             'totalReproducoesColetadas' => $totalReproducoesColetadas,
             'ultimaDetectada' => $this->serializarUltimaDetectada($ultimaDetectada),
             'extensao' => $this->serializarExtensao($extensao),
+            'fonteCaptura' => $fonteCaptura->value,
         ];
     }
 
@@ -92,6 +95,7 @@ final class ContaYoutubeMusicSerializer
             'msOuvidos' => $tocando->msReproduzidos(),
             'duracaoMs' => $video->duracaoMs(),
             'atualizadoEm' => $tocando->extensaoAtualizadaEm()?->format(DateTimeInterface::ATOM),
+            'pausada' => $tocando->isExtensaoPausada(),
             'vezesOuvida' => $extensao->vezesOuvidaTocando,
             'primeiraVezEm' => $extensao->primeiraVezTocandoEm?->format(DateTimeInterface::ATOM),
         ];

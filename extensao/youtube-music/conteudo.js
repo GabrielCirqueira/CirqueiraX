@@ -3,7 +3,9 @@
   globalThis.__cirqueiraxConteudo = true
   const ORIGEM = 'cirqueirax-youtube-music'
   const INTERVALO_MS = 1000
-  const INTERVALO_PROGRESSO_MS = 20000
+  const INTERVALO_PROGRESSO_MS = 10000
+  const ESTADOS_TOCANDO = [1, 3]
+  const ESTADO_TERMINOU = 0
   const DELTA_MAXIMO_MS = 2500
   const MS_MINIMO_PARA_REGISTRAR = 3000
   const VALIDADE_DADOS_PLAYER_MS = 5000
@@ -31,6 +33,25 @@
 
   function dadosPlayerRecentes() {
     return dadosPlayer && Date.now() - dadosPlayerEm < VALIDADE_DADOS_PLAYER_MS ? dadosPlayer : null
+  }
+
+  function lerVideo() {
+    return document.querySelector('#movie_player video') ?? document.querySelector('video')
+  }
+
+  function estadoDoPlayer() {
+    const estado = dadosPlayerRecentes()?.estadoPlayer
+    return Number.isInteger(estado) ? estado : null
+  }
+
+  function estaTocando(video) {
+    const estado = estadoDoPlayer()
+    if (estado !== null) return ESTADOS_TOCANDO.includes(estado)
+    return !video.paused && !video.ended
+  }
+
+  function terminouDeTocar(video) {
+    return estadoDoPlayer() === ESTADO_TERMINOU || video.ended
   }
 
   function texto(seletor) {
@@ -93,6 +114,7 @@
       idReproducao: crypto.randomUUID(),
       iniciadoEmMs: agora - Math.round(posicaoInicial(musica, video) * 1000),
       msOuvidos: 0,
+      tocando: false,
       ultimaPosicaoMs: 0,
       terminou: false,
       enviada: false,
@@ -128,6 +150,7 @@
       msOuvidos: Math.round(reproducao.msOuvidos),
       iniciadoEmMs: reproducao.iniciadoEmMs,
       pulada: pulada ?? null,
+      pausada: tipo === 'fim' ? null : !reproducao.tocando,
     }
     chrome.runtime.sendMessage({ tipo: 'evento', evento }).catch(() => undefined)
     reproducao.enviada = true
@@ -152,12 +175,13 @@
     const agora = Date.now()
     const delta = Math.min(Math.max(0, agora - ultimoTick), DELTA_MAXIMO_MS)
     ultimoTick = agora
-    const video = document.querySelector('video')
+    const video = lerVideo()
     if (!video) return registrarPresenca(agora, 'parada', '')
     if (emAnuncio()) return registrarPresenca(agora, 'anuncio', '')
     const musica = lerMusica(video)
     if (!musica) return registrarPresenca(agora, 'parada', '')
-    registrarPresenca(agora, video.paused ? 'pausada' : 'tocando', musica.titulo)
+    const tocando = estaTocando(video)
+    registrarPresenca(agora, tocando ? 'tocando' : 'pausada', musica.titulo)
 
     if (atual && atual.videoId !== musica.videoId) {
       encerrar(atual, false)
@@ -173,13 +197,17 @@
     atual.canal = musica.canal || atual.canal
     atual.urlCapa = musica.urlCapa ?? atual.urlCapa
     atual.duracaoMs = musica.duracaoMs ?? atual.duracaoMs
-    if (!video.paused && !video.ended) atual.msOuvidos += delta
+    const mudouEstado = atual.tocando !== tocando
+    atual.tocando = tocando
+    if (tocando) atual.msOuvidos += delta
     atual.ultimaPosicaoMs = Math.round(posicaoSegundos(video) * 1000)
-    if (video.ended) atual.terminou = true
+    if (terminouDeTocar(video)) atual.terminou = true
 
     if (atual.msOuvidos < MS_MINIMO_PARA_REGISTRAR) return
-    if (!atual.enviada) enviar(atual, 'inicio')
+    if (!atual.enviada) return enviar(atual, 'inicio')
+    if (mudouEstado) return enviar(atual, 'progresso')
     if (
+      tocando &&
       agora - atual.ultimoEnvioMs >= INTERVALO_PROGRESSO_MS &&
       atual.msOuvidos !== atual.msNoUltimoEnvio
     )
@@ -187,7 +215,9 @@
   }
 
   window.addEventListener('pagehide', () => {
-    if (atual && atual.msOuvidos >= MS_MINIMO_PARA_REGISTRAR) enviar(atual, 'progresso')
+    if (!atual || atual.msOuvidos < MS_MINIMO_PARA_REGISTRAR) return
+    atual.tocando = false
+    enviar(atual, 'progresso')
   })
 
   const temporizador = setInterval(() => {

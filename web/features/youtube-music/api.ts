@@ -1,7 +1,9 @@
 import { api } from '@/config/api'
 import type { RespostaApi } from '@/shared/types/api'
 import {
+  DefinirFonteCapturaYoutubeSchema,
   DesconectarYoutubeMusicSchema,
+  type FonteCapturaYoutube,
   type ImportacaoYoutube,
   ImportacaoYoutubeSchema,
   type ListaImportacoesYoutubeDados,
@@ -31,6 +33,13 @@ export async function conectarYoutubeMusic(cabecalhos: string): Promise<StatusYo
 export async function desconectarYoutubeMusic(): Promise<boolean> {
   const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/desconectar`)
   return DesconectarYoutubeMusicSchema.parse(data.data).desconectado
+}
+
+export async function definirFonteCapturaYoutube(
+  fonte: FonteCapturaYoutube
+): Promise<FonteCapturaYoutube> {
+  const { data } = await api.patch<RespostaApi<unknown>>(`${PREFIXO}/fonte-captura`, { fonte })
+  return DefinirFonteCapturaYoutubeSchema.parse(data.data).fonteCaptura
 }
 
 export async function iniciarImportacaoYoutube(arquivo: File): Promise<ImportacaoYoutube> {

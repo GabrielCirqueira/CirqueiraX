@@ -141,6 +141,7 @@ function enviarFila(forcar) {
     const pendentes = await removerEnviados(itens)
     return salvarEstado({
       erro: null,
+      desativada: corpo?.data?.ativa === false,
       pendentes,
       aparelho: corpo?.data?.aparelho ?? null,
       ultimoEnvioEm: agora,

@@ -37,6 +37,7 @@ final class YoutubeMusicExtensaoController extends DefaultController
         return $this->success([
             'recebidos' => $this->registrarEventosService->executar($extensao->token(), $lote),
             'aparelho' => $extensao->token()->nomeAparelho(),
+            'ativa' => $extensao->token()->usuario()->fonteCapturaYoutubeMusic()->isExtensao(),
         ]);
     }
 

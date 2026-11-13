@@ -37,6 +37,7 @@ final readonly class EventoExtensaoYoutubeDTO
         #[Assert\Range(min: 0, max: self::MAXIMO_SEGUNDOS_DESDE_INICIO)]
         public int $segundosDesdeInicio = 0,
         public ?bool $pulada = null,
+        public ?bool $pausada = null,
     ) {
     }
 
@@ -51,6 +52,11 @@ final readonly class EventoExtensaoYoutubeDTO
     public function tipoEvento(): TipoEventoExtensaoYoutube
     {
         return TipoEventoExtensaoYoutube::from($this->tipo);
+    }
+
+    public function isPausada(): bool
+    {
+        return true === $this->pausada && !$this->tipoEvento()->isFim();
     }
 
     public function puladaInformada(): ?bool

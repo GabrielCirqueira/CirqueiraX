@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\ContaYoutubeMusic;
 use App\Entity\Usuario;
+use App\Enum\FonteCapturaYoutubeMusic;
 use App\Enum\StatusContaYoutubeMusic;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -61,6 +62,9 @@ final class ContaYoutubeMusicRepository extends ServiceEntityRepository
     {
         /** @var list<ContaYoutubeMusic> $contas */
         $contas = $this->createQueryBuilder('c')
+            ->innerJoin('c.usuario', 'u')
+            ->andWhere('u.fonteCapturaYoutubeMusic = :fonteCaptura')
+            ->setParameter('fonteCaptura', FonteCapturaYoutubeMusic::Coletor)
             ->andWhere('c.status = :status')
             ->andWhere('c.credenciaisCriptografadas IS NOT NULL')
             ->andWhere('c.proximaConsultaEm IS NULL OR c.proximaConsultaEm <= :agora')
