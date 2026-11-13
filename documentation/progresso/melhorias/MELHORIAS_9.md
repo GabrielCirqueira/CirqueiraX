@@ -119,3 +119,13 @@
 - **Arquivos**: `web/features/musica/components/SecaoHabitos.tsx`, `web/features/musica/components/MapaHorariosMusica.tsx` (removido), `web/features/musica/components/index.ts`, `web/features/musica/utils/analiseMusica.ts`, `web/features/musica/types.ts`, `src/DataObject/Spotify/Analise/HabitosSpotifyDTO.php`, `src/Service/Musica/Analise/ObterHabitosMusicaService.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`
 
 ---
+
+### ✅ Melhoria 170 — Novas Descobertas Mais Compacta
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: na seção Novas Descobertas, os artistas novos apareciam em grade de fotos quadradas (6 por linha, ~180 px cada); com 24 artistas a seção ocupava a tela toda. As outras abas também listavam tudo de uma vez.
+- **Solução**: todas as abas (artistas, músicas, redescobertas, obsessões) viraram linhas compactas com capa/foto de 36 px, 3 por linha no computador, 2 no tablet e 1 no celular. Aparecem os 9 primeiros e um botão "Ver todos (N)" / "Mostrar menos" abre o resto (volta a fechar ao trocar de aba). No celular as abas ficam numa linha só com rolagem lateral.
+- **Arquivos**: `web/features/musica/components/SecaoDescobertas.tsx`, `web/features/musica/utils/descobertas.ts`, `web/features/musica/utils/index.ts`
+
+---

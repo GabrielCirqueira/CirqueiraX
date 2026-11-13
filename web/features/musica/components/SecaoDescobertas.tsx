@@ -20,6 +20,8 @@ import {
   formatarNomeMes,
   gerarRotaArtista,
   gerarRotaMusica,
+  itensVisiveisDescobertas,
+  rotuloVerTodosDescobertas,
 } from '../utils'
 import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
 import { CapaMusica } from './CapaMusica'
@@ -61,6 +63,12 @@ export const SecaoDescobertas = memo(function SecaoDescobertas({
   const opcoes = criarOpcoesDescobertas()
   const [chavePeriodo, setChavePeriodo] = useState('mes')
   const [aba, setAba] = useState<AbaDescobertas>('artistas')
+  const [expandido, setExpandido] = useState(false)
+
+  function trocarAba(nova: AbaDescobertas) {
+    setAba(nova)
+    setExpandido(false)
+  }
   const filtro = (opcoes.find((opcao) => opcao.chave === chavePeriodo) ?? opcoes[0])?.filtro ?? {
     periodo: 'dias',
     dias: 30,
@@ -92,37 +100,49 @@ export const SecaoDescobertas = memo(function SecaoDescobertas({
           <Skeleton h="220px" borderRadius="8px" />
         ) : (
           <VStack align="stretch" gap={4}>
-            <Flex gap={2} wrap="wrap">
+            <Flex
+              gap={2}
+              wrap={{ base: 'nowrap', md: 'wrap' }}
+              overflowX="auto"
+              mx={{ base: -1, md: 0 }}
+              px={{ base: 1, md: 0 }}
+              css={{ scrollbarWidth: 'none' }}
+            >
               <BotaoAba
                 ativa={aba === 'artistas'}
-                onClick={() => setAba('artistas')}
+                onClick={() => trocarAba('artistas')}
                 icone={<UserPlus size={13} />}
                 rotulo="Artistas novos"
                 total={data.totalArtistasNovos}
               />
               <BotaoAba
                 ativa={aba === 'musicas'}
-                onClick={() => setAba('musicas')}
+                onClick={() => trocarAba('musicas')}
                 icone={<Music2 size={13} />}
                 rotulo="Músicas novas"
                 total={data.totalMusicasNovas}
               />
               <BotaoAba
                 ativa={aba === 'redescobertas'}
-                onClick={() => setAba('redescobertas')}
+                onClick={() => trocarAba('redescobertas')}
                 icone={<History size={13} />}
                 rotulo="Redescobertas"
                 total={data.redescobertas.length}
               />
               <BotaoAba
                 ativa={aba === 'obsessoes'}
-                onClick={() => setAba('obsessoes')}
+                onClick={() => trocarAba('obsessoes')}
                 icone={<Flame size={13} />}
                 rotulo="Obsessões"
                 total={data.obsessoes.length}
               />
             </Flex>
-            <ConteudoAba dados={data} aba={aba} />
+            <ConteudoAba dados={data} aba={aba} expandido={expandido} />
+            <BotaoVerTodos
+              total={totalDaAba(data, aba)}
+              expandido={expandido}
+              onClick={() => setExpandido((atual) => !atual)}
+            />
           </VStack>
         )}
       </Box>
@@ -142,6 +162,7 @@ function BotaoAba({ ativa, onClick, icone, rotulo, total }: BotaoAbaProps) {
   return (
     <Button
       size="xs"
+      flexShrink={0}
       borderRadius="full"
       px={3}
       fontSize="xs"
@@ -165,7 +186,15 @@ function BotaoAba({ ativa, onClick, icone, rotulo, total }: BotaoAbaProps) {
   )
 }
 
-function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobertas }) {
+function ConteudoAba({
+  dados,
+  aba,
+  expandido,
+}: {
+  dados: DescobertasMusica
+  aba: AbaDescobertas
+  expandido: boolean
+}) {
   const itens: ItemComImagemMusica[] = [
     ...dados.artistasNovos.map((item) => item.artista),
     ...dados.musicasNovas.map((item) => item.musica),
@@ -178,41 +207,28 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
     return dados.artistasNovos.length === 0 ? (
       <Vazio texto={`Nenhum artista novo em ${dados.periodo.rotulo.toLowerCase()}.`} />
     ) : (
-      <SimpleGrid columns={{ base: 3, sm: 4, md: 6 }} gap={{ base: 3, md: 4 }}>
-        {dados.artistasNovos.map(({ artista, primeiraVezEm }) => (
-          <Link key={artista.nome} asChild _hover={{ textDecoration: 'none' }} display="block">
-            <LinkMusica to={gerarRotaArtista(artista.nome, artista.artistaUuid)}>
-              <VStack
-                gap={1.5}
-                p={2}
-                borderRadius="8px"
-                _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
-                transition="background-color 0.15s ease"
-              >
+      <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={2}>
+        {itensVisiveisDescobertas(dados.artistasNovos, expandido).map(
+          ({ artista, primeiraVezEm }) => (
+            <LinhaMusica
+              key={artista.nome}
+              rota={gerarRotaArtista(artista.nome, artista.artistaUuid)}
+              capa={
                 <CapaMusica
                   url={imagemDe(artista)}
                   alt={artista.nome}
                   tipo="artista"
-                  w="full"
-                  aspectRatio="1"
-                  tamanhoIcone={24}
+                  boxSize="36px"
+                  borderRadius="full"
+                  tamanhoIcone={14}
                 />
-                <Text
-                  fontSize="xs"
-                  fontWeight="semibold"
-                  color="cirqueira.musica.textoPrincipal"
-                  textAlign="center"
-                  lineClamp={1}
-                >
-                  {artista.nome}
-                </Text>
-                <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" textAlign="center">
-                  {artista.streams} streams · desde {formatarDataExtensa(primeiraVezEm)}
-                </Text>
-              </VStack>
-            </LinkMusica>
-          </Link>
-        ))}
+              }
+              titulo={artista.nome}
+              subtitulo={`desde ${formatarDataExtensa(primeiraVezEm)}`}
+              valor={`${artista.streams}x`}
+            />
+          )
+        )}
       </SimpleGrid>
     )
   }
@@ -221,17 +237,19 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
     return dados.musicasNovas.length === 0 ? (
       <Vazio texto={`Nenhuma música nova em ${dados.periodo.rotulo.toLowerCase()}.`} />
     ) : (
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
-        {dados.musicasNovas.map(({ musica, primeiraVezEm }) => (
-          <LinhaMusica
-            key={`${musica.nomeFaixa}-${musica.artista}`}
-            rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
-            capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="44px" />}
-            titulo={musica.nomeFaixa}
-            subtitulo={`${musica.artista} · primeira vez ${formatarDataExtensa(primeiraVezEm)}`}
-            valor={`${musica.streams}x`}
-          />
-        ))}
+      <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={2}>
+        {itensVisiveisDescobertas(dados.musicasNovas, expandido).map(
+          ({ musica, primeiraVezEm }) => (
+            <LinhaMusica
+              key={`${musica.nomeFaixa}-${musica.artista}`}
+              rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
+              capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="36px" />}
+              titulo={musica.nomeFaixa}
+              subtitulo={`${musica.artista} · primeira vez ${formatarDataExtensa(primeiraVezEm)}`}
+              valor={`${musica.streams}x`}
+            />
+          )
+        )}
       </SimpleGrid>
     )
   }
@@ -240,24 +258,26 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
     return dados.redescobertas.length === 0 ? (
       <Vazio texto="Nenhum artista voltou depois de mais de 3 meses sem ouvir." />
     ) : (
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
-        {dados.redescobertas.map(({ artista, diasAusente, ultimaVezAntes }) => (
-          <LinhaMusica
-            key={artista.nome}
-            rota={gerarRotaArtista(artista.nome, artista.artistaUuid)}
-            capa={
-              <CapaMusica
-                url={imagemDe(artista)}
-                alt={artista.nome}
-                tipo="artista"
-                boxSize="44px"
-              />
-            }
-            titulo={artista.nome}
-            subtitulo={`Voltou depois de ${Math.round(diasAusente / 30)} meses · antes: ${formatarDataExtensa(ultimaVezAntes)}`}
-            valor={`${artista.streams} streams`}
-          />
-        ))}
+      <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={2}>
+        {itensVisiveisDescobertas(dados.redescobertas, expandido).map(
+          ({ artista, diasAusente, ultimaVezAntes }) => (
+            <LinhaMusica
+              key={artista.nome}
+              rota={gerarRotaArtista(artista.nome, artista.artistaUuid)}
+              capa={
+                <CapaMusica
+                  url={imagemDe(artista)}
+                  alt={artista.nome}
+                  tipo="artista"
+                  boxSize="36px"
+                />
+              }
+              titulo={artista.nome}
+              subtitulo={`Voltou depois de ${Math.round(diasAusente / 30)} meses · antes: ${formatarDataExtensa(ultimaVezAntes)}`}
+              valor={`${artista.streams} streams`}
+            />
+          )
+        )}
       </SimpleGrid>
     )
   }
@@ -265,18 +285,20 @@ function ConteudoAba({ dados, aba }: { dados: DescobertasMusica; aba: AbaDescobe
   return dados.obsessoes.length === 0 ? (
     <Vazio texto={`Nenhuma música passou de 8 repetições em ${dados.diasJanelaObsessao} dias.`} />
   ) : (
-    <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
-      {dados.obsessoes.map(({ musica, vezesNaJanela, inicioJanela, fimJanela }) => (
-        <LinhaMusica
-          key={`${musica.nomeFaixa}-${musica.artista}`}
-          rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
-          capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="44px" />}
-          titulo={musica.nomeFaixa}
-          subtitulo={`${musica.artista} · ${formatarDataExtensa(inicioJanela)} a ${formatarDataExtensa(fimJanela)}`}
-          valor={`${vezesNaJanela}x em ${dados.diasJanelaObsessao} dias`}
-          destaque
-        />
-      ))}
+    <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={2}>
+      {itensVisiveisDescobertas(dados.obsessoes, expandido).map(
+        ({ musica, vezesNaJanela, inicioJanela, fimJanela }) => (
+          <LinhaMusica
+            key={`${musica.nomeFaixa}-${musica.artista}`}
+            rota={gerarRotaMusica(musica.nomeFaixa, musica.artista, musica.musicaUuid)}
+            capa={<CapaMusica url={imagemDe(musica)} alt={musica.album} boxSize="36px" />}
+            titulo={musica.nomeFaixa}
+            subtitulo={`${musica.artista} · ${formatarDataExtensa(inicioJanela)} a ${formatarDataExtensa(fimJanela)}`}
+            valor={`${vezesNaJanela}x em ${dados.diasJanelaObsessao} dias`}
+            destaque
+          />
+        )
+      )}
     </SimpleGrid>
   )
 }
@@ -295,8 +317,9 @@ function LinhaMusica({ rota, capa, titulo, subtitulo, valor, destaque }: LinhaMu
     <Link asChild _hover={{ textDecoration: 'none' }} display="block">
       <LinkMusica to={rota}>
         <HStack
-          gap={3}
-          p={2}
+          gap={2.5}
+          px={2}
+          py={1.5}
           borderRadius="8px"
           bg="cirqueira.musica.cartaoElevado"
           _hover={{ bg: 'cirqueira.musica.fundo' }}
@@ -305,7 +328,7 @@ function LinhaMusica({ rota, capa, titulo, subtitulo, valor, destaque }: LinhaMu
           {capa}
           <VStack align="flex-start" gap={0} flex={1} minW={0}>
             <Text
-              fontSize="sm"
+              fontSize="xs"
               fontWeight="semibold"
               color="cirqueira.musica.textoPrincipal"
               truncate
@@ -328,6 +351,42 @@ function LinhaMusica({ rota, capa, titulo, subtitulo, valor, destaque }: LinhaMu
         </HStack>
       </LinkMusica>
     </Link>
+  )
+}
+
+function totalDaAba(dados: DescobertasMusica, aba: AbaDescobertas): number {
+  const totais: Record<AbaDescobertas, number> = {
+    artistas: dados.artistasNovos.length,
+    musicas: dados.musicasNovas.length,
+    redescobertas: dados.redescobertas.length,
+    obsessoes: dados.obsessoes.length,
+  }
+  return totais[aba]
+}
+
+function BotaoVerTodos({
+  total,
+  expandido,
+  onClick,
+}: {
+  total: number
+  expandido: boolean
+  onClick: () => void
+}) {
+  const rotulo = rotuloVerTodosDescobertas(total, expandido)
+  if (!rotulo) return null
+  return (
+    <Button
+      size="xs"
+      variant="ghost"
+      alignSelf="center"
+      borderRadius="full"
+      color="cirqueira.musica.textoSecundario"
+      _hover={{ color: 'cirqueira.musica.verde', bg: 'cirqueira.musica.cartaoElevado' }}
+      onClick={onClick}
+    >
+      {rotulo}
+    </Button>
   )
 }
 
