@@ -2,25 +2,51 @@
   "manifest_version": 3,
   "name": "CirqueiraX — YouTube Music",
   "short_name": "CirqueiraX YT",
-  "version": "1.3.0",
-  "description": "Registra no CirqueiraX o que você ouve no YouTube Music deste navegador, com horário, tempo ouvido e pulos exatos.",
-  "permissions": ["storage", "alarms", "scripting"],
-  "host_permissions": ["https://music.youtube.com/*", "https://x.cirqueira.com/*"],
+  "version": "1.4.0",
+  "description": "Registra no CirqueiraX o que você ouve no YouTube Music deste navegador e toca no YouTube Music as músicas que você escolher no CirqueiraX.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://music.youtube.com/*",
+    "https://x.cirqueira.com/*"
+  ],
   "background": {
     "service_worker": "fundo.js",
-    "scripts": ["fundo.js"]
+    "scripts": [
+      "fundo.js"
+    ]
   },
   "content_scripts": [
     {
-      "matches": ["https://music.youtube.com/*"],
-      "js": ["pagina.js"],
+      "matches": [
+        "https://music.youtube.com/*"
+      ],
+      "js": [
+        "pagina.js"
+      ],
       "world": "MAIN",
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://music.youtube.com/*"],
-      "js": ["conteudo.js"],
+      "matches": [
+        "https://music.youtube.com/*"
+      ],
+      "js": [
+        "conteudo.js"
+      ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://x.cirqueira.com/*"
+      ],
+      "js": [
+        "ponte.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "action": {

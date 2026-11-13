@@ -243,3 +243,12 @@ export async function obterRetrospectivaMusica(
   })
   return RetrospectivaAnualSchema.parse(data.data)
 }
+
+const RespostaTocarSpotifySchema = z.object({ aparelho: z.string(), tipo: z.string() })
+
+export type RespostaTocarSpotify = z.infer<typeof RespostaTocarSpotifySchema>
+
+export async function tocarNoSpotify(codigoFaixa: string): Promise<RespostaTocarSpotify> {
+  const { data } = await api.post<RespostaApi<unknown>>('/api/v1/spotify/tocar', { codigoFaixa })
+  return RespostaTocarSpotifySchema.parse(data.data)
+}

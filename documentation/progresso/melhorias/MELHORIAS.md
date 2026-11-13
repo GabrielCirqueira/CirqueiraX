@@ -191,3 +191,4 @@
 | M170 | Novas Descobertas Mais Compacta | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-170--novas-descobertas-mais-compacta) |
 | M171 | Barras de Rolagem no Tema do Sistema | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-171--barras-de-rolagem-no-tema-do-sistema) |
 | M172 | Fonte Ativa do YouTube Music (Extensão ou Cookies) e Extensão 1.3.0 Mais Precisa | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-172--fonte-ativa-do-youtube-music-extensão-ou-cookies-e-extensão-130-mais-precisa) |
+| M173 | Popup da Música com Tocar no Spotify e no YouTube Music | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-173--popup-da-música-com-tocar-no-spotify-e-no-youtube-music) |

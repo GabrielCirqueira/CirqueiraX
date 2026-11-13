@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Interface;
 
+use App\DataObject\Spotify\AparelhoSpotifyDTO;
 use App\DataObject\Spotify\ArtistaSpotifyDTO;
 use App\DataObject\Spotify\BuscaFaixasSpotifyDTO;
 use App\DataObject\Spotify\FaixaSpotifyDTO;
@@ -41,4 +42,11 @@ interface SpotifyInterface
     public function buscarArtistas(string $accessToken, string $nome, int $limite = 5): array;
 
     public function buscarFaixas(string $accessToken, string $texto, int $limite = 10): BuscaFaixasSpotifyDTO;
+
+    /**
+     * @return list<AparelhoSpotifyDTO>
+     */
+    public function listarAparelhos(string $accessToken): array;
+
+    public function tocarFaixa(string $accessToken, string $codigoFaixa, string $idAparelho): void;
 }

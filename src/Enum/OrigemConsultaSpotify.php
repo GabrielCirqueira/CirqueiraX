@@ -11,6 +11,7 @@ enum OrigemConsultaSpotify: string
     case Capas = 'capas';
     case Artistas = 'busca_artistas';
     case Autorizacao = 'autorizacao';
+    case Player = 'player';
 
     public function isArtistas(): bool
     {
@@ -25,6 +26,7 @@ enum OrigemConsultaSpotify: string
             self::Capas => 'Capas e fotos',
             self::Artistas => 'Busca de artistas',
             self::Autorizacao => 'Conexão e renovação do acesso',
+            self::Player => 'Tocar pelo CirqueiraX',
         };
     }
 }

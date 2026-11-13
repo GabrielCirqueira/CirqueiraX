@@ -22,6 +22,10 @@ function emSerie(tarefa) {
 }
 
 const ENDERECO_YOUTUBE_MUSIC = 'https://music.youtube.com/*'
+const URL_VIDEO_YOUTUBE_MUSIC = 'https://music.youtube.com/watch?v='
+const PADRAO_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
+const MENSAGEM_ORIGEM_DESCONHECIDA = 'Pedido de uma página que não é o CirqueiraX.'
+const MENSAGEM_VIDEO_INVALIDO = 'Vídeo inválido.'
 
 function agendarEnvio() {
   chrome.alarms.create(ALARME_ENVIO, { periodInMinutes: MINUTOS_ENTRE_ENVIOS })
@@ -38,6 +42,12 @@ async function injetarNasAbasAbertas() {
       .executeScript({ target: alvo, files: ['conteudo.js'] })
       .catch(() => undefined)
   }
+  const paginasSistema = await chrome.tabs.query({ url: `${URL_SISTEMA}/*` }).catch(() => [])
+  for (const aba of paginasSistema) {
+    await chrome.scripting
+      .executeScript({ target: { tabId: aba.id }, files: ['ponte.js'] })
+      .catch(() => undefined)
+  }
 }
 
 function aoIniciar() {
@@ -52,10 +62,14 @@ chrome.alarms.onAlarm.addListener((alarme) => {
   if (alarme.name === ALARME_ENVIO) enviarFila(false)
 })
 
-chrome.runtime.onMessage.addListener((mensagem, _remetente, responder) => {
+chrome.runtime.onMessage.addListener((mensagem, remetente, responder) => {
   if (mensagem?.tipo === 'evento') {
     enfileirar(mensagem.evento).then(() => enviarFila(false))
     return false
+  }
+  if (mensagem?.tipo === 'tocar') {
+    tocarVideo(mensagem.videoId, remetente).then(responder)
+    return true
   }
   if (mensagem?.tipo === 'testar') {
     enviarFila(true).then(responder)
@@ -63,6 +77,32 @@ chrome.runtime.onMessage.addListener((mensagem, _remetente, responder) => {
   }
   return false
 })
+
+function veioDoSistema(remetente) {
+  return typeof remetente?.url === 'string' && remetente.url.startsWith(`${URL_SISTEMA}/`)
+}
+
+function escolherAba(abas) {
+  return abas.find((aba) => aba.audible) ?? abas.find((aba) => aba.active) ?? abas[0] ?? null
+}
+
+async function tocarVideo(videoId, remetente) {
+  if (!veioDoSistema(remetente)) return { ok: false, mensagem: MENSAGEM_ORIGEM_DESCONHECIDA }
+  if (typeof videoId !== 'string' || !PADRAO_VIDEO_ID.test(videoId))
+    return { ok: false, mensagem: MENSAGEM_VIDEO_INVALIDO }
+  const url = `${URL_VIDEO_YOUTUBE_MUSIC}${videoId}`
+  const aba = escolherAba(await chrome.tabs.query({ url: ENDERECO_YOUTUBE_MUSIC }).catch(() => []))
+  try {
+    if (!aba) {
+      await chrome.tabs.create({ url, active: true })
+      return { ok: true, novaAba: true }
+    }
+    await chrome.tabs.update(aba.id, { url, active: true })
+    return { ok: true, novaAba: false }
+  } catch {
+    return { ok: false, mensagem: 'Não foi possível abrir o YouTube Music.' }
+  }
+}
 
 function enfileirar(evento) {
   return emSerie(async () => {

@@ -11,11 +11,13 @@ import { MinutosMusica } from './MinutosMusica'
 export interface ListaVersoesMusicaProps {
   variantes: VarianteMusica[]
   acaoVariante?: (variante: VarianteMusica) => ReactNode
+  acaoFinal?: (variante: VarianteMusica) => ReactNode
 }
 
 export const ListaVersoesMusica = memo(function ListaVersoesMusica({
   variantes,
   acaoVariante,
+  acaoFinal,
 }: ListaVersoesMusicaProps) {
   if (variantes.length === 0) {
     return (
@@ -78,6 +80,7 @@ export const ListaVersoesMusica = memo(function ListaVersoesMusica({
               estimado={variante.fonte === 'youtube_music'}
             />
           </VStack>
+          {acaoFinal?.(variante)}
           {variante.url && (
             <Link
               href={variante.url}

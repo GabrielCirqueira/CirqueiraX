@@ -10,7 +10,7 @@ export const VERSAO_EXTENSAO_YOUTUBE = manifestoExtensao.version
 export const URL_DOWNLOAD_EXTENSAO_YOUTUBE = `/build/extensao/cirqueirax-youtube-music-${VERSAO_EXTENSAO_YOUTUBE}.zip`
 
 export const EXPLICACAO_EXTENSAO =
-  'Opcional. No computador, a extensão lê o player do YouTube Music (aba ou app instalado do Chrome) e manda horário, tempo ouvido e pulos exatos. O que você ouve no celular ou na TV continua vindo pela conexão acima, estimado.'
+  'Opcional. No computador, a extensão lê o player do YouTube Music (aba ou app instalado do Chrome) e manda horário, tempo ouvido e pulos exatos. O que você ouve no celular ou na TV continua vindo pela conexão acima, estimado. Ela também deixa o botão ▶ dos relatórios tocar a música direto no YouTube Music deste computador.'
 
 export const PASSOS_INSTALAR_EXTENSAO = [
   'Baixe o arquivo da extensão e descompacte numa pasta que não vai apagar.',

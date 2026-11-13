@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infra\Spotify;
 
+use App\DataObject\Spotify\AparelhoSpotifyDTO;
 use App\DataObject\Spotify\ArtistaSpotifyDTO;
 use App\DataObject\Spotify\BuscaFaixasSpotifyDTO;
 use App\DataObject\Spotify\FaixaSpotifyDTO;
@@ -29,6 +30,10 @@ final class SpotifyClient extends Client implements SpotifyInterface
     private const int ESPERA_MAXIMA_RATE_LIMIT_SEGUNDOS = 10;
     private const int LIMITE_PADRAO_RECENTES = 50;
     private const int LIMITE_MAXIMO_BUSCA = 10;
+    private const int STATUS_PROIBIDO = 403;
+    private const int STATUS_NAO_ENCONTRADO = 404;
+    private const string MOTIVO_PREMIUM = 'PREMIUM_REQUIRED';
+    private const string PREFIXO_URI_FAIXA = 'spotify:track:';
 
     private ?string $tokenClientCredentialsCache = null;
     private ?int $tokenClientCredentialsExpiraEm = null;
@@ -350,6 +355,63 @@ final class SpotifyClient extends Client implements SpotifyInterface
         return $this->mapearFaixa($dados);
     }
 
+    public function listarAparelhos(string $accessToken): array
+    {
+        $dados = $this->executarComRetry(function () use ($accessToken) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'GET',
+                $this->resolverUrl('/me/player/devices'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                    ],
+                ],
+                throw: fn (RequestException $e): \Throwable => $this->mapearErroPlayer($e),
+            );
+
+            return $resposta;
+        });
+
+        $aparelhos = [];
+        foreach (is_array($dados['devices'] ?? null) ? $dados['devices'] : [] as $bruto) {
+            if (!is_array($bruto)) {
+                continue;
+            }
+
+            $aparelhos[] = new AparelhoSpotifyDTO(
+                id: $this->extrairString($bruto['id'] ?? null),
+                nome: $this->extrairString($bruto['name'] ?? null),
+                tipo: $this->extrairString($bruto['type'] ?? null),
+                ativo: true === ($bruto['is_active'] ?? false),
+                restrito: true === ($bruto['is_restricted'] ?? false),
+            );
+        }
+
+        return $aparelhos;
+    }
+
+    public function tocarFaixa(string $accessToken, string $codigoFaixa, string $idAparelho): void
+    {
+        $this->executarComRetry(function () use ($accessToken, $codigoFaixa, $idAparelho) {
+            return $this->request(
+                'PUT',
+                $this->resolverUrl('/me/player/play?device_id='.rawurlencode($idAparelho)),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                    ],
+                    'json' => ['uris' => [self::PREFIXO_URI_FAIXA.$codigoFaixa]],
+                ],
+                throw: fn (RequestException $e): \Throwable => $this->mapearErroPlayer($e),
+            );
+        });
+    }
+
     public function obterArtista(string $accessToken, string $idArtista): ArtistaSpotifyDTO
     {
         $dados = $this->executarComRetry(function () use ($accessToken, $idArtista) {
@@ -560,6 +622,27 @@ final class SpotifyClient extends Client implements SpotifyInterface
         }
 
         throw SpotifyException::limiteRequisicoesExcedido(self::ESPERA_PADRAO_RATE_LIMIT_SEGUNDOS);
+    }
+
+    private function mapearErroPlayer(RequestException $e): \Throwable
+    {
+        if (!$e instanceof BadResponseException) {
+            return $e;
+        }
+
+        $resposta = $e->getResponse();
+        $status = $resposta->getStatusCode();
+        if (self::STATUS_NAO_ENCONTRADO === $status) {
+            return SpotifyException::nenhumAparelhoDisponivel();
+        }
+
+        if (self::STATUS_PROIBIDO !== $status) {
+            return $e;
+        }
+
+        return str_contains((string) $resposta->getBody(), self::MOTIVO_PREMIUM)
+            ? SpotifyException::premiumNecessarioParaTocar()
+            : SpotifyException::permissaoDeReproducaoAusente();
     }
 
     private function extrairSegundosRetryAfter(BadResponseException $e): int

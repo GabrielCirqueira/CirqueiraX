@@ -28,6 +28,7 @@ import {
   TemaMusica,
 } from './components'
 import { BlocoDetalhe } from './components/BlocoDetalhe'
+import { BotaoTocarVariante, BotoesTocarMusica } from './components/BotoesTocarMusica'
 import { LinkMusica } from './components/LinkMusica'
 import { ListaComponentesMashup, ListaVersoesMusica } from './components/ListaVersoesMusica'
 import { ResumoPorFonteDetalhe } from './components/ResumoPorFonteDetalhe'
@@ -111,6 +112,13 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
         urlSpotify={musica.urlSpotify}
         urlYoutubeMusic={musica.urlYoutubeMusic}
         posicaoGeral={dados.posicaoGeral}
+      />
+
+      <BotoesTocarMusica
+        titulo={musica.nomeFaixa}
+        artista={musica.artista}
+        variantes={dados.variantes}
+        codigoSpotify={musica.codigoFaixa}
       />
 
       {musica.musicaUuid && (
@@ -221,6 +229,11 @@ function ConteudoMusica({ dados }: { dados: DetalheMusica }) {
       <BlocoDetalhe titulo="Versões que você ouviu">
         <ListaVersoesMusica
           variantes={dados.variantes}
+          acaoFinal={(variante) =>
+            variante.codigo ? (
+              <BotaoTocarVariante variante={variante} artista={musica.artista} />
+            ) : null
+          }
           acaoVariante={(variante) =>
             variante.videoUuid && dados.variantes.length > 1 ? (
               <BotaoSepararVersao videoUuid={variante.videoUuid} />

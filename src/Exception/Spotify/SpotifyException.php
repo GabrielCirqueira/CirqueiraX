@@ -147,4 +147,19 @@ final class SpotifyException extends \DomainException
     {
         return new self(sprintf('Nenhuma reprodução de "%s" foi encontrada no seu histórico.', $musica), 404);
     }
+
+    public static function premiumNecessarioParaTocar(): self
+    {
+        return new self('Tocar pelo CirqueiraX exige Spotify Premium. Use "Abrir no Spotify".', 403);
+    }
+
+    public static function nenhumAparelhoDisponivel(): self
+    {
+        return new self('Abra o Spotify em algum aparelho (celular, computador ou web) e tente de novo.', 404);
+    }
+
+    public static function permissaoDeReproducaoAusente(): self
+    {
+        return new self('Reconecte o Spotify em Música → Gerenciar para liberar o controle do player.', 403);
+    }
 }

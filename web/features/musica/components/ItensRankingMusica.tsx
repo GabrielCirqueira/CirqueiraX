@@ -15,7 +15,7 @@ import { memo, useState } from 'react'
 import type { PeriodoMusicasItem } from '../api'
 import { useFonteMusica } from '../hooks/useFonteMusica'
 import type { AlbumAnalise, ItemRankingArtista, ItemRankingMusica } from '../types'
-import { gerarRotaArtista, gerarRotaMusica } from '../utils'
+import { gerarRotaArtista } from '../utils'
 import { urlCapaExibicao } from '../utils/capaMusica'
 import { CapaMusica } from './CapaMusica'
 import { DivisaoFontesMusica } from './DivisaoFontesMusica'
@@ -23,6 +23,7 @@ import { GrupoIconesFonte } from './IconeFonteMusica'
 import { LinkMusica } from './LinkMusica'
 import { ListaMusicasItem } from './ListaMusicasItem'
 import { MinutosMusica } from './MinutosMusica'
+import { ModalMusica } from './ModalMusica'
 import { VersoesItemRanking } from './VersoesItemRanking'
 
 export interface ItemRankingFaixaProps {
@@ -40,8 +41,13 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
 }: ItemRankingFaixaProps) {
   const { fonte } = useFonteMusica()
   const [expandido, setExpandido] = useState(false)
+  const [modalAberto, setModalAberto] = useState(false)
   const foto = item.imagemUrl || imagemUrlResolvida
   const expansivel = Boolean(item.musicaUuid)
+  const abrirModal = (evento: { stopPropagation: () => void }) => {
+    evento.stopPropagation()
+    setModalAberto(true)
+  }
   const linkExterno = item.urlSpotify ?? item.urlYoutubeMusic ?? null
 
   return (
@@ -81,6 +87,8 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
             </Center>
 
             <Box
+              as="button"
+              aria-label={`Abrir ${item.nomeFaixa}`}
               boxSize={{ base: 10, sm: 11 }}
               borderRadius="6px"
               overflow="hidden"
@@ -91,6 +99,9 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
               display="flex"
               alignItems="center"
               justifyContent="center"
+              cursor="pointer"
+              _hover={{ borderColor: 'cirqueira.musica.verde' }}
+              onClick={abrirModal}
             >
               {foto ? (
                 <Box
@@ -109,22 +120,20 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
 
             <VStack align="flex-start" gap={0.5} minW={0} flex={1}>
               <HStack gap={1.5} maxW="full">
-                <Link
-                  asChild
+                <Text
+                  as="button"
                   fontSize={{ base: 'xs', sm: 'sm' }}
                   fontWeight="semibold"
                   color="cirqueira.musica.textoPrincipal"
                   truncate
                   display="block"
+                  textAlign="left"
+                  cursor="pointer"
                   _hover={{ textDecoration: 'underline' }}
-                  onClick={(evento) => evento.stopPropagation()}
+                  onClick={abrirModal}
                 >
-                  <LinkMusica
-                    to={gerarRotaMusica(item.nomeFaixa, item.artistaPrincipal, item.musicaUuid)}
-                  >
-                    {item.nomeFaixa}
-                  </LinkMusica>
-                </Link>
+                  {item.nomeFaixa}
+                </Text>
                 {item.mashup && (
                   <Badge
                     size="xs"
@@ -205,6 +214,15 @@ export const ItemRankingFaixa = memo(function ItemRankingFaixa({
           </Box>
         </Collapsible.Content>
       </Box>
+      {modalAberto && (
+        <ModalMusica
+          aberto={modalAberto}
+          onFechar={() => setModalAberto(false)}
+          item={item}
+          imagemUrl={foto}
+          periodo={periodo}
+        />
+      )}
     </Collapsible.Root>
   )
 })

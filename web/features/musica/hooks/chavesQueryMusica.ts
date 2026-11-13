@@ -25,4 +25,5 @@ export const MUSICA_QUERY_KEYS = {
     ['musica', fonte, 'descobertas', filtro] as const,
   retrospectiva: (fonte: FonteMusica, ano: number) =>
     ['musica', fonte, 'retrospectiva', ano] as const,
+  extensaoNoNavegador: ['musica', 'extensao-no-navegador'] as const,
 }
