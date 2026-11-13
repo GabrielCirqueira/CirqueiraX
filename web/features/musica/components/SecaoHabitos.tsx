@@ -26,7 +26,6 @@ import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
 import { CapaMusica } from './CapaMusica'
 import { CartaoMetricaMusica } from './CartaoMetricaMusica'
 import { LinkMusica } from './LinkMusica'
-import { MapaHorariosMusica } from './MapaHorariosMusica'
 import { MinutosMusica } from './MinutosMusica'
 import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
 
@@ -78,21 +77,6 @@ function ConteudoHabitos({ dados }: { dados: HabitosMusica }) {
 
   return (
     <VStack align="stretch" gap={4}>
-      <Box
-        p={{ base: 3, sm: 5 }}
-        bg="cirqueira.musica.cartao"
-        borderRadius="8px"
-        border="1px solid"
-        borderColor="cirqueira.musica.cartaoElevado"
-      >
-        <VStack align="stretch" gap={3}>
-          <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
-            Mapa de horários · {dados.periodo.rotulo}
-          </Text>
-          <MapaHorariosMusica celulas={dados.mapaHorarios} />
-        </VStack>
-      </Box>
-
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap={4}>
         <Box
           p={{ base: 3, sm: 5 }}

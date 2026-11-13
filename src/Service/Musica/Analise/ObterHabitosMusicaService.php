@@ -40,7 +40,6 @@ final readonly class ObterHabitosMusicaService
             totalMinutos: $totais['minutos'],
             totalStreams: $totais['streams'],
             artistasDistintos: $totais['artistas'],
-            mapaHorarios: $this->analiseRepository->calcularMapaHorarios($usuario, $periodo, $fonte),
             minutosTopArtistas: $this->analiseRepository->calcularMinutosTopArtistas($usuario, $periodo, $fonte, self::QUANTIDADE_TOPO),
             topArtistas: $this->aplicarImagensService->aplicar($topArtistas, $mapa),
             faixasComStream: $faixas['faixasComStream'],

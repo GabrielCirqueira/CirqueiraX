@@ -419,20 +419,10 @@ export const DetalheMusicaSchema = z.object({
 
 export type DetalheMusica = z.infer<typeof DetalheMusicaSchema>
 
-export const CelulaMapaHorarioSchema = z.object({
-  diaSemana: z.number(),
-  hora: z.number(),
-  minutos: z.number(),
-  streams: z.number(),
-})
-
-export type CelulaMapaHorario = z.infer<typeof CelulaMapaHorarioSchema>
-
 export const HabitosMusicaSchema = z.object({
   periodo: PeriodoAnaliseSchema,
   totalMinutos: z.number(),
   totalStreams: z.number(),
-  mapaHorarios: z.array(CelulaMapaHorarioSchema),
   concentracao: z.object({
     artistasDistintos: z.number(),
     minutosTopArtistas: z.number(),

@@ -12,8 +12,6 @@ import type {
 import { gerarChaveArtista, gerarChaveFaixa } from './chavesImagemMusica'
 import { formatarNomeMesAbreviado } from './formatadoresMusica'
 
-export const NOMES_DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-
 export const NOMES_DIAS_SEMANA_EXTENSO = [
   'domingo',
   'segunda-feira',
@@ -23,8 +21,6 @@ export const NOMES_DIAS_SEMANA_EXTENSO = [
   'sexta-feira',
   'sábado',
 ]
-
-export const ORDEM_DIAS_SEMANA = [1, 2, 3, 4, 5, 6, 0]
 
 export interface OpcaoPeriodoAnalise {
   chave: string
@@ -79,10 +75,6 @@ export function gerarRotaMusica(
 
 export function formatarRotuloMesCurto(ponto: Pick<PontoMensal, 'ano' | 'mes'>): string {
   return `${formatarNomeMesAbreviado(ponto.mes)}/${String(ponto.ano).slice(-2)}`
-}
-
-export function formatarFaixaHoraria(hora: number): string {
-  return `${String(hora).padStart(2, '0')}h–${String((hora + 1) % 24).padStart(2, '0')}h`
 }
 
 export function formatarNumeroPtBr(valor: number): string {

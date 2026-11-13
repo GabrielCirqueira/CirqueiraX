@@ -7,7 +7,6 @@ namespace App\DataObject\Spotify\Analise;
 final readonly class HabitosSpotifyDTO
 {
     /**
-     * @param list<array{diaSemana: int, hora: int, minutos: int, streams: int}> $mapaHorarios
      * @param list<ArtistaAnaliseSpotifyDTO> $topArtistas
      */
     public function __construct(
@@ -15,7 +14,6 @@ final readonly class HabitosSpotifyDTO
         public int $totalMinutos,
         public int $totalStreams,
         public int $artistasDistintos,
-        public array $mapaHorarios,
         public int $minutosTopArtistas,
         public array $topArtistas,
         public int $faixasComStream,
@@ -32,7 +30,6 @@ final readonly class HabitosSpotifyDTO
             'periodo' => $this->periodo->paraArray(),
             'totalMinutos' => $this->totalMinutos,
             'totalStreams' => $this->totalStreams,
-            'mapaHorarios' => $this->mapaHorarios,
             'concentracao' => [
                 'artistasDistintos' => $this->artistasDistintos,
                 'minutosTopArtistas' => $this->minutosTopArtistas,

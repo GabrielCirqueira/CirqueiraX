@@ -109,3 +109,13 @@
 - **Arquivos**: `src/Service/Musica/Analise/ObterLinhaDoTempoMusicaService.php`, `src/DataObject/Spotify/Analise/LinhaDoTempoMusicaDTO.php`, `src/DataObject/Spotify/Analise/MesLinhaDoTempoMusicaDTO.php`, `src/Controller/Musica/MusicaAnaliseController.php`, `web/features/musica/components/SecaoLinhaDoTempo.tsx`, `web/features/musica/utils/linhaDoTempo.ts`, `web/features/musica/types.ts`, `web/features/musica/api.ts`, `web/features/musica/hooks/useAnaliseMusica.ts`, `web/features/musica/hooks/chavesQueryMusica.ts`, `web/features/musica/Musica.tsx`
 
 ---
+
+### ✅ Melhoria 169 — Mapa de Horários Removido dos Hábitos
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: o usuário pediu para tirar o "Mapa de horários" (dia da semana × hora) da seção Hábitos.
+- **Solução**: o cartão saiu da tela, junto com o componente `MapaHorariosMusica` e o que só ele usava (`NOMES_DIAS_SEMANA`, `ORDEM_DIAS_SEMANA`, `formatarFaixaHoraria`, `CelulaMapaHorarioSchema`). No backend, `/api/v1/musica/habitos` não calcula nem devolve mais `mapaHorarios`; a consulta continua existindo porque a Retrospectiva usa para achar o momento favorito. O cache das análises foi renovado (`VERSAO_FORMATO` 'v6').
+- **Arquivos**: `web/features/musica/components/SecaoHabitos.tsx`, `web/features/musica/components/MapaHorariosMusica.tsx` (removido), `web/features/musica/components/index.ts`, `web/features/musica/utils/analiseMusica.ts`, `web/features/musica/types.ts`, `src/DataObject/Spotify/Analise/HabitosSpotifyDTO.php`, `src/Service/Musica/Analise/ObterHabitosMusicaService.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`
+
+---

@@ -187,3 +187,4 @@
 | M166 | Cada Vídeo do YouTube Music Aparece Como Versão e Duplicadas Viram "Principal + Versão" | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-166--cada-vídeo-do-youtube-music-aparece-como-versão-e-duplicadas-viram-principal--versão) |
 | M167 | Vistoria de Segurança: Papéis, Token na URL, Saída de Verdade e Cabeçalhos | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-167--vistoria-de-segurança-papéis-token-na-url-saída-de-verdade-e-cabeçalhos) |
 | M168 | Linha do Tempo: Todos os Meses Lado a Lado | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-168--linha-do-tempo-todos-os-meses-lado-a-lado) |
+| M169 | Mapa de Horários Removido dos Hábitos | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-169--mapa-de-horários-removido-dos-hábitos) |
