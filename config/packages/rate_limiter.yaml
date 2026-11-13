@@ -13,12 +13,12 @@ framework:
         ingestao:
             policy: 'token_bucket'
             limit: 300
-            rate: { interval: '1 minute' }
+            rate: { interval: '1 minute', amount: 300 }
 
         marcador_posicao:
             policy: 'token_bucket'
             limit: 180
-            rate: { interval: '1 minute' }
+            rate: { interval: '1 minute', amount: 180 }
 
         youtube_music_conexao:
             policy: 'token_bucket'
@@ -28,4 +28,4 @@ framework:
         youtube_music_extensao:
             policy: 'token_bucket'
             limit: 60
-            rate: { interval: '1 minute' }
+            rate: { interval: '1 minute', amount: 60 }

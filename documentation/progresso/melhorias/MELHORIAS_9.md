@@ -167,3 +167,13 @@
 - **Arquivos**: `src/Controller/Spotify/SpotifyAnaliseController.php`, `src/Service/Spotify/TocarFaixaSpotifyService.php`, `src/Service/Spotify/GerarUrlAutorizacaoSpotifyService.php`, `src/DataObject/Spotify/TocarFaixaSpotifyDTO.php`, `src/DataObject/Spotify/AparelhoSpotifyDTO.php`, `src/Infra/Spotify/SpotifyClient.php`, `src/Interface/SpotifyInterface.php`, `src/Exception/Spotify/SpotifyException.php`, `src/Enum/OrigemConsultaSpotify.php`, `extensao/youtube-music/ponte.js`, `extensao/youtube-music/fundo.js`, `extensao/youtube-music/manifest.json`, `web/features/musica/components/ModalMusica.tsx`, `web/features/musica/components/BotoesTocarMusica.tsx`, `web/features/musica/components/ItensRankingMusica.tsx`, `web/features/musica/components/ListaVersoesMusica.tsx`, `web/features/musica/DetalheMusicaMusica.tsx`, `web/features/musica/hooks/useTocarMusica.ts`, `web/features/musica/utils/tocarMusica.ts`, `web/features/musica/api.ts`, `web/features/youtube-music/utils/extensaoYoutubeMusic.ts`
 
 ---
+
+### ✅ Melhoria 174 — Correção do Limite de Envios da Extensão (Pausado Falso e Troca de Música Lenta)
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: depois da extensão 1.3.0/1.4.0, o "Tocando agora" mostrava "Pausado" sem a música ter sido pausada e demorava para mostrar a troca de música. No log do nginx, a extensão enviava a cada ~10 s, mas o servidor respondia 400 ("eventos demais") e só aceitava um envio por minuto. O limitador `youtube_music_extensao` era um balde de 60 que reabastecia só 1 ficha por minuto (faltava o `amount`); com o envio mais frequente da 1.3.0 o balde esvaziou.
+- **Solução**: o limitador passou a repor 60 fichas por minuto (`amount: 60`), como era a intenção. O mesmo defeito existia no `marcador_posicao` (posição dos audiolivros, 180/min) e no `ingestao` (Syncthing, 300/min), corrigidos do mesmo jeito. Os baldes antigos foram limpos no deploy (`cache.rate_limiter`). Login e conexão do YouTube Music continuam com o limite mais restrito.
+- **Arquivos**: `config/packages/rate_limiter.yaml`
+
+---
