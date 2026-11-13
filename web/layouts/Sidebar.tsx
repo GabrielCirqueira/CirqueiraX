@@ -1,4 +1,5 @@
 import { useTheme } from '@/contexts'
+import { useSair } from '@/features/auth/hooks'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Badge, Box, Center, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
@@ -53,11 +54,11 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const usuario = useAuthStore((s) => s.usuario)
-  const limparAuth = useAuthStore((s) => s.limpar)
+  const sair = useSair()
   const { theme, toggleTheme } = useTheme()
 
   function handleLogout() {
-    limparAuth()
+    sair()
     navigate('/login')
   }
 

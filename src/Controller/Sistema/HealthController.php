@@ -30,12 +30,6 @@ final class HealthController extends DefaultController
         return $this->success([
             'status' => $isHealthy ? 'ok' : 'unhealthy',
             'timestamp' => (new DateTime())->format(DateTimeInterface::ATOM),
-            'services' => [
-                'database' => $databaseStatus,
-                'disk' => $diskStatus,
-                'disk_livros' => $diskLivrosStatus,
-            ],
-            'version' => $_ENV['APP_VERSION'] ?? '1.0.0-dev',
         ], $isHealthy ? Response::HTTP_OK : Response::HTTP_SERVICE_UNAVAILABLE);
     }
 

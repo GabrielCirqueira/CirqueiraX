@@ -79,3 +79,20 @@
 - **Arquivos**: `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `web/features/revisao-musica/components/CartaoDuplicataRevisao.tsx`, `web/features/revisao-musica/utils/revisaoMusica.ts`, `web/features/revisao-musica/hooks/useRevisaoMusica.ts`
 
 ---
+
+### ✅ Melhoria 167 — Vistoria de Segurança: Papéis, Token na URL, Saída de Verdade e Cabeçalhos
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: vistoria pedida antes de abrir o sistema para amigos. O isolamento entre contas estava certo (todas as rotas com uuid conferem o dono), mas havia pontas soltas: o token da extensão do YouTube Music e o token do agente entravam em qualquer rota `/api` (só precisavam estar autenticados); o login e o refresh consultavam também o usuário interno `master-cli`; o JWT valia ~41 dias e era aceito pela URL (`?token=`) em qualquer rota, inclusive POST/DELETE, e a URL fica em logs e no histórico do navegador; "Sair" só limpava o navegador e o refresh token seguia válido por 30 dias; o CORS usava a origem como regex sem âncora; o `/api/v1/health` público mostrava espaço em disco e versão; a capa de música (rota pública) seguia redirecionamentos; não havia cabeçalhos de segurança e o PHP se anunciava (`X-Powered-By`); e o IP real não chegava ao Symfony (tudo vinha do proxy), então o limite de tentativas de login era por usuário só.
+- **Solução**:
+  - `security.yaml`: `role_hierarchy` (SUPER_ADMIN → ADMIN → USER); `^/api` exige `ROLE_USER`, `/api/v1/ingestao` exige `ROLE_AGENTE`; login e refresh usam só os usuários do banco.
+  - JWT de acesso passou a valer 24 h (`JWT_TTL=86400`); o refresh automático do frontend renova sem pedir login.
+  - `RestringirTokenNaUrlListener`: `?token=` só vale em GET/HEAD de arquivos (stream, miniatura e download de mídia, áudio e áudio da transcrição); em qualquer outra rota é descartado.
+  - Saída de verdade: `POST /api/v1/auth/logout` (firewall `logout` + gesdinet) apaga o refresh token; `useSair` no Header e na Sidebar.
+  - `CabecalhosSegurancaListener`: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy: same-origin` (a URL com token não vaza para sites de fora), `Permissions-Policy`, `Cross-Origin-Opener-Policy` e HSTS em HTTPS; `expose_php = Off`.
+  - `trusted_proxies` em produção, para o IP real valer no limite de login e de ingestão.
+  - CORS com origem exata; `/api/v1/health` mostra só status e horário; capa de música não segue redirecionamentos.
+- **Arquivos**: `config/packages/security.yaml`, `config/packages/framework.yaml`, `config/packages/nelmio_cors.yaml`, `devops/php/php.prod.ini`, `.tooling/env/.env.prod.example`, `src/EventListener/RestringirTokenNaUrlListener.php`, `src/EventListener/CabecalhosSegurancaListener.php`, `src/Controller/Auth/AuthController.php`, `src/Controller/Sistema/HealthController.php`, `src/Service/Musica/Capa/ObterCapaMusicaService.php`, `web/features/auth/api.ts`, `web/features/auth/hooks.ts`, `web/layouts/Header.tsx`, `web/layouts/Sidebar.tsx`
+
+---

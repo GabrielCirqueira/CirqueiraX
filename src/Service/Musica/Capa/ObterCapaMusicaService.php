@@ -61,7 +61,7 @@ final readonly class ObterCapaMusicaService
     private function baixar(string $url, string $caminho): void
     {
         try {
-            $resposta = $this->httpClient->request('GET', $url, ['timeout' => self::TIMEOUT_SEGUNDOS, 'http_errors' => false]);
+            $resposta = $this->httpClient->request('GET', $url, ['timeout' => self::TIMEOUT_SEGUNDOS, 'http_errors' => false, 'allow_redirects' => false]);
         } catch (Throwable) {
             throw CapaMusicaException::naoDisponivel();
         }

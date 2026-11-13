@@ -185,3 +185,4 @@
 | M164 | Horário Certo nas Reproduções da Extensão e Fim das Duplicadas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-164--horário-certo-nas-reproduções-da-extensão-e-fim-das-duplicadas) |
 | M165 | "São Versões de Outra Música" nas Possíveis Duplicadas | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-165--são-versões-de-outra-música-nas-possíveis-duplicadas) |
 | M166 | Cada Vídeo do YouTube Music Aparece Como Versão e Duplicadas Viram "Principal + Versão" | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-166--cada-vídeo-do-youtube-music-aparece-como-versão-e-duplicadas-viram-principal--versão) |
+| M167 | Vistoria de Segurança: Papéis, Token na URL, Saída de Verdade e Cabeçalhos | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-167--vistoria-de-segurança-papéis-token-na-url-saída-de-verdade-e-cabeçalhos) |

@@ -1,4 +1,5 @@
 import { useTheme } from '@/contexts'
+import { useSair } from '@/features/auth/hooks'
 import { BotaoNotificacoes } from '@/features/notificacoes'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { Badge, Box, Button, Center, HStack, IconButton, Text } from '@chakra-ui/react'
@@ -31,7 +32,7 @@ function getTituloRota(pathname: string): string {
 export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProps) {
   const autenticado = useAuthStore((s) => s.autenticado)
   const usuario = useAuthStore((s) => s.usuario)
-  const limparAuth = useAuthStore((s) => s.limpar)
+  const sair = useSair()
   const { theme, toggleTheme } = useTheme()
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -39,7 +40,7 @@ export const Header = memo(function Header({ onToggleMobileSidebar }: HeaderProp
   const titulo = getTituloRota(pathname)
 
   function handleLogout() {
-    limparAuth()
+    sair()
     navigate('/login')
   }
 

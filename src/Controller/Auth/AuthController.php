@@ -6,6 +6,7 @@ namespace App\Controller\Auth;
 
 use App\Controller\Common\DefaultController;
 use App\Entity\Usuario;
+use LogicException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -26,5 +27,11 @@ final class AuthController extends DefaultController
             'roles' => $usuario->getRoles(),
             'criadoEm' => $usuario->getCriadoEm()->format(\DateTimeInterface::ATOM),
         ]);
+    }
+
+    #[Route('/logout', name: 'logout', methods: ['POST'])]
+    public function logout(): never
+    {
+        throw new LogicException('A saída é tratada pelo firewall.');
     }
 }

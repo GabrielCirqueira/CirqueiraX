@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { encerrarSessaoNoServidor } from './api'
 import type { LoginInput, RespostaLogin, RespostaMe } from './types'
 import { destinoAposLogin } from './utils'
 
@@ -50,4 +51,14 @@ export function useLogin() {
       }
     },
   })
+}
+
+export function useSair() {
+  const limpar = useAuthStore((s) => s.limpar)
+  const refreshToken = useAuthStore((s) => s.refreshToken)
+
+  return function sair() {
+    if (refreshToken) encerrarSessaoNoServidor(refreshToken).catch(() => {})
+    limpar()
+  }
 }
