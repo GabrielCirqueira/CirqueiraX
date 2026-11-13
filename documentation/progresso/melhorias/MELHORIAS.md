@@ -194,3 +194,4 @@
 | M173 | Popup da Música com Tocar no Spotify e no YouTube Music | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-173--popup-da-música-com-tocar-no-spotify-e-no-youtube-music) |
 | M174 | Correção do Limite de Envios da Extensão (Pausado Falso e Troca de Música Lenta) | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-174--correção-do-limite-de-envios-da-extensão-pausado-falso-e-troca-de-música-lenta) |
 | M175 | Imagem da Cápsula Sonora com Fontes, Modelos, Temas e Formatos | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-175--imagem-da-cápsula-sonora-com-fontes-modelos-temas-e-formatos) |
+| M176 | Importação do "Minha atividade" do YouTube Sem Curtidas Contadas Como Reprodução | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-176--importação-do-minha-atividade-do-youtube-sem-curtidas-contadas-como-reprodução) |

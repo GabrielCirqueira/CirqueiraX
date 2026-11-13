@@ -28,6 +28,13 @@ final readonly class LeitorArquivoTakeoutYoutube implements LeitorArquivoTakeout
     private const string FUSO_UTC = 'UTC';
     private const array PREFIXOS_TITULO = ['Assistiu ao ', 'Assistiu à ', 'Assistiu a ', 'Assistiu ', 'Watched '];
     private const array CAMPOS_OBRIGATORIOS = ['header', 'title', 'titleUrl', 'time'];
+    private const array PREFIXOS_SEM_REPRODUCAO = [
+        'Liked ', 'Disliked ', 'Dismissed ', 'Saved ', 'Voted on ', 'Voted ', 'Subscribed to ', 'Searched for ',
+        'Viewed ', 'Visited ', 'Answered ', 'Joined ', 'Purchased ', 'Commented on ', 'Shared ',
+        'Gostou de ', 'Gostou ', 'Não gostou de ', 'Não gostou ', 'Dispensou ', 'Salvou ', 'Votou em ', 'Votou ',
+        'Inscreveu-se em ', 'Inscreveu-se no ', 'Inscreveu-se ', 'Pesquisou por ', 'Pesquisou ', 'Visualizou ',
+        'Visitou ', 'Respondeu ', 'Participou ', 'Comprou ', 'Comentou ', 'Compartilhou ',
+    ];
 
     public function __construct(
         private LeitorStreamObjetosJsonInterface $leitorObjetosJson,
@@ -153,7 +160,7 @@ final readonly class LeitorArquivoTakeoutYoutube implements LeitorArquivoTakeout
         $analisados = 0;
 
         foreach ($this->leitorObjetosJson->ler($stream) as $registro) {
-            if ($this->temCamposDoHistorico($registro) && !$this->isAnuncio($registro) && null !== $this->extrairVideoId($registro['titleUrl'])) {
+            if ($this->temCamposDoHistorico($registro) && !$this->isAnuncio($registro) && !$this->isInteracaoSemReproducao($registro) && null !== $this->extrairVideoId($registro['titleUrl'])) {
                 return true;
             }
 
@@ -208,7 +215,7 @@ final readonly class LeitorArquivoTakeoutYoutube implements LeitorArquivoTakeout
      */
     private function converter(array $registro): ?ItemHistoricoTakeoutYoutubeDTO
     {
-        if (!$this->temCamposDoHistorico($registro) || $this->isAnuncio($registro)) {
+        if (!$this->temCamposDoHistorico($registro) || $this->isAnuncio($registro) || $this->isInteracaoSemReproducao($registro)) {
             return null;
         }
 
@@ -235,6 +242,22 @@ final readonly class LeitorArquivoTakeoutYoutube implements LeitorArquivoTakeout
     private function isAnuncio(array $registro): bool
     {
         return isset($registro['details']) && is_array($registro['details']) && [] !== $registro['details'];
+    }
+
+    /**
+     * @param array<string, mixed> $registro
+     */
+    private function isInteracaoSemReproducao(array $registro): bool
+    {
+        $titulo = is_string($registro['title'] ?? null) ? ltrim($registro['title']) : '';
+
+        foreach (self::PREFIXOS_SEM_REPRODUCAO as $prefixo) {
+            if (str_starts_with($titulo, $prefixo)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function extrairVideoId(mixed $endereco): ?string

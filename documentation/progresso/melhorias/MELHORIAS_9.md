@@ -192,3 +192,13 @@
 - **Arquivos**: `web/features/musica/components/ModalImagemCapsula.tsx`, `web/features/musica/components/SecaoCapsulaSonora.tsx`, `web/features/musica/hooks/useImagemCapsula.ts`, `web/features/musica/hooks/chavesQueryMusica.ts`, `web/features/musica/utils/imagemCapsula.ts`, `web/features/musica/utils/desenhoCapsula.ts`, `web/features/musica/utils/modelosImagemCapsula.ts`, `web/features/musica/utils/temasImagemCapsula.ts`
 
 ---
+
+### ✅ Melhoria 176 — Importação do "Minha atividade" do YouTube Sem Curtidas Contadas Como Reprodução
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: o export do Google "Minha atividade" (`Takeout/Minha atividade/YouTube/Minhaatividade.json`) mistura, no mesmo formato `header/title/titleUrl/time`, os vídeos assistidos com curtidas, "não gostei", "não tenho interesse", Super Chats e outras interações. O leitor aceitava qualquer entrada com link de vídeo, então essas interações entrariam como reproduções, com títulos como "Liked …" (no arquivo do usuário, cerca de 2,5 mil a mais).
+- **Solução**: o leitor descarta entradas cujo título começa com verbo de interação que não é reprodução (Liked, Disliked, Dismissed, Saved, Voted, Subscribed, Searched, Viewed, Visited, Answered, Joined, Purchased, Commented, Shared e os equivalentes em português), tanto na leitura quanto na detecção do arquivo. Continuam valendo: anúncios (`details`) descartados, vídeos apagados ("Watched https://…") entram como indisponíveis, horário com ou sem milissegundos convertido para UTC. Testado com um ZIP sintético com as 11 variações de esquema do arquivo: entram só os 4 "Watched" válidos e 17 são descartados (antes entravam 8).
+- **Arquivos**: `src/Infra/YoutubeMusic/LeitorArquivoTakeoutYoutube.php`
+
+---
