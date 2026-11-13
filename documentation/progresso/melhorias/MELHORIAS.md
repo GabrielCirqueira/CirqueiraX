@@ -189,3 +189,4 @@
 | M168 | Linha do Tempo: Todos os Meses Lado a Lado | ✅ Concluído | 12/11/2026 | [ver](MELHORIAS_9.md#melhoria-168--linha-do-tempo-todos-os-meses-lado-a-lado) |
 | M169 | Mapa de Horários Removido dos Hábitos | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-169--mapa-de-horários-removido-dos-hábitos) |
 | M170 | Novas Descobertas Mais Compacta | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-170--novas-descobertas-mais-compacta) |
+| M171 | Barras de Rolagem no Tema do Sistema | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-171--barras-de-rolagem-no-tema-do-sistema) |

@@ -44,7 +44,6 @@ const OPCOES_SELETOR = OPCOES_TIPO_LINHA_DO_TEMPO.map((opcao) => ({
 }))
 
 const ESTILO_ROLAGEM = {
-  scrollbarWidth: 'thin',
   scrollSnapType: 'x proximity',
 } as const
 

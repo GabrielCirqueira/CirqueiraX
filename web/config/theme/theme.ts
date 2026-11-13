@@ -105,6 +105,22 @@ const cardSlotRecipe = defineSlotRecipe({
 })
 
 const config = defineConfig({
+  globalCss: {
+    'html.dark': { colorScheme: 'dark' },
+    '*': {
+      scrollbarWidth: 'thin',
+      scrollbarColor: 'var(--chakra-colors-border-emphasized) transparent',
+    },
+    '*::-webkit-scrollbar': { width: '8px', height: '8px' },
+    '*::-webkit-scrollbar-track, *::-webkit-scrollbar-corner': { background: 'transparent' },
+    '*::-webkit-scrollbar-thumb': {
+      background: 'var(--chakra-colors-border-emphasized)',
+      borderRadius: '9999px',
+      border: '2px solid transparent',
+      backgroundClip: 'content-box',
+    },
+    '*::-webkit-scrollbar-thumb:hover': { background: 'var(--chakra-colors-fg-subtle)' },
+  },
   theme: {
     recipes: {
       badge: badgeRecipe,
@@ -397,10 +413,18 @@ const config = defineConfig({
           emphasized: { value: { _light: '{colors.cirqueira.grey.200}', _dark: '#32363C' } },
         },
         border: {
-          DEFAULT: { value: { _light: '{colors.cirqueira.grey.200}', _dark: 'rgba(255, 255, 255, 0.12)' } },
-          muted: { value: { _light: '{colors.cirqueira.grey.100}', _dark: 'rgba(255, 255, 255, 0.05)' } },
-          subtle: { value: { _light: '{colors.cirqueira.grey.50}', _dark: 'rgba(255, 255, 255, 0.08)' } },
-          emphasized: { value: { _light: '{colors.cirqueira.grey.300}', _dark: 'rgba(255, 255, 255, 0.20)' } },
+          DEFAULT: {
+            value: { _light: '{colors.cirqueira.grey.200}', _dark: 'rgba(255, 255, 255, 0.12)' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.grey.100}', _dark: 'rgba(255, 255, 255, 0.05)' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.grey.50}', _dark: 'rgba(255, 255, 255, 0.08)' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.grey.300}', _dark: 'rgba(255, 255, 255, 0.20)' },
+          },
         },
         fg: {
           DEFAULT: { value: { _light: '{colors.cirqueira.grey.950}', _dark: '#F4F5F6' } },
@@ -414,155 +438,475 @@ const config = defineConfig({
         },
         brand: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.brand.700}', _dark: '{colors.cirqueira.brand.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.brand.100}', _dark: '{colors.cirqueira.brand.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.brand.200}', _dark: '{colors.cirqueira.brand.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.brand.300}', _dark: '{colors.cirqueira.brand.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.brand.600}', _dark: '{colors.cirqueira.brand.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.brand.700}',
+              _dark: '{colors.cirqueira.brand.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.brand.100}',
+              _dark: '{colors.cirqueira.brand.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.brand.200}',
+              _dark: '{colors.cirqueira.brand.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.brand.300}',
+              _dark: '{colors.cirqueira.brand.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.brand.600}',
+              _dark: '{colors.cirqueira.brand.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.brand.500}' },
         },
         blue: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.blue.700}', _dark: '{colors.cirqueira.blue.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.blue.100}', _dark: '{colors.cirqueira.blue.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.blue.200}', _dark: '{colors.cirqueira.blue.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.blue.300}', _dark: '{colors.cirqueira.blue.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.blue.600}', _dark: '{colors.cirqueira.blue.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.blue.700}', _dark: '{colors.cirqueira.blue.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.blue.100}', _dark: '{colors.cirqueira.blue.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.blue.200}', _dark: '{colors.cirqueira.blue.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.blue.300}', _dark: '{colors.cirqueira.blue.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.blue.600}', _dark: '{colors.cirqueira.blue.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.blue.500}' },
         },
         green: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.green.700}', _dark: '{colors.cirqueira.green.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.green.100}', _dark: '{colors.cirqueira.green.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.green.200}', _dark: '{colors.cirqueira.green.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.green.300}', _dark: '{colors.cirqueira.green.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.green.600}', _dark: '{colors.cirqueira.green.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.green.700}',
+              _dark: '{colors.cirqueira.green.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.green.100}',
+              _dark: '{colors.cirqueira.green.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.green.200}',
+              _dark: '{colors.cirqueira.green.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.green.300}',
+              _dark: '{colors.cirqueira.green.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.green.600}',
+              _dark: '{colors.cirqueira.green.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.green.500}' },
         },
         red: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.red.700}', _dark: '{colors.cirqueira.red.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.red.100}', _dark: '{colors.cirqueira.red.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.red.200}', _dark: '{colors.cirqueira.red.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.red.300}', _dark: '{colors.cirqueira.red.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.red.600}', _dark: '{colors.cirqueira.red.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.red.700}', _dark: '{colors.cirqueira.red.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.red.100}', _dark: '{colors.cirqueira.red.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.red.200}', _dark: '{colors.cirqueira.red.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.red.300}', _dark: '{colors.cirqueira.red.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.red.600}', _dark: '{colors.cirqueira.red.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.red.500}' },
         },
         yellow: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.yellow.700}', _dark: '{colors.cirqueira.yellow.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.yellow.100}', _dark: '{colors.cirqueira.yellow.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.yellow.200}', _dark: '{colors.cirqueira.yellow.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.yellow.300}', _dark: '{colors.cirqueira.yellow.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.yellow.600}', _dark: '{colors.cirqueira.yellow.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.yellow.700}',
+              _dark: '{colors.cirqueira.yellow.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.yellow.100}',
+              _dark: '{colors.cirqueira.yellow.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.yellow.200}',
+              _dark: '{colors.cirqueira.yellow.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.yellow.300}',
+              _dark: '{colors.cirqueira.yellow.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.yellow.600}',
+              _dark: '{colors.cirqueira.yellow.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.yellow.500}' },
         },
         orange: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.orange.700}', _dark: '{colors.cirqueira.orange.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.orange.100}', _dark: '{colors.cirqueira.orange.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.orange.200}', _dark: '{colors.cirqueira.orange.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.orange.300}', _dark: '{colors.cirqueira.orange.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.orange.600}', _dark: '{colors.cirqueira.orange.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.orange.700}',
+              _dark: '{colors.cirqueira.orange.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.orange.100}',
+              _dark: '{colors.cirqueira.orange.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.orange.200}',
+              _dark: '{colors.cirqueira.orange.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.orange.300}',
+              _dark: '{colors.cirqueira.orange.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.orange.600}',
+              _dark: '{colors.cirqueira.orange.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.orange.500}' },
         },
         pink: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.pink.700}', _dark: '{colors.cirqueira.pink.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.pink.100}', _dark: '{colors.cirqueira.pink.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.pink.200}', _dark: '{colors.cirqueira.pink.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.pink.300}', _dark: '{colors.cirqueira.pink.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.pink.600}', _dark: '{colors.cirqueira.pink.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.pink.700}', _dark: '{colors.cirqueira.pink.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.pink.100}', _dark: '{colors.cirqueira.pink.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.pink.200}', _dark: '{colors.cirqueira.pink.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.pink.300}', _dark: '{colors.cirqueira.pink.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.pink.600}', _dark: '{colors.cirqueira.pink.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.pink.500}' },
         },
         purple: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.purple.700}', _dark: '{colors.cirqueira.purple.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.purple.100}', _dark: '{colors.cirqueira.purple.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.purple.200}', _dark: '{colors.cirqueira.purple.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.purple.300}', _dark: '{colors.cirqueira.purple.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.purple.600}', _dark: '{colors.cirqueira.purple.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.purple.700}',
+              _dark: '{colors.cirqueira.purple.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.purple.100}',
+              _dark: '{colors.cirqueira.purple.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.purple.200}',
+              _dark: '{colors.cirqueira.purple.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.purple.300}',
+              _dark: '{colors.cirqueira.purple.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.purple.600}',
+              _dark: '{colors.cirqueira.purple.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.purple.500}' },
         },
         brown: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.brown.700}', _dark: '{colors.cirqueira.brown.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.brown.100}', _dark: '{colors.cirqueira.brown.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.brown.200}', _dark: '{colors.cirqueira.brown.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.brown.300}', _dark: '{colors.cirqueira.brown.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.brown.600}', _dark: '{colors.cirqueira.brown.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.brown.700}',
+              _dark: '{colors.cirqueira.brown.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.brown.100}',
+              _dark: '{colors.cirqueira.brown.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.brown.200}',
+              _dark: '{colors.cirqueira.brown.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.brown.300}',
+              _dark: '{colors.cirqueira.brown.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.brown.600}',
+              _dark: '{colors.cirqueira.brown.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.brown.500}' },
         },
         cyan: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.cyan.700}', _dark: '{colors.cirqueira.cyan.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.cyan.100}', _dark: '{colors.cirqueira.cyan.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.cyan.200}', _dark: '{colors.cirqueira.cyan.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.cyan.300}', _dark: '{colors.cirqueira.cyan.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.cyan.600}', _dark: '{colors.cirqueira.cyan.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.cyan.700}', _dark: '{colors.cirqueira.cyan.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.cyan.100}', _dark: '{colors.cirqueira.cyan.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.cyan.200}', _dark: '{colors.cirqueira.cyan.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.cyan.300}', _dark: '{colors.cirqueira.cyan.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.cyan.600}', _dark: '{colors.cirqueira.cyan.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.cyan.500}' },
         },
         emerald: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.emerald.700}', _dark: '{colors.cirqueira.emerald.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.emerald.100}', _dark: '{colors.cirqueira.emerald.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.emerald.200}', _dark: '{colors.cirqueira.emerald.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.emerald.300}', _dark: '{colors.cirqueira.emerald.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.emerald.600}', _dark: '{colors.cirqueira.emerald.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.emerald.700}',
+              _dark: '{colors.cirqueira.emerald.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.emerald.100}',
+              _dark: '{colors.cirqueira.emerald.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.emerald.200}',
+              _dark: '{colors.cirqueira.emerald.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.emerald.300}',
+              _dark: '{colors.cirqueira.emerald.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.emerald.600}',
+              _dark: '{colors.cirqueira.emerald.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.emerald.500}' },
         },
         teal: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.teal.700}', _dark: '{colors.cirqueira.teal.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.teal.100}', _dark: '{colors.cirqueira.teal.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.teal.200}', _dark: '{colors.cirqueira.teal.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.teal.300}', _dark: '{colors.cirqueira.teal.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.teal.600}', _dark: '{colors.cirqueira.teal.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.teal.700}', _dark: '{colors.cirqueira.teal.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.teal.100}', _dark: '{colors.cirqueira.teal.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.teal.200}', _dark: '{colors.cirqueira.teal.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.teal.300}', _dark: '{colors.cirqueira.teal.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.teal.600}', _dark: '{colors.cirqueira.teal.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.teal.500}' },
         },
         indigo: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.indigo.700}', _dark: '{colors.cirqueira.indigo.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.indigo.100}', _dark: '{colors.cirqueira.indigo.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.indigo.200}', _dark: '{colors.cirqueira.indigo.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.indigo.300}', _dark: '{colors.cirqueira.indigo.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.indigo.600}', _dark: '{colors.cirqueira.indigo.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.indigo.700}',
+              _dark: '{colors.cirqueira.indigo.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.indigo.100}',
+              _dark: '{colors.cirqueira.indigo.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.indigo.200}',
+              _dark: '{colors.cirqueira.indigo.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.indigo.300}',
+              _dark: '{colors.cirqueira.indigo.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.indigo.600}',
+              _dark: '{colors.cirqueira.indigo.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.indigo.500}' },
         },
         rose: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.rose.700}', _dark: '{colors.cirqueira.rose.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.rose.100}', _dark: '{colors.cirqueira.rose.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.rose.200}', _dark: '{colors.cirqueira.rose.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.rose.300}', _dark: '{colors.cirqueira.rose.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.rose.600}', _dark: '{colors.cirqueira.rose.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.rose.700}', _dark: '{colors.cirqueira.rose.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.rose.100}', _dark: '{colors.cirqueira.rose.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.rose.200}', _dark: '{colors.cirqueira.rose.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.rose.300}', _dark: '{colors.cirqueira.rose.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.rose.600}', _dark: '{colors.cirqueira.rose.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.rose.500}' },
         },
         amber: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.amber.700}', _dark: '{colors.cirqueira.amber.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.amber.100}', _dark: '{colors.cirqueira.amber.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.amber.200}', _dark: '{colors.cirqueira.amber.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.amber.300}', _dark: '{colors.cirqueira.amber.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.amber.600}', _dark: '{colors.cirqueira.amber.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.amber.700}',
+              _dark: '{colors.cirqueira.amber.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.amber.100}',
+              _dark: '{colors.cirqueira.amber.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.amber.200}',
+              _dark: '{colors.cirqueira.amber.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.amber.300}',
+              _dark: '{colors.cirqueira.amber.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.amber.600}',
+              _dark: '{colors.cirqueira.amber.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.amber.500}' },
         },
         lime: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.lime.700}', _dark: '{colors.cirqueira.lime.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.lime.100}', _dark: '{colors.cirqueira.lime.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.lime.200}', _dark: '{colors.cirqueira.lime.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.lime.300}', _dark: '{colors.cirqueira.lime.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.lime.600}', _dark: '{colors.cirqueira.lime.500}' } },
+          fg: {
+            value: { _light: '{colors.cirqueira.lime.700}', _dark: '{colors.cirqueira.lime.300}' },
+          },
+          subtle: {
+            value: { _light: '{colors.cirqueira.lime.100}', _dark: '{colors.cirqueira.lime.900}' },
+          },
+          muted: {
+            value: { _light: '{colors.cirqueira.lime.200}', _dark: '{colors.cirqueira.lime.800}' },
+          },
+          emphasized: {
+            value: { _light: '{colors.cirqueira.lime.300}', _dark: '{colors.cirqueira.lime.700}' },
+          },
+          solid: {
+            value: { _light: '{colors.cirqueira.lime.600}', _dark: '{colors.cirqueira.lime.500}' },
+          },
           focusRing: { value: '{colors.cirqueira.lime.500}' },
         },
         violet: {
           contrast: { value: '{colors.cirqueira.grey.0}' },
-          fg: { value: { _light: '{colors.cirqueira.violet.700}', _dark: '{colors.cirqueira.violet.300}' } },
-          subtle: { value: { _light: '{colors.cirqueira.violet.100}', _dark: '{colors.cirqueira.violet.900}' } },
-          muted: { value: { _light: '{colors.cirqueira.violet.200}', _dark: '{colors.cirqueira.violet.800}' } },
-          emphasized: { value: { _light: '{colors.cirqueira.violet.300}', _dark: '{colors.cirqueira.violet.700}' } },
-          solid: { value: { _light: '{colors.cirqueira.violet.600}', _dark: '{colors.cirqueira.violet.500}' } },
+          fg: {
+            value: {
+              _light: '{colors.cirqueira.violet.700}',
+              _dark: '{colors.cirqueira.violet.300}',
+            },
+          },
+          subtle: {
+            value: {
+              _light: '{colors.cirqueira.violet.100}',
+              _dark: '{colors.cirqueira.violet.900}',
+            },
+          },
+          muted: {
+            value: {
+              _light: '{colors.cirqueira.violet.200}',
+              _dark: '{colors.cirqueira.violet.800}',
+            },
+          },
+          emphasized: {
+            value: {
+              _light: '{colors.cirqueira.violet.300}',
+              _dark: '{colors.cirqueira.violet.700}',
+            },
+          },
+          solid: {
+            value: {
+              _light: '{colors.cirqueira.violet.600}',
+              _dark: '{colors.cirqueira.violet.500}',
+            },
+          },
           focusRing: { value: '{colors.cirqueira.violet.500}' },
         },
         musica: {

@@ -129,3 +129,13 @@
 - **Arquivos**: `web/features/musica/components/SecaoDescobertas.tsx`, `web/features/musica/utils/descobertas.ts`, `web/features/musica/utils/index.ts`
 
 ---
+
+### ✅ Melhoria 171 — Barras de Rolagem no Tema do Sistema
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: as barras de rolagem usavam o visual padrão do navegador, com trilho branco, o que destoava do tema escuro (ex.: a faixa horizontal da Linha do Tempo).
+- **Solução**: estilo global no tema Chakra (`globalCss`): barra fina (8 px), trilho transparente e alça arredondada na cor `border.emphasized` (mais clara no hover com `fg.subtle`), para Chrome/Firefox (`scrollbar-color`) e Safari (`::-webkit-scrollbar`); `color-scheme: dark` no modo escuro. Na página de Música (`TemaMusica`), a alça usa a paleta da página (`textoDesabilitado`, e `textoSecundario` no hover).
+- **Arquivos**: `web/config/theme/theme.ts`, `web/features/musica/components/TemaMusica.tsx`, `web/features/musica/components/SecaoLinhaDoTempo.tsx`
+
+---
