@@ -34,7 +34,7 @@ parameters:
     env(OPENROUTER_MODELO): 'nvidia/nemotron-3-ultra-550b-a55b:free'
     env(CLOUDFLARE_API_TOKEN): ''
     env(CLOUDFLARE_ACCOUNT_ID): ''
-    env(CLOUDFLARE_MODELO): '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+    env(CLOUDFLARE_MODELO): '@@cf/meta/llama-3.3-70b-instruct-fp8-fast'
     env(NVIDIA_API_KEY): ''
     env(NVIDIA_MODELO): 'z-ai/glm-5.3-flash'
     env(ZAI_API_KEY): ''
