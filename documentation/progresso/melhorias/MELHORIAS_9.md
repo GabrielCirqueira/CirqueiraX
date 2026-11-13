@@ -177,3 +177,18 @@
 - **Arquivos**: `config/packages/rate_limiter.yaml`
 
 ---
+
+### ✅ Melhoria 175 — Imagem da Cápsula Sonora com Fontes, Modelos, Temas e Formatos
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: o botão "Gerar imagem" da Cápsula tinha um único layout, sempre com a marca do Spotify, usava só os dados do filtro da página e gerava apenas no tamanho de stories.
+- **Solução**: o botão agora abre um popup com prévia ao vivo (refeita a cada escolha) e quatro grupos de opções:
+  - **Dados**: Spotify + YouTube Music, só Spotify ou só YouTube Music, independente do filtro da página (busca a cápsula da fonte escolhida e as capas que faltam). O rodapé mostra o ícone e a atribuição da(s) fonte(s) usada(s).
+  - **Formato**: Stories (1080×1920), Feed (1080×1350) e Quadrado (1080×1080); cada modelo ajusta quantos itens cabem.
+  - **Modelo**: Clássico (números, artista do mês e top músicas), Pôster (capa gigante da música do mês), Grade (mosaico de capas com legenda), Pódio (top 3 artistas e músicas) e Recibo (cupom fiscal com código de barras).
+  - **Tema**: Spotify, YouTube Music, Misto, Grafite, Papel (claro), Pôr do sol, Oceano, Neon, Floresta e Vinho. O tema inicial acompanha a fonte (Misto para as duas).
+  - Baixar PNG e Compartilhar ficam logo abaixo da prévia; as capas continuam inteiras (sem corte).
+- **Arquivos**: `web/features/musica/components/ModalImagemCapsula.tsx`, `web/features/musica/components/SecaoCapsulaSonora.tsx`, `web/features/musica/hooks/useImagemCapsula.ts`, `web/features/musica/hooks/chavesQueryMusica.ts`, `web/features/musica/utils/imagemCapsula.ts`, `web/features/musica/utils/desenhoCapsula.ts`, `web/features/musica/utils/modelosImagemCapsula.ts`, `web/features/musica/utils/temasImagemCapsula.ts`
+
+---

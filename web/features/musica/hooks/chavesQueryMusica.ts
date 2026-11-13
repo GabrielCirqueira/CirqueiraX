@@ -26,4 +26,6 @@ export const MUSICA_QUERY_KEYS = {
   retrospectiva: (fonte: FonteMusica, ano: number) =>
     ['musica', fonte, 'retrospectiva', ano] as const,
   extensaoNoNavegador: ['musica', 'extensao-no-navegador'] as const,
+  imagemCapsula: (ano: number, mes: number, opcoes: object, imagens: object) =>
+    ['musica', 'imagem-capsula', ano, mes, opcoes, imagens] as const,
 }

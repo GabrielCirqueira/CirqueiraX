@@ -289,31 +289,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
             </Box>
           </Box>
 
-          <BotaoImagemCapsula
-            capsula={capsula}
-            imagens={{
-              musicas: (capsula?.topMusicas ?? [])
-                .slice(0, 5)
-                .map(
-                  (m) =>
-                    m.imagemUrl ||
-                    mapaImagensConsultadas?.[
-                      gerarChaveFaixa(m.codigoFaixa, m.artistaPrincipal, m.nomeFaixa)
-                    ]?.imagemUrl ||
-                    null
-                ),
-              artistaPrincipal: (() => {
-                const topo = capsula?.topArtistas[0]
-                if (!topo) return null
-                return (
-                  topo.imagemUrl ||
-                  mapaImagensConsultadas?.[gerarChaveArtista(topo.codigoArtista, topo.nomeArtista)]
-                    ?.imagemUrl ||
-                  null
-                )
-              })(),
-            }}
-          />
+          <BotaoImagemCapsula ano={mesAtivo?.ano ?? null} mes={mesAtivo?.mes ?? null} />
 
           <Button
             size="sm"
