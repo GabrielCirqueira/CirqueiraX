@@ -895,4 +895,28 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
 
         return $linhas;
     }
+
+    /**
+     * @return list<string>
+     */
+    public function listarIniciosNoIntervalo(Usuario $usuario, DateTimeImmutable $inicio, DateTimeImmutable $fim, int $minimoMs): array
+    {
+        $formato = 'Y-m-d H:i:s';
+
+        /** @var list<string> $inicios */
+        $inicios = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            'SELECT DATE_FORMAT(DATE_SUB(tocada_em, INTERVAL FLOOR(ms_reproduzidos / 1000) SECOND), \'%Y-%m-%d %H:%i:%s\') AS inicio
+                FROM reproducao_spotify
+                WHERE usuario_id = :usuarioId AND ms_reproduzidos >= :minimoMs AND tocada_em >= :inicio AND tocada_em < :fim
+                ORDER BY inicio ASC',
+            [
+                'usuarioId' => $usuario->getId(),
+                'minimoMs' => $minimoMs,
+                'inicio' => $inicio->format($formato),
+                'fim' => $fim->format($formato),
+            ],
+        );
+
+        return $inicios;
+    }
 }

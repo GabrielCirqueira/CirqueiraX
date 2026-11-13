@@ -202,3 +202,17 @@
 - **Arquivos**: `src/Infra/YoutubeMusic/LeitorArquivoTakeoutYoutube.php`
 
 ---
+
+### ✅ Melhoria 177 — Minutos Estimados do YouTube Mais Realistas
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: sem minutos ouvidos no Takeout e na coleta por cookies, cada reprodução do YouTube valia `min(intervalo até a próxima, duração)`. A última música antes de uma pausa longa contava inteira; nos dados do usuário essas reproduções eram 171 de 995 e somavam ~30% dos minutos estimados. A regra também ignorava o Spotify (se uma faixa do Spotify começa no meio do vídeo, o vídeo parou ali) e, na coleta por cookies, um vídeo sem duração contava o intervalo inteiro, sem teto.
+- **Solução**:
+  - Fim de sessão (sem próxima reprodução ou intervalo maior que duração + 30 min) passa a valer `duração × fator`. O fator é calibrado com os minutos exatos da extensão do próprio usuário: média do quanto ele ouve da última música de uma sessão, com pelo menos 50 amostras (entre 0,3 e 1); antes disso usa 0,75 (`CalcularFatorFimDeSessaoYoutubeService`).
+  - A interrupção considera a próxima reprodução do YouTube **ou** o início da próxima faixa do Spotify com 30 s ou mais (início = fim − ms ouvidos), o que vier primeiro.
+  - Vídeo sem duração conhecida conta 0 também na coleta (como já era na importação).
+  - Importação e coleta usam a mesma regra (`RecalcularTempoOuvidoYoutubeService` / `EstimarTempoReproduzidoYoutubeService`). O comando `app:youtube:recalcular-tempo-ouvido [--usuario=ID]` reaplica a regra ao histórico estimado (ignora as últimas 2 h e as reproduções com tempo exato) e reprojeta os relatórios; foi rodado no deploy.
+- **Arquivos**: `src/Service/YoutubeMusic/EstimarTempoReproduzidoYoutubeService.php`, `src/Service/YoutubeMusic/CalcularFatorFimDeSessaoYoutubeService.php`, `src/Service/YoutubeMusic/RecalcularTempoOuvidoYoutubeService.php`, `src/Service/YoutubeMusic/RegistrarReproducoesYoutubeService.php`, `src/Service/YoutubeMusic/Importacao/CalcularTempoOuvidoImportacaoYoutubeService.php`, `src/Repository/ReproducaoYoutubeRepository.php`, `src/Repository/ReproducaoSpotifyRepository.php`, `src/Command/RecalcularTempoOuvidoYoutubeCommand.php`
+
+---

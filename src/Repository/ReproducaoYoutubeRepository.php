@@ -380,4 +380,49 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
     {
         return $momento->setTimezone(new DateTimeZone(self::FUSO_UTC));
     }
+
+    /**
+     * @return array{total: int, fracaoMedia: ?float}
+     */
+    public function medirOuvidoNoFimDeSessao(Usuario $usuario, int $limiteSessaoSegundos, int $duracaoMinimaMs, DateTimeImmutable $encerradasAntesDe): array
+    {
+        $linha = $this->getEntityManager()->getConnection()->fetchAssociative(
+            'SELECT COUNT(*) AS total, AVG(LEAST(1, s.ms_reproduzidos / s.duracao_ms)) AS fracao
+                FROM (
+                    SELECT r.tempo_exato, r.ms_reproduzidos, r.tocada_em, v.duracao_ms,
+                        LEAD(r.tocada_em) OVER (ORDER BY r.tocada_em, r.uuid) AS proxima
+                    FROM reproducao_youtube r INNER JOIN video_youtube v ON v.uuid = r.video_uuid
+                    WHERE r.usuario_id = :usuarioId
+                ) s
+                WHERE s.tempo_exato = 1 AND s.duracao_ms >= :duracaoMinima AND s.tocada_em < :encerradasAntesDe
+                    AND (s.proxima IS NULL OR TIMESTAMPDIFF(SECOND, s.tocada_em, s.proxima) > s.duracao_ms / 1000 + :limiteSessao)',
+            [
+                'usuarioId' => $usuario->getId(),
+                'duracaoMinima' => $duracaoMinimaMs,
+                'encerradasAntesDe' => $encerradasAntesDe->format(self::FORMATO_MOMENTO_BANCO),
+                'limiteSessao' => $limiteSessaoSegundos,
+            ],
+        );
+
+        $total = (int) ($linha['total'] ?? 0);
+        $fracao = $linha['fracao'] ?? null;
+
+        return ['total' => $total, 'fracaoMedia' => is_numeric($fracao) ? (float) $fracao : null];
+    }
+
+    /**
+     * @return array{primeira: ?string, ultima: ?string}
+     */
+    public function obterLimitesDoUsuario(Usuario $usuario): array
+    {
+        $linha = $this->getEntityManager()->getConnection()->fetchAssociative(
+            'SELECT MIN(tocada_em) AS primeira, MAX(tocada_em) AS ultima FROM reproducao_youtube WHERE usuario_id = :usuarioId',
+            ['usuarioId' => $usuario->getId()],
+        );
+
+        return [
+            'primeira' => is_string($linha['primeira'] ?? null) ? $linha['primeira'] : null,
+            'ultima' => is_string($linha['ultima'] ?? null) ? $linha['ultima'] : null,
+        ];
+    }
 }

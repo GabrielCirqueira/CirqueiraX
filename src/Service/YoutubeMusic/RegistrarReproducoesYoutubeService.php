@@ -24,6 +24,7 @@ final readonly class RegistrarReproducoesYoutubeService
         private VideoYoutubeRepository $videoRepository,
         private ReproducaoYoutubeRepository $reproducaoRepository,
         private EstimarTempoReproduzidoYoutubeService $estimarTempo,
+        private CalcularFatorFimDeSessaoYoutubeService $calcularFator,
         private ProjetarReproducoesYoutubeService $projetarYoutube,
         private UnirReproducaoExtensaoComColetaService $unirComExtensao,
     ) {
@@ -114,9 +115,10 @@ final readonly class RegistrarReproducoesYoutubeService
 
         $anterior = $this->reproducaoRepository->buscarUltimaAntesDe($usuario, $novasEmOrdemCronologica[0]->tocadaEm());
         $anteriorExistente = $anterior;
+        $fator = $this->calcularFator->executar($usuario);
         foreach ($novasEmOrdemCronologica as $reproducao) {
             if (null !== $anterior) {
-                $this->estimarTempo->executar($anterior, $reproducao);
+                $this->estimarTempo->executar($anterior, $reproducao, $fator);
             }
             $anterior = $reproducao;
         }
