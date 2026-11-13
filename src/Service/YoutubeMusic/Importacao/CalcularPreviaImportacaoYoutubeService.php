@@ -9,7 +9,7 @@ use App\Enum\ResultadoEtapaImportacaoYoutube;
 use App\Enum\StatusClassificacaoVideo;
 use App\Repository\ImportacaoYoutubeRepository;
 use App\Repository\VideoYoutubeRepository;
-use App\Service\Ia\RegistrarConsumoIaService;
+use App\Service\Ia\EstimarCustoIaService;
 
 final readonly class CalcularPreviaImportacaoYoutubeService
 {
@@ -21,7 +21,7 @@ final readonly class CalcularPreviaImportacaoYoutubeService
     public function __construct(
         private VideoYoutubeRepository $videoRepository,
         private ImportacaoYoutubeRepository $importacaoRepository,
-        private RegistrarConsumoIaService $registrarConsumo,
+        private EstimarCustoIaService $estimarCusto,
     ) {
     }
 
@@ -33,7 +33,7 @@ final readonly class CalcularPreviaImportacaoYoutubeService
         $paraIa = max(0, $pendentes - $semIa);
         $tokensEntrada = $paraIa * self::TOKENS_ENTRADA_ESTIMADOS_POR_VIDEO;
         $tokensSaida = $paraIa * self::TOKENS_SAIDA_ESTIMADOS_POR_VIDEO;
-        $custo = $this->registrarConsumo->calcularCustoMicrodolares($tokensEntrada, $tokensSaida);
+        $custo = $this->estimarCusto->estimarMicrodolares($tokensEntrada, $tokensSaida);
 
         $importacao->registrarPrevia($semIa, $paraIa, $tokensEntrada, $tokensSaida, $custo);
 

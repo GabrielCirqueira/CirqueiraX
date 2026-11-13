@@ -196,3 +196,4 @@
 | M175 | Imagem da Cápsula Sonora com Fontes, Modelos, Temas e Formatos | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-175--imagem-da-cápsula-sonora-com-fontes-modelos-temas-e-formatos) |
 | M176 | Importação do "Minha atividade" do YouTube Sem Curtidas Contadas Como Reprodução | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-176--importação-do-minha-atividade-do-youtube-sem-curtidas-contadas-como-reprodução) |
 | M177 | Minutos Estimados do YouTube Mais Realistas | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-177--minutos-estimados-do-youtube-mais-realistas) |
+| M178 | Pool de IA Gratuita na Identificação de Músicas | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-178--pool-de-ia-gratuita-na-identificação-de-músicas) |

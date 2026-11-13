@@ -152,7 +152,7 @@ final readonly class IdentificarVideosYoutubeService
             return $this->tratarFalhaLote($usuario, $lote, $erro);
         }
 
-        $this->registrarConsumo->executar($usuario, FinalidadeConsumoIa::IdentificacaoMusica, $resultado->modelo, $resultado->tokensEntrada, $resultado->tokensSaida);
+        $this->registrarConsumo->executar($usuario, FinalidadeConsumoIa::IdentificacaoMusica, $resultado->consumo);
 
         $contagem = [];
         $invalidos = array_flip($resultado->idsInvalidos);
@@ -191,11 +191,12 @@ final readonly class IdentificarVideosYoutubeService
     private function tratarFalhaLote(Usuario $usuario, array $lote, IdentificacaoException $erro): ?array
     {
         $this->logger->warning('Identificação por IA falhou.', ['codigo' => $erro->getCode(), 'videos' => count($lote)]);
-        if (!$erro->isRespostaInvalida()) {
+        $resposta = $erro->resposta();
+        if (!$erro->isRespostaInvalida() || null === $resposta) {
             return null;
         }
 
-        $this->registrarConsumo->executar($usuario, FinalidadeConsumoIa::IdentificacaoMusica, $erro->modelo(), $erro->tokensEntrada(), $erro->tokensSaida());
+        $this->registrarConsumo->executar($usuario, FinalidadeConsumoIa::IdentificacaoMusica, $resposta);
         foreach ($lote as $video) {
             $video->classificar(StatusClassificacaoVideo::Revisar, OrigemClassificacao::Ia, null, null, null, ['erro' => self::ERRO_RESPOSTA_INVALIDA]);
         }

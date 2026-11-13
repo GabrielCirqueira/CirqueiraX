@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\FinalidadeConsumoIa;
+use App\Enum\ProvedorIa;
 use App\Repository\ConsumoIaRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -17,6 +18,8 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Index(name: 'IDX_CONSUMO_IA_FINALIDADE_CRIADO', fields: ['finalidade', 'criadoEm'])]
 class ConsumoIa
 {
+    private const int TAMANHO_MAXIMO_MODELO = 80;
+
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
@@ -27,6 +30,9 @@ class ConsumoIa
 
     #[ORM\Column(type: 'string', length: 40, enumType: FinalidadeConsumoIa::class)]
     private FinalidadeConsumoIa $finalidade;
+
+    #[ORM\Column(type: 'string', length: 30, nullable: true, enumType: ProvedorIa::class)]
+    private ?ProvedorIa $provedor;
 
     #[ORM\Column(type: 'string', length: 80)]
     private string $modelo;
@@ -43,12 +49,13 @@ class ConsumoIa
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
-    public function __construct(?Usuario $usuario, FinalidadeConsumoIa $finalidade, string $modelo, int $tokensEntrada, int $tokensSaida, int $custoMicrodolares)
+    public function __construct(?Usuario $usuario, FinalidadeConsumoIa $finalidade, ?ProvedorIa $provedor, string $modelo, int $tokensEntrada, int $tokensSaida, int $custoMicrodolares)
     {
         $this->uuid = Uuid::v7();
         $this->usuario = $usuario;
         $this->finalidade = $finalidade;
-        $this->modelo = $modelo;
+        $this->provedor = $provedor;
+        $this->modelo = mb_substr($modelo, 0, self::TAMANHO_MAXIMO_MODELO);
         $this->tokensEntrada = $tokensEntrada;
         $this->tokensSaida = $tokensSaida;
         $this->custoMicrodolares = $custoMicrodolares;
@@ -68,6 +75,11 @@ class ConsumoIa
     public function finalidade(): FinalidadeConsumoIa
     {
         return $this->finalidade;
+    }
+
+    public function provedor(): ?ProvedorIa
+    {
+        return $this->provedor;
     }
 
     public function modelo(): string

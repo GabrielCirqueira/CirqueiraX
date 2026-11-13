@@ -216,3 +216,20 @@
 - **Arquivos**: `src/Service/YoutubeMusic/EstimarTempoReproduzidoYoutubeService.php`, `src/Service/YoutubeMusic/CalcularFatorFimDeSessaoYoutubeService.php`, `src/Service/YoutubeMusic/RecalcularTempoOuvidoYoutubeService.php`, `src/Service/YoutubeMusic/RegistrarReproducoesYoutubeService.php`, `src/Service/YoutubeMusic/Importacao/CalcularTempoOuvidoImportacaoYoutubeService.php`, `src/Repository/ReproducaoYoutubeRepository.php`, `src/Repository/ReproducaoSpotifyRepository.php`, `src/Command/RecalcularTempoOuvidoYoutubeCommand.php`
 
 ---
+
+### ✅ Melhoria 178 — Pool de IA Gratuita na Identificação de Músicas
+
+- **Status**: Concluído
+- **Data**: 13 de novembro de 2026
+- **Problema**: a identificação de músicas da importação do Takeout dependia só da OpenAI. A importação do "Minha atividade" (11.718 vídeos para a IA) foi estimada em US$ 11,60.
+- **Solução**:
+  - Pool de IA genérico (não ligado à música): `CompletarComPoolIaService` tenta os provedores em ordem de prioridade (Groq → Gemini → Mistral → OpenRouter → Cloudflare → NVIDIA → Z.AI → OpenAI) e devolve a primeira resposta válida. Todos usam o mesmo cliente compatível com a API de chat da OpenAI (`ProvedorIaCompativelOpenAiClient`), configurado por provedor em `services.yaml` (URL, chave, modelo, esquema estrito, timeout, preço, prioridade da tag `app.provedor_ia`).
+  - Respostas estruturadas: com esquema, o pool só aceita objeto JSON com os campos obrigatórios (`LeitorJsonRespostaIa` remove `<think>` e cercas de código). Provedores sem esquema estrito recebem `json_object` e o esquema nas instruções. Resposta fora do formato passa para o próximo provedor em vez de mandar o lote para revisão.
+  - Pausas por provedor na tabela `estado_provedor_ia` (`EstadoProvedorIa`): limite respeita o `Retry-After` ou espera progressiva de 1 min dobrando até 6 h; acesso negado pausa 24 h; 3 falhas seguidas pausam 15 min. Comando `app:ia:provedores [--desbloquear=<provedor>]`.
+  - OpenAI só entra com `IA_POOL_PERMITIR_PAGOS=1`. A prévia da importação usa `EstimarCustoIaService` (pior caso entre os provedores liberados), então com só os gratuitos o custo estimado é zero e a importação não pede confirmação.
+  - `consumo_ia` guarda o provedor; consumo antigo marcado como `openai`. `RegistrarConsumoIaService` recebe a `RespostaIaDTO` com o custo calculado pelo próprio provedor.
+  - `OpenAiIdentificadorMusicaClient` saiu: a identificação (`IdentificarMusicasComIaService`) monta o pedido com o mesmo prompt e esquema e usa o pool. Sem provedor disponível, o lote fica pendente e a importação tenta de novo em 1 hora.
+  - Chaves no `.env` (Groq, Gemini, Mistral, OpenRouter, Cloudflare, NVIDIA, Z.AI). Uso e como adicionar provedores em `documentation/funcionalidades/POOL_IA.md`.
+- **Arquivos**: `src/Service/Ia/CompletarComPoolIaService.php`, `src/Service/Ia/ListarProvedoresIaService.php`, `src/Service/Ia/AtualizarEstadoProvedorIaService.php`, `src/Service/Ia/EstimarCustoIaService.php`, `src/Service/Ia/ListarSituacaoProvedoresIaService.php`, `src/Service/Ia/RegistrarConsumoIaService.php`, `src/Infra/Ia/ProvedorIaCompativelOpenAiClient.php`, `src/Interface/ProvedorIaInterface.php`, `src/Domain/Ia/LeitorJsonRespostaIa.php`, `src/Entity/EstadoProvedorIa.php`, `src/Repository/EstadoProvedorIaRepository.php`, `src/Enum/ProvedorIa.php`, `src/DataObject/Ia/`, `src/Exception/Ia/`, `src/Service/IdentificacaoMusica/Ia/`, `src/Command/SituacaoProvedoresIaCommand.php`, `migrations/Version20261113181247.php`, `config/services.yaml`
+
+---

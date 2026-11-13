@@ -2,10 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Infra\OpenAi;
+namespace App\Service\IdentificacaoMusica\Ia;
+
+use App\Enum\TipoIdentificacaoMusica;
+use App\Enum\TipoVersaoMusica;
 
 final class InstrucoesIdentificacaoMusica
 {
+    public const string NOME_ESQUEMA = 'identificacao_musicas';
+    public const string CAMPO_RESULTADOS = 'resultados';
+
     public const string SISTEMA = <<<'TEXTO'
         Você identifica músicas a partir de vídeos do YouTube Music de uma pessoa. Cada item traz id, título, canal, duração em segundos, categoria do YouTube (10 = Música) e um trecho da descrição. Responda um resultado para cada id recebido, sem pular nenhum.
 
@@ -27,4 +33,45 @@ final class InstrucoesIdentificacaoMusica
 
         Não invente. Se não reconhecer a música, se o título puder ser de músicas diferentes (por exemplo um título curto como "Renegade", que existe em vários artistas) ou se faltar o artista, baixe a confiança, marque "ambiguo" como true e coloque até 2 interpretações em "alternativas". A confiança vai de 0 a 100 e mede o quanto você tem certeza de título e artistas.
         TEXTO;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function esquema(): array
+    {
+        $componente = [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'required' => ['titulo', 'artistas'],
+            'properties' => [
+                'titulo' => ['type' => 'string'],
+                'artistas' => ['type' => 'array', 'items' => ['type' => 'string']],
+            ],
+        ];
+
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'required' => [self::CAMPO_RESULTADOS],
+            'properties' => [
+                self::CAMPO_RESULTADOS => [
+                    'type' => 'array',
+                    'items' => [
+                        'type' => 'object',
+                        'additionalProperties' => false,
+                        'required' => ['id', 'tipo', 'confianca', 'versao', 'componentes', 'ambiguo', 'alternativas'],
+                        'properties' => [
+                            'id' => ['type' => 'string'],
+                            'tipo' => ['type' => 'string', 'enum' => array_column(TipoIdentificacaoMusica::cases(), 'value')],
+                            'confianca' => ['type' => 'integer'],
+                            'versao' => ['type' => 'string', 'enum' => array_column(TipoVersaoMusica::cases(), 'value')],
+                            'componentes' => ['type' => 'array', 'items' => $componente],
+                            'ambiguo' => ['type' => 'boolean'],
+                            'alternativas' => ['type' => 'array', 'items' => $componente],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
 }

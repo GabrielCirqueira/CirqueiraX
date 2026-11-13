@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\DataObject\IdentificacaoMusica;
 
+use App\DataObject\Ia\RespostaIaDTO;
+
 final readonly class ResultadoLoteIdentificacaoDTO
 {
     /**
@@ -12,9 +14,7 @@ final readonly class ResultadoLoteIdentificacaoDTO
      */
     public function __construct(
         public array $resultados,
-        public string $modelo,
-        public int $tokensEntrada,
-        public int $tokensSaida,
+        public RespostaIaDTO $consumo,
         public array $idsInvalidos = [],
     ) {
     }

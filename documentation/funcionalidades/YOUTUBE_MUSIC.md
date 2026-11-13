@@ -292,10 +292,7 @@ O `status` também traz `extensao`: `aparelhosAtivos`, `ultimoEventoEm` e `tocan
 | Variável | Uso |
 |---|---|
 | `YOUTUBE_API_KEY` | Chave da YouTube Data API v3, restrita a essa API (orçamento de 5.000 unidades por dia) |
-| `OPENAI_MODELO_TEXTO` | Modelo da identificação (padrão `gpt-5.4-mini`) |
-| `OPENAI_ESFORCO_IDENTIFICACAO` | Esforço de raciocínio (padrão `low`) |
-| `OPENAI_PRECO_ENTRADA_POR_MILHAO` | Preço em US$ por milhão de tokens de entrada (padrão 0,75) |
-| `OPENAI_PRECO_SAIDA_POR_MILHAO` | Preço em US$ por milhão de tokens de saída (padrão 4,50) |
+| Pool de IA | A identificação usa o pool de provedores gratuitos. Chaves, modelos e ordem em [POOL_IA.md](POOL_IA.md) |
 
 A `ytmusicapi` vem instalada na imagem (`YTMUSICAPI_VERSAO = 1.12.3`). Atualizar só depois de testar `validar` e `historico` com uma sessão real.
 

@@ -19,10 +19,26 @@ parameters:
     env(SPOTIFY_REDIRECT_URI): 'http://127.0.0.1:4012/spotify/callback'
     env(OPENAI_API_KEY): ''
     env(YOUTUBE_API_KEY): ''
-    env(OPENAI_ESFORCO_IDENTIFICACAO): 'low'
+    env(OPENAI_ESFORCO_RACIOCINIO): 'low'
     env(OPENAI_PRECO_ENTRADA_POR_MILHAO): '0.75'
     env(OPENAI_PRECO_SAIDA_POR_MILHAO): '4.5'
     env(OPENAI_MODELO_TEXTO): 'gpt-5.4-mini'
+    env(IA_POOL_PERMITIR_PAGOS): '0'
+    env(GROQ_API_KEY): ''
+    env(GROQ_MODELO): 'openai/gpt-oss-120b'
+    env(GEMINI_API_KEY): ''
+    env(GEMINI_MODELO): 'gemini-2.5-flash'
+    env(MISTRAL_API_KEY): ''
+    env(MISTRAL_MODELO): 'ministral-8b-latest'
+    env(OPENROUTER_API_KEY): ''
+    env(OPENROUTER_MODELO): 'nvidia/nemotron-3-ultra-550b-a55b:free'
+    env(CLOUDFLARE_API_TOKEN): ''
+    env(CLOUDFLARE_ACCOUNT_ID): ''
+    env(CLOUDFLARE_MODELO): '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+    env(NVIDIA_API_KEY): ''
+    env(NVIDIA_MODELO): 'z-ai/glm-5.3-flash'
+    env(ZAI_API_KEY): ''
+    env(ZAI_MODELO): 'glm-4.5-flash'
 
 services:
     # default configuration for services in *this* file
@@ -173,18 +189,114 @@ services:
     App\Interface\ExtratorAudioVideoInterface: '@App\Infra\Transcricao\ExtratorAudioFfmpegClient'
     App\Interface\CorretorTextoTranscricaoInterface: '@App\Infra\OpenAi\OpenAiCorretorTextoClient'
 
-    App\Interface\IdentificadorMusicaInterface: '@App\Infra\OpenAi\OpenAiIdentificadorMusicaClient'
+    App\Interface\IdentificadorMusicaInterface: '@App\Service\IdentificacaoMusica\Ia\IdentificarMusicasComIaService'
 
-    App\Infra\OpenAi\OpenAiIdentificadorMusicaClient:
+    App\Service\Ia\ListarProvedoresIaService:
         arguments:
+            $provedores: !tagged_iterator { tag: !php/const App\Interface\ProvedorIaInterface::TAG }
+            $permitirPagos: '%env(bool:IA_POOL_PERMITIR_PAGOS)%'
+
+    app.provedor_ia.groq:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::Groq
+            $urlBase: 'https://api.groq.com/openai/v1'
+            $chaveApi: '%env(GROQ_API_KEY)%'
+            $modelo: '%env(GROQ_MODELO)%'
+            $aceitaEsquemaEstrito: false
+            $timeoutSegundos: 60.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 80 }
+
+    app.provedor_ia.gemini:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::Gemini
+            $urlBase: 'https://generativelanguage.googleapis.com/v1beta/openai'
+            $chaveApi: '%env(GEMINI_API_KEY)%'
+            $modelo: '%env(GEMINI_MODELO)%'
+            $aceitaEsquemaEstrito: true
+            $timeoutSegundos: 90.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 70 }
+
+    app.provedor_ia.mistral:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::Mistral
+            $urlBase: 'https://api.mistral.ai/v1'
+            $chaveApi: '%env(MISTRAL_API_KEY)%'
+            $modelo: '%env(MISTRAL_MODELO)%'
+            $aceitaEsquemaEstrito: true
+            $timeoutSegundos: 60.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 60 }
+
+    app.provedor_ia.openrouter:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::OpenRouter
+            $urlBase: 'https://openrouter.ai/api/v1'
+            $chaveApi: '%env(OPENROUTER_API_KEY)%'
+            $modelo: '%env(OPENROUTER_MODELO)%'
+            $aceitaEsquemaEstrito: true
+            $timeoutSegundos: 90.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 50 }
+
+    app.provedor_ia.cloudflare:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::Cloudflare
+            $urlBase: 'https://api.cloudflare.com/client/v4/accounts/%env(CLOUDFLARE_ACCOUNT_ID)%/ai/v1'
+            $chaveApi: '%env(CLOUDFLARE_API_TOKEN)%'
+            $modelo: '%env(CLOUDFLARE_MODELO)%'
+            $aceitaEsquemaEstrito: true
+            $timeoutSegundos: 90.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 40 }
+
+    app.provedor_ia.nvidia:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::Nvidia
+            $urlBase: 'https://integrate.api.nvidia.com/v1'
+            $chaveApi: '%env(NVIDIA_API_KEY)%'
+            $modelo: '%env(NVIDIA_MODELO)%'
+            $aceitaEsquemaEstrito: false
+            $timeoutSegundos: 180.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 30 }
+
+    app.provedor_ia.zai:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::Zai
+            $urlBase: 'https://api.z.ai/api/paas/v4'
+            $chaveApi: '%env(ZAI_API_KEY)%'
+            $modelo: '%env(ZAI_MODELO)%'
+            $aceitaEsquemaEstrito: false
+            $timeoutSegundos: 180.0
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 20 }
+
+    app.provedor_ia.openai:
+        class: App\Infra\Ia\ProvedorIaCompativelOpenAiClient
+        arguments:
+            $provedor: !php/enum App\Enum\ProvedorIa::OpenAi
+            $urlBase: 'https://api.openai.com/v1'
             $chaveApi: '%env(OPENAI_API_KEY)%'
             $modelo: '%env(OPENAI_MODELO_TEXTO)%'
-            $esforcoRaciocinio: '%env(OPENAI_ESFORCO_IDENTIFICACAO)%'
-
-    App\Service\Ia\RegistrarConsumoIaService:
-        arguments:
+            $aceitaEsquemaEstrito: true
+            $timeoutSegundos: 60.0
             $precoEntradaPorMilhao: '%env(float:OPENAI_PRECO_ENTRADA_POR_MILHAO)%'
             $precoSaidaPorMilhao: '%env(float:OPENAI_PRECO_SAIDA_POR_MILHAO)%'
+            $parametrosAdicionais:
+                reasoning_effort: '%env(OPENAI_ESFORCO_RACIOCINIO)%'
+            $campoLimiteTokens: 'max_completion_tokens'
+        tags:
+            - { name: !php/const App\Interface\ProvedorIaInterface::TAG, priority: 10 }
+
 
     App\Infra\OpenAi\OpenAiCorretorTextoClient:
         arguments:
