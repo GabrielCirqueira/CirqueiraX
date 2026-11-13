@@ -17,6 +17,7 @@ import {
   SecaoEvolucaoMensal,
   SecaoHabitos,
   SecaoHojeSemana,
+  SecaoLinhaDoTempo,
   SecaoRecordes,
   SecaoRetrospectiva,
   SeletorFonteMusica,
@@ -114,6 +115,8 @@ export function Musica() {
                 <SecaoCuriosidades curiosidades={resumo?.curiosidades} />
 
                 <SecaoCapsulaSonora conectada={habilitado} />
+
+                <SecaoLinhaDoTempo habilitado={habilitado} />
 
                 <SecaoRetrospectiva habilitado={habilitado} />
               </>

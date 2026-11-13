@@ -19,6 +19,7 @@ export const MUSICA_QUERY_KEYS = {
     ['musica', fonte, 'versoes', musicaUuid, periodo] as const,
   habitos: (fonte: FonteMusica, filtro: object) => ['musica', fonte, 'habitos', filtro] as const,
   recordes: (fonte: FonteMusica) => ['musica', fonte, 'recordes'] as const,
+  linhaDoTempo: (fonte: FonteMusica) => ['musica', fonte, 'linha-do-tempo'] as const,
   evolucao: (fonte: FonteMusica, meses: number) => ['musica', fonte, 'evolucao', meses] as const,
   descobertas: (fonte: FonteMusica, filtro: object) =>
     ['musica', fonte, 'descobertas', filtro] as const,

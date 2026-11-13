@@ -16,6 +16,7 @@ use App\Service\Musica\Analise\ObterDetalheArtistaMusicaService;
 use App\Service\Musica\Analise\ObterDetalheMusicaService;
 use App\Service\Musica\Analise\ObterEvolucaoMensalMusicaService;
 use App\Service\Musica\Analise\ObterHabitosMusicaService;
+use App\Service\Musica\Analise\ObterLinhaDoTempoMusicaService;
 use App\Service\Musica\Analise\ObterRecordesMusicaService;
 use App\Service\Musica\Analise\ObterRetrospectivaAnualMusicaService;
 use App\Service\Musica\Analise\ResolverAlvoPorNomeService;
@@ -34,6 +35,7 @@ final class MusicaAnaliseController extends DefaultController
         private readonly ObterDetalheMusicaService $obterDetalheMusicaService,
         private readonly ObterHabitosMusicaService $obterHabitosService,
         private readonly ObterRecordesMusicaService $obterRecordesService,
+        private readonly ObterLinhaDoTempoMusicaService $obterLinhaDoTempoService,
         private readonly ObterEvolucaoMensalMusicaService $obterEvolucaoMensalService,
         private readonly ObterDescobertasMusicaService $obterDescobertasService,
         private readonly ObterRetrospectivaAnualMusicaService $obterRetrospectivaService,
@@ -106,6 +108,12 @@ final class MusicaAnaliseController extends DefaultController
     public function recordes(Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         return $this->success($this->obterRecordesService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request))->paraArray());
+    }
+
+    #[Route(self::PREFIXO.'/linha-do-tempo', name: 'api_musica_linha_do_tempo', methods: ['GET'])]
+    public function linhaDoTempo(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->obterLinhaDoTempoService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request))->paraArray());
     }
 
     #[Route(self::PREFIXO.'/evolucao', name: 'api_musica_evolucao', methods: ['GET'])]

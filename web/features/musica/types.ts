@@ -560,3 +560,35 @@ export const RetrospectivaAnualSchema = z.object({
 export type RetrospectivaAnual = z.infer<typeof RetrospectivaAnualSchema>
 
 export type ItemComImagemMusica = MusicaAnalise | ArtistaAnalise | AlbumAnalise
+
+export const ItemMusicaLinhaDoTempoSchema = MusicaAnaliseSchema.extend({
+  posicao: z.number(),
+  posicaoAnterior: z.number().nullable(),
+})
+
+export type ItemMusicaLinhaDoTempo = z.infer<typeof ItemMusicaLinhaDoTempoSchema>
+
+export const ItemArtistaLinhaDoTempoSchema = ArtistaAnaliseSchema.extend({
+  posicao: z.number(),
+  posicaoAnterior: z.number().nullable(),
+})
+
+export type ItemArtistaLinhaDoTempo = z.infer<typeof ItemArtistaLinhaDoTempoSchema>
+
+export const MesLinhaDoTempoSchema = z.object({
+  ano: z.number(),
+  mes: z.number(),
+  totalMinutos: z.number(),
+  totalReproducoes: z.number(),
+  emAndamento: z.boolean(),
+  musicas: z.array(ItemMusicaLinhaDoTempoSchema),
+  artistas: z.array(ItemArtistaLinhaDoTempoSchema),
+})
+
+export type MesLinhaDoTempo = z.infer<typeof MesLinhaDoTempoSchema>
+
+export const LinhaDoTempoMusicaSchema = z.object({
+  meses: z.array(MesLinhaDoTempoSchema),
+})
+
+export type LinhaDoTempoMusica = z.infer<typeof LinhaDoTempoMusicaSchema>

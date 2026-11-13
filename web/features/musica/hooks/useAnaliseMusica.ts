@@ -7,6 +7,7 @@ import {
   obterDetalheMusica,
   obterEvolucaoMensalMusica,
   obterHabitosMusica,
+  obterLinhaDoTempoMusica,
   obterRecordesMusica,
   obterRetrospectivaMusica,
   obterVersoesMusica,
@@ -55,6 +56,16 @@ export function useRecordesMusica(habilitado = true) {
   return useQuery({
     queryKey: MUSICA_QUERY_KEYS.recordes(fonte),
     queryFn: () => obterRecordesMusica(fonte),
+    enabled: habilitado,
+    staleTime: TEMPO_DADOS_FRESCOS,
+  })
+}
+
+export function useLinhaDoTempoMusica(habilitado = true) {
+  const { fonte } = useFonteMusica()
+  return useQuery({
+    queryKey: MUSICA_QUERY_KEYS.linhaDoTempo(fonte),
+    queryFn: () => obterLinhaDoTempoMusica(fonte),
     enabled: habilitado,
     staleTime: TEMPO_DADOS_FRESCOS,
   })

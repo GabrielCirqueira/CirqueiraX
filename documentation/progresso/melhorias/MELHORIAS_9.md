@@ -96,3 +96,16 @@
 - **Arquivos**: `config/packages/security.yaml`, `config/packages/framework.yaml`, `config/packages/nelmio_cors.yaml`, `devops/php/php.prod.ini`, `.tooling/env/.env.prod.example`, `src/EventListener/RestringirTokenNaUrlListener.php`, `src/EventListener/CabecalhosSegurancaListener.php`, `src/Controller/Auth/AuthController.php`, `src/Controller/Sistema/HealthController.php`, `src/Service/Musica/Capa/ObterCapaMusicaService.php`, `web/features/auth/api.ts`, `web/features/auth/hooks.ts`, `web/layouts/Header.tsx`, `web/layouts/Sidebar.tsx`
 
 ---
+
+### ✅ Melhoria 168 — Linha do Tempo: Todos os Meses Lado a Lado
+
+- **Status**: Concluído
+- **Data**: 12 de novembro de 2026
+- **Problema**: a Cápsula Sonora mostra um mês por vez e é preciso escolher o mês na mão. Não havia como ver de uma vez, do primeiro mês até hoje, o que esteve no topo em cada mês.
+- **Solução**:
+  - Nova seção "Linha do Tempo" na página de Música, abaixo da Cápsula Sonora (que não mudou). Cada mês com reproduções vira uma coluna com o top 10 de músicas ou de artistas (troca por botão), minutos e plays do mês, e a seta de quanto subiu ou caiu em relação ao mês anterior ("novo" quando não estava no top 50 dele). A faixa rola de lado, abre no mês atual e tem atalhos por ano.
+  - Tocar numa música ou artista passa a "seguir" o item: ele fica destacado em todos os meses e os outros ficam apagados; um painel mostra quantos meses ficou no top 10, quantas vezes foi o 1º, a melhor posição e um gráfico de barras com a posição em cada mês.
+  - Backend: `GET /api/v1/musica/linha-do-tempo` (`ObterLinhaDoTempoMusicaService`), com o mesmo ranking da Cápsula (mês em UTC, ordem por streams, crédito para todos os artistas), respeita o filtro de fonte e fica em cache como as outras análises.
+- **Arquivos**: `src/Service/Musica/Analise/ObterLinhaDoTempoMusicaService.php`, `src/DataObject/Spotify/Analise/LinhaDoTempoMusicaDTO.php`, `src/DataObject/Spotify/Analise/MesLinhaDoTempoMusicaDTO.php`, `src/Controller/Musica/MusicaAnaliseController.php`, `web/features/musica/components/SecaoLinhaDoTempo.tsx`, `web/features/musica/utils/linhaDoTempo.ts`, `web/features/musica/types.ts`, `web/features/musica/api.ts`, `web/features/musica/hooks/useAnaliseMusica.ts`, `web/features/musica/hooks/chavesQueryMusica.ts`, `web/features/musica/Musica.tsx`
+
+---

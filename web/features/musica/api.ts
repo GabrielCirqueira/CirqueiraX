@@ -18,6 +18,8 @@ import {
   HabitosMusicaSchema,
   type ItemTopMusicaArtista,
   ItemTopMusicaArtistaSchema,
+  type LinhaDoTempoMusica,
+  LinhaDoTempoMusicaSchema,
   type RankingIntervalo,
   RankingIntervaloSchema,
   type RecordesMusica,
@@ -196,6 +198,13 @@ export async function obterHabitosMusica(
     params: { ...filtro, fonte },
   })
   return HabitosMusicaSchema.parse(data.data)
+}
+
+export async function obterLinhaDoTempoMusica(fonte: FonteMusica): Promise<LinhaDoTempoMusica> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO_MUSICA}/linha-do-tempo`, {
+    params: { fonte },
+  })
+  return LinhaDoTempoMusicaSchema.parse(data.data)
 }
 
 export async function obterRecordesMusica(fonte: FonteMusica): Promise<RecordesMusica> {
