@@ -8,7 +8,6 @@ use App\DataObject\Spotify\Analise\ArtistaAnaliseSpotifyDTO;
 use App\DataObject\Spotify\Analise\LinhaDoTempoMusicaDTO;
 use App\DataObject\Spotify\Analise\MesLinhaDoTempoMusicaDTO;
 use App\DataObject\Spotify\Analise\MusicaAnaliseSpotifyDTO;
-use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
@@ -35,23 +34,26 @@ final readonly class ObterLinhaDoTempoMusicaService
 
     private function calcular(Usuario $usuario, FiltroFonteMusica $fonte): LinhaDoTempoMusicaDTO
     {
-        $mesesDisponiveis = array_reverse($this->analiseRepository->listarMesesDisponiveis($usuario, $fonte));
+        $musicasPorMes = $this->agruparPorMes($this->analiseRepository->listarRankingMusicasPorMes($usuario, $fonte, self::LIMITE_COMPARACAO, self::LIMITE_EXIBIDO));
+        $artistasPorMes = $this->agruparPorMes($this->analiseRepository->listarRankingArtistasPorMes($usuario, $fonte, self::LIMITE_COMPARACAO, self::LIMITE_EXIBIDO));
         $posicoesMusicas = [];
         $posicoesArtistas = [];
         $meses = [];
         $todasMusicas = [];
         $todosArtistas = [];
 
-        foreach ($mesesDisponiveis as $mesInfo) {
-            $periodo = PeriodoAnaliseSpotifyDTO::doMes($mesInfo->ano(), $mesInfo->mes());
-            $musicas = $this->analiseRepository->listarRankingMusicas($usuario, $periodo, $fonte, self::LIMITE_COMPARACAO);
-            $artistas = $this->analiseRepository->listarRankingArtistas($usuario, $periodo, $fonte, self::LIMITE_COMPARACAO);
-            if ([] === $musicas && [] === $artistas) {
+        foreach (array_reverse($this->analiseRepository->listarMesesDisponiveis($usuario, $fonte)) as $mesInfo) {
+            $chaveMes = $this->chaveMes($mesInfo->ano(), $mesInfo->mes());
+            $rankingMusicas = $musicasPorMes[$chaveMes] ?? [];
+            $rankingArtistas = $artistasPorMes[$chaveMes] ?? [];
+            if ([] === $rankingMusicas && [] === $rankingArtistas) {
                 continue;
             }
 
-            $musicasExibidas = array_slice($musicas, 0, self::LIMITE_EXIBIDO);
-            $artistasExibidos = array_slice($artistas, 0, self::LIMITE_EXIBIDO);
+            /** @var list<MusicaAnaliseSpotifyDTO> $musicasExibidas */
+            $musicasExibidas = $this->itensExibidos($rankingMusicas);
+            /** @var list<ArtistaAnaliseSpotifyDTO> $artistasExibidos */
+            $artistasExibidos = $this->itensExibidos($rankingArtistas);
 
             $meses[] = new MesLinhaDoTempoMusicaDTO(
                 ano: $mesInfo->ano(),
@@ -65,8 +67,8 @@ final readonly class ObterLinhaDoTempoMusicaService
                 posicoesAnterioresArtistas: array_map(static fn (ArtistaAnaliseSpotifyDTO $artista): ?int => $posicoesArtistas[$artista->chaveIdentificacao()] ?? null, $artistasExibidos),
             );
 
-            $posicoesMusicas = $this->mapearPosicoes(array_map(static fn (MusicaAnaliseSpotifyDTO $musica): string => $musica->chaveIdentificacao(), $musicas));
-            $posicoesArtistas = $this->mapearPosicoes(array_map(static fn (ArtistaAnaliseSpotifyDTO $artista): string => $artista->chaveIdentificacao(), $artistas));
+            $posicoesMusicas = $this->mapearPosicoes($rankingMusicas);
+            $posicoesArtistas = $this->mapearPosicoes($rankingArtistas);
             array_push($todasMusicas, ...$musicasExibidas);
             array_push($todosArtistas, ...$artistasExibidos);
         }
@@ -77,15 +79,49 @@ final readonly class ObterLinhaDoTempoMusicaService
     }
 
     /**
-     * @param list<string> $chaves
+     * @template T
+     *
+     * @param list<array{ano: int, mes: int, posicao: int, chave: string, item: T|null}> $linhas
+     *
+     * @return array<string, list<array{ano: int, mes: int, posicao: int, chave: string, item: T|null}>>
+     */
+    private function agruparPorMes(array $linhas): array
+    {
+        $porMes = [];
+        foreach ($linhas as $linha) {
+            $porMes[$this->chaveMes($linha['ano'], $linha['mes'])][] = $linha;
+        }
+
+        return $porMes;
+    }
+
+    private function chaveMes(int $ano, int $mes): string
+    {
+        return sprintf('%d-%02d', $ano, $mes);
+    }
+
+    /**
+     * @template T of object
+     *
+     * @param list<array{ano: int, mes: int, posicao: int, chave: string, item: T|null}> $ranking
+     *
+     * @return list<T>
+     */
+    private function itensExibidos(array $ranking): array
+    {
+        return array_values(array_filter(array_map(static fn (array $linha): ?object => $linha['item'], $ranking)));
+    }
+
+    /**
+     * @param list<array{ano: int, mes: int, posicao: int, chave: string, item: mixed}> $ranking
      *
      * @return array<string, int>
      */
-    private function mapearPosicoes(array $chaves): array
+    private function mapearPosicoes(array $ranking): array
     {
         $posicoes = [];
-        foreach ($chaves as $indice => $chave) {
-            $posicoes[$chave] ??= $indice + 1;
+        foreach ($ranking as $linha) {
+            $posicoes[$linha['chave']] ??= $linha['posicao'];
         }
 
         return $posicoes;

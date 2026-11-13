@@ -136,6 +136,92 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return list<array{ano: int, mes: int, posicao: int, chave: string, item: MusicaAnaliseSpotifyDTO|null}>
+     */
+    public function listarRankingMusicasPorMes(Usuario $usuario, FiltroFonteMusica $filtro, int $limiteComparacao, int $limiteExibido): array
+    {
+        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, PeriodoAnaliseSpotifyDTO::todos(), $filtro);
+        $parametros['limiteComparacao'] = $limiteComparacao;
+        $tipos['limiteComparacao'] = ParameterType::INTEGER;
+
+        $linhas = $this->consultar(sprintf(
+            'WITH por_mes AS (
+                SELECT YEAR(r.tocada_em) AS ano, MONTH(r.tocada_em) AS mes, r.musica_uuid,
+                    SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, MAX(r.tocada_em) AS mais_recente, %s
+                FROM reproducao_musical r
+                WHERE r.usuario_id = :usuarioId%s
+                GROUP BY ano, mes, r.musica_uuid
+                HAVING streams > 0
+            ), ranqueadas AS (
+                SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.ano, p.mes ORDER BY p.streams DESC, p.ms DESC, p.mais_recente DESC) AS posicao
+                FROM por_mes p
+            )
+            SELECT * FROM ranqueadas WHERE posicao <= :limiteComparacao ORDER BY ano, mes, posicao',
+            self::COLUNAS_POR_FONTE,
+            $filtros,
+        ), $parametros, $tipos);
+
+        $exibidas = array_values(array_filter($linhas, static fn (array $linha): bool => (int) $linha['posicao'] <= $limiteExibido));
+        $musicas = array_map(MusicaAnaliseSpotifyDTO::daLinha(...), $this->complementarMusicas($usuario, $exibidas));
+        $musicasPorChave = [];
+        foreach ($exibidas as $indice => $linha) {
+            $musicasPorChave[$linha['ano'].'|'.$linha['mes'].'|'.$linha['posicao']] = $musicas[$indice];
+        }
+
+        return array_map(static fn (array $linha): array => [
+            'ano' => (int) $linha['ano'],
+            'mes' => (int) $linha['mes'],
+            'posicao' => (int) $linha['posicao'],
+            'chave' => Uuid::fromBinary((string) $linha['musica_uuid'])->toRfc4122(),
+            'item' => $musicasPorChave[$linha['ano'].'|'.$linha['mes'].'|'.$linha['posicao']] ?? null,
+        ], $linhas);
+    }
+
+    /**
+     * @return list<array{ano: int, mes: int, posicao: int, chave: string, item: ArtistaAnaliseSpotifyDTO|null}>
+     */
+    public function listarRankingArtistasPorMes(Usuario $usuario, FiltroFonteMusica $filtro, int $limiteComparacao, int $limiteExibido): array
+    {
+        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, PeriodoAnaliseSpotifyDTO::todos(), $filtro);
+        $parametros['limiteComparacao'] = $limiteComparacao;
+        $tipos['limiteComparacao'] = ParameterType::INTEGER;
+
+        $linhas = $this->consultar(sprintf(
+            '%s, por_mes AS (
+                SELECT YEAR(r.tocada_em) AS ano, MONTH(r.tocada_em) AS mes, c.artista_uuid,
+                    SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
+                FROM reproducao_musical r
+                INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
+                WHERE r.usuario_id = :usuarioId%s
+                GROUP BY ano, mes, c.artista_uuid
+                HAVING streams > 0
+            ), ranqueadas AS (
+                SELECT p.*, ROW_NUMBER() OVER (PARTITION BY p.ano, p.mes ORDER BY p.streams DESC, p.ms DESC) AS posicao
+                FROM por_mes p
+            )
+            SELECT * FROM ranqueadas WHERE posicao <= :limiteComparacao ORDER BY ano, mes, posicao',
+            self::CTE_CREDITOS,
+            self::COLUNAS_POR_FONTE,
+            $filtros,
+        ), $parametros, $tipos);
+
+        $exibidas = array_values(array_filter($linhas, static fn (array $linha): bool => (int) $linha['posicao'] <= $limiteExibido));
+        $artistas = array_map(ArtistaAnaliseSpotifyDTO::daLinha(...), $this->complementarArtistas($usuario, $exibidas));
+        $artistasPorChave = [];
+        foreach ($exibidas as $indice => $linha) {
+            $artistasPorChave[$linha['ano'].'|'.$linha['mes'].'|'.$linha['posicao']] = $artistas[$indice];
+        }
+
+        return array_map(static fn (array $linha): array => [
+            'ano' => (int) $linha['ano'],
+            'mes' => (int) $linha['mes'],
+            'posicao' => (int) $linha['posicao'],
+            'chave' => Uuid::fromBinary((string) $linha['artista_uuid'])->toRfc4122(),
+            'item' => $artistasPorChave[$linha['ano'].'|'.$linha['mes'].'|'.$linha['posicao']] ?? null,
+        ], $linhas);
+    }
+
+    /**
      * @return list<AlbumAnaliseSpotifyDTO>
      */
     public function listarRankingAlbuns(
