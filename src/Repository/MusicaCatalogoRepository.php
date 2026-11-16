@@ -53,6 +53,23 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
         return $resultado;
     }
 
+    public function buscarPorVideoOficialId(string $videoOficialId): ?MusicaCatalogo
+    {
+        if ('' === trim($videoOficialId)) {
+            return null;
+        }
+
+        /** @var MusicaCatalogo|null $resultado */
+        $resultado = $this->createQueryBuilder('e')
+            ->andWhere('e.videoOficialId = :videoOficialId')
+            ->setParameter('videoOficialId', $videoOficialId)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $resultado?->musicaEfetiva();
+    }
+
     public function buscarExistentePorTituloEArtistaCompactos(string $tituloCompacto, string $artistaCompacto): ?MusicaCatalogo
     {
         if ('' === $tituloCompacto || '' === $artistaCompacto) {

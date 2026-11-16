@@ -64,6 +64,14 @@ framework:
                     redeliver_timeout: 7200
                 retry_strategy:
                     max_retries: 0
+            transferencia_playlist:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                options:
+                    queue_name: transferencia_playlist
+                    use_notify: true
+                    check_delayed_interval: 60000
+                retry_strategy:
+                    max_retries: 0
             failed: 'doctrine://default?queue_name=failed'
 
         default_bus: messenger.bus.default
@@ -81,6 +89,9 @@ framework:
             'App\Message\ColetarHistoricoYoutubeMusicMessage': youtube_coleta
             'App\Message\IdentificarVideosYoutubeMessage': youtube_identificacao
             'App\Message\ImportarHistoricoYoutubeMessage': youtube_importacao
+            'App\Message\CasarFaixasTransferenciaMessage': transferencia_playlist
+            'App\Message\ExecutarTransferenciaPlaylistMessage': transferencia_playlist
+            'App\Message\SincronizarVinculoPlaylistMessage': transferencia_playlist
             'App\Message\*': async
 
 

@@ -71,7 +71,19 @@ Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseRepr
 
 ### Página principal e Gerenciar
 
-`/musica` mostra só os relatórios: tocando agora (Spotify e YouTube Music), hoje e semana, recordes, evolução, hábitos, descobertas, curiosidades, Cápsula e retrospectiva. Tudo que é configuração fica em `/musica/gerenciar`, aberto pelo botão **Gerenciar** ao lado do seletor de fonte: contas do Spotify e do YouTube Music (com a extensão do navegador), importação do histórico (Spotify e Google Takeout) e o cartão de **Revisão e correções**, que leva a `/musica/revisao`. O botão mostra um número quando há pendência (conta para reconectar ou itens na revisão). Os avisos de conexão do Dashboard também levam ao Gerenciar.
+`/musica` mostra só os relatórios: tocando agora (Spotify e YouTube Music), hoje e semana, recordes, evolução, hábitos, descobertas, curiosidades, Cápsula e retrospectiva. Tudo que é configuração fica em `/musica/gerenciar`, aberto pelo botão **Gerenciar** ao lado do seletor de fonte: contas do Spotify e do YouTube Music (com a extensão do navegador), importação do histórico (Spotify e Google Takeout), **transferência e vínculo de playlists** (Spotify ↔ YouTube Music via OAuth Google + API oficial do YouTube) e o cartão de **Revisão e correções**, que leva a `/musica/revisao`. O botão mostra um número quando há pendência (conta para reconectar ou itens na revisão). Os avisos de conexão do Dashboard também levam ao Gerenciar.
+
+### Transferência de playlists (Spotify ↔ YouTube Music)
+
+Fluxo no estilo TuneMyMusic, em `/musica/gerenciar`:
+
+1. Escolher direção (Spotify → YouTube Music ou o inverso).
+2. Conectar contas: Spotify (OAuth com escopos de playlist) e Google/YouTube (OAuth oficial, `ContaYoutubeOAuth`, redirect `YOUTUBE_OAUTH_REDIRECT_URI` / `/musica/youtube/callback`). O cookie do YouTube Music continua só para o histórico.
+3. Marcar playlists da origem; se o destino já tiver playlist parecida (nome normalizado), escolher: criar outra, atualizar um lado, ou só vincular.
+4. Casamento das faixas em fila (`transferencia_playlist`): catálogo (`videoOficialId` / vínculo Spotify) primeiro; senão busca (limiar 70 / duvidosa 40).
+5. Prévia → confirmar → criar/atualizar playlist e itens pela API oficial; grava `vinculo_playlist` para sincronizar depois.
+
+Backend: `src/Service/TransferenciaPlaylist/`, `src/Service/YoutubeOAuth/`, `src/Infra/YoutubeData/YoutubePlaylistClient.php`. Frontend: `web/features/transferencia-playlist/`. Cota da YouTube Data API (escritas ~50 unidades) limita transferências grandes; a fila pausa em `pausada_cota` e continua depois.
 
 ### Quanto foi ouvido em cada plataforma
 
@@ -387,6 +399,7 @@ Lista do que só pode ser conferido com a conta e os arquivos do Gabriel. Cada c
 
 ## Pendências do Gabriel
 
+0. **OAuth YouTube para transferência de playlists:** no Google Cloud, cliente OAuth tipo “aplicativo da Web” com redirect `https://x.cirqueira.com/musica/youtube/callback` (e o local), escopos YouTube + email; app em Produção (não Teste) para o refresh token não expirar em 7 dias; colocar `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `YOUTUBE_OAUTH_REDIRECT_URI` no `.env` de produção. Reconectar o Spotify uma vez para aceitar os escopos de playlist.
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.
 2. **Exclusão automática:** conferir em `myactivity.google.com` se o histórico do YouTube estava ligado e se há exclusão automática. Prazo menor que 13 meses significa que outubro de 2025 já foi apagado.
 3. **Marca do Spotify:** ler as diretrizes de marca e a política de desenvolvedor do Spotify para confirmar se dados do Spotify podem aparecer misturados com outro serviço sob o visual do Spotify. Conclusão: _pendente_.

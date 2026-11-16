@@ -103,6 +103,14 @@ const router = createBrowserRouter(
             }
           />
           <Route
+            path="musica/youtube/callback"
+            lazy={() =>
+              lazyWithRetry(
+                () => import('@/features/transferencia-playlist/components/YoutubeOAuthCallback')
+              )
+            }
+          />
+          <Route
             path="app"
             lazy={() => lazyWithRetry(() => import('@/features/dashboard/Dashboard'))}
           />

@@ -1,6 +1,7 @@
 import { ModalUploadHistoricoSpotify } from '@/features/spotify/components/ModalUploadHistoricoSpotify'
 import { PainelConexaoSpotify } from '@/features/spotify/components/PainelConexaoSpotify'
 import { SecaoTutorialHistoricoSpotify } from '@/features/spotify/components/SecaoTutorialHistoricoSpotify'
+import { SecaoTransferenciaPlaylists } from '@/features/transferencia-playlist/components'
 import { ListaImportacoesYoutube } from '@/features/youtube-music/components/ListaImportacoesYoutube'
 import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
 import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
@@ -68,6 +69,8 @@ export function GerenciarMusica() {
               <SecaoTutorialHistoricoSpotify />
               <ListaImportacoesYoutube />
             </VStack>
+
+            <SecaoTransferenciaPlaylists />
 
             <VStack align="stretch" gap={4}>
               <CabecalhoSecaoMusica

@@ -10,11 +10,15 @@ use App\Interface\SpotifyInterface;
 final readonly class GerarUrlAutorizacaoSpotifyService
 {
     public const array ESCOPOS_PADRAO = [
-        'user-read-recently-played',
-        'user-read-currently-playing',
-        'user-top-read',
-        'user-read-playback-state',
+        'playlist-modify-private',
+        'playlist-modify-public',
+        'playlist-read-collaborative',
+        'playlist-read-private',
         'user-modify-playback-state',
+        'user-read-currently-playing',
+        'user-read-playback-state',
+        'user-read-recently-played',
+        'user-top-read',
     ];
 
     public function __construct(

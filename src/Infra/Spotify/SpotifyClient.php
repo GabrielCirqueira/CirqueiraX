@@ -13,6 +13,10 @@ use App\DataObject\Spotify\ListaReproducoesRecentesSpotifyDTO;
 use App\DataObject\Spotify\PerfilSpotifyDTO;
 use App\DataObject\Spotify\TocandoAgoraSpotifyDTO;
 use App\DataObject\Spotify\TokensSpotifyDTO;
+use App\DataObject\TransferenciaPlaylist\FaixaPlaylistDTO;
+use App\DataObject\TransferenciaPlaylist\ListaFaixasPlaylistDTO;
+use App\DataObject\TransferenciaPlaylist\ListaPlaylistsDTO;
+use App\DataObject\TransferenciaPlaylist\PlaylistResumoDTO;
 use App\Exception\Spotify\SpotifyException;
 use App\Infra\Client;
 use App\Interface\SpotifyInterface;
@@ -30,6 +34,8 @@ final class SpotifyClient extends Client implements SpotifyInterface
     private const int ESPERA_MAXIMA_RATE_LIMIT_SEGUNDOS = 10;
     private const int LIMITE_PADRAO_RECENTES = 50;
     private const int LIMITE_MAXIMO_BUSCA = 10;
+    private const int LIMITE_MAXIMO_PLAYLISTS = 50;
+    private const int LIMITE_MAXIMO_ITENS_PLAYLIST = 100;
     private const int STATUS_PROIBIDO = 403;
     private const int STATUS_NAO_ENCONTRADO = 404;
     private const string MOTIVO_PREMIUM = 'PREMIUM_REQUIRED';
@@ -412,6 +418,177 @@ final class SpotifyClient extends Client implements SpotifyInterface
         });
     }
 
+    public function listarMinhasPlaylists(string $accessToken, int $limite = 50, int $offset = 0): ListaPlaylistsDTO
+    {
+        $limiteSanitizado = max(1, min($limite, self::LIMITE_MAXIMO_PLAYLISTS));
+        $offsetSanitizado = max(0, $offset);
+
+        $dados = $this->executarComRetry(function () use ($accessToken, $limiteSanitizado, $offsetSanitizado) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'GET',
+                $this->resolverUrl('/me/playlists'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                    ],
+                    'query' => [
+                        'limit' => $limiteSanitizado,
+                        'offset' => $offsetSanitizado,
+                    ],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+
+            return $resposta;
+        });
+
+        $itensBrutos = isset($dados['items']) && is_array($dados['items']) ? $dados['items'] : [];
+        $itens = [];
+        foreach ($itensBrutos as $itemBruto) {
+            if (!is_array($itemBruto)) {
+                continue;
+            }
+            $itens[] = $this->mapearPlaylistResumo($itemBruto);
+        }
+
+        return new ListaPlaylistsDTO($itens, $this->extrairInt($dados['total'] ?? null, count($itens)));
+    }
+
+    public function listarItensPlaylist(string $accessToken, string $playlistId, int $limite = 100, int $offset = 0): ListaFaixasPlaylistDTO
+    {
+        $limiteSanitizado = max(1, min($limite, self::LIMITE_MAXIMO_ITENS_PLAYLIST));
+        $offsetSanitizado = max(0, $offset);
+
+        $dados = $this->executarComRetry(function () use ($accessToken, $playlistId, $limiteSanitizado, $offsetSanitizado) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'GET',
+                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/tracks'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                    ],
+                    'query' => [
+                        'limit' => $limiteSanitizado,
+                        'offset' => $offsetSanitizado,
+                        'fields' => 'total,next,items(track(id,name,duration_ms,uri,artists(name),album(images)))',
+                    ],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+
+            return $resposta;
+        });
+
+        $itensBrutos = isset($dados['items']) && is_array($dados['items']) ? $dados['items'] : [];
+        $itens = [];
+        foreach ($itensBrutos as $itemBruto) {
+            if (!is_array($itemBruto)) {
+                continue;
+            }
+            $faixa = $this->mapearFaixaPlaylist($itemBruto);
+            if (null !== $faixa) {
+                $itens[] = $faixa;
+            }
+        }
+
+        $total = $this->extrairInt($dados['total'] ?? null, count($itens));
+        $proximoOffset = null;
+        if (isset($dados['next']) && is_string($dados['next']) && '' !== $dados['next']) {
+            $proximoOffset = $offsetSanitizado + count($itensBrutos);
+        }
+
+        return new ListaFaixasPlaylistDTO($itens, $total, $proximoOffset);
+    }
+
+    public function criarPlaylist(string $accessToken, string $nome, ?string $descricao = null, bool $publica = false): PlaylistResumoDTO
+    {
+        $corpo = [
+            'name' => $nome,
+            'public' => $publica,
+        ];
+        if (null !== $descricao && '' !== trim($descricao)) {
+            $corpo['description'] = $descricao;
+        }
+
+        $dados = $this->executarComRetry(function () use ($accessToken, $corpo) {
+            /** @var array<string, mixed> $resposta */
+            $resposta = $this->request(
+                'POST',
+                $this->resolverUrl('/me/playlists'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => $corpo,
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+
+            return $resposta;
+        });
+
+        return $this->mapearPlaylistResumo($dados);
+    }
+
+    public function adicionarItensPlaylist(string $accessToken, string $playlistId, array $uris): void
+    {
+        if ([] === $uris) {
+            return;
+        }
+
+        $this->executarComRetry(function () use ($accessToken, $playlistId, $uris) {
+            return $this->request(
+                'POST',
+                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/tracks'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => ['uris' => array_values($uris)],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+        });
+    }
+
+    public function removerItensPlaylist(string $accessToken, string $playlistId, array $uris): void
+    {
+        if ([] === $uris) {
+            return;
+        }
+
+        $tracks = array_map(static fn (string $uri): array => ['uri' => $uri], array_values($uris));
+
+        $this->executarComRetry(function () use ($accessToken, $playlistId, $tracks) {
+            return $this->request(
+                'DELETE',
+                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/tracks'),
+                [
+                    'timeout' => self::TIMEOUT_SEGUNDOS,
+                    'headers' => [
+                        'Authorization' => 'Bearer '.$accessToken,
+                        'Accept' => 'application/json',
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => ['tracks' => $tracks],
+                ],
+                throw: static fn (RequestException $e): \Throwable => $e,
+            );
+        });
+    }
+
     public function obterArtista(string $accessToken, string $idArtista): ArtistaSpotifyDTO
     {
         $dados = $this->executarComRetry(function () use ($accessToken, $idArtista) {
@@ -722,6 +899,61 @@ final class SpotifyClient extends Client implements SpotifyInterface
             $urlCapa,
             $duracaoMs,
             $tocadoEm
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     */
+    private function mapearPlaylistResumo(array $dados): PlaylistResumoDTO
+    {
+        $imagens = is_array($dados['images'] ?? null) ? $dados['images'] : [];
+        $dono = is_array($dados['owner'] ?? null) ? $dados['owner'] : [];
+        $tracks = is_array($dados['tracks'] ?? null) ? $dados['tracks'] : [];
+
+        return new PlaylistResumoDTO(
+            id: $this->extrairString($dados['id'] ?? null),
+            nome: $this->extrairString($dados['name'] ?? null),
+            totalFaixas: $this->extrairInt($tracks['total'] ?? null),
+            urlCapa: $this->extrairPrimeiraImagem($imagens),
+            snapshotId: $this->extrairString($dados['snapshot_id'] ?? null) ?: null,
+            dono: $this->extrairString($dono['display_name'] ?? ($dono['id'] ?? null)) ?: null,
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $itemBruto
+     */
+    private function mapearFaixaPlaylist(array $itemBruto): ?FaixaPlaylistDTO
+    {
+        $track = is_array($itemBruto['track'] ?? null) ? $itemBruto['track'] : null;
+        if (null === $track) {
+            return null;
+        }
+
+        $codigo = $this->extrairString($track['id'] ?? null);
+        if ('' === $codigo) {
+            return null;
+        }
+
+        $artistasBrutos = is_array($track['artists'] ?? null) ? $track['artists'] : [];
+        $nomesArtistas = [];
+        foreach ($artistasBrutos as $artista) {
+            if (is_array($artista) && is_string($artista['name'] ?? null) && '' !== trim($artista['name'])) {
+                $nomesArtistas[] = $artista['name'];
+            }
+        }
+
+        $album = is_array($track['album'] ?? null) ? $track['album'] : [];
+        $uri = $this->extrairString($track['uri'] ?? null, self::PREFIXO_URI_FAIXA.$codigo);
+
+        return new FaixaPlaylistDTO(
+            idExterno: $codigo,
+            titulo: $this->extrairString($track['name'] ?? null),
+            artistas: implode(', ', $nomesArtistas),
+            duracaoMs: $this->extrairInt($track['duration_ms'] ?? null) ?: null,
+            urlCapa: $this->extrairPrimeiraImagem($album['images'] ?? []),
+            uri: $uri,
         );
     }
 
