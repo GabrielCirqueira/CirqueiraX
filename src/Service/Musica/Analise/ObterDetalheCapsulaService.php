@@ -10,6 +10,7 @@ use App\DataObject\Spotify\ItemRankingArtistaCapsulaDTO;
 use App\DataObject\Spotify\ItemRankingMusicaCapsulaDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
 use App\Service\Spotify\EnriquecerImagensSpotifyService;
 
 final readonly class ObterDetalheCapsulaService
@@ -17,10 +18,21 @@ final readonly class ObterDetalheCapsulaService
     public function __construct(
         private CalcularCapsulaMensalService $calcularCapsulaService,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {
     }
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, int $ano, int $mes): DetalheCapsulaComImagensDTO
+    {
+        return $this->cacheAnalise->lembrar(
+            $usuario,
+            sprintf('capsula|%d|%d', $ano, $mes),
+            fn (): DetalheCapsulaComImagensDTO => $this->calcular($usuario, $fonte, $ano, $mes),
+            $fonte,
+        );
+    }
+
+    private function calcular(Usuario $usuario, FiltroFonteMusica $fonte, int $ano, int $mes): DetalheCapsulaComImagensDTO
     {
         $capsula = $this->calcularCapsulaService->executar($usuario, $fonte, $ano, $mes);
 

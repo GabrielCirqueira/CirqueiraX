@@ -17,6 +17,6 @@ export function useDetalheCapsulaMusica(ano: number | null, mes: number | null, 
       return obterCapsulaMusica(ano, mes, fonte)
     },
     enabled: podeBuscar,
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
   })
 }

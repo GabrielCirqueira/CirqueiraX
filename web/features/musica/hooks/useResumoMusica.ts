@@ -9,6 +9,6 @@ export function useResumoMusica(habilitado = true) {
     queryKey: MUSICA_QUERY_KEYS.resumo(fonte),
     queryFn: () => obterResumoMusica(fonte),
     enabled: habilitado,
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
   })
 }

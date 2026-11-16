@@ -10,8 +10,9 @@ use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\DataObject\Spotify\ResumoIntervaloComImagensDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
-use App\Service\Spotify\EnriquecerImagensSpotifyService;
 use App\Repository\AnaliseReproducaoMusicalRepository;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
+use App\Service\Spotify\EnriquecerImagensSpotifyService;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -25,6 +26,7 @@ final readonly class ObterResumoIntervaloPersonalizadoService
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
         private AnaliseReproducaoMusicalRepository $analiseRepository,
         private MontarResumoIntervaloMusicaService $montarResumoService,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {}
 
     public function executar(
@@ -39,7 +41,46 @@ final readonly class ObterResumoIntervaloPersonalizadoService
         int $limite = 50,
     ): ResumoIntervaloComImagensDTO {
         $limiteSanitizado = max(self::LIMITE_MINIMO, min(self::LIMITE_MAXIMO, $limite));
+        $chave = sprintf(
+            'ranking|%s|%s|%s|%s|%s|%s|%d',
+            $tipo,
+            $dias ?? '',
+            $ano ?? '',
+            $mes ?? '',
+            $inicio ?? '',
+            $fim ?? '',
+            $limiteSanitizado,
+        );
 
+        return $this->cacheAnalise->lembrar(
+            $usuario,
+            $chave,
+            fn (): ResumoIntervaloComImagensDTO => $this->calcular(
+                $usuario,
+                $fonte,
+                $tipo,
+                $dias,
+                $ano,
+                $mes,
+                $inicio,
+                $fim,
+                $limiteSanitizado,
+            ),
+            $fonte,
+        );
+    }
+
+    private function calcular(
+        Usuario $usuario,
+        FiltroFonteMusica $fonte,
+        string $tipo,
+        ?int $dias,
+        ?int $ano,
+        ?int $mes,
+        ?string $inicio,
+        ?string $fim,
+        int $limiteSanitizado,
+    ): ResumoIntervaloComImagensDTO {
         [$inicioLocal, $fimLocal, $compInicioLocal, $compFimLocal, $rotuloPeriodo] = $this->resolverIntervalo($tipo, $dias, $ano, $mes, $inicio, $fim);
 
         $periodo = self::TIPO_TODOS === $tipo ? PeriodoAnaliseSpotifyDTO::todos() : PeriodoAnaliseSpotifyDTO::entre($inicioLocal, $fimLocal, $rotuloPeriodo);

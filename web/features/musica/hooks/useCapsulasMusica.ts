@@ -9,6 +9,6 @@ export function useCapsulasMusica(habilitado = true) {
     queryKey: MUSICA_QUERY_KEYS.capsulasMeses(fonte),
     queryFn: () => listarCapsulasMusica(fonte),
     enabled: habilitado,
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
   })
 }

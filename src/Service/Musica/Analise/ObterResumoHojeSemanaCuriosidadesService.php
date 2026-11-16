@@ -12,6 +12,7 @@ use App\DataObject\Spotify\ResumoGeralSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
 use App\Repository\AnaliseReproducaoMusicalRepository;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
 use App\Service\Spotify\EnriquecerImagensSpotifyService;
 
 final readonly class ObterResumoHojeSemanaCuriosidadesService
@@ -27,9 +28,20 @@ final readonly class ObterResumoHojeSemanaCuriosidadesService
         private AnaliseReproducaoMusicalRepository $analiseRepository,
         private MontarResumoIntervaloMusicaService $montarResumoService,
         private EnriquecerImagensSpotifyService $enriquecerImagensService,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {}
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte): ResumoComImagensDTO
+    {
+        return $this->cacheAnalise->lembrar(
+            $usuario,
+            'resumo',
+            fn (): ResumoComImagensDTO => $this->calcular($usuario, $fonte),
+            $fonte,
+        );
+    }
+
+    private function calcular(Usuario $usuario, FiltroFonteMusica $fonte): ResumoComImagensDTO
     {
         $hojeInicio = PeriodoAnaliseSpotifyDTO::agoraLocal()->setTime(0, 0);
         $agora = PeriodoAnaliseSpotifyDTO::agoraLocal();

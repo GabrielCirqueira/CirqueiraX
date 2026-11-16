@@ -13,14 +13,14 @@ export function useImagensMusica(chavesFaltantes: string[]) {
     queryKey: [...MUSICA_QUERY_KEYS.imagens, ...chavesUnicas],
     queryFn: () => consultarImagensSpotify(chavesUnicas),
     enabled: habilitado,
-    staleTime: 10_000,
+    staleTime: 60_000,
     refetchInterval: (query) => {
       const mapa = query.state.data
       if (!mapa) {
-        return 4_000
+        return 12_000
       }
       const existemPendentes = Object.values(mapa).some((item) => item.status === 'pendente')
-      return existemPendentes ? 4_000 : false
+      return existemPendentes ? 12_000 : false
     },
   })
 }

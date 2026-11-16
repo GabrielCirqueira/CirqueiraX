@@ -159,13 +159,14 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
 
   const ehPadraoHoje = tipoFiltro === 'dias' && diasSelecionados === 1
   const ehPadraoSemana = tipoFiltro === 'dias' && diasSelecionados === 7
+  const periodoCobertoPeloResumo = ehPadraoHoje || ehPadraoSemana
 
   const usarResumoLocal =
     (ehPadraoHoje && Boolean(resumo?.hoje)) || (ehPadraoSemana && Boolean(resumo?.semana))
 
   const { data: dadosRankingRemoto, isLoading: carregandoRanking } = useRankingIntervaloMusica(
     paramsRanking,
-    !usarResumoLocal || !resumo
+    !periodoCobertoPeloResumo || (Boolean(resumo) && !usarResumoLocal)
   )
 
   const dadosAtivos = useMemo(() => {

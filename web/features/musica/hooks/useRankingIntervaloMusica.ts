@@ -9,6 +9,6 @@ export function useRankingIntervaloMusica(params: FiltroIntervaloRankingParams, 
     queryKey: MUSICA_QUERY_KEYS.rankingIntervalo(fonte, params),
     queryFn: () => obterRankingIntervaloMusica(params, fonte),
     enabled: habilitado,
-    staleTime: 60_000,
+    staleTime: 5 * 60_000,
   })
 }
