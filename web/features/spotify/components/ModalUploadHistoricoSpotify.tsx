@@ -472,8 +472,8 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                   <strong>spotify.com/account/privacy</strong> → <strong>Baixar seus dados</strong>.
                 </Text>
                 <Text>
-                  2. Marque <strong>Dados da conta</strong> (último ano, ~5 dias) e{' '}
-                  <strong>Histórico de streaming estendido</strong> (conta inteira, até 30 dias).
+                  2. Marque só <strong>Histórico ampliado de streams</strong> (conta inteira, tempo
+                  exato; até ~30 dias). Não precisa de Dados da conta.
                 </Text>
                 <Text>
                   3. Não marque <em>Informações técnicas de registro</em> — o sistema não usa.

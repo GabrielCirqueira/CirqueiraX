@@ -10,7 +10,7 @@ import {
 } from '../utils/tutorialHistoricoSpotify'
 
 export const SecaoTutorialHistoricoSpotify = memo(function SecaoTutorialHistoricoSpotify() {
-  const [aberta, setAberta] = useState(true)
+  const [aberta, setAberta] = useState(false)
 
   return (
     <Box

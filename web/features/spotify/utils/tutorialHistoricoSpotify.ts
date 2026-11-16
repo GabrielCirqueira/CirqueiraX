@@ -1,19 +1,19 @@
 export const URL_PRIVACIDADE_SPOTIFY = 'https://www.spotify.com/account/privacy'
 
 export const EXPLICACAO_TUTORIAL_HISTORICO_SPOTIFY =
-  'A conexão com o Spotify guarda sozinha o que você ouvir daqui pra frente (a cada ~30 min). O passado só entra quando você pede os arquivos na conta Spotify e importa o ZIP aqui.'
+  'A conexão com o Spotify guarda sozinha o que você ouvir daqui pra frente (a cada ~30 min). O passado só entra quando você pede o histórico ampliado na conta Spotify e importa o ZIP aqui.'
 
 export const OPCOES_PEDIDO_SPOTIFY = [
   {
     marcar: true,
-    titulo: 'Dados da conta',
-    detalhe: 'Histórico do último ano. Costuma chegar em cerca de 5 dias por e-mail.',
+    titulo: 'Histórico ampliado de streams',
+    detalhe:
+      'É o único necessário. Cobre a conta inteira, com tempo exato e código de cada faixa. Pode levar até 30 dias para chegar por e-mail. Só com esse arquivo já dá para importar o passado completo.',
   },
   {
-    marcar: true,
-    titulo: 'Histórico de streaming estendido',
-    detalhe:
-      'Conta inteira, com tempo exato e código de cada faixa. Pode levar até 30 dias. O estendido sozinho bastaria, mas demora mais — pedindo os dois você começa a usar antes.',
+    marcar: false,
+    titulo: 'Dados da conta',
+    detalhe: 'Não precisa. O histórico ampliado já traz o passado — e com mais detalhe.',
   },
   {
     marcar: false,
@@ -24,10 +24,10 @@ export const OPCOES_PEDIDO_SPOTIFY = [
 
 export const PASSOS_TUTORIAL_HISTORICO_SPOTIFY = [
   'Abra a página de privacidade da conta Spotify (botão abaixo).',
-  'Em "Baixar seus dados", marque só as duas caixas recomendadas.',
-  'Confirme o pedido. Os arquivos chegam por e-mail, com link de download.',
+  'Em "Baixar seus dados", marque só "Histórico ampliado de streams".',
+  'Confirme o pedido. O arquivo chega por e-mail, com link de download (até ~30 dias).',
   'Baixe o ZIP e envie em "Importar histórico do Spotify" — sem abrir nem separar pastas. O sistema lê só as reproduções e ignora o resto.',
-  'Pode importar os dois arquivos e também um ZIP antigo: o que já existe não duplica. O tempo exato do estendido substitui a estimativa da coleta.',
+  'Pode importar de novo depois: o que já existe não duplica. O tempo exato do arquivo substitui a estimativa da coleta.',
 ]
 
 export const NOTA_TUTORIAL_HISTORICO_SPOTIFY =
