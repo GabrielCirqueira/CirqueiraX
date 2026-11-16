@@ -10,7 +10,7 @@ final class YoutubeOAuthException extends DomainException
 {
     public static function credenciaisNaoConfiguradas(): self
     {
-        return new self('As credenciais OAuth do Google (Client ID ou Client Secret) não foram configuradas para o YouTube.', 500);
+        return new self('As credenciais OAuth do YouTube não foram configuradas. Crie um cliente do tipo Aplicativo da Web no Google Cloud e preencha YOUTUBE_OAUTH_CLIENT_ID e YOUTUBE_OAUTH_CLIENT_SECRET.', 500);
     }
 
     public static function codigoAutorizacaoAusente(): self

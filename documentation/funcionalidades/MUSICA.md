@@ -399,7 +399,7 @@ Lista do que só pode ser conferido com a conta e os arquivos do Gabriel. Cada c
 
 ## Pendências do Gabriel
 
-0. **OAuth YouTube para transferência de playlists:** no Google Cloud, cliente OAuth tipo “aplicativo da Web” com redirect `https://x.cirqueira.com/musica/youtube/callback` (e o local), escopos YouTube + email; app em Produção (não Teste) para o refresh token não expirar em 7 dias; colocar `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `YOUTUBE_OAUTH_REDIRECT_URI` no `.env` de produção. Reconectar o Spotify uma vez para aceitar os escopos de playlist.
+0. **OAuth YouTube para transferência de playlists:** o cliente tipo **TV** não serve (não tem URI de callback). Criar cliente **Aplicativo da Web**, redirect `https://x.cirqueira.com/musica/youtube/callback`, escopos YouTube + email; app em Produção; preencher `YOUTUBE_OAUTH_CLIENT_ID`, `YOUTUBE_OAUTH_CLIENT_SECRET` e `YOUTUBE_OAUTH_REDIRECT_URI` no `.env`. Reconectar o Spotify uma vez para os escopos de playlist.
 1. **Google Takeout:** em `takeout.google.com`, desmarcar tudo, marcar só YouTube e YouTube Music; em "Todos os dados do YouTube incluídos" deixar só o **histórico**; trocar o formato do histórico para **JSON**; exportar uma vez. Opcional: agendar a cada 2 meses por 1 ano.
 2. **Exclusão automática:** conferir em `myactivity.google.com` se o histórico do YouTube estava ligado e se há exclusão automática. Prazo menor que 13 meses significa que outubro de 2025 já foi apagado.
 3. **Marca do Spotify:** ler as diretrizes de marca e a política de desenvolvedor do Spotify para confirmar se dados do Spotify podem aparecer misturados com outro serviço sob o visual do Spotify. Conclusão: _pendente_.

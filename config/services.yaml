@@ -17,6 +17,8 @@ parameters:
     env(SPOTIFY_CLIENT_ID): ''
     env(SPOTIFY_CLIENT_SECRET): ''
     env(SPOTIFY_REDIRECT_URI): 'http://127.0.0.1:4012/spotify/callback'
+    env(YOUTUBE_OAUTH_CLIENT_ID): ''
+    env(YOUTUBE_OAUTH_CLIENT_SECRET): ''
     env(YOUTUBE_OAUTH_REDIRECT_URI): 'http://127.0.0.1:4012/musica/youtube/callback'
     env(OPENAI_API_KEY): ''
     env(YOUTUBE_API_KEY): ''
@@ -173,14 +175,14 @@ services:
 
     App\Service\YoutubeOAuth\AutorizarContaYoutubeOAuthService:
         arguments:
-            $clientId: '%env(GOOGLE_CLIENT_ID)%'
-            $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
+            $clientId: '%env(YOUTUBE_OAUTH_CLIENT_ID)%'
+            $clientSecret: '%env(YOUTUBE_OAUTH_CLIENT_SECRET)%'
             $redirectUri: '%env(YOUTUBE_OAUTH_REDIRECT_URI)%'
 
     App\Service\YoutubeOAuth\ObterTokenValidoYoutubeOAuthService:
         arguments:
-            $clientId: '%env(GOOGLE_CLIENT_ID)%'
-            $clientSecret: '%env(GOOGLE_CLIENT_SECRET)%'
+            $clientId: '%env(YOUTUBE_OAUTH_CLIENT_ID)%'
+            $clientSecret: '%env(YOUTUBE_OAUTH_CLIENT_SECRET)%'
 
     App\Infra\GoogleFotos\GoogleFotosAPI:
         arguments:
