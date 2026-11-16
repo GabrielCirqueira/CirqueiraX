@@ -44,6 +44,9 @@ final readonly class ListarPlaylistsServicoService
         if (null === $conta) {
             throw TransferenciaPlaylistException::contaSpotifyNecessaria();
         }
+        if (!$conta->temEscoposPlaylist()) {
+            throw TransferenciaPlaylistException::escoposPlaylistSpotifyAusentes();
+        }
 
         $token = $this->obterTokenSpotify->executar($conta);
         $itens = [];

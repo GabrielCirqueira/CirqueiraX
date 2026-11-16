@@ -76,7 +76,9 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
   const obterUrlYoutube = useObterUrlYoutubeOAuth()
 
   const destino = origem ? destinoOposto(origem) : null
-  const spotifyOk = Boolean(statusSpotify?.conectada && statusSpotify.status === 'conectada')
+  const spotifyConectado = Boolean(statusSpotify?.conectada && statusSpotify.status === 'conectada')
+  const spotifyPlaylistsOk = Boolean(statusSpotify?.podeLerPlaylists)
+  const spotifyOk = spotifyConectado && spotifyPlaylistsOk
   const youtubeOk = Boolean(statusYoutube?.conectada)
   const conexoesOk = spotifyOk && youtubeOk
 
@@ -294,7 +296,9 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
                       ? 'Verificando...'
                       : spotifyOk
                         ? (statusSpotify?.nomeExibicao ?? 'Conectado')
-                        : 'Não conectado'}
+                        : spotifyConectado
+                          ? 'Conectado, mas falta autorizar playlists'
+                          : 'Não conectado'}
                   </Text>
                 </VStack>
               </HStack>
@@ -308,7 +312,7 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
                   loading={obterUrlSpotify.isPending}
                   onClick={handleConectarSpotify}
                 >
-                  Conectar Spotify
+                  {spotifyConectado ? 'Reconectar Spotify' : 'Conectar Spotify'}
                 </Button>
               )}
               {spotifyOk && (
@@ -320,6 +324,12 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
                 </HStack>
               )}
             </HStack>
+            {spotifyConectado && !spotifyPlaylistsOk && (
+              <Text fontSize="xs" color="cirqueira.musica.textoSecundario" mt={2}>
+                É preciso reconectar o Spotify uma vez para liberar leitura e alteração de
+                playlists.
+              </Text>
+            )}
           </Box>
 
           <Box p={4} borderRadius="8px" bg="cirqueira.musica.cartaoElevado">

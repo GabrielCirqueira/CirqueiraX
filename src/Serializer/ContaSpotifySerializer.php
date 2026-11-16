@@ -27,6 +27,7 @@ final class ContaSpotifySerializer
                 'conectadoEm' => null,
                 'ultimaColetaEm' => null,
                 'escopos' => null,
+                'podeLerPlaylists' => false,
                 'erroMotivo' => null,
             ];
         }
@@ -42,6 +43,7 @@ final class ContaSpotifySerializer
             'conectadoEm' => $conta->conectadoEm()?->format(DateTimeInterface::ATOM),
             'ultimaColetaEm' => $conta->ultimaColetaEm()?->format(DateTimeInterface::ATOM),
             'escopos' => $conta->escopos(),
+            'podeLerPlaylists' => $conta->temEscoposPlaylist(),
             'erroMotivo' => $conta->erroMotivo(),
         ];
     }

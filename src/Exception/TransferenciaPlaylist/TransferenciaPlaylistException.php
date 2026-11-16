@@ -43,6 +43,11 @@ final class TransferenciaPlaylistException extends DomainException
         return new self('É necessário conectar uma conta Spotify antes de transferir playlists.', 400);
     }
 
+    public static function escoposPlaylistSpotifyAusentes(): self
+    {
+        return new self('Reconecte o Spotify em Gerenciar para autorizar a leitura e alteração de playlists.', 403);
+    }
+
     public static function contaYoutubeOAuthNecessaria(): self
     {
         return new self('É necessário autorizar o YouTube OAuth antes de transferir playlists.', 400);

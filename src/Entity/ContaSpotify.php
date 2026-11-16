@@ -125,6 +125,19 @@ class ContaSpotify
         return $this->escopos;
     }
 
+    public function temEscoposPlaylist(): bool
+    {
+        $escopos = $this->escopos;
+        if (null === $escopos || '' === trim($escopos)) {
+            return false;
+        }
+
+        $lista = preg_split('/\s+/', trim($escopos)) ?: [];
+
+        return in_array('playlist-read-private', $lista, true)
+            && in_array('playlist-modify-private', $lista, true);
+    }
+
     public function status(): StatusContaSpotify
     {
         return $this->status;

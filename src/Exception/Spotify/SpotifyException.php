@@ -31,6 +31,11 @@ final class SpotifyException extends \DomainException
         return new self('A conta Spotify não possui permissão ou não foi adicionada à lista de usuários do modo de desenvolvimento.', 403);
     }
 
+    public static function escopoInsuficiente(): self
+    {
+        return new self('O Spotify negou o acesso por falta de permissão. Reconecte a conta em Gerenciar para conceder os escopos necessários.', 403);
+    }
+
     public static function falhaNaTrocaDeCodigoPorTokens(): self
     {
         return new self('Ocorreu uma falha ao tentar trocar o código de autorização pelos tokens de acesso do Spotify.', 400);

@@ -761,6 +761,10 @@ final class SpotifyClient extends Client implements SpotifyInterface
                 }
 
                 if (403 === $statusCode) {
+                    if ($this->isEscopoInsuficiente($e)) {
+                        throw SpotifyException::escopoInsuficiente();
+                    }
+
                     throw SpotifyException::contaNaoAutorizadaNoModoDesenvolvimento();
                 }
 
@@ -799,6 +803,15 @@ final class SpotifyClient extends Client implements SpotifyInterface
         }
 
         throw SpotifyException::limiteRequisicoesExcedido(self::ESPERA_PADRAO_RATE_LIMIT_SEGUNDOS);
+    }
+
+    private function isEscopoInsuficiente(BadResponseException $e): bool
+    {
+        $corpo = strtolower((string) $e->getResponse()->getBody());
+
+        return str_contains($corpo, 'insufficient_scope')
+            || str_contains($corpo, 'insufficient scope')
+            || str_contains($corpo, 'scope') && str_contains($corpo, 'playlist');
     }
 
     private function mapearErroPlayer(RequestException $e): \Throwable

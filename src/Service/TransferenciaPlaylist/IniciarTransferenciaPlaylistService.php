@@ -140,8 +140,12 @@ final readonly class IniciarTransferenciaPlaylistService
     private function garantirContas(Usuario $usuario, ServicoPlaylist $origem, ServicoPlaylist $destino): void
     {
         if ($origem->isSpotify() || $destino->isSpotify()) {
-            if (null === $this->contaSpotifyRepository->buscarDoUsuario($usuario)) {
+            $contaSpotify = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
+            if (null === $contaSpotify) {
                 throw TransferenciaPlaylistException::contaSpotifyNecessaria();
+            }
+            if (!$contaSpotify->temEscoposPlaylist()) {
+                throw TransferenciaPlaylistException::escoposPlaylistSpotifyAusentes();
             }
         }
 
