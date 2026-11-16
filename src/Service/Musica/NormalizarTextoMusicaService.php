@@ -17,6 +17,9 @@ final readonly class NormalizarTextoMusicaService
     private const string PADRAO_PARTICIPACAO = '/[\(\[]\s*(feat\.?|ft\.?|with|com|part\.?)\s[^\)\]]*[\)\]]/iu';
     private const string PADRAO_SEPARADORES_ARTISTAS = '/\s*(?:,|&|\sx\s|\sfeat\.?\s|\sft\.?\s|\swith\s|\se\s)\s*/iu';
     private const string PADRAO_LETRAS_ESPACADAS = '/(?<![\p{L}\p{N}])(?:[\p{L}\p{N}] ){2,}[\p{L}\p{N}](?![\p{L}\p{N}])/u';
+    private const string PADRAO_ARTIGOS_E_PREPOSICOES = '/\b(?:the|os|as|o|a|de|da|do|dos|das)\b/iu';
+    private const string PADRAO_SUFIXO_CANAL = '/(?:\s*-\s*topic|\s*vevo|\s*oficial|\s*official|\s*music)$/iu';
+    private const int TAMANHO_MINIMO_COMPACTO_SEM_ARTIGOS = 4;
 
     public function normalizar(string $texto): string
     {
@@ -82,5 +85,30 @@ final readonly class NormalizarTextoMusicaService
         $partes = preg_split(self::PADRAO_SEPARADORES_ARTISTAS, trim($texto)) ?: [];
 
         return array_values(array_filter(array_map('trim', $partes), static fn (string $nome): bool => '' !== $nome));
+    }
+
+    public function compactar(string $texto): string
+    {
+        $normalizado = $this->normalizar($texto);
+        $semArtigos = str_replace(' ', '', preg_replace(self::PADRAO_ARTIGOS_E_PREPOSICOES, ' ', $normalizado) ?? $normalizado);
+        if (mb_strlen($semArtigos) >= self::TAMANHO_MINIMO_COMPACTO_SEM_ARTIGOS) {
+            return $semArtigos;
+        }
+
+        return str_replace(' ', '', $normalizado);
+    }
+
+    public function compactarTitulo(string $titulo): string
+    {
+        $semParticipacao = preg_replace(self::PADRAO_PARTICIPACAO, '', $titulo) ?? $titulo;
+
+        return $this->compactar($this->normalizarTitulo($semParticipacao));
+    }
+
+    public function limparCanal(string $canal): string
+    {
+        $semSufixo = trim(preg_replace(self::PADRAO_SUFIXO_CANAL, '', trim($canal)) ?? $canal);
+
+        return '' === $semSufixo ? trim($canal) : $semSufixo;
     }
 }

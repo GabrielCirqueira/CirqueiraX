@@ -184,15 +184,30 @@ def comando_historico(entrada):
     return {"itens": [mapear_item(item, posicao) for posicao, item in enumerate(itens)]}
 
 
+def buscar_por_filtro(cliente, texto, filtro, limite):
+    resultados = executar_com_classificacao(lambda: cliente.search(texto, filter=filtro, limit=limite))
+    return [item for item in resultados if isinstance(item, dict) and item.get("videoId")][:limite]
+
+
+def buscar_videos_opcional(cliente, texto, limite):
+    try:
+        return buscar_por_filtro(cliente, texto, "videos", limite)
+    except Exception:
+        return []
+
+
 def comando_buscar(entrada):
     texto = entrada.get("texto")
     if not isinstance(texto, str) or not texto.strip():
         raise FalhaYoutubeMusic(FORMATO_INESPERADO, "O texto da busca não foi informado.")
-    limite = entrada.get("limite") or LIMITE_BUSCA_PADRAO
+    limite = int(entrada.get("limite") or LIMITE_BUSCA_PADRAO)
     cliente = YTMusic()
-    resultados = executar_com_classificacao(lambda: cliente.search(texto.strip(), filter="songs", limit=int(limite)))
-    itens = [item for item in resultados if isinstance(item, dict) and item.get("videoId")]
-    return {"itens": [mapear_item(item, posicao) for posicao, item in enumerate(itens[: int(limite)])]}
+    termo = texto.strip()
+    itens = [
+        *buscar_por_filtro(cliente, termo, "songs", limite),
+        *buscar_videos_opcional(cliente, termo, limite),
+    ]
+    return {"itens": [mapear_item(item, posicao) for posicao, item in enumerate(itens)]}
 
 
 def normalizar_nome(nome):

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\MusicaCatalogo;
-use App\Entity\Usuario;
 use App\Entity\VinculoMusicaSpotify;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -41,14 +40,12 @@ final class VinculoMusicaSpotifyRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function buscarPorIdentidade(Usuario $usuario, string $nomeNormalizado, string $artistaNormalizado): ?VinculoMusicaSpotify
+    public function buscarPorIdentidade(string $nomeNormalizado, string $artistaNormalizado): ?VinculoMusicaSpotify
     {
         /** @var VinculoMusicaSpotify|null $resultado */
         $resultado = $this->createQueryBuilder('e')
-            ->andWhere('e.usuario = :usuario')
             ->andWhere('e.nomeNormalizado = :nomeNormalizado')
             ->andWhere('e.artistaNormalizado = :artistaNormalizado')
-            ->setParameter('usuario', $usuario)
             ->setParameter('nomeNormalizado', $nomeNormalizado)
             ->setParameter('artistaNormalizado', $artistaNormalizado)
             ->getQuery()
@@ -60,11 +57,10 @@ final class VinculoMusicaSpotifyRepository extends ServiceEntityRepository
     /**
      * @return array<string, true>
      */
-    public function listarIdentidadesDoUsuario(Usuario $usuario): array
+    public function listarIdentidades(): array
     {
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
-            'SELECT nome_normalizado, artista_normalizado FROM vinculo_musica_spotify WHERE usuario_id = :usuarioId',
-            ['usuarioId' => $usuario->getId()],
+            'SELECT nome_normalizado, artista_normalizado FROM vinculo_musica_spotify',
         )->fetchAllAssociative();
 
         $identidades = [];
@@ -89,11 +85,10 @@ final class VinculoMusicaSpotifyRepository extends ServiceEntityRepository
     /**
      * @return array<string, string>
      */
-    public function mapearMusicasPorIdentidade(Usuario $usuario, string $separador): array
+    public function mapearMusicasPorIdentidade(string $separador): array
     {
         $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative(
-            'SELECT nome_normalizado, artista_normalizado, musica_uuid FROM vinculo_musica_spotify WHERE usuario_id = :usuarioId',
-            ['usuarioId' => $usuario->getId()],
+            'SELECT nome_normalizado, artista_normalizado, musica_uuid FROM vinculo_musica_spotify',
         );
 
         $mapa = [];

@@ -41,7 +41,7 @@ final readonly class ObterDetalheArtistaMusicaService
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, string $uuid): DetalheArtistaSpotifyDTO
     {
-        $artista = $this->artistaCatalogoRepository->buscarDoUsuario($usuario, $uuid)?->artistaEfetivo();
+        $artista = $this->artistaCatalogoRepository->buscarPorUuid($uuid)?->artistaEfetivo();
         if (null === $artista) {
             throw MusicaCatalogoException::artistaNaoEncontrado();
         }

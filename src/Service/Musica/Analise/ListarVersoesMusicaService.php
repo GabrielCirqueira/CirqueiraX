@@ -27,7 +27,7 @@ final readonly class ListarVersoesMusicaService
      */
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, string $uuid, PeriodoAnaliseSpotifyDTO $periodo): array
     {
-        $musica = $this->musicaCatalogoRepository->buscarDoUsuario($usuario, $uuid)?->musicaEfetiva()
+        $musica = $this->musicaCatalogoRepository->buscarPorUuid($uuid)?->musicaEfetiva()
             ?? throw MusicaCatalogoException::musicaNaoEncontrada();
 
         return [

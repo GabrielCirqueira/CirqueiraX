@@ -6,7 +6,6 @@ namespace App\Service\Musica;
 
 use App\DataObject\IdentificacaoMusica\ComponenteIdentificadoDTO;
 use App\Entity\MusicaCatalogo;
-use App\Entity\Usuario;
 use App\Enum\TipoMusicaCatalogo;
 use App\Repository\MusicaCatalogoRepository;
 
@@ -22,19 +21,19 @@ final readonly class ObterMusicaCatalogoService
     /**
      * @param list<string> $artistas
      */
-    public function obterMusica(Usuario $usuario, string $titulo, array $artistas, ?string $album = null, ?string $urlCapa = null, ?string $videoOficialId = null): MusicaCatalogo
+    public function obterMusica(string $titulo, array $artistas, ?string $album = null, ?string $urlCapa = null, ?string $videoOficialId = null): MusicaCatalogo
     {
         $chave = $this->normalizador->chaveMusica($titulo, $artistas[0] ?? '');
-        $existente = $this->musicaRepository->buscarPorChave($usuario, $chave);
+        $existente = $this->musicaRepository->buscarPorChave($chave);
         if (null !== $existente && null !== $existente->unidaA()) {
             return $existente->musicaEfetiva();
         }
 
-        $musica = $existente ?? new MusicaCatalogo($usuario, trim($titulo), TipoMusicaCatalogo::Original, $chave);
+        $musica = $existente ?? new MusicaCatalogo(trim($titulo), TipoMusicaCatalogo::Original, $chave);
         $this->preferirTituloLimpo($musica, $titulo);
 
         foreach ($artistas as $nome) {
-            $musica->adicionarArtista($this->obterArtista->executar($usuario, $nome));
+            $musica->adicionarArtista($this->obterArtista->executar($nome));
         }
         $musica->completarDados($album, $urlCapa, $videoOficialId);
         $this->musicaRepository->salvar($musica);
@@ -45,16 +44,16 @@ final readonly class ObterMusicaCatalogoService
     /**
      * @param list<array{componente: ComponenteIdentificadoDTO, musica: MusicaCatalogo}> $partes
      */
-    public function obterMashup(Usuario $usuario, array $partes, ?string $urlCapa): MusicaCatalogo
+    public function obterMashup(array $partes, ?string $urlCapa): MusicaCatalogo
     {
         $chave = $this->normalizador->chaveMashup(array_map(static fn (array $parte): string => $parte['musica']->chaveNormalizada(), $partes));
-        $existente = $this->musicaRepository->buscarPorChave($usuario, $chave);
+        $existente = $this->musicaRepository->buscarPorChave($chave);
         if (null !== $existente) {
             return $existente->musicaEfetiva()->completarDados(null, $urlCapa, null);
         }
 
         $titulo = implode(' + ', array_map(static fn (array $parte): string => $parte['musica']->titulo(), $partes));
-        $mashup = new MusicaCatalogo($usuario, $titulo, TipoMusicaCatalogo::Mashup, $chave);
+        $mashup = new MusicaCatalogo($titulo, TipoMusicaCatalogo::Mashup, $chave);
         foreach ($partes as $parte) {
             $mashup->adicionarComponente($parte['componente']->titulo, $parte['musica']);
             foreach ($parte['musica']->artistas() as $artista) {

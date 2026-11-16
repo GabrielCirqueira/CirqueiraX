@@ -29,18 +29,18 @@ final readonly class DefinirComponentesMashupService
 
     public function executar(Usuario $usuario, string $mashupUuid, DefinirComponentesMashupDTO $dto): MusicaCatalogo
     {
-        $mashup = $this->musicaRepository->buscarDoUsuario($usuario, $mashupUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $mashup = $this->musicaRepository->buscarPorUuid($mashupUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
         if (!$mashup->isMashup()) {
             throw MusicaCatalogoException::naoEhMashup();
         }
 
         $componentes = array_map(fn (ComponenteMashupEntradaDTO $componente): array => [
             'texto' => trim($componente->titulo),
-            'musica' => $this->obterMusica->obterMusica($usuario, $componente->titulo, $componente->artistas),
+            'musica' => $this->obterMusica->obterMusica($componente->titulo, $componente->artistas),
         ], $dto->componentes);
 
         $chave = $this->normalizador->chaveMashup(array_map(static fn (array $componente): string => $componente['musica']->chaveNormalizada(), $componentes));
-        $existente = $this->musicaRepository->buscarPorChave($usuario, $chave);
+        $existente = $this->musicaRepository->buscarPorChave($chave);
         if (null !== $existente && $existente !== $mashup) {
             throw MusicaCatalogoException::mashupJaExiste();
         }

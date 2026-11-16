@@ -24,15 +24,15 @@ final readonly class UnirArtistasCatalogoService
 
     public function executar(Usuario $usuario, UnirArtistasDTO $dto): ArtistaCatalogo
     {
-        $origem = $this->artistaRepository->buscarDoUsuario($usuario, $dto->origemUuid) ?? throw MusicaCatalogoException::artistaNaoEncontrado();
-        $destino = ($this->artistaRepository->buscarDoUsuario($usuario, $dto->destinoUuid) ?? throw MusicaCatalogoException::artistaNaoEncontrado())->artistaEfetivo();
+        $origem = $this->artistaRepository->buscarPorUuid($dto->origemUuid) ?? throw MusicaCatalogoException::artistaNaoEncontrado();
+        $destino = ($this->artistaRepository->buscarPorUuid($dto->destinoUuid) ?? throw MusicaCatalogoException::artistaNaoEncontrado())->artistaEfetivo();
 
         if ($origem === $destino) {
             throw MusicaCatalogoException::uniaoComElaMesma();
         }
 
         $origem->unirA($destino);
-        if (null === $this->aliasRepository->buscarPorAlias($usuario, $origem->nomeNormalizado())) {
+        if (null === $this->aliasRepository->buscarPorAlias($origem->nomeNormalizado())) {
             $this->aliasRepository->salvar(new AliasArtistaCatalogo($destino, $origem->nomeNormalizado()), flush: false);
         }
         $this->artistaRepository->flush();

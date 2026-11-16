@@ -12,16 +12,12 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: VinculoMusicaSpotifyRepository::class)]
 #[ORM\Table(name: 'vinculo_musica_spotify')]
-#[ORM\UniqueConstraint(name: 'UNIQ_VINCULO_MUSICA_SPOTIFY_IDENTIDADE', fields: ['usuario', 'nomeNormalizado', 'artistaNormalizado'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_VINCULO_MUSICA_SPOTIFY_IDENTIDADE', fields: ['nomeNormalizado', 'artistaNormalizado'])]
 class VinculoMusicaSpotify
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
-
-    #[ORM\ManyToOne(targetEntity: Usuario::class)]
-    #[ORM\JoinColumn(name: 'usuario_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Usuario $usuario;
 
     #[ORM\Column(type: 'string', length: 255)]
     private string $nomeNormalizado;
@@ -39,10 +35,9 @@ class VinculoMusicaSpotify
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
-    public function __construct(Usuario $usuario, string $nomeNormalizado, string $artistaNormalizado, MusicaCatalogo $musica)
+    public function __construct(string $nomeNormalizado, string $artistaNormalizado, MusicaCatalogo $musica)
     {
         $this->uuid = Uuid::v7();
-        $this->usuario = $usuario;
         $this->nomeNormalizado = $nomeNormalizado;
         $this->artistaNormalizado = $artistaNormalizado;
         $this->musica = $musica;
@@ -60,11 +55,6 @@ class VinculoMusicaSpotify
     public function uuid(): Uuid
     {
         return $this->uuid;
-    }
-
-    public function usuario(): Usuario
-    {
-        return $this->usuario;
     }
 
     public function nomeNormalizado(): string

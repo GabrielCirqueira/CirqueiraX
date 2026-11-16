@@ -109,7 +109,7 @@ final readonly class IdentificarVideosYoutubeService
             return null;
         }
 
-        $musica = $this->obterMusica->obterMusica($usuario, $video->titulo(), $artistas, null, $video->urlCapa(), $video->videoId());
+        $musica = $this->obterMusica->obterMusica($video->titulo(), $artistas, null, $video->urlCapa(), $video->videoId());
         $video->classificar(StatusClassificacaoVideo::Musica, OrigemClassificacao::Regra, self::CONFIANCA_REGRA, TipoVersaoMusica::Original, $musica);
 
         return StatusClassificacaoVideo::Musica;

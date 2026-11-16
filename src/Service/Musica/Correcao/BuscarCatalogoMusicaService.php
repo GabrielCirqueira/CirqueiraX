@@ -35,7 +35,7 @@ final readonly class BuscarCatalogoMusicaService
 
         return array_map(
             fn (MusicaCatalogo $musica): array => $this->serializer->serializarMusica($musica),
-            $this->musicaRepository->buscarPorTexto($usuario, $termo, $dto->limite),
+            $this->musicaRepository->buscarPorTexto($termo, $dto->limite),
         );
     }
 
@@ -51,7 +51,7 @@ final readonly class BuscarCatalogoMusicaService
 
         return array_map(
             fn (ArtistaCatalogo $artista): array => $this->serializer->serializarArtista($artista),
-            $this->artistaRepository->buscarPorTexto($usuario, $termo, $dto->limite),
+            $this->artistaRepository->buscarPorTexto($termo, $dto->limite),
         );
     }
 }

@@ -38,7 +38,7 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
     public function executar(Usuario $usuario, ?DateTimeImmutable $tocadasDesde = null, ?callable $aoConcluirLote = null): int
     {
         $usuarioId = (int) $usuario->getId();
-        $identidades = $this->vinculoRepository->listarIdentidadesDoUsuario($usuario);
+        $identidades = $this->vinculoRepository->listarIdentidades();
         $vinculadas = 0;
         $deslocamento = 0;
 
@@ -87,8 +87,8 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
 
             $codigo = $faixa['codigo'] ?? '';
             $artistas = $this->juntarArtistas($faixa['artista'], $faixa['codigos'], $artistasPorFaixa);
-            $musica = $this->obterMusica->obterMusica($usuario, $faixa['nome'], $artistas, $faixa['album'], isset($imagens[$codigo]) ? $imagens[$codigo]->imagemMediaUrl() : null);
-            $this->vinculoRepository->salvar(new VinculoMusicaSpotify($usuario, $this->normalizador->normalizar($faixa['nome']), $this->normalizador->normalizar($faixa['artista']), $musica));
+            $musica = $this->obterMusica->obterMusica($faixa['nome'], $artistas, $faixa['album'], isset($imagens[$codigo]) ? $imagens[$codigo]->imagemMediaUrl() : null);
+            $this->vinculoRepository->salvar(new VinculoMusicaSpotify($this->normalizador->normalizar($faixa['nome']), $this->normalizador->normalizar($faixa['artista']), $musica));
             $identidades[$identidade] = true;
             ++$vinculadas;
         }

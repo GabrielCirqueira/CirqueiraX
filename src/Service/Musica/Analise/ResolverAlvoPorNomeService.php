@@ -23,8 +23,8 @@ final readonly class ResolverAlvoPorNomeService
     public function resolverArtista(Usuario $usuario, string $nome): string
     {
         $normalizado = $this->normalizador->normalizar($nome);
-        $artista = $this->aliasRepository->buscarPorAlias($usuario, $normalizado)?->artista()
-            ?? $this->artistaRepository->buscarPorNomeNormalizado($usuario, $normalizado)
+        $artista = $this->aliasRepository->buscarPorAlias($normalizado)?->artista()
+            ?? $this->artistaRepository->buscarPorNomeNormalizado($normalizado)
             ?? throw AnaliseMusicaException::naoEncontradaNoCatalogo();
 
         return $artista->artistaEfetivo()->uuid()->toRfc4122();
@@ -33,7 +33,6 @@ final readonly class ResolverAlvoPorNomeService
     public function resolverMusica(Usuario $usuario, string $nome, string $artista): string
     {
         $vinculo = $this->vinculoRepository->buscarPorIdentidade(
-            $usuario,
             $this->normalizador->normalizar($nome),
             $this->normalizador->normalizar($artista),
         ) ?? throw AnaliseMusicaException::naoEncontradaNoCatalogo();
@@ -41,3 +40,4 @@ final readonly class ResolverAlvoPorNomeService
         return $vinculo->musica()->musicaEfetiva()->uuid()->toRfc4122();
     }
 }
+

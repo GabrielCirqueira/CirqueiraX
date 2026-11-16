@@ -55,7 +55,7 @@ final readonly class DefinirMusicaDoVideoService
 
     public function executarEmLote(Usuario $usuario, DefinirMusicaVideosEmLoteDTO $dto): int
     {
-        $musica = $this->musicaRepository->buscarDoUsuario($usuario, $dto->musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $musica = $this->musicaRepository->buscarPorUuid($dto->musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
         $musica = $musica->musicaEfetiva()->confirmarManualmente();
         $status = $musica->isMashup() ? StatusClassificacaoVideo::Mashup : StatusClassificacaoVideo::Musica;
         $videos = $this->videoRepository->buscarPorUuidsOrdenados($usuario, array_values(array_unique($dto->videoUuids)));
@@ -79,9 +79,9 @@ final readonly class DefinirMusicaDoVideoService
 
         $partes = array_map(fn (ComponenteMashupEntradaDTO $componente): array => [
             'componente' => new ComponenteIdentificadoDTO(trim($componente->titulo), $componente->artistas),
-            'musica' => $this->obterMusica->obterMusica($usuario, $componente->titulo, $componente->artistas),
+            'musica' => $this->obterMusica->obterMusica($componente->titulo, $componente->artistas),
         ], $dto->componentes);
-        $mashup = $this->obterMusica->obterMashup($usuario, $partes, null)->confirmarManualmente();
+        $mashup = $this->obterMusica->obterMashup($partes, null)->confirmarManualmente();
 
         return $video->classificar(StatusClassificacaoVideo::Mashup, OrigemClassificacao::Manual, self::CONFIANCA_MANUAL, $dto->versao, $mashup);
     }
@@ -97,7 +97,7 @@ final readonly class DefinirMusicaDoVideoService
     private function obterMusicaEscolhida(Usuario $usuario, DefinirMusicaVideoDTO $dto): MusicaCatalogo
     {
         if (null !== $dto->musicaUuid) {
-            $musica = $this->musicaRepository->buscarDoUsuario($usuario, $dto->musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+            $musica = $this->musicaRepository->buscarPorUuid($dto->musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
 
             return $musica->musicaEfetiva();
         }
@@ -106,6 +106,6 @@ final readonly class DefinirMusicaDoVideoService
             throw MusicaCatalogoException::dadosDaMusicaAusentes();
         }
 
-        return $this->obterMusica->obterMusica($usuario, $dto->titulo, $dto->artistas);
+        return $this->obterMusica->obterMusica($dto->titulo, $dto->artistas);
     }
 }

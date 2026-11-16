@@ -29,8 +29,8 @@ final readonly class DescartarDuplicataCatalogoService
         sort($uuids);
         [$primeiraUuid, $segundaUuid] = $uuids;
 
-        $primeira = $this->musicaRepository->buscarDoUsuario($usuario, $primeiraUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
-        $segunda = $this->musicaRepository->buscarDoUsuario($usuario, $segundaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $primeira = $this->musicaRepository->buscarPorUuid($primeiraUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $segunda = $this->musicaRepository->buscarPorUuid($segundaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
 
         if (null !== $this->duplicataRepository->buscarPar($usuario, $primeira, $segunda)) {
             return;

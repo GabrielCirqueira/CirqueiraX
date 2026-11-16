@@ -36,13 +36,11 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     private const string ORDEM = 'streams DESC, ms DESC';
     private const string SELECT_CREDITOS = 'SELECT mac.musica_uuid, COALESCE(ac.unido_a_uuid, ac.uuid) AS artista_uuid
             FROM musica_artista_catalogo mac INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
-            WHERE ac.usuario_id = :usuarioId
             UNION
             SELECT cm.mashup_uuid, COALESCE(ac.unido_a_uuid, ac.uuid)
             FROM componente_mashup cm
             INNER JOIN musica_artista_catalogo mac ON mac.musica_uuid = cm.musica_componente_uuid
-            INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
-            WHERE ac.usuario_id = :usuarioId';
+            INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid';
     private const string CTE_CREDITOS = 'WITH creditos (musica_uuid, artista_uuid) AS ('.self::SELECT_CREDITOS.')';
     private const string COLUNAS_POR_FONTE = "SUM(r.fonte = 'spotify') AS qtd_spotify,
             SUM(r.fonte = 'youtube_music') AS qtd_youtube_music,
@@ -85,11 +83,11 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro, $alvo);
         if ($apenasMashups) {
             $parametros['tipoMashup'] = TipoMusicaCatalogo::Mashup->value;
-            $filtros .= ' AND r.musica_uuid IN (SELECT mc.uuid FROM musica_catalogo mc WHERE mc.usuario_id = :usuarioId AND mc.tipo = :tipoMashup)';
+            $filtros .= ' AND r.musica_uuid IN (SELECT mc.uuid FROM musica_catalogo mc WHERE mc.tipo = :tipoMashup)';
         }
         if (null !== $album) {
             $parametros['albumFiltro'] = $album;
-            $filtros .= ' AND r.musica_uuid IN (SELECT mc.uuid FROM musica_catalogo mc WHERE mc.usuario_id = :usuarioId AND LOWER(TRIM(mc.album)) = LOWER(TRIM(:albumFiltro)))';
+            $filtros .= ' AND r.musica_uuid IN (SELECT mc.uuid FROM musica_catalogo mc WHERE LOWER(TRIM(mc.album)) = LOWER(TRIM(:albumFiltro)))';
         }
 
         $linhas = $this->consultar(sprintf(

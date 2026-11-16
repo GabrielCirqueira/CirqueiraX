@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\MusicaCatalogo;
-use App\Entity\Usuario;
 use App\Enum\TipoMusicaCatalogo;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -42,13 +41,11 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function buscarPorChave(Usuario $usuario, string $chaveNormalizada): ?MusicaCatalogo
+    public function buscarPorChave(string $chaveNormalizada): ?MusicaCatalogo
     {
         /** @var MusicaCatalogo|null $resultado */
         $resultado = $this->createQueryBuilder('e')
-            ->andWhere('e.usuario = :usuario')
             ->andWhere('e.chaveNormalizada = :chaveNormalizada')
-            ->setParameter('usuario', $usuario)
             ->setParameter('chaveNormalizada', $chaveNormalizada)
             ->getQuery()
             ->getOneOrNullResult();
@@ -56,19 +53,57 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
         return $resultado;
     }
 
+    public function buscarExistentePorTituloEArtistaCompactos(string $tituloCompacto, string $artistaCompacto): ?MusicaCatalogo
+    {
+        if ('' === $tituloCompacto || '' === $artistaCompacto) {
+            return null;
+        }
+
+        $padraoArtigos = '\\b(the|os|as|o|a|de|da|do|dos|das)\\b';
+        $uuidBinario = $this->getEntityManager()->getConnection()->fetchOne(
+            "SELECT m.uuid
+            FROM musica_catalogo m
+            JOIN musica_artista_catalogo mac ON mac.musica_uuid = m.uuid
+            JOIN artista_catalogo a ON a.uuid = mac.artista_uuid
+            WHERE m.unida_a_uuid IS NULL
+                AND m.tipo = :tipo
+                AND (
+                    REPLACE(SUBSTRING_INDEX(m.chave_normalizada, '|', 1), ' ', '') = :tituloCompacto
+                    OR REPLACE(REGEXP_REPLACE(SUBSTRING_INDEX(m.chave_normalizada, '|', 1), :padrao, ''), ' ', '') = :tituloCompacto
+                )
+                AND (
+                    REPLACE(a.nome_normalizado, ' ', '') = :artistaCompacto
+                    OR REPLACE(REGEXP_REPLACE(a.nome_normalizado, :padrao, ''), ' ', '') = :artistaCompacto
+                )
+            LIMIT 1",
+            [
+                'tipo' => TipoMusicaCatalogo::Original->value,
+                'tituloCompacto' => $tituloCompacto,
+                'artistaCompacto' => $artistaCompacto,
+                'padrao' => $padraoArtigos,
+            ],
+        );
+
+        if (false === $uuidBinario || !is_string($uuidBinario)) {
+            return null;
+        }
+
+        return $this->buscarPorUuid(Uuid::fromBinary($uuidBinario)->toRfc4122())?->musicaEfetiva();
+    }
+
     public function liberarMemoria(): void
     {
         $this->getEntityManager()->clear();
     }
 
-    public function buscarDoUsuario(Usuario $usuario, string $uuid): ?MusicaCatalogo
+    public function buscarPorUuid(string $uuid): ?MusicaCatalogo
     {
         if (!Uuid::isValid($uuid)) {
             return null;
         }
 
         /** @var MusicaCatalogo|null $musica */
-        $musica = $this->findOneBy(['usuario' => $usuario, 'uuid' => Uuid::fromString($uuid)]);
+        $musica = $this->find(Uuid::fromString($uuid));
 
         return $musica;
     }
@@ -76,7 +111,7 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
     /**
      * @return list<array{uuid: string, titulo: string, chave: string, totalArtistas: int}>
      */
-    public function listarComTituloRepetido(Usuario $usuario): array
+    public function listarComTituloRepetido(): array
     {
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
             "SELECT m.uuid, m.titulo, m.chave_normalizada AS chave,
@@ -85,13 +120,13 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
             JOIN (
                 SELECT SUBSTRING_INDEX(chave_normalizada, '|', 1) AS titulo_chave
                 FROM musica_catalogo
-                WHERE usuario_id = :usuarioId AND unida_a_uuid IS NULL AND tipo = :tipo
+                WHERE unida_a_uuid IS NULL AND tipo = :tipo
                 GROUP BY titulo_chave
                 HAVING COUNT(*) > 1
             ) repetidas ON repetidas.titulo_chave = SUBSTRING_INDEX(m.chave_normalizada, '|', 1)
-            WHERE m.usuario_id = :usuarioId AND m.unida_a_uuid IS NULL AND m.tipo = :tipo
+            WHERE m.unida_a_uuid IS NULL AND m.tipo = :tipo
             ORDER BY m.chave_normalizada",
-            ['usuarioId' => $usuario->getId(), 'tipo' => TipoMusicaCatalogo::Original->value],
+            ['tipo' => TipoMusicaCatalogo::Original->value],
         )->fetchAllAssociative();
 
         return array_map(static fn (array $linha): array => [
@@ -107,14 +142,14 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
      *
      * @return array<string, MusicaCatalogo>
      */
-    public function buscarPorUuids(Usuario $usuario, array $uuids): array
+    public function buscarPorUuids(array $uuids): array
     {
         if ([] === $uuids) {
             return [];
         }
 
         /** @var list<MusicaCatalogo> $musicas */
-        $musicas = $this->findBy(['usuario' => $usuario, 'uuid' => array_map(static fn (string $uuid): Uuid => Uuid::fromString($uuid), $uuids)]);
+        $musicas = $this->findBy(['uuid' => array_map(static fn (string $uuid): Uuid => Uuid::fromString($uuid), $uuids)]);
 
         $mapa = [];
         foreach ($musicas as $musica) {
@@ -127,17 +162,15 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
     /**
      * @return list<MusicaCatalogo>
      */
-    public function buscarPorTexto(Usuario $usuario, string $termoNormalizado, int $limite): array
+    public function buscarPorTexto(string $termoNormalizado, int $limite): array
     {
         /** @var list<MusicaCatalogo> $musicas */
         $musicas = $this->createQueryBuilder('m')
             ->distinct()
             ->leftJoin('m.artistas', 'ma')
             ->leftJoin('ma.artista', 'a')
-            ->andWhere('m.usuario = :usuario')
             ->andWhere('m.unidaA IS NULL')
             ->andWhere('m.chaveNormalizada LIKE :termo OR a.nomeNormalizado LIKE :termo')
-            ->setParameter('usuario', $usuario)
             ->setParameter('termo', '%'.addcslashes($termoNormalizado, '%_').'%')
             ->orderBy('m.titulo', 'ASC')
             ->setMaxResults($limite)

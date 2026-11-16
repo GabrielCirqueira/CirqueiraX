@@ -185,6 +185,27 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
         return $videos;
     }
 
+    /**
+     * @return list<VideoYoutube>
+     */
+    public function listarEmRevisao(Usuario $usuario, int $limite): array
+    {
+        /** @var list<VideoYoutube> $videos */
+        $videos = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.status = :status')
+            ->andWhere('e.origemClassificacao IS NULL OR e.origemClassificacao != :manual')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', StatusClassificacaoVideo::Revisar)
+            ->setParameter('manual', OrigemClassificacao::Manual)
+            ->orderBy('e.classificadoEm', 'ASC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $videos;
+    }
+
     public function buscarDoUsuario(Usuario $usuario, string $uuid): ?VideoYoutube
     {
         if (!Uuid::isValid($uuid)) {

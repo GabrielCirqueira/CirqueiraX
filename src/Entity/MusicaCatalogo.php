@@ -15,7 +15,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: MusicaCatalogoRepository::class)]
 #[ORM\Table(name: 'musica_catalogo')]
-#[ORM\UniqueConstraint(name: 'UNIQ_MUSICA_CATALOGO_USUARIO_CHAVE', fields: ['usuario', 'chaveNormalizada'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_MUSICA_CATALOGO_CHAVE', fields: ['chaveNormalizada'])]
 #[ORM\HasLifecycleCallbacks]
 class MusicaCatalogo
 {
@@ -25,10 +25,6 @@ class MusicaCatalogo
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
-
-    #[ORM\ManyToOne(targetEntity: Usuario::class)]
-    #[ORM\JoinColumn(name: 'usuario_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Usuario $usuario;
 
     #[ORM\Column(type: 'string', length: 500)]
     private string $titulo;
@@ -75,10 +71,9 @@ class MusicaCatalogo
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $atualizadoEm;
 
-    public function __construct(Usuario $usuario, string $titulo, TipoMusicaCatalogo $tipo, string $chaveNormalizada)
+    public function __construct(string $titulo, TipoMusicaCatalogo $tipo, string $chaveNormalizada)
     {
         $this->uuid = Uuid::v7();
-        $this->usuario = $usuario;
         $this->titulo = mb_substr($titulo, 0, self::TAMANHO_MAXIMO_TITULO);
         $this->tipo = $tipo;
         $this->chaveNormalizada = $chaveNormalizada;
@@ -223,11 +218,6 @@ class MusicaCatalogo
     public function uuid(): Uuid
     {
         return $this->uuid;
-    }
-
-    public function usuario(): Usuario
-    {
-        return $this->usuario;
     }
 
     public function titulo(): string

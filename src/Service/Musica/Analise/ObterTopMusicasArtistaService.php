@@ -42,7 +42,7 @@ final readonly class ObterTopMusicasArtistaService
         ?string $fim = null,
         int $limite = self::LIMITE_PADRAO,
     ): array {
-        $artista = $this->artistaRepository->buscarDoUsuario($usuario, $artistaUuid)?->artistaEfetivo()
+        $artista = $this->artistaRepository->buscarPorUuid($artistaUuid)?->artistaEfetivo()
             ?? throw MusicaCatalogoException::artistaNaoEncontrado();
         $periodo = $this->resolverPeriodoService->executar($tipo, $dias, $ano, $mes, $inicio, $fim);
 

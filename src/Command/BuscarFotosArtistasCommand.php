@@ -31,22 +31,28 @@ final class BuscarFotosArtistasCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'Id do usuário (sem ele, todos os usuários)');
+        $this->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'Id do usuário usado para resolver código Spotify (padrão: primeiro usuário)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $usuarioId = $input->getOption('usuario');
-        $usuarios = null === $usuarioId ? $this->usuarioRepository->findAll() : array_filter([$this->usuarioRepository->find((int) $usuarioId)]);
+        $usuarioIdOpcao = $input->getOption('usuario');
+        $usuario = null === $usuarioIdOpcao
+            ? ($this->usuarioRepository->findAll()[0] ?? null)
+            : $this->usuarioRepository->find((int) $usuarioIdOpcao);
 
-        foreach ($usuarios as $usuario) {
-            $uuids = $this->artistaRepository->listarUuidsSemFotoBuscada($usuario);
-            foreach ($uuids as $uuid) {
-                $this->bus->dispatch(new BuscarFotoArtistaMessage((int) $usuario->getId(), $uuid));
-            }
-            $io->success(sprintf('Usuário %d: %d buscas de foto enfileiradas.', (int) $usuario->getId(), count($uuids)));
+        if (null === $usuario) {
+            $io->warning('Nenhum usuário encontrado para enfileirar buscas de foto.');
+
+            return Command::SUCCESS;
         }
+
+        $uuids = $this->artistaRepository->listarUuidsSemFotoBuscada();
+        foreach ($uuids as $uuid) {
+            $this->bus->dispatch(new BuscarFotoArtistaMessage((int) $usuario->getId(), $uuid));
+        }
+        $io->success(sprintf('%d buscas de foto enfileiradas (contexto usuário %d).', count($uuids), (int) $usuario->getId()));
 
         return Command::SUCCESS;
     }

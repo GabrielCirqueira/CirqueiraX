@@ -12,7 +12,7 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ArtistaCatalogoRepository::class)]
 #[ORM\Table(name: 'artista_catalogo')]
-#[ORM\UniqueConstraint(name: 'UNIQ_ARTISTA_CATALOGO_USUARIO_NOME', fields: ['usuario', 'nomeNormalizado'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_ARTISTA_CATALOGO_NOME', fields: ['nomeNormalizado'])]
 class ArtistaCatalogo
 {
     private const int TAMANHO_MAXIMO_NOME = 255;
@@ -21,10 +21,6 @@ class ArtistaCatalogo
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
-
-    #[ORM\ManyToOne(targetEntity: Usuario::class)]
-    #[ORM\JoinColumn(name: 'usuario_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Usuario $usuario;
 
     #[ORM\Column(type: 'string', length: 255)]
     private string $nome;
@@ -45,10 +41,9 @@ class ArtistaCatalogo
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
-    public function __construct(Usuario $usuario, string $nome, string $nomeNormalizado)
+    public function __construct(string $nome, string $nomeNormalizado)
     {
         $this->uuid = Uuid::v7();
-        $this->usuario = $usuario;
         $this->nome = mb_substr($nome, 0, self::TAMANHO_MAXIMO_NOME);
         $this->nomeNormalizado = mb_substr($nomeNormalizado, 0, self::TAMANHO_MAXIMO_NOME);
         $this->criadoEm = new DateTimeImmutable();
@@ -106,11 +101,6 @@ class ArtistaCatalogo
     public function uuid(): Uuid
     {
         return $this->uuid;
-    }
-
-    public function usuario(): Usuario
-    {
-        return $this->usuario;
     }
 
     public function nome(): string

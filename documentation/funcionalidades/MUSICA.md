@@ -99,7 +99,7 @@ O YouTube Music tem duas entradas: o **coletor por cookie** (todos os aparelhos,
 - **Stream:** 30 s ou mais (`30.000 ms`), aplicado na leitura, nunca na gravação.
 - **Contagem:** cada reprodução conta 1 para a música; minutos totais contam uma vez; cada artista recebe stream e minutos completos. Mês e ano em UTC; "Hoje", hora do dia e "Últimos N dias" em `America/Sao_Paulo` (M120).
 - **Ordem dos rankings:** streams, com minutos como desempate (M128).
-- **Multiusuário (M131):** toda tabela nova tem `usuario_id`; o catálogo é por usuário; item de outra pessoa responde 404.
+- **Multiusuário (M131):** reproduções, vídeos YouTube e contas continuam com `usuario_id`. O catálogo (`artista_catalogo`, `musica_catalogo`, aliases e vínculos Spotify) é **compartilhado** entre usuários; rankings e detalhes agregam só as reproduções do usuário logado.
 
 ## Segurança da credencial do YouTube Music
 

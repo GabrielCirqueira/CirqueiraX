@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\ArtistaCatalogo;
-use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -41,13 +40,11 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function buscarPorNomeNormalizado(Usuario $usuario, string $nomeNormalizado): ?ArtistaCatalogo
+    public function buscarPorNomeNormalizado(string $nomeNormalizado): ?ArtistaCatalogo
     {
         /** @var ArtistaCatalogo|null $resultado */
         $resultado = $this->createQueryBuilder('e')
-            ->andWhere('e.usuario = :usuario')
             ->andWhere('e.nomeNormalizado = :nomeNormalizado')
-            ->setParameter('usuario', $usuario)
             ->setParameter('nomeNormalizado', $nomeNormalizado)
             ->getQuery()
             ->getOneOrNullResult();
@@ -55,14 +52,14 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
         return $resultado;
     }
 
-    public function buscarDoUsuario(Usuario $usuario, string $uuid): ?ArtistaCatalogo
+    public function buscarPorUuid(string $uuid): ?ArtistaCatalogo
     {
         if (!Uuid::isValid($uuid)) {
             return null;
         }
 
         /** @var ArtistaCatalogo|null $artista */
-        $artista = $this->findOneBy(['usuario' => $usuario, 'uuid' => Uuid::fromString($uuid)]);
+        $artista = $this->find(Uuid::fromString($uuid));
 
         return $artista;
     }
@@ -70,16 +67,14 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
     /**
      * @return list<string>
      */
-    public function listarUuidsSemFotoBuscada(Usuario $usuario): array
+    public function listarUuidsSemFotoBuscada(): array
     {
         /** @var list<array{uuid: Uuid}> $linhas */
         $linhas = $this->createQueryBuilder('a')
             ->select('a.uuid')
-            ->andWhere('a.usuario = :usuario')
             ->andWhere('a.unidoA IS NULL')
             ->andWhere('a.urlFoto IS NULL')
             ->andWhere('a.fotoBuscadaEm IS NULL')
-            ->setParameter('usuario', $usuario)
             ->getQuery()
             ->getArrayResult();
 
@@ -89,14 +84,12 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
     /**
      * @return list<ArtistaCatalogo>
      */
-    public function buscarPorTexto(Usuario $usuario, string $termoNormalizado, int $limite): array
+    public function buscarPorTexto(string $termoNormalizado, int $limite): array
     {
         /** @var list<ArtistaCatalogo> $artistas */
         $artistas = $this->createQueryBuilder('a')
-            ->andWhere('a.usuario = :usuario')
             ->andWhere('a.unidoA IS NULL')
             ->andWhere('a.nomeNormalizado LIKE :termo')
-            ->setParameter('usuario', $usuario)
             ->setParameter('termo', '%'.addcslashes($termoNormalizado, '%_').'%')
             ->orderBy('a.nome', 'ASC')
             ->setMaxResults($limite)

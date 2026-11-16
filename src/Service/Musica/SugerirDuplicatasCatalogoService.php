@@ -26,7 +26,7 @@ final readonly class SugerirDuplicatasCatalogoService
     public function executar(Usuario $usuario): array
     {
         $porTitulo = [];
-        foreach ($this->musicaRepository->listarComTituloRepetido($usuario) as $musica) {
+        foreach ($this->musicaRepository->listarComTituloRepetido() as $musica) {
             [$titulo, $artista] = array_pad(explode(self::SEPARADOR_CHAVE, $musica['chave'], 2), 2, '');
             $porTitulo[$titulo][] = ['uuid' => $musica['uuid'], 'artista' => $artista, 'semArtista' => 0 === $musica['totalArtistas']];
         }

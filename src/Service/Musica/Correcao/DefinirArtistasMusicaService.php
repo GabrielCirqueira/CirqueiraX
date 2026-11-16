@@ -23,9 +23,9 @@ final readonly class DefinirArtistasMusicaService
 
     public function executar(Usuario $usuario, string $musicaUuid, DefinirArtistasMusicaDTO $dto): MusicaCatalogo
     {
-        $musica = $this->musicaRepository->buscarDoUsuario($usuario, $musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $musica = $this->musicaRepository->buscarPorUuid($musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
 
-        $musica->definirArtistas(array_map(fn (string $nome) => $this->obterArtista->executar($usuario, $nome), $dto->artistas))->confirmarManualmente();
+        $musica->definirArtistas(array_map(fn (string $nome) => $this->obterArtista->executar($nome), $dto->artistas))->confirmarManualmente();
         $this->musicaRepository->flush();
         $this->cacheAnalise->invalidar($usuario);
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\AliasArtistaCatalogo;
-use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -40,13 +39,11 @@ final class AliasArtistaCatalogoRepository extends ServiceEntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function buscarPorAlias(Usuario $usuario, string $aliasNormalizado): ?AliasArtistaCatalogo
+    public function buscarPorAlias(string $aliasNormalizado): ?AliasArtistaCatalogo
     {
         /** @var AliasArtistaCatalogo|null $resultado */
         $resultado = $this->createQueryBuilder('e')
-            ->andWhere('e.usuario = :usuario')
             ->andWhere('e.aliasNormalizado = :aliasNormalizado')
-            ->setParameter('usuario', $usuario)
             ->setParameter('aliasNormalizado', $aliasNormalizado)
             ->getQuery()
             ->getOneOrNullResult();

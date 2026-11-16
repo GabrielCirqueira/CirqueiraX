@@ -6,12 +6,14 @@ namespace App\Service\IdentificacaoMusica;
 
 use App\DataObject\IdentificacaoMusica\ComponenteIdentificadoDTO;
 use App\DataObject\IdentificacaoMusica\ResultadoIdentificacaoDTO;
+use App\DataObject\YoutubeMusic\ItemHistoricoYoutubeMusicDTO;
 use App\Entity\MusicaCatalogo;
 use App\Entity\VideoYoutube;
 use App\Enum\OrigemClassificacao;
 use App\Enum\StatusClassificacaoVideo;
 use App\Enum\TipoIdentificacaoMusica;
 use App\Enum\TipoVersaoMusica;
+use App\Repository\MusicaCatalogoRepository;
 use App\Service\Musica\NormalizarTextoMusicaService;
 use App\Service\Musica\ObterMusicaCatalogoService;
 
@@ -20,6 +22,7 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
     public const int LIMITE_CONFIANCA_REVISAO = 70;
     public const int LIMITE_COMPONENTES_MASHUP = 5;
     private const int MINIMO_COMPONENTES_MASHUP = 2;
+    private const int TAMANHO_MINIMO_TITULO_COMPACTO = 4;
     private const string ESPACO = ' ';
     private const array MARCAS_DE_MUSICA = [
         'lyrics', 'lyric', 'letra', 'legendado', 'slowed', 'reverb', 'sped up', 'nightcore', 'official video', 'official music video',
@@ -29,6 +32,7 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
     public function __construct(
         private ConfirmarMusicaYoutubeService $confirmarMusica,
         private ObterMusicaCatalogoService $obterMusica,
+        private MusicaCatalogoRepository $musicaRepository,
         private NormalizarTextoMusicaService $normalizador,
     ) {
     }
@@ -81,18 +85,36 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
      */
     private function isCoerenteComVideo(VideoYoutube $video, array $componentes): bool
     {
-        $textoVideo = self::ESPACO.$this->normalizador->normalizar(implode(self::ESPACO, [$video->titulo(), $video->canal(), $video->descricaoResumo() ?? ''])).self::ESPACO;
-
         foreach ($componentes as $componente) {
-            $candidatos = [$this->normalizador->normalizarTitulo($componente->titulo), ...array_map($this->normalizador->normalizar(...), $componente->artistas)];
-            foreach ($candidatos as $candidato) {
-                if ('' !== $candidato && str_contains($textoVideo, self::ESPACO.$candidato.self::ESPACO)) {
+            if ($this->isTituloPresenteNoVideo($video, $componente->titulo)) {
+                return true;
+            }
+
+            foreach ($componente->artistas as $artista) {
+                if ($this->isTituloPresenteNoVideo($video, $artista)) {
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    private function isTituloPresenteNoVideo(VideoYoutube $video, string $tituloMusica): bool
+    {
+        $textoBruto = implode(self::ESPACO, [$video->titulo(), $video->descricaoResumo() ?? '']);
+        $texto = self::ESPACO.$this->normalizador->normalizar($textoBruto).self::ESPACO;
+        $tituloNorm = $this->normalizador->normalizarTitulo($tituloMusica);
+        if ('' !== $tituloNorm && str_contains($texto, self::ESPACO.$tituloNorm.self::ESPACO)) {
+            return true;
+        }
+
+        $tituloCompacto = $this->normalizador->compactarTitulo($tituloMusica);
+        if (mb_strlen($tituloCompacto) < self::TAMANHO_MINIMO_TITULO_COMPACTO) {
+            return false;
+        }
+
+        return str_contains($this->normalizador->compactar($textoBruto), $tituloCompacto);
     }
 
     private function aplicarMusica(VideoYoutube $video, ResultadoIdentificacaoDTO $resultado, ComponenteIdentificadoDTO $componente): StatusClassificacaoVideo
@@ -116,40 +138,99 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
             $partes[] = ['componente' => $componente, 'musica' => $musica];
         }
 
-        $mashup = $this->obterMusica->obterMashup($video->usuario(), $partes, $video->urlCapa());
+        $mashup = $this->obterMusica->obterMashup($partes, $video->urlCapa());
 
         return $this->classificar($video, $resultado, StatusClassificacaoVideo::Mashup, $mashup);
     }
 
     private function obterMusicaConfirmada(VideoYoutube $video, ComponenteIdentificadoDTO $componente, TipoVersaoMusica $versao): ?MusicaCatalogo
     {
+        $existente = $this->buscarExistenteNoCatalogo($video, $componente);
+        if (null !== $existente) {
+            return $existente;
+        }
+
         $duracaoOriginal = TipoVersaoMusica::Original === $versao ? $video->duracaoMs() : null;
-        $oficial = $this->confirmarMusica->executar($componente, $duracaoOriginal);
-        if (null === $oficial) {
+        $oficial = $this->confirmarMusica->executar($componente, $duracaoOriginal, $video->canal());
+        if (null === $oficial || !$this->isTituloConfirmadoNoVideo($video, $componente, $oficial)) {
             return null;
         }
 
-        return $this->obterMusica->obterMusica(
-            $video->usuario(),
-            $oficial->titulo,
-            $this->escolherArtistas($componente, $oficial->textoArtistas),
+        return $this->obterMusica->obterMusica($oficial->titulo,
+            $this->escolherArtistas($componente, $oficial),
             $oficial->album,
             $oficial->urlCapa,
             $oficial->videoId,
         );
     }
 
+    private function isTituloConfirmadoNoVideo(VideoYoutube $video, ComponenteIdentificadoDTO $componente, ItemHistoricoYoutubeMusicDTO $oficial): bool
+    {
+        if ($this->isTituloPresenteNoVideo($video, $oficial->titulo)) {
+            return true;
+        }
+
+        $tituloEsperado = $this->isConfirmacaoInvertida($componente, $oficial)
+            ? ($componente->artistas[0] ?? '')
+            : $componente->titulo;
+
+        return $this->isTituloPresenteNoVideo($video, $tituloEsperado);
+    }
+
+    private function isConfirmacaoInvertida(ComponenteIdentificadoDTO $componente, ItemHistoricoYoutubeMusicDTO $oficial): bool
+    {
+        $tituloOficialCompacto = $this->normalizador->compactarTitulo($oficial->titulo);
+        $artistaPrincipalCompacto = $this->normalizador->compactarTitulo($componente->artistas[0] ?? '');
+
+        return '' !== $artistaPrincipalCompacto && $tituloOficialCompacto === $artistaPrincipalCompacto;
+    }
+
+    private function buscarExistenteNoCatalogo(VideoYoutube $video, ComponenteIdentificadoDTO $componente): ?MusicaCatalogo
+    {
+        $tituloCompacto = $this->normalizador->compactarTitulo($componente->titulo);
+        if ($this->isTituloPresenteNoVideo($video, $componente->titulo)) {
+            foreach ($componente->artistas as $artista) {
+                $direta = $this->musicaRepository->buscarExistentePorTituloEArtistaCompactos($tituloCompacto, $this->normalizador->compactar($artista));
+                if (null !== $direta) {
+                    return $direta;
+                }
+            }
+
+            $porCanal = $this->musicaRepository->buscarExistentePorTituloEArtistaCompactos($tituloCompacto, $this->normalizador->compactar($this->normalizador->limparCanal($video->canal())));
+            if (null !== $porCanal) {
+                return $porCanal;
+            }
+        }
+
+        $artistaComoArtista = $this->normalizador->compactar($componente->titulo);
+        foreach ($componente->artistas as $artistaComoTitulo) {
+            if (!$this->isTituloPresenteNoVideo($video, $artistaComoTitulo)) {
+                continue;
+            }
+
+            $invertida = $this->musicaRepository->buscarExistentePorTituloEArtistaCompactos($this->normalizador->compactarTitulo($artistaComoTitulo), $artistaComoArtista);
+            if (null !== $invertida) {
+                return $invertida;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @return list<string>
      */
-    private function escolherArtistas(ComponenteIdentificadoDTO $componente, string $textoArtistasOficial): array
+    private function escolherArtistas(ComponenteIdentificadoDTO $componente, ItemHistoricoYoutubeMusicDTO $oficial): array
     {
-        $principalIa = $this->normalizador->normalizar($componente->artistas[0] ?? '');
-        if ('' !== $principalIa && str_contains($this->normalizador->normalizar($textoArtistasOficial), $principalIa)) {
-            return $componente->artistas;
+        $oficiais = $this->normalizador->separarArtistas($oficial->textoArtistas);
+        if ($this->isConfirmacaoInvertida($componente, $oficial)) {
+            return [] === $oficiais ? $this->normalizador->separarArtistas($componente->titulo) : $oficiais;
         }
 
-        $oficiais = $this->normalizador->separarArtistas($textoArtistasOficial);
+        $principalIa = $this->normalizador->normalizar($componente->artistas[0] ?? '');
+        if ('' !== $principalIa && str_contains($this->normalizador->normalizar($oficial->textoArtistas), $principalIa)) {
+            return $componente->artistas;
+        }
 
         return [] === $oficiais ? $componente->artistas : $oficiais;
     }

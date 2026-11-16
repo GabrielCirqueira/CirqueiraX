@@ -22,7 +22,7 @@ final class ReproducaoMusicalRepository extends ServiceEntityRepository
 {
     private const string FUSO_UTC = 'UTC';
     private const string CTE_MUSICA_EFETIVA = 'WITH RECURSIVE efetiva (uuid, raiz) AS (
-            SELECT mc.uuid, mc.uuid FROM musica_catalogo mc WHERE mc.usuario_id = :usuarioId AND mc.unida_a_uuid IS NULL
+            SELECT mc.uuid, mc.uuid FROM musica_catalogo mc WHERE mc.unida_a_uuid IS NULL
             UNION ALL
             SELECT mf.uuid, e.raiz FROM musica_catalogo mf INNER JOIN efetiva e ON mf.unida_a_uuid = e.uuid
         )';

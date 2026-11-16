@@ -36,7 +36,7 @@ final readonly class ProjetarReproducoesSpotifyService
     public function executar(Usuario $usuario, ?DateTimeImmutable $desde = null, ?DateTimeImmutable $ate = null, ?callable $aoConcluirLote = null): array
     {
         $usuarioId = (int) $usuario->getId();
-        $mapa = $this->vinculoRepository->mapearMusicasPorIdentidade($usuario, self::SEPARADOR_IDENTIDADE);
+        $mapa = $this->vinculoRepository->mapearMusicasPorIdentidade(self::SEPARADOR_IDENTIDADE);
         $identidades = [];
         $resultado = ['lidas' => 0, 'projetadas' => 0, 'semVinculo' => 0, 'removidas' => 0];
         $ultimo = null;

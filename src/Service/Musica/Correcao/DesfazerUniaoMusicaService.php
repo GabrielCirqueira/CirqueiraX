@@ -22,7 +22,7 @@ final readonly class DesfazerUniaoMusicaService
 
     public function executar(Usuario $usuario, string $musicaUuid): MusicaCatalogo
     {
-        $musica = $this->musicaRepository->buscarDoUsuario($usuario, $musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $musica = $this->musicaRepository->buscarPorUuid($musicaUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
         if (null === $musica->unidaA()) {
             throw MusicaCatalogoException::musicaNaoUnida();
         }

@@ -24,8 +24,8 @@ final readonly class UnirMusicasCatalogoService
 
     public function executar(Usuario $usuario, UnirMusicasDTO $dto): MusicaCatalogo
     {
-        $origem = $this->musicaRepository->buscarDoUsuario($usuario, $dto->origemUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
-        $destino = ($this->musicaRepository->buscarDoUsuario($usuario, $dto->destinoUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada())->musicaEfetiva();
+        $origem = $this->musicaRepository->buscarPorUuid($dto->origemUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+        $destino = ($this->musicaRepository->buscarPorUuid($dto->destinoUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada())->musicaEfetiva();
 
         if ($origem === $destino) {
             throw MusicaCatalogoException::uniaoComElaMesma();
@@ -38,10 +38,10 @@ final readonly class UnirMusicasCatalogoService
 
     public function executarVarias(Usuario $usuario, UnirVariasMusicasDTO $dto): MusicaCatalogo
     {
-        $destino = ($this->musicaRepository->buscarDoUsuario($usuario, $dto->destinoUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada())->musicaEfetiva();
+        $destino = ($this->musicaRepository->buscarPorUuid($dto->destinoUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada())->musicaEfetiva();
 
         foreach (array_unique($dto->origemUuids) as $origemUuid) {
-            $origem = $this->musicaRepository->buscarDoUsuario($usuario, $origemUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
+            $origem = $this->musicaRepository->buscarPorUuid($origemUuid) ?? throw MusicaCatalogoException::musicaNaoEncontrada();
             if ($origem === $destino || $origem->musicaEfetiva() === $destino) {
                 continue;
             }

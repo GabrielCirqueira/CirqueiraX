@@ -11,16 +11,12 @@ use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: AliasArtistaCatalogoRepository::class)]
 #[ORM\Table(name: 'alias_artista_catalogo')]
-#[ORM\UniqueConstraint(name: 'UNIQ_ALIAS_ARTISTA_CATALOGO_USUARIO_ALIAS', fields: ['usuario', 'aliasNormalizado'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_ALIAS_ARTISTA_CATALOGO_ALIAS', fields: ['aliasNormalizado'])]
 class AliasArtistaCatalogo
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     private Uuid $uuid;
-
-    #[ORM\ManyToOne(targetEntity: Usuario::class)]
-    #[ORM\JoinColumn(name: 'usuario_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
-    private Usuario $usuario;
 
     #[ORM\ManyToOne(targetEntity: ArtistaCatalogo::class)]
     #[ORM\JoinColumn(name: 'artista_uuid', referencedColumnName: 'uuid', nullable: false, onDelete: 'CASCADE')]
@@ -32,7 +28,6 @@ class AliasArtistaCatalogo
     public function __construct(ArtistaCatalogo $artista, string $aliasNormalizado)
     {
         $this->uuid = Uuid::v7();
-        $this->usuario = $artista->usuario();
         $this->artista = $artista;
         $this->aliasNormalizado = $aliasNormalizado;
     }
@@ -50,10 +45,5 @@ class AliasArtistaCatalogo
     public function aliasNormalizado(): string
     {
         return $this->aliasNormalizado;
-    }
-
-    public function usuario(): Usuario
-    {
-        return $this->usuario;
     }
 }

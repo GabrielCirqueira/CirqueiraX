@@ -23,7 +23,7 @@ final readonly class BuscarFotoArtistaCatalogoService
 
     public function executar(Usuario $usuario, string $artistaUuid): void
     {
-        $artista = $this->artistaRepository->buscarDoUsuario($usuario, $artistaUuid)?->artistaEfetivo();
+        $artista = $this->artistaRepository->buscarPorUuid($artistaUuid)?->artistaEfetivo();
         if (null === $artista || !$artista->precisaBuscarFoto()) {
             return;
         }

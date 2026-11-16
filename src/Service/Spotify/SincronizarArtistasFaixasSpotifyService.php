@@ -75,7 +75,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
             }
 
             $this->artistaFaixaRepository->registrarArtistasDaFaixa($faixa['codigo_faixa'], $artistas);
-            $this->atualizarArtistasMusica->executar($conta->usuario(), $faixa['nome'], $faixa['artista'], array_map(static fn (array $artista): string => $artista['nome'], $artistas));
+            $this->atualizarArtistasMusica->executar($faixa['nome'], $faixa['artista'], array_map(static fn (array $artista): string => $artista['nome'], $artistas));
             ++$processadas;
         }
 

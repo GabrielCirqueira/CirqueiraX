@@ -115,7 +115,7 @@ final readonly class ListarRevisaoMusicaService
             $uuids = [...$uuids, ...$par];
         }
         $uuidsUnicos = array_values(array_unique($uuids));
-        $musicas = $this->musicaRepository->buscarPorUuids($usuario, $uuidsUnicos);
+        $musicas = $this->musicaRepository->buscarPorUuids($uuidsUnicos);
         $videosPrincipais = $this->videoRepository->mapearVideoPrincipalPorMusica($usuario, $uuidsUnicos);
         $faixasSpotify = $this->resolverFaixasSpotify($usuario, $uuidsUnicos);
 

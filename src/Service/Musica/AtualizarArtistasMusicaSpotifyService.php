@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service\Musica;
 
-use App\Entity\Usuario;
 use App\Repository\MusicaCatalogoRepository;
 use App\Repository\VinculoMusicaSpotifyRepository;
 
@@ -21,16 +20,16 @@ final readonly class AtualizarArtistasMusicaSpotifyService
     /**
      * @param list<string> $artistas
      */
-    public function executar(Usuario $usuario, string $nomeFaixa, string $artistaPrincipal, array $artistas): void
+    public function executar(string $nomeFaixa, string $artistaPrincipal, array $artistas): void
     {
-        $vinculo = $this->vinculoRepository->buscarPorIdentidade($usuario, $this->normalizador->normalizar($nomeFaixa), $this->normalizador->normalizar($artistaPrincipal));
+        $vinculo = $this->vinculoRepository->buscarPorIdentidade($this->normalizador->normalizar($nomeFaixa), $this->normalizador->normalizar($artistaPrincipal));
         if (null === $vinculo || $vinculo->musica()->confirmadaManualmente()) {
             return;
         }
 
         $musica = $vinculo->musica();
         foreach ($artistas as $nome) {
-            $musica->adicionarArtista($this->obterArtista->executar($usuario, $nome));
+            $musica->adicionarArtista($this->obterArtista->executar($nome));
         }
         $this->musicaRepository->salvar($musica);
     }
