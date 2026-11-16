@@ -7,8 +7,10 @@ namespace App\Controller\Spotify;
 use App\Controller\Common\DefaultController;
 use App\DataObject\Spotify\TocarFaixaSpotifyDTO;
 use App\Entity\Usuario;
+use App\Service\Spotify\ListarHistoricoRecenteSpotifyService;
 use App\Service\Spotify\ObterTocandoAgoraSpotifyService;
 use App\Service\Spotify\TocarFaixaSpotifyService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,12 +22,28 @@ final class SpotifyAnaliseController extends DefaultController
     public function __construct(
         private readonly ObterTocandoAgoraSpotifyService $obterTocandoAgoraService,
         private readonly TocarFaixaSpotifyService $tocarFaixaService,
+        private readonly ListarHistoricoRecenteSpotifyService $listarHistoricoRecenteService,
     ) {}
 
     #[Route('/tocando-agora', name: 'tocando_agora', methods: ['GET'])]
     public function tocandoAgora(#[CurrentUser] Usuario $usuario): Response
     {
         return $this->success($this->obterTocandoAgoraService->executar($usuario)->paraArray());
+    }
+
+    #[Route('/recente', name: 'recente', methods: ['GET'])]
+    public function recente(#[CurrentUser] Usuario $usuario, Request $request): Response
+    {
+        $excluirCodigo = $request->query->getString('excluirCodigo');
+        $itens = $this->listarHistoricoRecenteService->executar(
+            $usuario,
+            '' !== $excluirCodigo ? $excluirCodigo : null,
+        );
+
+        return $this->success(array_map(
+            static fn ($item) => $item->paraArray(),
+            $itens,
+        ));
     }
 
     #[Route('/tocar', name: 'tocar', methods: ['POST'])]

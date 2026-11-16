@@ -582,3 +582,20 @@ export const LinhaDoTempoMusicaSchema = z.object({
 })
 
 export type LinhaDoTempoMusica = z.infer<typeof LinhaDoTempoMusicaSchema>
+
+export const ItemHistoricoRecenteSchema = z.object({
+  titulo: z.string(),
+  artistas: z.array(z.string()),
+  album: z.string().nullable().optional(),
+  urlCapa: z.string().nullable(),
+  urlExterna: z.string().nullable(),
+  tocadaEm: z.string(),
+  fonte: FonteReproducaoSchema,
+  codigoFaixa: z.string().nullable().optional(),
+  videoId: z.string().nullable().optional(),
+  identificada: z.boolean().optional().default(true),
+})
+
+export type ItemHistoricoRecente = z.infer<typeof ItemHistoricoRecenteSchema>
+
+export const ListaHistoricoRecenteSchema = z.array(ItemHistoricoRecenteSchema)

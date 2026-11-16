@@ -256,6 +256,27 @@ final class ReproducaoYoutubeRepository extends ServiceEntityRepository
         return $resultado;
     }
 
+    /**
+     * @return list<ReproducaoYoutube>
+     */
+    public function listarRecentes(Usuario $usuario, int $limite): array
+    {
+        /** @var list<ReproducaoYoutube> $resultado */
+        $resultado = $this->createQueryBuilder('e')
+            ->innerJoin('e.video', 'v')
+            ->addSelect('v')
+            ->leftJoin('v.musica', 'm')
+            ->addSelect('m')
+            ->andWhere('e.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->orderBy('e.tocadaEm', 'DESC')
+            ->setMaxResults(max(1, $limite))
+            ->getQuery()
+            ->getResult();
+
+        return $resultado;
+    }
+
     public function contarDoUsuario(Usuario $usuario): int
     {
         return (int) $this->createQueryBuilder('e')

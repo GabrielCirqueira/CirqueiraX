@@ -98,6 +98,23 @@ final class ReproducaoSpotifyRepository extends ServiceEntityRepository
         return $ultima;
     }
 
+    /**
+     * @return list<ReproducaoSpotify>
+     */
+    public function listarRecentes(Usuario $usuario, int $limite): array
+    {
+        /** @var list<ReproducaoSpotify> $resultado */
+        $resultado = $this->createQueryBuilder('r')
+            ->andWhere('r.usuario = :usuario')
+            ->setParameter('usuario', $usuario)
+            ->orderBy('r.tocadaEm', 'DESC')
+            ->setMaxResults(max(1, $limite))
+            ->getQuery()
+            ->getResult();
+
+        return $resultado;
+    }
+
     public function buscarUltimaTocadaAntesDe(Usuario $usuario, DateTimeImmutable $momento): ?DateTimeImmutable
     {
         /** @var ReproducaoSpotify|null $anterior */

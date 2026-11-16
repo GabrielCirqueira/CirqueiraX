@@ -12,7 +12,9 @@ use App\Serializer\ContaYoutubeMusicSerializer;
 use App\Service\YoutubeMusic\ConectarYoutubeMusicService;
 use App\Service\YoutubeMusic\DefinirFonteCapturaYoutubeMusicService;
 use App\Service\YoutubeMusic\DesconectarYoutubeMusicService;
+use App\Service\YoutubeMusic\ListarHistoricoRecenteYoutubeService;
 use App\Service\YoutubeMusic\ObterStatusYoutubeMusicService;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,6 +29,7 @@ final class YoutubeMusicController extends DefaultController
         private readonly DesconectarYoutubeMusicService $desconectarService,
         private readonly ContaYoutubeMusicSerializer $serializer,
         private readonly DefinirFonteCapturaYoutubeMusicService $definirFonteCapturaService,
+        private readonly ListarHistoricoRecenteYoutubeService $listarHistoricoRecenteService,
     ) {
     }
 
@@ -62,5 +65,20 @@ final class YoutubeMusicController extends DefaultController
         $this->desconectarService->executar($usuario);
 
         return $this->success(['desconectado' => true]);
+    }
+
+    #[Route('/recente', name: 'recente', methods: ['GET'])]
+    public function recente(#[CurrentUser] Usuario $usuario, Request $request): Response
+    {
+        $excluirVideoId = $request->query->getString('excluirVideoId');
+        $itens = $this->listarHistoricoRecenteService->executar(
+            $usuario,
+            '' !== $excluirVideoId ? $excluirVideoId : null,
+        );
+
+        return $this->success(array_map(
+            static fn ($item) => $item->paraArray(),
+            $itens,
+        ));
     }
 }

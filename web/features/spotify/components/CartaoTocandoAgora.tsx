@@ -1,4 +1,5 @@
 import { CapaMusica } from '@/features/musica/components/CapaMusica'
+import { BotaoHistoricoRecente } from '@/features/musica/components/ModalHistoricoRecente'
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
 import {
   formatarDataExtensa,
@@ -10,6 +11,7 @@ import { Box, Button, Flex, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
 import { ExternalLink, Pause, Radio } from 'lucide-react'
 import { memo } from 'react'
+import { listarHistoricoRecenteSpotify } from '../api'
 import {
   useRelogioSpotify,
   useSincronizacaoAutomaticaSpotify,
@@ -221,20 +223,29 @@ function ConteudoTocandoAgora({ dados }: { dados: TocandoAgora }) {
                   : 'Primeira vez no seu histórico'}
               </Text>
             )}
-            {dados.urlSpotify && (
-              <Button
-                asChild
-                size="2xs"
-                variant="ghost"
-                ml="auto"
-                color="cirqueira.musica.textoSecundario"
-                _hover={{ color: 'cirqueira.musica.verde', bg: 'transparent' }}
-              >
-                <Link href={dados.urlSpotify} target="_blank" rel="noopener noreferrer">
-                  Abrir no Spotify <ExternalLink size={12} />
-                </Link>
-              </Button>
-            )}
+            <HStack gap={0} ml="auto">
+              <BotaoHistoricoRecente
+                corDestaque="cirqueira.musica.verde"
+                rotuloExterno="Abrir no Spotify"
+                excluirCodigo={dados.codigoFaixa}
+                buscar={({ excluirCodigo }) =>
+                  listarHistoricoRecenteSpotify({ excluirCodigo })
+                }
+              />
+              {dados.urlSpotify && (
+                <Button
+                  asChild
+                  size="2xs"
+                  variant="ghost"
+                  color="cirqueira.musica.textoSecundario"
+                  _hover={{ color: 'cirqueira.musica.verde', bg: 'transparent' }}
+                >
+                  <Link href={dados.urlSpotify} target="_blank" rel="noopener noreferrer">
+                    Abrir no Spotify <ExternalLink size={12} />
+                  </Link>
+                </Button>
+              )}
+            </HStack>
           </Flex>
         </VStack>
       </Flex>

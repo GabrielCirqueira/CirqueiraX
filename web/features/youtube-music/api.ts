@@ -1,4 +1,8 @@
 import { api } from '@/config/api'
+import {
+  type ItemHistoricoRecente,
+  ListaHistoricoRecenteSchema,
+} from '@/features/musica/types'
 import type { RespostaApi } from '@/shared/types/api'
 import {
   DefinirFonteCapturaYoutubeSchema,
@@ -103,4 +107,13 @@ export async function gerarTokenExtensaoYoutube(
 
 export async function revogarTokenExtensaoYoutube(uuid: string): Promise<void> {
   await api.delete(`${PREFIXO}/extensao/tokens/${uuid}`)
+}
+
+export async function listarHistoricoRecenteYoutube(params?: {
+  excluirVideoId?: string | null
+}): Promise<ItemHistoricoRecente[]> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO}/recente`, {
+    params: params?.excluirVideoId ? { excluirVideoId: params.excluirVideoId } : undefined,
+  })
+  return ListaHistoricoRecenteSchema.parse(data.data)
 }

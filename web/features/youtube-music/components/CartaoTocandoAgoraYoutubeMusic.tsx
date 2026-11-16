@@ -1,5 +1,6 @@
 import { CapaMusica } from '@/features/musica/components/CapaMusica'
 import { IconeFonteMusica } from '@/features/musica/components/IconeFonteMusica'
+import { BotaoHistoricoRecente } from '@/features/musica/components/ModalHistoricoRecente'
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
 import {
   formatarDataExtensa,
@@ -13,6 +14,7 @@ import { Box, Button, Flex, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
 import { ExternalLink, Pause } from 'lucide-react'
 import { memo } from 'react'
+import { listarHistoricoRecenteYoutube } from '../api'
 import type { TocandoAgoraExtensao } from '../types'
 import { calcularProgressoTocandoYoutube, urlVideoYoutubeMusic } from '../utils'
 
@@ -186,20 +188,29 @@ export const CartaoTocandoAgoraYoutubeMusic = memo(function CartaoTocandoAgoraYo
                   ? `Você já ouviu ${tocando.vezesOuvida} ${tocando.vezesOuvida === 1 ? 'vez' : 'vezes'} · desde ${formatarDataExtensa(tocando.primeiraVezEm)}`
                   : 'Primeira vez no seu histórico'}
             </Text>
-            {urlYoutube && (
-              <Button
-                asChild
-                size="2xs"
-                variant="ghost"
-                ml="auto"
-                color="cirqueira.musica.textoSecundario"
-                _hover={{ color: 'cirqueira.musica.fonteYoutubeMusic', bg: 'transparent' }}
-              >
-                <Link href={urlYoutube} target="_blank" rel="noopener noreferrer">
-                  Abrir no YouTube Music <ExternalLink size={12} />
-                </Link>
-              </Button>
-            )}
+            <HStack gap={0} ml="auto">
+              <BotaoHistoricoRecente
+                corDestaque="cirqueira.musica.fonteYoutubeMusic"
+                rotuloExterno="Abrir no YouTube Music"
+                excluirVideoId={tocando.videoId}
+                buscar={({ excluirVideoId }) =>
+                  listarHistoricoRecenteYoutube({ excluirVideoId })
+                }
+              />
+              {urlYoutube && (
+                <Button
+                  asChild
+                  size="2xs"
+                  variant="ghost"
+                  color="cirqueira.musica.textoSecundario"
+                  _hover={{ color: 'cirqueira.musica.fonteYoutubeMusic', bg: 'transparent' }}
+                >
+                  <Link href={urlYoutube} target="_blank" rel="noopener noreferrer">
+                    Abrir no YouTube Music <ExternalLink size={12} />
+                  </Link>
+                </Button>
+              )}
+            </HStack>
           </Flex>
         </VStack>
       </Flex>

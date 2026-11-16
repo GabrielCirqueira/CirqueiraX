@@ -1,4 +1,8 @@
 import { api } from '@/config/api'
+import {
+  type ItemHistoricoRecente,
+  ListaHistoricoRecenteSchema,
+} from '@/features/musica/types'
 import type { RespostaApi } from '@/shared/types/api'
 import {
   type ConcluirAutorizacaoSpotifyPayload,
@@ -63,4 +67,13 @@ export async function consultarImportacaoSpotify(uuid: string): Promise<Importac
 export async function obterTocandoAgoraSpotify(): Promise<TocandoAgora> {
   const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/tocando-agora')
   return { ...TocandoAgoraSchema.parse(data.data), consultadoEm: Date.now() }
+}
+
+export async function listarHistoricoRecenteSpotify(params?: {
+  excluirCodigo?: string | null
+}): Promise<ItemHistoricoRecente[]> {
+  const { data } = await api.get<RespostaApi<unknown>>('/api/v1/spotify/recente', {
+    params: params?.excluirCodigo ? { excluirCodigo: params.excluirCodigo } : undefined,
+  })
+  return ListaHistoricoRecenteSchema.parse(data.data)
 }
