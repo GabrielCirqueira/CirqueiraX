@@ -36,17 +36,56 @@ export function rotuloDirecao(
   return `${labelServico(origem)} → ${labelServico(destino)}`
 }
 
-export function formatarDecisao(decisao: DecisaoPlaylistDestino): string {
+export function formatarDecisao(
+  decisao: DecisaoPlaylistDestino,
+  origem?: ServicoPlaylist | null,
+  destino?: ServicoPlaylist | null
+): string {
+  const de = origem ? labelServico(origem) : 'origem'
+  const para = destino ? labelServico(destino) : 'destino'
+
   switch (decisao) {
     case 'criar_nova':
-      return 'Criar outra'
+      return `Criar nova no ${para}`
     case 'atualizar_origem_para_destino':
-      return 'Atualizar origem → destino'
+      return `Espelhar ${de} → ${para}`
     case 'atualizar_destino_para_origem':
-      return 'Atualizar destino → origem'
+      return `Espelhar ${para} → ${de}`
     case 'so_vincular':
-      return 'Só vincular'
+      return 'Só vincular (sem mudar faixas)'
   }
+}
+
+export function descreverDecisao(
+  decisao: DecisaoPlaylistDestino,
+  origem?: ServicoPlaylist | null,
+  destino?: ServicoPlaylist | null,
+  nomePar?: string | null
+): string {
+  const de = origem ? labelServico(origem) : 'origem'
+  const para = destino ? labelServico(destino) : 'destino'
+  const par = nomePar ? ` “${nomePar}”` : ' parecida'
+
+  switch (decisao) {
+    case 'criar_nova':
+      return `Ignora a playlist${par} que já existe no ${para} e cria uma cópia nova.`
+    case 'atualizar_origem_para_destino':
+      return `A do ${de} manda: o ${para} ganha as faixas novas e perde as que você tirou no ${de}.`
+    case 'atualizar_destino_para_origem':
+      return `A do ${para} manda: o ${de} acompanha o que já está no ${para}.`
+    case 'so_vincular':
+      return `Liga as duas playlists para sincronizar depois, sem adicionar nem remover faixas agora.`
+  }
+}
+
+export function idsComParNoDestino(
+  playlists: PlaylistResumo[],
+  origem: ServicoPlaylist,
+  pares: ParPlaylist[]
+): string[] {
+  return playlists
+    .filter((playlist) => Boolean(encontrarParOrientado(playlist.id, origem, pares)?.destino))
+    .map((playlist) => playlist.id)
 }
 
 export function destinoOposto(origem: ServicoPlaylist): ServicoPlaylist {

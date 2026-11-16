@@ -32,16 +32,18 @@ import {
   useObterUrlYoutubeOAuth,
   useStatusYoutubeOAuth,
 } from '../hooks'
-import type { DecisaoPlaylistDestino, ServicoPlaylist } from '../types'
+import type { DecisaoPlaylistDestino, ParPlaylist, ServicoPlaylist } from '../types'
 import {
   OPCOES_DECISAO,
   ROTA_RETORNO_GERENCIAR,
   agruparItensPrevia,
+  descreverDecisao,
   destinoOposto,
   encontrarParOrientado,
   filtrarPlaylistsPorBusca,
   formatarDecisao,
   formatarNumero,
+  idsComParNoDestino,
   labelServico,
   montarItensConfirmacaoPrevia,
   montarPlaylistsInicio,
@@ -65,6 +67,8 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
   const [passo, setPasso] = useState<PassoAssistente>(1)
   const [origem, setOrigem] = useState<ServicoPlaylist | null>(null)
   const [busca, setBusca] = useState('')
+  const [buscaVinculos, setBuscaVinculos] = useState('')
+  const [filtroSoComPar, setFiltroSoComPar] = useState(false)
   const [idsSelecionados, setIdsSelecionados] = useState<Set<string>>(new Set())
   const [decisoes, setDecisoes] = useState<Record<string, DecisaoPlaylistDestino>>({})
   const [uuidTransferencia, setUuidTransferencia] = useState<string | null>(null)
@@ -93,10 +97,29 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
     setPasso(1)
     setOrigem(null)
     setBusca('')
+    setBuscaVinculos('')
+    setFiltroSoComPar(false)
     setIdsSelecionados(new Set())
     setDecisoes({})
     setUuidTransferencia(null)
     setIgnorados(new Set())
+  }
+
+  function aplicarDecisaoEmMassa(
+    decisao: DecisaoPlaylistDestino,
+    idsAlvo: string[],
+    pares: ParPlaylist[]
+  ) {
+    if (!origem) return
+    setDecisoes((atual) => {
+      const proximo = { ...atual }
+      for (const id of idsAlvo) {
+        const par = encontrarParOrientado(id, origem, pares)
+        if (!par?.destino && decisao !== 'criar_nova') continue
+        proximo[id] = decisao
+      }
+      return proximo
+    })
   }
 
   function handleFechar() {
@@ -405,18 +428,57 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
           color="cirqueira.musica.textoPrincipal"
           _placeholder={{ color: 'cirqueira.musica.textoDesabilitado' }}
         />
-        <HStack justify="space-between">
+        <HStack gap={2} wrap="wrap">
           <Button
             size="xs"
-            variant="ghost"
-            color="cirqueira.musica.verde"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
             onClick={() => selecionarTodas(playlistsFiltradas.map((p) => p.id))}
           >
-            Selecionar todas
+            Todas (filtro)
+          </Button>
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
+            disabled={!origem || detectarPares.isLoading}
+            onClick={() => {
+              if (!origem) return
+              selecionarTodas(
+                idsComParNoDestino(playlistsFiltradas, origem, detectarPares.data ?? [])
+              )
+            }}
+          >
+            Só com par no destino
+          </Button>
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
+            onClick={() => {
+              const idsVisiveis = playlistsFiltradas.map((p) => p.id)
+              setIdsSelecionados((atual) => {
+                const proximo = new Set(atual)
+                for (const id of idsVisiveis) {
+                  if (proximo.has(id)) proximo.delete(id)
+                  else proximo.add(id)
+                }
+                return proximo
+              })
+            }}
+          >
+            Inverter filtro
           </Button>
           <Button
             size="xs"
             variant="ghost"
+            borderRadius="full"
             color="cirqueira.musica.textoSecundario"
             onClick={limparSelecao}
           >
@@ -535,11 +597,104 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
   } else if (passo === 4) {
     const pares = detectarPares.data ?? []
     const selecionadas = playlists.filter((p) => idsSelecionados.has(p.id))
+    const selecionadasFiltradas = filtrarPlaylistsPorBusca(selecionadas, buscaVinculos).filter(
+      (playlist) => {
+        if (!filtroSoComPar || !origem) return true
+        return Boolean(encontrarParOrientado(playlist.id, origem, pares)?.destino)
+      }
+    )
+    const idsComPar = origem ? idsComParNoDestino(selecionadas, origem, pares) : ([] as string[])
+    const idsVisiveisComPar = origem
+      ? idsComParNoDestino(selecionadasFiltradas, origem, pares)
+      : ([] as string[])
+
     conteudo = (
       <VStack align="stretch" gap={4}>
-        <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
-          Defina o que fazer quando já existir uma playlist parecida no destino.
-        </Text>
+        <VStack align="start" gap={1}>
+          <Text fontSize="sm" color="cirqueira.musica.textoPrincipal" fontWeight="semibold">
+            Como tratar playlists que já existem no destino
+          </Text>
+          <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+            Se o nome bater (ex.: DREARY nos dois lados), escolha se cria outra, espelha um lado no
+            outro ou só liga as duas sem mudar faixas agora.
+          </Text>
+        </VStack>
+
+        <Input
+          value={buscaVinculos}
+          onChange={(e) => setBuscaVinculos(e.target.value)}
+          placeholder="Buscar entre as selecionadas..."
+          bg="cirqueira.musica.cartaoElevado"
+          borderColor="cirqueira.musica.cartaoElevado"
+          color="cirqueira.musica.textoPrincipal"
+          _placeholder={{ color: 'cirqueira.musica.textoDesabilitado' }}
+        />
+
+        <HStack gap={2} wrap="wrap">
+          <Button
+            size="xs"
+            variant={filtroSoComPar ? 'solid' : 'outline'}
+            borderRadius="full"
+            bg={filtroSoComPar ? 'cirqueira.musica.verde' : undefined}
+            color={filtroSoComPar ? 'cirqueira.grey.950' : 'cirqueira.musica.textoPrincipal'}
+            borderColor="cirqueira.musica.cartaoElevado"
+            onClick={() => setFiltroSoComPar((atual) => !atual)}
+          >
+            Só com par ({formatarNumero(idsComPar.length)})
+          </Button>
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
+            disabled={idsVisiveisComPar.length === 0}
+            onClick={() =>
+              aplicarDecisaoEmMassa('atualizar_origem_para_destino', idsVisiveisComPar, pares)
+            }
+          >
+            Todas: {formatarDecisao('atualizar_origem_para_destino', origem, destino)}
+          </Button>
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
+            disabled={idsVisiveisComPar.length === 0}
+            onClick={() => aplicarDecisaoEmMassa('criar_nova', idsVisiveisComPar, pares)}
+          >
+            Todas: criar nova
+          </Button>
+          <Button
+            size="xs"
+            variant="outline"
+            borderRadius="full"
+            borderColor="cirqueira.musica.cartaoElevado"
+            color="cirqueira.musica.textoPrincipal"
+            disabled={idsVisiveisComPar.length === 0}
+            onClick={() => aplicarDecisaoEmMassa('so_vincular', idsVisiveisComPar, pares)}
+          >
+            Todas: só vincular
+          </Button>
+          <Button
+            size="xs"
+            variant="ghost"
+            borderRadius="full"
+            color="cirqueira.musica.textoSecundario"
+            onClick={() => {
+              const idsRemover = new Set(selecionadasFiltradas.map((playlist) => playlist.id))
+              setIdsSelecionados((atual) => {
+                const proximo = new Set(atual)
+                for (const id of idsRemover) proximo.delete(id)
+                return proximo
+              })
+            }}
+          >
+            Remover do lote (filtro)
+          </Button>
+        </HStack>
+
         {detectarPares.isLoading ? (
           <HStack gap={2}>
             <Spinner size="sm" color="cirqueira.musica.verde" />
@@ -547,27 +702,64 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
               Detectando pares...
             </Text>
           </HStack>
+        ) : selecionadasFiltradas.length === 0 ? (
+          <Text fontSize="sm" color="cirqueira.musica.textoDesabilitado">
+            Nenhuma playlist neste filtro.
+          </Text>
         ) : (
           <VStack align="stretch" gap={3} maxH="45vh" overflowY="auto">
-            {selecionadas.map((playlist) => {
+            {selecionadasFiltradas.map((playlist) => {
               const par = origem ? encontrarParOrientado(playlist.id, origem, pares) : undefined
               const decisaoAtual = decisoes[playlist.id] ?? 'criar_nova'
+              const temPar = Boolean(par?.destino)
               return (
                 <Box key={playlist.id} p={3} borderRadius="8px" bg="cirqueira.musica.cartaoElevado">
-                  <VStack align="stretch" gap={2}>
-                    <Text fontSize="sm" fontWeight="semibold">
-                      {playlist.nome}
-                    </Text>
-                    {par?.destino ? (
-                      <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-                        Par encontrado: {par.destino.nome} ({Math.round(par.similaridade)}% similar)
-                      </Text>
-                    ) : (
-                      <Text fontSize="xs" color="cirqueira.musica.textoDesabilitado">
-                        Sem par no destino — será criada uma nova playlist.
-                      </Text>
-                    )}
-                    {par?.destino ? (
+                  <VStack align="stretch" gap={3}>
+                    <HStack justify="space-between" align="start" gap={3}>
+                      <VStack align="start" gap={0.5} minW={0} flex={1}>
+                        <Text fontSize="sm" fontWeight="semibold" truncate maxW="full">
+                          {playlist.nome}
+                        </Text>
+                        <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
+                          {formatarNumero(playlist.totalFaixas)} faixas
+                          {origem ? ` no ${labelServico(origem)}` : ''}
+                        </Text>
+                        {temPar ? (
+                          <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+                            Já existe no {destino ? labelServico(destino) : 'destino'}:{' '}
+                            <Text
+                              as="span"
+                              fontWeight="semibold"
+                              color="cirqueira.musica.textoPrincipal"
+                            >
+                              {par?.destino?.nome}
+                            </Text>{' '}
+                            ({Math.round(par?.similaridade ?? 0)}% similar,{' '}
+                            {formatarNumero(par?.destino?.totalFaixas ?? 0)} faixas)
+                          </Text>
+                        ) : (
+                          <Text fontSize="xs" color="cirqueira.musica.textoDesabilitado">
+                            Sem playlist parecida no destino — vai criar uma nova.
+                          </Text>
+                        )}
+                      </VStack>
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        color="cirqueira.musica.textoSecundario"
+                        onClick={() =>
+                          setIdsSelecionados((atual) => {
+                            const proximo = new Set(atual)
+                            proximo.delete(playlist.id)
+                            return proximo
+                          })
+                        }
+                      >
+                        Tirar
+                      </Button>
+                    </HStack>
+
+                    {temPar ? (
                       <RadioGroup.Root
                         value={decisaoAtual}
                         onValueChange={(detalhes) => {
@@ -576,15 +768,38 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
                         }}
                         colorPalette="green"
                       >
-                        <VStack align="stretch" gap={1}>
+                        <VStack align="stretch" gap={2}>
                           {OPCOES_DECISAO.map((opcao) => (
-                            <RadioGroup.Item key={opcao} value={opcao}>
-                              <HStack gap={2}>
+                            <RadioGroup.Item
+                              key={opcao}
+                              value={opcao}
+                              p={2}
+                              borderRadius="lg"
+                              border="1px solid"
+                              borderColor={
+                                decisaoAtual === opcao
+                                  ? 'cirqueira.musica.verde'
+                                  : 'cirqueira.musica.cartao'
+                              }
+                              bg={
+                                decisaoAtual === opcao ? 'cirqueira.musica.cartao' : 'transparent'
+                              }
+                            >
+                              <HStack gap={3} align="start" w="full">
                                 <RadioGroup.ItemHiddenInput />
-                                <RadioGroup.ItemIndicator />
-                                <RadioGroup.ItemText fontSize="xs">
-                                  {formatarDecisao(opcao)}
-                                </RadioGroup.ItemText>
+                                <RadioGroup.ItemIndicator mt={0.5} />
+                                <VStack align="start" gap={0.5} flex={1}>
+                                  <RadioGroup.ItemText
+                                    fontSize="xs"
+                                    fontWeight="semibold"
+                                    color="cirqueira.musica.textoPrincipal"
+                                  >
+                                    {formatarDecisao(opcao, origem, destino)}
+                                  </RadioGroup.ItemText>
+                                  <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
+                                    {descreverDecisao(opcao, origem, destino, par?.destino?.nome)}
+                                  </Text>
+                                </VStack>
                               </HStack>
                             </RadioGroup.Item>
                           ))}
@@ -597,7 +812,7 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
             })}
           </VStack>
         )}
-        <HStack justify="space-between" pt={2}>
+        <HStack justify="space-between" pt={2} wrap="wrap" gap={2}>
           <Button variant="ghost" borderRadius="full" onClick={() => setPasso(3)}>
             Voltar
           </Button>
@@ -608,9 +823,10 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
             color="cirqueira.grey.950"
             _hover={{ bg: 'cirqueira.musica.verdeHover' }}
             loading={iniciar.isPending}
+            disabled={idsSelecionados.size === 0}
             onClick={handleIniciar}
           >
-            Iniciar casamento
+            Iniciar casamento ({formatarNumero(idsSelecionados.size)})
           </Button>
         </HStack>
       </VStack>
