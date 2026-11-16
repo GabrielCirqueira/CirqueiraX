@@ -27,7 +27,7 @@ Não existe cadastro pela API nem pela interface. Os usuários são criados no t
 php bin/console app:usuario:criar
 ```
 
-O provider de segurança é uma `chain`, com a entidade `Usuario` e o usuário em memória `master-cli`, usado por `app:jwt:master`.
+O provider de segurança é uma `chain`, com a entidade `Usuario` e o usuário em memória `master-cli`, usado por `app:jwt:master`. Em produção o comando `app:jwt:master` fica bloqueado a menos que `JWT_MASTER_ENABLED=1`. Contas de convidados devem nascer só com `ROLE_USER` (`--admin` em prod exige `ALLOW_ADMIN_CREATE=1`). Syncthing (`/api/v1/sync`) exige `ROLE_SUPER_ADMIN`.
 
 ### Login
 

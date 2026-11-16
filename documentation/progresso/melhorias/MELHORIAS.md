@@ -16,6 +16,7 @@
 > - **M121–M140** → [MELHORIAS_7.md](MELHORIAS_7.md)
 > - **M141–M160** → [MELHORIAS_8.md](MELHORIAS_8.md)
 > - **M161–M180** → [MELHORIAS_9.md](MELHORIAS_9.md)
+> - **M181–M200** → [MELHORIAS_10.md](MELHORIAS_10.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -199,3 +200,4 @@
 | M178 | Pool de IA Gratuita na Identificação de Músicas | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-178--pool-de-ia-gratuita-na-identificação-de-músicas) |
 | M179 | Extensão Visual Spotify no YouTube Music em Gerenciar | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_9.md#melhoria-179--extensão-visual-spotify-no-youtube-music-em-gerenciar) |
 | M180 | Tutorial de Dados Retroativos do Spotify no Gerenciar | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_9.md#melhoria-180--tutorial-de-dados-retroativos-do-spotify-no-gerenciar) |
+| M181 | Endurecimento de Segurança Multi-usuário | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_10.md#melhoria-181--endurecimento-de-segurança-multi-usuário) |

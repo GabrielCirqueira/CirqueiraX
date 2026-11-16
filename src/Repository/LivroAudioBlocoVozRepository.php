@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\LivroAudio;
 use App\Entity\LivroAudioBloco;
 use App\Entity\LivroAudioBlocoVoz;
+use App\Entity\Usuario;
 use App\Enum\StatusLivroAudioBloco;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -100,12 +101,19 @@ class LivroAudioBlocoVozRepository extends ServiceEntityRepository
     /**
      * @return list<array{voz: string, partes: int, bytes: int, segundos: int}>
      */
-    public function resumoPorVoz(): array
+    public function resumoPorVoz(?Usuario $usuario = null): array
     {
-        $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative(
-            'SELECT voz, COUNT(*) AS partes, COALESCE(SUM(tamanho_bytes), 0) AS bytes, COALESCE(SUM(duracao_segundos), 0) AS segundos FROM livro_audio_bloco_voz WHERE status = ? GROUP BY voz ORDER BY bytes DESC',
-            [StatusLivroAudioBloco::PRONTO->value],
-        );
+        $sql = 'SELECT v.voz AS voz, COUNT(*) AS partes, COALESCE(SUM(v.tamanho_bytes), 0) AS bytes, COALESCE(SUM(v.duracao_segundos), 0) AS segundos FROM livro_audio_bloco_voz v';
+        $params = [StatusLivroAudioBloco::PRONTO->value];
+        if (null !== $usuario) {
+            $sql .= ' INNER JOIN livro_audio_bloco b ON b.uuid = v.bloco_uuid INNER JOIN livro_audio l ON l.uuid = b.livro_uuid WHERE v.status = ? AND l.usuario_id = ?';
+            $params[] = $usuario->getId();
+        } else {
+            $sql .= ' WHERE v.status = ?';
+        }
+        $sql .= ' GROUP BY v.voz ORDER BY bytes DESC';
+
+        $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, $params);
 
         return array_map(static fn(array $linha): array => [
             'voz' => (string) $linha['voz'],

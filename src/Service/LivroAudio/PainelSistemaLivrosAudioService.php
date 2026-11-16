@@ -34,16 +34,24 @@ final readonly class PainelSistemaLivrosAudioService
      */
     public function obter(Usuario $usuario): array
     {
-        $livros = $this->livroAudioRepository->resumoArmazenamento();
-        $principais = $this->livroAudioBlocoRepository->resumoAudiosPrincipais();
-        $vozes = array_map(static fn(array $voz): array => $voz + ['nome' => VozNarracao::nomeDe($voz['voz'])], $this->livroAudioBlocoVozRepository->resumoPorVoz());
+        $livros = $this->livroAudioRepository->resumoArmazenamento($usuario);
+        $principais = $this->livroAudioBlocoRepository->resumoAudiosPrincipais($usuario);
+        $vozes = array_map(static fn(array $voz): array => $voz + ['nome' => VozNarracao::nomeDe($voz['voz'])], $this->livroAudioBlocoVozRepository->resumoPorVoz($usuario));
         $bytesVozes = array_sum(array_column($vozes, 'bytes'));
         $fila = $this->filaGeracao->resumo($usuario);
         $bytesPorParte = $this->bytesPorParte();
+        $ehAdmin = $usuario->isAdmin();
 
         return [
             'disco' => $this->disco($fila['partesNaFila'] * $bytesPorParte),
-            'memoria' => $this->memoria(),
+            'memoria' => $ehAdmin ? $this->memoria() : [
+                'containerUsadoBytes' => null,
+                'containerLimiteBytes' => null,
+                'servidorTotalBytes' => null,
+                'servidorDisponivelBytes' => null,
+                'workerBytes' => null,
+                'workerAtivo' => false,
+            ],
             'livros' => [
                 'total' => $livros['livros'],
                 'porStatus' => $livros['porStatus'],
@@ -63,7 +71,7 @@ final readonly class PainelSistemaLivrosAudioService
                 'porVoz' => $vozes,
             ],
             'bytesNoBanco' => $livros['bytesPdfs'] + $principais['bytes'] + $bytesVozes,
-            'bytesNaPasta' => $this->tamanhoPasta($this->diretorioBaseLivros),
+            'bytesNaPasta' => $ehAdmin ? $this->tamanhoPasta($this->diretorioBaseLivros) : null,
             'fila' => [
                 'partesNaFila' => $fila['partesNaFila'],
                 'segundosRestantes' => $fila['segundosRestantes'],

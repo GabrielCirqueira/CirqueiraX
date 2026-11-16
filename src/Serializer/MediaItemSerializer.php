@@ -29,7 +29,7 @@ final class MediaItemSerializer
                 $categoriaData = $this->cacheCategorias[$catId];
             } else {
                 try {
-                    $categoria = $this->categoriaService->buscarPorUuid($catId);
+                    $categoria = $this->categoriaService->buscarDoUsuario($catId, $item->usuario());
                     $categoriaData = $this->categoriaSerializer->normalizar($categoria);
                 } catch (\Throwable) {
                     $categoriaData = [
@@ -47,7 +47,7 @@ final class MediaItemSerializer
             'origemDescricao' => $item->origem()->descricao(),
             'status' => $item->status()->value,
             'statusDescricao' => $item->status()->descricao(),
-            'caminhoLocal' => $item->caminhoLocal(),
+            'caminhoLocal' => $this->nomeArquivoPublico($item->caminhoLocal()),
             'googlePhotosMediaId' => $item->googleFotosId(),
             'isEnviadoGoogleFotos' => $item->isEnviadoGoogleFotos(),
             'isDuplicado' => $item->isDuplicado(),
@@ -74,5 +74,14 @@ final class MediaItemSerializer
             fn(MediaItem $item): array => $this->normalizar($item),
             $itens,
         );
+    }
+
+    private function nomeArquivoPublico(?string $caminhoLocal): ?string
+    {
+        if (null === $caminhoLocal || '' === trim($caminhoLocal)) {
+            return null;
+        }
+
+        return basename(str_replace('\\', '/', $caminhoLocal));
     }
 }

@@ -31,6 +31,13 @@ final class AppSeedCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Iniciando Seeding do Banco de Dados');
 
+        $ambiente = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod';
+        if ('dev' !== $ambiente) {
+            $io->error('O seed só pode rodar em APP_ENV=dev. Em produção, use app:usuario:criar.');
+
+            return Command::FAILURE;
+        }
+
         try {
             $this->criarUsuarios($io);
 

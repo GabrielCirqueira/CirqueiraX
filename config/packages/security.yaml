@@ -46,6 +46,9 @@ security:
             provider: app_usuario_provider
             refresh_jwt:
                 check_path: /api/v1/token/refresh
+            login_throttling:
+                max_attempts: 10
+                interval: '1 minute'
 
         api:
             pattern: ^/api

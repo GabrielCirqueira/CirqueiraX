@@ -13,10 +13,12 @@ final class CabecalhosSegurancaListener
 {
     private const array CABECALHOS = [
         'X-Content-Type-Options' => 'nosniff',
-        'X-Frame-Options' => 'SAMEORIGIN',
+        'X-Frame-Options' => 'DENY',
         'Referrer-Policy' => 'same-origin',
-        'Permissions-Policy' => 'camera=(), geolocation=(), payment=(), usb=()',
+        'Permissions-Policy' => 'camera=(), geolocation=(), payment=(), usb=(), microphone=()',
         'Cross-Origin-Opener-Policy' => 'same-origin',
+        'Cross-Origin-Resource-Policy' => 'same-origin',
+        'X-Permitted-Cross-Domain-Policies' => 'none',
     ];
     private const string CABECALHO_HSTS = 'Strict-Transport-Security';
     private const string VALOR_HSTS = 'max-age=31536000; includeSubDomains';

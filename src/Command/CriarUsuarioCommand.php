@@ -93,6 +93,15 @@ final class CriarUsuarioCommand extends Command
 
         $roles = ['ROLE_USER'];
         if ($input->getOption('admin')) {
+            $ambiente = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod';
+            $liberado = $_ENV['ALLOW_ADMIN_CREATE'] ?? getenv('ALLOW_ADMIN_CREATE') ?: '0';
+            $podeAdmin = 'dev' === $ambiente
+                || in_array(strtolower((string) $liberado), ['1', 'true', 'yes'], true);
+            if (!$podeAdmin) {
+                $io->error('Criar ROLE_ADMIN em produção exige ALLOW_ADMIN_CREATE=1. Contas de convidados devem ficar só com ROLE_USER.');
+
+                return Command::FAILURE;
+            }
             $roles[] = 'ROLE_ADMIN';
         }
 

@@ -88,18 +88,25 @@ class LivroAudioRepository extends ServiceEntityRepository
     /**
      * @return array{livros: int, pdfs: int, bytesPdfs: int, porStatus: array<string, int>}
      */
-    public function resumoArmazenamento(): array
+    public function resumoArmazenamento(?Usuario $usuario = null): array
     {
         $conexao = $this->getEntityManager()->getConnection();
+        $filtro = null !== $usuario ? ' WHERE usuario_id = ?' : '';
+        $params = null !== $usuario ? [$usuario->getId()] : [];
         $totais = $conexao->fetchAssociative(
-            'SELECT COUNT(*) AS livros, COALESCE(SUM(caminho_pdf IS NOT NULL), 0) AS pdfs, COALESCE(SUM(tamanho_bytes), 0) AS bytes_pdfs FROM livro_audio',
+            'SELECT COUNT(*) AS livros, COALESCE(SUM(caminho_pdf IS NOT NULL), 0) AS pdfs, COALESCE(SUM(tamanho_bytes), 0) AS bytes_pdfs FROM livro_audio'.$filtro,
+            $params,
         ) ?: [];
+
+        $porStatusSql = 'SELECT status, COUNT(*) FROM livro_audio'
+            .(null !== $usuario ? ' WHERE usuario_id = ?' : '')
+            .' GROUP BY status';
 
         return [
             'livros' => (int) ($totais['livros'] ?? 0),
             'pdfs' => (int) ($totais['pdfs'] ?? 0),
             'bytesPdfs' => (int) ($totais['bytes_pdfs'] ?? 0),
-            'porStatus' => array_map('intval', $conexao->fetchAllKeyValue('SELECT status, COUNT(*) FROM livro_audio GROUP BY status')),
+            'porStatus' => array_map('intval', $conexao->fetchAllKeyValue($porStatusSql, $params)),
         ];
     }
 

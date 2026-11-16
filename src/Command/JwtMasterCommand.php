@@ -28,6 +28,12 @@ final class JwtMasterCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Gerador de Token JWT Master (Full Access)');
 
+        if (!$this->masterJwtLiberado()) {
+            $io->error('Comando bloqueado neste ambiente. Defina JWT_MASTER_ENABLED=1 só se realmente precisar.');
+
+            return Command::FAILURE;
+        }
+
         $io->section('Passo 1: Verificações de Configuração');
 
         if (!$this->verificarConfiguracao($io)) {
@@ -66,6 +72,18 @@ final class JwtMasterCommand extends Command
 
             return Command::FAILURE;
         }
+    }
+
+    private function masterJwtLiberado(): bool
+    {
+        $ambiente = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod';
+        if ('prod' !== $ambiente) {
+            return true;
+        }
+
+        $liberado = $_ENV['JWT_MASTER_ENABLED'] ?? getenv('JWT_MASTER_ENABLED') ?: '0';
+
+        return in_array(strtolower((string) $liberado), ['1', 'true', 'yes'], true);
     }
 
     private function verificarConfiguracao(SymfonyStyle $io): bool

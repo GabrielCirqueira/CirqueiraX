@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\LivroAudio;
 use App\Entity\LivroAudioBloco;
+use App\Entity\Usuario;
 use App\Enum\StatusLivroAudioBloco;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -207,12 +208,16 @@ class LivroAudioBlocoRepository extends ServiceEntityRepository
     /**
      * @return array{partes: int, prontas: int, bytes: int, segundos: int}
      */
-    public function resumoAudiosPrincipais(): array
+    public function resumoAudiosPrincipais(?Usuario $usuario = null): array
     {
-        $linha = $this->getEntityManager()->getConnection()->fetchAssociative(
-            'SELECT COUNT(*) AS partes, COALESCE(SUM(status = ?), 0) AS prontas, COALESCE(SUM(tamanho_bytes), 0) AS bytes, COALESCE(SUM(duracao_segundos), 0) AS segundos FROM livro_audio_bloco',
-            [StatusLivroAudioBloco::PRONTO->value],
-        ) ?: [];
+        $sql = 'SELECT COUNT(*) AS partes, COALESCE(SUM(b.status = ?), 0) AS prontas, COALESCE(SUM(b.tamanho_bytes), 0) AS bytes, COALESCE(SUM(b.duracao_segundos), 0) AS segundos FROM livro_audio_bloco b';
+        $params = [StatusLivroAudioBloco::PRONTO->value];
+        if (null !== $usuario) {
+            $sql .= ' INNER JOIN livro_audio l ON l.uuid = b.livro_uuid WHERE l.usuario_id = ?';
+            $params[] = $usuario->getId();
+        }
+
+        $linha = $this->getEntityManager()->getConnection()->fetchAssociative($sql, $params) ?: [];
 
         return [
             'partes' => (int) ($linha['partes'] ?? 0),
