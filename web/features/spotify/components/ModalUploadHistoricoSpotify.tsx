@@ -468,19 +468,20 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 lineHeight="tall"
               >
                 <Text>
-                  1. Acesse sua conta no Spotify e vá em <strong>Privacidade da conta</strong>.
+                  1. Acesse{' '}
+                  <strong>spotify.com/account/privacy</strong> → <strong>Baixar seus dados</strong>.
                 </Text>
                 <Text>
-                  2. Escolha <strong>Dados da conta</strong> (histórico do último ano, entregue em
-                  cerca de 5 dias) ou <strong>Histórico ampliado de streams</strong> (todo o
-                  histórico desde a criação da conta, em até 30 dias).
+                  2. Marque <strong>Dados da conta</strong> (último ano, ~5 dias) e{' '}
+                  <strong>Histórico de streaming estendido</strong> (conta inteira, até 30 dias).
                 </Text>
                 <Text>
-                  3. As <em>Informações técnicas de registro</em> não são necessárias.
+                  3. Não marque <em>Informações técnicas de registro</em> — o sistema não usa.
                 </Text>
                 <Text color="cirqueira.musica.textoDesabilitado">
-                  Nota: O intervalo de dias entre a solicitação do arquivo e a conexão da API só é
-                  preenchido em uma importação posterior.
+                  O passo a passo completo está em Gerenciar → Tutorial: dados retroativos do
+                  Spotify. O buraco entre o pedido e a conexão só fecha com uma importação
+                  posterior.
                 </Text>
               </VStack>
             </Accordion.ItemContent>

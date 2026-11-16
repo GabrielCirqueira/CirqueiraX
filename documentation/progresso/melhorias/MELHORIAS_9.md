@@ -247,3 +247,14 @@
 
 ---
 
+### ✅ Melhoria 180 — Tutorial de Dados Retroativos do Spotify no Gerenciar
+
+- **Status**: Concluído
+- **Data**: 15 de novembro de 2026
+- **Problema**: quem quer o passado do Spotify não sabia quais caixas marcar em "Baixar seus dados" nem a diferença entre coleta automática e arquivo de exportação.
+- **Solução**: em `/musica/gerenciar`, seção "Tutorial: dados retroativos do Spotify" com o fluxo (API = futuro, ZIP = passado), o que marcar/não marcar (Dados da conta + Histórico de streaming estendido; sem Informações técnicas), prazos, importação sem duplicar e link direto para a privacidade do Spotify. O accordion do modal de importação foi alinhado ao mesmo texto.
+- **Arquivos**: `web/features/spotify/components/SecaoTutorialHistoricoSpotify.tsx`, `web/features/spotify/utils/tutorialHistoricoSpotify.ts`, `web/features/musica/GerenciarMusica.tsx`, `web/features/spotify/components/ModalUploadHistoricoSpotify.tsx`, `documentation/funcionalidades/SPOTIFY.md`
+
+---
+
+

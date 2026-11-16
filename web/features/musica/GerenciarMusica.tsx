@@ -1,5 +1,6 @@
 import { ModalUploadHistoricoSpotify } from '@/features/spotify/components/ModalUploadHistoricoSpotify'
 import { PainelConexaoSpotify } from '@/features/spotify/components/PainelConexaoSpotify'
+import { SecaoTutorialHistoricoSpotify } from '@/features/spotify/components/SecaoTutorialHistoricoSpotify'
 import { ListaImportacoesYoutube } from '@/features/youtube-music/components/ListaImportacoesYoutube'
 import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
 import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
@@ -64,6 +65,7 @@ export function GerenciarMusica() {
                   onAbrirModalImportacao={() => setModalTakeoutAberto(true)}
                 />
               </SimpleGrid>
+              <SecaoTutorialHistoricoSpotify />
               <ListaImportacoesYoutube />
             </VStack>
 

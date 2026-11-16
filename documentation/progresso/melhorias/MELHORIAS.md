@@ -198,3 +198,4 @@
 | M177 | Minutos Estimados do YouTube Mais Realistas | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-177--minutos-estimados-do-youtube-mais-realistas) |
 | M178 | Pool de IA Gratuita na Identificação de Músicas | ✅ Concluído | 13/11/2026 | [ver](MELHORIAS_9.md#melhoria-178--pool-de-ia-gratuita-na-identificação-de-músicas) |
 | M179 | Extensão Visual Spotify no YouTube Music em Gerenciar | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_9.md#melhoria-179--extensão-visual-spotify-no-youtube-music-em-gerenciar) |
+| M180 | Tutorial de Dados Retroativos do Spotify no Gerenciar | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_9.md#melhoria-180--tutorial-de-dados-retroativos-do-spotify-no-gerenciar) |

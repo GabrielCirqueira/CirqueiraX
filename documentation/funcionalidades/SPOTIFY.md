@@ -90,12 +90,14 @@ As métricas seguem sempre as regras do próprio Spotify, para os números bater
 
 ## 4. Como Solicitar os Arquivos no Spotify
 
-Caso deseje carregar seus meses passados para a Cápsula:
+Caso deseje carregar seus meses passados para a Cápsula (tutorial também em `/musica/gerenciar`):
 1. Acesse sua conta em [spotify.com/account/privacy](https://www.spotify.com/account/privacy).
-2. Na seção **Baixar seus dados**:
-   - **Dados da conta**: inclui o histórico do último ano (cerca de 5 dias úteis para entrega por e-mail).
-   - **Histórico ampliado de streams**: histórico completo desde a criação da conta (até 30 dias para preparação).
-3. Baixe o arquivo ZIP recebido por e-mail e envie diretamente na página `/spotify` pelo botão **Importar histórico**.
+2. Na seção **Baixar seus dados**, marque:
+   - **Dados da conta**: histórico do último ano (cerca de 5 dias para entrega por e-mail).
+   - **Histórico de streaming estendido**: conta inteira, com tempo exato e código das faixas (até 30 dias).
+3. **Não marque** Informações técnicas de registro — o CirqueiraX não usa.
+4. Baixe o ZIP recebido por e-mail e envie em **Importar histórico** (em `/musica/gerenciar`). Pode importar os dois e um ZIP antigo: não duplica.
+5. A coleta pela API (após vincular) cobre o que você ouvir depois; o arquivo cobre o passado. Quanto antes vincular, menor o buraco entre os dois.
 
 ---
 
