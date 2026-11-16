@@ -466,7 +466,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
             /** @var array<string, mixed> $resposta */
             $resposta = $this->request(
                 'GET',
-                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/tracks'),
+                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/items'),
                 [
                     'timeout' => self::TIMEOUT_SEGUNDOS,
                     'headers' => [
@@ -476,7 +476,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
                     'query' => [
                         'limit' => $limiteSanitizado,
                         'offset' => $offsetSanitizado,
-                        'fields' => 'total,next,items(track(id,name,duration_ms,uri,artists(name),album(images)))',
+                        'fields' => 'total,next,items(item(id,name,duration_ms,uri,type,artists(name),album(images)))',
                     ],
                 ],
                 throw: static fn (RequestException $e): \Throwable => $e,
@@ -548,7 +548,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
         $this->executarComRetry(function () use ($accessToken, $playlistId, $uris) {
             return $this->request(
                 'POST',
-                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/tracks'),
+                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/items'),
                 [
                     'timeout' => self::TIMEOUT_SEGUNDOS,
                     'headers' => [
@@ -569,12 +569,12 @@ final class SpotifyClient extends Client implements SpotifyInterface
             return;
         }
 
-        $tracks = array_map(static fn (string $uri): array => ['uri' => $uri], array_values($uris));
+        $itens = array_map(static fn (string $uri): array => ['uri' => $uri], array_values($uris));
 
-        $this->executarComRetry(function () use ($accessToken, $playlistId, $tracks) {
+        $this->executarComRetry(function () use ($accessToken, $playlistId, $itens) {
             return $this->request(
                 'DELETE',
-                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/tracks'),
+                $this->resolverUrl('/playlists/'.rawurlencode($playlistId).'/items'),
                 [
                     'timeout' => self::TIMEOUT_SEGUNDOS,
                     'headers' => [
@@ -582,7 +582,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
                         'Accept' => 'application/json',
                         'Content-Type' => 'application/json',
                     ],
-                    'json' => ['tracks' => $tracks],
+                    'json' => ['tracks' => $itens],
                 ],
                 throw: static fn (RequestException $e): \Throwable => $e,
             );
@@ -811,7 +811,7 @@ final class SpotifyClient extends Client implements SpotifyInterface
 
         return str_contains($corpo, 'insufficient_scope')
             || str_contains($corpo, 'insufficient scope')
-            || str_contains($corpo, 'scope') && str_contains($corpo, 'playlist');
+            || (str_contains($corpo, 'scope') && str_contains($corpo, 'playlist'));
     }
 
     private function mapearErroPlayer(RequestException $e): \Throwable
@@ -922,12 +922,14 @@ final class SpotifyClient extends Client implements SpotifyInterface
     {
         $imagens = is_array($dados['images'] ?? null) ? $dados['images'] : [];
         $dono = is_array($dados['owner'] ?? null) ? $dados['owner'] : [];
+        $itens = is_array($dados['items'] ?? null) ? $dados['items'] : [];
         $tracks = is_array($dados['tracks'] ?? null) ? $dados['tracks'] : [];
+        $totalFaixas = $this->extrairInt($itens['total'] ?? ($tracks['total'] ?? null));
 
         return new PlaylistResumoDTO(
             id: $this->extrairString($dados['id'] ?? null),
             nome: $this->extrairString($dados['name'] ?? null),
-            totalFaixas: $this->extrairInt($tracks['total'] ?? null),
+            totalFaixas: $totalFaixas,
             urlCapa: $this->extrairPrimeiraImagem($imagens),
             snapshotId: $this->extrairString($dados['snapshot_id'] ?? null) ?: null,
             dono: $this->extrairString($dono['display_name'] ?? ($dono['id'] ?? null)) ?: null,
@@ -939,8 +941,15 @@ final class SpotifyClient extends Client implements SpotifyInterface
      */
     private function mapearFaixaPlaylist(array $itemBruto): ?FaixaPlaylistDTO
     {
-        $track = is_array($itemBruto['track'] ?? null) ? $itemBruto['track'] : null;
+        $track = is_array($itemBruto['item'] ?? null)
+            ? $itemBruto['item']
+            : (is_array($itemBruto['track'] ?? null) ? $itemBruto['track'] : null);
         if (null === $track) {
+            return null;
+        }
+
+        $tipo = $this->extrairString($track['type'] ?? null);
+        if ('' !== $tipo && 'track' !== $tipo) {
             return null;
         }
 
