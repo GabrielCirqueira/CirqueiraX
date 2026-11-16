@@ -43,7 +43,11 @@ function recursosOffline() {
   }
 }
 
-const PASTA_EXTENSAO_YOUTUBE = path.resolve(__dirname, '..', '..', 'extensao', 'youtube-music')
+const PASTA_EXTENSOES = path.resolve(__dirname, '..', '..', 'extensao')
+const EXTENSOES_PARA_PACOTE = [
+  { pasta: 'youtube-music', prefixoZip: 'cirqueirax-youtube-music' },
+  { pasta: 'ytm-spotify-skin', prefixoZip: 'ytm-spotify-skin' },
+]
 const DATA_DOS_ZERO = 0x21
 const ASSINATURA_LOCAL = 0x04034b50
 const ASSINATURA_CENTRAL = 0x02014b50
@@ -102,17 +106,20 @@ function montarZip(arquivos) {
   return Buffer.concat([...locais, diretorio, fim])
 }
 
-function pacoteExtensaoYoutube() {
+function pacoteExtensoes() {
   return {
-    name: 'pacote-extensao-youtube',
+    name: 'pacote-extensoes',
     apply: 'build',
     generateBundle() {
-      const manifesto = JSON.parse(fs.readFileSync(path.join(PASTA_EXTENSAO_YOUTUBE, 'manifest.json'), 'utf8'))
-      this.emitFile({
-        type: 'asset',
-        fileName: `extensao/cirqueirax-youtube-music-${manifesto.version}.zip`,
-        source: montarZip(listarArquivos(PASTA_EXTENSAO_YOUTUBE)),
-      })
+      for (const { pasta, prefixoZip } of EXTENSOES_PARA_PACOTE) {
+        const caminhoPasta = path.join(PASTA_EXTENSOES, pasta)
+        const manifesto = JSON.parse(fs.readFileSync(path.join(caminhoPasta, 'manifest.json'), 'utf8'))
+        this.emitFile({
+          type: 'asset',
+          fileName: `extensao/${prefixoZip}-${manifesto.version}.zip`,
+          source: montarZip(listarArquivos(caminhoPasta)),
+        })
+      }
     },
   }
 }
@@ -125,7 +132,7 @@ export default defineConfig((config) => ({
     react(),
     symfonyPlugin(),
     recursosOffline(),
-    pacoteExtensaoYoutube(),
+    pacoteExtensoes(),
     tsconfigPaths({
       projects: [path.resolve(__dirname, '..', '..', 'tsconfig.json')],
     }),

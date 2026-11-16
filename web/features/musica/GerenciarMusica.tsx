@@ -3,6 +3,7 @@ import { PainelConexaoSpotify } from '@/features/spotify/components/PainelConexa
 import { ListaImportacoesYoutube } from '@/features/youtube-music/components/ListaImportacoesYoutube'
 import { ModalImportarTakeoutYoutube } from '@/features/youtube-music/components/ModalImportarTakeoutYoutube'
 import { PainelConexaoYoutubeMusic } from '@/features/youtube-music/components/PainelConexaoYoutubeMusic'
+import { SecaoExtensaoYtmSpotifySkin } from '@/features/youtube-music/components/SecaoExtensaoYtmSpotifySkin'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
 import { Container, Heading, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
@@ -45,7 +46,7 @@ export function GerenciarMusica() {
                 Gerenciar
               </Heading>
               <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
-                Contas, extensão do navegador, importação do histórico e correções.
+                Contas, extensões do navegador, importação do histórico e correções.
               </Text>
             </VStack>
 
@@ -64,6 +65,14 @@ export function GerenciarMusica() {
                 />
               </SimpleGrid>
               <ListaImportacoesYoutube />
+            </VStack>
+
+            <VStack align="stretch" gap={4}>
+              <CabecalhoSecaoMusica
+                titulo="Visual do YouTube Music"
+                descricao="Extensão opcional só de aparência — deixa o YouTube Music com layout no estilo Spotify."
+              />
+              <SecaoExtensaoYtmSpotifySkin />
             </VStack>
 
             <VStack align="stretch" gap={4}>

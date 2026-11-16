@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>YT Music Spotify Skin</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <img src="../icons/icon48.png" alt="" width="40" height="40">
+    <div>
+      <h1>YT Music Spotify Skin</h1>
+      <p id="ver" class="muted"></p>
+    </div>
+  </header>
+
+  <div id="status" class="status"><span class="dot"></span><span id="statusText"></span></div>
+
+  <section>
+    <h2 data-i18n="tipsH"></h2>
+    <ul>
+      <li data-i18n="tip1"></li>
+      <li data-i18n="tip2"></li>
+      <li data-i18n="tip3"></li>
+      <li data-i18n="tip4"></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2 data-i18n="keysH"></h2>
+    <dl>
+      <dt>/</dt><dd data-i18n="k1"></dd>
+      <dt>Ctrl + ↑ ↓</dt><dd data-i18n="k2"></dd>
+      <dt>Alt + P</dt><dd data-i18n="k3"></dd>
+      <dt>Alt + R</dt><dd data-i18n="k4"></dd>
+      <dt>Alt + L</dt><dd data-i18n="k5"></dd>
+      <dt>Alt + F</dt><dd data-i18n="k6"></dd>
+      <dt>Alt + S</dt><dd data-i18n="k7"></dd>
+    </dl>
+  </section>
+
+  <div class="actions">
+    <button id="open" type="button" class="primary" data-i18n="open"></button>
+    <button id="reset" type="button" data-i18n="reset"></button>
+  </div>
+  <div class="actions" style="margin-top:8px"><button id="diag" type="button" data-i18n="diag"></button></div>
+  <pre id="diagOut" hidden></pre>
+  <p id="msg" class="muted" role="status"></p>
+  <script src="popup.js"></script>
+</body>
+</html>

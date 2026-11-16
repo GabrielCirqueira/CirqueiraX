@@ -233,3 +233,17 @@
 - **Arquivos**: `src/Service/Ia/CompletarComPoolIaService.php`, `src/Service/Ia/ListarProvedoresIaService.php`, `src/Service/Ia/AtualizarEstadoProvedorIaService.php`, `src/Service/Ia/EstimarCustoIaService.php`, `src/Service/Ia/ListarSituacaoProvedoresIaService.php`, `src/Service/Ia/RegistrarConsumoIaService.php`, `src/Infra/Ia/ProvedorIaCompativelOpenAiClient.php`, `src/Interface/ProvedorIaInterface.php`, `src/Domain/Ia/LeitorJsonRespostaIa.php`, `src/Entity/EstadoProvedorIa.php`, `src/Repository/EstadoProvedorIaRepository.php`, `src/Enum/ProvedorIa.php`, `src/DataObject/Ia/`, `src/Exception/Ia/`, `src/Service/IdentificacaoMusica/Ia/`, `src/Command/SituacaoProvedoresIaCommand.php`, `migrations/Version20261113181247.php`, `config/services.yaml`
 
 ---
+
+### ✅ Melhoria 179 — Extensão Visual Spotify no YouTube Music em Gerenciar
+
+- **Status**: Concluído
+- **Data**: 15 de novembro de 2026
+- **Problema**: a extensão de captura do YouTube Music já ficava em `extensao/youtube-music/` e no Gerenciar; faltava organizar a pasta de extensões e oferecer o download da extensão de visual (layout estilo Spotify no YouTube Music) na mesma tela.
+- **Solução**:
+  - `extensao/youtube-music/` continua com a captura CirqueiraX; `extensao/ytm-spotify-skin/` guarda a extensão visual (v0.10.0).
+  - O build do Vite empacota as duas em `/build/extensao/cirqueirax-youtube-music-<versão>.zip` e `/build/extensao/ytm-spotify-skin-<versão>.zip`.
+  - Em `/musica/gerenciar`, nova seção "Visual do YouTube Music" com explicação, destaques, download e passos de instalação, no mesmo estilo da seção da extensão de captura.
+- **Arquivos**: `extensao/ytm-spotify-skin/`, `.tooling/frontend/vite.config.js`, `web/features/youtube-music/components/SecaoExtensaoYtmSpotifySkin.tsx`, `web/features/youtube-music/utils/extensaoYtmSpotifySkin.ts`, `web/features/musica/GerenciarMusica.tsx`, `documentation/funcionalidades/YOUTUBE_MUSIC.md`
+
+---
+

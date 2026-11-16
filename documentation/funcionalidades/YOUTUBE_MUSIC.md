@@ -324,7 +324,7 @@ O coletor por cookie continua sendo a base (pega celular, TV e qualquer aparelho
 
 ### Instalar
 
-1. No cartão do YouTube Music, seção "Extensão do navegador", baixar o `.zip` (`/build/extensao/cirqueirax-youtube-music-<versão>.zip`, gerado no `npm run build` a partir de `extensao/youtube-music/`) e descompactar.
+1. No cartão do YouTube Music, seção "Extensão do navegador", baixar o `.zip` (`/build/extensao/cirqueirax-youtube-music-<versão>.zip`, gerado no `npm run build` a partir de `extensao/youtube-music/`) e descompactar. Há também a extensão só de visual em `extensao/ytm-spotify-skin/` (`/build/extensao/ytm-spotify-skin-<versão>.zip`), na seção "Visual do YouTube Music" de `/musica/gerenciar`.
 2. Chrome/Edge/Brave: `chrome://extensions` → ligar "Modo do desenvolvedor" → "Carregar sem compactação" → escolher a pasta. Firefox: `about:debugging#/runtime/this-firefox` → "Carregar extensão temporária" → `manifest.json` (no Firefox some ao fechar o navegador).
 3. No cartão, dar um nome ao aparelho ("PC de casa") e gerar o token. O token aparece **uma vez**; copiar e colar no popup da extensão → "Salvar e testar".
 4. Tocar uma música e conferir no popup a linha "Aba do YouTube Music": "Lendo: título" quer dizer que a aba está sendo lida. "Nenhuma aba sendo lida" = recarregar a aba (F5).

@@ -39,7 +39,8 @@
   },
   "include": [
     "web/**/*.ts",
-    "web/**/*.tsx"
+    "web/**/*.tsx",
+    "extensao/**/manifest.json"
   ],
   "exclude": [
     "node_modules",
