@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Enum\FonteCapturaYoutubeMusic;
+use App\Enum\FuncionalidadeSistema;
 use App\Repository\UsuarioRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -38,10 +40,10 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $criadoEm;
+    private DateTimeImmutable $criadoEm;
 
     #[ORM\Column(type: 'datetime_immutable')]
-    private \DateTimeImmutable $atualizadoEm;
+    private DateTimeImmutable $atualizadoEm;
 
     #[ORM\Column(type: 'smallint', options: ['default' => 30])]
     private int $metaEscutaMinutos = 30;
@@ -52,14 +54,18 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 20, enumType: FonteCapturaYoutubeMusic::class, options: ['default' => 'coletor'])]
     private FonteCapturaYoutubeMusic $fonteCapturaYoutubeMusic = FonteCapturaYoutubeMusic::Coletor;
 
+    /** @var list<string> */
+    #[ORM\Column(type: 'json')]
+    private array $permissoes = [];
+
     public function __construct(string $nomeCompleto, string $username, string $email)
     {
         $this->nomeCompleto = $nomeCompleto;
         $this->username = $username;
         $this->email = $email;
         $this->password = '';
-        $this->criadoEm = new \DateTimeImmutable();
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->criadoEm = new DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -75,7 +81,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNomeCompleto(string $nomeCompleto): static
     {
         $this->nomeCompleto = $nomeCompleto;
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
     }
@@ -93,7 +99,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
     }
@@ -107,7 +113,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(string $username): static
     {
         $this->username = $username;
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
     }
@@ -120,7 +126,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
     }
@@ -144,11 +150,6 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void {}
 
-    public function getCriadoEm(): \DateTimeImmutable
-    {
-        return $this->criadoEm;
-    }
-
     public function pastaArmazenamento(): string
     {
         return $this->pastaArmazenamento ?? 'usuarios/' . $this->username;
@@ -156,7 +157,69 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function isAdmin(): bool
     {
-        return in_array('ROLE_ADMIN', $this->getRoles(), true);
+        return in_array('ROLE_ADMIN', $this->getRoles(), true)
+            || in_array('ROLE_SUPER_ADMIN', $this->getRoles(), true);
+    }
+
+    public function isAdministrador(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function permissoes(): array
+    {
+        return array_values(array_unique($this->permissoes));
+    }
+
+    /**
+     * @param list<string> $permissoes
+     */
+    public function definirPermissoes(array $permissoes): static
+    {
+        $validas = [];
+        foreach ($permissoes as $permissao) {
+            if (null === FuncionalidadeSistema::tryFrom($permissao)) {
+                continue;
+            }
+            $validas[] = $permissao;
+        }
+        $this->permissoes = array_values(array_unique($validas));
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function possuiPermissao(FuncionalidadeSistema $funcionalidade): bool
+    {
+        if ($this->isAdministrador()) {
+            return true;
+        }
+
+        return in_array($funcionalidade->value, $this->permissoes(), true);
+    }
+
+    public function promoverAdministrador(): static
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_ADMIN';
+        $this->roles = array_values(array_unique($roles));
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
+    }
+
+    public function rebaixarAdministrador(): static
+    {
+        $this->roles = array_values(array_filter(
+            $this->roles,
+            static fn (string $papel): bool => !in_array($papel, ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN'], true),
+        ));
+        $this->atualizadoEm = new DateTimeImmutable();
+
+        return $this;
     }
 
     public function fonteCapturaYoutubeMusic(): FonteCapturaYoutubeMusic
@@ -167,7 +230,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function definirFonteCapturaYoutubeMusic(FonteCapturaYoutubeMusic $fonte): static
     {
         $this->fonteCapturaYoutubeMusic = $fonte;
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
     }
@@ -180,13 +243,18 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     public function definirMetaEscutaMinutos(int $minutos): static
     {
         $this->metaEscutaMinutos = max(5, min(600, $minutos));
-        $this->atualizadoEm = new \DateTimeImmutable();
+        $this->atualizadoEm = new DateTimeImmutable();
 
         return $this;
     }
 
-    public function getAtualizadoEm(): \DateTimeImmutable
+    public function getAtualizadoEm(): DateTimeImmutable
     {
         return $this->atualizadoEm;
+    }
+
+    public function getCriadoEm(): DateTimeImmutable
+    {
+        return $this->criadoEm;
     }
 }

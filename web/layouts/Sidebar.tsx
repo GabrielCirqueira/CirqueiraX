@@ -1,6 +1,11 @@
 import { useTheme } from '@/contexts'
 import { useSair } from '@/features/auth/hooks'
 import { useAuthStore } from '@/stores/useAuthStore'
+import {
+  funcionalidadeDaRota,
+  usuarioEhAdministrador,
+  usuarioPossuiPermissao,
+} from '@/shared/utils/funcionalidadesSistema'
 import { Badge, Box, Center, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
   AudioLines,
@@ -20,6 +25,7 @@ import {
   Sun,
   UploadCloud,
   User,
+  Users,
   X,
 } from 'lucide-react'
 import { memo } from 'react'
@@ -48,6 +54,7 @@ const navItems = [
     cor: 'cirqueira.orange.300',
   },
   { href: '/google-fotos', label: 'Google Fotos', icon: Images, cor: 'cirqueira.blue.300' },
+  { href: '/usuarios', label: 'Usuários', icon: Users, cor: 'cirqueira.brand.300' },
 ]
 
 export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: SidebarProps) {
@@ -56,6 +63,14 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
   const usuario = useAuthStore((s) => s.usuario)
   const sair = useSair()
   const { theme, toggleTheme } = useTheme()
+
+  const itensVisiveis = usuarioEhAdministrador(usuario)
+    ? navItems
+    : navItems.filter((item) => {
+        const funcionalidade = funcionalidadeDaRota(item.href)
+        if (!funcionalidade) return true
+        return usuarioPossuiPermissao(usuario, funcionalidade)
+      })
 
   function handleLogout() {
     sair()
@@ -154,7 +169,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
             Navegação
           </Text>
 
-          {navItems.map((item) => {
+          {itensVisiveis.map((item) => {
             const Icone = item.icon
             const ativo =
               pathname === item.href ||
@@ -243,7 +258,7 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
                 {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
               </Text>
               <Text fontSize="10px" color="fg.subtle" truncate maxW="110px">
-                Operador
+                {usuarioEhAdministrador(usuario) ? 'Administrador' : 'Operador'}
               </Text>
             </VStack>
           </HStack>

@@ -36,12 +36,17 @@ A migração `Version20261110151341` ligou tudo o que existia à conta principal
 
 Backup feito antes: `/root/backups/cirqueirax/2026-11-10_antes-multiusuario/` e tag git `backup-antes-multiusuario-2026-11-10`.
 
+## Permissões
+
+Cada usuário comum tem uma lista de funcionalidades em `usuario.permissoes`. Sem a permissão da tela, a rota some da sidebar e a API responde 403. Administradores (`ROLE_ADMIN`) têm acesso total e gerenciam contas em `/usuarios`. Detalhes em [PERMISSOES.md](PERMISSOES.md).
+
 ## Adicionar uma pessoa
 
-1. Criar o usuário (não há cadastro aberto):
+1. Preferencialmente pela tela **Usuários** (`/usuarios`), logado como administrador — define senha e permissões na hora. Alternativa via CLI:
    ```bash
    docker exec -it cirqueirax_symfony_prod php bin/console app:usuario:criar
    ```
+
 2. Spotify: o app do Spotify está em modo de desenvolvimento. O e-mail da conta Spotify da pessoa precisa ser adicionado em **User Management** no painel do Spotify for Developers.
 3. Google Fotos: enquanto o app OAuth do Google estiver em modo de teste, o e-mail Google da pessoa precisa estar em **Test users** na tela de consentimento. Depois ela conecta a própria conta em Configurações.
 4. Categorias e regras padrão (opcional):

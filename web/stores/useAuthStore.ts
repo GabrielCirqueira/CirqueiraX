@@ -1,6 +1,7 @@
 import { limparConsultasPersistidas } from '@/shared/pwa/persistenciaConsultas'
 import { limparDadosOffline } from '@/shared/pwa/serviceWorker'
 import type { Usuario } from '@/shared/types'
+import { normalizarUsuarioAuth } from '@/shared/utils/funcionalidadesSistema'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
@@ -14,14 +15,11 @@ interface AuthStore {
   limpar: () => void
 }
 
-/**
- * Store de autenticação global.
- *
- * Persistido no localStorage para sobreviver ao refresh de página.
- *
- * @example
- * const { usuario, autenticado } = useAuthStore()
- */
+function normalizarUsuarioPersistido(usuario: Usuario | null): Usuario | null {
+  if (!usuario) return null
+  return normalizarUsuarioAuth(usuario) as Usuario
+}
+
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
@@ -32,7 +30,12 @@ export const useAuthStore = create<AuthStore>()(
 
       setAutenticado: (usuario, token, refreshToken) => {
         localStorage.setItem('token', token)
-        set({ usuario, token, refreshToken, autenticado: true })
+        set({
+          usuario: normalizarUsuarioPersistido(usuario),
+          token,
+          refreshToken,
+          autenticado: true,
+        })
       },
 
       setToken: (token, refreshToken) => {
@@ -55,6 +58,13 @@ export const useAuthStore = create<AuthStore>()(
         refreshToken: state.refreshToken,
         autenticado: state.autenticado,
       }),
+      merge: (persistido, atual) => {
+        const estado = { ...atual, ...(persistido as Partial<AuthStore>) }
+        return {
+          ...estado,
+          usuario: normalizarUsuarioPersistido(estado.usuario ?? null),
+        }
+      },
     }
   )
 )

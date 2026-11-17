@@ -1,5 +1,7 @@
 import { useLogin } from '@/features/auth'
 import { useSEO } from '@/shared/hooks'
+import { primeiraRotaPermitida } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import {
   Badge,
   Box,
@@ -27,7 +29,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { z } from 'zod'
 
 const loginSchema = z.object({
@@ -44,9 +46,15 @@ export function Component() {
   })
 
   const login = useLogin()
+  const autenticado = useAuthStore((s) => s.autenticado)
+  const usuario = useAuthStore((s) => s.usuario)
   const [form, setForm] = useState({ emailOuUsuario: '', senha: '' })
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const [erros, setErros] = useState<Record<string, string>>({})
+
+  if (autenticado) {
+    return <Navigate to={primeiraRotaPermitida(usuario)} replace />
+  }
 
   function handleChange(campo: string, valor: string) {
     setForm((prev) => ({ ...prev, [campo]: valor }))

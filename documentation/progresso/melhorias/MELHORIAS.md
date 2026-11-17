@@ -214,3 +214,4 @@
 | M192 | Página `/musica` em Abas com Novos Blocos de Análise | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-192--página-musica-em-abas-com-novos-blocos-de-análise) |
 | M193 | Redesenho Visual das Abas de `/musica` (Capas, Gráficos e Tabela de Ranking) | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-193--redesenho-visual-das-abas-de-musica-capas-gráficos-e-tabela-de-ranking) |
 | M194 | Carregamento Rápido de `/musica` (Cache sem Apagar, Índices e Cache no Navegador) | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-194--carregamento-rápido-de-musica-cache-sem-apagar-índices-e-cache-no-navegador) |
+| M195 | Permissões por Funcionalidade e Tela de Gerenciar Usuários | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-195--permissões-por-funcionalidade-e-tela-de-gerenciar-usuários) |

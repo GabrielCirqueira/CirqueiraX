@@ -4,13 +4,18 @@
  * Tipos exclusivos de uma feature ficam em web/features/{feature}/types.ts
  */
 
+import type { FuncionalidadeSistema } from '@/shared/utils/funcionalidadesSistema'
+
 export interface Usuario {
   id: number
   nomeCompleto: string
   username: string
   email: string
   roles: string[]
+  administrador: boolean
+  permissoes: FuncionalidadeSistema[]
   criadoEm: string
+  atualizadoEm?: string
 }
 
 export interface Paginacao {

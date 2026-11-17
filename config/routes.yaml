@@ -10,4 +10,5 @@ react_frontend:
   defaults:
     template: 'base.html.twig'
   requirements:
-    reactRouting: ".+"
+    reactRouting: "^(?!api(?:/|$)).+"
+

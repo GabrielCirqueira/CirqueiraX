@@ -176,3 +176,20 @@
 - **Arquivos**: `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `src/Service/Spotify/FilaRecalculoAnaliseService.php`, `src/EventListener/RecalcularAnaliseAposRespostaListener.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Service/Spotify/SincronizarArtistasFaixasSpotifyService.php`, `src/Service/Musica/Projecao/ProjetarReproducoesYoutubeService.php`, `src/Service/Musica/Projecao/ProjetarReproducoesSpotifyService.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Entity/ReproducaoMusical.php`, `migrations/Version20261117120000.php`, `web/shared/pwa/persistenciaConsultas.ts`, `web/shared/pwa/versaoApp.ts`, `web/main.tsx`, `web/stores/useAuthStore.ts`, `web/features/musica/hooks/useBlocosMusica.ts`, `web/features/musica/hooks/useRankingIntervaloMusica.ts`
 
 ---
+
+### ✅ Melhoria 195 — Permissões por Funcionalidade e Tela de Gerenciar Usuários
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: qualquer usuário autenticado via todas as telas; não havia forma visual de criar contas nem de limitar acesso por módulo. A conta principal precisava ser o administrador explícito.
+- **Solução**:
+  - Coluna JSON `usuario.permissoes` + enum `FuncionalidadeSistema`; administrador (`ROLE_ADMIN`) tem acesso total.
+  - API `/api/v1/usuarios` (listar, criar, atualizar, funcionalidades) restrita a admin; `/auth/me` passa a devolver `administrador` e `permissoes`.
+  - Listeners de rota/API e guard `RotaComPermissao` no frontend; sidebar só mostra o que a conta pode usar.
+  - Tela `/usuarios` para criar/editar usuários, marcar administrador e marcar funcionalidades.
+  - Migration promove `gabrielcirqueira711@gmail.com` a admin e concede as funcionalidades atuais aos demais (exceto gerenciar usuários); comando `app:usuario:garantir-administrador`.
+  - Catch-all do React em `config/routes.yaml` deixa de capturar `/api/*` (senão `/api/v1/usuarios` devolvia o HTML da SPA).
+  - Docs: [PERMISSOES.md](../../funcionalidades/PERMISSOES.md), atualização de MULTIUSUARIO, FUNCIONALIDADES_DO_SISTEMA e CIRQUEIRAX.
+- **Arquivos**: `src/Entity/Usuario.php`, `src/Enum/FuncionalidadeSistema.php`, `src/Controller/Usuario/UsuarioController.php`, `src/Service/Usuario/*`, `src/EventListener/VerificarPermissao*.php`, `src/Security/Attribute/RequerPermissao.php`, `migrations/Version20261117131447.php`, `config/routes.yaml`, `web/features/usuarios/*`, `web/routes/RotaComPermissao.tsx`, `web/layouts/Sidebar.tsx`, `web/shared/utils/funcionalidadesSistema.ts`, `documentation/funcionalidades/PERMISSOES.md`
+
+---

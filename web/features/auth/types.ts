@@ -15,13 +15,6 @@ export interface RespostaRefresh {
   refresh_token: string
 }
 
-export interface RespostaMe {
-  id: number
-  nomeCompleto: string
-  username: string
-  email: string
-  roles: string[]
-  criadoEm: string
-}
+export type RespostaMe = Usuario
 
 export type UsuarioAuth = Usuario

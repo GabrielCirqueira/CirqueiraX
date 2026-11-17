@@ -81,6 +81,9 @@ Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.m
 | `/extrair-texto` | Extrair Texto | [EXTRAIR_TEXTO.md](EXTRAIR_TEXTO.md) |
 | `/upload-manual` | Upload Manual | [UPLOAD_MANUAL.md](UPLOAD_MANUAL.md) |
 | `/google-fotos` | Google Fotos | [GOOGLE_FOTOS.md](GOOGLE_FOTOS.md) |
+| `/usuarios` | Gerenciar usuários e permissões | [PERMISSOES.md](PERMISSOES.md) |
+| `/musica` | Música (Spotify / YouTube Music) | [MUSICA.md](MUSICA.md) |
+| `/transcricoes` | Transcrições | [TRANSCRICOES.md](TRANSCRICOES.md) |
 
 Processos sem tela própria:
 
@@ -88,6 +91,8 @@ Processos sem tela própria:
 - [Agente de prints](AGENTE.md)
 - [Syncthing](SYNCTHING.md)
 - [Retenção, limpeza e rebaixar](RETENCAO_E_LIMPEZA.md)
+- [Multiusuário](MULTIUSUARIO.md)
+- [Permissões por funcionalidade](PERMISSOES.md)
 
 ---
 
@@ -134,7 +139,7 @@ As mudanças de status ficam em `historicoStatus`, com data e hora.
 | `ContaGoogleFotos` | Conta conectada e tokens |
 | `RegistroEnvioGoogleFotos` | Histórico de envios |
 | `TokenAgente` | Credencial de cada agente |
-| `Usuario` | Usuários do sistema |
+| `Usuario` | Usuários do sistema (roles + `permissoes` JSON por funcionalidade) |
 | `RefreshToken` | Renovação de sessão |
 | `LivroAudio` | Livro em PDF enviado para narração, com posição (e quando foi gravada), pausa e prioridade na fila |
 | `LivroAudioBloco` | Parte do livro na voz principal, com áudio e tempos das frases e palavras |

@@ -41,6 +41,25 @@ class UsuarioRepository extends ServiceEntityRepository implements PasswordUpgra
         return $this->count(['email' => $email]) > 0;
     }
 
+    public function buscarPorId(int $id): ?Usuario
+    {
+        return $this->find($id);
+    }
+
+    /**
+     * @return list<Usuario>
+     */
+    public function listarTodosOrdenados(): array
+    {
+        /** @var list<Usuario> $usuarios */
+        $usuarios = $this->createQueryBuilder('u')
+            ->orderBy('u.nomeCompleto', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $usuarios;
+    }
+
     public function buscarPorEmail(string $email): ?Usuario
     {
         return $this->findOneBy(['email' => $email]);

@@ -56,7 +56,10 @@ export const ModalAuth = memo(function ModalAuth({ isOpen, onClose }: ModalAuthP
           username: meData.username,
           email: meData.email,
           roles: meData.roles,
+          administrador: meData.administrador,
+          permissoes: meData.permissoes,
           criadoEm: meData.criadoEm,
+          atualizadoEm: meData.atualizadoEm,
         },
         loginData.token,
         loginData.refresh_token

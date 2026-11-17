@@ -22,7 +22,7 @@ A ideia é simples: **você escolhe o que quer guardar, e o sistema cuida do res
 
 ## As páginas do sistema
 
-O menu lateral dá acesso a todas as páginas. Nele você também alterna entre **tema claro e escuro** e sai da sua conta.
+O menu lateral dá acesso às páginas que a sua conta tem permissão de usar. Nele você também alterna entre **tema claro e escuro** e sai da sua conta. Administradores veem tudo, inclusive **Usuários**. Detalhes em [PERMISSOES.md](PERMISSOES.md) e [MULTIUSUARIO.md](MULTIUSUARIO.md).
 
 ### Dashboard
 
@@ -197,6 +197,12 @@ Serve para enviar arquivos que já estão no seu dispositivo.
 
 Se o arquivo já existir, ele aparece como **Já Existente (Não Duplicado)**. Mesmo assim, você pode escolher **Sim, Sincronizar Mesmo Assim** para enviá-lo ao Google Fotos.
 
+### Usuários
+
+Só o **administrador** vê esta página. Nela dá para criar contas, editar e-mail/senha e marcar quais funcionalidades cada pessoa pode abrir. Sem a permissão da tela, o item some do menu e a API responde 403.
+
+A conta principal (`gabrielcirqueira711@gmail.com`) é o administrador do sistema. Detalhes em [PERMISSOES.md](PERMISSOES.md).
+
 ### Google Fotos
 
 É onde você cuida do backup na nuvem.
@@ -285,7 +291,7 @@ O Google só mostra ao sistema o que o próprio sistema criou. Para trazer fotos
 Clique em tentar novamente. Vídeos privados, removidos ou com restrição podem não estar disponíveis para download.
 
 **Existe cadastro pelo site?**
-Não. O CirqueiraX é um sistema pessoal, e os usuários são criados pelo administrador.
+Não há cadastro aberto. O administrador cria as contas na tela **Usuários** (`/usuarios`) ou pelo comando CLI.
 
 **O vídeo sumiu da pasta do celular?**
 A limpeza automática não mexe na pasta sincronizada. Se você apagar um arquivo em um dispositivo, porém, o Syncthing pode replicar essa remoção para os outros.
