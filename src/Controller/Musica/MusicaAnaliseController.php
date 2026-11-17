@@ -15,6 +15,7 @@ use App\Service\Musica\Analise\ObterDescobertasMusicaService;
 use App\Service\Musica\Analise\ObterDetalheArtistaMusicaService;
 use App\Service\Musica\Analise\ObterDetalheMusicaService;
 use App\Service\Musica\Analise\ObterEvolucaoMensalMusicaService;
+use App\Service\Musica\Analise\ObterExtrasPaginaMusicaService;
 use App\Service\Musica\Analise\ObterHabitosMusicaService;
 use App\Service\Musica\Analise\ObterLinhaDoTempoMusicaService;
 use App\Service\Musica\Analise\ObterRecordesMusicaService;
@@ -38,6 +39,7 @@ final class MusicaAnaliseController extends DefaultController
         private readonly ObterLinhaDoTempoMusicaService $obterLinhaDoTempoService,
         private readonly ObterEvolucaoMensalMusicaService $obterEvolucaoMensalService,
         private readonly ObterDescobertasMusicaService $obterDescobertasService,
+        private readonly ObterExtrasPaginaMusicaService $obterExtrasService,
         private readonly ObterRetrospectivaAnualMusicaService $obterRetrospectivaService,
         private readonly ResolverAlvoPorNomeService $resolverAlvoService,
         private readonly ObterResumoIdentificacaoService $obterResumoIdentificacaoService,
@@ -136,6 +138,84 @@ final class MusicaAnaliseController extends DefaultController
     public function retrospectiva(int $ano, Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         return $this->success($this->obterRetrospectivaService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $ano)->paraArray());
+    }
+
+    #[Route(self::PREFIXO.'/rotina', name: 'api_musica_rotina', methods: ['GET'])]
+    public function rotina(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterExtrasService->rotina($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
+    }
+
+    #[Route(self::PREFIXO.'/sessoes', name: 'api_musica_sessoes', methods: ['GET'])]
+    public function sessoes(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterExtrasService->sessoes($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
+    }
+
+    #[Route(self::PREFIXO.'/neste-dia', name: 'api_musica_neste_dia', methods: ['GET'])]
+    public function nesteDia(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->obterExtrasService->nesteDia(
+            $usuario,
+            FiltroFonteRequisicaoDTO::daRequisicao($request),
+            $this->inteiroOpcional($request, 'mes'),
+            $this->inteiroOpcional($request, 'dia'),
+        ));
+    }
+
+    #[Route(self::PREFIXO.'/saudade', name: 'api_musica_saudade', methods: ['GET'])]
+    public function saudade(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $dias = $this->inteiroOpcional($request, 'dias') ?? 90;
+
+        return $this->success($this->obterExtrasService->saudade($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $dias));
+    }
+
+    #[Route(self::PREFIXO.'/versoes-alteradas', name: 'api_musica_versoes_alteradas', methods: ['GET'])]
+    public function versoesAlteradas(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterExtrasService->versoesAlteradas($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
+    }
+
+    #[Route(self::PREFIXO.'/profundidade', name: 'api_musica_profundidade', methods: ['GET'])]
+    public function profundidade(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterExtrasService->profundidade($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
+    }
+
+    #[Route(self::PREFIXO.'/historico-dia', name: 'api_musica_historico_dia', methods: ['GET'])]
+    public function historicoDia(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $data = $this->textoOpcional($request, 'data');
+        if (null === $data || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data)) {
+            return $this->error('Informe a data no formato AAAA-MM-DD.');
+        }
+
+        return $this->success($this->obterExtrasService->historicoDia($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $data));
+    }
+
+    #[Route(self::PREFIXO.'/extremos-dia', name: 'api_musica_extremos_dia', methods: ['GET'])]
+    public function extremosDia(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterExtrasService->extremosDoDia($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
+    }
+
+    #[Route(self::PREFIXO.'/albuns-sequencia', name: 'api_musica_albuns_sequencia', methods: ['GET'])]
+    public function albunsSequencia(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterExtrasService->albunsEmSequencia($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
     }
 
     #[Route(self::PREFIXO.'/identificacao/resumo', name: 'api_musica_identificacao_resumo', methods: ['GET'])]

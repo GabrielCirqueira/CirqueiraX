@@ -3,27 +3,20 @@ import { useStatusSpotify } from '@/features/spotify/hooks/useStatusSpotify'
 import { UltimaDetectadaYoutubeMusic } from '@/features/youtube-music/components/UltimaDetectadaYoutubeMusic'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
-import { Box, Container, Flex, HStack, Heading, Text, VStack } from '@chakra-ui/react'
-import { type ReactNode, useMemo } from 'react'
+import { Container, Flex, HStack, Heading, Text, VStack } from '@chakra-ui/react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  AbasConteudoMusica,
+  AbasMusica,
   BotaoGerenciarMusica,
   EsqueletoPaginaMusica,
   EstadoVazioMusica,
   RodapeMusica,
-  SecaoCapsulaSonora,
-  SecaoCuriosidades,
-  SecaoDescobertas,
-  SecaoEvolucaoMensal,
-  SecaoHabitos,
-  SecaoHojeSemana,
-  SecaoLinhaDoTempo,
-  SecaoRecordes,
-  SecaoRetrospectiva,
   SeletorFonteMusica,
   TemaMusica,
 } from './components'
-import { useFonteMusica, useImagensMusica, useResumoMusica, useVisibilidadeSecao } from './hooks'
+import { useAbaMusica, useFonteMusica, useImagensMusica, useResumoMusica } from './hooks'
 import {
   ROTA_GERENCIAR_MUSICA,
   deveMostrarEstadoVazioMusica,
@@ -40,6 +33,7 @@ export function Musica() {
 
   const navigate = useNavigate()
   const { fonte } = useFonteMusica()
+  const { aba } = useAbaMusica()
 
   const { data: status, isLoading: carregandoStatus } = useStatusSpotify()
   const conectada = Boolean(status?.conectada && status.status === 'conectada')
@@ -54,11 +48,14 @@ export function Musica() {
   const mostrarEstadoVazio =
     !carregandoResumo && deveMostrarEstadoVazioMusica(conectada, temDados, fonte)
 
+  const mostrarSpotifyAgora = aba === 'visao' && fonte !== 'youtube_music'
+  const mostrarYoutubeAgora = aba === 'visao' && fonte !== 'spotify'
+
   return (
     <TemaMusica>
       <AppContainer>
         <Container maxW="6xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
-          <VStack gap={{ base: 6, md: 10 }} align="stretch" w="full">
+          <VStack gap={{ base: 5, md: 8 }} align="stretch" w="full">
             <Flex
               justify="space-between"
               align={{ base: 'start', md: 'center' }}
@@ -95,44 +92,18 @@ export function Musica() {
               />
             ) : (
               <>
-                {fonte !== 'youtube_music' && <CartaoTocandoAgora conectada={conectada} />}
-                {fonte !== 'spotify' && <UltimaDetectadaYoutubeMusic />}
+                {mostrarSpotifyAgora ? <CartaoTocandoAgora conectada={conectada} /> : null}
+                {mostrarYoutubeAgora ? <UltimaDetectadaYoutubeMusic /> : null}
 
-                <SecaoHojeSemana
+                <AbasMusica />
+
+                <AbasConteudoMusica
+                  aba={aba}
+                  habilitado={habilitado}
                   resumo={resumo}
-                  mapaImagens={mapaImagensResumo}
-                  carregando={carregandoResumo}
+                  mapaImagensResumo={mapaImagensResumo}
+                  carregandoResumo={carregandoResumo}
                 />
-
-                <SecaoCuriosidades curiosidades={resumo?.curiosidades} />
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoRecordes habilitado={carregavel} />}
-                </SecaoPreguicosa>
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoEvolucaoMensal habilitado={carregavel} />}
-                </SecaoPreguicosa>
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoHabitos habilitado={carregavel} />}
-                </SecaoPreguicosa>
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoDescobertas habilitado={carregavel} />}
-                </SecaoPreguicosa>
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoCapsulaSonora conectada={carregavel} />}
-                </SecaoPreguicosa>
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoLinhaDoTempo habilitado={carregavel} />}
-                </SecaoPreguicosa>
-
-                <SecaoPreguicosa habilitado={habilitado}>
-                  {(carregavel) => <SecaoRetrospectiva habilitado={carregavel} />}
-                </SecaoPreguicosa>
               </>
             )}
 
@@ -141,22 +112,6 @@ export function Musica() {
         </Container>
       </AppContainer>
     </TemaMusica>
-  )
-}
-
-function SecaoPreguicosa({
-  habilitado,
-  children,
-}: {
-  habilitado: boolean
-  children: (carregavel: boolean) => ReactNode
-}) {
-  const { ref, carregavel } = useVisibilidadeSecao(habilitado)
-
-  return (
-    <Box ref={ref} minH={carregavel ? undefined : '120px'}>
-      {children(carregavel)}
-    </Box>
   )
 }
 

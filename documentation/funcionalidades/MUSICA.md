@@ -71,7 +71,7 @@ Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseRepr
 
 ### Página principal e Gerenciar
 
-`/musica` mostra só os relatórios: tocando agora (Spotify e YouTube Music), hoje e semana, recordes, evolução, hábitos, descobertas, curiosidades, Cápsula e retrospectiva. Tudo que é configuração fica em `/musica/gerenciar`, aberto pelo botão **Gerenciar** ao lado do seletor de fonte: contas do Spotify e do YouTube Music (com a extensão do navegador), importação do histórico (Spotify e Google Takeout), **transferência e vínculo de playlists** (Spotify ↔ YouTube Music via OAuth Google + API oficial do YouTube) e o cartão de **Revisão e correções**, que leva a `/musica/revisao`. O botão mostra um número quando há pendência (conta para reconectar ou itens na revisão). Os avisos de conexão do Dashboard também levam ao Gerenciar.
+`/musica` é uma página só, com abas na URL (`?aba=habitos`, etc.) — trocar de aba não muda a rota. Topo fixo: título, seletor de fonte e **Gerenciar**. Abas: Visão geral, Rankings, Hábitos, Descobertas, Versões, Histórico, Recordes, Retrospectiva e (com fonte Todos) Serviços. Cada aba busca os dados ao abrir. Novos blocos com dados já guardados: rotina por hora/período do dia, sessões, primeira/última do dia, saudade, profundidade do artista, versões alteradas + mashups, neste dia, álbum em sequência, dia clicável (histórico do dia), evolução empilhada Spotify × YouTube Music. Sem reimportar campos extras do Spotify nem calendário de calor. Tudo que é configuração fica em `/musica/gerenciar`: contas, importação, **transferência de playlists** e **Revisão**.
 
 ### Transferência de playlists (Spotify ↔ YouTube Music)
 

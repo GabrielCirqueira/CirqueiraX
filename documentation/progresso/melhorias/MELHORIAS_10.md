@@ -125,3 +125,19 @@
 - **Arquivos**: `src/Repository/ItemTransferenciaPlaylistRepository.php`, `src/Repository/TransferenciaPlaylistRepository.php`, `src/Repository/PlaylistTransferenciaSelecionadaRepository.php`, `src/Serializer/TransferenciaPlaylistSerializer.php`, `src/Service/TransferenciaPlaylist/ConfirmarPreviaTransferenciaService.php`, `src/Service/TransferenciaPlaylist/DetectarParesPlaylistDestinoService.php`, `src/Service/TransferenciaPlaylist/ExecutarTransferenciaPlaylistService.php`, `src/Service/TransferenciaPlaylist/ListarTransferenciasPlaylistService.php`, `src/Command/ReprocessarTransferenciaPlaylistCommand.php`, `src/Command/DebugTransferenciaPlaylistCommand.php`, `web/features/transferencia-playlist/`
 
 ---
+
+### ✅ Melhoria 192 — Página `/musica` em Abas com Novos Blocos de Análise
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: `/musica` era uma página longa demais, com blocos repetidos; faltavam análises que já davam para fazer com `reproducao_musical` e o catálogo, sem nova consulta ao Spotify.
+- **Solução**:
+  - Mesma rota `/musica` com abas na URL (`?aba=`): Visão geral, Rankings, Hábitos, Descobertas, Versões, Histórico, Recordes, Retrospectiva e Serviços (quando a fonte é Todos).
+  - Cada aba carrega os dados ao abrir; tocando agora fica na Visão geral.
+  - Novos blocos: rotina (hora e período do dia), sessões, primeira/última do dia, saudade, profundidade do artista, versões alteradas + mashups, neste dia, álbum em sequência, dia clicável (histórico do dia), evolução mensal empilhada Spotify × YouTube Music.
+  - Endpoints em `MusicaAnaliseController` + `ObterExtrasPaginaMusicaService` + consultas em `AnaliseReproducaoMusicalRepository`.
+  - Sem calendário de calor, sem reimportar aparelho/país/offline do Spotify, sem metas/notificações/imagens extras.
+  - Service worker sobe para `cirqueirax-app-v2` para não servir o bundle antigo depois do deploy.
+- **Arquivos**: `web/features/musica/Musica.tsx`, `web/features/musica/components/AbasMusica.tsx`, `web/features/musica/components/AbasConteudoMusica.tsx`, `web/features/musica/components/ModalHistoricoDia.tsx`, `web/features/musica/hooks/useAbaMusica.ts`, `web/features/musica/utils/abasMusica.ts`, `src/Service/Musica/Analise/ObterExtrasPaginaMusicaService.php`, `src/Controller/Musica/MusicaAnaliseController.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `documentation/funcionalidades/MUSICA.md`, `public/sw.js`
+
+---

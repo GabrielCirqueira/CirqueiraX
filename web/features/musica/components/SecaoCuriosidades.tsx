@@ -7,10 +7,12 @@ import { MinutosMusica } from './MinutosMusica'
 
 export interface SecaoCuriosidadesProps {
   curiosidades?: CuriosidadesMusica
+  onAbrirDia?: (data: string) => void
 }
 
 export const SecaoCuriosidades = memo(function SecaoCuriosidades({
   curiosidades,
+  onAbrirDia,
 }: SecaoCuriosidadesProps) {
   if (!curiosidades) return null
 
@@ -124,6 +126,14 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
         </Box>
 
         <Box
+          as={diaMaisLongoData && onAbrirDia ? 'button' : 'div'}
+          type={diaMaisLongoData && onAbrirDia ? 'button' : undefined}
+          textAlign="left"
+          w="full"
+          cursor={diaMaisLongoData && onAbrirDia ? 'pointer' : undefined}
+          onClick={
+            diaMaisLongoData && onAbrirDia ? () => onAbrirDia(diaMaisLongoData) : undefined
+          }
           p={4}
           borderRadius="8px"
           bg="cirqueira.musica.cartao"
@@ -153,7 +163,9 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
                 {diaMaisLongoMinutos > 0 ? <MinutosMusica minutos={diaMaisLongoMinutos} /> : '—'}
               </Text>
               <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-                {diaMaisLongoData ? `Em ${formatarDataPtBr(diaMaisLongoData)}` : 'Sem registros'}
+                {diaMaisLongoData
+                  ? `Em ${formatarDataPtBr(diaMaisLongoData)}${onAbrirDia ? ' · toque para ver' : ''}`
+                  : 'Sem registros'}
               </Text>
             </VStack>
           </HStack>

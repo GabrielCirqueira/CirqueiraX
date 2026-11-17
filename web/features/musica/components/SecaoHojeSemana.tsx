@@ -51,6 +51,8 @@ export interface SecaoHojeSemanaProps {
   resumo?: ResumoGeralMusica
   carregando?: boolean
   mapaImagens?: RespostaConsultaImagens
+  /** visao = top 5; rankings = top 5 + modal completo */
+  modo?: 'visao' | 'rankings'
 }
 
 type TipoFiltroSecao = 'dias' | 'mes' | 'ano' | 'todos' | 'personalizado'
@@ -92,6 +94,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
   resumo,
   carregando = false,
   mapaImagens,
+  modo = 'visao',
 }: SecaoHojeSemanaProps) {
   const [tipoFiltro, setTipoFiltro] = useState<TipoFiltroSecao>('dias')
   const [diasSelecionados, setDiasSelecionados] = useState<number>(7)
@@ -820,7 +823,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             </VStack>
           )}
 
-          {totalAba > 0 && (
+          {totalAba > 0 && modo === 'rankings' && (
             <Button
               variant="ghost"
               size="sm"

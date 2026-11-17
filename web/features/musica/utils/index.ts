@@ -1,5 +1,6 @@
 export * from './formatadoresMusica'
 export * from './chavesImagemMusica'
+export * from './abasMusica'
 export * from './analiseMusica'
 export * from './imagemCapsula'
 export * from './fonteMusica'

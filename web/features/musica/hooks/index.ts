@@ -1,4 +1,5 @@
 export * from './chavesQueryMusica'
+export * from './useAbaMusica'
 export * from './useFonteMusica'
 export * from './useResumoMusica'
 export * from './useCapsulasMusica'

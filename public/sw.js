@@ -1,5 +1,5 @@
-const CACHE_APP = 'cirqueirax-app-v1'
-const CACHE_API = 'cirqueirax-api-v1'
+const CACHE_APP = 'cirqueirax-app-v2'
+const CACHE_API = 'cirqueirax-api-v2'
 const CACHES_ATUAIS = [CACHE_APP, CACHE_API]
 const CHAVE_SHELL = '/__app-shell__'
 const TEMPO_LIMITE_PAGINA_MS = 5000

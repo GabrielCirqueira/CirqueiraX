@@ -18,9 +18,13 @@ import { MinutosMusica } from './MinutosMusica'
 
 export interface SecaoRecordesProps {
   habilitado: boolean
+  onAbrirDia?: (data: string) => void
 }
 
-export const SecaoRecordes = memo(function SecaoRecordes({ habilitado }: SecaoRecordesProps) {
+export const SecaoRecordes = memo(function SecaoRecordes({
+  habilitado,
+  onAbrirDia,
+}: SecaoRecordesProps) {
   const { data, isLoading } = useRecordesMusica(habilitado)
   const itensComImagem = [
     ...(data?.musicaMaisOuvida ? [data.musicaMaisOuvida] : []),
@@ -85,7 +89,14 @@ export const SecaoRecordes = memo(function SecaoRecordes({ habilitado }: SecaoRe
           cor="cirqueira.musica.azul"
           rotulo="Dia recorde"
           valor={data.diaRecorde ? <MinutosMusica minutos={data.diaRecorde.minutos} /> : '—'}
-          detalhe={data.diaRecorde ? `Em ${formatarDataExtensa(data.diaRecorde.data)}` : undefined}
+          detalhe={
+            data.diaRecorde
+              ? `Em ${formatarDataExtensa(data.diaRecorde.data)}${onAbrirDia ? ' · toque para ver' : ''}`
+              : undefined
+          }
+          onClick={
+            data.diaRecorde && onAbrirDia ? () => onAbrirDia(data.diaRecorde!.data) : undefined
+          }
         />
         <CartaoMetricaMusica
           icone={CalendarCheck}

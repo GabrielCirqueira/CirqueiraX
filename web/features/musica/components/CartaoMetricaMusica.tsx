@@ -8,6 +8,7 @@ export interface CartaoMetricaMusicaProps {
   valor: ReactNode
   detalhe?: ReactNode
   cor?: string
+  onClick?: () => void
 }
 
 export const CartaoMetricaMusica = memo(function CartaoMetricaMusica({
@@ -16,9 +17,15 @@ export const CartaoMetricaMusica = memo(function CartaoMetricaMusica({
   valor,
   detalhe,
   cor = 'cirqueira.musica.verde',
+  onClick,
 }: CartaoMetricaMusicaProps) {
   return (
     <Box
+      as={onClick ? 'button' : 'div'}
+      type={onClick ? 'button' : undefined}
+      textAlign="left"
+      cursor={onClick ? 'pointer' : undefined}
+      onClick={onClick}
       p={{ base: 3, md: 4 }}
       borderRadius="8px"
       bg="cirqueira.musica.cartao"
@@ -27,6 +34,7 @@ export const CartaoMetricaMusica = memo(function CartaoMetricaMusica({
       _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
       transition="background-color 0.15s ease"
       minW={0}
+      w="full"
     >
       <Flex gap={{ base: 2, md: 3 }} align="flex-start" direction={{ base: 'column', sm: 'row' }}>
         <Center

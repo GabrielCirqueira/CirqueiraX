@@ -1,10 +1,16 @@
 import { Box, Flex, HStack, SimpleGrid, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { memo, useState } from 'react'
-import { useEvolucaoMensalMusica } from '../hooks'
-import { type OpcaoPeriodoAnalise, formatarMinutos, formatarNomeMes } from '../utils'
+import { useEvolucaoMensalMusica, useFonteMusica } from '../hooks'
+import {
+  type OpcaoPeriodoAnalise,
+  formatarMinutos,
+  formatarNomeMes,
+  temReproducoesYoutube,
+} from '../utils'
 import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
 import { GraficoMensalMusica } from './GraficoMensalMusica'
+import { GraficoMensalPorFonte } from './GraficoMensalPorFonte'
 import { MinutosMusica } from './MinutosMusica'
 import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
 
@@ -22,18 +28,24 @@ export const SecaoEvolucaoMensal = memo(function SecaoEvolucaoMensal({
   habilitado,
 }: SecaoEvolucaoMensalProps) {
   const [janela, setJanela] = useState('12')
+  const { fonte } = useFonteMusica()
   const { data, isLoading } = useEvolucaoMensalMusica(Number(janela), habilitado)
   const pontosVisiveis = (() => {
     const meses = data?.meses ?? []
     const primeiroComDados = meses.findIndex((ponto) => ponto.minutos > 0)
     return primeiroComDados <= 0 ? meses : meses.slice(primeiroComDados)
   })()
+  const empilhado = fonte === 'todas' && temReproducoesYoutube(pontosVisiveis)
 
   return (
     <VStack align="stretch" gap={4} w="full">
       <CabecalhoSecaoMusica
         titulo="Evolução por Mês"
-        descricao="Minutos ouvidos mês a mês, com o mês atual em verde"
+        descricao={
+          empilhado
+            ? 'Minutos mês a mês, empilhados por Spotify e YouTube Music'
+            : 'Minutos ouvidos mês a mês, com o mês atual em verde'
+        }
         acoes={
           <SeletorPeriodoAnalise
             opcoes={OPCOES_JANELA}
@@ -54,7 +66,11 @@ export const SecaoEvolucaoMensal = memo(function SecaoEvolucaoMensal({
           <Skeleton h="240px" borderRadius="8px" />
         ) : (
           <VStack align="stretch" gap={5}>
-            <GraficoMensalMusica pontos={pontosVisiveis} mostrarMedia />
+            {empilhado ? (
+              <GraficoMensalPorFonte pontos={pontosVisiveis} metrica="minutos" />
+            ) : (
+              <GraficoMensalMusica pontos={pontosVisiveis} mostrarMedia />
+            )}
             <SimpleGrid columns={{ base: 1, md: 3 }} gap={3}>
               <BlocoComparacao
                 rotulo={`${formatarNomeMes(data.comparacao.mes)} até dia ${data.comparacao.diaAtual}`}
