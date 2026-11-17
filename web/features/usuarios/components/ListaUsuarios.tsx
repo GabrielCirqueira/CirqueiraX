@@ -1,8 +1,19 @@
 import { ROTULOS_FUNCIONALIDADE } from '@/shared/utils/funcionalidadesSistema'
-import { Badge, Box, Button, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { Pencil, Shield, UserRound } from 'lucide-react'
+import {
+  Badge,
+  Box,
+  Button,
+  Center,
+  HStack,
+  IconButton,
+  Table,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import { Pencil, Shield, Users } from 'lucide-react'
 import { memo } from 'react'
 import type { UsuarioSistema } from '../types'
+import { iniciaisNome } from '@/shared/utils/iniciaisNome'
 import { resumoPermissoes } from '../utils/formularioUsuario'
 
 export interface ListaUsuariosProps {
@@ -16,79 +27,181 @@ export const ListaUsuarios = memo(function ListaUsuarios({
 }: ListaUsuariosProps) {
   if (usuarios.length === 0) {
     return (
-      <Box
-        p={8}
-        borderRadius="12px"
-        border="1px dashed"
+      <Center
+        py={16}
+        px={6}
+        borderRadius="xl"
+        borderWidth="1px"
         borderColor="border.subtle"
-        textAlign="center"
+        bg="bg.panel"
+        flexDirection="column"
+        gap={3}
       >
-        <Text color="fg.muted">Nenhum usuário cadastrado ainda.</Text>
-      </Box>
+        <Center boxSize={12} borderRadius="full" bg="bg.muted" color="fg.subtle">
+          <Users size={22} />
+        </Center>
+        <Text fontWeight="semibold" color="fg">
+          Nenhum usuário cadastrado
+        </Text>
+        <Text fontSize="sm" color="fg.muted" textAlign="center" maxW="sm">
+          Crie a primeira conta para começar a distribuir acessos por funcionalidade.
+        </Text>
+      </Center>
     )
   }
 
   return (
-    <SimpleGrid columns={{ base: 1, lg: 2 }} gap={4}>
-      {usuarios.map((usuario) => (
-        <Box
-          key={usuario.id}
-          p={4}
-          borderRadius="12px"
-          border="1px solid"
-          borderColor="border.subtle"
-          bg="bg.panel"
-        >
-          <HStack justify="space-between" align="start" gap={3}>
+    <Box
+      borderWidth="1px"
+      borderColor="border.subtle"
+      borderRadius="xl"
+      bg="bg.panel"
+      overflow="hidden"
+    >
+      <Box display={{ base: 'none', md: 'block' }} overflowX="auto">
+        <Table.Root size="sm" variant="line">
+          <Table.Header bg="bg.muted">
+            <Table.Row>
+              <Table.ColumnHeader py={3} px={4}>
+                Usuário
+              </Table.ColumnHeader>
+              <Table.ColumnHeader py={3} px={4}>
+                Papel
+              </Table.ColumnHeader>
+              <Table.ColumnHeader py={3} px={4}>
+                Acesso
+              </Table.ColumnHeader>
+              <Table.ColumnHeader py={3} px={4} textAlign="end" w="100px">
+                Ações
+              </Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {usuarios.map((usuario) => (
+              <Table.Row key={usuario.id} _hover={{ bg: 'bg.muted' }}>
+                <Table.Cell py={3.5} px={4}>
+                  <HStack gap={3} minW={0}>
+                    <AvatarUsuario nome={usuario.nomeCompleto} admin={usuario.administrador} />
+                    <VStack align="start" gap={0} minW={0}>
+                      <Text fontWeight="semibold" color="fg" truncate>
+                        {usuario.nomeCompleto}
+                      </Text>
+                      <Text fontSize="xs" color="fg.muted" truncate>
+                        @{usuario.username} · {usuario.email}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </Table.Cell>
+                <Table.Cell py={3.5} px={4}>
+                  <Badge
+                    colorPalette={usuario.administrador ? 'brand' : 'gray'}
+                    variant="subtle"
+                    borderRadius="md"
+                  >
+                    {usuario.administrador ? (
+                      <HStack gap={1}>
+                        <Shield size={11} />
+                        <Text as="span">Admin</Text>
+                      </HStack>
+                    ) : (
+                      'Operador'
+                    )}
+                  </Badge>
+                </Table.Cell>
+                <Table.Cell py={3.5} px={4} maxW="360px">
+                  {usuario.administrador ? (
+                    <Text fontSize="sm" color="fg.muted">
+                      Acesso total
+                    </Text>
+                  ) : (
+                    <HStack gap={1} flexWrap="wrap">
+                      {usuario.permissoes.length === 0 ? (
+                        <Text fontSize="sm" color="cirqueira.orange.400">
+                          Sem permissões
+                        </Text>
+                      ) : (
+                        usuario.permissoes.slice(0, 4).map((codigo) => (
+                          <Badge key={codigo} size="sm" variant="outline" borderRadius="md">
+                            {ROTULOS_FUNCIONALIDADE[codigo] ?? codigo}
+                          </Badge>
+                        ))
+                      )}
+                      {usuario.permissoes.length > 4 && (
+                        <Badge size="sm" variant="subtle" borderRadius="md">
+                          +{usuario.permissoes.length - 4}
+                        </Badge>
+                      )}
+                    </HStack>
+                  )}
+                </Table.Cell>
+                <Table.Cell py={3.5} px={4} textAlign="end">
+                  <IconButton
+                    aria-label={`Editar ${usuario.nomeCompleto}`}
+                    size="sm"
+                    variant="ghost"
+                    borderRadius="lg"
+                    onClick={() => onEditar(usuario)}
+                  >
+                    <Pencil size={15} />
+                  </IconButton>
+                </Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Root>
+      </Box>
+
+      <VStack display={{ base: 'flex', md: 'none' }} align="stretch" gap={0}>
+        {usuarios.map((usuario, indice) => (
+          <HStack
+            key={usuario.id}
+            p={4}
+            justify="space-between"
+            align="start"
+            gap={3}
+            borderTopWidth={indice === 0 ? 0 : '1px'}
+            borderColor="border.subtle"
+          >
             <HStack align="start" gap={3} minW={0}>
-              <Box
-                boxSize={10}
-                borderRadius="full"
-                bg="brand.subtle"
-                color="cirqueira.brand.300"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-              >
-                {usuario.administrador ? <Shield size={18} /> : <UserRound size={18} />}
-              </Box>
+              <AvatarUsuario nome={usuario.nomeCompleto} admin={usuario.administrador} />
               <VStack align="start" gap={1} minW={0}>
                 <Text fontWeight="semibold" color="fg" truncate>
                   {usuario.nomeCompleto}
                 </Text>
-                <Text fontSize="sm" color="fg.muted" truncate>
-                  @{usuario.username} · {usuario.email}
+                <Text fontSize="xs" color="fg.muted" truncate>
+                  @{usuario.username}
                 </Text>
-                <HStack gap={2} flexWrap="wrap">
-                  <Badge colorPalette={usuario.administrador ? 'brand' : 'gray'} variant="subtle">
-                    {usuario.administrador ? 'Administrador' : 'Usuário'}
-                  </Badge>
-                  <Badge variant="outline">{resumoPermissoes(usuario)}</Badge>
-                </HStack>
-                {!usuario.administrador && usuario.permissoes.length > 0 && (
-                  <HStack gap={1} flexWrap="wrap" pt={1}>
-                    {usuario.permissoes.map((codigo) => (
-                      <Badge key={codigo} size="sm" variant="surface">
-                        {ROTULOS_FUNCIONALIDADE[codigo] ?? codigo}
-                      </Badge>
-                    ))}
-                  </HStack>
-                )}
+                <Badge
+                  colorPalette={usuario.administrador ? 'brand' : 'gray'}
+                  variant="subtle"
+                  size="sm"
+                >
+                  {usuario.administrador ? 'Admin' : resumoPermissoes(usuario)}
+                </Badge>
               </VStack>
             </HStack>
-            <Button
-              size="sm"
-              variant="ghost"
-              colorPalette="brand"
-              onClick={() => onEditar(usuario)}
-            >
-              <Pencil size={14} />
+            <Button size="sm" variant="outline" borderRadius="lg" onClick={() => onEditar(usuario)}>
               Editar
             </Button>
           </HStack>
-        </Box>
-      ))}
-    </SimpleGrid>
+        ))}
+      </VStack>
+    </Box>
   )
 })
+
+function AvatarUsuario({ nome, admin }: { nome: string; admin: boolean }) {
+  return (
+    <Center
+      boxSize={10}
+      borderRadius="lg"
+      bg={admin ? 'cirqueira.brand.500/20' : 'bg.muted'}
+      color={admin ? 'cirqueira.brand.300' : 'fg.muted'}
+      fontSize="xs"
+      fontWeight="bold"
+      flexShrink={0}
+    >
+      {iniciaisNome(nome)}
+    </Center>
+  )
+}

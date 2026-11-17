@@ -21,8 +21,9 @@
 | [funcionalidades/MUSICA.md](funcionalidades/MUSICA.md) | Página Música: Spotify e YouTube Music juntos, decisões, regras de dados e pendências |
 | [funcionalidades/YOUTUBE_PLAYER.md](funcionalidades/YOUTUBE_PLAYER.md) | Página de teste do player oficial do YouTube na rede do trabalho |
 | [funcionalidades/MULTIUSUARIO.md](funcionalidades/MULTIUSUARIO.md) | Vários usuários: o que é de cada conta, pastas, Google Fotos por pessoa e como adicionar alguém |
+| [funcionalidades/PERMISSOES.md](funcionalidades/PERMISSOES.md) | Permissões por funcionalidade, papéis ADM/usuário, `/usuarios` e `/perfil` |
 | [guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md](guias/GUIA_SINCRONIZACAO_ECOSSISTEMA.md) | **Manual do ecossistema**: sincronização, Google Fotos, Celular (Syncthing-Fork) e Agente PC |
-| [funcionalidades/DASHBOARD.md](funcionalidades/DASHBOARD.md) | Painel inicial, métricas, categorias, sincronização e fila de erros |
+| [funcionalidades/DASHBOARD.md](funcionalidades/DASHBOARD.md) | Painel inicial: completo para ADM, início pessoal para usuário comum |
 | [funcionalidades/CENTRAL_MIDIAS.md](funcionalidades/CENTRAL_MIDIAS.md) | Biblioteca unificada, abas, filtros, ações em lote e atalhos |
 | [funcionalidades/DOWNLOADS_VIDEOS.md](funcionalidades/DOWNLOADS_VIDEOS.md) | Download de vídeos, fila, estratégias por plataforma, triagem e horários em lote |
 | [funcionalidades/DOWNLOADS_AUDIO.md](funcionalidades/DOWNLOADS_AUDIO.md) | Download de MP3, player, estados e retenção de 7 dias |

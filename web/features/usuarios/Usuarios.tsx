@@ -1,6 +1,6 @@
 import { useSEO } from '@/shared/hooks'
 import { Box, Button, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { UserPlus, Users } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { memo, useState } from 'react'
 import { ListaUsuarios, ModalFormularioUsuario } from './components'
 import { useAtualizarUsuario, useCadastrarUsuario, useListarUsuarios } from './hooks'
@@ -29,6 +29,7 @@ const UsuariosView = memo(function UsuariosView() {
   const atualizar = useAtualizarUsuario()
 
   const salvando = cadastrar.isPending || atualizar.isPending
+  const totalAdmins = usuarios.filter((u) => u.administrador).length
 
   function abrirCadastro() {
     setUsuarioEdicao(null)
@@ -79,51 +80,71 @@ const UsuariosView = memo(function UsuariosView() {
   return (
     <Box w="full" maxW="7xl" mx="auto" py={{ base: 4, md: 8 }} px={{ base: 4, md: 8 }}>
       <VStack w="full" gap={6} alignItems="stretch">
-        <HStack justify="space-between" align="start" gap={4} flexWrap="wrap">
-          <HStack gap={3} align="start">
-            <Box
-              boxSize={11}
-              borderRadius="12px"
-              bg="brand.subtle"
-              color="cirqueira.brand.300"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
+        <HStack
+          justify="space-between"
+          align={{ base: 'flex-start', sm: 'center' }}
+          flexWrap="wrap"
+          gap={4}
+        >
+          <HStack gap={3} align="center" flexWrap="wrap">
+            <Text
+              as="h1"
+              fontSize={{ base: 'xl', md: '2xl' }}
+              fontWeight="black"
+              color="fg"
+              letterSpacing="tight"
             >
-              <Users size={22} />
-            </Box>
-            <VStack align="start" gap={1}>
-              <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight="bold" color="fg">
-                Gerenciar usuários
-              </Text>
-              <Text fontSize="sm" color="fg.muted">
-                Crie contas e controle o acesso por funcionalidade.
-              </Text>
-            </VStack>
+              Usuários
+            </Text>
+            {!isLoading && !isError && (
+              <HStack
+                bg="bg.panel"
+                borderWidth="1px"
+                borderColor="border.subtle"
+                px={2.5}
+                py={1}
+                borderRadius="full"
+                fontSize="xs"
+                color="fg.muted"
+                gap={1.5}
+              >
+                <Text as="span" fontSize="11px" fontWeight="medium">
+                  {usuarios.length} {usuarios.length === 1 ? 'conta' : 'contas'}
+                  {totalAdmins > 0 ? ` · ${totalAdmins} admin` : ''}
+                </Text>
+              </HStack>
+            )}
           </HStack>
 
-          <Button colorPalette="brand" onClick={abrirCadastro}>
-            <UserPlus size={16} />
+          <Button
+            size="sm"
+            colorPalette="brand"
+            borderRadius="full"
+            onClick={abrirCadastro}
+          >
+            <UserPlus size={15} />
             Novo usuário
           </Button>
         </HStack>
 
         {isLoading ? (
           <VStack gap={3} align="stretch">
-            <Skeleton height="112px" borderRadius="12px" />
-            <Skeleton height="112px" borderRadius="12px" />
+            <Skeleton height="52px" borderRadius="xl" />
+            <Skeleton height="220px" borderRadius="xl" />
           </VStack>
         ) : isError ? (
           <Box
             p={6}
-            borderRadius="12px"
-            border="1px solid"
+            borderRadius="xl"
+            borderWidth="1px"
             borderColor="border.subtle"
             bg="bg.panel"
           >
             <VStack align="start" gap={3}>
-              <Text color="fg">Não foi possível carregar os usuários.</Text>
-              <Button size="sm" colorPalette="brand" onClick={() => void refetch()}>
+              <Text fontWeight="semibold" color="fg">
+                Não foi possível carregar os usuários
+              </Text>
+              <Button size="sm" colorPalette="brand" borderRadius="full" onClick={() => void refetch()}>
                 Tentar de novo
               </Button>
             </VStack>

@@ -51,8 +51,11 @@ docker exec -it cirqueirax_symfony_prod php bin/console app:usuario:garantir-adm
 
 - Login e `/api/v1/auth/me` gravam `administrador`, `roles` e `permissoes` no `auth-storage`.
 - `RotaComPermissao` bloqueia rota sem permissão.
-- A sidebar filtra o menu; administrador vê todos os itens (incluindo Usuários).
+- A sidebar filtra o menu; administrador vê todos os itens (incluindo Usuários). No rodapé há **Meu perfil** (`/perfil`) para qualquer conta logada.
 - No banco, admin pode ter `permissoes: []` — o acesso total vem do `ROLE_ADMIN`.
+- `/dashboard`: administrador vê o painel completo (`DashboardAdmin`); usuário comum vê o início pessoal (`DashboardOperador`) com atalhos só das permissões liberadas.
+- Sem `google_fotos`: downloads/upload/editor ainda categorizam localmente, mas não mostram sincronização/álbum do Google Fotos e o backend não dispara envio.
+- Syncthing (`/api/v1/sync`) exige `ROLE_SUPER_ADMIN`, independente das funcionalidades JSON.
 
 ## API
 
@@ -61,6 +64,15 @@ docker exec -it cirqueirax_symfony_prod php bin/console app:usuario:garantir-adm
 | GET | `/api/v1/usuarios` | `ROLE_ADMIN` |
 | POST | `/api/v1/usuarios` | `ROLE_ADMIN` |
 | GET/PUT | `/api/v1/usuarios/{id}` | `ROLE_ADMIN` |
+| GET | `/api/v1/usuarios/funcionalidades` | `ROLE_ADMIN` |
 | GET | `/api/v1/auth/me` | autenticado |
+| PUT | `/api/v1/auth/me` | autenticado (atualiza nome/e-mail) |
+| PUT | `/api/v1/auth/me/senha` | autenticado (troca senha) |
 
-A rota catch-all do React em `config/routes.yaml` **não** pode engolir `/api/*` (requirement `^(?!api(?:/|$)).+`).
+A tela `/perfil` é acessível a qualquer usuário logado (não exige permissão de módulo).
+
+Em `config/routes.yaml`:
+
+- catch-all da SPA: `reactRouting: "^(?!api(?:/|$)).+"` (não engole `/api/*`);
+- `api_auth_login` → `POST /api/v1/auth/login`;
+- `api_token_refresh` → `POST /api/v1/token/refresh`.

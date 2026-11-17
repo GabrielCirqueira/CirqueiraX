@@ -193,3 +193,59 @@
 - **Arquivos**: `src/Entity/Usuario.php`, `src/Enum/FuncionalidadeSistema.php`, `src/Controller/Usuario/UsuarioController.php`, `src/Service/Usuario/*`, `src/EventListener/VerificarPermissao*.php`, `src/Security/Attribute/RequerPermissao.php`, `migrations/Version20261117131447.php`, `config/routes.yaml`, `web/features/usuarios/*`, `web/routes/RotaComPermissao.tsx`, `web/layouts/Sidebar.tsx`, `web/shared/utils/funcionalidadesSistema.ts`, `documentation/funcionalidades/PERMISSOES.md`
 
 ---
+
+### ✅ Melhoria 196 — Dashboard Separado para Administrador e Usuário
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: usuário comum via o mesmo painel operacional do ADM (pipeline, sync, categorias, erros de sistema), sem sentido para quem só usa módulos liberados.
+- **Solução**:
+  - `Dashboard.tsx` escolhe `DashboardAdmin` (painel completo) ou `DashboardOperador` (saudação, atalhos por permissão, resumo de mídias/livros e badges de acesso).
+  - Operador não dispara queries de Syncthing/categorias/erros; resumo de mídia só carrega se houver permissão de mídia.
+- **Arquivos**: `web/features/dashboard/Dashboard.tsx`, `DashboardAdmin.tsx`, `DashboardOperador.tsx`, `components/AtalhosOperador.tsx`, `CardsResumoOperador.tsx`, `ContinuarOuvindoOperador.tsx`, `utils/atalhosOperador.ts`, `hooks/useDashboard.ts`, `documentation/funcionalidades/DASHBOARD.md`
+
+---
+
+### ✅ Melhoria 197 — Google Fotos Só com Permissão `google_fotos`
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: usuário só com downloads via opções de sincronizar/categorizar com Google Fotos e o backend ainda disparava envio ao categorizar.
+- **Solução**:
+  - Front oculta force sync, badges de álbum e textos de Google Fotos em downloads, upload manual e editor sem a permissão.
+  - Backend: `forcar-google-fotos` exige `google_fotos`; classificação/rebaixamento/handler só despacham `EnviarGoogleFotosMessage` com a permissão; `EnviarGoogleFotosService` ignora ou bloqueia o restante.
+- **Arquivos**: `MediaItemController.php`, `ClassificarMediaItemService.php`, `ClassificarMediaMessageHandler.php`, `RebaixarMediaItemService.php`, `EnviarGoogleFotosService.php`, `web/features/downloads-video/*`, `upload-manual/UploadManual.tsx`, `editor-imagem/*`
+
+---
+
+### ✅ Melhoria 198 — Perfil e Troca de Senha
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: usuário não tinha tela para editar nome/e-mail nem trocar a própria senha.
+- **Solução**:
+  - Tela `/perfil` (Sidebar → Meu perfil) com dados e senha.
+  - `PUT/PATCH /api/v1/auth/me` e `/auth/me/senha` + services/DTOs dedicados.
+- **Arquivos**: `web/features/perfil/*`, `AuthController.php`, `AtualizarPerfilService.php`, `AlterarSenhaPropriaService.php`, `Sidebar.tsx`, `App.tsx`
+
+---
+
+### ✅ Melhoria 199 — Rotas Explícitas de Login e Refresh
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: após o catch-all da SPA deixar de engolir `/api/*`, `POST /auth/login` e `/token/refresh` passaram a 404 (antes o catch-all dava rota para o firewall interceptar).
+- **Solução**: `api_auth_login` e `api_token_refresh` em `config/routes.yaml` (sem controller); firewall `json_login` / `refresh_jwt` voltam a autenticar.
+- **Arquivos**: `config/routes.yaml`, `documentation/stack/AUTH.md`
+
+---
+
+### ✅ Melhoria 200 — Docs Alinhadas e UI de Usuários
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: documentação fora de `/progresso` ainda descrevia dashboard único, Google Fotos sem gate, Syncthing como `ROLE_ADMIN` e cadastro só via CLI; tela de usuários estava frágil visualmente.
+- **Solução**: revisão das docs de funcionalidades/stack/guias; redesign de lista/modal/grade de permissões em `/usuarios`.
+- **Arquivos**: `documentation/**` (exceto só progresso pontual), `web/features/usuarios/*`
+
+---

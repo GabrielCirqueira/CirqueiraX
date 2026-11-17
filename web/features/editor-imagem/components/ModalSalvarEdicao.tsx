@@ -1,4 +1,6 @@
 import type { CategoriaOpcao } from '@/features/downloads-video/types'
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import {
   Badge,
   Box,
@@ -87,12 +89,15 @@ function FormularioSalvarEdicao({
   onFechar,
   onSalvar,
 }: FormularioSalvarEdicaoProps) {
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
   const [nomeArquivo, setNomeArquivo] = useState(nomeSugerido)
   const [categoriaId, setCategoriaId] = useState(VALOR_SEM_CATEGORIA)
 
   const categoriasOrdenadas = ordenarCategoriasParaEdicao(categorias)
   const categoriaEscolhida = categorias.find((categoria) => categoria.uuid === categoriaId)
-  const enviaAoGoogleFotos = Boolean(categoriaEscolhida?.googlePhotosAlbumId)
+  const enviaAoGoogleFotos =
+    podeGoogleFotos && Boolean(categoriaEscolhida?.googlePhotosAlbumId)
 
   function aoSalvar() {
     onSalvar({
@@ -146,7 +151,9 @@ function FormularioSalvarEdicao({
                 <OpcaoCategoria
                   key={categoria.uuid}
                   nome={categoria.nome}
-                  temAlbumGoogleFotos={Boolean(categoria.googlePhotosAlbumId)}
+                  temAlbumGoogleFotos={
+                    podeGoogleFotos && Boolean(categoria.googlePhotosAlbumId)
+                  }
                   selecionada={categoriaId === categoria.uuid}
                   onSelecionar={() => setCategoriaId(categoria.uuid)}
                 />

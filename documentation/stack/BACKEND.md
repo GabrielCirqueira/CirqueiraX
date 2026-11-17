@@ -26,20 +26,21 @@ API Symfony do CirqueiraX. Controllers ficam leves, regras de negócio vivem em 
 src/
 ├── Command/        Comandos de console
 ├── Controller/     Audio, Auth, Categoria, Common, Dashboard, GoogleFotos,
-│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Sistema, Spotify, Sync e Video
-├── DataObject/     DTOs de entrada
-├── Entity/         Entidades Doctrine (ContaSpotify, ImagemSpotify, ImportacaoSpotify, ReproducaoSpotify...)
-├── Enum/           Enums de domínio (FonteReproducaoSpotify, StatusContaSpotify, StatusImagemSpotify, StatusImportacaoSpotify, TipoImagemSpotify...)
-├── EventListener/  Listeners
-├── Exception/      Exceções por domínio (LivroAudio, Spotify, Storage, Video...)
+│                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Sistema, Spotify,
+│                   Sync, Usuario e Video
+├── DataObject/     DTOs de entrada (incl. Usuario: perfil, senha, cadastro)
+├── Entity/         Entidades Doctrine (Usuario com permissoes JSON, ContaSpotify, …)
+├── Enum/           Enums de domínio (FuncionalidadeSistema, StatusMediaItem, …)
+├── EventListener/  Incl. VerificarPermissaoPorRota e VerificarPermissaoFuncionalidade
+├── Exception/      Exceções por domínio (Usuario, LivroAudio, Spotify, Storage, Video...)
 ├── Infra/          Audio (Edge TTS, Piper e roteador), GoogleFotos, GoogleOAuth,
 │                   Imagem, Spotify, Storage, Syncthing e YtDlp
 ├── Interface/      Contratos
-├── Message/        Mensagens do Messenger (BuscarImagemSpotifyMessage, ImportarHistoricoSpotifyMessage, SincronizarHistoricoSpotifyMessage...)
+├── Message/        Mensagens do Messenger
 ├── MessageHandler/ Handlers
-├── Repository/     Consultas (ContaSpotifyRepository, ImagemSpotifyRepository, ImportacaoSpotifyRepository, ReproducaoSpotifyRepository...)
-├── Security/       TokenAgenteAuthenticator
-├── Serializer/     Contratos JSON de saída (ContaSpotifySerializer, ImportacaoSpotifySerializer, SpotifyCapsulaSerializer, SpotifyResumoSerializer...)
+├── Repository/     Consultas
+├── Security/       TokenAgenteAuthenticator, Attribute/RequerPermissao
+├── Serializer/     Contratos JSON de saída (UsuarioSerializer, …)
 ├── Service/        Audio, Categoria, Dashboard, Distribuicao, GoogleFotos,
 │                   Ingestao, LivroAudio, MediaItem, OrigemRegra, Seguranca, Spotify, Usuario e Video
 ├── Support/        Utilitários, como MetadataKeys
@@ -69,9 +70,17 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | Método | Rota | Descrição |
 | :--- | :--- | :--- |
 | `GET` | `/health` | Público; banco e disco |
-| `POST` | `/auth/login` | Público; login |
-| `POST` | `/token/refresh` | Público; renova o token |
-| `GET` | `/auth/me` | Usuário atual |
+| `POST` | `/auth/login` | Público; login (`api_auth_login` em `routes.yaml`) |
+| `POST` | `/token/refresh` | Público; renova o token (`api_token_refresh`) |
+| `GET` | `/auth/me` | Usuário atual (`administrador`, `permissoes`) |
+| `PUT`/`PATCH` | `/auth/me` | Atualiza nome/e-mail |
+| `PUT`/`PATCH` | `/auth/me/senha` | Troca a própria senha |
+| `GET` | `/usuarios` | Lista usuários (`ROLE_ADMIN`) |
+| `POST` | `/usuarios` | Cria usuário (`ROLE_ADMIN`) |
+| `GET`/`PUT` | `/usuarios/{id}` | Detalhe/atualiza (`ROLE_ADMIN`) |
+| `GET` | `/usuarios/funcionalidades` | Catálogo de funcionalidades (`ROLE_ADMIN`) |
+
+Permissões de módulo: `ResolverPermissaoPorRotaService` + listeners; ações pontuais com `#[RequerPermissao]`. Ver [PERMISSOES.md](../funcionalidades/PERMISSOES.md) e [AUTH.md](AUTH.md).
 
 ### Mídias
 
@@ -91,7 +100,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `PATCH` | `/media-itens/{uuid}/categoria` | Categoriza |
 | `POST` | `/media-itens/{uuid}/retentar` | Retenta |
 | `POST` | `/media-itens/{uuid}/rebaixar` | Rebaixa |
-| `POST` | `/media-itens/{uuid}/forcar-google-fotos` | Força o envio |
+| `POST` | `/media-itens/{uuid}/forcar-google-fotos` | Força o envio (`#[RequerPermissao(GoogleFotos)]`) |
 | `GET` | `/media-itens/{uuid}/stream` | Reprodução |
 | `GET` | `/media-itens/{uuid}/thumbnail` | Miniatura |
 | `GET` | `/media-itens/{uuid}/download` | Download |
@@ -214,10 +223,14 @@ Conexão pela sessão do navegador (cookie), coleta a cada 30 s e Takeout. Funci
 | `GET` | `/dashboard/erros` | Fila de erros |
 | `GET` | `/dashboard/livros` | Armazenamento, memória e fila dos livros em áudio |
 | `POST` | `/dashboard/erros/retentar` | Retenta os erros |
-| `GET` | `/sync/pastas` | Estado do Syncthing |
-| `POST` | `/sync/pastas/{id}/sincronizar` | Dispara o rescan |
+| `GET` | `/sync/pastas` | Estado do Syncthing (`ROLE_SUPER_ADMIN`) |
+| `POST` | `/sync/pastas/{id}/sincronizar` | Dispara o rescan (`ROLE_SUPER_ADMIN`) |
+
+Classificação/rebaixamento só despacham `EnviarGoogleFotosMessage` se o dono tiver permissão `google_fotos`.
 
 ### Google Fotos
+
+Prefixo exige funcionalidade `google_fotos` (rota).
 
 | Método | Rota | Descrição |
 | :--- | :--- | :--- |
@@ -247,6 +260,7 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `StatusEnvioGoogleFotos` | `enviado`, `reaproveitado`, `falha` |
 | `OrigemEnvioGoogleFotos` | `automatico`, `retentativa`, `reenvio_manual`, `forcado` |
 | `TipoCliente` | `usuario`, `agente` |
+| `FuncionalidadeSistema` | `dashboard`, `musica`, `central_midias`, `downloads_video`, `downloads_audio`, `livros_audio`, `transcricoes`, `prints`, `editor_imagem`, `extrair_texto`, `upload_manual`, `google_fotos`, `gerenciar_usuarios` |
 
 `PlataformaVideo` identifica as plataformas de vídeo.
 
@@ -257,6 +271,7 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `app:seed` | Popula dados iniciais |
 | `app:seed:origem-regras` | Cria categorias e regras padrão (`--usuario`) |
 | `app:usuario:criar` | Cria usuário |
+| `app:usuario:garantir-administrador` | Garante admin na conta principal |
 | `app:agente:gerar-token` | Gera token de agente (`--usuario`) |
 | `app:jwt:master` | Gera JWT administrativo |
 | `app:google-fotos:autorizar-conta` | Autoriza a conta Google (`--usuario`) |

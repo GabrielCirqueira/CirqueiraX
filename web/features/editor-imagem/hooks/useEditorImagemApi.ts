@@ -1,5 +1,7 @@
 import type { CategoriaOpcao } from '@/features/downloads-video/types'
 import { addToast } from '@/shared/components/ui/toaster'
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { baixarArquivoDaMidia, detalharMidiaParaEdicao, salvarEdicaoImagem } from '../api'
 import type { SalvarEdicaoInput } from '../types'
@@ -27,6 +29,8 @@ export function useImagemDaMidia(uuid: string | null) {
 
 export function useSalvarEdicao(categorias: CategoriaOpcao[]) {
   const queryClient = useQueryClient()
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
 
   return useMutation({
     mutationFn: (entrada: SalvarEdicaoInput) => salvarEdicaoImagem(entrada),
@@ -36,9 +40,10 @@ export function useSalvarEdicao(categorias: CategoriaOpcao[]) {
       }
       const categoria = categorias.find((item) => item.uuid === entrada.categoriaId)
       addToast({
-        title: categoria?.googlePhotosAlbumId
-          ? 'Imagem salva e a caminho do Google Fotos'
-          : 'Imagem salva no CirqueiraX',
+        title:
+          podeGoogleFotos && categoria?.googlePhotosAlbumId
+            ? 'Imagem salva e a caminho do Google Fotos'
+            : 'Imagem salva no CirqueiraX',
         description: categoria
           ? `Categoria "${categoria.nome}".`
           : 'Ficou sem categoria. Ela aparece na Central de Mídias.',

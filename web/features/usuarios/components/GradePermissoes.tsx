@@ -1,5 +1,5 @@
 import type { FuncionalidadeSistema } from '@/shared/utils/funcionalidadesSistema'
-import { Box, Checkbox, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Flex, Text, VStack, Wrap, WrapItem } from '@chakra-ui/react'
 import { memo } from 'react'
 import type { FuncionalidadeOpcao } from '../types'
 import { alternarPermissao } from '../utils/formularioUsuario'
@@ -17,106 +17,94 @@ export const GradePermissoes = memo(function GradePermissoes({
   desabilitado = false,
   onChange,
 }: GradePermissoesProps) {
-  if (funcionalidades.length === 0) {
-    return (
-      <Box p={3} borderRadius="10px" border="1px dashed" borderColor="border.subtle">
-        <Text fontSize="sm" color="fg.muted">
-          Não foi possível carregar as funcionalidades. Recarregue a página.
-        </Text>
-      </Box>
-    )
-  }
+  const total = funcionalidades.length
+  const marcadas = selecionadas.length
 
   return (
     <VStack align="stretch" gap={3}>
-      <HStack justify="space-between" align="center" gap={3} flexWrap="wrap">
+      <Flex justify="space-between" align="center" gap={3} flexWrap="wrap">
         <VStack align="start" gap={0}>
           <Text fontSize="sm" fontWeight="semibold" color="fg">
-            Funcionalidades
+            Permissões de acesso
           </Text>
           <Text fontSize="xs" color="fg.muted">
-            Marque ao menos uma para liberar o acesso do usuário.
+            {desabilitado
+              ? 'Administrador tem acesso a tudo automaticamente.'
+              : `${marcadas} de ${total} selecionadas`}
           </Text>
         </VStack>
         {!desabilitado && (
-          <HStack gap={2}>
-            <Box
-              as="button"
+          <Flex gap={2}>
+            <Button
               type="button"
-              fontSize="xs"
-              color="cirqueira.brand.400"
-              fontWeight="semibold"
+              size="xs"
+              variant="ghost"
+              colorPalette="brand"
               onClick={() =>
                 onChange(funcionalidades.map((item) => item.codigo as FuncionalidadeSistema))
               }
             >
-              Marcar todas
-            </Box>
-            <Text fontSize="xs" color="fg.subtle">
-              ·
-            </Text>
-            <Box
-              as="button"
+              Todas
+            </Button>
+            <Button
               type="button"
-              fontSize="xs"
-              color="fg.muted"
-              fontWeight="semibold"
+              size="xs"
+              variant="ghost"
               onClick={() => onChange([])}
+              disabled={marcadas === 0}
             >
               Limpar
-            </Box>
-          </HStack>
+            </Button>
+          </Flex>
         )}
-      </HStack>
+      </Flex>
 
-      <SimpleGrid columns={{ base: 1, md: 2 }} gap={2}>
+      <Wrap gap={2}>
         {funcionalidades.map((item) => {
           const codigo = item.codigo as FuncionalidadeSistema
-          const marcada = selecionadas.includes(codigo)
+          const marcada = desabilitado || selecionadas.includes(codigo)
 
           return (
-            <Box
-              key={codigo}
-              as="button"
-              type="button"
-              textAlign="left"
-              p={3}
-              borderRadius="10px"
-              border="1px solid"
-              borderColor={marcada ? 'cirqueira.brand.500' : 'border.subtle'}
-              bg={marcada ? 'brand.subtle' : 'bg.panel'}
-              opacity={desabilitado ? 0.55 : 1}
-              cursor={desabilitado ? 'not-allowed' : 'pointer'}
-              transition="all 0.15s ease"
-              disabled={desabilitado}
-              onClick={() => {
-                if (desabilitado) return
-                onChange(alternarPermissao(selecionadas, codigo))
-              }}
-            >
-              <HStack gap={3} align="center">
-                <Checkbox.Root
-                  checked={marcada}
-                  disabled={desabilitado}
-                  colorPalette="brand"
-                  size="sm"
-                  pointerEvents="none"
-                >
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control />
-                </Checkbox.Root>
-                <Text fontSize="sm" fontWeight="medium" color="fg">
-                  {item.descricao}
-                </Text>
-              </HStack>
-            </Box>
+            <WrapItem key={codigo}>
+              <Box
+                as="button"
+                type="button"
+                px={3}
+                py={1.5}
+                borderRadius="full"
+                borderWidth="1px"
+                borderColor={marcada ? 'cirqueira.brand.500' : 'border.subtle'}
+                bg={marcada ? 'cirqueira.brand.500/15' : 'bg.muted'}
+                color={marcada ? 'cirqueira.brand.300' : 'fg.muted'}
+                fontSize="xs"
+                fontWeight={marcada ? 'semibold' : 'medium'}
+                opacity={desabilitado ? 0.7 : 1}
+                cursor={desabilitado ? 'default' : 'pointer'}
+                transition="all 0.12s ease"
+                _hover={
+                  desabilitado
+                    ? undefined
+                    : {
+                        borderColor: 'cirqueira.brand.400',
+                        color: 'fg',
+                      }
+                }
+                disabled={desabilitado}
+                onClick={() => {
+                  if (desabilitado) return
+                  onChange(alternarPermissao(selecionadas, codigo))
+                }}
+              >
+                {item.descricao}
+              </Box>
+            </WrapItem>
           )
         })}
-      </SimpleGrid>
+      </Wrap>
 
-      {!desabilitado && selecionadas.length === 0 && (
+      {!desabilitado && marcadas === 0 && (
         <Text fontSize="xs" color="cirqueira.orange.400">
-          Selecione pelo menos uma funcionalidade ou marque como administrador.
+          Selecione ao menos uma permissão ou ative administrador.
         </Text>
       )}
     </VStack>

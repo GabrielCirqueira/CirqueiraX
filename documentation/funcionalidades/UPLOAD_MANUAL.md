@@ -20,7 +20,8 @@ A tela **Upload Manual** (`/upload-manual`) envia fotos e vídeos que já estão
     ├─ 3. Ingestão com dedupe
     │     └─ Duplicado: devolve o item existente e _warning: item_duplicado_existente
     │
-    └─ 4. Com categoria: classifica, distribui e envia ao Google Fotos
+    └─ 4. Com categoria: classifica e distribui localmente;
+          envia ao Google Fotos só se a conta tiver permissão google_fotos
           Sem categoria: fica como sem_categoria
 ```
 
@@ -47,7 +48,7 @@ A tela **Upload Manual** (`/upload-manual`) envia fotos e vídeos que já estão
 
 ### Arquivo duplicado
 
-O item aparece como **Já Existente (Não Duplicado)**, e nenhum arquivo novo é criado. O modal **Sim, Sincronizar Mesmo Assim** chama `POST /api/v1/media-itens/{uuid}/forcar-google-fotos`. A mesma ação existe no botão **Forçar Google Fotos**.
+O item aparece como **Já Existente (Não Duplicado)**, e nenhum arquivo novo é criado. Com permissão `google_fotos`, o modal **Sim, Sincronizar Mesmo Assim** e o botão **Forçar Google Fotos** chamam `POST /api/v1/media-itens/{uuid}/forcar-google-fotos` (API exige a mesma permissão). Sem a permissão, essas ações não aparecem.
 
 ---
 

@@ -15,8 +15,10 @@ use App\DataObject\RebaixarLoteDTO;
 use App\DataObject\RemoverCategoriaLoteDTO;
 use App\DataObject\UploadManualDTO;
 use App\Entity\Usuario;
+use App\Enum\FuncionalidadeSistema;
 use App\Enum\OrigemMedia;
 use App\Repository\MediaItemRepository;
+use App\Security\Attribute\RequerPermissao;
 use App\Serializer\MediaItemSerializer;
 use App\Service\GoogleFotos\EnviarGoogleFotosService;
 use App\Service\Categoria\CategoriaService;
@@ -227,6 +229,7 @@ final class MediaItemController extends DefaultController
     }
 
     #[Route('/{uuid}/forcar-google-fotos', name: 'forcar_google_fotos', methods: ['POST'])]
+    #[RequerPermissao(FuncionalidadeSistema::GoogleFotos)]
     public function forcarGoogleFotos(string $uuid, Request $request, #[CurrentUser] Usuario $usuario): Response
     {
         $corpo = json_decode((string) $request->getContent(), true);

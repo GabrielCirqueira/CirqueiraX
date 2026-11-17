@@ -26,19 +26,18 @@ O menu lateral dá acesso às páginas que a sua conta tem permissão de usar. N
 
 ### Dashboard
 
-É a página inicial, um resumo de tudo que está acontecendo.
+É a página inicial. O conteúdo muda conforme o papel da conta:
+
+**Administrador** vê o painel completo de operação:
 
 - **Números principais:** total de mídias, concluídas, em processamento e com erro.
 - **Métricas de vídeos:** quantos foram baixados, quantos estão no disco, quantos foram apagados hoje e quanto espaço foi liberado.
 - **Atalhos rápidos:** baixar um vídeo, abrir os prints ou fazer um upload.
-- **Gráficos e atividades recentes:** mostram a distribuição das mídias e as últimas movimentações.
-- **Status das integrações:** indica se Syncthing, processamento, Google Fotos e armazenamento estão funcionando.
+- **Gráficos e atividades recentes:** distribuição das mídias e últimas movimentações.
+- **Status das integrações:** Syncthing, processamento, Google Fotos e armazenamento.
+- Abas **Categorias**, **Sincronização** (API só para super-admin) e **Erros**.
 
-O Dashboard também tem outras três abas:
-
-- **Categorias:** crie e edite categorias e escolha a pasta e o álbum de cada uma.
-- **Sincronização:** veja a situação das pastas sincronizadas e peça uma sincronização na hora.
-- **Erros:** veja o que falhou, o motivo, e tente de novo com um clique.
+**Usuário comum** vê um início pessoal: saudação, atalhos só das funcionalidades liberadas, resumo de mídias/livros se tiver permissão e a lista do que a conta pode acessar. Sem Syncthing, categorias do painel nem fila de erros de sistema. Detalhes em [DASHBOARD.md](DASHBOARD.md).
 
 ### Central de Mídias
 
@@ -68,14 +67,14 @@ Dois atalhos ajudam no dia a dia: **Ctrl+A** seleciona tudo, e com itens selecio
 
 **Ações com vários vídeos selecionados:**
 
-- **Categorizar** ou **remover categoria**.
+- **Categorizar** ou **remover categoria** (sempre para pasta local; álbum/envio ao Google Fotos só se a conta tiver a permissão **Google Fotos**).
 - **Distribuir horários:** espalha os vídeos ao longo do dia para organizar a linha do tempo. Há três modos: uniforme, retroativo e orgânico.
 - **Rebaixar:** baixa novamente vídeos cujo arquivo foi removido.
 - **Apagar**.
 
 **Editar um vídeo:** você ajusta título, autor, data, duração exibida e capa. Há atalhos como Hoje, Ontem, -7 e -30 dias.
 
-Cada vídeo também pode ser assistido dentro do próprio sistema.
+Cada vídeo também pode ser assistido dentro do próprio sistema. Sem a permissão Google Fotos, não aparecem botão de sincronizar, badges de álbum nem textos de backup na nuvem.
 
 > **Link repetido:** se o vídeo já foi baixado antes, o sistema não baixa outra vez e usa o que já tem.
 
@@ -122,7 +121,7 @@ Transforma seus livros em formato PDF em audiolivros interativos com narração 
 - A geração começa pelas partes à frente de onde você está ouvindo. Pause um livro ou passe ele na frente da fila.
 - Se a voz principal falhar, a parte é gerada com uma voz local (Piper), e há duas vozes Piper para escolher.
 - Áudio e PDF por links assinados de curta duração, sem o login na URL.
-- No Dashboard: continuar ouvindo, tempo ouvido por dia com meta diária e sequência, e quanto os livros ocupam de disco e memória.
+- No Dashboard do administrador: continuar ouvindo, tempo ouvido por dia com meta diária e sequência, e quanto os livros ocupam de disco e memória. No início do operador, continuar ouvindo aparece se a conta tiver `livros_audio`.
 - Baixe as próximas partes para ouvir sem internet.
 
 ### Transcrições
@@ -195,7 +194,11 @@ Serve para enviar arquivos que já estão no seu dispositivo.
 - Acompanhe o progresso e veja o resultado em grade ou tabela.
 - Filtre por Todas, Sem Categoria, Classificadas e Com Erro.
 
-Se o arquivo já existir, ele aparece como **Já Existente (Não Duplicado)**. Mesmo assim, você pode escolher **Sim, Sincronizar Mesmo Assim** para enviá-lo ao Google Fotos.
+Se o arquivo já existir, ele aparece como **Já Existente (Não Duplicado)**. Com a permissão **Google Fotos**, você pode escolher **Sim, Sincronizar Mesmo Assim** para enviá-lo à nuvem; sem essa permissão, essa opção não aparece.
+
+### Perfil
+
+Qualquer usuário logado abre **Meu perfil** no rodapé do menu. Lá atualiza nome/e-mail e troca a própria senha (senha atual + nova). Não exige permissão de módulo.
 
 ### Usuários
 
@@ -205,7 +208,7 @@ A conta principal (`gabrielcirqueira711@gmail.com`) é o administrador do sistem
 
 ### Google Fotos
 
-É onde você cuida do backup na nuvem.
+É onde você cuida do backup na nuvem. Só aparece no menu se a conta tiver a permissão **Google Fotos**.
 
 - **Conexão:** conecte, reconecte ou desconecte sua conta Google pelo próprio sistema.
 - **Álbuns:** veja os álbuns criados pelo CirqueiraX e quais estão ligados a uma categoria.
@@ -230,7 +233,7 @@ As mídias organizadas chegam ao celular pelo **Syncthing**, um aplicativo de si
 
 ### Backup no Google Fotos
 
-Assim que uma mídia recebe uma categoria com álbum, o sistema a envia para o Google Fotos, com a data correta. Se o arquivo já tiver sido enviado, ele é reaproveitado sem subir de novo.
+Se a conta tiver a permissão **Google Fotos** e a categoria tiver álbum, o sistema envia a mídia após classificar, com a data correta. Sem a permissão, a categoria só organiza a pasta local — nada sobe para a nuvem. Se o arquivo já tiver sido enviado, ele é reaproveitado sem subir de novo.
 
 ### Agente de prints
 

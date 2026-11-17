@@ -134,12 +134,12 @@ No cirqueiraX, o uso direto do `useEffect` em páginas e features é **proibido*
 
 ### 4.2 Regra de permissão
 
-Nenhuma página protegida pode ser acessada se:
+Nenhuma página de módulo pode ser acessada se:
 
-* o usuário não estiver logado
-* o usuário não tiver permissão
+* o usuário não estiver logado (`RotaProtegida`)
+* o usuário não tiver a funcionalidade do módulo (`RotaComPermissao` + `funcionalidadesSistema.ts`)
 
-A lógica de permissão deve estar centralizada em `routes/`, e não espalhada em páginas.
+Guards ficam em `routes/`. Em páginas, só ocultar ações pontuais com `usuarioPossuiPermissao` (ex.: Google Fotos). Ver [PERMISSOES.md](../funcionalidades/PERMISSOES.md).
 
 ---
 

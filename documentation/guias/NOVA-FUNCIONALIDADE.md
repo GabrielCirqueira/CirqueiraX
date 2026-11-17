@@ -32,10 +32,17 @@ Este documento é o guia resumido e prático para implementar qualquer nova tela
 | Tipo | Comportamento |
 | :--- | :--- |
 | **Pública** | Qualquer pessoa acessa e usa normalmente |
-| **Parcialmente protegida** | Tela visível para todos, mas ações exigem login — mostrar estado bloqueado com CTA de login |
-| **Totalmente protegida** | Redireciona para login se não autenticado — proteger a rota em `routes/` |
+| **Autenticada** | `RotaProtegida` — redireciona para login sem JWT |
+| **Por funcionalidade** | `RotaComPermissao` — exige código em `usuario.permissoes` (admin bypass) |
 
-Lógica de permissão centralizada em `web/routes/`. Nunca dentro de páginas ou componentes.
+Checklist de módulo novo:
+
+- [ ] Case em `App\Enum\FuncionalidadeSistema` e em `web/shared/utils/funcionalidadesSistema.ts`
+- [ ] Prefixo de API em `ResolverPermissaoPorRotaService` e/ou `#[RequerPermissao]`
+- [ ] Item na Sidebar + rota lazy em `App.tsx`
+- [ ] Atualizar [PERMISSOES.md](../funcionalidades/PERMISSOES.md)
+
+Guards ficam em `web/routes/`. Em páginas, só ocultar ações pontuais (ex.: Google Fotos) com `usuarioPossuiPermissao` — não reinventar o guard de rota.
 
 ---
 

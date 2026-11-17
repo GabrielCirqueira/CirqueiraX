@@ -6,10 +6,12 @@ namespace App\Service\GoogleFotos;
 
 use App\Entity\MediaItem;
 use App\Entity\RegistroEnvioGoogleFotos;
+use App\Enum\FuncionalidadeSistema;
 use App\Enum\StatusMediaItem;
 use App\Exception\Categoria\CategoriaException;
 use App\Exception\GoogleFotos\GoogleFotosAPIException;
 use App\Exception\MediaItem\MediaItemException;
+use App\Exception\Usuario\UsuarioException;
 use App\Infra\GoogleFotos\GoogleFotosAPI;
 use App\Interface\MetadataImagemInterface;
 use App\Repository\CategoriaRepository;
@@ -45,6 +47,18 @@ final readonly class EnviarGoogleFotosService
         $mediaItem = $this->mediaItemRepository->buscarPorUuid($mediaItemUuid);
         if (null === $mediaItem) {
             throw MediaItemException::midiaNaoEncontradaPorUuid();
+        }
+
+        if (!$mediaItem->usuario()->possuiPermissao(FuncionalidadeSistema::GoogleFotos)) {
+            if ($forcarUpload || $reenvioManual) {
+                throw UsuarioException::permissaoNegada(FuncionalidadeSistema::GoogleFotos->descricao());
+            }
+
+            $this->logger?->info('Envio ao Google Fotos ignorado: usuário sem permissão google_fotos.', [
+                'uuid' => $mediaItemUuid,
+            ]);
+
+            return $mediaItem;
         }
 
         if (!$forcarUpload && $mediaItem->isEnviadoGoogleFotos()) {

@@ -32,7 +32,7 @@ As abas e os contadores vêm de `GET /api/v1/media-itens/contagens`:
 
 **Por item:** visualizar, copiar para a área de transferência, baixar, editar imagem, atribuir categoria e apagar.
 
-**Em lote:** categorizar e apagar.
+**Em lote:** categorizar e apagar. Categorizar organiza a pasta local; envio/álbum do Google Fotos só ocorre se a conta tiver permissão `google_fotos`.
 
 ### Atalhos de teclado
 

@@ -28,7 +28,8 @@ O **Agente CirqueiraX** é um programa em Python que roda em segundo plano no co
 ┌──────────────────────────────────────────────────────┐
 │ SERVIDOR                                             │
 │  Autentica o token e identifica a origem             │
-│  Ingere, classifica, distribui e envia ao Google     │
+│  Ingere, classifica, distribui; Google Fotos só se   │
+│  o dono do token tiver permissão google_fotos        │
 └──────────────────────────────────────────────────────┘
 ```
 

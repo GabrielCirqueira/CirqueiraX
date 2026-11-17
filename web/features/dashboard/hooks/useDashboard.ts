@@ -55,12 +55,13 @@ export function useDefinirMetaEscuta() {
   })
 }
 
-export function useResumoDashboard() {
+export function useResumoDashboard(habilitado = true) {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.resumo,
     queryFn: obterResumoDashboard,
+    enabled: habilitado,
     staleTime: 1000 * 45,
-    refetchInterval: 30_000,
+    refetchInterval: habilitado ? 30_000 : false,
     refetchIntervalInBackground: false,
   })
 }

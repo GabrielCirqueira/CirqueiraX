@@ -1,7 +1,7 @@
 # CirqueiraX — Visão Geral Técnica
 
-**Última atualização:** 02/11/2026
-**Situação:** 185 tópicos de roadmap e 95 melhorias concluídos ([progresso](../progresso/README.md))
+**Última atualização:** 17/11/2026
+**Situação:** multi-usuário com permissões por funcionalidade, perfil, dashboard ADM/operador ([progresso](../progresso/README.md))
 **Produção:** https://x.cirqueira.com
 
 Para uma visão voltada ao usuário final, veja [FUNCIONALIDADES_DO_SISTEMA.md](FUNCIONALIDADES_DO_SISTEMA.md).
@@ -10,7 +10,7 @@ Para uma visão voltada ao usuário final, veja [FUNCIONALIDADES_DO_SISTEMA.md](
 
 ## 1. O que é
 
-CirqueiraX é um hub pessoal de mídias. Ele recebe arquivos de várias origens, elimina duplicados, classifica por categoria, distribui para pastas sincronizadas com Syncthing e envia para álbuns do Google Fotos.
+CirqueiraX é um hub pessoal de mídias. Ele recebe arquivos de várias origens, elimina duplicados, classifica por categoria, distribui para pastas sincronizadas com Syncthing e, quando a conta tem permissão `google_fotos`, envia para álbuns do Google Fotos. O acesso às telas é controlado por funcionalidade ([PERMISSOES.md](PERMISSOES.md)).
 
 ### Princípios de design
 
@@ -40,7 +40,7 @@ Ingestão (dedupe: SHA-256 ► MD5 ► hash visual ► URL)
 Classificação (OrigemRegra ou decisão manual)
         │
         ├──► Distribuição local ──► Syncthing ──► Celular e PCs
-        └──► Envio ao Google Fotos ──► Álbum da categoria
+        └──► Envio ao Google Fotos (só com permissão google_fotos) ──► Álbum da categoria
 
 Rotinas diárias: limpeza de vídeos e expiração de áudios
 Módulos isolados: 
@@ -70,7 +70,7 @@ Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.m
 | Rota | Tela | Documento |
 | :--- | :--- | :--- |
 | `/login` | Login | [AUTH.md](../stack/AUTH.md) |
-| `/`, `/dashboard`, `/app` | Dashboard | [DASHBOARD.md](DASHBOARD.md) |
+| `/`, `/dashboard`, `/app` | Dashboard (ADM completo / operador pessoal) | [DASHBOARD.md](DASHBOARD.md) |
 | `/central-midias`, `/todas-midias` | Central de Mídias | [CENTRAL_MIDIAS.md](CENTRAL_MIDIAS.md) |
 | `/downloads` | Downloads de vídeo | [DOWNLOADS_VIDEOS.md](DOWNLOADS_VIDEOS.md) |
 | `/downloads-mp3` | Downloads MP3 | [DOWNLOADS_AUDIO.md](DOWNLOADS_AUDIO.md) |
@@ -82,6 +82,7 @@ Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.m
 | `/upload-manual` | Upload Manual | [UPLOAD_MANUAL.md](UPLOAD_MANUAL.md) |
 | `/google-fotos` | Google Fotos | [GOOGLE_FOTOS.md](GOOGLE_FOTOS.md) |
 | `/usuarios` | Gerenciar usuários e permissões | [PERMISSOES.md](PERMISSOES.md) |
+| `/perfil` | Perfil e troca de senha | [PERMISSOES.md](PERMISSOES.md) |
 | `/musica` | Música (Spotify / YouTube Music) | [MUSICA.md](MUSICA.md) |
 | `/transcricoes` | Transcrições | [TRANSCRICOES.md](TRANSCRICOES.md) |
 
@@ -102,13 +103,14 @@ Processos sem tela própria:
 recebido ──► em_fila ──► sem_categoria (aguarda o usuário)
                     └──► classificado ──► distribuindo ──► distribuido_local
                                                                  │
-                                       enviando_google_fotos ◄───┘
+                              (se google_fotos) enviando_google_fotos ◄──┘
                                                  │
                                              concluido ──► arquivo_removido
                                                                  │
                                                 baixando ◄───────┘ (rebaixar)
 
 Qualquer etapa pode terminar em erro, com o motivo salvo em erroMotivo.
+Sem permissão google_fotos, após distribuido_local o item segue para concluido sem passar por enviando_google_fotos.
 ```
 
 | Status | Significado |
@@ -118,7 +120,7 @@ Qualquer etapa pode terminar em erro, com o motivo salvo em erroMotivo.
 | `classificado` | Categoria definida |
 | `distribuindo`, `distribuido_local` | Cópia para a pasta da categoria |
 | `baixando` | Download ou rebaixar em andamento |
-| `enviando_google_fotos` | Envio ao álbum |
+| `enviando_google_fotos` | Envio ao álbum (só contas com permissão) |
 | `concluido` | Pipeline completo |
 | `erro` | Falha, com motivo |
 | `arquivo_removido` | Arquivo removido pela retenção; o registro permanece |
@@ -186,7 +188,7 @@ As mudanças de status ficam em `historicoStatus`, com data e hora.
 - Apagar mídias ou mudar datas no Google Fotos pela API.
 - Várias categorias por item: cada mídia tem uma só.
 - Sincronização sob demanda de arquivo individual, por limitação do Syncthing.
-- Cadastro público de usuários.
+- Cadastro público de usuários (só admin em `/usuarios` ou CLI).
 
 ---
 

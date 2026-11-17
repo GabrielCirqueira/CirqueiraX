@@ -1,0 +1,15 @@
+---
+description: Após cada pedido do usuário, registrar melhoria, commit e push
+alwaysApply: true
+---
+
+# Entrega obrigatória
+
+Sempre que o usuário pedir uma alteração (feature, fix, docs, etc.):
+
+1. Implementar no código.
+2. Registrar em `documentation/progresso/melhorias/` (índice `MELHORIAS.md` + detalhe em `MELHORIAS_N.md`).
+3. Atualizar docs funcionais/stack/guias relevantes (exceto se o pedido for só progresso).
+4. `git add` dos arquivos da mudança, `git commit` e `git push` para `origin` (sem force).
+
+Não esperar o usuário pedir commit/push de novo — isso já faz parte do fluxo.

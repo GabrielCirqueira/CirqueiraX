@@ -215,3 +215,8 @@
 | M193 | Redesenho Visual das Abas de `/musica` (Capas, Gráficos e Tabela de Ranking) | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-193--redesenho-visual-das-abas-de-musica-capas-gráficos-e-tabela-de-ranking) |
 | M194 | Carregamento Rápido de `/musica` (Cache sem Apagar, Índices e Cache no Navegador) | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-194--carregamento-rápido-de-musica-cache-sem-apagar-índices-e-cache-no-navegador) |
 | M195 | Permissões por Funcionalidade e Tela de Gerenciar Usuários | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-195--permissões-por-funcionalidade-e-tela-de-gerenciar-usuários) |
+| M196 | Dashboard Separado para Administrador e Usuário | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-196--dashboard-separado-para-administrador-e-usuário) |
+| M197 | Google Fotos Só com Permissão `google_fotos` | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-197--google-fotos-só-com-permissão-google_fotos) |
+| M198 | Perfil e Troca de Senha | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-198--perfil-e-troca-de-senha) |
+| M199 | Rotas Explícitas de Login e Refresh | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-199--rotas-explícitas-de-login-e-refresh) |
+| M200 | Docs Alinhadas e UI de Usuários | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-200--docs-alinhadas-e-ui-de-usuários) |

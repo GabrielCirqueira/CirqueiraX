@@ -18,8 +18,8 @@ Cada usuário logado só vê e só mexe nos próprios dados. Uma mídia, categor
 | Tokens de agente (PCs que mandam prints) | `token_agente.usuario_id` — o print entra na conta do dono do token |
 | Spotify, livros, transcrições, áudios | já eram por usuário |
 | YouTube Music, catálogo de músicas, revisão e projeção `reproducao_musical` | por usuário desde o lote 186–205; item de outra pessoa responde 404 |
-| Painel (dashboard) | números, últimas mídias, categorias, erros e Spotify da própria conta |
-| Sincronização (Syncthing) | só para administradores (`ROLE_ADMIN`) |
+| Painel (dashboard) | ADM: painel completo da própria conta; usuário: início pessoal com atalhos/resumo conforme permissões ([DASHBOARD.md](DASHBOARD.md)) |
+| Sincronização (Syncthing) | só para `ROLE_SUPER_ADMIN` |
 
 Duplicados são procurados só dentro da conta: a mesma imagem enviada por duas pessoas vira dois itens, um para cada.
 
@@ -32,7 +32,7 @@ Os arquivos de cada usuário ficam em `MEDIA_STORAGE_PATH/<pasta do usuário>/<p
 
 ## Dados que já existiam
 
-A migração `Version20261110151341` ligou tudo o que existia à conta principal (`gabrielcirqueira711@gmail.com`): 1.513 mídias, 4 categorias, 2 regras, a conta do Google Fotos, 663 envios e 4 tokens. Ela também deu `ROLE_ADMIN` a essa conta, para continuar vendo a sincronização.
+A migração `Version20261110151341` ligou tudo o que existia à conta principal (`gabrielcirqueira711@gmail.com`): 1.513 mídias, 4 categorias, 2 regras, a conta do Google Fotos, 663 envios e 4 tokens. Ela também deu `ROLE_ADMIN` a essa conta. A API do Syncthing exige `ROLE_SUPER_ADMIN` (hierarquia: SUPER_ADMIN ⊃ ADMIN).
 
 Backup feito antes: `/root/backups/cirqueirax/2026-11-10_antes-multiusuario/` e tag git `backup-antes-multiusuario-2026-11-10`.
 

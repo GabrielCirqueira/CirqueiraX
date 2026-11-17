@@ -14,7 +14,7 @@ O **CirqueiraX** é um hub inteligente e soberano projetado para unificar, organ
 * **Screenshots / Prints**: Capturados automaticamente no PC ou no celular, deduplicados via hash SHA-256 e salvos com data real.
 * **Downloads de Vídeos**: Ingestão e download automático de vídeos (YouTube, TikTok, Twitter/X, Instagram) com extração rica de metadados via `yt-dlp`.
 * **Organização Local**: Separação das mídias em categorias e pastas estruturadas no disco.
-* **Backup no Google Fotos**: Envio append-only direto para álbuns oficiais na sua conta do Google via OAuth2.
+* **Backup no Google Fotos**: Envio append-only para álbuns oficiais via OAuth2, **somente** se a conta tiver a permissão `google_fotos`.
 
 ### Arquitetura de Sincronização das Três Pontas
 
@@ -60,7 +60,7 @@ O **CirqueiraX** é um hub inteligente e soberano projetado para unificar, organ
 3. O agente calcula o hash SHA-256 local da imagem (evitando envios repetidos).
 4. O agente dispara um `POST /api/v1/ingestao/print` seguro contendo a imagem e os metadados (resolução, título, data e origem `print_pessoal` ou `print_empresa`).
 5. O backend salva a imagem na pasta física `sync_media/prints/`, registra no MySQL e despacha o worker assíncrono.
-6. O worker do Symfony Messenger envia a imagem para o Google Fotos no álbum vinculado à categoria **Prints**.
+6. Se a conta tiver permissão `google_fotos`, o worker do Messenger envia a imagem para o Google Fotos no álbum da categoria **Prints**.
 
 ### Fluxo B: Prints e Fotos do Celular
 1. Você tira um screenshot ou salva uma foto no seu celular Android.
@@ -74,7 +74,7 @@ O **CirqueiraX** é um hub inteligente e soberano projetado para unificar, organ
 3. O vídeo aparece na aba **Downloads de Vídeo** aguardando sua revisão.
 4. Ao categorizar (ex: para `videos/memes`, `Shingeki no Kyojin` ou `One Piece`):
    - O arquivo é movido para a subpasta física correspondente (`sync_media/videos/<categoria>/`).
-   - O trabalho de upload para o álbum correspondente no Google Fotos é enfileirado no Messenger.
+   - Com permissão `google_fotos`, o upload para o álbum correspondente é enfileirado no Messenger.
 
 ---
 
@@ -323,7 +323,7 @@ Execute este checklist prático para ter 100% de certeza de que o ecossistema es
 | **1. Print no PC** | Tire um print no PC (salvando na pasta monitorada). | Log do agente exibe `Print enviada com sucesso!`. Acesse `https://x.<seu-dominio>.com/prints` e veja a imagem aparecer instantaneamente. |
 | **2. Print no Celular** | Tire um print no celular. | Syncthing-Fork sincroniza com a VPS. O arquivo aparece na pasta `sync_media/prints/` do host. |
 | **3. Download de Vídeo** | Cole o link de um vídeo (ex: YouTube/TikTok) em `Downloads de Vídeo`. | O download é concluído e o card do vídeo aparece na lista. |
-| **4. Categorização** | Selecione o vídeo e clique em **Categorizar**. No modal, escolha `videos/memes`. | O vídeo é movido para a pasta física `sync_media/videos/memes/` e enfileirado para o Google Fotos. |
+| **4. Categorização** | Selecione o vídeo e clique em **Categorizar**. No modal, escolha `videos/memes`. | O vídeo vai para a pasta física `sync_media/videos/memes/`; com `google_fotos`, também é enfileirado para o Google Fotos. |
 | **5. Google Fotos** | Acesse [photos.google.com](https://photos.google.com). | Abra o álbum correspondente e verifique se as mídias recém-processadas estão lá com a data original preservada. |
 
 ---
@@ -367,4 +367,4 @@ Execute este checklist prático para ter 100% de certeza de que o ecossistema es
 
 1. **Segurança em Primeiro Lugar**: O repositório Git é público. Nunca commite arquivos `.env`, chaves privadas SSH, tokens de agentes ou arquivos de mídia pessoais no repositório.
 2. **Sincronização P2P Limpa**: A pasta de sincronização do Syncthing deve sempre residir fora do repositório Git.
-3. **Supervisão Contínua**: O comando `docker ps` e a página `/dashboard` do CirqueiraX mostram em tempo real a saúde do pipeline, quantidade de itens na fila e o status das sincronizações.
+3. **Supervisão Contínua**: `docker ps` e o `/dashboard` do **administrador** mostram saúde do pipeline, fila e (com `ROLE_SUPER_ADMIN`) status Syncthing.

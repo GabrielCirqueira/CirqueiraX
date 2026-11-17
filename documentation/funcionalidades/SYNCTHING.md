@@ -2,7 +2,7 @@
 
 O **Syncthing** replica as mídias organizadas pelo CirqueiraX entre a VPS, o celular Android (Syncthing-Fork) e os computadores. O CirqueiraX não transfere arquivos: ele grava na pasta compartilhada, e o Syncthing faz o resto.
 
-> A aba **Sincronização** e as rotas `/api/v1/sync/*` são só para administradores (`ROLE_ADMIN`). Os arquivos de cada usuário ficam em `<pasta do usuário>/<pasta da categoria>`; a conta principal usa a pasta vazia, então os caminhos dela não mudaram ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
+> As rotas `/api/v1/sync/*` exigem `ROLE_SUPER_ADMIN` (`SyncController`). A aba **Sincronização** fica no dashboard do administrador; ADM comum (`ROLE_ADMIN` sem SUPER) vê a aba, mas a API responde 403. Os arquivos de cada usuário ficam em `<pasta do usuário>/<pasta da categoria>`; a conta principal usa a pasta vazia ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
 
 ---
 

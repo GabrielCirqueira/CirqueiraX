@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+use App\Enum\FuncionalidadeSistema;
 use App\Enum\StatusMediaItem;
 use App\Message\ClassificarMediaMessage;
 use App\Message\DistribuirLocalMessage;
@@ -40,7 +41,11 @@ final readonly class ClassificarMediaMessageHandler
                 $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
 
                 $metadata = $mediaItem->metadata();
-                if (empty($metadata['franky_id']) && empty($metadata['importado_franky'])) {
+                if (
+                    empty($metadata['franky_id'])
+                    && empty($metadata['importado_franky'])
+                    && $mediaItem->usuario()->possuiPermissao(FuncionalidadeSistema::GoogleFotos)
+                ) {
                     $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
                 }
 

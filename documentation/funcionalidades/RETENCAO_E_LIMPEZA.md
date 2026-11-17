@@ -83,7 +83,7 @@ Baixa de novo o vídeo de um item, por exemplo depois da limpeza.
 ### Garantias
 
 - **As datas não mudam:** os metadados e a data do arquivo são preservados, o que evita nova sincronização ou reordenação no celular.
-- **Sem envio repetido:** só envia ao Google Fotos se a categoria tiver álbum e o item ainda não tiver sido enviado. Itens importados do Franky também não são reenviados.
+- **Sem envio repetido:** só envia ao Google Fotos se o dono tiver permissão `google_fotos`, a categoria tiver álbum e o item ainda não tiver sido enviado. Itens importados do Franky também não são reenviados.
 - O status final é `concluido`.
 
 Se o envio ao Google Fotos não encontrar o arquivo, `EnviarGoogleFotosService` também tenta rebaixá-lo automaticamente.

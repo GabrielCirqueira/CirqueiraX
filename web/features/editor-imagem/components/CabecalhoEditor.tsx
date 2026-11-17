@@ -1,3 +1,5 @@
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import { Button, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { Copy, Download, ImagePlus, Save } from 'lucide-react'
 import { memo } from 'react'
@@ -21,6 +23,9 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
   onSalvar,
   onCopiar,
 }: CabecalhoEditorProps) {
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
+
   return (
     <HStack justify="space-between" align="flex-end" flexWrap="wrap" gap={4}>
       <VStack gap={1} alignItems="flex-start" minW={0}>
@@ -62,7 +67,11 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
           borderRadius="full"
           disabled={!temImagem}
           onClick={onSalvar}
-          title="Salvar no CirqueiraX ou enviar ao Google Fotos (Ctrl + S)"
+          title={
+            podeGoogleFotos
+              ? 'Salvar no CirqueiraX ou enviar ao Google Fotos (Ctrl + S)'
+              : 'Salvar no CirqueiraX (Ctrl + S)'
+          }
         >
           <Save size={15} />
           Salvar

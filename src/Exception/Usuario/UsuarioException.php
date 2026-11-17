@@ -46,4 +46,19 @@ class UsuarioException extends DomainException
     {
         return new self(sprintf('A funcionalidade "%s" não é válida.', $valor), 422);
     }
+
+    public static function senhaAtualIncorreta(): self
+    {
+        return new self('A senha atual está incorreta.', 422);
+    }
+
+    public static function confirmacaoSenhaDivergente(): self
+    {
+        return new self('A confirmação não coincide com a nova senha.', 422);
+    }
+
+    public static function novaSenhaIgualAtual(): self
+    {
+        return new self('A nova senha deve ser diferente da senha atual.', 422);
+    }
 }

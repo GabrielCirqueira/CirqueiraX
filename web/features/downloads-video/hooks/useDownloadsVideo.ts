@@ -1,4 +1,6 @@
 import { addToast, toaster } from '@/shared/components/ui/toaster'
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   apagarLote,
@@ -200,11 +202,13 @@ export function useRebaixarIndividual() {
 
 export function useRemoverCategoriaLote() {
   const queryClient = useQueryClient()
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
 
   return useMutation({
     mutationFn: (input: RemoverCategoriaLoteInput) => removerCategoriaLote(input),
     onSuccess: (itens, input) => {
-      addToast(montarAvisoRemocaoCategoria(itens.length, input.uuids.length))
+      addToast(montarAvisoRemocaoCategoria(itens.length, input.uuids.length, podeGoogleFotos))
       queryClient.invalidateQueries({ queryKey: ['media-itens'] })
     },
     onError: () => {

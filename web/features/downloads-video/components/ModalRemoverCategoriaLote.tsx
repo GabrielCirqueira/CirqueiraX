@@ -1,3 +1,5 @@
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import { Button, Dialog, HStack, Portal, Text, VStack } from '@chakra-ui/react'
 import { Loader2 } from 'lucide-react'
 import { memo } from 'react'
@@ -10,11 +12,17 @@ export interface ModalRemoverCategoriaLoteProps {
   onConfirmar: () => void
 }
 
-const PASSOS = [
+const PASSOS_COM_GOOGLE = [
   'Os vídeos voltam para "Sem categoria" e o arquivo continua no lugar.',
   'O vínculo com o Google Fotos é desfeito. Apague lá as cópias com a data errada, porque o Google não deixa o sistema apagar.',
   'Ajuste a data e o horário (individual ou em "Distribuir horários").',
   'Categorize de novo para reenviar ao Google Fotos com a data certa.',
+]
+
+const PASSOS_LOCAL = [
+  'Os vídeos voltam para "Sem categoria" e o arquivo continua no lugar.',
+  'Ajuste a data e o horário (individual ou em "Distribuir horários").',
+  'Categorize de novo quando quiser.',
 ]
 
 export const ModalRemoverCategoriaLote = memo(function ModalRemoverCategoriaLote({
@@ -24,6 +32,9 @@ export const ModalRemoverCategoriaLote = memo(function ModalRemoverCategoriaLote
   onFechar,
   onConfirmar,
 }: ModalRemoverCategoriaLoteProps) {
+  const usuario = useAuthStore((s) => s.usuario)
+  const passos = usuarioPossuiPermissao(usuario, 'google_fotos') ? PASSOS_COM_GOOGLE : PASSOS_LOCAL
+
   return (
     <Dialog.Root
       lazyMount
@@ -53,7 +64,7 @@ export const ModalRemoverCategoriaLote = memo(function ModalRemoverCategoriaLote
             <Dialog.Body p={0}>
               <VStack gap={4} align="stretch">
                 <VStack as="ol" gap={2} align="stretch" ps={4} listStyleType="decimal">
-                  {PASSOS.map((passo) => (
+                  {passos.map((passo) => (
                     <Text as="li" key={passo} fontSize="sm" color="fg.muted">
                       {passo}
                     </Text>

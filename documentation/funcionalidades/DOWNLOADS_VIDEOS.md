@@ -129,7 +129,7 @@ Abas: **Geral**, **Data**, **Duração** e **Capa / Thumbnail**. Há atalhos Hoj
 
 ### Outras ações por vídeo
 
-Assistir em modal, retentar e forçar Google Fotos.
+Assistir em modal, retentar e (só com permissão `google_fotos`) forçar Google Fotos. Sem essa permissão, categorizar continua só no armazenamento local — nada de badge/álbum/envio ao Google.
 
 ---
 

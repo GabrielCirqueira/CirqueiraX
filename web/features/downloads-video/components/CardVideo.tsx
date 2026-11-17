@@ -1,3 +1,5 @@
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import { Badge, Box, Card, Flex, HStack, IconButton, Link, Text, VStack } from '@chakra-ui/react'
 import {
   AlertCircle,
@@ -74,6 +76,8 @@ export const CardVideo = memo(function CardVideo({
   onApagar,
   onForcarGoogleFotos,
 }: CardVideoProps) {
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
   const [erroImagem, setErroImagem] = useState(false)
   const [usarFallbackApi, setUsarFallbackApi] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
@@ -120,7 +124,8 @@ export const CardVideo = memo(function CardVideo({
 
   const plataformaInfo = urlOriginal ? identificarPlataforma(urlOriginal) : null
   const ehDuplicado = Boolean(item.isDuplicado || item.metadata?.duplicado)
-  const enviadoGoogleFotos = Boolean(item.isEnviadoGoogleFotos || item.googlePhotosMediaId)
+  const enviadoGoogleFotos =
+    podeGoogleFotos && Boolean(item.isEnviadoGoogleFotos || item.googlePhotosMediaId)
   const densidadeAlta = colunas >= 6
 
   const handleDownloadDirecto = async (e: React.MouseEvent) => {

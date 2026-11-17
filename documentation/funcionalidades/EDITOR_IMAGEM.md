@@ -61,12 +61,15 @@ POST /api/v1/media-itens/edicoes (arquivo + editado_de_uuid)
 Nova mídia ──► herda a origem e a data da original
               │
               ▼
-Segue o pipeline normal de ingestão e classificação
+Ingestão + classificação (pasta local)
+              │
+              └──► Google Fotos só se a conta tiver permissão google_fotos
 ```
 
 - Aceita PNG, JPEG e WebP de até 50 MB.
 - A ligação com a mídia original fica nos metadados, em `editado_de_uuid`.
 - A edição herda a origem da mídia original, portanto um print editado continua na galeria de Prints.
+- Na UI, badge/texto “enviar ao Google Fotos” só aparece com a permissão (`ModalSalvarEdicao`, `CabecalhoEditor`).
 
 ---
 

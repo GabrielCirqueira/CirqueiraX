@@ -8,6 +8,7 @@ use App\DataObject\CategorizarLoteDTO;
 use App\DataObject\ClassificarManualDTO;
 use App\Entity\Categoria;
 use App\Entity\MediaItem;
+use App\Enum\FuncionalidadeSistema;
 use App\Enum\StatusMediaItem;
 use App\Exception\MediaItem\MediaItemException;
 use App\Infra\GoogleFotos\GoogleFotosAPI;
@@ -101,7 +102,9 @@ final readonly class ClassificarMediaItemService
         if (null !== $mediaItem->uuid()) {
             $mediaUuidStr = $mediaItem->uuid()->toString();
             $this->messageBus->dispatch(new DistribuirLocalMessage($mediaUuidStr));
-            $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+            if ($mediaItem->usuario()->possuiPermissao(FuncionalidadeSistema::GoogleFotos)) {
+                $this->messageBus->dispatch(new EnviarGoogleFotosMessage($mediaUuidStr));
+            }
         }
     }
 
@@ -144,6 +147,10 @@ final readonly class ClassificarMediaItemService
         ?string $categoriaAntigaId,
         Categoria $categoriaNova,
     ): void {
+        if (!$mediaItem->usuario()->possuiPermissao(FuncionalidadeSistema::GoogleFotos)) {
+            return;
+        }
+
         $googleMediaId = $mediaItem->googleFotosId();
         if (TextoUtil::estaEmBranco($googleMediaId)) {
             return;

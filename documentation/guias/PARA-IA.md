@@ -116,7 +116,7 @@ Rota lazy em `App.tsx`:
 <Route path="pedidos" lazy={() => lazyWithRetry(() => import('@/features/pedidos/Pedidos'))} />
 ```
 
-Página autenticada: envolva com `<RotaProtegida />` como `/app`.
+Página autenticada: `RotaProtegida` (JWT) + `RotaComPermissao` (funcionalidade). Novo módulo: case em `FuncionalidadeSistema` (PHP + TS), item na Sidebar, e se a API for exclusiva, `#[RequerPermissao]` / mapa em `ResolverPermissaoPorRotaService`. Ver [PERMISSOES.md](../funcionalidades/PERMISSOES.md).
 
 ### 3.2 UI (obrigatório)
 
@@ -395,7 +395,7 @@ class YtDlpException extends \DomainException
 1. Entender a tela e o contrato JSON.
 2. Backend: **Controller primeiro**. Service atômico. Lógica grande/repetida → vários services + interface + `TaggedIterator` na Feature. Nunca um arquivo com toda a lógica. Repository para toda consulta → Entidade / migration / DTO / Serializer.
 3. Frontend: `types.ts` → `api.ts` → hook → componentes Chakra UI + layout → página `Component` → rota lazy em `App.tsx`.
-4. Se a rota for autenticada, registrar em `RotaProtegida`.
+4. Se a rota for autenticada: `RotaProtegida` + `RotaComPermissao`; registrar funcionalidade no enum (backend/front), Sidebar e docs de permissões.
 5. `make lint-all`. Corrigir o que o Biome/PHP apontar.
 
 ---

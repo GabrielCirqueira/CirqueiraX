@@ -32,6 +32,8 @@ import {
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSEO } from '@/shared/hooks'
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import { DropzoneUpload } from './components/DropzoneUpload'
 import { FilaTriagemUpload } from './components/FilaTriagemUpload'
 import { ModalConfirmarSincronizacaoDuplicado } from './components/ModalConfirmarSincronizacaoDuplicado'
@@ -44,6 +46,8 @@ const UploadManual = memo(function UploadManual() {
     keywords: 'upload manual, triagem de midias, cirqueirax',
   })
 
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
   const queryClient = useQueryClient()
   const [filtroStatus, setFiltroStatus] = useState<string>('todos')
   const [busca, setBusca] = useState<string>('')
@@ -466,16 +470,19 @@ const UploadManual = memo(function UploadManual() {
                 setModalConfirmarApagar(true)
               }}
               onRetentar={(uuid) => mutationRetentar.mutate(uuid)}
-              onForcarGoogleFotos={(item) =>
-                abrirConfirmacaoDuplicado({
-                  nome:
-                    item.metadata?.titulo ||
-                    (item.caminhoLocal ? item.caminhoLocal.split('/').pop() || '' : '') ||
-                    item.hash,
-                  tamanhoBytes: item.tamanhoBytes ?? undefined,
-                  previewUrl: item.thumbnailUrl,
-                  mediaItem: item,
-                })
+              onForcarGoogleFotos={
+                podeGoogleFotos
+                  ? (item) =>
+                      abrirConfirmacaoDuplicado({
+                        nome:
+                          item.metadata?.titulo ||
+                          (item.caminhoLocal ? item.caminhoLocal.split('/').pop() || '' : '') ||
+                          item.hash,
+                        tamanhoBytes: item.tamanhoBytes ?? undefined,
+                        previewUrl: item.thumbnailUrl,
+                        mediaItem: item,
+                      })
+                  : undefined
               }
               filtroStatus={filtroStatus}
               onMudarFiltroStatus={setFiltroStatus}

@@ -6,6 +6,7 @@ namespace App\Service\MediaItem;
 
 use App\DataObject\RebaixarLoteDTO;
 use App\Entity\MediaItem;
+use App\Enum\FuncionalidadeSistema;
 use App\Enum\StatusMediaItem;
 use App\Exception\MediaItem\MediaItemException;
 use App\Interface\ArmazenamentoInterface;
@@ -209,7 +210,12 @@ final readonly class RebaixarMediaItemService
         $this->mediaItemRepository->salvar($mediaItem);
 
         $isFranky = !empty($metadata['franky_id']) || !empty($metadata['importado_franky']);
-        if (!$isFranky && !$mediaItem->isEnviadoGoogleFotos() && null !== $mediaItem->categoriaId()) {
+        if (
+            !$isFranky
+            && !$mediaItem->isEnviadoGoogleFotos()
+            && null !== $mediaItem->categoriaId()
+            && $mediaItem->usuario()->possuiPermissao(FuncionalidadeSistema::GoogleFotos)
+        ) {
             $categoria = $this->categoriaRepository->buscarPorUuid((string) $mediaItem->categoriaId());
             if (null !== $categoria && !TextoUtil::estaEmBranco($categoria->googleFotosAlbumId())) {
                 $this->messageBus->dispatch(new EnviarGoogleFotosMessage($uuid));

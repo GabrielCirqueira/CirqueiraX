@@ -8,7 +8,8 @@ A integração faz o backup das mídias em álbuns do Google Fotos. O envio roda
 
 - **Só o que o app criou:** a Google Photos Library API só dá acesso ao conteúdo enviado pelo próprio CirqueiraX.
 - **Sem apagar e sem mudar data (M84):** a API não exclui mídias nem altera a data de itens já enviados. Por isso, apagar no CirqueiraX não apaga no Google Fotos.
-- **Conta única:** o sistema trabalha com uma conta principal (`ContaGoogleFotos`).
+- **Uma conta Google por usuário:** cada pessoa conecta a própria `ContaGoogleFotos`.
+- **Permissão `google_fotos`:** a tela `/google-fotos` e o envio automático exigem essa funcionalidade. Sem ela, categorizar só organiza pasta local (downloads, upload e editor ocultam sync/álbum). `POST …/forcar-google-fotos` usa `#[RequerPermissao(GoogleFotos)]`; classificar/rebaixar não despacham `EnviarGoogleFotosMessage` sem a permissão.
 
 ### Escopos OAuth
 
@@ -59,18 +60,21 @@ GOOGLE_CLIENT_SECRET=...
 ```
 [ Mídia classificada com álbum ]
               │
-    EnviarGoogleFotosMessage
-              │
-    EnviarGoogleFotosService
-       ├─ Já enviado ou Franky? ──► ignora, sem registro
-       ├─ Conteúdo igual já enviado? ──► reaproveita o mediaId e associa ao álbum
-       ├─ Arquivo faltando? ──► tenta rebaixar
-       ├─ PNG? ──► cópia temporária com data em eXIf/XMP
-       └─ Sobe os bytes e cria o item no álbum
-              │
-    RegistrarEnvioGoogleFotosService
-              │
-    status concluido
+    dono tem permissão google_fotos?
+       ├─ não ──► só distribuição local; sem mensagem de envio
+       └─ sim ──► EnviarGoogleFotosMessage
+                        │
+              EnviarGoogleFotosService
+                 ├─ Sem permissão (defesa) ──► ignora / bloqueia se forçado
+                 ├─ Já enviado ou Franky? ──► ignora, sem registro
+                 ├─ Conteúdo igual já enviado? ──► reaproveita o mediaId e associa ao álbum
+                 ├─ Arquivo faltando? ──► tenta rebaixar
+                 ├─ PNG? ──► cópia temporária com data em eXIf/XMP
+                 └─ Sobe os bytes e cria o item no álbum
+                        │
+              RegistrarEnvioGoogleFotosService
+                        │
+              status concluido
 ```
 
 - `GoogleFotosAlbumService::obterOuCriarAlbumId` cria o álbum automaticamente quando a categoria ainda não tem um.
@@ -157,7 +161,7 @@ php bin/console app:media:indexar-metadados
 | `GET` | `/api/v1/google-fotos/envios` | Histórico |
 | `GET` | `/api/v1/google-fotos/envios/resumo` | Contadores |
 | `POST` | `/api/v1/google-fotos/envios/{uuid}/reenviar` | Reenvia |
-| `POST` | `/api/v1/media-itens/{uuid}/forcar-google-fotos` | Força o envio |
+| `POST` | `/api/v1/media-itens/{uuid}/forcar-google-fotos` | Força o envio (`#[RequerPermissao(GoogleFotos)]`) |
 
 ---
 

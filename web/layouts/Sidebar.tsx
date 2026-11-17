@@ -243,25 +243,31 @@ export const Sidebar = memo(function Sidebar({ isMobile = false, onClose }: Side
           justify="space-between"
           align="center"
         >
-          <HStack gap={2.5} minW={0}>
-            <Center
-              boxSize={8}
-              borderRadius="full"
-              bg="brand.subtle"
-              color="cirqueira.brand.300"
-              flexShrink={0}
-            >
-              <User size={16} />
-            </Center>
-            <VStack gap={0} align="flex-start" minW={0}>
-              <Text fontSize="xs" fontWeight="semibold" color="fg" truncate maxW="110px">
-                {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
-              </Text>
-              <Text fontSize="10px" color="fg.subtle" truncate maxW="110px">
-                {usuarioEhAdministrador(usuario) ? 'Administrador' : 'Operador'}
-              </Text>
-            </VStack>
-          </HStack>
+          <RouterLink
+            to="/perfil"
+            onClick={handleItemClick}
+            style={{ minWidth: 0, flex: 1, textDecoration: 'none' }}
+          >
+            <HStack gap={2.5} minW={0}>
+              <Center
+                boxSize={8}
+                borderRadius="full"
+                bg="brand.subtle"
+                color="cirqueira.brand.300"
+                flexShrink={0}
+              >
+                <User size={16} />
+              </Center>
+              <VStack gap={0} align="flex-start" minW={0}>
+                <Text fontSize="xs" fontWeight="semibold" color="fg" truncate maxW="110px">
+                  {usuario?.nomeCompleto || usuario?.username || 'Usuário'}
+                </Text>
+                <Text fontSize="10px" color="fg.subtle" truncate maxW="110px">
+                  {usuarioEhAdministrador(usuario) ? 'Administrador' : 'Operador'}
+                </Text>
+              </VStack>
+            </HStack>
+          </RouterLink>
 
           <HStack gap={1}>
             <IconButton

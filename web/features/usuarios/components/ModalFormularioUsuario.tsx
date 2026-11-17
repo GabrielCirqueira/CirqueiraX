@@ -3,13 +3,17 @@ import {
   Button,
   Dialog,
   Field,
+  Flex,
   HStack,
+  IconButton,
   Input,
   Portal,
+  Separator,
   Switch,
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { Shield, UserPlus, X } from 'lucide-react'
 import { memo, useState } from 'react'
 import type { FormularioUsuarioValores, FuncionalidadeOpcao, UsuarioSistema } from '../types'
 import {
@@ -50,68 +54,131 @@ function ConteudoFormularioUsuario({
 
   return (
     <>
-      <Dialog.Header>
-        <Dialog.Title>{usuario ? 'Editar usuário' : 'Novo usuário'}</Dialog.Title>
-        <Dialog.CloseTrigger />
+      <Dialog.Header
+        px={5}
+        py={4}
+        borderBottomWidth="1px"
+        borderColor="border.subtle"
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        gap={3}
+      >
+        <HStack gap={3} minW={0}>
+          <Box
+            p={2}
+            borderRadius="lg"
+            bg="cirqueira.brand.500/15"
+            color="cirqueira.brand.300"
+            display="inline-flex"
+          >
+            {usuario ? <Shield size={18} /> : <UserPlus size={18} />}
+          </Box>
+          <VStack align="start" gap={0} minW={0}>
+            <Dialog.Title fontSize="md" fontWeight="bold" color="fg">
+              {usuario ? 'Editar usuário' : 'Novo usuário'}
+            </Dialog.Title>
+            <Text fontSize="xs" color="fg.muted">
+              {usuario
+                ? `Conta @${usuario.username}`
+                : 'Preencha os dados e defina o acesso'}
+            </Text>
+          </VStack>
+        </HStack>
+        <Dialog.CloseTrigger asChild>
+          <IconButton
+            aria-label="Fechar"
+            size="sm"
+            variant="ghost"
+            borderRadius="full"
+            disabled={salvando}
+          >
+            <X size={16} />
+          </IconButton>
+        </Dialog.CloseTrigger>
       </Dialog.Header>
-      <Dialog.Body>
-        <VStack align="stretch" gap={4}>
-          <Field.Root required>
-            <Field.Label>Nome completo</Field.Label>
-            <Input
-              value={valores.nomeCompleto}
-              onChange={(e) => atualizarCampo('nomeCompleto', e.target.value)}
-              placeholder="Nome e sobrenome"
-            />
-          </Field.Root>
 
-          {modo === 'cadastro' && (
+      <Dialog.Body px={5} py={5} maxH="70vh" overflowY="auto">
+        <VStack align="stretch" gap={5}>
+          <VStack align="stretch" gap={3}>
+            <Text fontSize="xs" fontWeight="bold" color="fg.subtle" textTransform="uppercase">
+              Dados da conta
+            </Text>
+
             <Field.Root required>
-              <Field.Label>Usuário</Field.Label>
+              <Field.Label fontSize="sm">Nome completo</Field.Label>
               <Input
-                value={valores.username}
-                onChange={(e) => atualizarCampo('username', e.target.value)}
-                placeholder="usuario.login"
-                autoComplete="off"
+                value={valores.nomeCompleto}
+                onChange={(e) => atualizarCampo('nomeCompleto', e.target.value)}
+                placeholder="Nome e sobrenome"
+                borderRadius="lg"
               />
             </Field.Root>
-          )}
 
-          <Field.Root required>
-            <Field.Label>E-mail</Field.Label>
-            <Input
-              type="email"
-              value={valores.email}
-              onChange={(e) => atualizarCampo('email', e.target.value)}
-              placeholder="email@exemplo.com"
-            />
-          </Field.Root>
+            <Flex gap={3} direction={{ base: 'column', sm: 'row' }}>
+              {modo === 'cadastro' && (
+                <Field.Root required flex={1}>
+                  <Field.Label fontSize="sm">Usuário</Field.Label>
+                  <Input
+                    value={valores.username}
+                    onChange={(e) => atualizarCampo('username', e.target.value)}
+                    placeholder="login"
+                    autoComplete="off"
+                    borderRadius="lg"
+                  />
+                </Field.Root>
+              )}
+              <Field.Root required flex={1.4}>
+                <Field.Label fontSize="sm">E-mail</Field.Label>
+                <Input
+                  type="email"
+                  value={valores.email}
+                  onChange={(e) => atualizarCampo('email', e.target.value)}
+                  placeholder="email@exemplo.com"
+                  borderRadius="lg"
+                />
+              </Field.Root>
+            </Flex>
 
-          <Field.Root required={modo === 'cadastro'}>
-            <Field.Label>{modo === 'cadastro' ? 'Senha' : 'Nova senha (opcional)'}</Field.Label>
-            <Input
-              type="password"
-              value={valores.senha}
-              onChange={(e) => atualizarCampo('senha', e.target.value)}
-              placeholder={modo === 'cadastro' ? 'Mínimo 6 caracteres' : 'Deixe em branco'}
-              autoComplete="new-password"
-            />
-          </Field.Root>
+            <Field.Root required={modo === 'cadastro'}>
+              <Field.Label fontSize="sm">
+                {modo === 'cadastro' ? 'Senha' : 'Nova senha (opcional)'}
+              </Field.Label>
+              <Input
+                type="password"
+                value={valores.senha}
+                onChange={(e) => atualizarCampo('senha', e.target.value)}
+                placeholder={modo === 'cadastro' ? 'Mínimo 6 caracteres' : 'Deixe em branco para manter'}
+                autoComplete="new-password"
+                borderRadius="lg"
+              />
+            </Field.Root>
+          </VStack>
 
-          <Box
-            p={3}
-            borderRadius="10px"
-            border="1px solid"
-            borderColor="border.subtle"
-            bg="bg.muted"
-          >
-            <HStack justify="space-between">
+          <Separator borderColor="border.subtle" />
+
+          <VStack align="stretch" gap={3}>
+            <Text fontSize="xs" fontWeight="bold" color="fg.subtle" textTransform="uppercase">
+              Controle de acesso
+            </Text>
+
+            <HStack
+              justify="space-between"
+              align="center"
+              px={3}
+              py={3}
+              borderRadius="lg"
+              borderWidth="1px"
+              borderColor={valores.administrador ? 'cirqueira.brand.500/40' : 'border.subtle'}
+              bg={valores.administrador ? 'cirqueira.brand.500/8' : 'bg.muted'}
+            >
               <VStack align="start" gap={0}>
-                <Text fontSize="sm" fontWeight="semibold">
+                <Text fontSize="sm" fontWeight="semibold" color="fg">
                   Administrador
                 </Text>
                 <Text fontSize="xs" color="fg.muted">
-                  Acesso total a todas as funcionalidades
+                  Ignora a lista e libera todas as telas
                 </Text>
               </VStack>
               <Switch.Root
@@ -125,30 +192,37 @@ function ConteudoFormularioUsuario({
                 <Switch.Control />
               </Switch.Root>
             </HStack>
-          </Box>
 
-          <GradePermissoes
-            funcionalidades={funcionalidades}
-            selecionadas={valores.permissoes}
-            desabilitado={valores.administrador}
-            onChange={(permissoes) => atualizarCampo('permissoes', permissoes)}
-          />
+            <GradePermissoes
+              funcionalidades={funcionalidades}
+              selecionadas={valores.permissoes}
+              desabilitado={valores.administrador}
+              onChange={(permissoes) => atualizarCampo('permissoes', permissoes)}
+            />
+          </VStack>
         </VStack>
       </Dialog.Body>
-      <Dialog.Footer>
-        <HStack gap={2}>
-          <Button variant="ghost" onClick={onFechar} disabled={salvando}>
-            Cancelar
-          </Button>
-          <Button
-            colorPalette="brand"
-            disabled={!valido || salvando}
-            loading={salvando}
-            onClick={() => onSalvar(valores)}
-          >
-            {usuario ? 'Salvar alterações' : 'Criar usuário'}
-          </Button>
-        </HStack>
+
+      <Dialog.Footer
+        px={5}
+        py={4}
+        borderTopWidth="1px"
+        borderColor="border.subtle"
+        gap={2}
+        justifyContent="flex-end"
+      >
+        <Button variant="ghost" borderRadius="lg" onClick={onFechar} disabled={salvando}>
+          Cancelar
+        </Button>
+        <Button
+          colorPalette="brand"
+          borderRadius="lg"
+          disabled={!valido || salvando}
+          loading={salvando}
+          onClick={() => onSalvar(valores)}
+        >
+          {usuario ? 'Salvar' : 'Criar usuário'}
+        </Button>
       </Dialog.Footer>
     </>
   )
@@ -166,16 +240,30 @@ export const ModalFormularioUsuario = memo(function ModalFormularioUsuario({
 
   return (
     <Dialog.Root
+      lazyMount
+      unmountOnExit
       open={aberto}
       onOpenChange={(detalhes) => {
-        if (!detalhes.open) onFechar()
+        if (!detalhes.open && !salvando) onFechar()
       }}
-      size="lg"
+      size="xl"
+      placement="center"
     >
       <Portal>
-        <Dialog.Backdrop />
+        <Dialog.Backdrop bg="blackAlpha.700" />
         <Dialog.Positioner>
-          <Dialog.Content bg="bg.panel" border="1px solid" borderColor="border.subtle">
+          <Dialog.Content
+            bg="bg.panel"
+            borderWidth="1px"
+            borderColor="border.subtle"
+            borderRadius="xl"
+            maxW="640px"
+            w="full"
+            mx={4}
+            p={0}
+            overflow="hidden"
+            shadow="2xl"
+          >
             {aberto && (
               <ConteudoFormularioUsuario
                 key={chaveFormulario}

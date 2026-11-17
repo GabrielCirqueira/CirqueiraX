@@ -102,34 +102,13 @@
 
   ### Regra
 
-  A lógica de permissão deve estar centralizada em `web/routes/`. Nunca colocar lógica de permissão dentro de páginas ou componentes.
+  Autenticação e acesso a módulo ficam em `web/routes/` (`RotaProtegida` + `RotaComPermissao`). Catálogo em `funcionalidadesSistema.ts` / `FuncionalidadeSistema`. Em componentes, só ocultar ações pontuais com `usuarioPossuiPermissao` (ex.: sync Google Fotos). Ver [PERMISSOES.md](../funcionalidades/PERMISSOES.md).
 
-  **Exemplo de Implementação (`web/routes/RotaProtegida.tsx`):**
-  ```tsx
-  import { useAuthStore } from '@/stores/useAuthStore';
-  import { Navigate } from 'react-router-dom';
-
-  export function RotaProtegida({ children }) {
-    const { usuario } = useAuthStore();
-    if (!usuario) return <Navigate to="/login" replace />;
-    return children;
-  }
-  ```
-
-  **Uso no Roteador (`web/App.tsx`):**
-  ```tsx
-  <Route path="/dashboard" element={
-    <RotaProtegida>
-      <DashboardPage />
-    </RotaProtegida>
-  } />
-  ```
-  
   ### Rate Limiting (Proteção contra Brute Force)
   
-  O subflow já vem com o componente `symfony/rate-limiter` configurado. O firewall de login (`/api/auth/login`) possui **throttling nativo** (limite de 5 tentativas por minuto por IP/Username).
+  O firewall de login (`POST /api/v1/auth/login`, rota `api_auth_login` em `config/routes.yaml`) possui **throttling nativo** (5 tentativas por minuto). Refresh em `api_token_refresh`.
   
-  Para proteger outros endpoints sensíveis, use o atributo `#[IsGranted]` ou injete o `RateLimiterFactory` nos seus services.
+  Para proteger outros endpoints sensíveis, use `#[IsGranted]`, `#[RequerPermissao]` ou o `RateLimiterFactory`.
 
   ---
 

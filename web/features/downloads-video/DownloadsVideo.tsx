@@ -1,5 +1,7 @@
 import { useLocalStorageState, useSEO } from '@/shared/hooks'
 import { CHAVES_STORAGE } from '@/shared/utils'
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import {
   Badge,
   Box,
@@ -85,6 +87,9 @@ export default function DownloadsVideo() {
       'Gerencie e monitore os downloads de vídeos sociais, metadados enriquecidos, categorias e status de sincronização.',
     keywords: 'downloads de videos, tiktok, twitter, instagram, youtube, cirqueirax',
   })
+
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
 
   const [pagina, setPagina] = useState(1)
   const [busca, setBusca] = useState('')
@@ -1052,7 +1057,7 @@ export default function DownloadsVideo() {
               onRebaixar={handleAbrirRebaixarIndividual}
               onRetentar={(uuid) => retentarItemMutate(uuid)}
               onApagar={handleAbrirApagarIndividual}
-              onForcarGoogleFotos={handleForcarGoogleFotos}
+              onForcarGoogleFotos={podeGoogleFotos ? handleForcarGoogleFotos : undefined}
             />
           ) : (
             <TabelaVideos
@@ -1073,7 +1078,7 @@ export default function DownloadsVideo() {
               onRebaixar={handleAbrirRebaixarIndividual}
               onRetentar={(uuid) => retentarItemMutate(uuid)}
               onApagar={handleAbrirApagarIndividual}
-              onForcarGoogleFotos={handleForcarGoogleFotos}
+              onForcarGoogleFotos={podeGoogleFotos ? handleForcarGoogleFotos : undefined}
             />
           )}
         </Box>
@@ -1321,7 +1326,7 @@ export default function DownloadsVideo() {
                                       selecionada ? 'cirqueira.brand.500/30' : 'border.subtle'
                                     }
                                   >
-                                    {cat.googlePhotosAlbumId ? (
+                                    {podeGoogleFotos && cat.googlePhotosAlbumId ? (
                                       <Cloud size={16} />
                                     ) : (
                                       <Folder size={16} />
@@ -1336,7 +1341,7 @@ export default function DownloadsVideo() {
                                       {cat.nome}
                                     </Text>
                                     <HStack gap={1.5}>
-                                      {cat.googlePhotosAlbumId ? (
+                                      {podeGoogleFotos && cat.googlePhotosAlbumId ? (
                                         <Badge
                                           size="xs"
                                           variant="subtle"
@@ -1549,8 +1554,10 @@ export default function DownloadsVideo() {
                       O vídeo será baixado novamente a partir da URL original gravada nos metadados.
                       Com um vídeo só, o download acontece na hora e você acompanha pelo aviso e
                       pelo status do card; com vários, eles entram na fila. Todas as datas
-                      alteradas, categorias e metadados existentes serão rigorosamente preservados,
-                      sem reenviar para o Google Fotos se já sincronizado.
+                      alteradas, categorias e metadados existentes serão rigorosamente preservados
+                      {podeGoogleFotos
+                        ? ', sem reenviar para o Google Fotos se já sincronizado.'
+                        : '.'}
                     </Text>
 
                     <HStack

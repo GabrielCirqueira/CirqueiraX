@@ -12,7 +12,7 @@ Arquitetura, estrutura e convenções do frontend React do CirqueiraX.
 | **Vite 7** | Build e servidor de desenvolvimento (porta `4012`) |
 | **Chakra UI 3** | Design system e layout |
 | **Paleta `cirqueira.*`** | Tokens de cor, gerados por `scripts/gerar-paleta-brand.mjs` |
-| **React Router 7** | `createBrowserRouter`, `lazyWithRetry` e `RotaProtegida` |
+| **React Router 7** | `createBrowserRouter`, `lazyWithRetry`, `RotaProtegida` e `RotaComPermissao` |
 | **TanStack Query 5** | Dados do servidor |
 | **Zustand 5** | Estado global persistido |
 | **Axios** | Cliente HTTP com renovação de token |
@@ -38,7 +38,7 @@ web/
 ├── features/               Módulos por domínio
 │   ├── auth/
 │   ├── central-midias/
-│   ├── dashboard/
+│   ├── dashboard/          DashboardAdmin (ADM) e DashboardOperador (usuário)
 │   ├── downloads-audio/
 │   ├── downloads-video/
 │   ├── editor-imagem/
@@ -46,23 +46,26 @@ web/
 │   ├── home/               Sem rota no momento
 │   ├── livros-audio/
 │   ├── not-found/
+│   ├── perfil/             Dados da conta e troca de senha
 │   ├── prints/
 │   ├── musica/             Página Música, detalhes, rankings e Cápsula
 │   ├── revisao-musica/     Tela de revisão e correções do catálogo
 │   ├── spotify/            Conexão, importação, callback e tocando agora
 │   ├── youtube-music/      Conexão, extensão do navegador, importação do Takeout e selo de revisão
 │   ├── transcricoes/
-│   └── upload-manual/
+│   ├── upload-manual/
+│   └── usuarios/           Só administrador
 ├── layouts/                MainLayout, AuthLayout, AppContainer, Sidebar, Header e Footer
 ├── pages/                  Pontos de entrada de DownloadsVideo e UploadManual
-├── routes/                 RotaProtegida
+├── routes/                 RotaProtegida, RotaComPermissao
 ├── shared/
 │   ├── hooks/              useDebounce, useFiltrosUrl, useLocalStorageState,
 │   │                       useMediaQuery, useMountEffect, useSEO
 │   ├── components/
-│   └── utils/
-└── stores/                 useAuthStore
+│   └── utils/              funcionalidadesSistema.ts, iniciaisNome.ts, …
+└── stores/                 useAuthStore (administrador, roles, permissoes)
 ```
+
 
 ---
 
@@ -71,27 +74,30 @@ web/
 | Rota | Tela | Acesso |
 | :--- | :--- | :--- |
 | `/login` | Login | Pública |
-| `/`, `/dashboard`, `/app` | Dashboard | Protegida |
-| `/central-midias`, `/todas-midias` | Central de Mídias | Protegida |
-| `/downloads` | Downloads de vídeo | Protegida |
-| `/downloads-mp3` | Downloads MP3 | Protegida |
-| `/prints` | Prints & Capturas | Protegida |
-| `/editor-imagem` | Editor de Imagem | Protegida |
-| `/upload-manual` | Upload Manual | Protegida |
-| `/google-fotos` | Google Fotos | Protegida |
-| `/livros-audio` | Livros em Áudio | Protegida |
-| `/livros-audio/:uuid` | Leitor de Livro em Áudio | Protegida |
-| `/musica` | Música (Spotify, YouTube Music e Cápsula Sonora) | Protegida |
-| `/musica/artista?uuid=` | Detalhe do artista | Protegida |
-| `/musica/faixa?uuid=` | Detalhe da música | Protegida |
-| `/musica/gerenciar` | Contas (Spotify e YouTube Music), extensões (captura + visual Spotify), importações e acesso à revisão | Protegida |
-| `/musica/revisao?aba=` | Revisão e correções do catálogo | Protegida |
-| `/spotify`, `/spotify/artista`, `/spotify/musica` | Redirecionam para as rotas de Música | Protegida |
-| `/transcricoes` | Transcrições de Áudio | Protegida |
-| `/spotify/callback` | Retorno OAuth do Spotify | Protegida |
+| `/`, `/dashboard`, `/app` | Dashboard (ADM ou operador) | Autenticada + `dashboard` |
+| `/central-midias`, `/todas-midias` | Central de Mídias | Autenticada + permissão |
+| `/downloads` | Downloads de vídeo | Autenticada + permissão |
+| `/downloads-mp3` | Downloads MP3 | Autenticada + permissão |
+| `/prints` | Prints & Capturas | Autenticada + permissão |
+| `/editor-imagem` | Editor de Imagem | Autenticada + permissão |
+| `/extrair-texto` | Extrair Texto | Autenticada + permissão |
+| `/upload-manual` | Upload Manual | Autenticada + permissão |
+| `/google-fotos` | Google Fotos | Autenticada + `google_fotos` |
+| `/livros-audio` | Livros em Áudio | Autenticada + permissão |
+| `/livros-audio/:uuid` | Leitor de Livro em Áudio | Autenticada + permissão |
+| `/musica` | Música (Spotify, YouTube Music e Cápsula Sonora) | Autenticada + `musica` |
+| `/musica/artista?uuid=` | Detalhe do artista | Autenticada + `musica` |
+| `/musica/faixa?uuid=` | Detalhe da música | Autenticada + `musica` |
+| `/musica/gerenciar` | Contas, extensões, importações e revisão | Autenticada + `musica` |
+| `/musica/revisao?aba=` | Revisão e correções do catálogo | Autenticada + `musica` |
+| `/spotify`, `/spotify/artista`, `/spotify/musica` | Redirecionam para as rotas de Música | Autenticada + `musica` |
+| `/transcricoes` | Transcrições de Áudio | Autenticada + permissão |
+| `/spotify/callback` | Retorno OAuth do Spotify | Autenticada |
+| `/usuarios` | Gerenciar usuários | Autenticada + admin / `gerenciar_usuarios` |
+| `/perfil` | Perfil e senha | Autenticada (sem permissão de módulo) |
 | `*` | NotFound | Pública |
 
-A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainLayout` abre `ModalAuth` quando necessário.
+A Sidebar mostra só as telas liberadas (admin vê todas, inclusive Usuários), troca de tema, link **Meu perfil** e logout. Guards: `RotaProtegida` (JWT) + `RotaComPermissao` (funcionalidade). Catálogo em `web/shared/utils/funcionalidadesSistema.ts`. Detalhes em [PERMISSOES.md](../funcionalidades/PERMISSOES.md).
 
 ---
 
@@ -112,6 +118,8 @@ A Sidebar leva às dez telas principais e tem a troca de tema e o logout. `MainL
 | `musica`, `revisao-musica` | [MUSICA.md](../funcionalidades/MUSICA.md) |
 | `spotify` | [SPOTIFY.md](../funcionalidades/SPOTIFY.md) |
 | `youtube-music` | [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md) |
+| `usuarios` | [PERMISSOES.md](../funcionalidades/PERMISSOES.md) |
+| `perfil` | [PERMISSOES.md](../funcionalidades/PERMISSOES.md) |
 | `notificacoes` | [NOTIFICACOES.md](../funcionalidades/NOTIFICACOES.md) |
 
 ---

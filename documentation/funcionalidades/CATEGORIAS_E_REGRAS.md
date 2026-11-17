@@ -58,7 +58,8 @@ Criadas por `app:seed:origem-regras --usuario=<email ou username>`. Categorias e
  classificado + categoria       sem_categoria
           │                     aguarda o usuário
           ▼
- DistribuirLocalMessage e EnviarGoogleFotosMessage
+ DistribuirLocalMessage
+ (+ EnviarGoogleFotosMessage só se o dono tiver permissão google_fotos)
 ```
 
 Em downloads e uploads, a categoria escolhida no pedido é aplicada sem esperar a triagem.
@@ -78,7 +79,7 @@ Em downloads e uploads, a categoria escolhida no pedido é aplicada sem esperar 
 `ClassificarMediaItemService` também trata itens já concluídos ou distribuídos:
 
 - move o arquivo para a nova pasta;
-- troca o álbum com `adicionarItensAoAlbum` e `removerItensDoAlbum`.
+- com permissão `google_fotos`, troca o álbum com `adicionarItensAoAlbum` e `removerItensDoAlbum` (sem a permissão, só move o arquivo local).
 
 A troca de álbum funciona para itens que o próprio CirqueiraX enviou.
 
@@ -95,7 +96,7 @@ Disponível para itens `classificado`, `distribuido_local`, `concluido` ou `erro
 
 ## 6. Gestão
 
-**Pela interface:** Dashboard, aba Categorias, onde é possível criar, editar e vincular álbum.
+**Pela interface:** Dashboard do administrador, aba Categorias (criar, editar e vincular álbum). Usuário comum não vê essa aba.
 
 **Pela API:**
 

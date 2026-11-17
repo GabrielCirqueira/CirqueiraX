@@ -1,12 +1,23 @@
 # Funcionalidade: Dashboard
 
-O **Dashboard** (`/`, `/dashboard` ou `/app`) é a página inicial e mostra o estado de todo o pipeline. A interface foi simplificada na melhoria M86.
+O **Dashboard** (`/`, `/dashboard` ou `/app`) é a página inicial. O conteúdo muda conforme o papel do usuário.
 
-> Desde a M131, todos os números, as últimas mídias, as categorias, a fila de erros e o card do Spotify são da conta logada. A aba **Sincronização** só aparece para administradores ([MULTIUSUARIO.md](MULTIUSUARIO.md)).
+> Desde a M131, números, últimas mídias, categorias, fila de erros e Spotify são da conta logada. Syncthing só para super-admin. Desde a M196, o layout completo de operação fica só para administrador; usuário comum vê um início pessoal.
 
 ---
 
-## 1. Estrutura
+## 1. Dois dashboards
+
+| Papel | Componente | Conteúdo |
+| :--- | :--- | :--- |
+| Administrador (`ROLE_ADMIN`) | `DashboardAdmin` | Pipeline completo: resumo, vídeos, livros, abas (visão geral, categorias, sync, erros) |
+| Usuário | `DashboardOperador` | Saudação, atalhos pelas permissões, resumo de mídias (se tiver), continuar ouvindo (se tiver livros), badges de acesso |
+
+`Dashboard.tsx` escolhe entre os dois com `usuarioEhAdministrador`.
+
+---
+
+## 2. Dashboard do administrador
 
 Sempre visíveis no topo:
 
@@ -15,29 +26,37 @@ Sempre visíveis no topo:
 | `BarraAcoesRapidas` | Atalhos: Baixar vídeo, Prints e Upload manual |
 | `CardsResumo` | Total de mídias, Concluídas, Em processamento e Erros |
 | `CardsVideosMetricas` | Baixados, No disco, Apagados hoje e Espaço liberado |
-| `SecaoLivrosDashboard` | Livros em áudio: "Continuar ouvindo" (3 últimos), tempo ouvido hoje, na semana e no total, sequência de dias, gráfico de 14 dias com a meta diária editável, e armazenamento (livros por status, PDFs, partes de áudio, vozes extras por voz, disco, memória do container, do servidor e do worker, e fila) |
+| `SecaoLivrosDashboard` | Continuar ouvindo, meta diária, disco e memória |
 
 ### Aba Visão geral
 
-- `GraficosDashboard`: gráficos em Recharts.
-- `AtividadesRecentes`: as 6 últimas movimentações.
-- `StatusIntegracoes`: estado real de Syncthing, Pipeline, Google Fotos, Armazenamento, Spotify (com o estado âmbar de bloqueio) e YouTube Music (não configurado, conectado ou reconectar). Os dois de música levam a `/musica`.
+- `GraficosDashboard`, `AtividadesRecentes`, `StatusIntegracoes` (Syncthing, Pipeline, Google Fotos, Spotify, YouTube Music).
 
 ### Aba Categorias
 
-`TabelaCategorias` traz busca, criação (`ModalCriarCategoria`), edição (`ModalEditarCategoria`) e vínculo ou troca de álbum. A API aceita `DELETE /api/v1/categorias/{uuid}`, mas a tela não oferece exclusão.
+`TabelaCategorias` com criação/edição e vínculo de álbum.
 
 ### Aba Sincronização
 
-`PainelSync` mostra as pastas do Syncthing e dispara a sincronização de cada uma.
+`PainelSync` (API exige `ROLE_SUPER_ADMIN`).
 
 ### Aba Erros
 
-`FilaErros` lista as mídias com falha e o motivo, com retentativa individual ou em lote.
+`FilaErros` com retentativa individual ou em lote.
 
 ---
 
-## 2. API
+## 3. Dashboard do operador
+
+- Atalhos filtrados por `usuario.permissoes` (`utils/atalhosOperador.ts`).
+- Cards de mídia e últimas entradas só se houver alguma permissão de mídia.
+- Bloco de livros em áudio só com `livros_audio`.
+- Lista das funcionalidades liberadas + link para `/perfil`.
+- Não carrega Syncthing, categorias, fila de erros nem métricas de sistema.
+
+---
+
+## 4. API
 
 | Método | Rota | Descrição |
 | :--- | :--- | :--- |
@@ -53,7 +72,7 @@ Sempre visíveis no topo:
 
 ---
 
-## 3. Retentativa
+## 5. Retentativa
 
 `RetentarMediaItemService` decide o próximo passo de cada item:
 
@@ -62,6 +81,11 @@ Sempre visíveis no topo:
 
 ---
 
-## 4. Código
+## 6. Código
 
-`web/features/dashboard/`. Rótulos e cálculos das métricas ficam em `utils/metricasDashboard.ts`.
+`web/features/dashboard/`:
+
+- `Dashboard.tsx` — roteador ADM vs operador
+- `DashboardAdmin.tsx` / `DashboardOperador.tsx`
+- `components/AtalhosOperador.tsx`, `CardsResumoOperador.tsx`, `ContinuarOuvindoOperador.tsx`
+- Rótulos e cálculos em `utils/metricasDashboard.ts` e `utils/atalhosOperador.ts`

@@ -9,6 +9,8 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores'
 import {
   Clipboard,
   Cloud,
@@ -37,6 +39,8 @@ export interface CampoNovoLinkProps {
 export const CampoNovoLink = memo(function CampoNovoLink({
   onDownloadIniciado,
 }: CampoNovoLinkProps) {
+  const usuario = useAuthStore((s) => s.usuario)
+  const podeGoogleFotos = usuarioPossuiPermissao(usuario, 'google_fotos')
   // Modo: 'unico' (input rápido) ou 'lote' (textarea para vários links)
   const [modo, setModo] = useState<'unico' | 'lote'>('unico')
 
@@ -394,14 +398,18 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                     {categoriaSelecionada ? (
                       <Badge
                         variant="subtle"
-                        colorPalette={categoriaSelecionada.googlePhotosAlbumId ? 'teal' : 'purple'}
+                        colorPalette={
+                          podeGoogleFotos && categoriaSelecionada.googlePhotosAlbumId
+                            ? 'teal'
+                            : 'purple'
+                        }
                         fontSize="xs"
                         fontWeight="medium"
                         px={2.5}
                         py={1}
                       >
                         <HStack gap={1.5} alignItems="center">
-                          {categoriaSelecionada.googlePhotosAlbumId ? (
+                          {podeGoogleFotos && categoriaSelecionada.googlePhotosAlbumId ? (
                             <Cloud size={13} />
                           ) : (
                             <Folder size={13} />
@@ -431,8 +439,12 @@ export const CampoNovoLink = memo(function CampoNovoLink({
                           <option value="">Classificar depois</option>
                           {categorias.map((cat) => (
                             <option key={cat.uuid} value={cat.uuid}>
-                              {cat.nome}{' '}
-                              {cat.googlePhotosAlbumId ? '☁️ (Google Fotos)' : '📁 (Local)'}
+                              {cat.nome}
+                              {podeGoogleFotos
+                                ? cat.googlePhotosAlbumId
+                                  ? ' ☁️ (Google Fotos)'
+                                  : ' 📁 (Local)'
+                                : ''}
                             </option>
                           ))}
                         </NativeSelect.Field>
@@ -555,7 +567,12 @@ https://youtube.com/watch?v=abcdefghij`}
                         <option value="">Classificar depois</option>
                         {categorias.map((cat) => (
                           <option key={cat.uuid} value={cat.uuid}>
-                            {cat.nome} {cat.googlePhotosAlbumId ? '☁️ (Google Fotos)' : '📁 (Local)'}
+                            {cat.nome}
+                            {podeGoogleFotos
+                              ? cat.googlePhotosAlbumId
+                                ? ' ☁️ (Google Fotos)'
+                                : ' 📁 (Local)'
+                              : ''}
                           </option>
                         ))}
                       </NativeSelect.Field>

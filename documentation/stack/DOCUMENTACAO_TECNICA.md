@@ -316,21 +316,33 @@ POST /api/v1/token/refresh  →  { token }  (novo access token)
      [refresh expirado]    →  redireciona para /login
 ```
 
+Rotas explícitas em `config/routes.yaml` (sem controller; o firewall intercepta):
+- `api_auth_login` → `POST /api/v1/auth/login`
+- `api_token_refresh` → `POST /api/v1/token/refresh`
+
+O catch-all da SPA usa `reactRouting: "^(?!api(?:/|$)).+"` e não pode engolir `/api/*`. Sem as rotas acima, login/refresh devolvem 404.
+
 Configurações:
 - `config/packages/lexik_jwt_authentication.yaml` — define `token_ttl`
 - `config/packages/gesdinet_jwt_refresh_token.yaml` — define `ttl` (2592000s = 30 dias)
 
+`GET/PUT /api/v1/auth/me` e `PUT /api/v1/auth/me/senha` atualizam perfil; `/api/v1/usuarios*` é `ROLE_ADMIN`. Permissões por funcionalidade: [PERMISSOES.md](../funcionalidades/PERMISSOES.md) e [AUTH.md](AUTH.md).
+
 ### 5.5 Segurança e Firewalls
 
-`config/packages/security.yaml` define dois firewalls:
+`config/packages/security.yaml`:
 
-- `api` — sem estado (`stateless: true`), cobre `/api/*`, usa autenticação JWT
-- `main` — firewall padrão para rotas web (se houver)
+- `login` — `json_login` em `/api/v1/auth/login`
+- `refresh` — `refresh_jwt` em `/api/v1/token/refresh`
+- `api` — JWT + autenticadores de agente/extensão
+- `main` — lazy, web
 
-Endpoints públicos configurados em `access_control` (sem token necessário):
+Endpoints públicos em `access_control`:
 - `POST /api/v1/auth/login`
 - `POST /api/v1/token/refresh`
 - `GET  /api/v1/health`
+
+Syncthing: `ROLE_SUPER_ADMIN`. Módulos: `ResolverPermissaoPorRotaService` / `#[RequerPermissao]`.
 
 ### 5.6 Rate Limiting
 
@@ -477,7 +489,11 @@ interface AuthStore {
 | `setToken` | Atualiza apenas o access token (após refresh bem-sucedido) |
 | `limpar` | Reseta todo o estado (logout ou refresh falhou) |
 
-### 6.4 Guard de Rota — `web/routes/RotaProtegida.tsx`
+### 6.4 Guards de rota — `RotaProtegida` e `RotaComPermissao`
+
+Além do JWT (`RotaProtegida`), cada módulo usa `RotaComPermissao` com o código de `FuncionalidadeSistema` (`web/shared/utils/funcionalidadesSistema.ts`). Sidebar filtra o menu; `/perfil` não exige funcionalidade.
+
+### 6.4.1 Guard legado — `web/routes/RotaProtegida.tsx`
 
 ```tsx
 // Se não autenticado: redireciona para /login
