@@ -11,6 +11,7 @@ use App\Entity\Usuario;
 use App\Service\IdentificacaoMusica\ObterConsumoIdentificacaoService;
 use App\Service\IdentificacaoMusica\ObterResumoIdentificacaoService;
 use App\Service\Musica\Analise\ListarVersoesMusicaService;
+use App\Service\Musica\Analise\ObterComparativoServicosMusicaService;
 use App\Service\Musica\Analise\ObterDescobertasMusicaService;
 use App\Service\Musica\Analise\ObterDetalheArtistaMusicaService;
 use App\Service\Musica\Analise\ObterDetalheMusicaService;
@@ -20,6 +21,7 @@ use App\Service\Musica\Analise\ObterHabitosMusicaService;
 use App\Service\Musica\Analise\ObterLinhaDoTempoMusicaService;
 use App\Service\Musica\Analise\ObterRecordesMusicaService;
 use App\Service\Musica\Analise\ObterRetrospectivaAnualMusicaService;
+use App\Service\Musica\Analise\ObterVisaoGeralMusicaService;
 use App\Service\Musica\Analise\ResolverAlvoPorNomeService;
 use App\Service\Musica\Analise\ResolverPeriodoAnaliseMusicaService;
 use Symfony\Component\HttpFoundation\Request;
@@ -46,7 +48,39 @@ final class MusicaAnaliseController extends DefaultController
         private readonly ObterConsumoIdentificacaoService $obterConsumoIdentificacaoService,
         private readonly ListarVersoesMusicaService $listarVersoesService,
         private readonly ResolverPeriodoAnaliseMusicaService $resolverPeriodoService,
+        private readonly ObterVisaoGeralMusicaService $obterVisaoGeralService,
+        private readonly ObterComparativoServicosMusicaService $obterComparativoServicosService,
     ) {}
+
+    #[Route(self::PREFIXO.'/visao-geral', name: 'api_musica_visao_geral', methods: ['GET'])]
+    public function visaoGeral(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $periodo = PeriodoAnaliseSpotifyDTO::fromRequest($request);
+
+        return $this->success($this->obterVisaoGeralService->executar($usuario, FiltroFonteRequisicaoDTO::daRequisicao($request), $periodo));
+    }
+
+    #[Route(self::PREFIXO.'/ultimas-ouvidas', name: 'api_musica_ultimas_ouvidas', methods: ['GET'])]
+    public function ultimasOuvidas(Request $request, #[CurrentUser] Usuario $usuario): Response
+    {
+        $antes = $this->textoOpcional($request, 'antes');
+        if (null !== $antes && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $antes)) {
+            return $this->error('Informe o cursor no formato AAAA-MM-DD HH:MM:SS.');
+        }
+
+        return $this->success($this->obterExtrasService->ultimasOuvidas(
+            $usuario,
+            FiltroFonteRequisicaoDTO::daRequisicao($request),
+            $this->inteiroOpcional($request, 'limite'),
+            $antes,
+        ));
+    }
+
+    #[Route(self::PREFIXO.'/servicos', name: 'api_musica_servicos', methods: ['GET'])]
+    public function servicos(#[CurrentUser] Usuario $usuario): Response
+    {
+        return $this->success($this->obterComparativoServicosService->executar($usuario));
+    }
 
     #[Route(self::PREFIXO.'/artistas/{uuid}', name: 'api_musica_detalhe_artista', requirements: ['uuid' => '[0-9a-fA-F-]{36}'], methods: ['GET'])]
     public function detalheArtista(string $uuid, Request $request, #[CurrentUser] Usuario $usuario): Response

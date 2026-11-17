@@ -12,7 +12,7 @@ import {
 import { Fingerprint, Repeat1, Shuffle, SkipForward, Sparkle, Target } from 'lucide-react'
 import { memo, useState } from 'react'
 import { useFonteMusica, useHabitosMusica, useImagensItensMusica } from '../hooks'
-import type { HabitosMusica } from '../types'
+import type { FiltroPeriodoAnalise, HabitosMusica } from '../types'
 import {
   TEXTO_INDISPONIVEL_YOUTUBE,
   criarOpcoesPeriodoAnalise,
@@ -31,15 +31,21 @@ import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
 
 export interface SecaoHabitosProps {
   habilitado: boolean
+  filtroExterno?: FiltroPeriodoAnalise
 }
 
-export const SecaoHabitos = memo(function SecaoHabitos({ habilitado }: SecaoHabitosProps) {
+export const SecaoHabitos = memo(function SecaoHabitos({
+  habilitado,
+  filtroExterno,
+}: SecaoHabitosProps) {
   const opcoes = criarOpcoesPeriodoAnalise(new Date().getFullYear())
   const [chavePeriodo, setChavePeriodo] = useState('90d')
-  const filtro = (opcoes.find((opcao) => opcao.chave === chavePeriodo) ?? opcoes[0])?.filtro ?? {
+  const filtroInterno = (opcoes.find((opcao) => opcao.chave === chavePeriodo) ?? opcoes[0])
+    ?.filtro ?? {
     periodo: 'dias',
     dias: 30,
   }
+  const filtro = filtroExterno ?? filtroInterno
   const { data, isLoading } = useHabitosMusica(filtro, habilitado)
 
   return (
@@ -48,11 +54,13 @@ export const SecaoHabitos = memo(function SecaoHabitos({ habilitado }: SecaoHabi
         titulo="Seus Hábitos"
         descricao="Quando você ouve, quanto se concentra nos favoritos e como você ouve"
         acoes={
-          <SeletorPeriodoAnalise
-            opcoes={opcoes}
-            selecionada={chavePeriodo}
-            onSelecionar={setChavePeriodo}
-          />
+          filtroExterno ? undefined : (
+            <SeletorPeriodoAnalise
+              opcoes={opcoes}
+              selecionada={chavePeriodo}
+              onSelecionar={setChavePeriodo}
+            />
+          )
         }
       />
 

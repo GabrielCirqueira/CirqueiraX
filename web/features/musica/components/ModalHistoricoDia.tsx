@@ -1,19 +1,10 @@
+import { api } from '@/config/api'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
-import {
-  Box,
-  Dialog,
-  Drawer,
-  HStack,
-  Portal,
-  Skeleton,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import type { RespostaApi } from '@/shared/types/api'
+import { Box, Dialog, Drawer, HStack, Portal, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { useQuery } from '@tanstack/react-query'
 import { CalendarDays, X } from 'lucide-react'
 import { memo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { api } from '@/config/api'
-import type { RespostaApi } from '@/shared/types/api'
 import { useFonteMusica } from '../hooks'
 import { formatarDataExtensa, formatarMinutos, gerarRotaMusica } from '../utils'
 import { LinkMusica } from './LinkMusica'
@@ -39,13 +30,16 @@ export const ModalHistoricoDia = memo(function ModalHistoricoDia({
   const aberto = Boolean(data)
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const { fonte } = useFonteMusica()
-  const { data: resposta, isLoading, isError } = useQuery({
+  const {
+    data: resposta,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['musica', fonte, 'historico-dia', data],
     queryFn: async () => {
-      const { data: body } = await api.get<RespostaApi<{ data: string; itens: ItemHistoricoDia[] }>>(
-        '/api/v1/musica/historico-dia',
-        { params: { fonte, data } }
-      )
+      const { data: body } = await api.get<
+        RespostaApi<{ data: string; itens: ItemHistoricoDia[] }>
+      >('/api/v1/musica/historico-dia', { params: { fonte, data } })
       return body.data
     },
     enabled: aberto && Boolean(data),

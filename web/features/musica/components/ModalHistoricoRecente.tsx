@@ -12,13 +12,9 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { ExternalLink, History, X } from 'lucide-react'
-import { memo, useState, type ReactNode } from 'react'
+import { type ReactNode, memo, useState } from 'react'
 import type { ItemHistoricoRecente } from '../types'
-import {
-  formatarDataHoraPtBr,
-  gerarRotaArtista,
-  gerarRotaMusica,
-} from '../utils'
+import { formatarDataHoraPtBr, gerarRotaArtista, gerarRotaMusica } from '../utils'
 import { CapaMusica } from './CapaMusica'
 import { LinkMusica } from './LinkMusica'
 
@@ -186,11 +182,7 @@ function ConteudoHistorico({
           borderBottom={indice < itens.length - 1 ? '1px solid' : undefined}
           borderColor="cirqueira.musica.cartaoElevado"
         >
-          <ItemHistorico
-            item={item}
-            corDestaque={corDestaque}
-            rotuloExterno={rotuloExterno}
-          />
+          <ItemHistorico item={item} corDestaque={corDestaque} rotuloExterno={rotuloExterno} />
         </Box>
       ))}
     </VStack>
@@ -253,7 +245,12 @@ function ItemHistorico({
           _hover={{ color: corDestaque, bg: 'transparent' }}
           flexShrink={0}
         >
-          <Link href={item.urlExterna} target="_blank" rel="noopener noreferrer" title={rotuloExterno}>
+          <Link
+            href={item.urlExterna}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={rotuloExterno}
+          >
             <ExternalLink size={14} />
           </Link>
         </Button>

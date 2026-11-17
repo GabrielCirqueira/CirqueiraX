@@ -1,17 +1,12 @@
-import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import {
   Badge,
   Box,
   Button,
-  Center,
-  Dialog,
-  Drawer,
   Flex,
   HStack,
   Heading,
   Input,
   NativeSelect,
-  Portal,
   Skeleton,
   Text,
   VStack,
@@ -19,14 +14,11 @@ import {
 import {
   Calendar,
   CalendarDays,
-  ChevronRight,
   Disc3,
-  Filter,
   Infinity as IconeInfinito,
   Music2,
   SlidersHorizontal,
   Users,
-  X,
 } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import type { FiltroIntervaloRankingParams, PeriodoMusicasItem } from '../api'
@@ -36,16 +28,18 @@ import {
   useImagensMusica,
   useRankingIntervaloMusica,
 } from '../hooks'
-import type {
-  AlbumAnalise,
-  ItemRankingArtista,
-  ItemRankingMusica,
-  RespostaConsultaImagens,
-  ResumoGeralMusica,
-} from '../types'
-import { formatarPercentualVariacao, gerarChaveArtista, gerarChaveFaixa } from '../utils'
+import type { AlbumAnalise, RespostaConsultaImagens, ResumoGeralMusica } from '../types'
+import {
+  formatarPercentualVariacao,
+  gerarChaveArtista,
+  gerarChaveFaixa,
+  linhasRankingAlbuns,
+  linhasRankingArtistas,
+  linhasRankingMusicas,
+} from '../utils'
 import { ItemRankingAlbum, ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingMusica'
 import { MinutosMusica } from './MinutosMusica'
+import { TabelaRankingMusica } from './TabelaRankingMusica'
 
 export interface SecaoHojeSemanaProps {
   resumo?: ResumoGeralMusica
@@ -110,8 +104,6 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
   })
 
   const [aba, setAba] = useState<AbaRanking>('musicas')
-  const [modalRankingAberto, setModalRankingAberto] = useState(false)
-  const isDesktop = useMediaQuery('(min-width: 768px)')
 
   const { data: mesesDisponiveis } = useCapsulasMusica()
 
@@ -265,12 +257,27 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             ? 'Desde sempre'
             : 'Personalizado')
 
-  const totalAba =
+  const linhasTabela =
     aba === 'musicas'
-      ? topMusicas.length
+      ? linhasRankingMusicas(
+          topMusicas,
+          (musica) =>
+            musica.imagemUrl ??
+            mapaImagensCompleto?.[
+              gerarChaveFaixa(musica.codigoFaixa, musica.artistaPrincipal, musica.nomeFaixa)
+            ]?.imagemUrl ??
+            null
+        )
       : aba === 'artistas'
-        ? topArtistas.length
-        : topAlbuns.length
+        ? linhasRankingArtistas(
+            topArtistas,
+            (artista) =>
+              artista.imagemUrl ??
+              mapaImagensCompleto?.[gerarChaveArtista(artista.codigoArtista, artista.nomeArtista)]
+                ?.imagemUrl ??
+              null
+          )
+        : linhasRankingAlbuns(topAlbuns, imagemAlbum)
 
   return (
     <VStack gap={4} align="stretch" w="full" maxW="100%">
@@ -751,7 +758,13 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             </HStack>
           </Flex>
 
-          {carregandoRanking && !dadosAtivos ? (
+          {modo === 'rankings' ? (
+            carregandoRanking && !dadosAtivos ? (
+              <Skeleton h="320px" w="full" borderRadius="8px" />
+            ) : (
+              <TabelaRankingMusica linhas={linhasTabela} />
+            )
+          ) : carregandoRanking && !dadosAtivos ? (
             <VStack gap={2} py={4}>
               <Skeleton h="56px" w="full" borderRadius="8px" />
               <Skeleton h="56px" w="full" borderRadius="8px" />
@@ -822,270 +835,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               })}
             </VStack>
           )}
-
-          {totalAba > 0 && modo === 'rankings' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              w="full"
-              mt={1}
-              py={2.5}
-              h="auto"
-              borderRadius="6px"
-              justifyContent="space-between"
-              color="cirqueira.musica.textoSecundario"
-              _hover={{
-                color: 'cirqueira.musica.textoPrincipal',
-                bg: 'cirqueira.musica.cartaoElevado',
-              }}
-              onClick={() => setModalRankingAberto(true)}
-            >
-              <Text as="span" fontSize="xs" fontWeight="semibold">
-                {`Ver ranking completo (Top ${Math.min(totalAba, 50)} ${aba === 'musicas' ? 'músicas' : aba === 'artistas' ? 'artistas' : 'álbuns'})`}
-              </Text>
-              <ChevronRight size={16} />
-            </Button>
-          )}
         </VStack>
       </Box>
-
-      {modalRankingAberto && (
-        <ModalRankingHojeSemana
-          aberto={modalRankingAberto}
-          onFechar={() => setModalRankingAberto(false)}
-          tipo={aba}
-          rotuloPeriodo={rotuloAtivo}
-          periodo={periodoMusicasItem}
-          topMusicas={topMusicas}
-          topArtistas={topArtistas}
-          topAlbuns={topAlbuns}
-          imagemAlbum={imagemAlbum}
-          mapaImagens={mapaImagensCompleto}
-          isDesktop={isDesktop}
-        />
-      )}
     </VStack>
   )
 })
-
-interface ModalRankingHojeSemanaProps {
-  aberto: boolean
-  onFechar: () => void
-  tipo: AbaRanking
-  rotuloPeriodo: string
-  periodo: PeriodoMusicasItem
-  topMusicas: ItemRankingMusica[]
-  topArtistas: ItemRankingArtista[]
-  topAlbuns: AlbumAnalise[]
-  imagemAlbum: (item: AlbumAnalise) => string | null
-  mapaImagens?: RespostaConsultaImagens
-  isDesktop: boolean
-}
-
-function ModalRankingHojeSemana({
-  aberto,
-  onFechar,
-  tipo,
-  rotuloPeriodo,
-  periodo,
-  topMusicas,
-  topArtistas,
-  topAlbuns,
-  imagemAlbum,
-  mapaImagens,
-  isDesktop,
-}: ModalRankingHojeSemanaProps) {
-  const titulo = `Top 50 ${TITULOS_ABA[tipo]}`
-
-  const total =
-    tipo === 'musicas'
-      ? topMusicas.length
-      : tipo === 'artistas'
-        ? topArtistas.length
-        : topAlbuns.length
-  const subtitulo = `${rotuloPeriodo} • Mostrando ${Math.min(total, 50)} no ranking`
-
-  const renderConteudo = () => (
-    <VStack
-      gap={2}
-      align="stretch"
-      w="full"
-      maxH={isDesktop ? '70vh' : 'auto'}
-      overflowY={isDesktop ? 'auto' : 'visible'}
-      pr={1}
-    >
-      {tipo === 'albuns' &&
-        topAlbuns
-          .slice(0, 50)
-          .map((album, indice) => (
-            <ItemRankingAlbum
-              key={`${album.album}-${album.artista}`}
-              item={album}
-              posicao={indice + 1}
-              imagemUrl={imagemAlbum(album)}
-              periodo={periodo}
-              rotuloPeriodo={rotuloPeriodo}
-            />
-          ))}
-      {tipo === 'musicas' &&
-        topMusicas.slice(0, 50).map((musica) => {
-          const chave = gerarChaveFaixa(
-            musica.codigoFaixa,
-            musica.artistaPrincipal,
-            musica.nomeFaixa
-          )
-          return (
-            <ItemRankingFaixa
-              key={`${musica.posicao}-${musica.nomeFaixa}-${musica.artistaPrincipal}`}
-              item={musica}
-              imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
-              periodo={periodo}
-            />
-          )
-        })}
-      {tipo === 'artistas' &&
-        topArtistas.slice(0, 50).map((artista) => {
-          const chave = gerarChaveArtista(artista.codigoArtista, artista.nomeArtista)
-          return (
-            <ItemRankingArtistaLinha
-              key={`${artista.posicao}-${artista.nomeArtista}`}
-              item={artista}
-              periodo={periodo}
-              rotuloPeriodo={rotuloPeriodo}
-              imagemUrlResolvida={mapaImagens?.[chave]?.imagemUrl}
-            />
-          )
-        })}
-    </VStack>
-  )
-
-  if (!isDesktop) {
-    return (
-      <Drawer.Root
-        open={aberto}
-        onOpenChange={(detalhes) => !detalhes.open && onFechar()}
-        placement="bottom"
-      >
-        <Portal>
-          <Drawer.Backdrop bg="rgba(0, 0, 0, 0.85)" backdropFilter="blur(4px)" />
-          <Drawer.Positioner>
-            <Drawer.Content
-              bg="cirqueira.musica.cartao"
-              borderTop="1px solid"
-              borderColor="cirqueira.musica.cartaoElevado"
-              borderTopRadius="16px"
-              p={{ base: 3.5, sm: 5 }}
-              maxH="90vh"
-              display="flex"
-              flexDirection="column"
-              color="cirqueira.musica.textoPrincipal"
-            >
-              <Drawer.Header
-                p={0}
-                mb={3}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <VStack align="flex-start" gap={0.5} maxW="calc(100% - 36px)">
-                  <Drawer.Title
-                    fontSize={{ base: 'sm', sm: 'md' }}
-                    fontWeight="bold"
-                    truncate
-                    maxW="full"
-                  >
-                    {titulo}
-                  </Drawer.Title>
-                  <Text
-                    fontSize="2xs"
-                    color="cirqueira.musica.textoSecundario"
-                    truncate
-                    maxW="full"
-                  >
-                    {subtitulo}
-                  </Text>
-                </VStack>
-
-                <Drawer.CloseTrigger asChild>
-                  <Button
-                    size="xs"
-                    variant="ghost"
-                    borderRadius="full"
-                    color="cirqueira.musica.textoSecundario"
-                    _hover={{
-                      color: 'cirqueira.musica.textoPrincipal',
-                      bg: 'cirqueira.musica.cartaoElevado',
-                    }}
-                    onClick={onFechar}
-                  >
-                    <X size={16} />
-                  </Button>
-                </Drawer.CloseTrigger>
-              </Drawer.Header>
-
-              <Drawer.Body p={0} overflowY="auto" maxH="75vh">
-                {renderConteudo()}
-              </Drawer.Body>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
-    )
-  }
-
-  return (
-    <Dialog.Root open={aberto} onOpenChange={(detalhes) => !detalhes.open && onFechar()}>
-      <Portal>
-        <Dialog.Backdrop bg="rgba(0, 0, 0, 0.85)" backdropFilter="blur(4px)" />
-        <Dialog.Positioner>
-          <Dialog.Content
-            bg="cirqueira.musica.cartao"
-            border="1px solid"
-            borderColor="cirqueira.musica.cartaoElevado"
-            borderRadius="8px"
-            p={6}
-            maxW="2xl"
-            w="full"
-            color="cirqueira.musica.textoPrincipal"
-            boxShadow="0 20px 40px rgba(0, 0, 0, 0.7)"
-          >
-            <Dialog.Header
-              p={0}
-              mb={4}
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <VStack align="flex-start" gap={0.5}>
-                <Dialog.Title fontSize="lg" fontWeight="bold">
-                  {titulo}
-                </Dialog.Title>
-                <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
-                  {subtitulo}
-                </Text>
-              </VStack>
-
-              <Dialog.CloseTrigger asChild>
-                <Button
-                  size="xs"
-                  variant="ghost"
-                  borderRadius="full"
-                  color="cirqueira.musica.textoSecundario"
-                  _hover={{
-                    color: 'cirqueira.musica.textoPrincipal',
-                    bg: 'cirqueira.musica.cartaoElevado',
-                  }}
-                  onClick={onFechar}
-                >
-                  <X size={16} />
-                </Button>
-              </Dialog.CloseTrigger>
-            </Dialog.Header>
-
-            <Dialog.Body p={0}>{renderConteudo()}</Dialog.Body>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
-  )
-}

@@ -29,6 +29,8 @@ final readonly class PeriodoAnaliseSpotifyDTO
 
     private const int DIAS_PADRAO = 30;
     private const int DIAS_MAXIMO = 3650;
+    private const int DIAS_MAXIMO_SERIE_DIARIA = 92;
+    private const string ROTULO_PERIODO_ANTERIOR = 'Período anterior';
     private const string FORMATO_SQL = 'Y-m-d H:i:s';
     private const string DATA_UTC_SQL = 'r.tocada_em';
     private const string DATA_LOCAL_SQL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
@@ -97,6 +99,24 @@ final readonly class PeriodoAnaliseSpotifyDTO
     public static function entre(DateTimeImmutable $inicioLocal, DateTimeImmutable $fimLocal, string $rotulo): self
     {
         return new self(TipoPeriodoAnaliseSpotify::Intervalo, $inicioLocal, $fimLocal, $rotulo);
+    }
+
+    public function periodoAnterior(): ?self
+    {
+        if (null === $this->inicioLocal || null === $this->fimLocal) {
+            return null;
+        }
+
+        return self::entre($this->inicioLocal->sub($this->inicioLocal->diff($this->fimLocal)), $this->inicioLocal, self::ROTULO_PERIODO_ANTERIOR);
+    }
+
+    public function isSerieDiaria(): bool
+    {
+        if (null === $this->inicioLocal || null === $this->fimLocal) {
+            return false;
+        }
+
+        return $this->inicioLocal->diff($this->fimLocal)->days <= self::DIAS_MAXIMO_SERIE_DIARIA;
     }
 
     public static function agoraLocal(): DateTimeImmutable

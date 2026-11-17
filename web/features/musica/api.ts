@@ -252,3 +252,11 @@ export async function tocarNoSpotify(codigoFaixa: string): Promise<RespostaTocar
   const { data } = await api.post<RespostaApi<unknown>>('/api/v1/spotify/tocar', { codigoFaixa })
   return RespostaTocarSpotifySchema.parse(data.data)
 }
+
+export async function obterBlocoMusica<T>(
+  caminho: string,
+  params: Record<string, string | number | undefined>
+): Promise<T> {
+  const { data } = await api.get<RespostaApi<T>>(`${PREFIXO_MUSICA}/${caminho}`, { params })
+  return data.data as T
+}

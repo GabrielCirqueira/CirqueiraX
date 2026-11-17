@@ -212,3 +212,4 @@
 | M190 | Decisões de Vínculo e Atalhos de Seleção na Transferência | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-190--decisões-de-vínculo-e-atalhos-de-seleção-na-transferência) |
 | M191 | Correções da Transferência de Playlists (Prévia, Pareamento e Progresso) | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-191--correções-da-transferência-de-playlists-prévia-pareamento-e-progresso) |
 | M192 | Página `/musica` em Abas com Novos Blocos de Análise | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-192--página-musica-em-abas-com-novos-blocos-de-análise) |
+| M193 | Redesenho Visual das Abas de `/musica` (Capas, Gráficos e Tabela de Ranking) | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-193--redesenho-visual-das-abas-de-musica-capas-gráficos-e-tabela-de-ranking) |

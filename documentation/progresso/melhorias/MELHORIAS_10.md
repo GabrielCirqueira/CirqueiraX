@@ -141,3 +141,23 @@
 - **Arquivos**: `web/features/musica/Musica.tsx`, `web/features/musica/components/AbasMusica.tsx`, `web/features/musica/components/AbasConteudoMusica.tsx`, `web/features/musica/components/ModalHistoricoDia.tsx`, `web/features/musica/hooks/useAbaMusica.ts`, `web/features/musica/utils/abasMusica.ts`, `src/Service/Musica/Analise/ObterExtrasPaginaMusicaService.php`, `src/Controller/Musica/MusicaAnaliseController.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `documentation/funcionalidades/MUSICA.md`, `public/sw.js`
 
 ---
+
+### ✅ Melhoria 193 — Redesenho Visual das Abas de `/musica` (Capas, Gráficos e Tabela de Ranking)
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: as abas da M192 tinham o mesmo formato em tudo (cartões de número e linhas de texto), sem capas nem gráficos; Visão geral e Rankings repetiam o mesmo conteúdo; o histórico recente era um popup.
+- **Solução**:
+  - Toda música, álbum e artista com capa/foto (dados do banco + mapa de imagens já existente, sem chamada nova ao Spotify).
+  - Visão geral nova: destaque em gradiente (minutos, variação vs período anterior, streams, artistas, dias) com gráfico de minutos por dia/mês; pódio de artistas; música e álbum do período; carrossel do top 10; rosca Spotify × YouTube Music; mini rotina de 24 barras; rostos de artistas novos; últimas 6 tocadas; saudade e neste dia — cada bloco com atalho para a aba.
+  - Rankings virou tabela: posição, capa, streams, minutos, serviços, com busca, ordenar por streams/minutos e filtro por serviço.
+  - Hábitos: barras por hora coloridas por período do dia com pico, barras por dia da semana, artista de cada período com foto; histograma de sessões e maior maratona com mosaico de capas; primeira/última do dia em duas colunas com capa grande.
+  - Descobertas: saudade em grade de capas com selo "X dias sem ouvir"; profundidade com foto, barra de músicas e barra de meses.
+  - Versões: rosca original × alterada, barras por tipo, top versões com capa do vídeo e mashups com fotos empilhadas dos artistas.
+  - Histórico: feed de últimas ouvidas agrupado por dia (com "carregar mais") no lugar do popup, neste dia por ano com mosaico de 4 capas, álbuns em sequência com capa.
+  - Serviços: linha de % por serviço por mês, contagem de músicas exclusivas e listas "só no Spotify" / "só no YouTube Music"; saiu a evolução duplicada.
+  - Novos endpoints `/api/v1/musica/visao-geral`, `/ultimas-ouvidas` e `/servicos`; cache de análise sobe para v7; service worker para `cirqueirax-app-v3`.
+- **Fora desta entrega**: variação de posição e comparação entre períodos na tabela de ranking.
+- **Arquivos**: `src/Service/Musica/Analise/ObterVisaoGeralMusicaService.php`, `src/Service/Musica/Analise/ObterComparativoServicosMusicaService.php`, `src/Service/Musica/Analise/MontarItensComImagemMusicaService.php`, `src/Service/Musica/Analise/ObterExtrasPaginaMusicaService.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Controller/Musica/MusicaAnaliseController.php`, `src/DataObject/Spotify/Analise/PeriodoAnaliseSpotifyDTO.php`, `web/features/musica/components/Aba*.tsx`, `web/features/musica/components/VisaoGeral*.tsx`, `web/features/musica/components/TabelaRankingMusica.tsx`, `web/features/musica/components/PecasBlocoMusica.tsx`, `web/features/musica/hooks/useBlocosMusica.ts`, `web/features/musica/utils/blocosMusica.ts`, `public/sw.js`
+
+---

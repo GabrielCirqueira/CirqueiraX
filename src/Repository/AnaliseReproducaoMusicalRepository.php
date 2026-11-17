@@ -30,6 +30,8 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 {
     public const int CORTE_STREAM_MS = 30000;
     private const int MS_POR_MINUTO = 60000;
+    private const array FAIXAS_SESSAO_MINUTOS = [15, 30, 60, 120, 240];
+    private const int LIMITE_CAPAS_MARATONA = 9;
     private const string URL_FAIXA_SPOTIFY = 'https://open.spotify.com/track/%s';
     private const string URL_YOUTUBE_MUSIC = 'https://music.youtube.com/watch?v=%s';
     private const string DATA_LOCAL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
@@ -1253,14 +1255,14 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return list<array{data: string, album: string, artista: string, faixas: int, minutos: int}>
+     * @return list<array{data: string, album: string, artista: string, faixas: int, minutos: int, musicaUuid: ?string}>
      */
     public function listarAlbunsEmSequencia(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, FiltroFonteMusica $filtro, int $minimoFaixas = 5, int $limite = 20): array
     {
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
 
         $linhas = $this->consultar(sprintf(
-            "SELECT DATE(%1\$s) AS dia, m.album, r.musica_uuid, r.tocada_em, r.ms_reproduzidos AS ms,
+            "SELECT DATE(%1\$s) AS dia, m.album, BIN_TO_UUID(r.musica_uuid) AS musica_uuid, r.tocada_em, r.ms_reproduzidos AS ms,
                 COALESCE((
                     SELECT ac.nome FROM musica_artista_catalogo mac
                     INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
@@ -1275,120 +1277,497 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
             $filtros,
         ), $parametros, $tipos);
 
-        $resultados = [];
-        $albumAtual = null;
-        $artistaAtual = null;
-        $diaAtual = null;
-        $faixas = 0;
-        $ms = 0;
-        $vistos = [];
-
-        $flush = static function () use (&$resultados, &$albumAtual, &$artistaAtual, &$diaAtual, &$faixas, &$ms, &$vistos, $minimoFaixas): void {
-            if (null !== $albumAtual && null !== $diaAtual && $faixas >= $minimoFaixas) {
-                $chave = $diaAtual.'|'.$albumAtual;
-                if (!isset($vistos[$chave]) || $faixas > $vistos[$chave]['faixas']) {
-                    $vistos[$chave] = [
-                        'data' => $diaAtual,
-                        'album' => $albumAtual,
-                        'artista' => $artistaAtual ?? 'Desconhecido',
-                        'faixas' => $faixas,
-                        'minutos' => (int) round($ms / 60000),
-                    ];
-                }
-            }
-            $albumAtual = null;
-            $artistaAtual = null;
-            $diaAtual = null;
-            $faixas = 0;
-            $ms = 0;
-        };
-
+        $sequencias = [];
+        $atual = null;
         foreach ($linhas as $linha) {
-            $album = (string) $linha['album'];
-            $dia = (string) $linha['dia'];
-            if ($album !== $albumAtual || $dia !== $diaAtual) {
-                $flush();
-                $albumAtual = $album;
-                $artistaAtual = (string) $linha['artista'];
-                $diaAtual = $dia;
+            $chave = $linha['dia'].'|'.$linha['album'];
+            if (null === $atual || $atual['chave'] !== $chave) {
+                if (null !== $atual) {
+                    $sequencias[] = $atual;
+                }
+                $atual = [
+                    'chave' => $chave,
+                    'data' => (string) $linha['dia'],
+                    'album' => (string) $linha['album'],
+                    'artista' => (string) $linha['artista'],
+                    'faixas' => 0,
+                    'ms' => 0,
+                    'musicaUuid' => (string) $linha['musica_uuid'],
+                ];
             }
-            ++$faixas;
-            $ms += (int) $linha['ms'];
+            ++$atual['faixas'];
+            $atual['ms'] += (int) $linha['ms'];
         }
-        $flush();
+        if (null !== $atual) {
+            $sequencias[] = $atual;
+        }
 
-        $resultados = array_values($vistos);
+        $melhores = [];
+        foreach ($sequencias as $sequencia) {
+            if ($sequencia['faixas'] < $minimoFaixas || $sequencia['faixas'] <= ($melhores[$sequencia['chave']]['faixas'] ?? 0)) {
+                continue;
+            }
+            $melhores[$sequencia['chave']] = [
+                'data' => $sequencia['data'],
+                'album' => $sequencia['album'],
+                'artista' => $sequencia['artista'],
+                'faixas' => $sequencia['faixas'],
+                'minutos' => $this->paraMinutos($sequencia['ms']),
+                'musicaUuid' => $sequencia['musicaUuid'],
+            ];
+        }
+
+        $resultados = array_values($melhores);
         usort($resultados, static fn (array $a, array $b): int => $b['faixas'] <=> $a['faixas'] ?: strcmp($b['data'], $a['data']));
 
         return array_slice($resultados, 0, $limite);
     }
 
     /**
-     * @return array{sessoes: int, duracaoMediaMinutos: int, maratonaMinutos: int, maratonaInicio: ?string, maratonaFim: ?string}
+     * @return array{sessoes: int, duracaoMediaMinutos: int, maratonaMinutos: int, maratonaInicio: ?string, maratonaFim: ?string, histograma: list<array{ateMinutos: ?int, sessoes: int}>, maratonaMusicas: list<string>, maratonaFaixas: int}
      */
     public function calcularSessoes(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, FiltroFonteMusica $filtro, int $gapMinutos = 10): array
     {
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
 
         $linhas = $this->consultar(sprintf(
-            'SELECT UNIX_TIMESTAMP(r.tocada_em) AS ts, r.ms_reproduzidos AS ms
+            'SELECT UNIX_TIMESTAMP(r.tocada_em) AS ts, r.ms_reproduzidos AS ms, BIN_TO_UUID(r.musica_uuid) AS musica_uuid
             FROM reproducao_musical r
             WHERE r.usuario_id = :usuarioId%s
             ORDER BY r.tocada_em ASC',
             $filtros,
         ), $parametros, $tipos);
 
-        $gapSegundos = $gapMinutos * 60;
-        $sessoes = 0;
-        $duracoes = [];
-        $inicioAtual = null;
-        $fimAtual = null;
-        $msAtual = 0;
-        $maratonaMs = 0;
-        $maratonaInicio = null;
-        $maratonaFim = null;
+        $sessoes = $this->agruparSessoes($linhas, $gapMinutos * 60);
+        $maratona = null;
+        foreach ($sessoes as $sessao) {
+            if (null === $maratona || $sessao['ms'] > $maratona['ms']) {
+                $maratona = $sessao;
+            }
+        }
+
+        $duracoes = array_column($sessoes, 'ms');
+        $media = [] === $duracoes ? 0 : (int) round(array_sum($duracoes) / count($duracoes));
+
+        return [
+            'sessoes' => count($sessoes),
+            'duracaoMediaMinutos' => $this->paraMinutos($media),
+            'maratonaMinutos' => $this->paraMinutos($maratona['ms'] ?? 0),
+            'maratonaInicio' => null === $maratona ? null : gmdate('c', $maratona['inicio']),
+            'maratonaFim' => null === $maratona ? null : gmdate('c', $maratona['fim']),
+            'histograma' => $this->montarHistogramaSessoes($duracoes),
+            'maratonaMusicas' => null === $maratona ? [] : $this->listarMaisTocadasDaSessao($maratona['musicas']),
+            'maratonaFaixas' => null === $maratona ? 0 : count($maratona['musicas']),
+        ];
+    }
+
+    /**
+     * @param list<array<string, mixed>> $linhas
+     *
+     * @return list<array{inicio: int, fim: int, ms: int, musicas: list<string>}>
+     */
+    private function agruparSessoes(array $linhas, int $gapSegundos): array
+    {
+        $sessoes = [];
+        $atual = null;
         $ultimoTs = null;
 
         foreach ($linhas as $linha) {
             $ts = (int) $linha['ts'];
             $ms = (int) $linha['ms'];
             if (null === $ultimoTs || ($ts - $ultimoTs) > $gapSegundos) {
-                if (null !== $inicioAtual) {
-                    ++$sessoes;
-                    $duracoes[] = $msAtual;
-                    if ($msAtual > $maratonaMs) {
-                        $maratonaMs = $msAtual;
-                        $maratonaInicio = $inicioAtual;
-                        $maratonaFim = $fimAtual;
-                    }
+                if (null !== $atual) {
+                    $sessoes[] = $atual;
                 }
-                $inicioAtual = $ts;
-                $msAtual = 0;
+                $atual = ['inicio' => $ts, 'fim' => $ts, 'ms' => 0, 'musicas' => []];
             }
-            $fimAtual = $ts + (int) floor($ms / 1000);
-            $msAtual += $ms;
+            $atual['fim'] = $ts + intdiv($ms, 1000);
+            $atual['ms'] += $ms;
+            $atual['musicas'][] = (string) $linha['musica_uuid'];
             $ultimoTs = $ts;
         }
 
-        if (null !== $inicioAtual) {
-            ++$sessoes;
-            $duracoes[] = $msAtual;
-            if ($msAtual > $maratonaMs) {
-                $maratonaMs = $msAtual;
-                $maratonaInicio = $inicioAtual;
-                $maratonaFim = $fimAtual;
-            }
+        if (null !== $atual) {
+            $sessoes[] = $atual;
         }
 
-        $media = [] === $duracoes ? 0 : (int) round(array_sum($duracoes) / count($duracoes));
+        return $sessoes;
+    }
+
+    /**
+     * @param list<int> $duracoesMs
+     *
+     * @return list<array{ateMinutos: ?int, sessoes: int}>
+     */
+    private function montarHistogramaSessoes(array $duracoesMs): array
+    {
+        $faixas = array_map(static fn (int $limite): array => ['ateMinutos' => $limite, 'sessoes' => 0], self::FAIXAS_SESSAO_MINUTOS);
+        $faixas[] = ['ateMinutos' => null, 'sessoes' => 0];
+
+        foreach ($duracoesMs as $ms) {
+            $minutos = $ms / self::MS_POR_MINUTO;
+            $indice = count(self::FAIXAS_SESSAO_MINUTOS);
+            foreach (self::FAIXAS_SESSAO_MINUTOS as $posicao => $limite) {
+                if ($minutos < $limite) {
+                    $indice = $posicao;
+                    break;
+                }
+            }
+            ++$faixas[$indice]['sessoes'];
+        }
+
+        return $faixas;
+    }
+
+    /**
+     * @param list<string> $musicas
+     *
+     * @return list<string>
+     */
+    private function listarMaisTocadasDaSessao(array $musicas): array
+    {
+        $contagem = array_count_values($musicas);
+        arsort($contagem);
+
+        return array_slice(array_map('strval', array_keys($contagem)), 0, self::LIMITE_CAPAS_MARATONA);
+    }
+
+    /**
+     * @param list<string> $uuids
+     *
+     * @return array<string, MusicaAnaliseSpotifyDTO>
+     */
+    public function mapearMusicasPorUuid(Usuario $usuario, FiltroFonteMusica $filtro, array $uuids): array
+    {
+        $binarios = $this->paraBinarios($uuids);
+        if ([] === $binarios) {
+            return [];
+        }
+
+        $linhas = $this->consultar(sprintf(
+            'SELECT r.musica_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
+            FROM reproducao_musical r
+            WHERE r.usuario_id = :usuarioId AND r.fonte IN (:fontes) AND r.musica_uuid IN (:uuids)
+            GROUP BY r.musica_uuid',
+            self::COLUNAS_POR_FONTE,
+        ), $this->parametrosUuids($usuario, $filtro, $binarios), $this->tiposUuids());
+
+        $mapa = [];
+        foreach ($this->complementarMusicas($usuario, $linhas) as $linha) {
+            $musica = MusicaAnaliseSpotifyDTO::daLinha($linha);
+            $mapa[(string) $musica->musicaUuid] = $musica;
+        }
+
+        return $mapa;
+    }
+
+    /**
+     * @param list<string> $uuids
+     *
+     * @return array<string, ArtistaAnaliseSpotifyDTO>
+     */
+    public function mapearArtistasPorUuid(Usuario $usuario, FiltroFonteMusica $filtro, array $uuids): array
+    {
+        $binarios = $this->paraBinarios($uuids);
+        if ([] === $binarios) {
+            return [];
+        }
+
+        $linhas = $this->consultar(sprintf(
+            '%s
+            SELECT c.artista_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
+            FROM reproducao_musical r
+            INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
+            WHERE r.usuario_id = :usuarioId AND r.fonte IN (:fontes) AND c.artista_uuid IN (:uuids)
+            GROUP BY c.artista_uuid',
+            self::CTE_CREDITOS,
+            self::COLUNAS_POR_FONTE,
+        ), $this->parametrosUuids($usuario, $filtro, $binarios), $this->tiposUuids());
+
+        $mapa = [];
+        foreach ($this->complementarArtistas($usuario, $linhas) as $linha) {
+            $artista = ArtistaAnaliseSpotifyDTO::daLinha($linha);
+            $mapa[(string) $artista->artistaUuid] = $artista;
+        }
+
+        return $mapa;
+    }
+
+    /**
+     * @param list<string> $uuids
+     *
+     * @return array<string, list<string>>
+     */
+    public function listarArtistasDasMusicas(array $uuids): array
+    {
+        $binarios = $this->paraBinarios($uuids);
+        if ([] === $binarios) {
+            return [];
+        }
+
+        $linhas = $this->consultar(sprintf(
+            '%s SELECT DISTINCT BIN_TO_UUID(c.musica_uuid) AS musica_uuid, BIN_TO_UUID(c.artista_uuid) AS artista_uuid FROM creditos c WHERE c.musica_uuid IN (:uuids)',
+            self::CTE_CREDITOS,
+        ), ['uuids' => $binarios], ['uuids' => ArrayParameterType::BINARY]);
+
+        $mapa = [];
+        foreach ($linhas as $linha) {
+            $mapa[(string) $linha['musica_uuid']][] = (string) $linha['artista_uuid'];
+        }
+
+        return $mapa;
+    }
+
+    /**
+     * @return list<array{faixa: string, artistaUuid: string, streams: int}>
+     */
+    public function listarTopArtistaPorFaixaDoDia(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, FiltroFonteMusica $filtro): array
+    {
+        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
+
+        $linhas = $this->consultar(sprintf(
+            "%1\$s, por_faixa AS (
+                SELECT CASE
+                        WHEN HOUR(%2\$s) < 6 THEN 'madrugada'
+                        WHEN HOUR(%2\$s) < 12 THEN 'manha'
+                        WHEN HOUR(%2\$s) < 18 THEN 'tarde'
+                        ELSE 'noite'
+                    END AS faixa,
+                    c.artista_uuid,
+                    SUM(r.ms_reproduzidos >= :corte) AS streams,
+                    SUM(r.ms_reproduzidos) AS ms
+                FROM reproducao_musical r
+                INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
+                WHERE r.usuario_id = :usuarioId%3\$s
+                GROUP BY faixa, c.artista_uuid
+            )
+            SELECT faixa, BIN_TO_UUID(artista_uuid) AS artista_uuid, streams
+            FROM (
+                SELECT faixa, artista_uuid, streams, ROW_NUMBER() OVER (PARTITION BY faixa ORDER BY streams DESC, ms DESC) AS posicao
+                FROM por_faixa
+            ) ranqueado
+            WHERE posicao = 1",
+            self::CTE_CREDITOS,
+            self::DATA_LOCAL,
+            $filtros,
+        ), $parametros, $tipos);
+
+        return array_map(static fn (array $linha): array => [
+            'faixa' => (string) $linha['faixa'],
+            'artistaUuid' => (string) $linha['artista_uuid'],
+            'streams' => (int) $linha['streams'],
+        ], $linhas);
+    }
+
+    /**
+     * @return array<int, list<string>>
+     */
+    public function listarTopMusicasNesteDia(Usuario $usuario, FiltroFonteMusica $filtro, int $mes, int $dia, int $porAno): array
+    {
+        $parametros = [
+            'usuarioId' => $usuario->getId(),
+            'corte' => self::CORTE_STREAM_MS,
+            'fontes' => $filtro->valoresFontes(),
+            'mes' => $mes,
+            'dia' => $dia,
+            'porAno' => $porAno,
+        ];
+        $tipos = ['fontes' => ArrayParameterType::STRING, 'porAno' => ParameterType::INTEGER];
+
+        $linhas = $this->consultar(sprintf(
+            'SELECT ano, BIN_TO_UUID(musica_uuid) AS musica_uuid FROM (
+                SELECT YEAR(%1$s) AS ano, r.musica_uuid,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY YEAR(%1$s)
+                        ORDER BY SUM(r.ms_reproduzidos >= :corte) DESC, SUM(r.ms_reproduzidos) DESC
+                    ) AS posicao
+                FROM reproducao_musical r
+                WHERE r.usuario_id = :usuarioId AND r.fonte IN (:fontes)
+                    AND MONTH(%1$s) = :mes AND DAY(%1$s) = :dia
+                GROUP BY ano, r.musica_uuid
+            ) ranqueado
+            WHERE posicao <= :porAno
+            ORDER BY ano DESC, posicao ASC',
+            self::DATA_LOCAL,
+        ), $parametros, $tipos);
+
+        $mapa = [];
+        foreach ($linhas as $linha) {
+            $mapa[(int) $linha['ano']][] = (string) $linha['musica_uuid'];
+        }
+
+        return $mapa;
+    }
+
+    /**
+     * @return list<array{musicaUuid: string, fonte: string, tocadaEm: string, tocadaEmUtc: string, minutos: int}>
+     */
+    public function listarUltimasReproducoes(Usuario $usuario, FiltroFonteMusica $filtro, int $limite, ?string $antesUtc = null): array
+    {
+        $parametros = ['usuarioId' => $usuario->getId(), 'fontes' => $filtro->valoresFontes(), 'limite' => $limite];
+        $tipos = ['fontes' => ArrayParameterType::STRING, 'limite' => ParameterType::INTEGER];
+        $filtroAntes = '';
+        if (null !== $antesUtc) {
+            $parametros['antes'] = $antesUtc;
+            $filtroAntes = ' AND r.tocada_em < :antes';
+        }
+
+        $linhas = $this->consultar(sprintf(
+            'SELECT BIN_TO_UUID(r.musica_uuid) AS musica_uuid, r.fonte, r.tocada_em, %s AS tocada_local, r.ms_reproduzidos AS ms
+            FROM reproducao_musical r
+            WHERE r.usuario_id = :usuarioId AND r.fonte IN (:fontes)%s
+            ORDER BY r.tocada_em DESC
+            LIMIT :limite',
+            self::DATA_LOCAL,
+            $filtroAntes,
+        ), $parametros, $tipos);
+
+        return array_map(fn (array $linha): array => [
+            'musicaUuid' => (string) $linha['musica_uuid'],
+            'fonte' => (string) $linha['fonte'],
+            'tocadaEm' => (string) $linha['tocada_local'],
+            'tocadaEmUtc' => (string) $linha['tocada_em'],
+            'minutos' => $this->paraMinutos($linha['ms']),
+        ], $linhas);
+    }
+
+    /**
+     * @return list<MusicaAnaliseSpotifyDTO>
+     */
+    public function listarMusicasExclusivasDaFonte(Usuario $usuario, FonteReproducaoMusical $fonte, int $limite): array
+    {
+        $linhas = $this->consultar(sprintf(
+            'SELECT r.musica_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
+            FROM reproducao_musical r
+            WHERE r.usuario_id = :usuarioId
+            GROUP BY r.musica_uuid
+            HAVING SUM(r.fonte <> :fonte) = 0 AND streams > 0
+            ORDER BY %s
+            LIMIT :limite',
+            self::COLUNAS_POR_FONTE,
+            self::ORDEM,
+        ), [
+            'usuarioId' => $usuario->getId(),
+            'corte' => self::CORTE_STREAM_MS,
+            'fonte' => $fonte->value,
+            'limite' => $limite,
+        ], ['limite' => ParameterType::INTEGER]);
+
+        return array_map(MusicaAnaliseSpotifyDTO::daLinha(...), $this->complementarMusicas($usuario, $linhas));
+    }
+
+    /**
+     * @return array{spotify: int, youtube_music: int, ambas: int}
+     */
+    public function contarMusicasPorExclusividade(Usuario $usuario): array
+    {
+        $linha = $this->consultarLinha(
+            "SELECT COALESCE(SUM(sp > 0 AND yt = 0), 0) AS so_spotify,
+                COALESCE(SUM(sp = 0 AND yt > 0), 0) AS so_youtube,
+                COALESCE(SUM(sp > 0 AND yt > 0), 0) AS ambas
+            FROM (
+                SELECT SUM(r.fonte = 'spotify') AS sp, SUM(r.fonte = 'youtube_music') AS yt
+                FROM reproducao_musical r
+                WHERE r.usuario_id = :usuarioId
+                GROUP BY r.musica_uuid
+            ) por_musica",
+            ['usuarioId' => $usuario->getId()],
+            [],
+        ) ?? [];
 
         return [
-            'sessoes' => $sessoes,
-            'duracaoMediaMinutos' => $this->paraMinutos($media),
-            'maratonaMinutos' => $this->paraMinutos($maratonaMs),
-            'maratonaInicio' => null === $maratonaInicio ? null : gmdate('c', $maratonaInicio),
-            'maratonaFim' => null === $maratonaFim ? null : gmdate('c', $maratonaFim),
+            'spotify' => (int) ($linha['so_spotify'] ?? 0),
+            'youtube_music' => (int) ($linha['so_youtube'] ?? 0),
+            'ambas' => (int) ($linha['ambas'] ?? 0),
         ];
+    }
+
+    /**
+     * @return list<array{data: string, minutos: int, streams: int}>
+     */
+    public function listarMinutosPorDiaDoPeriodo(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, FiltroFonteMusica $filtro): array
+    {
+        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
+
+        $linhas = $this->consultar(sprintf(
+            'SELECT DATE(%s) AS dia, SUM(r.ms_reproduzidos) AS ms, SUM(r.ms_reproduzidos >= :corte) AS streams
+            FROM reproducao_musical r
+            WHERE r.usuario_id = :usuarioId%s
+            GROUP BY dia
+            ORDER BY dia ASC',
+            self::DATA_LOCAL,
+            $filtros,
+        ), $parametros, $tipos);
+
+        return array_map(fn (array $linha): array => [
+            'data' => (string) $linha['dia'],
+            'minutos' => $this->paraMinutos($linha['ms']),
+            'streams' => (int) $linha['streams'],
+        ], $linhas);
+    }
+
+    /**
+     * @return list<array{musicaUuid: string, tipo: string, titulo: string, urlCapa: ?string, streams: int, minutos: int}>
+     */
+    public function listarTopVersoesAlteradas(Usuario $usuario, PeriodoAnaliseSpotifyDTO $periodo, FiltroFonteMusica $filtro, int $limite): array
+    {
+        [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
+        $parametros['limite'] = $limite;
+        $tipos['limite'] = ParameterType::INTEGER;
+
+        $linhas = $this->consultar(sprintf(
+            "SELECT BIN_TO_UUID(r.musica_uuid) AS musica_uuid, v.tipo_versao AS tipo,
+                MAX(v.titulo) AS titulo, MAX(v.url_capa) AS url_capa,
+                SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
+            FROM reproducao_musical r
+            INNER JOIN reproducao_youtube ry ON r.fonte = 'youtube_music' AND ry.uuid = UUID_TO_BIN(r.origem_id)
+            INNER JOIN video_youtube v ON v.uuid = ry.video_uuid
+            WHERE r.usuario_id = :usuarioId AND v.tipo_versao IS NOT NULL AND v.tipo_versao <> 'original'%s
+            GROUP BY r.musica_uuid, v.tipo_versao
+            ORDER BY %s
+            LIMIT :limite",
+            $filtros,
+            self::ORDEM,
+        ), $parametros, $tipos);
+
+        return array_map(fn (array $linha): array => [
+            'musicaUuid' => (string) $linha['musica_uuid'],
+            'tipo' => (string) $linha['tipo'],
+            'titulo' => (string) $linha['titulo'],
+            'urlCapa' => is_string($linha['url_capa']) ? $linha['url_capa'] : null,
+            'streams' => (int) $linha['streams'],
+            'minutos' => $this->paraMinutos($linha['ms']),
+        ], $linhas);
+    }
+
+    /**
+     * @param list<string> $uuids
+     *
+     * @return list<string>
+     */
+    private function paraBinarios(array $uuids): array
+    {
+        $validos = array_values(array_unique(array_filter($uuids, static fn (string $uuid): bool => Uuid::isValid($uuid))));
+
+        return array_map(static fn (string $uuid): string => Uuid::fromString($uuid)->toBinary(), $validos);
+    }
+
+    /**
+     * @param list<string> $binarios
+     *
+     * @return array<string, mixed>
+     */
+    private function parametrosUuids(Usuario $usuario, FiltroFonteMusica $filtro, array $binarios): array
+    {
+        return ['usuarioId' => $usuario->getId(), 'corte' => self::CORTE_STREAM_MS, 'fontes' => $filtro->valoresFontes(), 'uuids' => $binarios];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function tiposUuids(): array
+    {
+        return ['fontes' => ArrayParameterType::STRING, 'uuids' => ArrayParameterType::BINARY];
     }
 
     /**

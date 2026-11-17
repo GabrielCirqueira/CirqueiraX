@@ -131,9 +131,7 @@ export const SecaoCuriosidades = memo(function SecaoCuriosidades({
           textAlign="left"
           w="full"
           cursor={diaMaisLongoData && onAbrirDia ? 'pointer' : undefined}
-          onClick={
-            diaMaisLongoData && onAbrirDia ? () => onAbrirDia(diaMaisLongoData) : undefined
-          }
+          onClick={diaMaisLongoData && onAbrirDia ? () => onAbrirDia(diaMaisLongoData) : undefined}
           p={4}
           borderRadius="8px"
           bg="cirqueira.musica.cartao"
