@@ -11,11 +11,14 @@ final readonly class ConfirmarPreviaTransferenciaDTO
 {
     /**
      * @param list<ItemConfirmacaoPreviaDTO|array<string, mixed>> $itens
+     * @param list<string>                                        $uuidsIgnorados
      */
     public function __construct(
-        #[Assert\NotBlank]
-        #[Assert\Count(min: 1)]
-        public array $itens,
+        #[Assert\Type('array')]
+        public array $itens = [],
+        #[Assert\Type('array')]
+        #[Assert\All([new Assert\NotBlank(), new Assert\Uuid()])]
+        public array $uuidsIgnorados = [],
     ) {
     }
 
@@ -56,5 +59,21 @@ final readonly class ConfirmarPreviaTransferenciaDTO
         }
 
         return $resultado;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function uuidsIgnoradosNormalizados(): array
+    {
+        $resultado = [];
+        foreach ($this->uuidsIgnorados as $uuid) {
+            if (!is_string($uuid) || '' === trim($uuid)) {
+                continue;
+            }
+            $resultado[] = $uuid;
+        }
+
+        return array_values(array_unique($resultado));
     }
 }

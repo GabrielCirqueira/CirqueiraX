@@ -1,14 +1,52 @@
 import { Box, Button, HStack, Heading, Spinner, Text, VStack } from '@chakra-ui/react'
 import { ArrowLeftRight, RefreshCw } from 'lucide-react'
 import { memo, useState } from 'react'
-import { useListarVinculos, useSincronizarVinculo } from '../hooks'
-import { formatarDataCurta } from '../utils'
+import {
+  useListarTransferenciasPendentes,
+  useListarVinculos,
+  useSincronizarVinculo,
+} from '../hooks'
+import type { TransferenciaResumo } from '../types'
+import { formatarDataCurta, formatarNumero, labelServico } from '../utils'
 import { AssistenteTransferenciaPlaylists } from './AssistenteTransferenciaPlaylists'
+
+function rotuloStatusPendente(transferencia: TransferenciaResumo): string {
+  switch (transferencia.status) {
+    case 'casando':
+      return 'Casando faixas'
+    case 'previa':
+      return 'Prévia pronta — revisar e confirmar'
+    case 'executando':
+      return 'Transferindo faixas'
+    case 'pausada_cota':
+      return 'Pausada por cota da API'
+    default:
+      return transferencia.statusDescricao
+  }
+}
 
 export const SecaoTransferenciaPlaylists = memo(function SecaoTransferenciaPlaylists() {
   const [assistenteAberto, setAssistenteAberto] = useState(false)
+  const [uuidRetomar, setUuidRetomar] = useState<string | null>(null)
   const { data: vinculos, isLoading } = useListarVinculos()
+  const { data: pendentesData, isLoading: carregandoPendentes } = useListarTransferenciasPendentes()
   const sincronizar = useSincronizarVinculo()
+  const pendentes = pendentesData?.itens ?? []
+
+  function abrirNova() {
+    setUuidRetomar(null)
+    setAssistenteAberto(true)
+  }
+
+  function continuar(uuid: string) {
+    setUuidRetomar(uuid)
+    setAssistenteAberto(true)
+  }
+
+  function fecharAssistente() {
+    setAssistenteAberto(false)
+    setUuidRetomar(null)
+  }
 
   return (
     <>
@@ -45,11 +83,64 @@ export const SecaoTransferenciaPlaylists = memo(function SecaoTransferenciaPlayl
             bg="cirqueira.musica.verde"
             color="cirqueira.grey.950"
             _hover={{ bg: 'cirqueira.musica.verdeHover' }}
-            onClick={() => setAssistenteAberto(true)}
+            onClick={abrirNova}
           >
-            Abrir transferência
+            Nova transferência
           </Button>
         </HStack>
+
+        {carregandoPendentes ? (
+          <HStack gap={2}>
+            <Spinner size="sm" color="cirqueira.musica.verde" />
+            <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
+              Buscando transferências em andamento...
+            </Text>
+          </HStack>
+        ) : pendentes.length > 0 ? (
+          <VStack align="stretch" gap={2}>
+            <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.amarelo">
+              Em andamento / aguardando confirmação
+            </Text>
+            {pendentes.map((transferencia) => (
+              <Box
+                key={transferencia.uuid}
+                p={3}
+                borderRadius="8px"
+                bg="cirqueira.musica.cartaoElevado"
+                border="1px solid"
+                borderColor="cirqueira.musica.verde"
+              >
+                <HStack justify="space-between" align="start" gap={3}>
+                  <VStack align="start" gap={0.5} minW={0} flex={1}>
+                    <Text fontSize="sm" fontWeight="semibold">
+                      {rotuloStatusPendente(transferencia)}
+                    </Text>
+                    <Text fontSize="2xs" color="cirqueira.musica.textoSecundario">
+                      {labelServico(transferencia.origem)} → {labelServico(transferencia.destino)} ·{' '}
+                      {formatarNumero(transferencia.totalCasadas)} casadas ·{' '}
+                      {formatarNumero(transferencia.totalNaoEncontradas)} não encontradas ·{' '}
+                      {formatarNumero(transferencia.totalFaixas)} faixas
+                    </Text>
+                    <Text fontSize="2xs" color="cirqueira.musica.textoDesabilitado">
+                      atualizado {formatarDataCurta(transferencia.atualizadoEm)}
+                    </Text>
+                  </VStack>
+                  <Button
+                    size="xs"
+                    borderRadius="full"
+                    fontWeight="bold"
+                    bg="cirqueira.musica.verde"
+                    color="cirqueira.grey.950"
+                    flexShrink={0}
+                    onClick={() => continuar(transferencia.uuid)}
+                  >
+                    Continuar
+                  </Button>
+                </HStack>
+              </Box>
+            ))}
+          </VStack>
+        ) : null}
 
         {isLoading ? (
           <HStack gap={2}>
@@ -60,10 +151,14 @@ export const SecaoTransferenciaPlaylists = memo(function SecaoTransferenciaPlayl
           </HStack>
         ) : !vinculos || vinculos.length === 0 ? (
           <Text fontSize="xs" color="cirqueira.musica.textoDesabilitado">
-            Nenhum vínculo de playlist ainda. Use o assistente para criar a primeira transferência.
+            Nenhum vínculo de playlist ainda. Os vínculos aparecem depois que você confirma e
+            executa uma transferência.
           </Text>
         ) : (
           <VStack align="stretch" gap={2}>
+            <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.textoSecundario">
+              Vínculos já criados
+            </Text>
             {vinculos.map((vinculo) => (
               <Box key={vinculo.uuid} p={3} borderRadius="8px" bg="cirqueira.musica.cartaoElevado">
                 <HStack justify="space-between" align="start" gap={3}>
@@ -102,7 +197,8 @@ export const SecaoTransferenciaPlaylists = memo(function SecaoTransferenciaPlayl
 
       <AssistenteTransferenciaPlaylists
         aberto={assistenteAberto}
-        onFechar={() => setAssistenteAberto(false)}
+        onFechar={fecharAssistente}
+        uuidRetomar={uuidRetomar}
       />
     </>
   )

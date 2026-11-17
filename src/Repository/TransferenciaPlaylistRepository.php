@@ -82,4 +82,29 @@ final class TransferenciaPlaylistRepository extends ServiceEntityRepository
 
         return $lista;
     }
+
+    /**
+     * @param list<\App\Enum\StatusTransferenciaPlaylist> $status
+     *
+     * @return list<TransferenciaPlaylist>
+     */
+    public function listarDoUsuarioPorStatus(Usuario $usuario, array $status, int $limite = 20): array
+    {
+        if ([] === $status) {
+            return [];
+        }
+
+        /** @var list<TransferenciaPlaylist> $lista */
+        $lista = $this->createQueryBuilder('t')
+            ->andWhere('t.usuario = :usuario')
+            ->andWhere('t.status IN (:status)')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', $status)
+            ->orderBy('t.atualizadoEm', 'DESC')
+            ->setMaxResults($limite)
+            ->getQuery()
+            ->getResult();
+
+        return $lista;
+    }
 }

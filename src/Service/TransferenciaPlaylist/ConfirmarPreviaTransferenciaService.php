@@ -33,31 +33,51 @@ final readonly class ConfirmarPreviaTransferenciaService
         }
 
         $entradas = $dto->itensNormalizados();
-        $uuids = array_map(static fn (ItemConfirmacaoPreviaDTO $item): string => $item->uuid, $entradas);
-        $itens = $this->itemRepository->listarPorUuidsDaTransferencia($transferencia, $uuids);
-        $mapa = [];
-        foreach ($itens as $item) {
-            $mapa[$item->uuid()->toRfc4122()] = $item;
-        }
+        $uuidsIgnorados = $dto->uuidsIgnoradosNormalizados();
 
-        foreach ($entradas as $entrada) {
-            $item = $mapa[$entrada->uuid] ?? null;
-            if (null === $item) {
-                continue;
+        $uuids = array_values(array_unique([
+            ...array_map(static fn (ItemConfirmacaoPreviaDTO $item): string => $item->uuid, $entradas),
+            ...$uuidsIgnorados,
+        ]));
+
+        if ([] !== $uuids) {
+            $itens = $this->itemRepository->listarPorUuidsDaTransferencia($transferencia, $uuids);
+            $mapa = [];
+            foreach ($itens as $item) {
+                $mapa[$item->uuid()->toRfc4122()] = $item;
             }
 
-            $status = StatusItemTransferenciaPlaylist::tryFrom($entrada->status);
-            if (null === $status) {
-                continue;
+            foreach ($entradas as $entrada) {
+                $item = $mapa[$entrada->uuid] ?? null;
+                if (null === $item) {
+                    continue;
+                }
+
+                $status = StatusItemTransferenciaPlaylist::tryFrom($entrada->status);
+                if (null === $status) {
+                    continue;
+                }
+
+                $item->aplicarConfirmacao(
+                    $status,
+                    $entrada->idExternoDestino,
+                    $entrada->tituloDestino,
+                    $entrada->artistasDestino,
+                );
+                $this->itemRepository->salvar($item, false);
             }
 
-            $item->aplicarConfirmacao(
-                $status,
-                $entrada->idExternoDestino,
-                $entrada->tituloDestino,
-                $entrada->artistasDestino,
-            );
-            $this->itemRepository->salvar($item, false);
+            foreach ($uuidsIgnorados as $uuidIgnorado) {
+                $item = $mapa[$uuidIgnorado] ?? null;
+                if (null === $item) {
+                    continue;
+                }
+
+                $item->aplicarConfirmacao(StatusItemTransferenciaPlaylist::Ignorada, null, null, null);
+                $this->itemRepository->salvar($item, false);
+            }
+
+            $this->itemRepository->flush();
         }
 
         $contagem = $this->itemRepository->contarPorStatus($transferencia);

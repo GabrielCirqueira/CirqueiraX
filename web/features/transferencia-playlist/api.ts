@@ -6,6 +6,7 @@ import {
   type IniciarTransferenciaPayload,
   ListaParesSchema,
   ListaPlaylistsSchema,
+  ListaTransferenciasSchema,
   ListaVinculosSchema,
   type ServicoPlaylist,
   StatusContaYoutubeOAuthSchema,
@@ -50,6 +51,11 @@ export async function listarPlaylistsServico(servico: ServicoPlaylist) {
 export async function detectarParesPlaylists() {
   const { data } = await api.get<RespostaApi<unknown>>(`${BASE_TRANSFERENCIA}/pares`)
   return ListaParesSchema.parse(data.data)
+}
+
+export async function listarTransferenciasPendentes() {
+  const { data } = await api.get<RespostaApi<unknown>>(BASE_TRANSFERENCIA)
+  return ListaTransferenciasSchema.parse(data.data)
 }
 
 export async function iniciarTransferencia(payload: IniciarTransferenciaPayload) {

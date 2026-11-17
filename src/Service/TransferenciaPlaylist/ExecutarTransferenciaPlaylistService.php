@@ -20,6 +20,7 @@ use App\Message\ExecutarTransferenciaPlaylistMessage;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\ContaYoutubeOAuthRepository;
 use App\Repository\ItemTransferenciaPlaylistRepository;
+use App\Repository\PlaylistTransferenciaSelecionadaRepository;
 use App\Repository\TransferenciaPlaylistRepository;
 use App\Repository\VinculoPlaylistRepository;
 use App\Service\Spotify\ObterTokenValidoSpotifyService;
@@ -39,6 +40,7 @@ final readonly class ExecutarTransferenciaPlaylistService
         private MessageBusInterface $messageBus,
         private ObterTokenValidoSpotifyService $obterTokenSpotify,
         private ObterTokenValidoYoutubeOAuthService $obterTokenYoutube,
+        private PlaylistTransferenciaSelecionadaRepository $playlistSelecionadaRepository,
         private SpotifyInterface $spotify,
         private TransferenciaPlaylistRepository $transferenciaRepository,
         private VinculoPlaylistRepository $vinculoRepository,
@@ -113,7 +115,7 @@ final readonly class ExecutarTransferenciaPlaylistService
         $tokenSpotify = $this->obterTokenSeNecessario($transferencia, ServicoPlaylist::Spotify);
         $tokenYoutube = $this->obterTokenSeNecessario($transferencia, ServicoPlaylist::Youtube);
 
-        foreach ($transferencia->playlistsSelecionadas() as $playlist) {
+        foreach ($this->playlistSelecionadaRepository->listarDaTransferencia($transferencia) as $playlist) {
             $this->processarPlaylist($transferencia, $playlist, $tokenSpotify, $tokenYoutube);
         }
     }
@@ -124,18 +126,17 @@ final readonly class ExecutarTransferenciaPlaylistService
         ?string $tokenSpotify,
         ?string $tokenYoutube,
     ): void {
-        $itens = array_values(array_filter(
-            $this->itemRepository->listarDaTransferencia($transferencia),
-            static fn (ItemTransferenciaPlaylist $item): bool => $item->playlistSelecionada()?->uuid()->equals($playlist->uuid()) ?? false,
-        ));
-
-        $itensProntos = array_values(array_filter(
-            $itens,
-            static fn (ItemTransferenciaPlaylist $item): bool => $item->status()->isProntaParaTransferir() && null !== $item->idExternoDestino(),
-        ));
+        $itensProntos = $this->itemRepository->listarProntosParaTransferirDaPlaylist($transferencia, $playlist);
 
         if ($playlist->decisao()->isSoVincular()) {
             $this->criarVinculo($transferencia, $playlist, $itensProntos);
+            foreach ($itensProntos as $item) {
+                $item->marcarTransferida();
+                $this->itemRepository->salvar($item, false);
+            }
+            $this->itemRepository->flush();
+            $playlist->avancarProgressoFaixas(count($itensProntos));
+            $this->persistirProgresso($transferencia);
 
             return;
         }
@@ -144,15 +145,15 @@ final readonly class ExecutarTransferenciaPlaylistService
         $playlist->definirDestinoFinal($idDestino);
 
         if ($transferencia->destino()->isSpotify()) {
-            $this->transferirParaSpotify($tokenSpotify ?? '', $idDestino, $itensProntos);
+            $this->transferirParaSpotify($transferencia, $playlist, $tokenSpotify ?? '', $idDestino, $itensProntos);
         }
 
         if ($transferencia->destino()->isYoutube()) {
-            $this->transferirParaYoutube($tokenYoutube ?? '', $idDestino, $itensProntos);
+            $this->transferirParaYoutube($transferencia, $playlist, $tokenYoutube ?? '', $idDestino, $itensProntos);
         }
 
         $this->criarVinculo($transferencia, $playlist, $itensProntos);
-        $this->transferenciaRepository->salvar($transferencia, false);
+        $this->persistirProgresso($transferencia);
     }
 
     private function resolverPlaylistDestino(
@@ -182,33 +183,49 @@ final readonly class ExecutarTransferenciaPlaylistService
     /**
      * @param list<ItemTransferenciaPlaylist> $itens
      */
-    private function transferirParaSpotify(string $token, string $playlistId, array $itens): void
-    {
-        $uris = [];
-        foreach ($itens as $item) {
-            $id = $item->idExternoDestino();
-            if (null === $id || '' === $id) {
-                continue;
+    private function transferirParaSpotify(
+        TransferenciaPlaylist $transferencia,
+        PlaylistTransferenciaSelecionada $playlist,
+        string $token,
+        string $playlistId,
+        array $itens,
+    ): void {
+        foreach (array_chunk($itens, self::LOTE_SPOTIFY) as $loteItens) {
+            $uris = [];
+            foreach ($loteItens as $item) {
+                $id = $item->idExternoDestino();
+                if (null === $id || '' === $id) {
+                    continue;
+                }
+                $uris[] = self::PREFIXO_URI_FAIXA.$id;
             }
-            $uris[] = self::PREFIXO_URI_FAIXA.$id;
-        }
 
-        foreach (array_chunk($uris, self::LOTE_SPOTIFY) as $lote) {
-            $this->spotify->adicionarItensPlaylist($token, $playlistId, $lote);
-        }
+            if ([] !== $uris) {
+                $this->spotify->adicionarItensPlaylist($token, $playlistId, $uris);
+            }
 
-        foreach ($itens as $item) {
-            $item->marcarTransferida();
-            $this->itemRepository->salvar($item, false);
+            foreach ($loteItens as $item) {
+                $item->marcarTransferida();
+                $this->itemRepository->salvar($item, false);
+            }
+            $this->itemRepository->flush();
+            $playlist->avancarProgressoFaixas(count($loteItens));
+            $this->persistirProgresso($transferencia);
         }
-        $this->itemRepository->flush();
     }
 
     /**
      * @param list<ItemTransferenciaPlaylist> $itens
      */
-    private function transferirParaYoutube(string $token, string $playlistId, array $itens): void
-    {
+    private function transferirParaYoutube(
+        TransferenciaPlaylist $transferencia,
+        PlaylistTransferenciaSelecionada $playlist,
+        string $token,
+        string $playlistId,
+        array $itens,
+    ): void {
+        $processadosDesdeFlush = 0;
+
         foreach ($itens as $item) {
             $videoId = $item->idExternoDestino();
             if (null === $videoId || '' === $videoId) {
@@ -220,15 +237,44 @@ final readonly class ExecutarTransferenciaPlaylistService
                 $item->marcarTransferida();
             } catch (YoutubeOAuthException $erro) {
                 if (429 === $erro->getCode()) {
+                    $this->itemRepository->flush();
+                    $this->persistirProgresso($transferencia);
                     throw $erro;
                 }
                 $item->marcarFalha();
             }
 
             $this->itemRepository->salvar($item, false);
+            $playlist->avancarProgressoFaixas(1);
+            ++$processadosDesdeFlush;
+
+            if ($processadosDesdeFlush >= 5) {
+                $this->itemRepository->flush();
+                $this->persistirProgresso($transferencia);
+                $processadosDesdeFlush = 0;
+            }
+
             usleep(self::ESPERA_YOUTUBE_MICROSEGUNDOS);
         }
-        $this->itemRepository->flush();
+
+        if ($processadosDesdeFlush > 0) {
+            $this->itemRepository->flush();
+            $this->persistirProgresso($transferencia);
+        }
+    }
+
+    private function persistirProgresso(TransferenciaPlaylist $transferencia): void
+    {
+        $contagem = $this->itemRepository->contarPorStatus($transferencia);
+        $transferencia->atualizarContadores(
+            $contagem['total'],
+            $contagem['casadas'],
+            $contagem['duvidosas'],
+            $contagem['naoEncontradas'],
+            $contagem['transferidas'],
+            $contagem['falhas'],
+        );
+        $this->transferenciaRepository->salvar($transferencia);
     }
 
     /**

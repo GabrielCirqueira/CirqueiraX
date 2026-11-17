@@ -51,7 +51,12 @@ final class PlaylistTransferenciaSelecionadaRepository extends ServiceEntityRepo
     public function listarDaTransferencia(TransferenciaPlaylist $transferencia): array
     {
         /** @var list<PlaylistTransferenciaSelecionada> $lista */
-        $lista = $this->findBy(['transferencia' => $transferencia]);
+        $lista = $this->createQueryBuilder('p')
+            ->andWhere('IDENTITY(p.transferencia) = :transferenciaUuid')
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
+            ->orderBy('p.criadoEm', 'ASC')
+            ->getQuery()
+            ->getResult();
 
         return $lista;
     }

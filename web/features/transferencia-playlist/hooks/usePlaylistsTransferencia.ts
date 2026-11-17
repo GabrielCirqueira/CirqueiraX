@@ -6,6 +6,7 @@ import {
   executarTransferencia,
   iniciarTransferencia,
   listarPlaylistsServico,
+  listarTransferenciasPendentes,
   listarVinculosPlaylists,
   obterDetalheTransferencia,
   sincronizarVinculoPlaylist,
@@ -31,7 +32,23 @@ export function useDetectarPares(enabled = true) {
     queryKey: CHAVES_QUERY_TRANSFERENCIA_PLAYLIST.pares,
     queryFn: detectarParesPlaylists,
     enabled,
-    staleTime: 30_000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+  })
+}
+
+export function useListarTransferenciasPendentes() {
+  return useQuery({
+    queryKey: CHAVES_QUERY_TRANSFERENCIA_PLAYLIST.pendentes,
+    queryFn: listarTransferenciasPendentes,
+    staleTime: 5_000,
+    refetchInterval: (query) => {
+      const itens = query.state.data?.itens ?? []
+      return itens.some((t) => t.status === 'casando' || t.status === 'executando')
+        ? 2000
+        : false
+    },
   })
 }
 
@@ -104,6 +121,13 @@ export function useExecutarTransferencia() {
   return useMutation({
     mutationFn: (uuid: string) => executarTransferencia(uuid),
     onSuccess: (resumo) => {
+      queryClient.setQueryData(
+        CHAVES_QUERY_TRANSFERENCIA_PLAYLIST.detalhe(resumo.uuid),
+        (atual: unknown) =>
+          atual && typeof atual === 'object'
+            ? { ...atual, ...resumo }
+            : { ...resumo, playlists: [], itens: [] }
+      )
       queryClient.invalidateQueries({
         queryKey: CHAVES_QUERY_TRANSFERENCIA_PLAYLIST.detalhe(resumo.uuid),
       })

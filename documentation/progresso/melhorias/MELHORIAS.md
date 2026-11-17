@@ -201,3 +201,13 @@
 | M179 | Extensão Visual Spotify no YouTube Music em Gerenciar | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_9.md#melhoria-179--extensão-visual-spotify-no-youtube-music-em-gerenciar) |
 | M180 | Tutorial de Dados Retroativos do Spotify no Gerenciar | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_9.md#melhoria-180--tutorial-de-dados-retroativos-do-spotify-no-gerenciar) |
 | M181 | Endurecimento de Segurança Multi-usuário | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_10.md#melhoria-181--endurecimento-de-segurança-multi-usuário) |
+| M182 | Tutorial Spotify Recolhido e Só Histórico Ampliado | ✅ Concluído | 15/11/2026 | [ver](MELHORIAS_10.md#melhoria-182--tutorial-spotify-recolhido-e-só-histórico-ampliado) |
+| M183 | Histórico das 15 Faixas Anteriores no Tocando Agora | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-183--histórico-das-15-faixas-anteriores-no-tocando-agora) |
+| M184 | Catálogo de Artistas e Músicas Compartilhado Entre Usuários | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-184--catálogo-de-artistas-e-músicas-compartilhado-entre-usuários) |
+| M185 | Página de Música Mais Rápida com Cache e Lazy Load | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-185--página-de-música-mais-rápida-com-cache-e-lazy-load) |
+| M186 | Transferir e Vincular Playlists entre Spotify e YouTube Music | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-186--transferir-e-vincular-playlists-entre-spotify-e-youtube-music) |
+| M187 | OAuth Web Dedicado para Playlists do YouTube | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-187--oauth-web-dedicado-para-playlists-do-youtube) |
+| M188 | Reconexão do Spotify com Escopos de Playlist | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-188--reconexão-do-spotify-com-escopos-de-playlist) |
+| M189 | Playlists do Spotify na API `items` (Migração 2026) | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-189--playlists-do-spotify-na-api-items-migração-2026) |
+| M190 | Decisões de Vínculo e Atalhos de Seleção na Transferência | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-190--decisões-de-vínculo-e-atalhos-de-seleção-na-transferência) |
+| M191 | Correções da Transferência de Playlists (Prévia, Pareamento e Progresso) | ✅ Concluído | 16/11/2026 | [ver](MELHORIAS_10.md#melhoria-191--correções-da-transferência-de-playlists-prévia-pareamento-e-progresso) |

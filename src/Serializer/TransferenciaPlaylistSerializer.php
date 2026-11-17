@@ -10,10 +10,18 @@ use App\Entity\ItemTransferenciaPlaylist;
 use App\Entity\PlaylistTransferenciaSelecionada;
 use App\Entity\TransferenciaPlaylist;
 use App\Entity\VinculoPlaylist;
+use App\Repository\ItemTransferenciaPlaylistRepository;
+use App\Repository\PlaylistTransferenciaSelecionadaRepository;
 use DateTimeInterface;
 
 final class TransferenciaPlaylistSerializer
 {
+    public function __construct(
+        private readonly ItemTransferenciaPlaylistRepository $itemRepository,
+        private readonly PlaylistTransferenciaSelecionadaRepository $playlistSelecionadaRepository,
+    ) {
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -40,18 +48,23 @@ final class TransferenciaPlaylistSerializer
     /**
      * @return array<string, mixed>
      */
-    public function serializarDetalhe(TransferenciaPlaylist $transferencia): array
+    public function serializarDetalhe(TransferenciaPlaylist $transferencia, bool $incluirTodasFaixas = false): array
     {
+        $itens = $incluirTodasFaixas
+            ? $this->itemRepository->listarDaTransferencia($transferencia)
+            : $this->itemRepository->listarParaRevisaoPrevia($transferencia);
+
         return [
             ...$this->serializarResumo($transferencia),
             'playlists' => array_map(
                 $this->serializarPlaylistSelecionada(...),
-                $transferencia->playlistsSelecionadas()->toArray(),
+                $this->playlistSelecionadaRepository->listarDaTransferencia($transferencia),
             ),
             'itens' => array_map(
                 $this->serializarItem(...),
-                $transferencia->itens()->toArray(),
+                $itens,
             ),
+            'itensResumo' => !$incluirTodasFaixas,
         ];
     }
 

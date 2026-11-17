@@ -133,8 +133,14 @@ export type ItemTransferencia = z.infer<typeof ItemTransferenciaSchema>
 export const TransferenciaDetalheSchema = TransferenciaResumoSchema.extend({
   playlists: z.array(PlaylistSelecionadaSchema),
   itens: z.array(ItemTransferenciaSchema),
+  itensResumo: z.boolean().optional().default(false),
 })
 export type TransferenciaDetalhe = z.infer<typeof TransferenciaDetalheSchema>
+
+export const ListaTransferenciasSchema = z.object({
+  itens: z.array(TransferenciaResumoSchema),
+})
+export type ListaTransferencias = z.infer<typeof ListaTransferenciasSchema>
 
 export const VinculoPlaylistSchema = z.object({
   uuid: z.string(),
@@ -179,6 +185,7 @@ export const ItemConfirmacaoPreviaSchema = z.object({
 export type ItemConfirmacaoPrevia = z.infer<typeof ItemConfirmacaoPreviaSchema>
 
 export const ConfirmarPreviaPayloadSchema = z.object({
-  itens: z.array(ItemConfirmacaoPreviaSchema).min(1),
+  itens: z.array(ItemConfirmacaoPreviaSchema).optional().default([]),
+  uuidsIgnorados: z.array(z.string()).optional().default([]),
 })
 export type ConfirmarPreviaPayload = z.infer<typeof ConfirmarPreviaPayloadSchema>

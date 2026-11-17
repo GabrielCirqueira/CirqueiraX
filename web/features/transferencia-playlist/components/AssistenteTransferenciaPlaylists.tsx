@@ -21,7 +21,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { ArrowRight, CheckCircle2, Music2 } from 'lucide-react'
-import { type ReactNode, memo, useState } from 'react'
+import { type ReactNode, memo, useEffect, useState } from 'react'
 import {
   useConfirmarPrevia,
   useDetalheTransferencia,
@@ -38,6 +38,7 @@ import {
   ROTA_RETORNO_GERENCIAR,
   agruparItensPrevia,
   descreverDecisao,
+  montarPayloadConfirmacaoPrevia,
   destinoOposto,
   encontrarParOrientado,
   filtrarPlaylistsPorBusca,
@@ -45,7 +46,6 @@ import {
   formatarNumero,
   idsComParNoDestino,
   labelServico,
-  montarItensConfirmacaoPrevia,
   montarPlaylistsInicio,
   rotuloDirecao,
   salvarRetornoYoutubeOAuth,
@@ -55,6 +55,7 @@ import {
 export interface AssistenteTransferenciaPlaylistsProps {
   aberto: boolean
   onFechar: () => void
+  uuidRetomar?: string | null
 }
 
 type PassoAssistente = 1 | 2 | 3 | 4 | 5 | 6
@@ -62,6 +63,7 @@ type PassoAssistente = 1 | 2 | 3 | 4 | 5 | 6
 export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransferenciaPlaylists({
   aberto,
   onFechar,
+  uuidRetomar = null,
 }: AssistenteTransferenciaPlaylistsProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)')
   const [passo, setPasso] = useState<PassoAssistente>(1)
@@ -92,6 +94,27 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
   const { data: detalhe } = useDetalheTransferencia(uuidTransferencia)
   const confirmarPrevia = useConfirmarPrevia()
   const executar = useExecutarTransferencia()
+
+  useEffect(() => {
+    if (!aberto || !uuidRetomar) return
+    setUuidTransferencia(uuidRetomar)
+    setPasso(5)
+  }, [aberto, uuidRetomar])
+
+  useEffect(() => {
+    if (!detalhe || !uuidTransferencia) return
+    if (detalhe.uuid !== uuidTransferencia) return
+    setOrigem(detalhe.origem)
+    if (detalhe.status === 'executando' || detalhe.status === 'concluida' || detalhe.status === 'pausada_cota') {
+      setPasso(6)
+    } else if (
+      detalhe.status === 'casando' ||
+      detalhe.status === 'previa' ||
+      detalhe.status === 'falha'
+    ) {
+      setPasso(5)
+    }
+  }, [detalhe, uuidTransferencia])
 
   function reiniciarEstado() {
     setPasso(1)
@@ -209,7 +232,11 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
 
   function handleConfirmarETransferir() {
     if (!uuidTransferencia || !detalhe) return
-    const payload = { itens: montarItensConfirmacaoPrevia(detalhe, ignorados) }
+    const temOQueTransferir =
+      (detalhe.totalCasadas ?? 0) + (detalhe.totalDuvidosas ?? 0) > 0 ||
+      detalhe.itens.some((item) => item.status === 'casada' || item.status === 'duvidosa')
+    if (!temOQueTransferir) return
+    const payload = montarPayloadConfirmacaoPrevia(detalhe, ignorados)
     confirmarPrevia.mutate(
       { uuid: uuidTransferencia, payload },
       {
@@ -887,61 +914,93 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
         {previaPronta && grupos && (
           <VStack align="stretch" gap={4} maxH="50vh" overflowY="auto">
             <Text fontSize="sm" color="cirqueira.musica.textoSecundario">
-              Revise o casamento. Marque como ignorar o que não quiser transferir.
+              Relatório do casamento. As casadas seguem prontas; revise só as duvidosas / não
+              encontradas e ignore o que não quiser transferir.
             </Text>
-            {(
-              [
-                ['Casadas', grupos.casadas],
-                ['Duvidosas', grupos.duvidosas],
-                ['Não encontradas', grupos.naoEncontradas],
-              ] as const
-            ).map(([rotulo, itens]) =>
-              itens.length === 0 ? null : (
-                <VStack key={rotulo} align="stretch" gap={2}>
-                  <Heading as="h3" fontSize="xs" color="cirqueira.musica.amarelo">
-                    {rotulo} ({formatarNumero(itens.length)})
-                  </Heading>
-                  {itens.map((item) => {
-                    const ignorado = ignorados.has(item.uuid)
-                    return (
-                      <HStack
-                        key={item.uuid}
-                        gap={3}
-                        p={2}
-                        borderRadius="8px"
-                        bg="cirqueira.musica.cartaoElevado"
-                        opacity={ignorado ? 0.55 : 1}
-                      >
-                        <VStack align="start" gap={0} flex={1} minW={0}>
-                          <Text fontSize="sm" fontWeight="semibold" truncate maxW="full">
-                            {item.tituloOrigem}
-                          </Text>
-                          <Text
-                            fontSize="2xs"
-                            color="cirqueira.musica.textoSecundario"
-                            truncate
-                            maxW="full"
-                          >
-                            {item.artistasOrigem}
-                            {item.tituloDestino
-                              ? ` → ${item.tituloDestino}${item.artistasDestino ? ` · ${item.artistasDestino}` : ''}`
-                              : ''}
-                          </Text>
-                        </VStack>
-                        <Button
-                          size="xs"
-                          variant="ghost"
-                          color={
-                            ignorado ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoSecundario'
-                          }
-                          onClick={() => alternarIgnorado(item.uuid)}
+            <Box p={3} borderRadius="8px" bg="cirqueira.musica.cartaoElevado">
+              <Text fontSize="sm" fontWeight="semibold">
+                {formatarNumero(detalhe?.totalCasadas ?? 0)} casadas ·{' '}
+                {formatarNumero(detalhe?.totalDuvidosas ?? 0)} duvidosas ·{' '}
+                {formatarNumero(detalhe?.totalNaoEncontradas ?? 0)} não encontradas
+              </Text>
+              <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" mt={1}>
+                {formatarNumero(detalhe?.playlists?.length ?? 0)} playlists ·{' '}
+                {formatarNumero(detalhe?.totalFaixas ?? 0)} faixas no total
+                {detalhe?.itensResumo
+                  ? ' · lista abaixo só com duvidosas/não encontradas'
+                  : ''}
+              </Text>
+            </Box>
+            {(detalhe?.totalCasadas ?? 0) > 0 && grupos.casadas.length === 0 && (
+              <Text fontSize="xs" color="cirqueira.musica.verde">
+                {formatarNumero(detalhe?.totalCasadas ?? 0)} faixas casadas prontas para transferir
+                (ocultas na lista para caber tudo).
+              </Text>
+            )}
+            {grupos.duvidosas.length + grupos.naoEncontradas.length === 0 &&
+            grupos.casadas.length === 0 ? (
+              <Text fontSize="sm" color="cirqueira.musica.textoDesabilitado">
+                Nenhuma faixa problemática. Pode confirmar e transferir as casadas.
+              </Text>
+            ) : (
+              (
+                [
+                  { rotulo: 'Duvidosas', itens: grupos.duvidosas },
+                  { rotulo: 'Não encontradas', itens: grupos.naoEncontradas },
+                  ...(detalhe?.itensResumo
+                    ? []
+                    : [{ rotulo: 'Casadas', itens: grupos.casadas }]),
+                ] as { rotulo: string; itens: typeof grupos.duvidosas }[]
+              ).map(({ rotulo, itens }) =>
+                itens.length === 0 ? null : (
+                  <VStack key={rotulo} align="stretch" gap={2}>
+                    <Heading as="h3" fontSize="xs" color="cirqueira.musica.amarelo">
+                      {rotulo} ({formatarNumero(itens.length)})
+                    </Heading>
+                    {itens.map((item) => {
+                      const ignorado = ignorados.has(item.uuid)
+                      return (
+                        <HStack
+                          key={item.uuid}
+                          gap={3}
+                          p={2}
+                          borderRadius="8px"
+                          bg="cirqueira.musica.cartaoElevado"
+                          opacity={ignorado ? 0.55 : 1}
                         >
-                          {ignorado ? 'Restaurar' : 'Ignorar'}
-                        </Button>
-                      </HStack>
-                    )
-                  })}
-                </VStack>
+                          <VStack align="start" gap={0} flex={1} minW={0}>
+                            <Text fontSize="sm" fontWeight="semibold" truncate maxW="full">
+                              {item.tituloOrigem}
+                            </Text>
+                            <Text
+                              fontSize="2xs"
+                              color="cirqueira.musica.textoSecundario"
+                              truncate
+                              maxW="full"
+                            >
+                              {item.artistasOrigem}
+                              {item.tituloDestino
+                                ? ` → ${item.tituloDestino}${item.artistasDestino ? ` · ${item.artistasDestino}` : ''}`
+                                : ''}
+                            </Text>
+                          </VStack>
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            color={
+                              ignorado
+                                ? 'cirqueira.musica.verde'
+                                : 'cirqueira.musica.textoSecundario'
+                            }
+                            onClick={() => alternarIgnorado(item.uuid)}
+                          >
+                            {ignorado ? 'Restaurar' : 'Ignorar'}
+                          </Button>
+                        </HStack>
+                      )
+                    })}
+                  </VStack>
+                )
               )
             )}
           </VStack>
@@ -963,6 +1022,7 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
               color="cirqueira.grey.950"
               _hover={{ bg: 'cirqueira.musica.verdeHover' }}
               loading={confirmarPrevia.isPending || executar.isPending}
+              disabled={(detalhe?.totalCasadas ?? 0) + (detalhe?.totalDuvidosas ?? 0) === 0}
               onClick={handleConfirmarETransferir}
             >
               Confirmar e transferir
@@ -1004,7 +1064,26 @@ export const AssistenteTransferenciaPlaylists = memo(function AssistenteTransfer
             <Text fontSize="xs" color="cirqueira.musica.textoSecundario">
               {formatarNumero(detalhe.totalTransferidas)} transferidas ·{' '}
               {formatarNumero(detalhe.totalFalhas)} falhas de {formatarNumero(detalhe.totalFaixas)}
+              {detalhe.totalFaixas > 0
+                ? ` (${Math.min(100, Math.round(((detalhe.totalTransferidas + detalhe.totalFalhas) / detalhe.totalFaixas) * 100))}%)`
+                : ''}
             </Text>
+            {detalhe.status === 'executando' && detalhe.totalFaixas > 0 && (
+              <Progress.Root
+                value={Math.min(
+                  100,
+                  Math.round(
+                    ((detalhe.totalTransferidas + detalhe.totalFalhas) / detalhe.totalFaixas) * 100
+                  )
+                )}
+                size="sm"
+                mt={1}
+              >
+                <Progress.Track bg="cirqueira.musica.cartao" borderRadius="full">
+                  <Progress.Range bg="cirqueira.musica.verde" borderRadius="full" />
+                </Progress.Track>
+              </Progress.Root>
+            )}
             {detalhe.status === 'pausada_cota' && (
               <Text fontSize="xs" color="cirqueira.musica.amarelo">
                 Pausada por cota da API. Você pode tentar novamente mais tarde.

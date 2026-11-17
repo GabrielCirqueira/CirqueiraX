@@ -16,6 +16,7 @@ use App\Service\TransferenciaPlaylist\DetectarParesPlaylistDestinoService;
 use App\Service\TransferenciaPlaylist\ExecutarTransferenciaPlaylistService;
 use App\Service\TransferenciaPlaylist\IniciarTransferenciaPlaylistService;
 use App\Service\TransferenciaPlaylist\ListarPlaylistsServicoService;
+use App\Service\TransferenciaPlaylist\ListarTransferenciasPlaylistService;
 use App\Service\TransferenciaPlaylist\ListarVinculosPlaylistService;
 use App\Service\TransferenciaPlaylist\ObterDetalheTransferenciaPlaylistService;
 use App\Service\TransferenciaPlaylist\SincronizarVinculoPlaylistService;
@@ -34,11 +35,25 @@ final class TransferenciaPlaylistController extends DefaultController
         private readonly ExecutarTransferenciaPlaylistService $executarTransferencia,
         private readonly IniciarTransferenciaPlaylistService $iniciarTransferencia,
         private readonly ListarPlaylistsServicoService $listarPlaylists,
+        private readonly ListarTransferenciasPlaylistService $listarTransferencias,
         private readonly ListarVinculosPlaylistService $listarVinculos,
         private readonly ObterDetalheTransferenciaPlaylistService $obterDetalhe,
         private readonly SincronizarVinculoPlaylistService $sincronizarVinculo,
         private readonly TransferenciaPlaylistSerializer $serializer,
     ) {
+    }
+
+    #[Route('', name: 'listar', methods: ['GET'])]
+    public function listar(#[CurrentUser] Usuario $usuario): Response
+    {
+        $transferencias = $this->listarTransferencias->listarPendentes($usuario);
+
+        return $this->success([
+            'itens' => array_map(
+                $this->serializer->serializarResumo(...),
+                $transferencias,
+            ),
+        ]);
     }
 
     #[Route('/servicos/{servico}/playlists', name: 'listar_playlists', methods: ['GET'])]
@@ -96,7 +111,7 @@ final class TransferenciaPlaylistController extends DefaultController
         }
     }
 
-    #[Route('', name: 'iniciar', methods: ['POST'])]
+    #[Route('', name: 'iniciar', methods: ['POST'], priority: -10)]
     public function iniciar(
         #[MapRequestPayload] IniciarTransferenciaPlaylistDTO $dto,
         #[CurrentUser] Usuario $usuario,

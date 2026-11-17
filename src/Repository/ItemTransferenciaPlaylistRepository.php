@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\ItemTransferenciaPlaylist;
+use App\Entity\PlaylistTransferenciaSelecionada;
 use App\Entity\TransferenciaPlaylist;
 use App\Enum\StatusItemTransferenciaPlaylist;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -53,9 +54,9 @@ final class ItemTransferenciaPlaylistRepository extends ServiceEntityRepository
     {
         /** @var list<ItemTransferenciaPlaylist> $itens */
         $itens = $this->createQueryBuilder('i')
-            ->andWhere('i.transferencia = :transferencia')
+            ->andWhere('IDENTITY(i.transferencia) = :transferenciaUuid')
             ->andWhere('i.status = :status')
-            ->setParameter('transferencia', $transferencia)
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
             ->setParameter('status', StatusItemTransferenciaPlaylist::Pendente)
             ->orderBy('i.ordem', 'ASC')
             ->setMaxResults($limite)
@@ -72,8 +73,59 @@ final class ItemTransferenciaPlaylistRepository extends ServiceEntityRepository
     {
         /** @var list<ItemTransferenciaPlaylist> $itens */
         $itens = $this->createQueryBuilder('i')
-            ->andWhere('i.transferencia = :transferencia')
-            ->setParameter('transferencia', $transferencia)
+            ->andWhere('IDENTITY(i.transferencia) = :transferenciaUuid')
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
+            ->orderBy('i.ordem', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $itens;
+    }
+
+    /**
+     * Itens relevantes para revisão da prévia (duvidosas + não encontradas).
+     * Casadas em massa ficam só nos contadores para não estourar a API.
+     *
+     * @return list<ItemTransferenciaPlaylist>
+     */
+    public function listarParaRevisaoPrevia(TransferenciaPlaylist $transferencia): array
+    {
+        /** @var list<ItemTransferenciaPlaylist> $itens */
+        $itens = $this->createQueryBuilder('i')
+            ->andWhere('IDENTITY(i.transferencia) = :transferenciaUuid')
+            ->andWhere('i.status IN (:status)')
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
+            ->setParameter('status', [
+                StatusItemTransferenciaPlaylist::Duvidosa,
+                StatusItemTransferenciaPlaylist::NaoEncontrada,
+            ])
+            ->orderBy('i.ordem', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $itens;
+    }
+
+    /**
+     * @return list<ItemTransferenciaPlaylist>
+     */
+    public function listarProntosParaTransferirDaPlaylist(
+        TransferenciaPlaylist $transferencia,
+        PlaylistTransferenciaSelecionada $playlist,
+    ): array
+    {
+        /** @var list<ItemTransferenciaPlaylist> $itens */
+        $itens = $this->createQueryBuilder('i')
+            ->andWhere('IDENTITY(i.transferencia) = :transferenciaUuid')
+            ->andWhere('IDENTITY(i.playlistSelecionada) = :playlistUuid')
+            ->andWhere('i.status IN (:status)')
+            ->andWhere('i.idExternoDestino IS NOT NULL')
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
+            ->setParameter('playlistUuid', $playlist->uuid(), 'uuid')
+            ->setParameter('status', [
+                StatusItemTransferenciaPlaylist::Casada,
+                StatusItemTransferenciaPlaylist::Duvidosa,
+            ])
             ->orderBy('i.ordem', 'ASC')
             ->getQuery()
             ->getResult();
@@ -102,9 +154,9 @@ final class ItemTransferenciaPlaylistRepository extends ServiceEntityRepository
 
         /** @var list<ItemTransferenciaPlaylist> $itens */
         $itens = $this->createQueryBuilder('i')
-            ->andWhere('i.transferencia = :transferencia')
+            ->andWhere('IDENTITY(i.transferencia) = :transferenciaUuid')
             ->andWhere('i.uuid IN (:uuids)')
-            ->setParameter('transferencia', $transferencia)
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
             ->setParameter('uuids', array_map(static fn (string $uuid): Uuid => Uuid::fromString($uuid), $uuidsValidos))
             ->getQuery()
             ->getResult();
@@ -119,8 +171,8 @@ final class ItemTransferenciaPlaylistRepository extends ServiceEntityRepository
     {
         $linhas = $this->createQueryBuilder('i')
             ->select('i.status AS status, COUNT(i.uuid) AS total')
-            ->andWhere('i.transferencia = :transferencia')
-            ->setParameter('transferencia', $transferencia)
+            ->andWhere('IDENTITY(i.transferencia) = :transferenciaUuid')
+            ->setParameter('transferenciaUuid', $transferencia->uuid(), 'uuid')
             ->groupBy('i.status')
             ->getQuery()
             ->getArrayResult();

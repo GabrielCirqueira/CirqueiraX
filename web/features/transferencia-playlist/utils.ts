@@ -175,8 +175,11 @@ export function montarPlaylistsInicio(
 
 export function deveRefetchDetalhe(status?: StatusTransferencia): number | false {
   if (!status) return false
-  if (status === 'casando' || status === 'executando' || status === 'pausada_cota') {
+  if (status === 'casando' || status === 'pausada_cota') {
     return 2000
+  }
+  if (status === 'executando') {
+    return 1000
   }
   return false
 }
@@ -189,29 +192,47 @@ export function agruparItensPrevia(itens: ItemTransferencia[]) {
   }
 }
 
+export function montarPayloadConfirmacaoPrevia(
+  detalhe: TransferenciaDetalhe,
+  ignorados: ReadonlySet<string>
+): { itens: ItemConfirmacaoPrevia[]; uuidsIgnorados: string[] } {
+  if (detalhe.itensResumo) {
+    return {
+      itens: [],
+      uuidsIgnorados: Array.from(ignorados),
+    }
+  }
+
+  return {
+    itens: detalhe.itens
+      .filter((item) => ['casada', 'duvidosa', 'nao_encontrada'].includes(item.status))
+      .map((item) => {
+        if (ignorados.has(item.uuid)) {
+          return { uuid: item.uuid, status: 'ignorada' as const }
+        }
+
+        if (item.status === 'casada' || item.status === 'duvidosa') {
+          return {
+            uuid: item.uuid,
+            status: 'casada' as const,
+            idExternoDestino: item.idExternoDestino,
+            tituloDestino: item.tituloDestino,
+            artistasDestino: item.artistasDestino,
+          }
+        }
+
+        return { uuid: item.uuid, status: 'nao_encontrada' as const }
+      }),
+    uuidsIgnorados: Array.from(ignorados),
+  }
+}
+
+/** @deprecated use montarPayloadConfirmacaoPrevia */
 export function montarItensConfirmacaoPrevia(
   detalhe: TransferenciaDetalhe,
   ignorados: ReadonlySet<string>
 ): ItemConfirmacaoPrevia[] {
-  return detalhe.itens
-    .filter((item) => ['casada', 'duvidosa', 'nao_encontrada'].includes(item.status))
-    .map((item) => {
-      if (ignorados.has(item.uuid)) {
-        return { uuid: item.uuid, status: 'ignorada' as const }
-      }
-
-      if (item.status === 'casada' || item.status === 'duvidosa') {
-        return {
-          uuid: item.uuid,
-          status: 'casada' as const,
-          idExternoDestino: item.idExternoDestino,
-          tituloDestino: item.tituloDestino,
-          artistasDestino: item.artistasDestino,
-        }
-      }
-
-      return { uuid: item.uuid, status: 'nao_encontrada' as const }
-    })
+  return montarPayloadConfirmacaoPrevia(detalhe, ignorados).itens
 }
 
 export function formatarNumero(valor: number): string {
