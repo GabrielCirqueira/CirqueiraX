@@ -161,3 +161,18 @@
 - **Arquivos**: `src/Service/Musica/Analise/ObterVisaoGeralMusicaService.php`, `src/Service/Musica/Analise/ObterComparativoServicosMusicaService.php`, `src/Service/Musica/Analise/MontarItensComImagemMusicaService.php`, `src/Service/Musica/Analise/ObterExtrasPaginaMusicaService.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Controller/Musica/MusicaAnaliseController.php`, `src/DataObject/Spotify/Analise/PeriodoAnaliseSpotifyDTO.php`, `web/features/musica/components/Aba*.tsx`, `web/features/musica/components/VisaoGeral*.tsx`, `web/features/musica/components/TabelaRankingMusica.tsx`, `web/features/musica/components/PecasBlocoMusica.tsx`, `web/features/musica/hooks/useBlocosMusica.ts`, `web/features/musica/utils/blocosMusica.ts`, `public/sw.js`
 
 ---
+
+### ✅ Melhoria 194 — Carregamento Rápido de `/musica` (Cache sem Apagar, Índices e Cache no Navegador)
+
+- **Status**: Concluído
+- **Data**: 17 de novembro de 2026
+- **Problema**: toda vez que a página abria, ficava carregando por muito tempo (resumo 13,8 s, linha do tempo 14,8 s, recordes 13,4 s, visão geral 9,2 s). Os coletores (YouTube a cada 30 s, Spotify a cada 5 min) apagavam todo o cache de análise a cada reprodução nova, então quase sempre o cálculo era do zero. No navegador, o cache durava só 10 min em memória.
+- **Solução**:
+  - Cache "mostra o guardado e atualiza por trás": reprodução nova só marca o cache como desatualizado; a resposta sai na hora com o último cálculo e o recálculo roda depois da resposta (`kernel.terminate`, no máximo 12 por requisição, só se o cálculo tiver mais de 90 s). Correções manuais, importação completa e reprojeção total continuam apagando o cache. Validade passou de 6 h para 24 h; cache sobe para v8.
+  - Índices de cobertura em `reproducao_musical` (usuário+data, usuário+música e música+usuário com fonte, ms e tempo exato) para as somas saírem só do índice.
+  - Consultas de artista (ranking, total de artistas, artistas novos, minutos do top) somam primeiro por música e só depois juntam com os créditos — mesmo resultado, 40–70% mais rápido; total de artistas de 7 dias caiu de 1,05 s para 0,10 s.
+  - Navegador guarda as consultas de música no `localStorage` (até 3 dias, descartado quando sai versão nova do app ou no logout): a página abre já preenchida e atualiza em segundo plano.
+  - Trocar o período mantém o resultado anterior na tela enquanto busca o novo.
+- **Arquivos**: `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `src/Service/Spotify/FilaRecalculoAnaliseService.php`, `src/EventListener/RecalcularAnaliseAposRespostaListener.php`, `src/Service/Spotify/ColetarHistoricoRecenteSpotifyService.php`, `src/Service/Spotify/SincronizarArtistasFaixasSpotifyService.php`, `src/Service/Musica/Projecao/ProjetarReproducoesYoutubeService.php`, `src/Service/Musica/Projecao/ProjetarReproducoesSpotifyService.php`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Entity/ReproducaoMusical.php`, `migrations/Version20261117120000.php`, `web/shared/pwa/persistenciaConsultas.ts`, `web/shared/pwa/versaoApp.ts`, `web/main.tsx`, `web/stores/useAuthStore.ts`, `web/features/musica/hooks/useBlocosMusica.ts`, `web/features/musica/hooks/useRankingIntervaloMusica.ts`
+
+---

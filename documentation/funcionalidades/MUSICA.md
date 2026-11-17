@@ -75,6 +75,8 @@ Depois da projeção, todas as análises (`Service/Musica/Analise`, `AnaliseRepr
 
 Formato de cada aba (M193): toda música, álbum e artista aparece com capa ou foto (só dados já guardados; música só do YouTube sem foto de artista usa a capa do vídeo ou a inicial). A Visão geral é um resumo com atalhos: destaque em gradiente com gráfico de minutos, pódio de artistas, música e álbum do período, carrossel do top 10, rosca de serviços, mini rotina, artistas novos, últimas tocadas, saudade e neste dia. Listas completas ficam só em Rankings, que é uma tabela com busca, ordem por streams/minutos e filtro por serviço. Histórico tem o feed de últimas ouvidas agrupado por dia (sem popup). Endpoints: `/api/v1/musica/visao-geral`, `/ultimas-ouvidas` (cursor `antes`) e `/servicos`.
 
+Desempenho (M194): o cache de análise não é apagado quando chegam reproduções novas — elas só marcam o cache como desatualizado, a resposta sai com o último cálculo e o recálculo roda depois da resposta. Correções manuais e reimportações apagam o cache. O navegador guarda as consultas de música por até 3 dias (descartadas em versão nova do app e no logout), então a página abre preenchida e atualiza por trás.
+
 ### Transferência de playlists (Spotify ↔ YouTube Music)
 
 Fluxo no estilo TuneMyMusic, em `/musica/gerenciar`:

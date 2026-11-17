@@ -29,7 +29,7 @@ final readonly class ProjetarReproducoesYoutubeService
         $uuids = array_values(array_unique(array_map(static fn (VideoYoutube $video): string => $video->uuid()->toBinary(), $videos)));
 
         $projetadas = $this->reproducaoMusicalRepository->reprojetarYoutube($usuario, $uuids);
-        $this->cacheAnalise->invalidar($usuario);
+        $this->cacheAnalise->registrarNovasReproducoes($usuario);
 
         return $projetadas;
     }

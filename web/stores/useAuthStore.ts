@@ -1,3 +1,4 @@
+import { limparConsultasPersistidas } from '@/shared/pwa/persistenciaConsultas'
 import { limparDadosOffline } from '@/shared/pwa/serviceWorker'
 import type { Usuario } from '@/shared/types'
 import { create } from 'zustand'
@@ -42,6 +43,7 @@ export const useAuthStore = create<AuthStore>()(
       limpar: () => {
         localStorage.removeItem('token')
         limparDadosOffline()
+        limparConsultasPersistidas()
         set({ usuario: null, token: null, refreshToken: null, autenticado: false })
       },
     }),

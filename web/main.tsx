@@ -6,6 +6,10 @@ import { ThemeProvider } from './contexts'
 import { Provider } from './shared/components/ui/provider'
 import { Toaster } from './shared/components/ui/toaster'
 import './index.css'
+import {
+  persistirConsultas,
+  restaurarConsultasPersistidas,
+} from './shared/pwa/persistenciaConsultas'
 import { registrarServiceWorker } from './shared/pwa/serviceWorker'
 import { iniciarVerificacaoVersao } from './shared/pwa/versaoApp'
 import './stores/useInstalacaoAppStore'
@@ -45,6 +49,9 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+restaurarConsultasPersistidas(queryClient)
+persistirConsultas(queryClient)
 
 const rootElement = document.getElementById('root')
 

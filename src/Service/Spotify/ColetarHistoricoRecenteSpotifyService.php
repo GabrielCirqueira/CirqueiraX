@@ -191,7 +191,7 @@ final readonly class ColetarHistoricoRecenteSpotifyService
         $this->contaSpotifyRepository->flush();
 
         if ($totalNovas > 0) {
-            $this->cacheAnalise->invalidar($conta->usuario());
+            $this->cacheAnalise->registrarNovasReproducoes($conta->usuario());
             $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $conta->usuario()->getId(), (new DateTimeImmutable(self::JANELA_VINCULO_CATALOGO))->getTimestamp()));
         }
 

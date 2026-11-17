@@ -36,6 +36,10 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     private const string URL_YOUTUBE_MUSIC = 'https://music.youtube.com/watch?v=%s';
     private const string DATA_LOCAL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
     private const string ORDEM = 'streams DESC, ms DESC';
+    private const string COLUNAS_POR_FONTE_SOMADAS = 'SUM(m.qtd_spotify) AS qtd_spotify, SUM(m.qtd_youtube_music) AS qtd_youtube_music,
+            SUM(m.streams_spotify) AS streams_spotify, SUM(m.ms_spotify) AS ms_spotify,
+            SUM(m.streams_youtube_music) AS streams_youtube_music, SUM(m.ms_youtube_music) AS ms_youtube_music,
+            SUM(m.ms_estimado) AS ms_estimado';
     private const string SELECT_CREDITOS = 'SELECT mac.musica_uuid, COALESCE(ac.unido_a_uuid, ac.uuid) AS artista_uuid
             FROM musica_artista_catalogo mac INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
             UNION
@@ -117,10 +121,15 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             '%s
-            SELECT c.artista_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
-            FROM reproducao_musical r
-            INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
-            WHERE r.usuario_id = :usuarioId%s
+            , por_musica AS (
+                SELECT r.musica_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms, %s
+                FROM reproducao_musical r
+                WHERE r.usuario_id = :usuarioId%s
+                GROUP BY r.musica_uuid
+            )
+            SELECT c.artista_uuid, SUM(m.streams) AS streams, SUM(m.ms) AS ms, %s
+            FROM por_musica m
+            INNER JOIN creditos c ON c.musica_uuid = m.musica_uuid
             GROUP BY c.artista_uuid
             HAVING streams > 0
             ORDER BY %s
@@ -128,6 +137,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
             self::CTE_CREDITOS,
             self::COLUNAS_POR_FONTE,
             $filtros,
+            self::COLUNAS_POR_FONTE_SOMADAS,
             self::ORDEM,
             $limite,
         ), $parametros, $tipos);
@@ -294,7 +304,9 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
             $filtros,
         ), $parametros, $tipos) ?? [];
         $artistas = $this->consultarLinha(sprintf(
-            '%s SELECT COUNT(DISTINCT c.artista_uuid) AS artistas FROM reproducao_musical r INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid WHERE r.usuario_id = :usuarioId%s',
+            '%s SELECT COUNT(DISTINCT c.artista_uuid) AS artistas
+            FROM (SELECT DISTINCT r.musica_uuid FROM reproducao_musical r WHERE r.usuario_id = :usuarioId%s) m
+            INNER JOIN creditos c ON c.musica_uuid = m.musica_uuid',
             self::CTE_CREDITOS,
             $filtros,
         ), $parametros, $tipos);
@@ -343,20 +355,20 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
 
         $linha = $this->consultarLinha(sprintf(
-            '%1$s, base AS (
-                SELECT r.id, r.ms_reproduzidos, c.artista_uuid
-                FROM reproducao_musical r INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
+            '%1$s, por_musica AS (
+                SELECT r.musica_uuid, SUM(r.ms_reproduzidos >= :corte) AS streams, SUM(r.ms_reproduzidos) AS ms
+                FROM reproducao_musical r
                 WHERE r.usuario_id = :usuarioId%2$s
+                GROUP BY r.musica_uuid
             ), topo AS (
-                SELECT artista_uuid FROM base
-                GROUP BY artista_uuid
-                HAVING SUM(ms_reproduzidos >= :corte) > 0
-                ORDER BY SUM(ms_reproduzidos >= :corte) DESC, SUM(ms_reproduzidos) DESC
+                SELECT c.artista_uuid FROM por_musica m INNER JOIN creditos c ON c.musica_uuid = m.musica_uuid
+                GROUP BY c.artista_uuid
+                HAVING SUM(m.streams) > 0
+                ORDER BY SUM(m.streams) DESC, SUM(m.ms) DESC
                 LIMIT %3$d
             )
-            SELECT COALESCE(SUM(ms_reproduzidos), 0) AS ms FROM (
-                SELECT DISTINCT b.id, b.ms_reproduzidos FROM base b INNER JOIN topo t ON t.artista_uuid = b.artista_uuid
-            ) reproducoes_topo',
+            SELECT COALESCE(SUM(m.ms), 0) AS ms FROM por_musica m
+            WHERE m.musica_uuid IN (SELECT c.musica_uuid FROM creditos c INNER JOIN topo t ON t.artista_uuid = c.artista_uuid)',
             self::CTE_CREDITOS,
             $filtros,
             $quantidade,
@@ -703,11 +715,16 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $linhas = $this->consultar(sprintf(
             '%s
-            SELECT c.artista_uuid, MIN(r.tocada_em) AS primeira,
-                SUM(r.tocada_em >= :inicioUtc AND r.ms_reproduzidos >= :corte) AS streams,
-                SUM(CASE WHEN r.tocada_em >= :inicioUtc THEN r.ms_reproduzidos ELSE 0 END) AS ms
-            FROM reproducao_musical r INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
-            WHERE r.usuario_id = :usuarioId%s
+            , por_musica AS (
+                SELECT r.musica_uuid, MIN(r.tocada_em) AS primeira,
+                    SUM(r.tocada_em >= :inicioUtc AND r.ms_reproduzidos >= :corte) AS streams,
+                    SUM(CASE WHEN r.tocada_em >= :inicioUtc THEN r.ms_reproduzidos ELSE 0 END) AS ms
+                FROM reproducao_musical r
+                WHERE r.usuario_id = :usuarioId%s
+                GROUP BY r.musica_uuid
+            )
+            SELECT c.artista_uuid, MIN(m.primeira) AS primeira, SUM(m.streams) AS streams, SUM(m.ms) AS ms
+            FROM por_musica m INNER JOIN creditos c ON c.musica_uuid = m.musica_uuid
             GROUP BY c.artista_uuid
             HAVING primeira >= :inicioUtc
             ORDER BY %s',
@@ -732,12 +749,17 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $linha = $this->consultarLinha(sprintf(
             '%s
+            , por_musica AS (
+                SELECT r.musica_uuid, MIN(r.tocada_em) AS primeira
+                FROM reproducao_musical r
+                WHERE r.usuario_id = :usuarioId%s
+                GROUP BY r.musica_uuid
+            )
             SELECT COUNT(*) AS total FROM (
                 SELECT c.artista_uuid
-                FROM reproducao_musical r INNER JOIN creditos c ON c.musica_uuid = r.musica_uuid
-                WHERE r.usuario_id = :usuarioId%s
+                FROM por_musica m INNER JOIN creditos c ON c.musica_uuid = m.musica_uuid
                 GROUP BY c.artista_uuid
-                HAVING MIN(r.tocada_em) >= :inicioUtc
+                HAVING MIN(m.primeira) >= :inicioUtc
             ) novos',
             self::CTE_CREDITOS,
             $filtros,

@@ -12,12 +12,17 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 final readonly class CacheAnaliseSpotifyService
 {
-    private const int VALIDADE_SEGUNDOS = 21600;
+    private const int VALIDADE_SEGUNDOS = 86400;
+    private const int IDADE_MINIMA_RECALCULO_SEGUNDOS = 90;
     private const string PREFIXO = 'spotify_analise';
-    private const string VERSAO_FORMATO = 'v7';
+    private const string PREFIXO_MARCA = 'spotify_analise_marca';
+    private const string VERSAO_FORMATO = 'v8';
+    private const string CAMPO_CALCULADO_EM = 'calculadoEm';
+    private const string CAMPO_VALOR = 'valor';
 
     public function __construct(
         private TagAwareCacheInterface $cache,
+        private FilaRecalculoAnaliseService $fila,
     ) {
     }
 
@@ -38,17 +43,64 @@ final readonly class CacheAnaliseSpotifyService
             md5(self::VERSAO_FORMATO.'|'.PeriodoAnaliseSpotifyDTO::agoraLocal()->format('Y-m-d').'|'.$chave),
         );
 
-        return $this->cache->get($chaveCompleta, function (ItemInterface $item) use ($usuario, $calcular): mixed {
-            $item->expiresAfter(self::VALIDADE_SEGUNDOS);
-            $item->tag($this->tag($usuario));
+        $entrada = $this->obterEntrada($usuario, $chaveCompleta, $calcular, 0.0);
 
-            return $calcular();
-        });
+        if ($this->estaDesatualizada($usuario, $entrada[self::CAMPO_CALCULADO_EM])) {
+            $this->fila->agendar($chaveCompleta, function () use ($usuario, $chaveCompleta, $calcular): void {
+                $this->obterEntrada($usuario, $chaveCompleta, $calcular, INF);
+            });
+        }
+
+        return $entrada[self::CAMPO_VALOR];
+    }
+
+    public function registrarNovasReproducoes(Usuario $usuario): void
+    {
+        $agora = time();
+        $this->cache->get($this->chaveMarca($usuario), static function (ItemInterface $item) use ($agora): int {
+            $item->expiresAfter(self::VALIDADE_SEGUNDOS);
+
+            return $agora;
+        }, INF);
     }
 
     public function invalidar(Usuario $usuario): void
     {
         $this->cache->invalidateTags([$this->tag($usuario)]);
+    }
+
+    /**
+     * @template T
+     *
+     * @param callable(): T $calcular
+     *
+     * @return array{calculadoEm: int, valor: T}
+     */
+    private function obterEntrada(Usuario $usuario, string $chaveCompleta, callable $calcular, float $beta): array
+    {
+        return $this->cache->get($chaveCompleta, function (ItemInterface $item) use ($usuario, $calcular): array {
+            $item->expiresAfter(self::VALIDADE_SEGUNDOS);
+            $item->tag($this->tag($usuario));
+            $calculadoEm = time();
+
+            return [self::CAMPO_CALCULADO_EM => $calculadoEm, self::CAMPO_VALOR => $calcular()];
+        }, $beta);
+    }
+
+    private function estaDesatualizada(Usuario $usuario, int $calculadoEm): bool
+    {
+        if (time() - $calculadoEm < self::IDADE_MINIMA_RECALCULO_SEGUNDOS) {
+            return false;
+        }
+
+        $marca = $this->cache->get($this->chaveMarca($usuario), static fn (): int => 0);
+
+        return $marca > $calculadoEm;
+    }
+
+    private function chaveMarca(Usuario $usuario): string
+    {
+        return sprintf('%s_%d', self::PREFIXO_MARCA, (int) $usuario->getId());
     }
 
     private function tag(Usuario $usuario): string

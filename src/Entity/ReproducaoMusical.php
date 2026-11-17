@@ -12,8 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ReproducaoMusicalRepository::class)]
 #[ORM\Table(name: 'reproducao_musical')]
 #[ORM\UniqueConstraint(name: 'UNIQ_REPRODUCAO_MUSICAL_FONTE_ORIGEM', fields: ['fonte', 'origemId'])]
-#[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_USUARIO_TOCADA', fields: ['usuario', 'tocadaEm'])]
-#[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_USUARIO_MUSICA', fields: ['usuario', 'musica'])]
+#[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_USUARIO_TOCADA', fields: ['usuario', 'tocadaEm', 'fonte', 'musica', 'msReproduzidos', 'tempoExato'])]
+#[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_USUARIO_MUSICA', fields: ['usuario', 'musica', 'tocadaEm', 'fonte', 'msReproduzidos', 'tempoExato'])]
+#[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_MUSICA_COBERTURA', fields: ['musica', 'usuario', 'tocadaEm', 'fonte', 'msReproduzidos'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_USUARIO_FONTE_TOCADA', fields: ['usuario', 'fonte', 'tocadaEm'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_MUSICAL_MUSICA_ORIGEM', fields: ['musicaOrigem'])]
 class ReproducaoMusical

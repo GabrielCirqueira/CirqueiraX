@@ -71,11 +71,16 @@ final readonly class ProjetarReproducoesSpotifyService
             }
         } while (self::TAMANHO_LOTE === count($linhas));
 
+        $usuarioAtual = $this->usuarioRepository->find($usuarioId) ?? $usuario;
+
         if (null === $desde && null === $ate) {
-            $resultado['removidas'] = $this->reproducaoMusicalRepository->removerOrfasSpotify($this->usuarioRepository->find($usuarioId) ?? $usuario);
+            $resultado['removidas'] = $this->reproducaoMusicalRepository->removerOrfasSpotify($usuarioAtual);
+            $this->cacheAnalise->invalidar($usuarioAtual);
+
+            return $resultado;
         }
 
-        $this->cacheAnalise->invalidar($this->usuarioRepository->find($usuarioId) ?? $usuario);
+        $this->cacheAnalise->registrarNovasReproducoes($usuarioAtual);
 
         return $resultado;
     }

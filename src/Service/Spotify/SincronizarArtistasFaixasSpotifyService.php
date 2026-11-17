@@ -80,7 +80,7 @@ final readonly class SincronizarArtistasFaixasSpotifyService
         }
 
         if ($processadas > 0) {
-            $this->cacheAnalise->invalidar($conta->usuario());
+            $this->cacheAnalise->registrarNovasReproducoes($conta->usuario());
         }
 
         return $processadas;

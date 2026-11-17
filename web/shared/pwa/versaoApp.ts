@@ -4,7 +4,7 @@ const SELETOR_SCRIPT_PRINCIPAL = 'script[type="module"][src*="/build/assets/app-
 
 let atualizacaoPendente = false
 
-function scriptCarregado(): string | null {
+export function scriptCarregado(): string | null {
   const script = document.querySelector<HTMLScriptElement>(SELETOR_SCRIPT_PRINCIPAL)
   return script ? new URL(script.src).pathname : null
 }

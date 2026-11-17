@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { obterBlocoMusica } from '../api'
 import type {
   ComparativoServicosMusica,
@@ -21,6 +21,7 @@ export function useBlocoMusica<T>(caminho: string, habilitado: boolean, params?:
     queryFn: () => obterBlocoMusica<T>(caminho, { fonte, ...params }),
     enabled: habilitado,
     staleTime: VALIDADE_BLOCO_MS,
+    placeholderData: keepPreviousData,
   })
 }
 

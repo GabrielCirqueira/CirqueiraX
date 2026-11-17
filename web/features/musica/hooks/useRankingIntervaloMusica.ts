@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { type FiltroIntervaloRankingParams, obterRankingIntervaloMusica } from '../api'
 import { MUSICA_QUERY_KEYS } from './chavesQueryMusica'
 import { useFonteMusica } from './useFonteMusica'
@@ -10,5 +10,6 @@ export function useRankingIntervaloMusica(params: FiltroIntervaloRankingParams, 
     queryFn: () => obterRankingIntervaloMusica(params, fonte),
     enabled: habilitado,
     staleTime: 5 * 60_000,
+    placeholderData: keepPreviousData,
   })
 }
