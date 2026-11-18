@@ -8,17 +8,27 @@ export interface TooltipMusicaProps {
   conteudo: ReactNode
   children: ReactNode
   desativado?: boolean
+  openDelay?: number
+  closeDelay?: number
+  placement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
 export const TooltipMusica = memo(function TooltipMusica({
   conteudo,
   children,
   desativado = false,
+  openDelay = 200,
+  closeDelay = 50,
+  placement = 'top',
 }: TooltipMusicaProps) {
   if (desativado) return <>{children}</>
 
   return (
-    <Tooltip.Root openDelay={200} closeDelay={50} positioning={{ placement: 'top' }}>
+    <Tooltip.Root
+      openDelay={openDelay}
+      closeDelay={closeDelay}
+      positioning={{ placement }}
+    >
       <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
       <Portal>
         <Tooltip.Positioner>

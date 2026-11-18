@@ -1,11 +1,13 @@
 import { Box, type BoxProps, Button, Flex, Grid, HStack, Text } from '@chakra-ui/react'
-import { ChevronRight, CircleHelp } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { type ReactNode, memo } from 'react'
 import { useAbaMusica } from '../hooks/useAbaMusica'
 import type { MusicaAnalise } from '../types'
 import type { AbaMusica } from '../utils/abasMusica'
 import { CapaMusica } from './CapaMusica'
 import { TooltipMusica } from './MinutosMusica'
+
+const ATRASO_TOOLTIP_CARTAO_MS = 4000
 
 export interface CartaoBlocoMusicaProps extends Omit<BoxProps, 'title'> {
   titulo: string
@@ -25,7 +27,7 @@ export const CartaoBlocoMusica = memo(function CartaoBlocoMusica({
   children,
   ...props
 }: CartaoBlocoMusicaProps) {
-  return (
+  const cartao = (
     <Box
       p={{ base: 4, md: 5 }}
       bg="cirqueira.musica.cartao"
@@ -48,39 +50,25 @@ export const CartaoBlocoMusica = memo(function CartaoBlocoMusica({
             {titulo}
           </Text>
         </HStack>
-        <HStack gap={1} flexShrink={0}>
-          {descricao ? <AjudaBlocoMusica texto={descricao} /> : null}
-          {acao}
-        </HStack>
+        {acao}
       </Flex>
       {children}
     </Box>
   )
-})
 
-const AjudaBlocoMusica = memo(function AjudaBlocoMusica({ texto }: { texto: string }) {
+  if (!descricao) return cartao
+
   return (
     <TooltipMusica
+      openDelay={ATRASO_TOOLTIP_CARTAO_MS}
+      closeDelay={100}
       conteudo={
         <Text fontSize="xs" fontWeight="medium" lineHeight="1.4" whiteSpace="normal">
-          {texto}
+          {descricao}
         </Text>
       }
     >
-      <Box
-        as="span"
-        display="inline-flex"
-        alignItems="center"
-        justifyContent="center"
-        color="cirqueira.musica.textoSecundario"
-        opacity={0.55}
-        cursor="help"
-        borderRadius="full"
-        _hover={{ opacity: 1, color: 'cirqueira.musica.textoPrincipal' }}
-        aria-label="O que é este bloco"
-      >
-        <CircleHelp size={14} strokeWidth={1.75} />
-      </Box>
+      {cartao}
     </TooltipMusica>
   )
 })

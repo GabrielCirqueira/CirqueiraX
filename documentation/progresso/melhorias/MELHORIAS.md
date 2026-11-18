@@ -222,3 +222,4 @@
 | M199 | Rotas Explícitas de Login e Refresh | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-199--rotas-explícitas-de-login-e-refresh) |
 | M200 | Docs Alinhadas e UI de Usuários | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-200--docs-alinhadas-e-ui-de-usuários) |
 | M201 | Ajuda Contextual nos Cards de `/musica` | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_11.md#melhoria-201--ajuda-contextual-nos-cards-de-musica) |
+| M202 | Tooltip no Hover do Card (sem ícone ?) | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_11.md#melhoria-202--tooltip-no-hover-do-card-sem-ícone-) |
