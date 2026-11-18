@@ -1,13 +1,15 @@
 import { Box, type BoxProps, Button, Flex, Grid, HStack, Text } from '@chakra-ui/react'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, CircleHelp } from 'lucide-react'
 import { type ReactNode, memo } from 'react'
 import { useAbaMusica } from '../hooks/useAbaMusica'
 import type { MusicaAnalise } from '../types'
 import type { AbaMusica } from '../utils/abasMusica'
 import { CapaMusica } from './CapaMusica'
+import { TooltipMusica } from './MinutosMusica'
 
 export interface CartaoBlocoMusicaProps extends Omit<BoxProps, 'title'> {
   titulo: string
+  descricao?: string
   icone?: ReactNode
   cor?: string
   acao?: ReactNode
@@ -16,6 +18,7 @@ export interface CartaoBlocoMusicaProps extends Omit<BoxProps, 'title'> {
 
 export const CartaoBlocoMusica = memo(function CartaoBlocoMusica({
   titulo,
+  descricao,
   icone,
   cor = 'cirqueira.musica.amarelo',
   acao,
@@ -45,10 +48,40 @@ export const CartaoBlocoMusica = memo(function CartaoBlocoMusica({
             {titulo}
           </Text>
         </HStack>
-        {acao}
+        <HStack gap={1} flexShrink={0}>
+          {descricao ? <AjudaBlocoMusica texto={descricao} /> : null}
+          {acao}
+        </HStack>
       </Flex>
       {children}
     </Box>
+  )
+})
+
+const AjudaBlocoMusica = memo(function AjudaBlocoMusica({ texto }: { texto: string }) {
+  return (
+    <TooltipMusica
+      conteudo={
+        <Text fontSize="xs" fontWeight="medium" lineHeight="1.4" whiteSpace="normal">
+          {texto}
+        </Text>
+      }
+    >
+      <Box
+        as="span"
+        display="inline-flex"
+        alignItems="center"
+        justifyContent="center"
+        color="cirqueira.musica.textoSecundario"
+        opacity={0.55}
+        cursor="help"
+        borderRadius="full"
+        _hover={{ opacity: 1, color: 'cirqueira.musica.textoPrincipal' }}
+        aria-label="O que é este bloco"
+      >
+        <CircleHelp size={14} strokeWidth={1.75} />
+      </Box>
+    </TooltipMusica>
   )
 })
 

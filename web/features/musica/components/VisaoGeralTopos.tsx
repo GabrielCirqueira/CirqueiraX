@@ -37,13 +37,18 @@ export const VisaoGeralTopos = memo(function VisaoGeralTopos({
       <Grid templateColumns={{ base: '1fr', lg: '1.2fr 1fr' }} gap={4}>
         <CartaoBlocoMusica
           titulo="Pódio de artistas"
+          descricao="Os 3 artistas que você mais ouviu no período selecionado, ordenados por streams."
           icone={<Mic2 size={14} />}
           cor="cirqueira.musica.azul"
           acao={<AtalhoAbaMusica aba="rankings" rotulo="Ranking" />}
         >
           <PodioArtistas artistas={dados.topArtistas.slice(0, 3)} imagemDe={imagemDe} />
         </CartaoBlocoMusica>
-        <CartaoBlocoMusica titulo="Música do período" icone={<Crown size={14} />}>
+        <CartaoBlocoMusica
+          titulo="Música do período"
+          descricao="A faixa com mais reproduções no período. É o topo do seu ranking de músicas."
+          icone={<Crown size={14} />}
+        >
           {musicaDoPeriodo ? (
             <DestaqueMusica musica={musicaDoPeriodo} imagemUrl={imagemDe(musicaDoPeriodo)} />
           ) : (
@@ -55,13 +60,18 @@ export const VisaoGeralTopos = memo(function VisaoGeralTopos({
       <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={4}>
         <CartaoBlocoMusica
           titulo="Mais tocadas"
+          descricao="Carrossel com as músicas mais ouvidas no período, com capa, streams e minutos."
           icone={<Music2 size={14} />}
           cor="cirqueira.musica.verde"
           acao={<AtalhoAbaMusica aba="rankings" rotulo="Top 50" />}
         >
           <CarrosselMusicas musicas={dados.topMusicas} imagemDe={imagemDe} />
         </CartaoBlocoMusica>
-        <CartaoBlocoMusica titulo="Álbum do período" icone={<Disc3 size={14} />}>
+        <CartaoBlocoMusica
+          titulo="Álbum do período"
+          descricao="O álbum cujas faixas somaram mais escuta no período selecionado."
+          icone={<Disc3 size={14} />}
+        >
           {albumDoPeriodo ? (
             <DestaqueAlbum album={albumDoPeriodo} imagemUrl={imagemDe(albumDoPeriodo)} />
           ) : (

@@ -17,6 +17,7 @@
 > - **M141–M160** → [MELHORIAS_8.md](MELHORIAS_8.md)
 > - **M161–M180** → [MELHORIAS_9.md](MELHORIAS_9.md)
 > - **M181–M200** → [MELHORIAS_10.md](MELHORIAS_10.md)
+> - **M201–M220** → [MELHORIAS_11.md](MELHORIAS_11.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -220,3 +221,4 @@
 | M198 | Perfil e Troca de Senha | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-198--perfil-e-troca-de-senha) |
 | M199 | Rotas Explícitas de Login e Refresh | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-199--rotas-explícitas-de-login-e-refresh) |
 | M200 | Docs Alinhadas e UI de Usuários | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_10.md#melhoria-200--docs-alinhadas-e-ui-de-usuários) |
+| M201 | Ajuda Contextual nos Cards de `/musica` | ✅ Concluído | 17/11/2026 | [ver](MELHORIAS_11.md#melhoria-201--ajuda-contextual-nos-cards-de-musica) |

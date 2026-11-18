@@ -1,4 +1,4 @@
-const CACHE_APP = 'cirqueirax-app-v14'
+const CACHE_APP = 'cirqueirax-app-v15'
 const CACHE_API = 'cirqueirax-api-v2'
 const CACHES_ATUAIS = [CACHE_APP, CACHE_API]
 const CHAVE_SHELL = '/__app-shell__'

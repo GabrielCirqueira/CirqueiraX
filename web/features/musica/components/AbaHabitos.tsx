@@ -74,7 +74,11 @@ function BlocoRotina({ habilitado, filtro }: { habilitado: boolean; filtro: Filt
   const maximoDia = encontrarPico(data.porDiaSemana)?.minutos ?? 0
 
   return (
-    <CartaoBlocoMusica titulo="Sua rotina" icone={<Clock3 size={14} />}>
+    <CartaoBlocoMusica
+      titulo="Sua rotina"
+      descricao="Minutos por hora e por dia da semana no período, com o pico destacado e o artista favorito de cada faixa do dia."
+      icone={<Clock3 size={14} />}
+    >
       <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
         <VStack align="stretch" gap={2}>
           <Flex align="flex-end" gap={{ base: '2px', md: '4px' }} h="160px">
@@ -213,6 +217,7 @@ function BlocoSessoes({ habilitado, filtro }: { habilitado: boolean; filtro: Fil
   return (
     <CartaoBlocoMusica
       titulo="Sessões de escuta"
+      descricao="Quanto tempo você costuma ouvir de uma vez: distribuição das sessões e a maior maratona do período."
       icone={<Timer size={14} />}
       cor="cirqueira.musica.azul"
     >
@@ -296,7 +301,11 @@ function BlocoExtremos({ habilitado, filtro }: { habilitado: boolean; filtro: Fi
   if (isLoading || !data) return <Skeleton h="320px" borderRadius="12px" />
 
   return (
-    <CartaoBlocoMusica titulo="Primeira e última do dia" icone={<Sunrise size={14} />}>
+    <CartaoBlocoMusica
+      titulo="Primeira e última do dia"
+      descricao="As músicas que mais abrem e fecham o seu dia no período — a primeira e a última tocada em cada jornada."
+      icone={<Sunrise size={14} />}
+    >
       <SimpleGrid columns={2} gap={4}>
         <ColunaExtremo
           titulo="Abre o dia"

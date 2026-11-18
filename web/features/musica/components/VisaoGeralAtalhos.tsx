@@ -82,6 +82,7 @@ function RoscaServicos({ dados }: { dados: VisaoGeralMusica }) {
   return (
     <CartaoBlocoMusica
       titulo="Onde você ouviu"
+      descricao="Proporção de minutos entre Spotify e YouTube Music no período da visão geral."
       icone={<IconePizza size={14} />}
       cor="cirqueira.musica.textoPrincipal"
       acao={<AtalhoAbaMusica aba="servicos" rotulo="Comparar" />}
@@ -136,6 +137,7 @@ function RotinaMini({ porHora }: { porHora: { hora: number; minutos: number }[] 
   return (
     <CartaoBlocoMusica
       titulo="Rotina"
+      descricao="Miniatura das 24 horas: em quais horários você mais ouviu no período."
       icone={<Clock3 size={14} />}
       acao={<AtalhoAbaMusica aba="habitos" rotulo="Hábitos" />}
     >
@@ -177,6 +179,7 @@ function RostosNovos({ artistas }: { artistas: ArtistaAnalise[] }) {
   return (
     <CartaoBlocoMusica
       titulo="Artistas novos"
+      descricao="Artistas que você ouviu pela primeira vez neste período."
       icone={<UserPlus size={14} />}
       cor="cirqueira.musica.verde"
       acao={<AtalhoAbaMusica aba="descobertas" rotulo="Descobertas" />}
@@ -220,6 +223,7 @@ function UltimasOuvidasMini({ habilitado }: { habilitado: boolean }) {
   return (
     <CartaoBlocoMusica
       titulo="Últimas ouvidas"
+      descricao="As reproduções mais recentes, com horário e de qual serviço vieram."
       icone={<History size={14} />}
       cor="cirqueira.musica.azul"
       acao={<AtalhoAbaMusica aba="historico" rotulo="Histórico" />}
@@ -281,6 +285,7 @@ function SaudadeMini({ habilitado }: { habilitado: boolean }) {
   return (
     <CartaoBlocoMusica
       titulo="Saudade"
+      descricao="Músicas que você ouvia bastante e não toca há mais de 90 dias."
       icone={<Wind size={14} />}
       cor="cirqueira.musica.azul"
       acao={<AtalhoAbaMusica aba="descobertas" />}
@@ -333,6 +338,7 @@ function NesteDiaMini({ habilitado }: { habilitado: boolean }) {
   return (
     <CartaoBlocoMusica
       titulo="Neste dia"
+      descricao="O que você ouviu nesta mesma data em anos anteriores."
       icone={<CalendarHeart size={14} />}
       cor="cirqueira.musica.verde"
       acao={<AtalhoAbaMusica aba="historico" />}

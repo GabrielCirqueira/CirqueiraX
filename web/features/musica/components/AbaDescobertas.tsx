@@ -38,10 +38,12 @@ function BlocoSaudade({ habilitado }: { habilitado: boolean }) {
   const imagemDe = useImagensItensMusica(musicasValidas(itens.map((item) => item.musica)))
 
   return (
-    <CartaoBlocoMusica titulo="Saudade" icone={<Wind size={14} />} cor="cirqueira.musica.azul">
-      <Text fontSize="xs" color="cirqueira.musica.textoSecundario" mb={4}>
-        Músicas que você ouvia bastante e não toca há mais de 90 dias
-      </Text>
+    <CartaoBlocoMusica
+      titulo="Saudade"
+      descricao="Músicas que você ouvia bastante e não toca há mais de 90 dias — um convite a reencontrar o que ficou para trás."
+      icone={<Wind size={14} />}
+      cor="cirqueira.musica.azul"
+    >
       {isLoading ? (
         <Skeleton h="320px" borderRadius="8px" />
       ) : itens.length === 0 ? (
@@ -113,6 +115,7 @@ function BlocoProfundidade({ habilitado }: { habilitado: boolean }) {
   return (
     <CartaoBlocoMusica
       titulo="Profundidade do artista"
+      descricao="Artistas em que você conhece muitas faixas e ainda volta ao longo dos meses — variedade e constância juntos."
       icone={<Layers size={14} />}
       cor="cirqueira.musica.verde"
     >

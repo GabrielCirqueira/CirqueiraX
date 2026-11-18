@@ -74,6 +74,7 @@ function BlocoProporcaoVersoes({ dados }: { dados: VersoesMusica }) {
   return (
     <CartaoBlocoMusica
       titulo="Original × alterada"
+      descricao="Quanto do que você ouviu é a versão original versus slowed, reverb, speed e outras alterações."
       icone={<Waves size={14} />}
       cor="cirqueira.musica.azul"
     >
@@ -146,7 +147,11 @@ function BlocoTopVersoes({ dados }: { dados: VersoesMusica }) {
   )
 
   return (
-    <CartaoBlocoMusica titulo="Versões mais ouvidas" icone={<Shuffle size={14} />}>
+    <CartaoBlocoMusica
+      titulo="Versões mais ouvidas"
+      descricao="As faixas alteradas (não originais) que mais tocaram no período, com a capa do vídeo/fonte."
+      icone={<Shuffle size={14} />}
+    >
       {dados.topVersoes.length === 0 ? (
         <VazioBlocoMusica texto="Nenhuma versão alterada no período." />
       ) : (
@@ -213,6 +218,7 @@ function BlocoMashups({ dados }: { dados: VersoesMusica }) {
   return (
     <CartaoBlocoMusica
       titulo="Mashups mais ouvidos"
+      descricao="Músicas feitas da mistura de outras: mashups, com os artistas componentes empilhados."
       icone={<Blend size={14} />}
       cor="cirqueira.musica.verde"
     >

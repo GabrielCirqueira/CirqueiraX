@@ -47,6 +47,7 @@ export const AbaServicos = memo(function AbaServicos({ habilitado }: { habilitad
         <>
           <CartaoBlocoMusica
             titulo="Participação por mês"
+            descricao="Em cada mês, quanto dos seus minutos veio do Spotify e quanto do YouTube Music."
             icone={<TrendingUp size={14} />}
             cor="cirqueira.musica.textoPrincipal"
           >
@@ -168,6 +169,7 @@ function ListaExclusivas({
   return (
     <CartaoBlocoMusica
       titulo={`Só no ${ROTULOS_FONTE_REPRODUCAO[fonte]}`}
+      descricao={`Músicas que você só ouviu no ${ROTULOS_FONTE_REPRODUCAO[fonte]} — não aparecem no outro serviço no período analisado.`}
       icone={<IconeFonteMusica fonte={fonte} tamanho={14} />}
       cor="cirqueira.musica.textoPrincipal"
     >

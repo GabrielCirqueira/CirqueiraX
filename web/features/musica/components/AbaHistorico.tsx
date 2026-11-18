@@ -60,6 +60,7 @@ function FeedUltimasOuvidas({ habilitado }: { habilitado: boolean }) {
   return (
     <CartaoBlocoMusica
       titulo="Últimas ouvidas"
+      descricao="Feed das reproduções recentes, agrupadas por dia. Use “carregar mais” para ir mais longe no passado."
       icone={<History size={14} />}
       cor="cirqueira.musica.azul"
     >
@@ -172,6 +173,7 @@ function BlocoNesteDia({
           ? `Neste dia · ${String(data.dia).padStart(2, '0')}/${String(data.mes).padStart(2, '0')}`
           : 'Neste dia'
       }
+      descricao="O que você ouviu nesta mesma data (dia e mês) em anos anteriores. Clique num ano para abrir o dia completo."
       icone={<CalendarHeart size={14} />}
       cor="cirqueira.musica.verde"
     >
@@ -239,10 +241,11 @@ function BlocoAlbunsSequencia({
   const imagemDe = useImagensItensMusica(musicasValidas(itens.map((item) => item.musica)))
 
   return (
-    <CartaoBlocoMusica titulo="Álbum em sequência" icone={<Disc3 size={14} />}>
-      <Text fontSize="xs" color="cirqueira.musica.textoSecundario" mb={3}>
-        Dias em que você ouviu 5 ou mais faixas seguidas do mesmo álbum
-      </Text>
+    <CartaoBlocoMusica
+      titulo="Álbum em sequência"
+      descricao="Dias em que você ouviu 5 ou mais faixas seguidas do mesmo álbum — sessões de “disco inteiro”."
+      icone={<Disc3 size={14} />}
+    >
       {isLoading ? (
         <Skeleton h="200px" borderRadius="8px" />
       ) : itens.length === 0 ? (
