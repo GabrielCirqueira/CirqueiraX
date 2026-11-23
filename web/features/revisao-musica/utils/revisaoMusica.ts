@@ -3,11 +3,14 @@ import type {
   ComponenteMashupEntrada,
   ContagensRevisao,
   CorrecaoVideoPayload,
+  FiltrosRevisao,
   LeituraIa,
   MidiaSugestao,
   MusicaCatalogo,
   MusicaDuplicata,
+  OrdemRevisao,
   PaginaRevisao,
+  SugestaoFiltroRevisao,
   TipoRevisao,
   VideoRevisao,
 } from '../types'
@@ -25,7 +28,7 @@ export const ABAS_REVISAO: AbaRevisao[] = [
     rotulo: 'Sem vínculo',
     descricao: 'Vídeos que ainda não estão ligados a nenhuma música.',
     instrucao:
-      'Para cada vídeo, confirme a música sugerida ou escolha a certa. Se não for música, marque como "Não é música".',
+      'Para cada vídeo, confirme a música sugerida ou escolha a certa. Se não for música, marque como "Não é música". Para ir rápido: filtre pela sugestão da IA e pela confiança, selecione a página e use "Aceitar sugestões".',
   },
   {
     tipo: 'ambiguo',
@@ -42,9 +45,9 @@ export const ABAS_REVISAO: AbaRevisao[] = [
   {
     tipo: 'canal_novo',
     rotulo: 'Canais novos',
-    descricao: 'Canais que ainda não têm regra.',
+    descricao: 'Canais com 2 ou mais vídeos em aberto que ainda não têm regra.',
     instrucao:
-      'Diga se o canal só posta música. A regra vale para todos os vídeos dele, inclusive os próximos.',
+      'Diga se o canal só posta música. A regra vale para todos os vídeos dele, inclusive os próximos. Dá para marcar vários canais e decidir de uma vez.',
   },
   {
     tipo: 'possivel_duplicata',
@@ -58,7 +61,7 @@ export const ABAS_REVISAO: AbaRevisao[] = [
     rotulo: 'Indisponíveis',
     descricao: 'Vídeos removidos ou privados no YouTube.',
     instrucao:
-      'Se você lembrar qual música era, informe. Se não, marque como "Não é música" para tirar da lista.',
+      'Se você lembrar qual música era, informe. Se não, marque como "Não é música" para tirar da lista. Quase todos vieram do Takeout só com o código do vídeo: marque "Só os sem título" e tire todos de uma vez.',
   },
 ]
 
@@ -487,4 +490,81 @@ export function tituloBaseVersoes(titulos: string[]): string {
   const [primeiro = ''] = titulos
   const base = primeiro.replace(PADRAO_SUFIXO_VERSAO, '').trim()
   return base || primeiro.trim()
+}
+
+export const TAMANHO_PAGINA_PADRAO_REVISAO = 20
+
+export const FILTROS_PADRAO_REVISAO: FiltrosRevisao = {
+  busca: '',
+  sugestao: null,
+  confiancaMinima: null,
+  ordem: 'recentes',
+  porPagina: TAMANHO_PAGINA_PADRAO_REVISAO,
+  semTitulo: false,
+  incluirCanaisUnicos: false,
+}
+
+export const OPCOES_SUGESTAO_REVISAO: { valor: SugestaoFiltroRevisao | null; rotulo: string }[] = [
+  { valor: null, rotulo: 'Todas' },
+  { valor: 'musica', rotulo: 'IA: música' },
+  { valor: 'nao_musica', rotulo: 'IA: não é música' },
+  { valor: 'mashup', rotulo: 'IA: mashup' },
+  { valor: 'sem', rotulo: 'Sem sugestão' },
+]
+
+export const OPCOES_CONFIANCA_REVISAO: { valor: number | null; rotulo: string }[] = [
+  { valor: null, rotulo: 'Qualquer' },
+  { valor: 70, rotulo: '70%+' },
+  { valor: 90, rotulo: '90%+' },
+]
+
+export const OPCOES_ORDEM_REVISAO: { valor: OrdemRevisao; rotulo: string }[] = [
+  { valor: 'recentes', rotulo: 'Mais recentes' },
+  { valor: 'mais_ouvidos', rotulo: 'Mais ouvidos' },
+  { valor: 'confianca', rotulo: 'Maior confiança da IA' },
+  { valor: 'canal', rotulo: 'Canal (A–Z)' },
+]
+
+export const OPCOES_TAMANHO_PAGINA_REVISAO = [20, 50, 100]
+
+export function filtraVideos(tipo: TipoRevisao): boolean {
+  return tipo !== 'canal_novo' && tipo !== 'possivel_duplicata'
+}
+
+export function filtraSugestao(tipo: TipoRevisao): boolean {
+  return tipo === 'sem_vinculo' || tipo === 'ambiguo'
+}
+
+export function filtrosAtivos(filtros: FiltrosRevisao): boolean {
+  return (
+    filtros.busca.trim() !== '' ||
+    filtros.sugestao !== null ||
+    filtros.confiancaMinima !== null ||
+    filtros.semTitulo
+  )
+}
+
+export function sugereNaoMusica(video: VideoRevisao): boolean {
+  return video.sugestaoIa?.tipo === 'nao_musica'
+}
+
+export function payloadAceitarSugestao(video: VideoRevisao): CorrecaoVideoPayload | null {
+  if (sugereNaoMusica(video)) return { acao: 'nao_musica' }
+  return payloadDaSugestao(video)
+}
+
+export function descreverQuantidadeVideos(quantidade: number): string {
+  return `${quantidade} ${quantidade === 1 ? 'vídeo' : 'vídeos'}`
+}
+
+export function principalDaDuplicata(par: [MusicaDuplicata, MusicaDuplicata]): {
+  principal: MusicaDuplicata
+  outra: MusicaDuplicata
+} {
+  const [primeira, segunda] = par
+  const ouvidas = (musica: MusicaDuplicata) =>
+    (musica.videoPrincipal?.reproducoes ?? 0) + (musica.spotify?.reproducoes ?? 0)
+  return ouvidas(segunda) > ouvidas(primeira)
+    ? { principal: segunda, outra: primeira }
+    : { principal: primeira, outra: segunda }
 }

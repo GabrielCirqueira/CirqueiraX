@@ -226,3 +226,4 @@
 | M203 | Extensão do YouTube Music: Tempo Real, Pausa Certa e Identificação Imediata | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-203--extensão-do-youtube-music-tempo-real-pausa-certa-e-identificação-imediata) |
 | M204 | YouTube Music Instantâneo no Painel | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-204--youtube-music-instantâneo-no-painel) |
 | M205 | Visão Geral com Ranking de Hoje, Filtro Ontem e Top 50 na Cápsula | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-205--visão-geral-com-ranking-de-hoje-filtro-ontem-e-top-50-na-cápsula) |
+| M206 | Revisão em Massa: Filtros, Lista Compacta, Lote e Atalhos | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-206--revisão-em-massa-filtros-lista-compacta-lote-e-atalhos) |

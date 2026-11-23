@@ -73,3 +73,20 @@
 - **Arquivos**: `web/features/musica/components/ModalTop50Musica.tsx`, `web/features/musica/components/SecaoHojeSemana.tsx`, `web/features/musica/components/AbaVisaoGeral.tsx`, `web/features/musica/components/AbasConteudoMusica.tsx`, `web/features/musica/components/TopsMesCapsula.tsx`, `web/features/musica/utils/blocosMusica.ts`, `web/features/musica/typesBlocos.ts`, `web/features/musica/types.ts`, `src/Enum/TipoPeriodoAnaliseSpotify.php`, `src/DataObject/Spotify/Analise/PeriodoAnaliseSpotifyDTO.php`
 
 ---
+
+### ✅ Melhoria 206 — Revisão em Massa: Filtros, Lista Compacta, Lote e Atalhos
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Problema**: depois de importar o Takeout do YouTube, a revisão ficou com 7.273 pendências e só dava para resolver um vídeo por vez, em cartões grandes de 20 em 20.
+- **Diagnóstico (dados reais)**: ~1.855 sem vínculo (842 com sugestão "música" e 625 "não é música", confiança média ~85%), 429 compilações, 3.206 indisponíveis (3.203 só com o código do vídeo, sem título nem canal) e ~1.760 canais novos (1.559 com um único vídeo).
+- **Solução**:
+  - **Filtros** em todas as abas: busca por título/canal; sugestão da IA (música, não é música, mashup, sem sugestão) e confiança mínima (70%+, 90%+); ordenação (recentes, mais ouvidos, confiança, canal A–Z); 20/50/100 por página; paginação com primeira/última.
+  - **Lista compacta** (padrão): uma linha por vídeo com a sugestão, confiança, versão e botões Aceitar / Buscar / Não é música.
+  - **Atalhos de teclado** (lista e cartões): A aceitar, N não é música, B buscar, X selecionar, J/K navegar; o foco pula para o próximo vídeo depois de resolver.
+  - **Seleção e lote** em todas as abas, com "selecionar a página": vídeos → Aceitar sugestões (inclui as de "não é música"), São todos a mesma música, Não é música, Manter como compilação; canais → Sempre música / Nunca música; duplicatas → Mais ouvida vira a principal / São músicas diferentes.
+  - **Resolver o filtro inteiro** (com confirmação): "Não é música para todos" / "Manter como compilação para todos" aplica a todos os vídeos do filtro, não só da página (`POST /revisao/videos/acao-filtro`, até 5.000). Em Indisponíveis, "Só os sem título" + essa ação limpa os 3.203 de uma vez.
+  - **Canais novos** passa a mostrar (e contar) só canais com 2+ vídeos; "Incluir canais com só 1 vídeo" mostra o resto.
+- **Arquivos**: `src/DataObject/Musica/FiltroRevisaoMusicaDTO.php`, `src/DataObject/Musica/AcaoRevisaoEmLoteDTO.php`, `src/DataObject/Musica/AcaoRevisaoPorFiltroDTO.php`, `src/Service/Musica/Correcao/AplicarAcaoRevisaoEmLoteService.php`, `src/Service/Musica/ListarRevisaoMusicaService.php`, `src/Repository/VideoYoutubeRepository.php`, `src/Controller/Musica/MusicaCorrecaoController.php`, `src/Exception/Musica/MusicaCatalogoException.php`, `web/features/revisao-musica/components/ListaRevisao.tsx`, `web/features/revisao-musica/components/BarraFiltrosRevisao.tsx`, `web/features/revisao-musica/components/BarraLoteRevisao.tsx`, `web/features/revisao-musica/components/LinhaCompactaVideoRevisao.tsx`, `web/features/revisao-musica/components/PainelAcaoFiltroRevisao.tsx`, `web/features/revisao-musica/components/CartaoVideoRevisao.tsx`, `web/features/revisao-musica/hooks/useAcoesEmMassaRevisao.ts`, `web/features/revisao-musica/hooks/useRevisaoMusica.ts`, `web/features/revisao-musica/hooks/chavesQueryRevisao.ts`, `web/features/revisao-musica/utils/tecladoRevisao.ts`, `web/features/revisao-musica/utils/revisaoMusica.ts`, `web/features/revisao-musica/api.ts`, `web/features/revisao-musica/types.ts`
+
+---

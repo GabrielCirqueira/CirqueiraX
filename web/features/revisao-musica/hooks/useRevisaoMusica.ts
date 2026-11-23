@@ -4,6 +4,7 @@ import { addToast } from '@/shared/components/ui/toaster'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import {
   type QueryClient,
+  type QueryKey,
   keepPreviousData,
   useMutation,
   useQuery,
@@ -27,6 +28,7 @@ import type {
   ClassificacaoCanal,
   ContagensRevisao,
   CorrecaoVideoPayload,
+  FiltrosRevisao,
   PaginaRevisao,
   TipoRevisao,
 } from '../types'
@@ -43,39 +45,33 @@ const TEMPO_DADOS_FRESCOS = 30_000
 const ESPERA_BUSCA_MS = 300
 
 interface InstantaneoRevisao {
-  pagina: PaginaRevisao | undefined
+  paginas: [QueryKey, PaginaRevisao | undefined][]
   contagens: ContagensRevisao | undefined
 }
 
 async function aplicarOtimista(
   queryClient: QueryClient,
   tipo: TipoRevisao,
-  numeroPagina: number,
   transformar: (pagina: PaginaRevisao | undefined) => PaginaRevisao | undefined,
   quantidade: number
 ): Promise<InstantaneoRevisao> {
-  const chavePagina = REVISAO_QUERY_KEYS.lista(tipo, numeroPagina)
-  await queryClient.cancelQueries({ queryKey: chavePagina })
+  const prefixo = REVISAO_QUERY_KEYS.listasDoTipo(tipo)
+  await queryClient.cancelQueries({ queryKey: prefixo })
   await queryClient.cancelQueries({ queryKey: REVISAO_QUERY_KEYS.contagens })
   const instantaneo = {
-    pagina: queryClient.getQueryData<PaginaRevisao>(chavePagina),
+    paginas: queryClient.getQueriesData<PaginaRevisao>({ queryKey: prefixo }),
     contagens: queryClient.getQueryData<ContagensRevisao>(REVISAO_QUERY_KEYS.contagens),
   }
-  queryClient.setQueryData<PaginaRevisao | undefined>(chavePagina, transformar)
+  queryClient.setQueriesData<PaginaRevisao | undefined>({ queryKey: prefixo }, transformar)
   queryClient.setQueryData<ContagensRevisao | undefined>(REVISAO_QUERY_KEYS.contagens, (atual) =>
     descontarContagem(atual, tipo, quantidade)
   )
   return instantaneo
 }
 
-function restaurar(
-  queryClient: QueryClient,
-  tipo: TipoRevisao,
-  numeroPagina: number,
-  instantaneo: InstantaneoRevisao | undefined
-) {
+function restaurar(queryClient: QueryClient, instantaneo: InstantaneoRevisao | undefined) {
   if (!instantaneo) return
-  queryClient.setQueryData(REVISAO_QUERY_KEYS.lista(tipo, numeroPagina), instantaneo.pagina)
+  for (const [chave, pagina] of instantaneo.paginas) queryClient.setQueryData(chave, pagina)
   queryClient.setQueryData(REVISAO_QUERY_KEYS.contagens, instantaneo.contagens)
 }
 
@@ -93,10 +89,10 @@ export function useContagensRevisao() {
   })
 }
 
-export function useListaRevisao(tipo: TipoRevisao, pagina: number) {
+export function useListaRevisao(tipo: TipoRevisao, pagina: number, filtros: FiltrosRevisao) {
   return useQuery({
-    queryKey: REVISAO_QUERY_KEYS.lista(tipo, pagina),
-    queryFn: () => listarRevisao(tipo, pagina),
+    queryKey: REVISAO_QUERY_KEYS.lista(tipo, pagina, filtros),
+    queryFn: () => listarRevisao(tipo, pagina, filtros),
     staleTime: TEMPO_DADOS_FRESCOS,
     placeholderData: keepPreviousData,
   })
@@ -127,22 +123,16 @@ export interface CorrecaoVideoVariaveis {
   payload: CorrecaoVideoPayload
 }
 
-export function useCorrigirVideo(tipo: TipoRevisao, pagina: number) {
+export function useCorrigirVideo(tipo: TipoRevisao) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: ({ videoUuid, payload }: CorrecaoVideoVariaveis) =>
       corrigirVideo(videoUuid, payload),
     onMutate: ({ videoUuid }) =>
-      aplicarOtimista(
-        queryClient,
-        tipo,
-        pagina,
-        (atual) => removerVideosDaPagina(atual, [videoUuid]),
-        1
-      ),
+      aplicarOtimista(queryClient, tipo, (atual) => removerVideosDaPagina(atual, [videoUuid]), 1),
     onError: (erro, _variaveis, instantaneo) => {
-      restaurar(queryClient, tipo, pagina, instantaneo)
+      restaurar(queryClient, instantaneo)
       addToast({
         type: 'error',
         title: 'Não foi possível salvar a correção',
@@ -165,7 +155,7 @@ export interface LoteVariaveis {
   musicaUuid: string
 }
 
-export function useDefinirMusicaEmLote(tipo: TipoRevisao, pagina: number) {
+export function useDefinirMusicaEmLote(tipo: TipoRevisao) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -175,12 +165,11 @@ export function useDefinirMusicaEmLote(tipo: TipoRevisao, pagina: number) {
       aplicarOtimista(
         queryClient,
         tipo,
-        pagina,
         (atual) => removerVideosDaPagina(atual, videoUuids),
         videoUuids.length
       ),
     onError: (erro, _variaveis, instantaneo) => {
-      restaurar(queryClient, tipo, pagina, instantaneo)
+      restaurar(queryClient, instantaneo)
       addToast({
         type: 'error',
         title: 'Não foi possível corrigir os vídeos',
@@ -203,7 +192,7 @@ export interface CanalVariaveis {
   classificacao: ClassificacaoCanal
 }
 
-export function useClassificarCanal(tipo: TipoRevisao, pagina: number) {
+export function useClassificarCanal(tipo: TipoRevisao) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -211,16 +200,10 @@ export function useClassificarCanal(tipo: TipoRevisao, pagina: number) {
       classificarCanal(canal, classificacao),
     onMutate: ({ canal }) =>
       tipo === 'canal_novo'
-        ? aplicarOtimista(
-            queryClient,
-            tipo,
-            pagina,
-            (atual) => removerCanalDaPagina(atual, canal),
-            1
-          )
+        ? aplicarOtimista(queryClient, tipo, (atual) => removerCanalDaPagina(atual, canal), 1)
         : undefined,
     onError: (erro, _variaveis, instantaneo) => {
-      restaurar(queryClient, tipo, pagina, instantaneo)
+      restaurar(queryClient, instantaneo)
       addToast({
         type: 'error',
         title: 'Não foi possível salvar a regra do canal',
@@ -246,7 +229,7 @@ export interface UniaoVariaveis {
   destinoUuid: string
 }
 
-export function useUnirMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
+export function useUnirMusicas(tipo: TipoRevisao | null = null) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -257,13 +240,12 @@ export function useUnirMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
         ? aplicarOtimista(
             queryClient,
             tipo,
-            pagina,
             (atual) => removerDuplicataDaPagina(atual, [origemUuid, destinoUuid]),
             1
           )
         : undefined,
     onError: (erro, _variaveis, instantaneo) => {
-      if (tipo) restaurar(queryClient, tipo, pagina, instantaneo)
+      if (tipo) restaurar(queryClient, instantaneo)
       addToast({
         type: 'error',
         title: 'Não foi possível unir as músicas',
@@ -281,7 +263,7 @@ export function useUnirMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
   })
 }
 
-export function useDescartarDuplicata(pagina = 1) {
+export function useDescartarDuplicata() {
   const queryClient = useQueryClient()
   const tipo: TipoRevisao = 'possivel_duplicata'
 
@@ -292,12 +274,11 @@ export function useDescartarDuplicata(pagina = 1) {
       aplicarOtimista(
         queryClient,
         tipo,
-        pagina,
         (atual) => removerDuplicataDaPagina(atual, [origemUuid, destinoUuid]),
         1
       ),
     onError: (erro, _variaveis, instantaneo) => {
-      restaurar(queryClient, tipo, pagina, instantaneo)
+      restaurar(queryClient, instantaneo)
       addToast({
         type: 'error',
         title: 'Não foi possível salvar',
@@ -343,7 +324,7 @@ export interface UniaoVariasVariaveis {
   destinoUuid: string
 }
 
-export function useUnirVariasMusicas(tipo: TipoRevisao | null = null, pagina = 1) {
+export function useUnirVariasMusicas(tipo: TipoRevisao | null = null) {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -354,13 +335,12 @@ export function useUnirVariasMusicas(tipo: TipoRevisao | null = null, pagina = 1
         ? aplicarOtimista(
             queryClient,
             tipo,
-            pagina,
             (atual) => removerDuplicataDaPagina(atual, origemUuids),
             1
           )
         : undefined,
     onError: (erro, _variaveis, instantaneo) => {
-      if (tipo) restaurar(queryClient, tipo, pagina, instantaneo)
+      if (tipo) restaurar(queryClient, instantaneo)
       addToast({
         type: 'error',
         title: 'Não foi possível ligar as versões',

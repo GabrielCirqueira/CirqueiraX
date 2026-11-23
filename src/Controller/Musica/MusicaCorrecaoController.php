@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controller\Musica;
 
 use App\Controller\Common\DefaultController;
+use App\DataObject\Musica\AcaoRevisaoEmLoteDTO;
+use App\DataObject\Musica\AcaoRevisaoPorFiltroDTO;
 use App\DataObject\Musica\BuscaCatalogoMusicaDTO;
 use App\DataObject\Musica\ClassificarCanalDTO;
 use App\DataObject\Musica\DefinirArtistasMusicaDTO;
@@ -20,6 +22,7 @@ use App\DataObject\Musica\UnirVariasMusicasDTO;
 use App\Entity\Usuario;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Serializer\MusicaCatalogoSerializer;
+use App\Service\Musica\Correcao\AplicarAcaoRevisaoEmLoteService;
 use App\Service\Musica\Correcao\BuscarCatalogoMusicaService;
 use App\Service\Musica\Correcao\ClassificarCanalYoutubeService;
 use App\Service\Musica\Correcao\DefinirArtistasMusicaService;
@@ -53,6 +56,7 @@ final class MusicaCorrecaoController extends DefaultController
         private readonly MusicaCatalogoSerializer $serializer,
         private readonly BuscarCatalogoMusicaService $buscarCatalogo,
         private readonly DescartarDuplicataCatalogoService $descartarDuplicata,
+        private readonly AplicarAcaoRevisaoEmLoteService $aplicarAcaoEmLote,
     ) {
     }
 
@@ -72,6 +76,18 @@ final class MusicaCorrecaoController extends DefaultController
     public function definirMusicaEmLote(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] DefinirMusicaVideosEmLoteDTO $dto): Response
     {
         return $this->success(['videosAfetados' => $this->definirMusicaDoVideo->executarEmLote($usuario, $dto)]);
+    }
+
+    #[Route('/revisao/videos/acao-lote', name: 'acao_lote', methods: ['POST'])]
+    public function acaoEmLote(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] AcaoRevisaoEmLoteDTO $dto): Response
+    {
+        return $this->success(['videosAfetados' => $this->aplicarAcaoEmLote->executar($usuario, $dto)]);
+    }
+
+    #[Route('/revisao/videos/acao-filtro', name: 'acao_filtro', methods: ['POST'])]
+    public function acaoPorFiltro(#[CurrentUser] Usuario $usuario, #[MapRequestPayload] AcaoRevisaoPorFiltroDTO $dto): Response
+    {
+        return $this->success(['videosAfetados' => $this->aplicarAcaoEmLote->executarPorFiltro($usuario, $dto)]);
     }
 
     #[Route('/catalogo/musicas', name: 'buscar_musicas', methods: ['GET'])]

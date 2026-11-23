@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\DataObject\Musica\FiltroRevisaoMusicaDTO;
 use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
@@ -22,6 +23,21 @@ use Symfony\Component\Uid\Uuid;
 final class VideoYoutubeRepository extends ServiceEntityRepository
 {
     private const string SEPARADOR_AGRUPAMENTO = "\x1F";
+    private const string EXPRESSAO_CONFIANCA = "COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(v.resposta_ia, '$.confianca')) AS SIGNED), v.confianca, 0)";
+
+    private const array CONDICOES_SUGESTAO = [
+        FiltroRevisaoMusicaDTO::SUGESTAO_MUSICA => "JSON_UNQUOTE(JSON_EXTRACT(v.resposta_ia, '$.tipo')) = 'musica'",
+        FiltroRevisaoMusicaDTO::SUGESTAO_NAO_MUSICA => "JSON_UNQUOTE(JSON_EXTRACT(v.resposta_ia, '$.tipo')) = 'nao_musica'",
+        FiltroRevisaoMusicaDTO::SUGESTAO_MASHUP => "JSON_UNQUOTE(JSON_EXTRACT(v.resposta_ia, '$.tipo')) = 'mashup'",
+        FiltroRevisaoMusicaDTO::SUGESTAO_SEM => "(v.resposta_ia IS NULL OR JSON_EXTRACT(v.resposta_ia, '$.tipo') IS NULL OR JSON_TYPE(JSON_EXTRACT(v.resposta_ia, '$.tipo')) = 'NULL')",
+    ];
+
+    private const array ORDENS_REVISAO = [
+        FiltroRevisaoMusicaDTO::ORDEM_RECENTES => 'v.atualizado_em DESC',
+        FiltroRevisaoMusicaDTO::ORDEM_MAIS_OUVIDOS => '(SELECT COUNT(*) FROM reproducao_youtube r WHERE r.video_uuid = v.uuid) DESC, v.atualizado_em DESC',
+        FiltroRevisaoMusicaDTO::ORDEM_CONFIANCA => self::EXPRESSAO_CONFIANCA . ' DESC, v.atualizado_em DESC',
+        FiltroRevisaoMusicaDTO::ORDEM_CANAL => 'v.canal ASC, v.titulo ASC',
+    ];
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -224,17 +240,18 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     /**
      * @return array{uuids: list<string>, total: int}
      */
-    public function listarParaRevisao(Usuario $usuario, TipoRevisaoMusica $tipo, int $deslocamento, int $limite): array
+    public function listarParaRevisao(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro): array
     {
-        $condicao = $this->condicaoRevisao($tipo);
+        [$condicao, $parametros] = $this->condicaoFiltradaRevisao($usuario, $filtro);
         $conexao = $this->getEntityManager()->getConnection();
-        $parametros = ['usuarioId' => $usuario->getId(), 'deslocamento' => $deslocamento, 'limite' => $limite];
+        $paginacao = [...$parametros, 'deslocamento' => $filtro->deslocamento(), 'limite' => $filtro->porPagina];
         $tipos = ['deslocamento' => \PDO::PARAM_INT, 'limite' => \PDO::PARAM_INT];
+        $ordem = self::ORDENS_REVISAO[$filtro->ordem] ?? self::ORDENS_REVISAO[FiltroRevisaoMusicaDTO::ORDEM_RECENTES];
 
-        $total = (int) $conexao->fetchOne("SELECT COUNT(*) FROM video_youtube WHERE usuario_id = :usuarioId AND {$condicao}", $parametros, $tipos);
+        $total = (int) $conexao->fetchOne("SELECT COUNT(*) FROM video_youtube v WHERE {$condicao}", $parametros);
         $linhas = $conexao->fetchFirstColumn(
-            "SELECT uuid FROM video_youtube WHERE usuario_id = :usuarioId AND {$condicao} ORDER BY atualizado_em DESC LIMIT :deslocamento, :limite",
-            $parametros,
+            "SELECT v.uuid FROM video_youtube v WHERE {$condicao} ORDER BY {$ordem} LIMIT :deslocamento, :limite",
+            $paginacao,
             $tipos,
         );
 
@@ -242,9 +259,54 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return list<string>
+     */
+    public function listarUuidsFiltradosParaRevisao(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro, int $limite): array
+    {
+        [$condicao, $parametros] = $this->condicaoFiltradaRevisao($usuario, $filtro);
+        $linhas = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            "SELECT v.uuid FROM video_youtube v WHERE {$condicao} ORDER BY v.atualizado_em DESC LIMIT :limite",
+            [...$parametros, 'limite' => $limite],
+            ['limite' => \PDO::PARAM_INT],
+        );
+
+        return array_map(static fn (mixed $uuid): string => Uuid::fromBinary((string) $uuid)->toRfc4122(), $linhas);
+    }
+
+    /**
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function condicaoFiltradaRevisao(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro): array
+    {
+        $condicoes = ['v.usuario_id = :usuarioId', $this->condicaoRevisao($filtro->tipo)];
+        $parametros = ['usuarioId' => $usuario->getId()];
+
+        $busca = $filtro->buscaNormalizada();
+        if (null !== $busca) {
+            $condicoes[] = '(v.titulo LIKE :busca OR v.canal LIKE :busca)';
+            $parametros['busca'] = '%' . addcslashes($busca, '%_\\') . '%';
+        }
+
+        if (null !== $filtro->sugestao) {
+            $condicoes[] = self::CONDICOES_SUGESTAO[$filtro->sugestao];
+        }
+
+        if (null !== $filtro->confiancaMinima) {
+            $condicoes[] = self::EXPRESSAO_CONFIANCA . ' >= :confiancaMinima';
+            $parametros['confiancaMinima'] = $filtro->confiancaMinima;
+        }
+
+        if ($filtro->semTitulo) {
+            $condicoes[] = "(v.titulo = '' OR v.titulo = v.video_id)";
+        }
+
+        return [implode(' AND ', $condicoes), $parametros];
+    }
+
+    /**
      * @return list<array{canal: string, canalId: string|null, total: int, exemplo: string, exemploVideoId: string|null}>
      */
-    public function listarCanaisEmAberto(Usuario $usuario): array
+    public function listarCanaisEmAberto(Usuario $usuario, int $minimoVideos = 1): array
     {
         $linhas = $this->getEntityManager()->getConnection()->executeQuery(
             "SELECT canal, COUNT(*) AS total, MAX(canal_id) AS canal_id,
@@ -256,8 +318,9 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
                 AND (origem_classificacao IS NULL OR origem_classificacao <> 'manual')
                 AND canal <> ''
             GROUP BY canal
+            HAVING COUNT(*) >= :minimoVideos
             ORDER BY total DESC, canal",
-            ['usuarioId' => $usuario->getId(), 'separador' => self::SEPARADOR_AGRUPAMENTO],
+            ['usuarioId' => $usuario->getId(), 'separador' => self::SEPARADOR_AGRUPAMENTO, 'minimoVideos' => $minimoVideos],
         )->fetchAllAssociative();
 
         return array_map(static fn (array $linha): array => [

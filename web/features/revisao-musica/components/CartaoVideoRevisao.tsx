@@ -19,7 +19,9 @@ import {
   formatarDuracaoVideo,
   nivelConfianca,
   opcoesLeituraVideo,
+  payloadAceitarSugestao,
   rotuloVersao,
+  tratarTecladoRevisao,
 } from '../utils'
 import { AtalhosVideoRevisao } from './AtalhosVideoRevisao'
 import { MiniaturaVideoRevisao } from './MiniaturaVideoRevisao'
@@ -70,6 +72,7 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
   const confianca = nivelConfianca(confiancaVideo(video))
   const versao = rotuloVersao(video.sugestaoIa?.versao ?? video.tipoVersao)
   const compilacao = tipo === 'compilacao'
+  const aceitar = payloadAceitarSugestao(video)
 
   return (
     <VStack
@@ -84,6 +87,20 @@ export const CartaoVideoRevisao = memo(function CartaoVideoRevisao({
       opacity={ocupado ? 0.6 : 1}
       aria-busy={ocupado}
       minW={0}
+      tabIndex={0}
+      outline="none"
+      _focusVisible={{
+        borderColor: 'cirqueira.musica.azul',
+        boxShadow: '0 0 0 1px var(--chakra-colors-cirqueira-musica-azul)',
+      }}
+      onKeyDown={(evento) =>
+        tratarTecladoRevisao(evento, {
+          aceitar: aceitar ? () => onCorrigir(video, aceitar) : undefined,
+          naoMusica: () => onCorrigir(video, { acao: 'nao_musica' }),
+          buscar: () => onEscolherMusica(video),
+          selecionar: aceitaLote(tipo) ? () => onAlternarSelecao(video.uuid) : undefined,
+        })
+      }
     >
       <Flex gap={3} align="start" minW={0}>
         <MiniaturaVideoRevisao

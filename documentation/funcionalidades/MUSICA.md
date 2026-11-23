@@ -435,3 +435,10 @@ Capas hospedadas no Google/YouTube (`yt3.googleusercontent.com`, `lh3.googleuser
 - Vale para todas as capas e fotos da música: `CapaMusica`, linhas dos rankings, lista de músicas, Cápsula (inclusive a imagem PNG gerada no navegador) e o fundo do topo do detalhe (`HeroDetalheMusica`).
 - Links de outros hosts continuam direto do endereço original.
 - Diagnóstico usado no caso real: gerar a resposta do ranking do usuário, separar as capas quebradas das que funcionam e comparar os hosts. As quebradas eram todas `image-cdn-ak/fa.spotifycdn.com`; as que abriam eram `i.scdn.co`. Do servidor, todas respondiam 200, e o log do Nginx não mostrava pedidos do navegador para as quebradas, sinal de bloqueio no próprio navegador ou na rede.
+
+## Revisão em massa (M206)
+
+- `GET /api/v1/musica/revisao` aceita `busca`, `sugestao` (`musica|nao_musica|mashup|sem`), `confiancaMinima`, `ordem` (`recentes|mais_ouvidos|confianca|canal`), `semTitulo` (indisponíveis só com o código) e `incluirCanaisUnicos` (aba de canais; o padrão lista e conta só canais com 2+ vídeos).
+- `POST /api/v1/musica/revisao/videos/acao-lote` — `{ videoUuids (até 200), acao: nao_musica|manter_compilacao }`.
+- `POST /api/v1/musica/revisao/videos/acao-filtro` — `{ tipo, acao, busca?, sugestao?, confiancaMinima?, semTitulo? }`, aplica a todos os vídeos do filtro (até 5.000; não vale para canais e duplicatas).
+- Frontend: lista compacta (padrão), seleção por página em todas as abas, "Aceitar sugestões" (vídeos com sugestão "não é música" vão pela ação em lote, os demais pelo endpoint de correção, 3 por vez), lote de canais e de duplicatas, atalhos A/N/B/X/J/K.

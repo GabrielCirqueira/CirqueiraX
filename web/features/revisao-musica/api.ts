@@ -1,6 +1,7 @@
 import { api } from '@/config/api'
 import type { RespostaApi } from '@/shared/types/api'
 import {
+  type AcaoLoteRevisao,
   type ArtistaCatalogo,
   ArtistaCatalogoSchema,
   CanalRevisaoSchema,
@@ -9,6 +10,7 @@ import {
   ContagensRevisaoSchema,
   type CorrecaoVideoPayload,
   DuplicataRevisaoSchema,
+  type FiltrosRevisao,
   type MusicaCatalogo,
   MusicaCatalogoSchema,
   type PaginaRevisao,
@@ -28,9 +30,30 @@ export async function obterContagensRevisao(): Promise<ContagensRevisao> {
   return ContagensRevisaoSchema.parse(data.data)
 }
 
-export async function listarRevisao(tipo: TipoRevisao, pagina: number): Promise<PaginaRevisao> {
+function parametrosFiltro(filtros: FiltrosRevisao): Record<string, string | number | boolean> {
+  const parametros: Record<string, string | number | boolean> = {}
+  const busca = filtros.busca.trim()
+  if (busca !== '') parametros.busca = busca
+  if (filtros.sugestao) parametros.sugestao = filtros.sugestao
+  if (filtros.confiancaMinima !== null) parametros.confiancaMinima = filtros.confiancaMinima
+  if (filtros.semTitulo) parametros.semTitulo = true
+  return parametros
+}
+
+export async function listarRevisao(
+  tipo: TipoRevisao,
+  pagina: number,
+  filtros: FiltrosRevisao
+): Promise<PaginaRevisao> {
   const { data } = await api.get<RespostaApi<unknown>>(`${PREFIXO}/revisao`, {
-    params: { tipo, pagina, porPagina: TAMANHO_PAGINA_REVISAO },
+    params: {
+      tipo,
+      pagina,
+      porPagina: filtros.porPagina,
+      ordem: filtros.ordem,
+      ...parametrosFiltro(filtros),
+      ...(filtros.incluirCanaisUnicos ? { incluirCanaisUnicos: true } : {}),
+    },
   })
   const bruta = PaginaRevisaoBrutaSchema.parse(data.data)
   const base = {
@@ -69,6 +92,30 @@ export async function definirMusicaEmLote(
   const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/revisao/videos/lote`, {
     videoUuids,
     musicaUuid,
+  })
+  return VideosAfetadosSchema.parse(data.data).videosAfetados
+}
+
+export async function aplicarAcaoEmLote(
+  videoUuids: string[],
+  acao: AcaoLoteRevisao
+): Promise<number> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/revisao/videos/acao-lote`, {
+    videoUuids,
+    acao,
+  })
+  return VideosAfetadosSchema.parse(data.data).videosAfetados
+}
+
+export async function aplicarAcaoPorFiltro(
+  tipo: TipoRevisao,
+  filtros: FiltrosRevisao,
+  acao: AcaoLoteRevisao
+): Promise<number> {
+  const { data } = await api.post<RespostaApi<unknown>>(`${PREFIXO}/revisao/videos/acao-filtro`, {
+    tipo,
+    acao,
+    ...parametrosFiltro(filtros),
   })
   return VideosAfetadosSchema.parse(data.data).videosAfetados
 }

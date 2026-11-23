@@ -173,3 +173,19 @@ export interface CorrecaoVideoPayload {
   versao?: string
   componentes?: ComponenteMashupEntrada[]
 }
+
+export type SugestaoFiltroRevisao = 'musica' | 'nao_musica' | 'mashup' | 'sem'
+
+export type OrdemRevisao = 'recentes' | 'mais_ouvidos' | 'confianca' | 'canal'
+
+export interface FiltrosRevisao {
+  busca: string
+  sugestao: SugestaoFiltroRevisao | null
+  confiancaMinima: number | null
+  ordem: OrdemRevisao
+  porPagina: number
+  semTitulo: boolean
+  incluirCanaisUnicos: boolean
+}
+
+export type AcaoLoteRevisao = 'nao_musica' | 'manter_compilacao'

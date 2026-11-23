@@ -20,6 +20,8 @@ use App\Service\Spotify\EnriquecerImagensSpotifyService;
 final readonly class ListarRevisaoMusicaService
 {
     private const int PRIORIDADE_IMAGENS = 2;
+    private const int MINIMO_VIDEOS_CANAL = 2;
+    private const int MINIMO_VIDEOS_CANAL_UNICO = 1;
 
     public function __construct(
         private VideoYoutubeRepository $videoRepository,
@@ -56,7 +58,7 @@ final readonly class ListarRevisaoMusicaService
         $contagens = [];
         foreach (TipoRevisaoMusica::cases() as $tipo) {
             $contagens[$tipo->value] = match ($tipo) {
-                TipoRevisaoMusica::CanalNovo => count($this->filtrarCanaisSemRegra($usuario)),
+                TipoRevisaoMusica::CanalNovo => count($this->filtrarCanaisSemRegra($usuario, self::MINIMO_VIDEOS_CANAL)),
                 TipoRevisaoMusica::PossivelDuplicata => count($this->sugerirDuplicatas->executar($usuario)),
                 default => $this->videoRepository->contarParaRevisao($usuario, $tipo),
             };
@@ -70,7 +72,7 @@ final readonly class ListarRevisaoMusicaService
      */
     private function listarVideos(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro): array
     {
-        $pagina = $this->videoRepository->listarParaRevisao($usuario, $filtro->tipo, $filtro->deslocamento(), $filtro->porPagina);
+        $pagina = $this->videoRepository->listarParaRevisao($usuario, $filtro);
         $videos = $this->videoRepository->buscarPorUuidsOrdenados($usuario, $pagina['uuids']);
         $midias = $this->montarMidiaSugestoes->executar($usuario, $videos);
 
@@ -85,7 +87,11 @@ final readonly class ListarRevisaoMusicaService
      */
     private function listarCanais(Usuario $usuario, FiltroRevisaoMusicaDTO $filtro): array
     {
-        $canais = $this->filtrarCanaisSemRegra($usuario);
+        $canais = $this->filtrarCanaisSemRegra($usuario, $filtro->incluirCanaisUnicos ? self::MINIMO_VIDEOS_CANAL_UNICO : self::MINIMO_VIDEOS_CANAL);
+        $busca = $filtro->buscaNormalizada();
+        if (null !== $busca) {
+            $canais = array_values(array_filter($canais, static fn (array $canal): bool => false !== mb_stripos($canal['canal'] . ' ' . $canal['exemplo'], $busca)));
+        }
 
         return [array_slice($canais, $filtro->deslocamento(), $filtro->porPagina), count($canais)];
     }
@@ -93,12 +99,12 @@ final readonly class ListarRevisaoMusicaService
     /**
      * @return list<array{canal: string, canalId: string|null, total: int, exemplo: string, exemploVideoId: string|null}>
      */
-    private function filtrarCanaisSemRegra(Usuario $usuario): array
+    private function filtrarCanaisSemRegra(Usuario $usuario, int $minimoVideos): array
     {
         $comRegra = $this->regraRepository->listarCanaisComRegra($usuario);
 
         return array_values(array_filter(
-            $this->videoRepository->listarCanaisEmAberto($usuario),
+            $this->videoRepository->listarCanaisEmAberto($usuario, $minimoVideos),
             fn (array $canal): bool => !isset($comRegra[$this->normalizador->normalizar($canal['canal'])]),
         ));
     }

@@ -12,6 +12,11 @@ final class MusicaCatalogoException extends DomainException
     private const int CODIGO_INVALIDO = 422;
     private const int CODIGO_CONFLITO = 409;
 
+    public static function acaoEmLoteIndisponivel(): self
+    {
+        return new self('Esta categoria não aceita ação em lote por filtro.', self::CODIGO_INVALIDO);
+    }
+
     public static function musicaNaoEncontrada(): self
     {
         return new self('Música não encontrada.', self::CODIGO_NAO_ENCONTRADO);
