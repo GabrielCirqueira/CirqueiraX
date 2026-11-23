@@ -150,3 +150,18 @@
 - **Arquivos**: `web/features/musica/utils/modelosExtrasImagemCapsula.ts`, `web/features/musica/utils/apoioModelosCapsula.ts`, `web/features/musica/utils/modelosImagemCapsula.ts`, `web/features/musica/utils/temasImagemCapsula.ts`, `documentation/funcionalidades/MUSICA.md`
 
 ---
+
+### ✅ Melhoria 211 — Música: Correções de Layout no Celular
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Pedido**: as seções da página de música estavam quebradas no celular.
+- **Causa**: os grids das seções usavam `1fr`, que no CSS vale "no mínimo a largura do conteúdo". Fileiras com rolagem horizontal, gráficos e textos sem quebra alargavam a coluna além da tela e empurravam a página inteira para o lado.
+- **Solução**:
+  - Todas as colunas de grid da página passaram para `minmax(0, …fr)` (Visão geral, Rankings, Hábitos, Descobertas, Versões, Histórico, Retrospectiva, Serviços, tabela de ranking e esqueleto de carregamento).
+  - Contêiner da página com `overflow-x: clip`, para nada mais criar rolagem lateral.
+  - Espaçamentos internos e números grandes menores no celular (Cápsula, Topos, Atalhos, Hábitos, modal da música, estado vazio) e contadores da aba Serviços que encolhem sem vazar.
+  - A barra de abas rola até a aba escolhida.
+- **Arquivos**: `web/features/musica/Musica.tsx` e componentes em `web/features/musica/components/` (AbasMusica, AbaDescobertas, AbaHabitos, AbaHistorico, AbaServicos, AbaVersoes, EsqueletoPaginaMusica, EstadoVazioMusica, ModalMusica, PecasBlocoMusica, SecaoCapsulaSonora, SecaoHojeSemana, SecaoRetrospectiva, TabelaRankingMusica, VisaoGeralAtalhos, VisaoGeralDestaque, VisaoGeralTopos)
+
+---

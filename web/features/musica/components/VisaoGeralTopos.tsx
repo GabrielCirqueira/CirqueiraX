@@ -34,7 +34,10 @@ export const VisaoGeralTopos = memo(function VisaoGeralTopos({
 
   return (
     <VStack align="stretch" gap={4}>
-      <Grid templateColumns={{ base: '1fr', lg: '1.2fr 1fr' }} gap={4}>
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1.2fr) minmax(0, 1fr)' }}
+        gap={4}
+      >
         <CartaoBlocoMusica
           titulo="Pódio de artistas"
           descricao="Os 3 artistas que você mais ouviu no período selecionado, ordenados por streams."
@@ -57,7 +60,10 @@ export const VisaoGeralTopos = memo(function VisaoGeralTopos({
         </CartaoBlocoMusica>
       </Grid>
 
-      <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={4}>
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 1fr)' }}
+        gap={4}
+      >
         <CartaoBlocoMusica
           titulo="Mais tocadas"
           descricao="Carrossel com as músicas mais ouvidas no período, com capa, streams e minutos."
@@ -174,7 +180,7 @@ function DestaqueMusica({
           {musica.artista}
         </Text>
         <Text
-          fontSize="3xl"
+          fontSize={{ base: '2xl', md: '3xl' }}
           fontWeight="black"
           color="cirqueira.musica.verde"
           lineHeight="1.1"

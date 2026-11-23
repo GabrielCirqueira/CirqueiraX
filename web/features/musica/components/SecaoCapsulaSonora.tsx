@@ -332,7 +332,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
       ) : (
         <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={4}>
           <Box
-            p={5}
+            p={{ base: 4, md: 5 }}
             borderRadius="8px"
             bg="cirqueira.musica.cartao"
             border="1px solid"
@@ -361,7 +361,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
               </Text>
               <TooltipMusica conteudo={formatarMinutosEmHorasExtenso(capsula.totalMinutos)}>
                 <Text
-                  fontSize="2xl"
+                  fontSize={{ base: 'xl', md: '2xl' }}
                   fontWeight="black"
                   color="cirqueira.musica.verde"
                   cursor="default"
@@ -387,7 +387,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
           </Box>
 
           <Box
-            p={5}
+            p={{ base: 4, md: 5 }}
             borderRadius="8px"
             bg="cirqueira.musica.cartao"
             border="1px solid"
@@ -485,7 +485,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
           </Box>
 
           <Box
-            p={5}
+            p={{ base: 4, md: 5 }}
             borderRadius="8px"
             bg="cirqueira.musica.cartao"
             border="1px solid"
@@ -583,7 +583,7 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
           </Box>
 
           <Box
-            p={5}
+            p={{ base: 4, md: 5 }}
             borderRadius="8px"
             bg="cirqueira.musica.cartao"
             border="1px solid"
@@ -610,7 +610,11 @@ export const SecaoCapsulaSonora = memo(function SecaoCapsulaSonora({
               >
                 Variedade musical
               </Text>
-              <Text fontSize="2xl" fontWeight="black" color="cirqueira.musica.textoPrincipal">
+              <Text
+                fontSize={{ base: 'xl', md: '2xl' }}
+                fontWeight="black"
+                color="cirqueira.musica.textoPrincipal"
+              >
                 {capsula.faixasDistintas.toLocaleString('pt-BR')} músicas
               </Text>
               <Text fontSize="xs" color="cirqueira.musica.textoSecundario" lineHeight="tall">
@@ -1483,7 +1487,7 @@ function ModalDetalheCapsula({
             border="1px solid"
             borderColor="cirqueira.musica.cartaoElevado"
             borderRadius="8px"
-            p={6}
+            p={{ base: 4, md: 6 }}
             maxW="2xl"
             w="full"
             color="cirqueira.musica.textoPrincipal"

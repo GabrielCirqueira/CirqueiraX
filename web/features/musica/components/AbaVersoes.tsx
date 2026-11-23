@@ -48,7 +48,10 @@ export const AbaVersoes = memo(function AbaVersoes({ habilitado }: { habilitado:
         <Skeleton h="420px" borderRadius="12px" />
       ) : (
         <>
-          <Grid templateColumns={{ base: '1fr', lg: '1fr 1.6fr' }} gap={4}>
+          <Grid
+            templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) minmax(0, 1.6fr)' }}
+            gap={4}
+          >
             <BlocoProporcaoVersoes dados={data} />
             <BlocoTopVersoes dados={data} />
           </Grid>

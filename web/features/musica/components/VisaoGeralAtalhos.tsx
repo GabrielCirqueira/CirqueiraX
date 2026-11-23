@@ -61,14 +61,25 @@ export const VisaoGeralAtalhos = memo(function VisaoGeralAtalhos({
   return (
     <VStack align="stretch" gap={4}>
       <Grid
-        templateColumns={{ base: '1fr', md: mostrarRosca ? '1fr 1.3fr 1.3fr' : '1fr 1fr' }}
+        templateColumns={{
+          base: 'minmax(0, 1fr)',
+          md: mostrarRosca
+            ? 'minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1.3fr)'
+            : 'minmax(0, 1fr) minmax(0, 1fr)',
+        }}
         gap={4}
       >
         {mostrarRosca ? <RoscaServicos dados={dados} /> : null}
         <RotinaMini porHora={dados.porHora} />
         <RostosNovos artistas={dados.artistasNovos} />
       </Grid>
-      <Grid templateColumns={{ base: '1fr', md: '1.4fr 1fr 1fr' }} gap={4}>
+      <Grid
+        templateColumns={{
+          base: 'minmax(0, 1fr)',
+          md: 'minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr)',
+        }}
+        gap={4}
+      >
         <UltimasOuvidasMini habilitado={habilitado} />
         <SaudadeMini habilitado={habilitado} />
         <NesteDiaMini habilitado={habilitado} />
@@ -352,7 +363,7 @@ function NesteDiaMini({ habilitado }: { habilitado: boolean }) {
           <MosaicoCapasMusica musicas={destaque.musicas} imagemDe={imagemDe} tamanho="96px" />
           <VStack align="flex-start" gap={0} minW={0}>
             <Text
-              fontSize="2xl"
+              fontSize={{ base: 'xl', md: '2xl' }}
               fontWeight="black"
               color="cirqueira.musica.textoPrincipal"
               lineHeight="1"

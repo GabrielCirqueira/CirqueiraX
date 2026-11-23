@@ -39,7 +39,14 @@ export const AbasMusica = memo(function AbasMusica() {
             transition="background-color 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease, transform 0.15s ease"
             _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
             _active={{ transform: 'scale(0.96)' }}
-            onClick={() => selecionarAba(chave)}
+            onClick={(evento) => {
+              evento.currentTarget.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center',
+              })
+              selecionarAba(chave)
+            }}
           >
             {ROTULOS_ABA_MUSICA[chave]}
           </Button>

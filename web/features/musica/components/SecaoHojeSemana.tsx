@@ -230,7 +230,11 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
     return (
       <VStack gap={4} align="stretch" w="full">
         <Skeleton h="40px" w="200px" borderRadius="full" />
-        <Box display="grid" gridTemplateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+        <Box
+          display="grid"
+          gridTemplateColumns={{ base: 'minmax(0, 1fr)', md: 'minmax(0, 1fr) minmax(0, 1fr)' }}
+          gap={4}
+        >
           <Skeleton h="240px" borderRadius="8px" />
           <Skeleton h="240px" borderRadius="8px" />
         </Box>

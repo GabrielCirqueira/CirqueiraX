@@ -84,7 +84,7 @@ export const EstadoVazioMusica = memo(function EstadoVazioMusica({
             onClick={handleVincular}
             loading={obterUrlMutation.isPending}
             h="40px"
-            px={6}
+            px={{ base: 4, md: 6 }}
           >
             Vincular ao Spotify
           </Button>
@@ -99,7 +99,7 @@ export const EstadoVazioMusica = memo(function EstadoVazioMusica({
             _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
             onClick={onAbrirModalImportacao}
             h="40px"
-            px={6}
+            px={{ base: 4, md: 6 }}
             fontSize="sm"
           >
             <Upload size={14} style={{ marginRight: '6px' }} />
@@ -116,7 +116,7 @@ export const EstadoVazioMusica = memo(function EstadoVazioMusica({
             _hover={{ bg: 'cirqueira.musica.cartaoElevado' }}
             onClick={onConectarYoutubeMusic}
             h="40px"
-            px={6}
+            px={{ base: 4, md: 6 }}
             fontSize="sm"
           >
             Conectar o YouTube Music

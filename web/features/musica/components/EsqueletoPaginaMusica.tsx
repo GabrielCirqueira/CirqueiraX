@@ -5,7 +5,11 @@ export const EsqueletoPaginaMusica = memo(function EsqueletoPaginaMusica() {
   return (
     <VStack gap={8} align="stretch" w="full">
       <Skeleton h="80px" borderRadius="8px" />
-      <Box display="grid" gridTemplateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={6}>
+      <Box
+        display="grid"
+        gridTemplateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) minmax(0, 1fr)' }}
+        gap={6}
+      >
         <Skeleton h="260px" borderRadius="8px" />
         <Skeleton h="260px" borderRadius="8px" />
       </Box>

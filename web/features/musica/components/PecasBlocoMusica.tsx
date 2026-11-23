@@ -122,7 +122,7 @@ export const MosaicoCapasMusica = memo(function MosaicoCapasMusica({
   }
   return (
     <Grid
-      templateColumns="1fr 1fr"
+      templateColumns="minmax(0, 1fr) minmax(0, 1fr)"
       boxSize={tamanho}
       flexShrink={0}
       borderRadius="8px"

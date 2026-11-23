@@ -38,7 +38,11 @@ export const AbaHistorico = memo(function AbaHistorico({
 }) {
   return (
     <VStack align="stretch" gap={6}>
-      <Grid templateColumns={{ base: '1fr', lg: '1.5fr 1fr' }} gap={4} alignItems="start">
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1.5fr) minmax(0, 1fr)' }}
+        gap={4}
+        alignItems="start"
+      >
         <FeedUltimasOuvidas habilitado={habilitado} />
         <VStack align="stretch" gap={4}>
           <BlocoNesteDia habilitado={habilitado} onAbrirDia={onAbrirDia} />

@@ -51,7 +51,10 @@ export const AbaHabitos = memo(function AbaHabitos({ habilitado }: { habilitado:
         }
       />
       <BlocoRotina habilitado={habilitado} filtro={filtro} />
-      <Grid templateColumns={{ base: '1fr', lg: '1fr 1fr' }} gap={4}>
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) minmax(0, 1fr)' }}
+        gap={4}
+      >
         <BlocoSessoes habilitado={habilitado} filtro={filtro} />
         <BlocoExtremos habilitado={habilitado} filtro={filtro} />
       </Grid>
@@ -79,7 +82,10 @@ function BlocoRotina({ habilitado, filtro }: { habilitado: boolean; filtro: Filt
       descricao="Minutos por hora e por dia da semana no período, com o pico destacado e o artista favorito de cada faixa do dia."
       icone={<Clock3 size={14} />}
     >
-      <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 1fr)' }}
+        gap={6}
+      >
         <VStack align="stretch" gap={2}>
           <Flex align="flex-end" gap={{ base: '2px', md: '4px' }} h="160px">
             {data.porHora.map((hora) => {
@@ -270,7 +276,7 @@ function BlocoSessoes({ habilitado, filtro }: { habilitado: boolean; filtro: Fil
               Maior maratona
             </Text>
             <Text
-              fontSize="2xl"
+              fontSize={{ base: 'xl', md: '2xl' }}
               fontWeight="black"
               color="cirqueira.musica.textoPrincipal"
               lineHeight="1.1"

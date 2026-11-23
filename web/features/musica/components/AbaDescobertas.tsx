@@ -24,7 +24,10 @@ export const AbaDescobertas = memo(function AbaDescobertas({
   return (
     <VStack align="stretch" gap={6}>
       <SecaoDescobertas habilitado={habilitado} />
-      <Grid templateColumns={{ base: '1fr', lg: '1.4fr 1fr' }} gap={4}>
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1.4fr) minmax(0, 1fr)' }}
+        gap={4}
+      >
         <BlocoSaudade habilitado={habilitado} />
         <BlocoProfundidade habilitado={habilitado} />
       </Grid>

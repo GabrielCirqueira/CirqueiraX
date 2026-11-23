@@ -51,7 +51,7 @@ export const AbaServicos = memo(function AbaServicos({ habilitado }: { habilitad
             icone={<TrendingUp size={14} />}
             cor="cirqueira.musica.textoPrincipal"
           >
-            <SimpleGrid columns={3} gap={3} mb={4}>
+            <SimpleGrid columns={3} gap={{ base: 2, md: 3 }} mb={4}>
               <ContagemServico
                 rotulo="Só no Spotify"
                 valor={data.contagem.spotify}
@@ -120,7 +120,10 @@ export const AbaServicos = memo(function AbaServicos({ habilitado }: { habilitad
               </ResponsiveContainer>
             </Box>
           </CartaoBlocoMusica>
-          <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
+          <Grid
+            templateColumns={{ base: 'minmax(0, 1fr)', md: 'minmax(0, 1fr) minmax(0, 1fr)' }}
+            gap={4}
+          >
             <ListaExclusivas fonte="spotify" musicas={data.soSpotify} imagemDe={imagemDe} />
             <ListaExclusivas
               fonte="youtube_music"
@@ -140,8 +143,15 @@ function ContagemServico({
   fonte,
 }: { rotulo: string; valor: number; fonte?: FonteReproducao }) {
   return (
-    <VStack gap={1} p={3} borderRadius="8px" bg="cirqueira.musica.cartaoElevado" align="flex-start">
-      <HStack gap={1.5}>
+    <VStack
+      gap={1}
+      p={{ base: 2.5, md: 3 }}
+      borderRadius="8px"
+      bg="cirqueira.musica.cartaoElevado"
+      align="flex-start"
+      minW={0}
+    >
+      <HStack gap={1.5} minW={0} maxW="full">
         {fonte ? <IconeFonteMusica fonte={fonte} tamanho={12} /> : null}
         <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" lineClamp={1}>
           {rotulo}

@@ -16,7 +16,7 @@ import { LinkMusica } from './LinkMusica'
 import { MinutosMusica } from './MinutosMusica'
 import { VazioBlocoMusica } from './PecasBlocoMusica'
 
-const COLUNAS = { base: '28px 1fr 64px', md: '36px 1fr 90px 90px 150px' }
+const COLUNAS = { base: '28px minmax(0, 1fr) 64px', md: '36px minmax(0, 1fr) 90px 90px 150px' }
 
 const OPCOES_ORDEM: { valor: OrdemTabelaRanking; rotulo: string }[] = [
   { valor: 'streams', rotulo: 'Streams' },

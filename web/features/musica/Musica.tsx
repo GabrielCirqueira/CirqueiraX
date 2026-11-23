@@ -50,7 +50,7 @@ export function Musica() {
   return (
     <TemaMusica>
       <AppContainer>
-        <Container maxW="6xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }}>
+        <Container maxW="6xl" py={{ base: 4, md: 8 }} px={{ base: 3, md: 6 }} overflowX="clip">
           <VStack gap={{ base: 5, md: 8 }} align="stretch" w="full">
             <Flex
               justify="space-between"

@@ -38,7 +38,10 @@ export const VisaoGeralDestaque = memo(function VisaoGeralDestaque({
       gradientTo="cirqueira.musica.fundo"
       color="cirqueira.musica.fundo"
     >
-      <Grid templateColumns={{ base: '1fr', lg: '1fr 1.2fr' }} gap={{ base: 5, md: 8 }}>
+      <Grid
+        templateColumns={{ base: 'minmax(0, 1fr)', lg: 'minmax(0, 1fr) minmax(0, 1.2fr)' }}
+        gap={{ base: 5, md: 8 }}
+      >
         <VStack align="flex-start" gap={3}>
           <HStack gap={2}>
             <Sparkles size={16} />

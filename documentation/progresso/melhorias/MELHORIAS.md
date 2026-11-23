@@ -231,3 +231,4 @@
 | M208 | Música: Este Mês, Tocando Agora em Todas as Abas e Transições | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-208--música-este-mês-tocando-agora-em-todas-as-abas-e-transições) |
 | M209 | Música: Imagem da Cápsula Personalizável e Seletor de Mês | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-209--música-imagem-da-cápsula-personalizável-e-seletor-de-mês) |
 | M210 | Música: Novos Modelos de Imagem da Cápsula | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-210--música-novos-modelos-de-imagem-da-cápsula) |
+| M211 | Música: Correções de Layout no Celular | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-211--música-correções-de-layout-no-celular) |

@@ -102,10 +102,10 @@ export const ModalMusica = memo(function ModalMusica({
             maxH="80vh"
             my="auto"
           >
-            <Dialog.Header px={6} pt={6} pb={3}>
+            <Dialog.Header px={{ base: 4, md: 6 }} pt={6} pb={3}>
               <BarraTitulo fechar={<BotaoFechar onFechar={onFechar} />}>{cabecalho}</BarraTitulo>
             </Dialog.Header>
-            <Dialog.Body px={6} pb={6} overflowY="auto" flex="1" minH={0}>
+            <Dialog.Body px={{ base: 4, md: 6 }} pb={6} overflowY="auto" flex="1" minH={0}>
               {conteudo}
             </Dialog.Body>
           </Dialog.Content>

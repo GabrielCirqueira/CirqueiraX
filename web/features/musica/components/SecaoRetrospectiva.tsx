@@ -126,7 +126,7 @@ function ConteudoRetrospectiva({ dados }: { dados: RetrospectivaAnual }) {
         color="cirqueira.musica.fundo"
       >
         <Grid
-          templateColumns={{ base: '1fr', md: '1.3fr 1fr' }}
+          templateColumns={{ base: 'minmax(0, 1fr)', md: 'minmax(0, 1.3fr) minmax(0, 1fr)' }}
           gap={{ base: 6, md: 8 }}
           alignItems="center"
         >
