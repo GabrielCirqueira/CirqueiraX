@@ -228,3 +228,4 @@
 | M205 | Visão Geral com Ranking de Hoje, Filtro Ontem e Top 50 na Cápsula | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-205--visão-geral-com-ranking-de-hoje-filtro-ontem-e-top-50-na-cápsula) |
 | M206 | Revisão em Massa: Filtros, Lista Compacta, Lote e Atalhos | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-206--revisão-em-massa-filtros-lista-compacta-lote-e-atalhos) |
 | M207 | Seletor de Período em Menu e Modal | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-207--seletor-de-período-em-menu-e-modal) |
+| M208 | Música: Este Mês, Tocando Agora em Todas as Abas e Transições | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-208--música-este-mês-tocando-agora-em-todas-as-abas-e-transições) |

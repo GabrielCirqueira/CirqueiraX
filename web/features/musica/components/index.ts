@@ -1,5 +1,6 @@
 export * from './TemaMusica'
 export * from './AbasMusica'
+export * from './PainelTocandoAgoraMusica'
 export * from './AbasConteudoMusica'
 export * from './ItensRankingMusica'
 export * from './SecaoHojeSemana'

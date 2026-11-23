@@ -20,11 +20,21 @@ export interface OpcaoPeriodoBloco {
   filtro: FiltroBlocoMusica
 }
 
-export function criarOpcoesPeriodoVisao(anoAtual: number): OpcaoPeriodoBloco[] {
+export const CHAVE_MES_ATUAL = 'mes-atual'
+
+export function criarOpcoesPeriodoVisao(
+  anoAtual: number,
+  mesAtual: number = new Date().getMonth() + 1
+): OpcaoPeriodoBloco[] {
   return [
     { chave: 'hoje', rotulo: 'Hoje', filtro: { periodo: 'dias', dias: 1 } },
     { chave: 'ontem', rotulo: 'Ontem', filtro: { periodo: 'ontem' } },
     { chave: '7d', rotulo: '7 dias', filtro: { periodo: 'dias', dias: 7 } },
+    {
+      chave: CHAVE_MES_ATUAL,
+      rotulo: 'Este mês',
+      filtro: { periodo: 'mes', ano: anoAtual, mes: mesAtual },
+    },
     { chave: '30d', rotulo: '30 dias', filtro: { periodo: 'dias', dias: 30 } },
     { chave: '90d', rotulo: '90 dias', filtro: { periodo: 'dias', dias: 90 } },
     { chave: 'ano', rotulo: String(anoAtual), filtro: { periodo: 'ano', ano: anoAtual } },

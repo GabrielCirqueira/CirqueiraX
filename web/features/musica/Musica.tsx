@@ -1,6 +1,4 @@
-import { CartaoTocandoAgora } from '@/features/spotify/components/CartaoTocandoAgora'
 import { useStatusSpotify } from '@/features/spotify/hooks/useStatusSpotify'
-import { UltimaDetectadaYoutubeMusic } from '@/features/youtube-music/components/UltimaDetectadaYoutubeMusic'
 import { AppContainer } from '@/layouts'
 import { useSEO } from '@/shared/hooks'
 import { Container, Flex, HStack, Heading, Text, VStack } from '@chakra-ui/react'
@@ -12,6 +10,7 @@ import {
   BotaoGerenciarMusica,
   EsqueletoPaginaMusica,
   EstadoVazioMusica,
+  PainelTocandoAgoraMusica,
   RodapeMusica,
   SeletorFonteMusica,
   TemaMusica,
@@ -47,9 +46,6 @@ export function Musica() {
   const habilitado = conectada || temDados
   const mostrarEstadoVazio =
     !carregandoResumo && deveMostrarEstadoVazioMusica(conectada, temDados, fonte)
-
-  const mostrarSpotifyAgora = aba === 'visao' && fonte !== 'youtube_music'
-  const mostrarYoutubeAgora = aba === 'visao' && fonte !== 'spotify'
 
   return (
     <TemaMusica>
@@ -92,10 +88,9 @@ export function Musica() {
               />
             ) : (
               <>
-                {mostrarSpotifyAgora ? <CartaoTocandoAgora conectada={conectada} /> : null}
-                {mostrarYoutubeAgora ? <UltimaDetectadaYoutubeMusic /> : null}
-
                 <AbasMusica />
+
+                <PainelTocandoAgoraMusica conectada={conectada} fonte={fonte} />
 
                 <AbasConteudoMusica
                   aba={aba}

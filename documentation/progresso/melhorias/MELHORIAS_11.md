@@ -103,3 +103,17 @@
 - **Arquivos**: `web/features/musica/components/SeletorPeriodoMusica.tsx`, `web/features/musica/components/ModalPeriodoMusica.tsx`, `web/features/musica/components/SeletorPeriodoAnalise.tsx`, `web/features/musica/components/SecaoHojeSemana.tsx`
 
 ---
+
+### ✅ Melhoria 208 — Música: Este Mês, Tocando Agora em Todas as Abas e Transições
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Pedido**: a seção "Visão geral" abrir com o mês atual (mantendo o filtro); "Tocando agora" em todas as abas, com opção de ocultar; barra de abas acima do "Tocando agora" e o conteúdo da aba abaixo; transições mais fluidas entre as abas.
+- **Solução**:
+  - Nova opção **Este mês** nos seletores de período (mês do calendário, regra do Spotify); a seção "Visão geral" abre nela. O card de ranking do topo continua abrindo em "Hoje" (M205).
+  - `PainelTocandoAgoraMusica`: Spotify e YouTube Music juntos, visível em todas as abas, com botão Ocultar/Mostrar (lembrado no navegador) e recolhimento animado (grid 0fr↔1fr + opacidade).
+  - Ordem da página: barra de abas → Tocando agora → conteúdo da aba.
+  - Troca de aba com entrada suave (fade + deslize + leve desfoque, 380 ms, curva ease-out) e botões da barra com transição de cor e toque; respeita `prefers-reduced-motion`.
+- **Arquivos**: `web/features/musica/Musica.tsx`, `web/features/musica/components/PainelTocandoAgoraMusica.tsx`, `web/features/musica/components/AbasConteudoMusica.tsx`, `web/features/musica/components/AbasMusica.tsx`, `web/features/musica/components/AbaVisaoGeral.tsx`, `web/features/musica/components/index.ts`, `web/features/musica/utils/blocosMusica.ts`
+
+---

@@ -2,7 +2,7 @@ import { Skeleton, VStack } from '@chakra-ui/react'
 import { memo, useState } from 'react'
 import { useVisaoGeralMusica } from '../hooks'
 import type { RespostaConsultaImagens, ResumoGeralMusica } from '../types'
-import { criarOpcoesPeriodoVisao, filtroDaOpcao } from '../utils'
+import { CHAVE_MES_ATUAL, criarOpcoesPeriodoVisao, filtroDaOpcao } from '../utils'
 import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
 import { SecaoHojeSemana } from './SecaoHojeSemana'
 import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
@@ -24,7 +24,7 @@ export const AbaVisaoGeral = memo(function AbaVisaoGeral({
   carregandoResumo,
 }: AbaVisaoGeralProps) {
   const opcoes = criarOpcoesPeriodoVisao(new Date().getFullYear())
-  const [chavePeriodo, setChavePeriodo] = useState('hoje')
+  const [chavePeriodo, setChavePeriodo] = useState(CHAVE_MES_ATUAL)
   const { data, isLoading } = useVisaoGeralMusica(filtroDaOpcao(opcoes, chavePeriodo), habilitado)
 
   return (
