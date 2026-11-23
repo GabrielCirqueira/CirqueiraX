@@ -1,9 +1,8 @@
-import { Button, HStack } from '@chakra-ui/react'
 import { memo } from 'react'
-import type { OpcaoPeriodoAnalise } from '../utils'
+import { SeletorPeriodoMusica } from './SeletorPeriodoMusica'
 
 export interface SeletorPeriodoAnaliseProps {
-  opcoes: OpcaoPeriodoAnalise[]
+  opcoes: { chave: string; rotulo: string }[]
   selecionada: string
   onSelecionar: (chave: string) => void
 }
@@ -14,39 +13,6 @@ export const SeletorPeriodoAnalise = memo(function SeletorPeriodoAnalise({
   onSelecionar,
 }: SeletorPeriodoAnaliseProps) {
   return (
-    <HStack
-      gap={1}
-      bg="cirqueira.musica.cartao"
-      p={1}
-      borderRadius="full"
-      border="1px solid"
-      borderColor="cirqueira.musica.cartaoElevado"
-      w="max-content"
-      maxW="full"
-      overflowX="auto"
-      css={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
-    >
-      {opcoes.map((opcao) => {
-        const ativa = opcao.chave === selecionada
-        return (
-          <Button
-            key={opcao.chave}
-            size="xs"
-            h="28px"
-            px={3}
-            borderRadius="full"
-            fontSize="xs"
-            fontWeight="bold"
-            flexShrink={0}
-            bg={ativa ? 'cirqueira.musica.cartaoElevado' : 'transparent'}
-            color={ativa ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoSecundario'}
-            _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-            onClick={() => onSelecionar(opcao.chave)}
-          >
-            {opcao.rotulo}
-          </Button>
-        )
-      })}
-    </HStack>
+    <SeletorPeriodoMusica opcoes={opcoes} selecionada={selecionada} onSelecionar={onSelecionar} />
   )
 })

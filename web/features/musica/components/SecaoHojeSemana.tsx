@@ -1,26 +1,5 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  HStack,
-  Heading,
-  Input,
-  NativeSelect,
-  Skeleton,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
-import {
-  Calendar,
-  CalendarDays,
-  Disc3,
-  Infinity as IconeInfinito,
-  ListOrdered,
-  Music2,
-  SlidersHorizontal,
-  Users,
-} from 'lucide-react'
+import { Badge, Box, Button, Flex, HStack, Heading, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Disc3, ListOrdered, Music2, Users } from 'lucide-react'
 import { memo, useMemo, useState } from 'react'
 import type { FiltroIntervaloRankingParams, PeriodoMusicasItem } from '../api'
 import {
@@ -41,6 +20,7 @@ import {
 import { ItemRankingAlbum, ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingMusica'
 import { MinutosMusica } from './MinutosMusica'
 import { ModalTop50Musica } from './ModalTop50Musica'
+import { CHAVE_PERIODO_ANO, CHAVE_PERIODO_MES, SeletorPeriodoMusica } from './SeletorPeriodoMusica'
 import { TabelaRankingMusica } from './TabelaRankingMusica'
 
 export interface SecaoHojeSemanaProps {
@@ -73,6 +53,11 @@ const OPCOES_DIAS: { rotulo: string; tipo: 'dias' | 'ontem'; dias: number }[] = 
   { rotulo: '30 dias', tipo: 'dias', dias: 30 },
   { rotulo: '90 dias', tipo: 'dias', dias: 90 },
 ]
+
+function formatarDataCurta(data: string): string {
+  const [ano, mes, dia] = data.split('-')
+  return dia && mes && ano ? `${dia}/${mes}/${ano.slice(2)}` : data
+}
 
 function dataLocalDeslocada(dias: number): string {
   const data = new Date()
@@ -276,6 +261,39 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             ? 'Desde sempre'
             : 'Personalizado')
 
+  const opcoesSeletor = [
+    ...OPCOES_DIAS.map((opcao) => ({
+      chave: opcao.tipo === 'ontem' ? 'ontem' : `d${opcao.dias}`,
+      rotulo: opcao.rotulo,
+    })),
+    { chave: 'todos', rotulo: 'Sempre' },
+  ]
+  const chaveSelecionada =
+    tipoFiltro === 'dias'
+      ? `d${diasSelecionados}`
+      : tipoFiltro === 'mes'
+        ? CHAVE_PERIODO_MES
+        : tipoFiltro === 'ano'
+          ? CHAVE_PERIODO_ANO
+          : tipoFiltro
+  const rotuloSeletor =
+    tipoFiltro === 'mes'
+      ? `${NOMES_MESES.find((m) => m.valor === mesSelecionado)?.rotulo} de ${anoSelecionado}`
+      : tipoFiltro === 'ano'
+        ? `Ano de ${anoSelecionado}`
+        : tipoFiltro === 'personalizado'
+          ? `${formatarDataCurta(dataInicioPersonalizada)} – ${formatarDataCurta(dataFimPersonalizada)}`
+          : undefined
+
+  function selecionarPreset(chave: string) {
+    if (chave === 'ontem' || chave === 'todos') {
+      setTipoFiltro(chave)
+      return
+    }
+    setTipoFiltro('dias')
+    setDiasSelecionados(Number(chave.slice(1)))
+  }
+
   const linhasTabela =
     aba === 'musicas'
       ? linhasRankingMusicas(
@@ -309,151 +327,39 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
           w="full"
           maxW="100%"
         >
-          <Box
-            w={{ base: 'full', md: 'auto' }}
-            maxW="100%"
-            overflowX="auto"
-            py={0.5}
-            css={{
-              scrollbarWidth: 'none',
-              '&::-webkit-scrollbar': { display: 'none' },
-              WebkitOverflowScrolling: 'touch',
+          <SeletorPeriodoMusica
+            opcoes={opcoesSeletor}
+            selecionada={chaveSelecionada}
+            rotuloSelecionado={rotuloSeletor}
+            onSelecionar={selecionarPreset}
+            mes={{
+              ano: anoSelecionado,
+              mes: mesSelecionado,
+              anos: anosDisponiveis,
+              onAplicar: (ano, mes) => {
+                setTipoFiltro('mes')
+                setAnoSelecionado(ano)
+                setMesSelecionado(mes)
+              },
             }}
-          >
-            <HStack
-              gap={1}
-              bg="cirqueira.musica.cartao"
-              p={1}
-              borderRadius="full"
-              border="1px solid"
-              borderColor="cirqueira.musica.cartaoElevado"
-              w="max-content"
-              minW="min-content"
-            >
-              {OPCOES_DIAS.map((opcao) => {
-                const ativo =
-                  tipoFiltro === opcao.tipo &&
-                  (opcao.tipo === 'ontem' || diasSelecionados === opcao.dias)
-                return (
-                  <Button
-                    key={opcao.rotulo}
-                    size="xs"
-                    borderRadius="full"
-                    px={{ base: 3, sm: 3.5 }}
-                    h={{ base: '28px', sm: '32px' }}
-                    fontSize="xs"
-                    fontWeight="bold"
-                    bg={ativo ? 'cirqueira.musica.cartaoElevado' : 'transparent'}
-                    color={
-                      ativo ? 'cirqueira.musica.textoPrincipal' : 'cirqueira.musica.textoSecundario'
-                    }
-                    _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-                    onClick={() => {
-                      setTipoFiltro(opcao.tipo)
-                      setDiasSelecionados(opcao.dias)
-                    }}
-                    flexShrink={0}
-                  >
-                    {opcao.rotulo}
-                  </Button>
-                )
-              })}
-
-              <Button
-                size="xs"
-                borderRadius="full"
-                px={{ base: 3, sm: 3.5 }}
-                h={{ base: '28px', sm: '32px' }}
-                fontSize="xs"
-                fontWeight="bold"
-                bg={tipoFiltro === 'mes' ? 'cirqueira.musica.cartaoElevado' : 'transparent'}
-                color={
-                  tipoFiltro === 'mes'
-                    ? 'cirqueira.musica.verde'
-                    : 'cirqueira.musica.textoSecundario'
-                }
-                _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-                onClick={() => setTipoFiltro('mes')}
-                flexShrink={0}
-              >
-                <HStack gap={1.5}>
-                  <Calendar size={13} />
-                  <Text as="span">Mês</Text>
-                </HStack>
-              </Button>
-
-              <Button
-                size="xs"
-                borderRadius="full"
-                px={{ base: 3, sm: 3.5 }}
-                h={{ base: '28px', sm: '32px' }}
-                fontSize="xs"
-                fontWeight="bold"
-                bg={tipoFiltro === 'ano' ? 'cirqueira.musica.cartaoElevado' : 'transparent'}
-                color={
-                  tipoFiltro === 'ano'
-                    ? 'cirqueira.musica.amarelo'
-                    : 'cirqueira.musica.textoSecundario'
-                }
-                _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-                onClick={() => setTipoFiltro('ano')}
-                flexShrink={0}
-              >
-                <HStack gap={1.5}>
-                  <CalendarDays size={13} />
-                  <Text as="span">Ano</Text>
-                </HStack>
-              </Button>
-
-              <Button
-                size="xs"
-                borderRadius="full"
-                px={{ base: 3, sm: 3.5 }}
-                h={{ base: '28px', sm: '32px' }}
-                fontSize="xs"
-                fontWeight="bold"
-                bg={tipoFiltro === 'todos' ? 'cirqueira.musica.cartaoElevado' : 'transparent'}
-                color={
-                  tipoFiltro === 'todos'
-                    ? 'cirqueira.musica.verde'
-                    : 'cirqueira.musica.textoSecundario'
-                }
-                _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-                onClick={() => setTipoFiltro('todos')}
-                flexShrink={0}
-              >
-                <HStack gap={1.5}>
-                  <IconeInfinito size={13} />
-                  <Text as="span">Sempre</Text>
-                </HStack>
-              </Button>
-
-              <Button
-                size="xs"
-                borderRadius="full"
-                px={{ base: 3, sm: 3.5 }}
-                h={{ base: '28px', sm: '32px' }}
-                fontSize="xs"
-                fontWeight="bold"
-                bg={
-                  tipoFiltro === 'personalizado' ? 'cirqueira.musica.cartaoElevado' : 'transparent'
-                }
-                color={
-                  tipoFiltro === 'personalizado'
-                    ? 'cirqueira.musica.azul'
-                    : 'cirqueira.musica.textoSecundario'
-                }
-                _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
-                onClick={() => setTipoFiltro('personalizado')}
-                flexShrink={0}
-              >
-                <HStack gap={1.5}>
-                  <SlidersHorizontal size={13} />
-                  <Text as="span">Personalizado</Text>
-                </HStack>
-              </Button>
-            </HStack>
-          </Box>
+            ano={{
+              ano: anoSelecionado,
+              anos: anosDisponiveis,
+              onAplicar: (ano) => {
+                setTipoFiltro('ano')
+                setAnoSelecionado(ano)
+              },
+            }}
+            personalizado={{
+              inicio: dataInicioPersonalizada,
+              fim: dataFimPersonalizada,
+              onAplicar: (inicio, fim) => {
+                setTipoFiltro('personalizado')
+                setDataInicioPersonalizada(inicio)
+                setDataFimPersonalizada(fim)
+              },
+            }}
+          />
 
           <Flex
             justify={{ base: 'space-between', md: 'flex-end' }}
@@ -494,186 +400,6 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
             </HStack>
           </Flex>
         </Flex>
-
-        {tipoFiltro === 'mes' && (
-          <Flex
-            p={{ base: 2.5, sm: 3 }}
-            bg="cirqueira.musica.cartao"
-            borderRadius="8px"
-            border="1px solid"
-            borderColor="cirqueira.musica.cartaoElevado"
-            align={{ base: 'stretch', sm: 'center' }}
-            direction={{ base: 'column', sm: 'row' }}
-            gap={2.5}
-            w="full"
-          >
-            <HStack gap={2} align="center">
-              <Calendar size={14} color="var(--chakra-colors-cirqueira-musica-verde)" />
-              <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
-                Selecione o mês:
-              </Text>
-            </HStack>
-
-            <Flex gap={2} direction={{ base: 'column', sm: 'row' }} flex={1} w="full">
-              <NativeSelect.Root size="xs" w={{ base: 'full', sm: '160px' }}>
-                <NativeSelect.Field
-                  value={mesSelecionado}
-                  onChange={(e) => setMesSelecionado(Number(e.target.value))}
-                  bg="cirqueira.musica.cartaoElevado"
-                  borderColor="border.subtle"
-                  borderRadius="8px"
-                  fontSize="xs"
-                  color="cirqueira.musica.textoPrincipal"
-                >
-                  {NOMES_MESES.map((m) => (
-                    <Box
-                      as="option"
-                      key={m.valor}
-                      value={m.valor}
-                      bg="cirqueira.musica.cartao"
-                      color="cirqueira.musica.textoPrincipal"
-                    >
-                      {m.rotulo}
-                    </Box>
-                  ))}
-                </NativeSelect.Field>
-                <NativeSelect.Indicator />
-              </NativeSelect.Root>
-
-              <NativeSelect.Root size="xs" w={{ base: 'full', sm: '120px' }}>
-                <NativeSelect.Field
-                  value={anoSelecionado}
-                  onChange={(e) => setAnoSelecionado(Number(e.target.value))}
-                  bg="cirqueira.musica.cartaoElevado"
-                  borderColor="border.subtle"
-                  borderRadius="8px"
-                  fontSize="xs"
-                  color="cirqueira.musica.textoPrincipal"
-                >
-                  {anosDisponiveis.map((ano) => (
-                    <Box
-                      as="option"
-                      key={ano}
-                      value={ano}
-                      bg="cirqueira.musica.cartao"
-                      color="cirqueira.musica.textoPrincipal"
-                    >
-                      {ano}
-                    </Box>
-                  ))}
-                </NativeSelect.Field>
-                <NativeSelect.Indicator />
-              </NativeSelect.Root>
-            </Flex>
-          </Flex>
-        )}
-
-        {tipoFiltro === 'ano' && (
-          <Flex
-            p={{ base: 2.5, sm: 3 }}
-            bg="cirqueira.musica.cartao"
-            borderRadius="8px"
-            border="1px solid"
-            borderColor="border.subtle"
-            align={{ base: 'stretch', sm: 'center' }}
-            direction={{ base: 'column', sm: 'row' }}
-            gap={2.5}
-            w="full"
-          >
-            <HStack gap={2} align="center">
-              <CalendarDays size={14} color="var(--chakra-colors-cirqueira-musica-amarelo)" />
-              <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
-                Selecione o ano:
-              </Text>
-            </HStack>
-
-            <NativeSelect.Root size="xs" w={{ base: 'full', sm: '140px' }}>
-              <NativeSelect.Field
-                value={anoSelecionado}
-                onChange={(e) => setAnoSelecionado(Number(e.target.value))}
-                bg="cirqueira.musica.cartaoElevado"
-                borderColor="border.subtle"
-                borderRadius="8px"
-                fontSize="xs"
-                color="cirqueira.musica.textoPrincipal"
-              >
-                {anosDisponiveis.map((ano) => (
-                  <Box
-                    as="option"
-                    key={ano}
-                    value={ano}
-                    bg="cirqueira.musica.cartao"
-                    color="cirqueira.musica.textoPrincipal"
-                  >
-                    {ano}
-                  </Box>
-                ))}
-              </NativeSelect.Field>
-              <NativeSelect.Indicator />
-            </NativeSelect.Root>
-          </Flex>
-        )}
-
-        {tipoFiltro === 'personalizado' && (
-          <Flex
-            p={{ base: 2.5, sm: 3 }}
-            bg="cirqueira.musica.cartao"
-            borderRadius="8px"
-            border="1px solid"
-            borderColor="border.subtle"
-            align={{ base: 'stretch', sm: 'center' }}
-            direction={{ base: 'column', sm: 'row' }}
-            gap={2.5}
-            w="full"
-          >
-            <HStack gap={2} align="center">
-              <SlidersHorizontal size={14} color="var(--chakra-colors-cirqueira-musica-azul)" />
-              <Text fontSize="xs" fontWeight="bold" color="cirqueira.musica.textoPrincipal">
-                Intervalo de datas:
-              </Text>
-            </HStack>
-
-            <Flex gap={2} direction={{ base: 'column', sm: 'row' }} flex={1} w="full">
-              <HStack gap={1.5} align="center" flex={1} w="full">
-                <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" minW="22px">
-                  De:
-                </Text>
-                <Input
-                  type="date"
-                  size="xs"
-                  w="full"
-                  value={dataInicioPersonalizada}
-                  onChange={(e) => setDataInicioPersonalizada(e.target.value)}
-                  bg="cirqueira.musica.cartaoElevado"
-                  border="1px solid"
-                  borderColor="border.subtle"
-                  borderRadius="8px"
-                  color="cirqueira.musica.textoPrincipal"
-                  fontSize="xs"
-                />
-              </HStack>
-
-              <HStack gap={1.5} align="center" flex={1} w="full">
-                <Text fontSize="2xs" color="cirqueira.musica.textoSecundario" minW="22px">
-                  Até:
-                </Text>
-                <Input
-                  type="date"
-                  size="xs"
-                  w="full"
-                  value={dataFimPersonalizada}
-                  onChange={(e) => setDataFimPersonalizada(e.target.value)}
-                  bg="cirqueira.musica.cartaoElevado"
-                  border="1px solid"
-                  borderColor="border.subtle"
-                  borderRadius="8px"
-                  color="cirqueira.musica.textoPrincipal"
-                  fontSize="xs"
-                />
-              </HStack>
-            </Flex>
-          </Flex>
-        )}
       </VStack>
 
       <Box

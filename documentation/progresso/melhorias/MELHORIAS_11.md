@@ -90,3 +90,16 @@
 - **Arquivos**: `src/DataObject/Musica/FiltroRevisaoMusicaDTO.php`, `src/DataObject/Musica/AcaoRevisaoEmLoteDTO.php`, `src/DataObject/Musica/AcaoRevisaoPorFiltroDTO.php`, `src/Service/Musica/Correcao/AplicarAcaoRevisaoEmLoteService.php`, `src/Service/Musica/ListarRevisaoMusicaService.php`, `src/Repository/VideoYoutubeRepository.php`, `src/Controller/Musica/MusicaCorrecaoController.php`, `src/Exception/Musica/MusicaCatalogoException.php`, `web/features/revisao-musica/components/ListaRevisao.tsx`, `web/features/revisao-musica/components/BarraFiltrosRevisao.tsx`, `web/features/revisao-musica/components/BarraLoteRevisao.tsx`, `web/features/revisao-musica/components/LinhaCompactaVideoRevisao.tsx`, `web/features/revisao-musica/components/PainelAcaoFiltroRevisao.tsx`, `web/features/revisao-musica/components/CartaoVideoRevisao.tsx`, `web/features/revisao-musica/hooks/useAcoesEmMassaRevisao.ts`, `web/features/revisao-musica/hooks/useRevisaoMusica.ts`, `web/features/revisao-musica/hooks/chavesQueryRevisao.ts`, `web/features/revisao-musica/utils/tecladoRevisao.ts`, `web/features/revisao-musica/utils/revisaoMusica.ts`, `web/features/revisao-musica/api.ts`, `web/features/revisao-musica/types.ts`
 
 ---
+
+### ✅ Melhoria 207 — Seletor de Período em Menu e Modal
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Pedido**: as barras de período (Hoje, Ontem, 7/30/90 dias, Mês, Ano, Sempre, Personalizado) poluíam a tela; trocar por um select com a opção escolhida que abre a lista, e abrir mês/ano/personalizado num popup em vez de expandir na seção.
+- **Solução**:
+  - `SeletorPeriodoMusica`: botão com o período atual que abre um menu com as opções (marca a escolhida); "Escolher mês…", "Escolher ano…" e "Personalizado…" abrem `ModalPeriodoMusica` e só filtram ao clicar em Aplicar (personalizado valida início ≤ fim).
+  - `SeletorPeriodoAnalise` passou a usar o menu, então Visão geral, Hábitos, Versões, Descobertas, Linha do tempo e Evolução mensal ficaram iguais.
+  - Card de ranking por período (`SecaoHojeSemana`): os chips e os três painéis embutidos de mês, ano e datas viraram um único seletor; o rótulo mostra o período escolhido ("Março de 2026", "01/11/26 – 15/11/26").
+- **Arquivos**: `web/features/musica/components/SeletorPeriodoMusica.tsx`, `web/features/musica/components/ModalPeriodoMusica.tsx`, `web/features/musica/components/SeletorPeriodoAnalise.tsx`, `web/features/musica/components/SecaoHojeSemana.tsx`
+
+---
