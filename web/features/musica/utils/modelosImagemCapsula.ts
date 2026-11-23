@@ -143,12 +143,18 @@ function desenharPoster(prancheta: Prancheta, dados: DadosDesenhoCapsula) {
   const { tema, altura, largura } = prancheta
   const { capsula } = dados
   const musica = capsula.topMusicas[0]
-  escrever(prancheta, `CÁPSULA SONORA · ${capsula.rotulo.toUpperCase()}`, MARGEM_IMAGEM, 130, {
-    tamanho: 30,
-    peso: 700,
-    cor: tema.destaque,
-    larguraMaxima: larguraUtil(prancheta),
-  })
+  escrever(
+    prancheta,
+    `${prancheta.estilo.titulo} · ${capsula.rotulo.toUpperCase()}`,
+    MARGEM_IMAGEM,
+    130,
+    {
+      tamanho: 30,
+      peso: 700,
+      cor: tema.destaque,
+      larguraMaxima: larguraUtil(prancheta),
+    }
+  )
   const espacoCapa = altura >= ALTURA_GRANDE ? 0.48 : altura >= ALTURA_MEDIA ? 0.42 : 0.36
   const tamanhoCapa = Math.min(larguraUtil(prancheta), Math.round(altura * espacoCapa))
   const xCapa = (largura - tamanhoCapa) / 2
@@ -436,7 +442,7 @@ function desenharRecibo(prancheta: Prancheta, dados: DadosDesenhoCapsula) {
     alinhamento: 'center',
   })
   y += 50
-  escrever(prancheta, `CÁPSULA SONORA · ${capsula.rotulo.toUpperCase()}`, centro, y, {
+  escrever(prancheta, `${prancheta.estilo.titulo} · ${capsula.rotulo.toUpperCase()}`, centro, y, {
     ...mono,
     tamanho: 26,
     cor: tema.textoSecundario,

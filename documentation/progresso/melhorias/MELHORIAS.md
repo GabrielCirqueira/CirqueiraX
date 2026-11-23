@@ -229,3 +229,4 @@
 | M206 | Revisão em Massa: Filtros, Lista Compacta, Lote e Atalhos | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-206--revisão-em-massa-filtros-lista-compacta-lote-e-atalhos) |
 | M207 | Seletor de Período em Menu e Modal | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-207--seletor-de-período-em-menu-e-modal) |
 | M208 | Música: Este Mês, Tocando Agora em Todas as Abas e Transições | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-208--música-este-mês-tocando-agora-em-todas-as-abas-e-transições) |
+| M209 | Música: Imagem da Cápsula Personalizável e Seletor de Mês | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-209--música-imagem-da-cápsula-personalizável-e-seletor-de-mês) |

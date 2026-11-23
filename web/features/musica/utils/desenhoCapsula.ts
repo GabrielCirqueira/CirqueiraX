@@ -1,7 +1,11 @@
 import type { CapsulaMensal, FonteMusica } from '../types'
 import { urlCapaExibicao } from './capaMusica'
 import { atribuicaoFonteMusica } from './fonteMusica'
-import type { TemaImagemCapsula } from './temasImagemCapsula'
+import type {
+  CantosImagemCapsula,
+  FundoImagemCapsula,
+  TemaImagemCapsula,
+} from './temasImagemCapsula'
 
 export const FONTE_TEXTO = 'Inter, "Segoe UI", Arial, sans-serif'
 export const FONTE_MONO = '"JetBrains Mono", "Courier New", monospace'
@@ -12,12 +16,27 @@ const COR_ICONE_YOUTUBE = '#FF0033'
 const COR_SIMBOLO_ICONE = '#FFFFFF'
 const COR_ARCOS_SPOTIFY = '#121212'
 const ASSINATURA = 'CirqueiraX'
+const DESFOQUE_FUNDO_CAPA = 'blur(48px) saturate(1.2)'
+const OPACIDADE_VEU_CAPA = 0.62
+const TAMANHO_GRAO = 160
+const OPACIDADE_GRAO = 18
+
+export interface EstiloPrancheta {
+  cantos: CantosImagemCapsula
+  familia: string
+  titulo: string
+  assinatura: boolean
+  fundo: FundoImagemCapsula
+  brilho: boolean
+  granulado: boolean
+}
 
 export interface Prancheta {
   contexto: CanvasRenderingContext2D
   largura: number
   altura: number
   tema: TemaImagemCapsula
+  estilo: EstiloPrancheta
 }
 
 export interface DadosDesenhoCapsula {
@@ -47,15 +66,47 @@ export function carregarImagemCapsula(url: string | null): Promise<HTMLImageElem
   })
 }
 
-export function pintarFundo(prancheta: Prancheta) {
+function pintarGradiente(prancheta: Prancheta, alfa: number) {
   const { contexto, largura, altura, tema } = prancheta
   const gradiente = contexto.createLinearGradient(0, 0, largura * 0.4, altura)
   tema.fundo.forEach((cor, indice) => {
     gradiente.addColorStop(indice / Math.max(1, tema.fundo.length - 1), cor)
   })
+  contexto.save()
+  contexto.globalAlpha = alfa
   contexto.fillStyle = gradiente
   contexto.fillRect(0, 0, largura, altura)
-  if (!tema.brilho) return
+  contexto.restore()
+}
+
+function pintarCapaDesfocada(prancheta: Prancheta, capa: HTMLImageElement) {
+  const { contexto, largura, altura } = prancheta
+  const escala = Math.max(largura / capa.naturalWidth, altura / capa.naturalHeight) * 1.25
+  const larguraCapa = capa.naturalWidth * escala
+  const alturaCapa = capa.naturalHeight * escala
+  contexto.save()
+  contexto.filter = DESFOQUE_FUNDO_CAPA
+  contexto.drawImage(
+    capa,
+    (largura - larguraCapa) / 2,
+    (altura - alturaCapa) / 2,
+    larguraCapa,
+    alturaCapa
+  )
+  contexto.restore()
+  pintarGradiente(prancheta, OPACIDADE_VEU_CAPA)
+}
+
+export function pintarFundo(prancheta: Prancheta, capa: HTMLImageElement | null = null) {
+  const { contexto, largura, altura, tema, estilo } = prancheta
+  if (estilo.fundo === 'solido') {
+    contexto.fillStyle = tema.fundo[0] ?? '#000000'
+    contexto.fillRect(0, 0, largura, altura)
+  }
+  if (estilo.fundo === 'gradiente' || (estilo.fundo === 'capa' && !capa))
+    pintarGradiente(prancheta, 1)
+  if (estilo.fundo === 'capa' && capa) pintarCapaDesfocada(prancheta, capa)
+  if (!tema.brilho || !estilo.brilho) return
   const raio = Math.max(largura, altura) * 0.55
   const brilho = contexto.createRadialGradient(largura * 0.85, 120, 40, largura * 0.85, 120, raio)
   brilho.addColorStop(0, tema.brilho)
@@ -73,6 +124,37 @@ function limitarTexto(contexto: CanvasRenderingContext2D, texto: string, largura
   return `${resultado.trimEnd()}…`
 }
 
+export function aplicarGranulado(prancheta: Prancheta) {
+  if (!prancheta.estilo.granulado) return
+  const { contexto, largura, altura } = prancheta
+  const grao = document.createElement('canvas')
+  grao.width = TAMANHO_GRAO
+  grao.height = TAMANHO_GRAO
+  const contextoGrao = grao.getContext('2d')
+  if (!contextoGrao) return
+  const pixels = contextoGrao.createImageData(TAMANHO_GRAO, TAMANHO_GRAO)
+  for (let indice = 0; indice < pixels.data.length; indice += 4) {
+    const valor = Math.random() * 255
+    pixels.data[indice] = valor
+    pixels.data[indice + 1] = valor
+    pixels.data[indice + 2] = valor
+    pixels.data[indice + 3] = OPACIDADE_GRAO
+  }
+  contextoGrao.putImageData(pixels, 0, 0)
+  const padrao = contexto.createPattern(grao, 'repeat')
+  if (!padrao) return
+  contexto.save()
+  contexto.fillStyle = padrao
+  contexto.fillRect(0, 0, largura, altura)
+  contexto.restore()
+}
+
+function raioDosCantos(prancheta: Prancheta, tamanho: number, raio: number): number {
+  if (prancheta.estilo.cantos === 'retos') return 0
+  if (prancheta.estilo.cantos === 'redondos') return tamanho / 2
+  return raio
+}
+
 export function escrever(
   prancheta: Prancheta,
   texto: string,
@@ -81,7 +163,7 @@ export function escrever(
   estilo: EstiloTexto
 ): number {
   const { contexto } = prancheta
-  contexto.font = `${estilo.peso ?? 500} ${estilo.tamanho}px ${estilo.fonte ?? FONTE_TEXTO}`
+  contexto.font = `${estilo.peso ?? 500} ${estilo.tamanho}px ${estilo.fonte ?? prancheta.estilo.familia}`
   contexto.fillStyle = estilo.cor
   contexto.textAlign = estilo.alinhamento ?? 'left'
   contexto.textBaseline = 'alphabetic'
@@ -118,7 +200,7 @@ export function desenharCapa(
   const { contexto, tema } = prancheta
   contexto.save()
   contexto.beginPath()
-  contexto.roundRect(x, y, tamanho, tamanho, raio)
+  contexto.roundRect(x, y, tamanho, tamanho, raioDosCantos(prancheta, tamanho, raio))
   contexto.clip()
   contexto.fillStyle = tema.cartao
   contexto.fillRect(x, y, tamanho, tamanho)
@@ -216,6 +298,7 @@ export function desenharRodape(prancheta: Prancheta, fonte: FonteMusica) {
     cor: tema.texto,
     larguraMaxima: largura - x - MARGEM_IMAGEM - 180,
   })
+  if (!prancheta.estilo.assinatura) return
   escrever(prancheta, ASSINATURA, largura - MARGEM_IMAGEM, base, {
     tamanho: 26,
     cor: tema.apagado,
@@ -225,7 +308,7 @@ export function desenharRodape(prancheta: Prancheta, fonte: FonteMusica) {
 
 export function desenharCabecalho(prancheta: Prancheta, rotulo: string, y: number): number {
   const { largura, tema } = prancheta
-  escrever(prancheta, 'CÁPSULA SONORA', MARGEM_IMAGEM, y, {
+  escrever(prancheta, prancheta.estilo.titulo, MARGEM_IMAGEM, y, {
     tamanho: 30,
     peso: 700,
     cor: tema.destaque,

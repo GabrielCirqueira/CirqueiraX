@@ -2,6 +2,7 @@ import type { CapsulaMensal } from '../types'
 import { gerarChaveArtista, gerarChaveFaixa } from './chavesImagemMusica'
 import {
   type Prancheta,
+  aplicarGranulado,
   canvasParaBlob,
   carregarImagemCapsula,
   desenharRodape,
@@ -10,8 +11,10 @@ import {
 import { DESENHOS_MODELOS } from './modelosImagemCapsula'
 import {
   type OpcoesImagemCapsula,
+  TITULO_PADRAO_IMAGEM_CAPSULA,
   buscarFormatoImagemCapsula,
   buscarTemaImagemCapsula,
+  familiaTipografiaCapsula,
 } from './temasImagemCapsula'
 
 export const QUANTIDADE_CAPAS_IMAGEM_CAPSULA = 10
@@ -44,10 +47,11 @@ export async function gerarImagemCapsula(
   await document.fonts.ready
   const formato = buscarFormatoImagemCapsula(opcoes.formato)
   const canvas = document.createElement('canvas')
-  canvas.width = formato.largura
-  canvas.height = formato.altura
+  canvas.width = formato.largura * opcoes.qualidade
+  canvas.height = formato.altura * opcoes.qualidade
   const contexto = canvas.getContext('2d')
   if (!contexto) throw new Error('Canvas indisponível')
+  contexto.scale(opcoes.qualidade, opcoes.qualidade)
 
   const [capasMusicas, fotosArtistas] = await Promise.all([
     Promise.all(imagens.musicas.map(carregarImagemCapsula)),
@@ -57,15 +61,25 @@ export async function gerarImagemCapsula(
     contexto,
     largura: formato.largura,
     altura: formato.altura,
-    tema: buscarTemaImagemCapsula(opcoes.tema),
+    tema: buscarTemaImagemCapsula(opcoes.tema, opcoes.cores),
+    estilo: {
+      cantos: opcoes.cantos,
+      familia: familiaTipografiaCapsula(opcoes.tipografia),
+      titulo: opcoes.titulo.trim().toUpperCase() || TITULO_PADRAO_IMAGEM_CAPSULA,
+      assinatura: opcoes.assinatura,
+      fundo: opcoes.fundo,
+      brilho: opcoes.brilho,
+      granulado: opcoes.granulado,
+    },
   }
-  pintarFundo(prancheta)
+  pintarFundo(prancheta, capasMusicas[0] ?? null)
   DESENHOS_MODELOS[opcoes.modelo](prancheta, {
     capsula,
     fonte: opcoes.fonte,
     capasMusicas,
     fotosArtistas,
   })
+  aplicarGranulado(prancheta)
   desenharRodape(prancheta, opcoes.fonte)
 
   const blob = await canvasParaBlob(canvas)

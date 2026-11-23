@@ -117,3 +117,19 @@
 - **Arquivos**: `web/features/musica/Musica.tsx`, `web/features/musica/components/PainelTocandoAgoraMusica.tsx`, `web/features/musica/components/AbasConteudoMusica.tsx`, `web/features/musica/components/AbasMusica.tsx`, `web/features/musica/components/AbaVisaoGeral.tsx`, `web/features/musica/components/index.ts`, `web/features/musica/utils/blocosMusica.ts`
 
 ---
+
+### ✅ Melhoria 209 — Música: Imagem da Cápsula Personalizável e Seletor de Mês
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Pedido**: mais personalizações na geração de imagem (tamanhos, temas e outras opções) e um select no topo do modal com o mês, para trocar de mês e atualizar a imagem com os dados dele.
+- **Solução**:
+  - Seletor de mês no topo do modal (lista das cápsulas com plays e música do mês, mais setas anterior/próximo); a prévia é refeita com os dados do mês escolhido.
+  - Tamanhos novos: Retrato 3:4, Paisagem 16:9 e Papel de parede de celular, mais exportação em alta qualidade (2×).
+  - 6 temas novos (Aurora, Pastel, Café, Meia-noite, Cereja, Limão) e o tema "Suas cores", com 4 cores escolhidas pelo usuário.
+  - Fundo gradiente, sólido ou capa desfocada da música do mês; brilho e textura granulada liga/desliga.
+  - Tipografia (moderna, clássica, máquina), título editável, cantos das capas (retos, arredondados, redondos) e assinatura CirqueiraX opcional.
+  - Preferências lembradas no navegador e botão "Restaurar padrão"; a prévia usa valor adiado para não travar enquanto se digita ou arrasta a cor.
+- **Arquivos**: `web/features/musica/components/ModalImagemCapsula.tsx`, `web/features/musica/utils/temasImagemCapsula.ts`, `web/features/musica/utils/desenhoCapsula.ts`, `web/features/musica/utils/imagemCapsula.ts`, `web/features/musica/utils/modelosImagemCapsula.ts`, `documentation/funcionalidades/MUSICA.md`
+
+---
