@@ -142,6 +142,19 @@ class VideoYoutube
         return $this;
     }
 
+    public function corrigirDuracaoInformadaPeloPlayer(?int $duracaoMs): self
+    {
+        if (null === $duracaoMs || $duracaoMs <= 0 || null !== $this->detalhesAtualizadosEm) {
+            return $this;
+        }
+
+        if (null === $this->duracaoMs || $duracaoMs > $this->duracaoMs) {
+            $this->duracaoMs = $duracaoMs;
+        }
+
+        return $this;
+    }
+
     public function registrarDetalhesYoutube(?string $canalId, ?string $categoriaYoutube, ?int $duracaoMs, ?string $descricao): self
     {
         $this->canalId = $canalId ?? $this->canalId;

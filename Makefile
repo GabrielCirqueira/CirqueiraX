@@ -26,7 +26,7 @@ COMPOSE_PROD_CMD = $(COMPOSE_ENV) $(COMPOSE) -f $(COMPOSE_PROD_FILE)
 # --- EXECUÇÃO NOS CONTAINERS ---
 EXEC_BACKEND  = $(COMPOSE_DEV_CMD) exec --user $(DEV_UID):$(DEV_GID) symfony
 EXEC_FRONTEND = $(COMPOSE_DEV_CMD) exec --user $(DEV_UID):$(DEV_GID) vite-react
-PROD_SYMFONY  = $(COMPOSE_PROD_CMD) exec -T symfony
+PROD_SYMFONY  = $(COMPOSE_PROD_CMD) exec -T --user www-data symfony
 
 .PHONY: help \
   build up up-d down restart rebuild pull-images \

@@ -12,16 +12,19 @@ use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
 use App\Enum\FonteReproducaoYoutube;
 use App\Exception\YoutubeMusic\ExtensaoYoutubeMusicException;
+use App\Message\IdentificarVideosYoutubeMessage;
 use App\Repository\ReproducaoYoutubeRepository;
 use App\Repository\TokenExtensaoYoutubeMusicRepository;
 use App\Repository\VideoYoutubeRepository;
 use App\Service\Musica\Projecao\ProjetarReproducoesYoutubeService;
 use DateTimeImmutable;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 final readonly class RegistrarEventosExtensaoYoutubeService
 {
     private const string FORMATO_SEGUNDOS_ATRAS = '-%d seconds';
+    private const string FORMATO_MILISSEGUNDOS_ATRAS = '-%d milliseconds';
     private const string JANELA_ENCERRAR_SEM_FIM = '-1 day';
     private const int TOLERANCIA_INICIO_MS = 60000;
     private const int MILISSEGUNDOS_POR_SEGUNDO = 1000;
@@ -33,6 +36,7 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         private UnirReproducaoExtensaoComColetaService $unirComColeta,
         private ProjetarReproducoesYoutubeService $projetarYoutube,
         private RateLimiterFactoryInterface $youtubeMusicExtensaoLimiter,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
@@ -50,8 +54,11 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         $recebidoEm = new DateTimeImmutable();
         $registradas = [];
         $videos = [];
+        $novaPendente = false;
         foreach ($lote->eventos as $evento) {
+            $jaExistia = isset($registradas[$evento->idReproducao]) || null !== $this->reproducaoRepository->buscarDaExtensao($usuario, $evento->idReproducao);
             $registradas[$evento->idReproducao] = $this->registrar($usuario, $evento, $recebidoEm, $registradas[$evento->idReproducao] ?? null, $videos);
+            $novaPendente = $novaPendente || (!$jaExistia && $registradas[$evento->idReproducao]->video()->isPendente());
         }
 
         if ($token->isUsoParaRegistrar($recebidoEm)) {
@@ -60,6 +67,10 @@ final readonly class RegistrarEventosExtensaoYoutubeService
 
         $this->reproducaoRepository->flush();
         $this->projetarYoutube->projetarVideos($usuario, array_values(array_map(static fn (ReproducaoYoutube $reproducao): VideoYoutube => $reproducao->video(), $registradas)));
+
+        if ($novaPendente) {
+            $this->messageBus->dispatch(new IdentificarVideosYoutubeMessage());
+        }
 
         return count($lote->eventos);
     }
@@ -71,7 +82,11 @@ final readonly class RegistrarEventosExtensaoYoutubeService
     {
         $existente = $doLote ?? $this->reproducaoRepository->buscarDaExtensao($usuario, $evento->idReproducao);
         if (null !== $existente) {
-            return $existente->atualizarProgressoDaExtensao($evento->msOuvidos, $evento->puladaInformada(), $evento->isPausada());
+            $existente->video()->corrigirDuracaoInformadaPeloPlayer($evento->duracaoMs);
+
+            return $existente
+                ->atualizarProgressoDaExtensao($evento->msOuvidos, $evento->puladaInformada(), $evento->isPausada())
+                ->registrarPosicaoDaExtensao($evento->posicaoMs, $this->momentoDaAmostra($evento, $recebidoEm));
         }
 
         $video = $videos[$evento->videoId] ?? $this->obterVideo($usuario, $evento);
@@ -80,10 +95,21 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         $this->encerrarAnterioresSemFim($usuario, $inicio);
         $estimada = $this->unirComColeta->buscarEstimadaParaExtensao($usuario, $video, $inicio);
         $reproducao = $estimada?->marcarVistaPeloColetor() ?? new ReproducaoYoutube($usuario, $video, $inicio, 0, FonteReproducaoYoutube::Extensao);
-        $reproducao->assumirDadosDaExtensao($evento->idReproducao, $inicio, $evento->msOuvidos, $evento->puladaInformada(), $evento->isPausada());
+        $reproducao
+            ->assumirDadosDaExtensao($evento->idReproducao, $inicio, $evento->msOuvidos, $evento->puladaInformada(), $evento->isPausada())
+            ->registrarPosicaoDaExtensao($evento->posicaoMs, $this->momentoDaAmostra($evento, $recebidoEm));
         $this->reproducaoRepository->salvar($reproducao, flush: false);
 
         return $reproducao;
+    }
+
+    private function momentoDaAmostra(EventoExtensaoYoutubeDTO $evento, DateTimeImmutable $recebidoEm): ?DateTimeImmutable
+    {
+        if (null === $evento->msDesdeAmostra) {
+            return null;
+        }
+
+        return $recebidoEm->modify(sprintf(self::FORMATO_MILISSEGUNDOS_ATRAS, $evento->msDesdeAmostra));
     }
 
     private function segundosDesdeInicio(EventoExtensaoYoutubeDTO $evento, VideoYoutube $video): int
@@ -110,6 +136,7 @@ final readonly class RegistrarEventosExtensaoYoutubeService
         $video = $this->videoRepository->buscarPorVideoIds($usuario, [$evento->videoId])[$evento->videoId]
             ?? new VideoYoutube($usuario, $evento->videoId, $evento->titulo, $evento->canal);
         $video->atualizarDadosColetados($video->titulo(), $video->canal(), $video->duracaoMs() ?? $evento->duracaoMs, $video->urlCapa() ?? $evento->urlCapa);
+        $video->corrigirDuracaoInformadaPeloPlayer($evento->duracaoMs);
         $this->videoRepository->salvar($video, flush: false);
 
         return $video;

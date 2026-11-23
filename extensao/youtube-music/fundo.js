@@ -128,8 +128,12 @@ async function salvarEstado(parcial) {
 }
 
 function paraEnvio(item, agora) {
-  const { versao, iniciadoEmMs, ...evento } = item
-  return { ...evento, segundosDesdeInicio: Math.max(0, Math.round((agora - iniciadoEmMs) / 1000)) }
+  const { versao, iniciadoEmMs, amostradoEmMs, ...evento } = item
+  return {
+    ...evento,
+    segundosDesdeInicio: Math.max(0, Math.round((agora - iniciadoEmMs) / 1000)),
+    msDesdeAmostra: Number.isFinite(amostradoEmMs) ? Math.max(0, agora - amostradoEmMs) : null,
+  }
 }
 
 async function removerEnviados(itens) {

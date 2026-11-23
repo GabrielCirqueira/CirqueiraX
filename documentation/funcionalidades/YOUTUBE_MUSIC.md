@@ -369,3 +369,11 @@ Janela de 600 s, mesmo vídeo, a mais próxima primeiro, uma para uma:
 ### Testes (12/11/2026)
 
 Ambiente isolado (MySQL e app temporários): geração e limite de 5 tokens, nome vazio (422), token de outro usuário (404 na revogação, lista vazia), token errado (401), token em outra rota (401), login normal na rota da extensão (403), `inicio` → "tocando agora", `progresso` e `fim` com pulo, `fim` repetido sem duplicar, `progresso` atrasado sem diminuir tempo, evento inválido (422), união com linha estimada do coletor (virou uma só, sem duplicar na projeção), detecção do coletor descartada depois da extensão, revogação (401). O `conteudo.js` foi testado numa página simulada: pausa e anúncio não contam, troca de música fecha a anterior com pulo, repetição abre nova reprodução.
+
+## Extensão 1.5.0 — posição real do player (M203)
+
+- Cada evento leva `posicaoMs` (posição do player) e `msDesdeAmostra` (há quanto tempo foi lida); o servidor grava em `extensao_posicao_ms` / `extensao_posicao_em` e o painel calcula o tempo a partir disso, não do tempo ouvido.
+- Pausa, play e avanço manual geram evento na hora; tocando, o progresso sai a cada 5 s.
+- Duração só é lida fora de anúncio (estado do player + overlay visível); o servidor aceita duração maior que a guardada enquanto a API do YouTube não trouxe a oficial.
+- Primeira reprodução de um vídeo pendente dispara a identificação na hora; a rodada de cada minuto pega primeiro os pendentes tocados mais recentemente.
+- Comandos de console em produção devem rodar como `www-data` (`docker exec -u www-data …`); rodar como root deixa o cache sem permissão e para o scheduler.

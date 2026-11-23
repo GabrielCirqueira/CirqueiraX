@@ -22,6 +22,8 @@ export const TocandoAgoraExtensaoSchema = z.object({
   duracaoMs: z.number().nullable(),
   atualizadoEm: z.string().nullable().default(null),
   pausada: z.boolean().default(false),
+  posicaoMs: z.number().nullable().default(null),
+  posicaoEm: z.string().nullable().default(null),
   vezesOuvida: z.number().default(0),
   primeiraVezEm: z.string().nullable().default(null),
 })

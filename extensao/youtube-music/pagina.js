@@ -3,6 +3,17 @@
   window.__cirqueiraxPagina = true
   const ORIGEM = 'cirqueirax-youtube-music'
   const INTERVALO_MS = 1000
+  const ESTADO_ANUNCIO_TOCANDO = 1
+  const CLASSES_ANUNCIO = ['ad-showing', 'ad-interrupting']
+  const SELETORES_ANUNCIO = '.ytp-ad-player-overlay, .ytp-ad-player-overlay-layout'
+
+  function emAnuncio(player) {
+    if (CLASSES_ANUNCIO.some((classe) => player.classList.contains(classe))) return true
+    if (typeof player.getAdState === 'function' && player.getAdState() === ESTADO_ANUNCIO_TOCANDO)
+      return true
+    const sobreposicao = player.querySelector(SELETORES_ANUNCIO)
+    return Boolean(sobreposicao && sobreposicao.offsetWidth > 0 && sobreposicao.offsetHeight > 0)
+  }
 
   function lerDadosDoPlayer() {
     const player = document.querySelector('#movie_player')
@@ -19,13 +30,18 @@
       videoId: dados.video_id,
       titulo: dados.title || '',
       autor: dados.author || '',
-      anuncio:
-        player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting'),
+      anuncio: emAnuncio(player),
+      lidoEmMs: Date.now(),
     }
   }
 
-  setInterval(() => {
+  function publicar() {
     const dados = lerDadosDoPlayer()
     if (dados) window.postMessage({ origem: ORIGEM, dados }, location.origin)
-  }, INTERVALO_MS)
+  }
+
+  setInterval(publicar, INTERVALO_MS)
+  for (const evento of ['play', 'pause', 'seeked', 'ended', 'loadedmetadata']) {
+    document.addEventListener(evento, publicar, true)
+  }
 })()

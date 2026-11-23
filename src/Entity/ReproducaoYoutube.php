@@ -72,6 +72,12 @@ class ReproducaoYoutube
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $extensaoPausada = false;
 
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $extensaoPosicaoMs = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $extensaoPosicaoEm = null;
+
     #[ORM\Column(type: 'datetime_immutable')]
     private DateTimeImmutable $criadoEm;
 
@@ -131,6 +137,28 @@ class ReproducaoYoutube
         $this->extensaoAtualizadaEm = new DateTimeImmutable();
 
         return $this;
+    }
+
+    public function registrarPosicaoDaExtensao(?int $posicaoMs, ?DateTimeImmutable $lidaEm): self
+    {
+        if (null === $posicaoMs || null === $lidaEm) {
+            return $this;
+        }
+
+        $this->extensaoPosicaoMs = self::limitarMs($posicaoMs);
+        $this->extensaoPosicaoEm = $lidaEm;
+
+        return $this;
+    }
+
+    public function extensaoPosicaoMs(): ?int
+    {
+        return $this->extensaoPosicaoMs;
+    }
+
+    public function extensaoPosicaoEm(): ?DateTimeImmutable
+    {
+        return $this->extensaoPosicaoEm;
     }
 
     public function encerrarSemFimDaExtensao(): self

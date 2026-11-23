@@ -3,7 +3,8 @@
   globalThis.__cirqueiraxConteudo = true
   const ORIGEM = 'cirqueirax-youtube-music'
   const INTERVALO_MS = 1000
-  const INTERVALO_PROGRESSO_MS = 10000
+  const INTERVALO_PROGRESSO_MS = 5000
+  const SALTO_MINIMO_MS = 3000
   const ESTADOS_TOCANDO = [1, 3]
   const ESTADO_TERMINOU = 0
   const DELTA_MAXIMO_MS = 2500
@@ -27,8 +28,10 @@
 
   window.addEventListener('message', (evento) => {
     if (evento.source !== window || evento.data?.origem !== ORIGEM) return
+    const estadoAnterior = dadosPlayer?.estadoPlayer
     dadosPlayer = evento.data.dados
     dadosPlayerEm = Date.now()
+    if (estadoAnterior !== dadosPlayer?.estadoPlayer) tick()
   })
 
   function dadosPlayerRecentes() {
@@ -97,7 +100,7 @@
     const videoId = lerVideoId()
     const titulo = dadosPlayerRecentes()?.titulo || texto('ytmusic-player-bar .title')
     if (!videoId || !titulo) return null
-    const duracao = duracaoSegundos(video)
+    const duracao = emAnuncio() ? null : duracaoSegundos(video)
     const duracaoMs = duracao ? Math.round(duracao * 1000) : null
     return { videoId, titulo, canal: lerCanal(), urlCapa: lerCapa(), duracaoMs }
   }
@@ -151,6 +154,8 @@
       iniciadoEmMs: reproducao.iniciadoEmMs,
       pulada: pulada ?? null,
       pausada: tipo === 'fim' ? null : !reproducao.tocando,
+      posicaoMs: reproducao.ultimaPosicaoMs,
+      amostradoEmMs: Date.now(),
     }
     chrome.runtime.sendMessage({ tipo: 'evento', evento }).catch(() => undefined)
     reproducao.enviada = true
@@ -196,16 +201,19 @@
     atual.titulo = musica.titulo
     atual.canal = musica.canal || atual.canal
     atual.urlCapa = musica.urlCapa ?? atual.urlCapa
-    atual.duracaoMs = musica.duracaoMs ?? atual.duracaoMs
+    atual.duracaoMs = Math.max(atual.duracaoMs ?? 0, musica.duracaoMs ?? 0) || null
     const mudouEstado = atual.tocando !== tocando
+    const posicaoMs = Math.round(posicaoSegundos(video) * 1000)
+    const esperadaMs = atual.ultimaPosicaoMs + (atual.tocando ? delta : 0)
+    const saltou = atual.enviada && Math.abs(posicaoMs - esperadaMs) > SALTO_MINIMO_MS
     atual.tocando = tocando
     if (tocando) atual.msOuvidos += delta
-    atual.ultimaPosicaoMs = Math.round(posicaoSegundos(video) * 1000)
+    atual.ultimaPosicaoMs = posicaoMs
     if (terminouDeTocar(video)) atual.terminou = true
 
     if (atual.msOuvidos < MS_MINIMO_PARA_REGISTRAR) return
     if (!atual.enviada) return enviar(atual, 'inicio')
-    if (mudouEstado) return enviar(atual, 'progresso')
+    if (mudouEstado || saltou) return enviar(atual, 'progresso')
     if (
       tocando &&
       agora - atual.ultimoEnvioMs >= INTERVALO_PROGRESSO_MS &&

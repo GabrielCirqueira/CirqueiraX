@@ -51,12 +51,16 @@ export function calcularProgressoTocandoYoutube(
   agora: number
 ): ProgressoTocandoYoutube {
   const atualizadoEm = tocando.atualizadoEm ? new Date(tocando.atualizadoEm).getTime() : agora
-  const decorrido = Math.max(0, agora - atualizadoEm)
-  const emReproducao = !tocando.pausada && decorrido <= LIMITE_SEM_EVENTO_TOCANDO_MS
-  const somado = tocando.msOuvidos + (emReproducao ? decorrido : 0)
-  const progressoMs = tocando.duracaoMs ? Math.min(tocando.duracaoMs, somado) : somado
-  const percentual = tocando.duracaoMs ? (progressoMs / tocando.duracaoMs) * 100 : 0
-  return { progressoMs, duracaoMs: tocando.duracaoMs, percentual, emReproducao }
+  const emReproducao =
+    !tocando.pausada && Math.max(0, agora - atualizadoEm) <= LIMITE_SEM_EVENTO_TOCANDO_MS
+  const temPosicao = tocando.posicaoMs !== null && tocando.posicaoEm !== null
+  const base = temPosicao ? (tocando.posicaoMs ?? 0) : tocando.msOuvidos
+  const lidoEm = temPosicao ? new Date(tocando.posicaoEm ?? '').getTime() : atualizadoEm
+  const somado = base + (emReproducao ? Math.max(0, agora - lidoEm) : 0)
+  const duracaoMs = tocando.duracaoMs && tocando.duracaoMs >= base ? tocando.duracaoMs : null
+  const progressoMs = duracaoMs ? Math.min(duracaoMs, somado) : somado
+  const percentual = duracaoMs ? (progressoMs / duracaoMs) * 100 : 0
+  return { progressoMs, duracaoMs, percentual, emReproducao }
 }
 
 export function urlVideoYoutubeMusic(videoId: string): string | null {

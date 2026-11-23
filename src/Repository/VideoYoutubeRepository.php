@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\ReproducaoYoutube;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
 use App\Enum\OrigemClassificacao;
@@ -153,9 +154,11 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
     {
         /** @var list<VideoYoutube> $videos */
         $videos = $this->createQueryBuilder('e')
+            ->addSelect(sprintf('(SELECT MAX(r.tocadaEm) FROM %s r WHERE r.video = e) AS HIDDEN ultimaReproducao', ReproducaoYoutube::class))
             ->andWhere('e.status = :status')
             ->setParameter('status', StatusClassificacaoVideo::Pendente)
-            ->orderBy('e.criadoEm', 'ASC')
+            ->orderBy('ultimaReproducao', 'DESC')
+            ->addOrderBy('e.criadoEm', 'DESC')
             ->andWhere('e.aguardandoImportacao = false')
             ->setMaxResults($limite)
             ->getQuery()

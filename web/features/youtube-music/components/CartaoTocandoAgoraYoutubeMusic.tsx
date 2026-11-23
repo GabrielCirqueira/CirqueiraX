@@ -1,7 +1,7 @@
 import { CapaMusica } from '@/features/musica/components/CapaMusica'
 import { IconeFonteMusica } from '@/features/musica/components/IconeFonteMusica'
-import { BotaoHistoricoRecente } from '@/features/musica/components/ModalHistoricoRecente'
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
+import { BotaoHistoricoRecente } from '@/features/musica/components/ModalHistoricoRecente'
 import {
   formatarDataExtensa,
   formatarDuracaoMs,
@@ -193,9 +193,7 @@ export const CartaoTocandoAgoraYoutubeMusic = memo(function CartaoTocandoAgoraYo
                 corDestaque="cirqueira.musica.fonteYoutubeMusic"
                 rotuloExterno="Abrir no YouTube Music"
                 excluirVideoId={tocando.videoId}
-                buscar={({ excluirVideoId }) =>
-                  listarHistoricoRecenteYoutube({ excluirVideoId })
-                }
+                buscar={({ excluirVideoId }) => listarHistoricoRecenteYoutube({ excluirVideoId })}
               />
               {urlYoutube && (
                 <Button

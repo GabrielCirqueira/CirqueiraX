@@ -96,6 +96,8 @@ final class ContaYoutubeMusicSerializer
             'duracaoMs' => $video->duracaoMs(),
             'atualizadoEm' => $tocando->extensaoAtualizadaEm()?->format(DateTimeInterface::ATOM),
             'pausada' => $tocando->isExtensaoPausada(),
+            'posicaoMs' => $tocando->extensaoPosicaoMs(),
+            'posicaoEm' => $tocando->extensaoPosicaoEm()?->format(DateTimeInterface::ATOM),
             'vezesOuvida' => $extensao->vezesOuvidaTocando,
             'primeiraVezEm' => $extensao->primeiraVezTocandoEm?->format(DateTimeInterface::ATOM),
         ];

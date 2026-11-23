@@ -11,6 +11,7 @@ final readonly class EventoExtensaoYoutubeDTO
 {
     public const int MAXIMO_MS = 86400000;
     public const int MAXIMO_SEGUNDOS_DESDE_INICIO = 604800;
+    public const int MAXIMO_MS_DESDE_AMOSTRA = 3600000;
 
     public function __construct(
         #[Assert\NotBlank]
@@ -38,6 +39,10 @@ final readonly class EventoExtensaoYoutubeDTO
         public int $segundosDesdeInicio = 0,
         public ?bool $pulada = null,
         public ?bool $pausada = null,
+        #[Assert\Range(min: 0, max: self::MAXIMO_MS)]
+        public ?int $posicaoMs = null,
+        #[Assert\Range(min: 0, max: self::MAXIMO_MS_DESDE_AMOSTRA)]
+        public ?int $msDesdeAmostra = null,
     ) {
     }
 
