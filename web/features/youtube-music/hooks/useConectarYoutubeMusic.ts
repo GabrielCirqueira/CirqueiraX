@@ -10,7 +10,7 @@ export function useConectarYoutubeMusic() {
   return useMutation({
     mutationFn: (cabecalhos: string) => conectarYoutubeMusic(cabecalhos),
     onSuccess: (status) => {
-      queryClient.setQueryData(YOUTUBE_MUSIC_QUERY_KEYS.status, status)
+      queryClient.setQueriesData({ queryKey: YOUTUBE_MUSIC_QUERY_KEYS.status }, status)
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       addToast({
         title: 'YouTube Music conectado',

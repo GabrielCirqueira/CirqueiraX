@@ -45,3 +45,17 @@
 - **Arquivos**: `extensao/youtube-music/pagina.js`, `extensao/youtube-music/conteudo.js`, `extensao/youtube-music/fundo.js`, `extensao/youtube-music/manifest.json`, `src/Service/YoutubeMusic/Extensao/RegistrarEventosExtensaoYoutubeService.php`, `src/DataObject/YoutubeMusic/EventoExtensaoYoutubeDTO.php`, `src/Entity/ReproducaoYoutube.php`, `src/Entity/VideoYoutube.php`, `src/Repository/VideoYoutubeRepository.php`, `src/Serializer/ContaYoutubeMusicSerializer.php`, `migrations/Version20261123090000.php`, `web/features/youtube-music/types.ts`, `web/features/youtube-music/utils/extensaoYoutubeMusic.ts`, `web/features/youtube-music/hooks/useStatusYoutubeMusic.ts`, `Makefile`
 
 ---
+
+### ✅ Melhoria 204 — YouTube Music Instantâneo no Painel
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Problema**: ao trocar de música no YouTube Music o painel levava ~10 s para mudar; ao voltar para a aba do CirqueiraX depois de várias músicas, aparecia a última música vista antes de sair, marcada como "Pausado".
+- **Causa**: o painel só sabia da música pela consulta ao servidor (a cada 10 s, e parada com a aba em segundo plano); ao voltar, mostrava o dado antigo, que sem evento recente virava "Pausado".
+- **Solução**:
+  - Extensão 1.6.0 manda o estado do player direto para as abas abertas do CirqueiraX (troca de música, pausa e avanço na hora; posição a cada 2 s), sem passar pelo servidor.
+  - A página pede o estado atual à extensão ao abrir, e o painel junta esse estado com o do servidor (capa, artistas e identificação vêm do servidor quando o vídeo bate).
+  - Consulta de status refeita ao voltar para a aba; quando a extensão já mostra outro vídeo, o painel consulta a cada 2 s até o servidor alcançar.
+- **Arquivos**: `extensao/youtube-music/conteudo.js`, `extensao/youtube-music/fundo.js`, `extensao/youtube-music/ponte.js`, `extensao/youtube-music/manifest.json`, `web/features/youtube-music/utils/tempoRealExtensao.ts`, `web/features/youtube-music/hooks/useTocandoAgoraTempoReal.ts`, `web/features/youtube-music/hooks/useStatusYoutubeMusic.ts`, `web/features/youtube-music/hooks/useConectarYoutubeMusic.ts`, `web/features/youtube-music/components/UltimaDetectadaYoutubeMusic.tsx`
+
+---

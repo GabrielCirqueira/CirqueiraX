@@ -5,6 +5,8 @@
   const INTERVALO_MS = 1000
   const INTERVALO_PROGRESSO_MS = 5000
   const SALTO_MINIMO_MS = 3000
+  const INTERVALO_TEMPO_REAL_MS = 2000
+  const INTERVALO_TEMPO_REAL_PARADO_MS = 10000
   const ESTADOS_TOCANDO = [1, 3]
   const ESTADO_TERMINOU = 0
   const DELTA_MAXIMO_MS = 2500
@@ -25,6 +27,7 @@
   let atual = null
   let ultimoTick = Date.now()
   let ultimaPresenca = 0
+  let ultimoAgora = { chave: '', em: 0 }
 
   window.addEventListener('message', (evento) => {
     if (evento.source !== window || evento.data?.origem !== ORIGEM) return
@@ -176,15 +179,43 @@
       .catch(() => undefined)
   }
 
+  function publicarAgora(reproducao, forcar) {
+    if (!chrome.runtime?.id) return
+    const agora = Date.now()
+    const chave = reproducao ? `${reproducao.videoId}|${reproducao.tocando}` : 'parada'
+    const intervalo = reproducao?.tocando ? INTERVALO_TEMPO_REAL_MS : INTERVALO_TEMPO_REAL_PARADO_MS
+    if (!forcar && chave === ultimoAgora.chave && agora - ultimoAgora.em < intervalo) return
+    ultimoAgora = { chave, em: agora }
+    const estado = reproducao
+      ? {
+          videoId: reproducao.videoId,
+          titulo: reproducao.titulo,
+          canal: reproducao.canal,
+          urlCapa: reproducao.urlCapa,
+          duracaoMs: reproducao.duracaoMs,
+          posicaoMs: reproducao.ultimaPosicaoMs,
+          tocando: reproducao.tocando,
+          lidoEmMs: agora,
+        }
+      : null
+    chrome.runtime.sendMessage({ tipo: 'agora', estado }).catch(() => undefined)
+  }
+
   function tick() {
     const agora = Date.now()
     const delta = Math.min(Math.max(0, agora - ultimoTick), DELTA_MAXIMO_MS)
     ultimoTick = agora
     const video = lerVideo()
-    if (!video) return registrarPresenca(agora, 'parada', '')
+    if (!video) {
+      publicarAgora(null, false)
+      return registrarPresenca(agora, 'parada', '')
+    }
     if (emAnuncio()) return registrarPresenca(agora, 'anuncio', '')
     const musica = lerMusica(video)
-    if (!musica) return registrarPresenca(agora, 'parada', '')
+    if (!musica) {
+      publicarAgora(null, false)
+      return registrarPresenca(agora, 'parada', '')
+    }
     const tocando = estaTocando(video)
     registrarPresenca(agora, tocando ? 'tocando' : 'pausada', musica.titulo)
 
@@ -210,6 +241,7 @@
     if (tocando) atual.msOuvidos += delta
     atual.ultimaPosicaoMs = posicaoMs
     if (terminouDeTocar(video)) atual.terminou = true
+    publicarAgora(atual, mudouEstado || saltou)
 
     if (atual.msOuvidos < MS_MINIMO_PARA_REGISTRAR) return
     if (!atual.enviada) return enviar(atual, 'inicio')

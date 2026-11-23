@@ -3,14 +3,16 @@ import { useRelogioSpotify } from '@/features/spotify/hooks'
 import { HStack, Text } from '@chakra-ui/react'
 import { memo } from 'react'
 import { useStatusYoutubeMusic } from '../hooks/useStatusYoutubeMusic'
-import { descreverDeteccaoAproximada } from '../utils'
+import { useTocandoAgoraTempoReal } from '../hooks/useTocandoAgoraTempoReal'
+import { descreverDeteccaoAproximada, mesclarTocandoAgora } from '../utils'
 import { CartaoTocandoAgoraYoutubeMusic } from './CartaoTocandoAgoraYoutubeMusic'
 
 export const UltimaDetectadaYoutubeMusic = memo(function UltimaDetectadaYoutubeMusic() {
   const { data } = useStatusYoutubeMusic()
+  const tempoReal = useTocandoAgoraTempoReal()
   const agora = useRelogioSpotify()
   const ultima = data?.ultimaDetectada
-  const tocando = data?.extensao?.tocandoAgora
+  const tocando = mesclarTocandoAgora(data?.extensao?.tocandoAgora, tempoReal, agora)
 
   if (tocando) {
     return <CartaoTocandoAgoraYoutubeMusic tocando={tocando} />

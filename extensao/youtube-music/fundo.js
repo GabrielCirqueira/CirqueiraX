@@ -4,6 +4,7 @@ const CHAVE_FILA = 'fila'
 const CHAVE_TOKEN = 'token'
 const CHAVE_ESTADO = 'estado'
 const ALARME_ENVIO = 'enviar-fila'
+const CHAVE_AGORA = 'agora'
 const MINUTOS_ENTRE_ENVIOS = 1
 const MAXIMO_POR_ENVIO = 50
 const STATUS_TOKEN_INVALIDO = 401
@@ -67,6 +68,15 @@ chrome.runtime.onMessage.addListener((mensagem, remetente, responder) => {
     enfileirar(mensagem.evento).then(() => enviarFila(false))
     return false
   }
+  if (mensagem?.tipo === 'agora') {
+    repassarAgora(mensagem.estado ?? null)
+    return false
+  }
+  if (mensagem?.tipo === 'estado-agora') {
+    if (!veioDoSistema(remetente)) return false
+    lerAgora().then(responder)
+    return true
+  }
   if (mensagem?.tipo === 'tocar') {
     tocarVideo(mensagem.videoId, remetente).then(responder)
     return true
@@ -77,6 +87,21 @@ chrome.runtime.onMessage.addListener((mensagem, remetente, responder) => {
   }
   return false
 })
+
+async function repassarAgora(estado) {
+  await chrome.storage.session
+    ?.set({ [CHAVE_AGORA]: { estado, enviadoEmMs: Date.now() } })
+    .catch(() => undefined)
+  const abas = await chrome.tabs.query({ url: `${URL_SISTEMA}/*` }).catch(() => [])
+  for (const aba of abas) {
+    chrome.tabs.sendMessage(aba.id, { tipo: 'agora', estado }).catch(() => undefined)
+  }
+}
+
+async function lerAgora() {
+  const dados = await chrome.storage.session?.get(CHAVE_AGORA).catch(() => null)
+  return dados?.[CHAVE_AGORA] ?? null
+}
 
 function veioDoSistema(remetente) {
   return typeof remetente?.url === 'string' && remetente.url.startsWith(`${URL_SISTEMA}/`)

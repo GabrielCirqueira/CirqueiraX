@@ -377,3 +377,8 @@ Ambiente isolado (MySQL e app temporários): geração e limite de 5 tokens, nom
 - Duração só é lida fora de anúncio (estado do player + overlay visível); o servidor aceita duração maior que a guardada enquanto a API do YouTube não trouxe a oficial.
 - Primeira reprodução de um vídeo pendente dispara a identificação na hora; a rodada de cada minuto pega primeiro os pendentes tocados mais recentemente.
 - Comandos de console em produção devem rodar como `www-data` (`docker exec -u www-data …`); rodar como root deixa o cache sem permissão e para o scheduler.
+
+## Extensão 1.6.0 — tempo real direto no painel (M204)
+
+- `conteudo.js` publica `{ tipo: 'agora', estado }` (vídeo, título, posição, tocando, lido em) na troca de música/pausa/avanço e a cada 2 s tocando; `fundo.js` guarda em `chrome.storage.session` e repassa às abas do sistema; `ponte.js` entrega à página como `tocando-agora` e responde `estado-agora` ao abrir.
+- O painel usa esse estado por até 15 s (`utils/tempoRealExtensao.ts`) e mescla com `tocandoAgora` do servidor; sem extensão na aba, continua só com o servidor.
