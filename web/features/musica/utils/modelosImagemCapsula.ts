@@ -1,5 +1,13 @@
 import {
-  ALTURA_RODAPE,
+  ALTURA_GRANDE,
+  ALTURA_MEDIA,
+  desenharCodigoBarras,
+  larguraUtil,
+  limiteInferior,
+  numero,
+  plural,
+} from './apoioModelosCapsula'
+import {
   type DadosDesenhoCapsula,
   FONTE_MONO,
   MARGEM_IMAGEM,
@@ -12,34 +20,17 @@ import {
   retanguloArredondado,
 } from './desenhoCapsula'
 import { formatarMinutos } from './formatadoresMusica'
+import { DESENHOS_MODELOS_EXTRAS } from './modelosExtrasImagemCapsula'
 import type { IdModeloImagemCapsula } from './temasImagemCapsula'
 
 const MAXIMO_LISTA = 5
 const MAXIMO_GRADE = 9
 const MAXIMO_GRADE_COMPACTA = 10
-const ALTURA_GRANDE = 1800
-const ALTURA_MEDIA = 1300
 const TOPO_RECIBO = 100
 const ALTURA_FIXA_RECIBO = 750
 const ALTURA_CODIGO_RECIBO = 150
 
 type DesenharModelo = (prancheta: Prancheta, dados: DadosDesenhoCapsula) => void
-
-function numero(valor: number): string {
-  return valor.toLocaleString('pt-BR')
-}
-
-function plural(valor: number, singular: string, pluralTexto: string): string {
-  return `${numero(valor)} ${valor === 1 ? singular : pluralTexto}`
-}
-
-function limiteInferior(prancheta: Prancheta): number {
-  return prancheta.altura - ALTURA_RODAPE - 20
-}
-
-function larguraUtil(prancheta: Prancheta): number {
-  return prancheta.largura - MARGEM_IMAGEM * 2
-}
 
 function desenharClassico(prancheta: Prancheta, dados: DadosDesenhoCapsula) {
   const { tema, altura } = prancheta
@@ -391,26 +382,6 @@ function desenharPodio(prancheta: Prancheta, dados: DadosDesenhoCapsula) {
   )
 }
 
-function desenharCodigoBarras(
-  prancheta: Prancheta,
-  semente: string,
-  x: number,
-  y: number,
-  largura: number
-) {
-  const { contexto, tema } = prancheta
-  contexto.fillStyle = tema.texto
-  let posicao = x
-  let indice = 0
-  while (posicao < x + largura) {
-    const codigo = semente.charCodeAt(indice % semente.length) + indice
-    const espessura = 2 + (codigo % 4) * 2
-    if (indice % 2 === 0) contexto.fillRect(posicao, y, espessura, 90)
-    posicao += espessura + 2
-    indice += 1
-  }
-}
-
 function desenharRecibo(prancheta: Prancheta, dados: DadosDesenhoCapsula) {
   const { tema, largura } = prancheta
   const { capsula } = dados
@@ -543,4 +514,5 @@ export const DESENHOS_MODELOS: Record<IdModeloImagemCapsula, DesenharModelo> = {
   grade: desenharGrade,
   podio: desenharPodio,
   recibo: desenharRecibo,
+  ...DESENHOS_MODELOS_EXTRAS,
 }

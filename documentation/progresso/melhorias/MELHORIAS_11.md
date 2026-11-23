@@ -133,3 +133,20 @@
 - **Arquivos**: `web/features/musica/components/ModalImagemCapsula.tsx`, `web/features/musica/utils/temasImagemCapsula.ts`, `web/features/musica/utils/desenhoCapsula.ts`, `web/features/musica/utils/imagemCapsula.ts`, `web/features/musica/utils/modelosImagemCapsula.ts`, `documentation/funcionalidades/MUSICA.md`
 
 ---
+
+### ✅ Melhoria 210 — Música: Novos Modelos de Imagem da Cápsula
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Pedido**: mais modelos na personalização da imagem da Cápsula.
+- **Solução**: 6 modelos novos, todos adaptados a retrato e paisagem e respeitando tema, fundo, tipografia, título e cantos:
+  - **Gráfico:** minutos de cada dia do mês em barras, com o dia de pico em destaque, média por dia e o que mais tocou.
+  - **Números:** painel com minutos, streams, músicas diferentes, dias ouvindo, média por dia e dia mais ouvido, mais artista e música do mês.
+  - **Vinil:** disco saindo da capa da música do mês e o "Lado A" com as seguintes.
+  - **Revista:** título como nome da revista, capa e manchetes (artista do mês, minutos, música e álbum do mês).
+  - **Ingresso:** o artista do mês como atração principal, os outros como convidados, dados do mês e canhoto com código de barras.
+  - **Player:** tela de "tocando agora" com a música do mês, barra de progresso, controles e a fila a seguir.
+  - Utilitários comuns dos modelos foram para `apoioModelosCapsula.ts`.
+- **Arquivos**: `web/features/musica/utils/modelosExtrasImagemCapsula.ts`, `web/features/musica/utils/apoioModelosCapsula.ts`, `web/features/musica/utils/modelosImagemCapsula.ts`, `web/features/musica/utils/temasImagemCapsula.ts`, `documentation/funcionalidades/MUSICA.md`
+
+---

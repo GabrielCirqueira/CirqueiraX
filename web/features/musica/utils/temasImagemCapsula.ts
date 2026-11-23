@@ -27,7 +27,18 @@ export type IdFormatoImagemCapsula =
   | 'paisagem'
   | 'papel_parede'
 
-export type IdModeloImagemCapsula = 'classico' | 'poster' | 'grade' | 'recibo' | 'podio'
+export type IdModeloImagemCapsula =
+  | 'classico'
+  | 'poster'
+  | 'grade'
+  | 'recibo'
+  | 'podio'
+  | 'grafico'
+  | 'numeros'
+  | 'vinil'
+  | 'revista'
+  | 'ingresso'
+  | 'player'
 
 export interface TemaImagemCapsula {
   id: IdTemaImagemCapsula
@@ -419,6 +430,12 @@ export const MODELOS_IMAGEM_CAPSULA: ModeloImagemCapsula[] = [
   { id: 'grade', nome: 'Grade', descricao: 'Mosaico com as capas mais ouvidas' },
   { id: 'podio', nome: 'Pódio', descricao: 'Top 3 artistas e músicas em destaque' },
   { id: 'recibo', nome: 'Recibo', descricao: 'Cupom fiscal do que você ouviu' },
+  { id: 'grafico', nome: 'Gráfico', descricao: 'Minutos de cada dia do mês em barras' },
+  { id: 'numeros', nome: 'Números', descricao: 'Painel com as estatísticas do mês' },
+  { id: 'vinil', nome: 'Vinil', descricao: 'Disco saindo da capa e o lado A' },
+  { id: 'revista', nome: 'Revista', descricao: 'Capa de revista com manchetes' },
+  { id: 'ingresso', nome: 'Ingresso', descricao: 'Ingresso de show do artista do mês' },
+  { id: 'player', nome: 'Player', descricao: 'Tocando agora com a fila a seguir' },
 ]
 
 export const FONTES_IMAGEM_CAPSULA: OpcaoFonteImagemCapsula[] = [
