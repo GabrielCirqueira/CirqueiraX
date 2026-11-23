@@ -16,6 +16,7 @@ import {
   CalendarDays,
   Disc3,
   Infinity as IconeInfinito,
+  ListOrdered,
   Music2,
   SlidersHorizontal,
   Users,
@@ -39,6 +40,7 @@ import {
 } from '../utils'
 import { ItemRankingAlbum, ItemRankingArtistaLinha, ItemRankingFaixa } from './ItensRankingMusica'
 import { MinutosMusica } from './MinutosMusica'
+import { ModalTop50Musica } from './ModalTop50Musica'
 import { TabelaRankingMusica } from './TabelaRankingMusica'
 
 export interface SecaoHojeSemanaProps {
@@ -49,7 +51,7 @@ export interface SecaoHojeSemanaProps {
   modo?: 'visao' | 'rankings'
 }
 
-type TipoFiltroSecao = 'dias' | 'mes' | 'ano' | 'todos' | 'personalizado'
+type TipoFiltroSecao = 'dias' | 'ontem' | 'mes' | 'ano' | 'todos' | 'personalizado'
 
 type AbaRanking = 'musicas' | 'artistas' | 'albuns'
 
@@ -61,13 +63,24 @@ const TITULOS_ABA: Record<AbaRanking, string> = {
 
 const SEM_ALBUNS: AlbumAnalise[] = []
 
-const OPCOES_DIAS = [
-  { rotulo: 'Hoje', dias: 1 },
-  { rotulo: '7 dias', dias: 7 },
-  { rotulo: '14 dias', dias: 14 },
-  { rotulo: '30 dias', dias: 30 },
-  { rotulo: '90 dias', dias: 90 },
+const ROTULO_ONTEM = 'Ontem'
+
+const OPCOES_DIAS: { rotulo: string; tipo: 'dias' | 'ontem'; dias: number }[] = [
+  { rotulo: 'Hoje', tipo: 'dias', dias: 1 },
+  { rotulo: ROTULO_ONTEM, tipo: 'ontem', dias: 1 },
+  { rotulo: '7 dias', tipo: 'dias', dias: 7 },
+  { rotulo: '14 dias', tipo: 'dias', dias: 14 },
+  { rotulo: '30 dias', tipo: 'dias', dias: 30 },
+  { rotulo: '90 dias', tipo: 'dias', dias: 90 },
 ]
+
+function dataLocalDeslocada(dias: number): string {
+  const data = new Date()
+  data.setDate(data.getDate() + dias)
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+  return `${data.getFullYear()}-${mes}-${dia}`
+}
 
 const NOMES_MESES = [
   { valor: 1, rotulo: 'Janeiro' },
@@ -91,7 +104,8 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
   modo = 'visao',
 }: SecaoHojeSemanaProps) {
   const [tipoFiltro, setTipoFiltro] = useState<TipoFiltroSecao>('dias')
-  const [diasSelecionados, setDiasSelecionados] = useState<number>(7)
+  const [diasSelecionados, setDiasSelecionados] = useState<number>(1)
+  const [top50Aberto, setTop50Aberto] = useState(false)
   const [anoSelecionado, setAnoSelecionado] = useState<number>(() => new Date().getFullYear())
   const [mesSelecionado, setMesSelecionado] = useState<number>(() => new Date().getMonth() + 1)
   const [dataInicioPersonalizada, setDataInicioPersonalizada] = useState<string>(() => {
@@ -122,6 +136,10 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
   const paramsRanking = useMemo<FiltroIntervaloRankingParams>(() => {
     if (tipoFiltro === 'dias') {
       return { tipo: 'dias', dias: diasSelecionados, limite: 50 }
+    }
+    if (tipoFiltro === 'ontem') {
+      const ontem = dataLocalDeslocada(-1)
+      return { tipo: 'personalizado', inicio: ontem, fim: ontem, limite: 50 }
     }
     if (tipoFiltro === 'mes') {
       return { tipo: 'mes', ano: anoSelecionado, mes: mesSelecionado, limite: 50 }
@@ -246,6 +264,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
   const topArtistasExibidos = topArtistas.slice(0, 5)
 
   const rotuloAtivo =
+    (tipoFiltro === 'ontem' ? ROTULO_ONTEM : null) ??
     dadosAtivos?.rotuloPeriodo ??
     (tipoFiltro === 'dias'
       ? (OPCOES_DIAS.find((o) => o.dias === diasSelecionados)?.rotulo ?? 'Período')
@@ -312,7 +331,9 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               minW="min-content"
             >
               {OPCOES_DIAS.map((opcao) => {
-                const ativo = tipoFiltro === 'dias' && diasSelecionados === opcao.dias
+                const ativo =
+                  tipoFiltro === opcao.tipo &&
+                  (opcao.tipo === 'ontem' || diasSelecionados === opcao.dias)
                 return (
                   <Button
                     key={opcao.rotulo}
@@ -328,7 +349,7 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
                     }
                     _hover={{ color: 'cirqueira.musica.textoPrincipal' }}
                     onClick={() => {
-                      setTipoFiltro('dias')
+                      setTipoFiltro(opcao.tipo)
                       setDiasSelecionados(opcao.dias)
                     }}
                     flexShrink={0}
@@ -691,6 +712,22 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
               </Text>
             </VStack>
 
+            {modo === 'visao' ? (
+              <Button
+                size="xs"
+                borderRadius="full"
+                variant="outline"
+                borderColor="cirqueira.musica.cartaoElevado"
+                color="cirqueira.musica.textoPrincipal"
+                fontSize="2xs"
+                fontWeight="semibold"
+                onClick={() => setTop50Aberto(true)}
+              >
+                <ListOrdered size={12} />
+                Top 50
+              </Button>
+            ) : null}
+
             <HStack
               gap={1}
               bg="cirqueira.musica.cartaoElevado"
@@ -837,6 +874,15 @@ export const SecaoHojeSemana = memo(function SecaoHojeSemana({
           )}
         </VStack>
       </Box>
+
+      {top50Aberto ? (
+        <ModalTop50Musica
+          periodo={periodoMusicasItem}
+          rotuloPeriodo={rotuloAtivo}
+          abaInicial={aba}
+          onFechar={() => setTop50Aberto(false)}
+        />
+      ) : null}
     </VStack>
   )
 })

@@ -33,7 +33,14 @@ export const AbasConteudoMusica = memo(function AbasConteudoMusica({
 
   return (
     <>
-      {aba === 'visao' ? <AbaVisaoGeral habilitado={habilitado} /> : null}
+      {aba === 'visao' ? (
+        <AbaVisaoGeral
+          habilitado={habilitado}
+          resumo={resumo}
+          mapaImagensResumo={mapaImagensResumo}
+          carregandoResumo={carregandoResumo}
+        />
+      ) : null}
 
       {aba === 'rankings' ? (
         <SecaoHojeSemana

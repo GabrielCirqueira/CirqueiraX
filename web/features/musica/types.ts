@@ -264,7 +264,7 @@ export const ItemTopMusicaArtistaSchema = z.object({
 
 export type ItemTopMusicaArtista = z.infer<typeof ItemTopMusicaArtistaSchema>
 
-export const TipoPeriodoAnaliseSchema = z.enum(['todos', 'ano', 'mes', 'dias', 'intervalo'])
+export const TipoPeriodoAnaliseSchema = z.enum(['todos', 'ano', 'mes', 'dias', 'intervalo', 'ontem'])
 
 export type TipoPeriodoAnalise = z.infer<typeof TipoPeriodoAnaliseSchema>
 

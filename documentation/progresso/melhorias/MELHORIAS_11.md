@@ -59,3 +59,17 @@
 - **Arquivos**: `extensao/youtube-music/conteudo.js`, `extensao/youtube-music/fundo.js`, `extensao/youtube-music/ponte.js`, `extensao/youtube-music/manifest.json`, `web/features/youtube-music/utils/tempoRealExtensao.ts`, `web/features/youtube-music/hooks/useTocandoAgoraTempoReal.ts`, `web/features/youtube-music/hooks/useStatusYoutubeMusic.ts`, `web/features/youtube-music/hooks/useConectarYoutubeMusic.ts`, `web/features/youtube-music/components/UltimaDetectadaYoutubeMusic.tsx`
 
 ---
+
+### ✅ Melhoria 205 — Visão Geral com Ranking de Hoje, Filtro Ontem e Top 50 na Cápsula
+
+- **Status**: Concluído
+- **Data**: 23 de novembro de 2026
+- **Pedido**: ao entrar em `/musica`, ver logo o card das músicas ouvidas no período começando em "Hoje" (antes abria em 7 dias), poder abrir a lista das 50 mais ouvidas num popup, ter o filtro rápido "Ontem" e ver o top 50 do mês nos cards de top artistas, músicas e álbuns da Cápsula Sonora.
+- **Solução**:
+  - Card de ranking por período (`SecaoHojeSemana`) no topo da Visão geral, abrindo em "Hoje"; a aba Rankings também passa a abrir em "Hoje".
+  - Botão **Top 50** no card abre `ModalTop50Musica`: a mesma tabela da aba Rankings (busca, ordenação, serviço), com abas Músicas / Artistas / Álbuns.
+  - Filtro **Ontem** no card (intervalo personalizado do dia anterior) e no seletor da Visão geral (`periodo=ontem` → `PeriodoAnaliseSpotifyDTO::ontem()`); Visão geral também abre em "Hoje".
+  - Cápsula Sonora: "Ver top 50" em cada um dos 3 cards, abrindo o mesmo modal com o ranking do mês da cápsula (mês UTC, regra do Spotify).
+- **Arquivos**: `web/features/musica/components/ModalTop50Musica.tsx`, `web/features/musica/components/SecaoHojeSemana.tsx`, `web/features/musica/components/AbaVisaoGeral.tsx`, `web/features/musica/components/AbasConteudoMusica.tsx`, `web/features/musica/components/TopsMesCapsula.tsx`, `web/features/musica/utils/blocosMusica.ts`, `web/features/musica/typesBlocos.ts`, `web/features/musica/types.ts`, `src/Enum/TipoPeriodoAnaliseSpotify.php`, `src/DataObject/Spotify/Analise/PeriodoAnaliseSpotifyDTO.php`
+
+---

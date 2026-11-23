@@ -1,6 +1,6 @@
-import { HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { Disc3, Mic2, Music2 } from 'lucide-react'
-import { type ReactNode, memo } from 'react'
+import { Button, HStack, Link, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Disc3, ListOrdered, Mic2, Music2 } from 'lucide-react'
+import { type ReactNode, memo, useState } from 'react'
 import { useImagensItensMusica } from '../hooks/useImagensItensMusica'
 import type { CapsulaMensal, PorFonte, RespostaConsultaImagens } from '../types'
 import {
@@ -14,6 +14,7 @@ import { CapaMusica } from './CapaMusica'
 import { DivisaoFontesMusica } from './DivisaoFontesMusica'
 import { LinkMusica } from './LinkMusica'
 import { MinutosMusica } from './MinutosMusica'
+import { type AbaTop50Musica, ModalTop50Musica } from './ModalTop50Musica'
 
 const LIMITE_ITENS_TOPO = 5
 
@@ -27,6 +28,7 @@ export const TopsMesCapsula = memo(function TopsMesCapsula({
   mapaImagens,
 }: TopsMesCapsulaProps) {
   const imagemAlbum = useImagensItensMusica(capsula.topAlbuns)
+  const [top50Aberto, setTop50Aberto] = useState<AbaTop50Musica | null>(null)
 
   return (
     <SimpleGrid columns={{ base: 1, lg: 3 }} gap={4}>
@@ -34,6 +36,7 @@ export const TopsMesCapsula = memo(function TopsMesCapsula({
         titulo="Top artistas do mês"
         icone={<Mic2 size={14} />}
         cor="cirqueira.musica.azul"
+        onVerTop50={() => setTop50Aberto('artistas')}
       >
         {capsula.topArtistas.slice(0, LIMITE_ITENS_TOPO).map((artista) => (
           <ItemTopoCapsula
@@ -62,6 +65,7 @@ export const TopsMesCapsula = memo(function TopsMesCapsula({
 
       <ListaTopoCapsula
         titulo="Top músicas do mês"
+        onVerTop50={() => setTop50Aberto('musicas')}
         icone={<Music2 size={14} />}
         cor="cirqueira.musica.verde"
       >
@@ -95,6 +99,7 @@ export const TopsMesCapsula = memo(function TopsMesCapsula({
         titulo="Top álbuns do mês"
         icone={<Disc3 size={14} />}
         cor="cirqueira.musica.amarelo"
+        onVerTop50={() => setTop50Aberto('albuns')}
       >
         {capsula.topAlbuns.slice(0, LIMITE_ITENS_TOPO).map((album, indice) => (
           <ItemTopoCapsula
@@ -111,6 +116,15 @@ export const TopsMesCapsula = memo(function TopsMesCapsula({
           />
         ))}
       </ListaTopoCapsula>
+
+      {top50Aberto ? (
+        <ModalTop50Musica
+          periodo={{ tipo: 'mes', ano: capsula.ano, mes: capsula.mes }}
+          rotuloPeriodo={capsula.rotulo}
+          abaInicial={top50Aberto}
+          onFechar={() => setTop50Aberto(null)}
+        />
+      ) : null}
     </SimpleGrid>
   )
 })
@@ -119,10 +133,11 @@ interface ListaTopoCapsulaProps {
   titulo: string
   icone: ReactNode
   cor: string
+  onVerTop50: () => void
   children: ReactNode
 }
 
-function ListaTopoCapsula({ titulo, icone, cor, children }: ListaTopoCapsulaProps) {
+function ListaTopoCapsula({ titulo, icone, cor, onVerTop50, children }: ListaTopoCapsulaProps) {
   return (
     <VStack
       align="stretch"
@@ -143,6 +158,20 @@ function ListaTopoCapsula({ titulo, icone, cor, children }: ListaTopoCapsulaProp
         </Text>
       </HStack>
       {children}
+      <Button
+        size="xs"
+        variant="ghost"
+        borderRadius="full"
+        alignSelf="flex-start"
+        color={cor}
+        fontSize="2xs"
+        fontWeight="semibold"
+        mt={1}
+        onClick={onVerTop50}
+      >
+        <ListOrdered size={12} />
+        Ver top 50
+      </Button>
     </VStack>
   )
 }

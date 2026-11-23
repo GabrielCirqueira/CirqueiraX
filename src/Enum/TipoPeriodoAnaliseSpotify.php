@@ -11,6 +11,7 @@ enum TipoPeriodoAnaliseSpotify: string
     case Mes = 'mes';
     case Dias = 'dias';
     case Intervalo = 'intervalo';
+    case Ontem = 'ontem';
 
     public function isTodos(): bool
     {

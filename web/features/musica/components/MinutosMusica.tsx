@@ -24,11 +24,7 @@ export const TooltipMusica = memo(function TooltipMusica({
   if (desativado) return <>{children}</>
 
   return (
-    <Tooltip.Root
-      openDelay={openDelay}
-      closeDelay={closeDelay}
-      positioning={{ placement }}
-    >
+    <Tooltip.Root openDelay={openDelay} closeDelay={closeDelay} positioning={{ placement }}>
       <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
       <Portal>
         <Tooltip.Positioner>

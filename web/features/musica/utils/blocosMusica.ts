@@ -23,6 +23,7 @@ export interface OpcaoPeriodoBloco {
 export function criarOpcoesPeriodoVisao(anoAtual: number): OpcaoPeriodoBloco[] {
   return [
     { chave: 'hoje', rotulo: 'Hoje', filtro: { periodo: 'dias', dias: 1 } },
+    { chave: 'ontem', rotulo: 'Ontem', filtro: { periodo: 'ontem' } },
     { chave: '7d', rotulo: '7 dias', filtro: { periodo: 'dias', dias: 7 } },
     { chave: '30d', rotulo: '30 dias', filtro: { periodo: 'dias', dias: 30 } },
     { chave: '90d', rotulo: '90 dias', filtro: { periodo: 'dias', dias: 90 } },
@@ -32,7 +33,9 @@ export function criarOpcoesPeriodoVisao(anoAtual: number): OpcaoPeriodoBloco[] {
 }
 
 export function criarOpcoesPeriodoBlocos(anoAtual: number): OpcaoPeriodoBloco[] {
-  return criarOpcoesPeriodoVisao(anoAtual).filter((opcao) => opcao.chave !== 'hoje')
+  return criarOpcoesPeriodoVisao(anoAtual).filter(
+    (opcao) => opcao.chave !== 'hoje' && opcao.chave !== 'ontem'
+  )
 }
 
 export function filtroDaOpcao(opcoes: OpcaoPeriodoBloco[], chave: string): FiltroBlocoMusica {

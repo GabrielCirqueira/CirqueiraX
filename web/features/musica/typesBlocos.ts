@@ -7,7 +7,7 @@ import type {
 } from './types'
 
 export interface FiltroBlocoMusica {
-  periodo: 'dias' | 'mes' | 'ano' | 'todos'
+  periodo: 'dias' | 'ontem' | 'mes' | 'ano' | 'todos'
   dias?: number
   ano?: number
   mes?: number

@@ -31,6 +31,7 @@ final readonly class PeriodoAnaliseSpotifyDTO
     private const int DIAS_MAXIMO = 3650;
     private const int DIAS_MAXIMO_SERIE_DIARIA = 92;
     private const string ROTULO_PERIODO_ANTERIOR = 'Período anterior';
+    private const string ROTULO_ONTEM = 'Ontem';
     private const string FORMATO_SQL = 'Y-m-d H:i:s';
     private const string DATA_UTC_SQL = 'r.tocada_em';
     private const string DATA_LOCAL_SQL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
@@ -54,6 +55,7 @@ final readonly class PeriodoAnaliseSpotifyDTO
             TipoPeriodoAnaliseSpotify::Todos => self::todos(),
             TipoPeriodoAnaliseSpotify::Ano => self::doAno($ano),
             TipoPeriodoAnaliseSpotify::Mes => self::doMes($ano, $mes),
+            TipoPeriodoAnaliseSpotify::Ontem => self::ontem(),
             default => self::ultimosDias($request->query->getInt('dias', self::DIAS_PADRAO)),
         };
     }
@@ -94,6 +96,13 @@ final readonly class PeriodoAnaliseSpotifyDTO
             $amanha,
             1 === $diasValidos ? 'Hoje' : sprintf('Últimos %d dias', $diasValidos),
         );
+    }
+
+    public static function ontem(): self
+    {
+        $hoje = self::agoraLocal()->setTime(0, 0);
+
+        return self::entre($hoje->modify('-1 day'), $hoje, self::ROTULO_ONTEM);
     }
 
     public static function entre(DateTimeImmutable $inicioLocal, DateTimeImmutable $fimLocal, string $rotulo): self

@@ -1,20 +1,40 @@
 import { Skeleton, VStack } from '@chakra-ui/react'
 import { memo, useState } from 'react'
 import { useVisaoGeralMusica } from '../hooks'
+import type { RespostaConsultaImagens, ResumoGeralMusica } from '../types'
 import { criarOpcoesPeriodoVisao, filtroDaOpcao } from '../utils'
 import { CabecalhoSecaoMusica } from './CabecalhoSecaoMusica'
+import { SecaoHojeSemana } from './SecaoHojeSemana'
 import { SeletorPeriodoAnalise } from './SeletorPeriodoAnalise'
 import { VisaoGeralAtalhos } from './VisaoGeralAtalhos'
 import { VisaoGeralDestaque } from './VisaoGeralDestaque'
 import { VisaoGeralTopos } from './VisaoGeralTopos'
 
-export const AbaVisaoGeral = memo(function AbaVisaoGeral({ habilitado }: { habilitado: boolean }) {
+export interface AbaVisaoGeralProps {
+  habilitado: boolean
+  resumo?: ResumoGeralMusica
+  mapaImagensResumo?: RespostaConsultaImagens
+  carregandoResumo: boolean
+}
+
+export const AbaVisaoGeral = memo(function AbaVisaoGeral({
+  habilitado,
+  resumo,
+  mapaImagensResumo,
+  carregandoResumo,
+}: AbaVisaoGeralProps) {
   const opcoes = criarOpcoesPeriodoVisao(new Date().getFullYear())
-  const [chavePeriodo, setChavePeriodo] = useState('7d')
+  const [chavePeriodo, setChavePeriodo] = useState('hoje')
   const { data, isLoading } = useVisaoGeralMusica(filtroDaOpcao(opcoes, chavePeriodo), habilitado)
 
   return (
     <VStack align="stretch" gap={4}>
+      <SecaoHojeSemana
+        resumo={resumo}
+        mapaImagens={mapaImagensResumo}
+        carregando={carregandoResumo}
+        modo="visao"
+      />
       <CabecalhoSecaoMusica
         titulo="Visão geral"
         cor="cirqueira.musica.verde"
