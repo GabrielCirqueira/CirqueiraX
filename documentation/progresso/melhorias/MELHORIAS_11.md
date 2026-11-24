@@ -178,3 +178,17 @@
 - **Arquivos**: `src/Repository/ResumoAtividadeUsuarioRepository.php`, `src/DataObject/Usuario/ResumoAtividadeUsuarioDTO.php`, `src/Service/Usuario/ObterResumoAtividadeUsuarioService.php`, `src/Controller/Usuario/UsuarioController.php`, `web/features/usuarios/` (ModalResumoUsuario, PecasResumoUsuario, ListaUsuarios, Usuarios, api, types, hooks, utils/formatarResumoUsuario)
 
 ---
+
+### ✅ Melhoria 213 — Spotify: Importação Sem Fila de Vínculos Travada
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: depois de importar o histórico do Spotify, as reproduções não apareciam na página de Música.
+- **Causa**: a importação mandava um `VincularSpotifyAoCatalogoMessage` por lote de 500 reproduções (cerca de 540 mensagens para dois arquivos). Cada uma religava o histórico inteiro a partir da sua data. Com dois workers em paralelo, as duas tentavam criar o mesmo `vinculo_musica_spotify` e caíam em `Duplicate entry … UNIQ_VINCULO_MUSICA_SPOTIFY_IDENTIDADE`.
+- **Solução**:
+  - A importação junta o intervalo de todos os lotes e manda uma única mensagem no fim.
+  - A ligação ao catálogo roda sob uma trava do MySQL (`GET_LOCK('cirqueirax_vincular_spotify')`), então workers e comandos nunca ligam faixas ao mesmo tempo.
+  - Operação: backup completo do banco antes, mensagens repetidas removidas da fila e `app:musica:projetar-spotify` rodado para os usuários 6 e 7.
+- **Arquivos**: `src/Service/Spotify/DeduplicarEImportarHistoricoSpotifyService.php`, `src/Service/Musica/VincularFaixasSpotifyAoCatalogoService.php`, `src/Repository/VinculoMusicaSpotifyRepository.php`, `src/Exception/Musica/MusicaCatalogoException.php`
+
+---

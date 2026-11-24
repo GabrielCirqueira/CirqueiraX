@@ -7,6 +7,7 @@ namespace App\Service\Musica;
 use App\Entity\Usuario;
 use App\Entity\VinculoMusicaSpotify;
 use App\Enum\TipoImagemSpotify;
+use App\Exception\Musica\MusicaCatalogoException;
 use App\Repository\ArtistaFaixaSpotifyRepository;
 use App\Repository\ImagemSpotifyRepository;
 use App\Repository\MusicaCatalogoRepository;
@@ -18,6 +19,7 @@ use DateTimeImmutable;
 final readonly class VincularFaixasSpotifyAoCatalogoService
 {
     public const int TAMANHO_LOTE = 200;
+    private const int ESPERA_TRAVA_SEGUNDOS = 900;
     private const string SEPARADOR_IDENTIDADE = '|';
 
     public function __construct(
@@ -36,6 +38,22 @@ final readonly class VincularFaixasSpotifyAoCatalogoService
      * @param callable(int, int): void|null $aoConcluirLote
      */
     public function executar(Usuario $usuario, ?DateTimeImmutable $tocadasDesde = null, ?callable $aoConcluirLote = null): int
+    {
+        if (!$this->vinculoRepository->travar(self::ESPERA_TRAVA_SEGUNDOS)) {
+            throw MusicaCatalogoException::vinculacaoSpotifyOcupada();
+        }
+
+        try {
+            return $this->vincularComTrava($usuario, $tocadasDesde, $aoConcluirLote);
+        } finally {
+            $this->vinculoRepository->destravar();
+        }
+    }
+
+    /**
+     * @param callable(int, int): void|null $aoConcluirLote
+     */
+    private function vincularComTrava(Usuario $usuario, ?DateTimeImmutable $tocadasDesde, ?callable $aoConcluirLote): int
     {
         $usuarioId = (int) $usuario->getId();
         $identidades = $this->vinculoRepository->listarIdentidades();

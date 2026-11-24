@@ -36,6 +36,8 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
         $totalIgnorados = 0;
         $totalSubstituidos = 0;
 
+        $intervalo = [null, null];
+
         /** @var array<int, ItemHistoricoImportadoDTO> $lote */
         $lote = [];
 
@@ -44,14 +46,20 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
             $lote[] = $item;
 
             if (count($lote) >= self::TAMANHO_LOTE) {
-                $this->processarLote($lote, $usuario, $totalNovos, $totalIgnorados, $totalSubstituidos);
+                $intervalo = $this->ampliarIntervalo($intervalo, $this->processarLote($lote, $usuario, $totalNovos, $totalIgnorados, $totalSubstituidos));
                 $usuario = $this->reproducaoRepository->obterReferenciaUsuario($usuario);
                 $lote = [];
             }
         }
 
         if (!empty($lote)) {
-            $this->processarLote($lote, $usuario, $totalNovos, $totalIgnorados, $totalSubstituidos);
+            $intervalo = $this->ampliarIntervalo($intervalo, $this->processarLote($lote, $usuario, $totalNovos, $totalIgnorados, $totalSubstituidos));
+        }
+
+        [$inicio, $fim] = $intervalo;
+        if (null !== $inicio && null !== $fim) {
+            $this->cacheAnalise->invalidar($usuario);
+            $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $usuario->getId(), $inicio, $fim));
         }
 
         return new ResultadoImportacaoHistoricoSpotifyDTO(
@@ -63,7 +71,23 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
     }
 
     /**
+     * @param array{0: ?int, 1: ?int} $atual
+     * @param array{0: ?int, 1: ?int} $lote
+     *
+     * @return array{0: ?int, 1: ?int}
+     */
+    private function ampliarIntervalo(array $atual, array $lote): array
+    {
+        return [
+            null === $atual[0] ? $lote[0] : (null === $lote[0] ? $atual[0] : min($atual[0], $lote[0])),
+            null === $atual[1] ? $lote[1] : (null === $lote[1] ? $atual[1] : max($atual[1], $lote[1])),
+        ];
+    }
+
+    /**
      * @param array<int, ItemHistoricoImportadoDTO> $lote
+     *
+     * @return array{0: ?int, 1: ?int}
      */
     private function processarLote(
         array $lote,
@@ -71,9 +95,9 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
         int &$novos,
         int &$ignorados,
         int &$substituidos,
-    ): void {
+    ): array {
         if (empty($lote)) {
-            return;
+            return [null, null];
         }
 
         $minTimestamp = null;
@@ -161,8 +185,8 @@ final readonly class DeduplicarEImportarHistoricoSpotifyService
 
         $this->reproducaoRepository->flush();
         $this->reproducaoRepository->limparCache();
-        $this->cacheAnalise->invalidar($usuario);
-        $this->messageBus->dispatch(new VincularSpotifyAoCatalogoMessage((int) $usuario->getId(), $minTimestamp - self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS, $maxTimestamp + self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS));
+
+        return [$minTimestamp - self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS, $maxTimestamp + self::MARGEM_MAXIMA_CONSULTA_SEGUNDOS];
     }
 
     /**

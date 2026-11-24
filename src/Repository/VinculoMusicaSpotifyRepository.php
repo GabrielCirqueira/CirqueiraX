@@ -14,6 +14,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 final class VinculoMusicaSpotifyRepository extends ServiceEntityRepository
 {
+    private const string NOME_TRAVA = 'cirqueirax_vincular_spotify';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, VinculoMusicaSpotify::class);
@@ -38,6 +40,19 @@ final class VinculoMusicaSpotifyRepository extends ServiceEntityRepository
     public function flush(): void
     {
         $this->getEntityManager()->flush();
+    }
+
+    public function travar(int $esperaSegundos): bool
+    {
+        return 1 === (int) $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT GET_LOCK(:nome, :espera)',
+            ['nome' => self::NOME_TRAVA, 'espera' => $esperaSegundos],
+        );
+    }
+
+    public function destravar(): void
+    {
+        $this->getEntityManager()->getConnection()->executeQuery('SELECT RELEASE_LOCK(:nome)', ['nome' => self::NOME_TRAVA]);
     }
 
     public function buscarPorIdentidade(string $nomeNormalizado, string $artistaNormalizado): ?VinculoMusicaSpotify

@@ -17,6 +17,11 @@ final class MusicaCatalogoException extends DomainException
         return new self('Esta categoria não aceita ação em lote por filtro.', self::CODIGO_INVALIDO);
     }
 
+    public static function vinculacaoSpotifyOcupada(): self
+    {
+        return new self('Outra ligação de músicas do Spotify ao catálogo está em andamento. Tente de novo em instantes.', self::CODIGO_CONFLITO);
+    }
+
     public static function musicaNaoEncontrada(): self
     {
         return new self('Música não encontrada.', self::CODIGO_NAO_ENCONTRADO);
