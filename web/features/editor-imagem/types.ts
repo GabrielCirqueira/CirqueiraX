@@ -1,25 +1,48 @@
+export type FerramentaForma =
+  | 'retangulo'
+  | 'elipse'
+  | 'triangulo'
+  | 'losango'
+  | 'estrela'
+  | 'hexagono'
+  | 'balao'
+
 export type FerramentaEditor =
   | 'selecionar'
   | 'pincel'
   | 'marcaTexto'
   | 'seta'
   | 'linha'
-  | 'retangulo'
-  | 'elipse'
+  | FerramentaForma
   | 'texto'
   | 'numero'
   | 'desfoque'
   | 'recorte'
 
-export type FerramentaDeArraste = 'seta' | 'linha' | 'retangulo' | 'elipse' | 'desfoque' | 'recorte'
+export type FerramentaDeArraste = 'seta' | 'linha' | FerramentaForma | 'desfoque' | 'recorte'
 
 export type FerramentaDeTraco = 'pincel' | 'marcaTexto'
 
 export type NivelEspessura = 'fina' | 'media' | 'grossa'
 
-export type EstiloBorda = 'solida' | 'tracejada'
+export type EstiloBorda = 'solida' | 'tracejada' | 'pontilhada'
 
 export type TipoPreenchimento = 'nenhum' | 'translucido' | 'solido'
+
+export type EstiloTexto = 'simples' | 'contorno' | 'etiqueta'
+
+export type AlinhamentoTexto = 'esquerda' | 'centro' | 'direita'
+
+export type FonteTexto =
+  | 'lato'
+  | 'poppins'
+  | 'montserrat'
+  | 'oswald'
+  | 'bebas'
+  | 'playfair'
+  | 'mono'
+  | 'marcador'
+  | 'pacifico'
 
 export type AlcaTransformacao = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w' | 'inicio' | 'fim'
 
@@ -39,6 +62,8 @@ interface AnotacaoBase {
   id: string
   cor: string
   espessura: number
+  opacidade: number
+  sombra: boolean
 }
 
 export interface AnotacaoTraco extends AnotacaoBase {
@@ -53,14 +78,22 @@ export interface AnotacaoArraste extends AnotacaoBase {
   raioCanto: number
   estiloBorda: EstiloBorda
   preenchimento: TipoPreenchimento
+  corPreenchimento: string
 }
 
-export interface AnotacaoTexto extends AnotacaoBase {
+export interface FormatoTexto {
+  fonte: FonteTexto
+  negrito: boolean
+  italico: boolean
+  alinhamento: AlinhamentoTexto
+}
+
+export interface AnotacaoTexto extends AnotacaoBase, FormatoTexto {
   tipo: 'texto'
   posicao: Ponto
   texto: string
   tamanhoFonte: number
-  comFundo: boolean
+  estiloTexto: EstiloTexto
 }
 
 export interface AnotacaoNumero extends AnotacaoBase {
@@ -72,6 +105,12 @@ export interface AnotacaoNumero extends AnotacaoBase {
 
 export type Anotacao = AnotacaoTraco | AnotacaoArraste | AnotacaoTexto | AnotacaoNumero
 
+export interface ConfiguracaoTela {
+  largura: number
+  altura: number
+  corFundo: string | null
+}
+
 export interface ImagemEditor {
   id: string
   bitmap: ImageBitmap
@@ -79,6 +118,7 @@ export interface ImagemEditor {
   altura: number
   nome: string
   mediaItemOrigemUuid: string | null
+  tela: ConfiguracaoTela | null
 }
 
 export interface HistoricoAnotacoes {
@@ -92,6 +132,9 @@ export type AcaoHistorico =
   | { tipo: 'atualizar'; anotacao: Anotacao }
   | { tipo: 'remover'; id: string }
   | { tipo: 'trazerParaFrente'; id: string }
+  | { tipo: 'enviarParaTras'; id: string }
+  | { tipo: 'subirCamada'; id: string }
+  | { tipo: 'descerCamada'; id: string }
   | { tipo: 'desfazer' }
   | { tipo: 'refazer' }
   | { tipo: 'limpar' }
@@ -99,16 +142,21 @@ export type AcaoHistorico =
 
 export type FerramentaComPreferencias = Exclude<FerramentaEditor, 'selecionar' | 'recorte'>
 
-export interface PreferenciasFerramenta {
+export interface PreferenciasFerramenta extends FormatoTexto {
   cor: string
+  corPreenchimento: string
   espessura: number
   raioCanto: number
   estiloBorda: EstiloBorda
   preenchimento: TipoPreenchimento
   tamanhoFonte: number
-  comFundo: boolean
+  estiloTexto: EstiloTexto
   raio: number
+  opacidade: number
+  sombra: boolean
 }
+
+export type PropriedadeEditavel = keyof PreferenciasFerramenta
 
 export type PreferenciasEditor = Partial<
   Record<FerramentaComPreferencias, Partial<PreferenciasFerramenta>>
@@ -119,16 +167,14 @@ export interface EstiloExibido {
   nivelEspessura: NivelEspessura | null
 }
 
-export type AlteracaoAnotacao = Partial<{
-  cor: string
-  espessura: number
-  raioCanto: number
-  estiloBorda: EstiloBorda
-  preenchimento: TipoPreenchimento
-  tamanhoFonte: number
-  comFundo: boolean
-  raio: number
-}>
+export type AlteracaoAnotacao = Partial<PreferenciasFerramenta>
+
+export interface AlvoPainel {
+  tipo: Anotacao['tipo']
+  valores: PreferenciasFerramenta
+  anotacaoId: string | null
+  limiteRaioCanto: number | null
+}
 
 export type InteracaoPonteiro =
   | { tipo: 'desenhando'; anotacao: Anotacao }
@@ -148,7 +194,12 @@ export interface TextoEmEdicao {
   valor: string
   tamanhoFonte: number
   cor: string
+  formato: FormatoTexto
 }
+
+export type DirecaoCamada = 'frente' | 'tras' | 'subir' | 'descer'
+
+export type EixoAlinhamento = 'horizontal' | 'vertical'
 
 export type ComandoAtalho =
   | { tipo: 'desfazer' }
@@ -160,6 +211,8 @@ export type ComandoAtalho =
   | { tipo: 'duplicar' }
   | { tipo: 'deslocar'; dx: number; dy: number }
   | { tipo: 'ferramenta'; ferramenta: FerramentaEditor }
+  | { tipo: 'camada'; direcao: DirecaoCamada }
+  | { tipo: 'ajustarTamanho'; passo: number }
 
 export interface SalvarEdicaoInput {
   arquivo: Blob

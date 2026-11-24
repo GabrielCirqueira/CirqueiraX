@@ -6,8 +6,10 @@ import type {
   Ponto,
   Retangulo,
 } from '../types'
+import { criarCaminhoForma } from './caminhosForma'
 import { MULTIPLICADOR_MARCA_TEXTO } from './constantesEditor'
-import { medirCaixaTexto } from './desenhoCanvas'
+import { contextoParaAcerto, medirCaixaTexto } from './desenhoCanvas'
+import { isFerramentaForma } from './fabricaAnotacoes'
 import { distanciaEntre, normalizarRetangulo } from './geometria'
 
 export type ModoAcerto = 'area' | 'preciso'
@@ -30,8 +32,8 @@ const CURSOR_POR_ALCA: Record<AlcaTransformacao, string> = {
   fim: 'grab',
 }
 
-const TIPOS_COM_CAIXA_REDIMENSIONAVEL = ['retangulo', 'elipse', 'desfoque']
 const TIPOS_COM_PONTAS = ['seta', 'linha']
+const TIPOS_COM_ESCALA_PROPORCIONAL = ['texto', 'numero']
 
 const CURSOR_POR_FERRAMENTA: Partial<Record<FerramentaEditor, string>> = {
   selecionar: 'default',
@@ -102,18 +104,18 @@ export function caixaDaAnotacao(anotacao: Anotacao): Retangulo {
   }
 }
 
-function acertouBordaDaForma(anotacao: AnotacaoArraste, ponto: Ponto, margem: number): boolean {
-  const area = normalizarRetangulo(anotacao.inicio, anotacao.fim)
-  if (anotacao.tipo === 'retangulo') {
-    return contem(expandir(area, margem), ponto) && !contem(expandir(area, -margem), ponto)
-  }
-  const raioX = Math.max(area.largura / 2, 1)
-  const raioY = Math.max(area.altura / 2, 1)
-  const distanciaNormalizada = Math.hypot(
-    (ponto.x - (area.x + raioX)) / raioX,
-    (ponto.y - (area.y + raioY)) / raioY
-  )
-  return Math.abs(distanciaNormalizada - 1) * Math.min(raioX, raioY) <= margem
+function acertouCaminhoDaForma(
+  anotacao: AnotacaoArraste,
+  ponto: Ponto,
+  margem: number,
+  preenchida: boolean
+): boolean {
+  const contexto = contextoParaAcerto()
+  if (!contexto) return contem(expandir(caixaDaAnotacao(anotacao), margem), ponto)
+  const caminho = criarCaminhoForma(anotacao)
+  if (preenchida && contexto.isPointInPath(caminho, ponto.x, ponto.y)) return true
+  contexto.lineWidth = margem * 2
+  return contexto.isPointInStroke(caminho, ponto.x, ponto.y)
 }
 
 function acertouForma(
@@ -126,11 +128,10 @@ function acertouForma(
   if (anotacao.tipo === 'seta' || anotacao.tipo === 'linha') {
     return distanciaAoSegmento(ponto, anotacao.inicio, anotacao.fim) <= margem
   }
-  const preenchida = anotacao.preenchimento !== 'nenhum' || anotacao.tipo === 'desfoque'
-  if (modo === 'area' || preenchida) {
+  if (modo === 'area' || anotacao.tipo === 'desfoque' || anotacao.tipo === 'recorte') {
     return contem(expandir(normalizarRetangulo(anotacao.inicio, anotacao.fim), margem), ponto)
   }
-  return acertouBordaDaForma(anotacao, ponto, margem)
+  return acertouCaminhoDaForma(anotacao, ponto, margem, anotacao.preenchimento !== 'nenhum')
 }
 
 export function acertouAnotacao(
@@ -175,16 +176,7 @@ export function encontrarAnotacaoNoPonto(
   return null
 }
 
-export function alcasDaAnotacao(anotacao: Anotacao): AlcaPosicionada[] {
-  if (anotacao.tipo === 'seta' || anotacao.tipo === 'linha') {
-    return [
-      { alca: 'inicio', ponto: anotacao.inicio },
-      { alca: 'fim', ponto: anotacao.fim },
-    ]
-  }
-  if (!TIPOS_COM_CAIXA_REDIMENSIONAVEL.includes(anotacao.tipo)) return []
-
-  const { x, y, largura, altura } = caixaDaAnotacao(anotacao)
+function alcasDaCaixa({ x, y, largura, altura }: Retangulo): AlcaPosicionada[] {
   const meioX = x + largura / 2
   const meioY = y + altura / 2
   return [
@@ -197,6 +189,21 @@ export function alcasDaAnotacao(anotacao: Anotacao): AlcaPosicionada[] {
     { alca: 'sw', ponto: { x, y: y + altura } },
     { alca: 'w', ponto: { x, y: meioY } },
   ]
+}
+
+export function alcasDaAnotacao(anotacao: Anotacao): AlcaPosicionada[] {
+  if (anotacao.tipo === 'seta' || anotacao.tipo === 'linha') {
+    return [
+      { alca: 'inicio', ponto: anotacao.inicio },
+      { alca: 'fim', ponto: anotacao.fim },
+    ]
+  }
+  if (TIPOS_COM_ESCALA_PROPORCIONAL.includes(anotacao.tipo)) {
+    const { x, y, largura, altura } = caixaDaAnotacao(anotacao)
+    return [{ alca: 'se', ponto: { x: x + largura, y: y + altura } }]
+  }
+  if (!isFerramentaForma(anotacao.tipo) && anotacao.tipo !== 'desfoque') return []
+  return alcasDaCaixa(caixaDaAnotacao(anotacao))
 }
 
 export function encontrarAlcaNoPonto(

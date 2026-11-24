@@ -6,7 +6,7 @@ import type {
   ImagemEditor,
   InteracaoPonteiro,
 } from '../types'
-import { renderizarCena } from '../utils/desenhoCanvas'
+import { carregarFontesFaltantes, renderizarCena } from '../utils/desenhoCanvas'
 import { renderizarSobreposicao } from '../utils/desenhoSelecao'
 import { escalaDaTela, obterRecorteAtivo } from '../utils/geometria'
 import { HISTORICO_VAZIO, aplicarAcaoHistorico } from '../utils/historicoAnotacoes'
@@ -57,7 +57,10 @@ export function useCanvasEditor(imagem: ImagemEditor | null) {
     const recorteAtual = obterRecorteAtivo(imagem, historicoRef.current.anotacoes)
     const visiveis = anotacoesVisiveis()
 
-    if (redesenharBase) renderizarCena(canvasBase, imagem, visiveis, recorteAtual)
+    if (redesenharBase) {
+      renderizarCena(canvasBase, imagem, visiveis, recorteAtual)
+      carregarFontesFaltantes(visiveis, () => agendarDesenho(true))
+    }
 
     const canvasSobreposicao = canvasSobreposicaoRef.current
     if (!canvasSobreposicao) return

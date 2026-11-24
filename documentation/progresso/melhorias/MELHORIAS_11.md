@@ -260,3 +260,19 @@
 - **Arquivos**: `src/Service/IdentificacaoMusica/VincularVideoPeloHistoricoService.php`, `src/DataObject/IdentificacaoMusica/HistoricoMusicalDTO.php`, `src/Command/VincularVideosPeloHistoricoCommand.php`, `src/Service/IdentificacaoMusica/IdentificarVideosYoutubeService.php`, `src/Service/IdentificacaoMusica/AplicarIdentificacaoVideoYoutubeService.php`, `src/Service/IdentificacaoMusica/Ia/InstrucoesIdentificacaoMusica.php`, `src/Service/YoutubeMusic/Importacao/FiltrarVideosImportacaoYoutubeService.php`, `src/Service/Musica/NormalizarTextoMusicaService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Repository/VideoYoutubeRepository.php`, `src/Enum/OrigemClassificacao.php`
 
 ---
+
+### ✅ Melhoria 218 — Editor de Imagem: Criar do Zero, Mais Formas, Cores e Texto
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: mais cores e seletor livre de cor, editar formas (cor, tamanho, preenchimento), texto móvel com fonte e tamanho do mínimo ao máximo, criar imagem do zero numa tela em branco com formato escolhido (colar imagem substitui a tela) e mais utilidades.
+- **Solução**:
+  - Tela em branco ao abrir: 8 formatos, tamanho livre, fundo de qualquer cor ou transparente; mudar a tela mantém os itens.
+  - Formas novas: triângulo, losango, estrela, hexágono e balão de fala, todas com cor de borda, preenchimento com cor própria, espessura (0 = sem borda), traço sólido/tracejado/pontilhado.
+  - Seletor de cor com paleta de 42 cores, recentes, área deslizante, matiz, hex e conta-gotas.
+  - Texto com 9 fontes, tamanho 6 a 400 (digitável), negrito, itálico, alinhamento, estilo simples/contorno/etiqueta, várias linhas e alça para redimensionar.
+  - Painel lateral para o item selecionado ou para a ferramenta antes de desenhar; opacidade, sombra, ordem das camadas, centralizar; lista de camadas.
+  - Atalhos `[`/`]` (tamanho) e `Ctrl+[`/`Ctrl+]` (camadas), `Shift` mantém proporção ao esticar, baixar em PNG ou JPG.
+- **Arquivos**: `web/features/editor-imagem/` (novos: `components/SeletorCor.tsx`, `components/PainelTela.tsx`, `components/ListaCamadas.tsx`, `hooks/useCoresRecentes.ts`, `utils/caminhosForma.ts`, `utils/fontesEditor.ts`), `web/shared/utils/localStorageService.ts`, `package.json`
+
+---

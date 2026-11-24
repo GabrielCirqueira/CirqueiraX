@@ -1,15 +1,17 @@
 import { usuarioPossuiPermissao } from '@/shared/utils/funcionalidadesSistema'
 import { useAuthStore } from '@/stores'
-import { Button, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
-import { Copy, Download, ImagePlus, Save } from 'lucide-react'
+import { Button, HStack, IconButton, Menu, Portal, Text, VStack } from '@chakra-ui/react'
+import { Copy, Download, FilePlus2, ImagePlus, Save } from 'lucide-react'
 import { memo } from 'react'
+import type { FormatoExportacao } from '../utils/exportacaoImagem'
 
 export interface CabecalhoEditorProps {
   descricaoImagem: string | null
   temImagem: boolean
   copiando: boolean
   onAbrirArquivo: () => void
-  onBaixar: () => void
+  onNovaTela: () => void
+  onBaixar: (formato: FormatoExportacao) => void
   onSalvar: () => void
   onCopiar: () => void
 }
@@ -19,6 +21,7 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
   temImagem,
   copiando,
   onAbrirArquivo,
+  onNovaTela,
   onBaixar,
   onSalvar,
   onCopiar,
@@ -33,7 +36,7 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
           Editor de imagem
         </Text>
         <Text fontSize="sm" color="fg.subtle" truncate maxW={{ base: '80vw', md: 'lg' }}>
-          {descricaoImagem ?? 'Cole um print, marque o que importa e copie de volta.'}
+          {descricaoImagem ?? 'Cole um print ou crie do zero com formas e texto.'}
         </Text>
       </VStack>
 
@@ -54,13 +57,41 @@ export const CabecalhoEditor = memo(function CabecalhoEditor({
           variant="ghost"
           borderRadius="full"
           color="fg.muted"
-          aria-label="Baixar imagem"
-          title="Baixar PNG"
-          disabled={!temImagem}
-          onClick={onBaixar}
+          aria-label="Nova tela em branco"
+          title="Nova tela em branco"
+          onClick={onNovaTela}
         >
-          <Download size={16} />
+          <FilePlus2 size={16} />
         </IconButton>
+        <Menu.Root positioning={{ placement: 'bottom-end' }}>
+          <Menu.Trigger asChild>
+            <IconButton
+              size="sm"
+              variant="ghost"
+              borderRadius="full"
+              color="fg.muted"
+              aria-label="Baixar imagem"
+              title="Baixar imagem"
+              disabled={!temImagem}
+            >
+              <Download size={16} />
+            </IconButton>
+          </Menu.Trigger>
+          <Portal>
+            <Menu.Positioner>
+              <Menu.Content minW="200px">
+                <Menu.Item value="png" onClick={() => onBaixar('png')}>
+                  Baixar PNG
+                  <Menu.ItemCommand>transparência</Menu.ItemCommand>
+                </Menu.Item>
+                <Menu.Item value="jpg" onClick={() => onBaixar('jpg')}>
+                  Baixar JPG
+                  <Menu.ItemCommand>menor</Menu.ItemCommand>
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Positioner>
+          </Portal>
+        </Menu.Root>
         <Button
           size="sm"
           variant="outline"

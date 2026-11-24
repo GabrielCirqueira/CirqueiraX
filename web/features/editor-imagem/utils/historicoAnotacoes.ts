@@ -12,10 +12,25 @@ function registrar(historico: HistoricoAnotacoes, anotacoes: Anotacao[]): Histor
   }
 }
 
-function trazerParaFrente(anotacoes: Anotacao[], id: string): Anotacao[] {
-  const alvo = anotacoes.find((anotacao) => anotacao.id === id)
+function moverParaPosicao(
+  anotacoes: Anotacao[],
+  id: string,
+  destino: (atual: number, total: number) => number
+): Anotacao[] {
+  const atual = anotacoes.findIndex((anotacao) => anotacao.id === id)
+  const alvo = anotacoes[atual]
   if (!alvo) return anotacoes
-  return [...anotacoes.filter((anotacao) => anotacao.id !== id), alvo]
+  const posicao = Math.min(Math.max(destino(atual, anotacoes.length), 0), anotacoes.length - 1)
+  if (posicao === atual) return anotacoes
+  const restantes = anotacoes.filter((anotacao) => anotacao.id !== id)
+  return [...restantes.slice(0, posicao), alvo, ...restantes.slice(posicao)]
+}
+
+function registrarSeMudou(
+  historico: HistoricoAnotacoes,
+  anotacoes: Anotacao[]
+): HistoricoAnotacoes {
+  return anotacoes === historico.anotacoes ? historico : registrar(historico, anotacoes)
 }
 
 export function aplicarAcaoHistorico(
@@ -38,7 +53,25 @@ export function aplicarAcaoHistorico(
         historico.anotacoes.filter((anotacao) => anotacao.id !== acao.id)
       )
     case 'trazerParaFrente':
-      return registrar(historico, trazerParaFrente(historico.anotacoes, acao.id))
+      return registrarSeMudou(
+        historico,
+        moverParaPosicao(historico.anotacoes, acao.id, (_, total) => total - 1)
+      )
+    case 'enviarParaTras':
+      return registrarSeMudou(
+        historico,
+        moverParaPosicao(historico.anotacoes, acao.id, () => 0)
+      )
+    case 'subirCamada':
+      return registrarSeMudou(
+        historico,
+        moverParaPosicao(historico.anotacoes, acao.id, (atual) => atual + 1)
+      )
+    case 'descerCamada':
+      return registrarSeMudou(
+        historico,
+        moverParaPosicao(historico.anotacoes, acao.id, (atual) => atual - 1)
+      )
     case 'desfazer': {
       const anterior = historico.passado.at(-1)
       if (!anterior) return historico

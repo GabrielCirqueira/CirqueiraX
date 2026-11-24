@@ -27,6 +27,10 @@ function interpretarAtalhoComModificador(evento: KeyboardEvent): ComandoAtalho |
   if (tecla === 's') return { tipo: 'salvar' }
   if (tecla === 'd') return { tipo: 'duplicar' }
   if (tecla === 'c' && !isTextoSelecionadoNaPagina()) return { tipo: 'copiar' }
+  if (evento.key === ']') return { tipo: 'camada', direcao: evento.shiftKey ? 'frente' : 'subir' }
+  if (evento.key === '[') return { tipo: 'camada', direcao: evento.shiftKey ? 'tras' : 'descer' }
+  if (evento.code === 'BracketRight') return { tipo: 'camada', direcao: 'frente' }
+  if (evento.code === 'BracketLeft') return { tipo: 'camada', direcao: 'tras' }
   return null
 }
 
@@ -36,6 +40,8 @@ export function interpretarAtalho(evento: KeyboardEvent): ComandoAtalho | null {
   if (evento.altKey) return null
   if (evento.key === TECLA_ESCAPE) return { tipo: 'cancelar' }
   if (TECLAS_EXCLUSAO.includes(evento.key)) return { tipo: 'excluir' }
+  if (evento.key === ']' || evento.key === '+') return { tipo: 'ajustarTamanho', passo: 1 }
+  if (evento.key === '[' || evento.key === '-') return { tipo: 'ajustarTamanho', passo: -1 }
 
   const direcao = DIRECAO_POR_SETA[evento.key]
   if (direcao) {

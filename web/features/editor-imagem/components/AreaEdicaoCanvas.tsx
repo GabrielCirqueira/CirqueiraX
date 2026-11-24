@@ -1,10 +1,16 @@
-import { Box, Input, chakra } from '@chakra-ui/react'
+import { Box, Textarea, chakra } from '@chakra-ui/react'
 import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react'
-import type { FerramentaEditor, ImagemEditor, TextoEmEdicao } from '../types'
+import type { AlinhamentoTexto, FerramentaEditor, ImagemEditor, TextoEmEdicao } from '../types'
 import { montarFonte } from '../utils/desenhoCanvas'
 import { cursorDaFerramenta } from '../utils/selecaoAnotacoes'
 
 const LARGURA_MINIMA_TEXTO_CARACTERES = 6
+const FUNDO_XADREZ = 'repeating-conic-gradient(#d4d4d8 0% 25%, #ffffff 0% 50%) 50% / 20px 20px'
+const ALINHAMENTO_CSS: Record<AlinhamentoTexto, 'left' | 'center' | 'right'> = {
+  esquerda: 'left',
+  centro: 'center',
+  direita: 'right',
+}
 
 export interface AreaEdicaoCanvasProps {
   imagem: ImagemEditor
@@ -35,8 +41,8 @@ export function AreaEdicaoCanvas({
   onConfirmarTexto,
   onCancelarTexto,
 }: AreaEdicaoCanvasProps) {
-  function aoTeclarNoTexto(evento: KeyboardEvent<HTMLInputElement>) {
-    if (evento.key === 'Enter') {
+  function aoTeclarNoTexto(evento: KeyboardEvent<HTMLTextAreaElement>) {
+    if (evento.key === 'Enter' && !evento.shiftKey) {
       evento.preventDefault()
       onConfirmarTexto()
     }
@@ -47,15 +53,25 @@ export function AreaEdicaoCanvas({
   }
 
   const tamanhoFonteTela = textoEmEdicao ? textoEmEdicao.tamanhoFonte * textoEmEdicao.escalaTela : 0
+  const linhas = textoEmEdicao?.valor.split('\n') ?? []
+  const maiorLinha = Math.max(0, ...linhas.map((linha) => linha.length))
+  const transparente = imagem.tela !== null && imagem.tela.corFundo === null
 
   return (
-    <Box position="relative" lineHeight={0} shadow="lg" borderRadius="8px" maxW="full">
+    <Box
+      position="relative"
+      lineHeight={0}
+      shadow="lg"
+      borderRadius="8px"
+      maxW="full"
+      style={transparente ? { background: FUNDO_XADREZ } : undefined}
+    >
       <chakra.canvas
         key={imagem.id}
         ref={registrarCanvasBase}
         display="block"
         maxW="full"
-        maxH={{ base: '62dvh', md: 'calc(100dvh - 300px)' }}
+        maxH={{ base: '62dvh', md: 'calc(100dvh - 260px)' }}
         w="auto"
         h="auto"
         borderRadius="8px"
@@ -75,26 +91,36 @@ export function AreaEdicaoCanvas({
         onDoubleClick={onDuploClique}
       />
       {textoEmEdicao && (
-        <Input
+        <Textarea
           autoFocus
           position="absolute"
           left={`${textoEmEdicao.posicaoTela.x}px`}
           top={`${textoEmEdicao.posicaoTela.y}px`}
-          w={`${Math.max(textoEmEdicao.valor.length + 1, LARGURA_MINIMA_TEXTO_CARACTERES)}ch`}
+          w={`${Math.max(maiorLinha + 2, LARGURA_MINIMA_TEXTO_CARACTERES)}ch`}
+          rows={Math.max(1, linhas.length)}
           h="auto"
           minH={0}
           p={0}
+          resize="none"
+          overflow="hidden"
+          whiteSpace="pre"
           bg="transparent"
           borderWidth="1px"
           borderStyle="dashed"
           borderColor="fg.muted"
-          borderRadius="8px"
+          borderRadius="4px"
           lineHeight={1.2}
           placeholder="Digite..."
+          title="Enter confirma · Shift + Enter quebra a linha"
           value={textoEmEdicao.valor}
           onChange={(evento) => onAtualizarTexto(evento.target.value)}
           onKeyDown={aoTeclarNoTexto}
-          style={{ color: textoEmEdicao.cor, font: montarFonte(tamanhoFonteTela) }}
+          style={{
+            color: textoEmEdicao.cor,
+            font: montarFonte(tamanhoFonteTela, textoEmEdicao.formato),
+            lineHeight: 1.2,
+            textAlign: ALINHAMENTO_CSS[textoEmEdicao.formato.alinhamento],
+          }}
         />
       )}
     </Box>

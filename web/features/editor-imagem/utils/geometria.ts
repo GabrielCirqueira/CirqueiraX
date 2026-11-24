@@ -2,11 +2,12 @@ import type {
   Anotacao,
   AnotacaoArraste,
   FerramentaEditor,
+  FerramentaForma,
   ImagemEditor,
   Ponto,
   Retangulo,
 } from '../types'
-import { LADO_REFERENCIA_ESCALA } from './constantesEditor'
+import { FERRAMENTAS_FORMA, LADO_REFERENCIA_ESCALA } from './constantesEditor'
 
 const PASSO_ANGULO_RESTRITO = Math.PI / 4
 
@@ -105,8 +106,12 @@ export function aplicarRestricaoComShift(
   fim: Ponto
 ): Ponto {
   if (ferramenta === 'seta' || ferramenta === 'linha') return restringirAngulo(inicio, fim)
-  if (ferramenta === 'retangulo' || ferramenta === 'elipse') {
+  if (FERRAMENTAS_FORMA.includes(ferramenta as FerramentaForma)) {
     return restringirProporcaoQuadrada(inicio, fim)
   }
   return fim
+}
+
+export function centroDoRetangulo(retangulo: Retangulo): Ponto {
+  return { x: retangulo.x + retangulo.largura / 2, y: retangulo.y + retangulo.altura / 2 }
 }

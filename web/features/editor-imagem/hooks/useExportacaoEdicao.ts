@@ -7,7 +7,11 @@ import {
   isAreaTransferenciaDisponivel,
 } from '../utils/areaTransferencia'
 import { TIPO_IMAGEM_EXPORTADA } from '../utils/constantesEditor'
-import { gerarImagemEditada, sugerirNomeArquivo } from '../utils/exportacaoImagem'
+import {
+  type FormatoExportacao,
+  gerarImagemEditada,
+  sugerirNomeArquivo,
+} from '../utils/exportacaoImagem'
 
 export function useExportacaoEdicao() {
   const [copiando, setCopiando] = useState(false)
@@ -45,9 +49,13 @@ export function useExportacaoEdicao() {
     }
   }
 
-  async function baixar(imagem: ImagemEditor, anotacoes: Anotacao[]) {
-    const conteudo = await gerarImagemEditada(imagem, anotacoes)
-    baixarArquivo(conteudo, sugerirNomeArquivo(imagem))
+  async function baixar(
+    imagem: ImagemEditor,
+    anotacoes: Anotacao[],
+    formato: FormatoExportacao = 'png'
+  ) {
+    const conteudo = await gerarImagemEditada(imagem, anotacoes, formato)
+    baixarArquivo(conteudo, sugerirNomeArquivo(imagem, formato))
   }
 
   return { copiando, copiar, baixar }

@@ -6,19 +6,20 @@ import type {
   FerramentaDeArraste,
   FerramentaDeTraco,
   FerramentaEditor,
+  FerramentaForma,
+  FormatoTexto,
   ImagemEditor,
   Ponto,
   PreferenciasFerramenta,
 } from '../types'
-import { TAMANHO_MINIMO_ARRASTE } from './constantesEditor'
+import { FERRAMENTAS_FORMA, TAMANHO_MINIMO_ARRASTE } from './constantesEditor'
 import { calcularFatorEscala, distanciaEntre } from './geometria'
 
 const FERRAMENTAS_DE_TRACO: FerramentaEditor[] = ['pincel', 'marcaTexto']
 const FERRAMENTAS_DE_ARRASTE: FerramentaEditor[] = [
   'seta',
   'linha',
-  'retangulo',
-  'elipse',
+  ...FERRAMENTAS_FORMA,
   'desfoque',
   'recorte',
 ]
@@ -33,12 +34,34 @@ export function isFerramentaDeArraste(
   return FERRAMENTAS_DE_ARRASTE.includes(ferramenta)
 }
 
+export function isFerramentaForma(ferramenta: string): ferramenta is FerramentaForma {
+  return FERRAMENTAS_FORMA.includes(ferramenta as FerramentaForma)
+}
+
 export function gerarIdAnotacao(): string {
   return crypto.randomUUID()
 }
 
 function escalar(imagem: ImagemEditor, valorRelativo: number): number {
   return valorRelativo * calcularFatorEscala(imagem)
+}
+
+function propriedadesComuns(preferencias: PreferenciasFerramenta) {
+  return {
+    id: gerarIdAnotacao(),
+    cor: preferencias.cor,
+    opacidade: preferencias.opacidade,
+    sombra: preferencias.sombra,
+  }
+}
+
+export function formatoDoTexto(preferencias: FormatoTexto): FormatoTexto {
+  return {
+    fonte: preferencias.fonte,
+    negrito: preferencias.negrito,
+    italico: preferencias.italico,
+    alinhamento: preferencias.alinhamento,
+  }
 }
 
 export function criarTraco(
@@ -48,10 +71,9 @@ export function criarTraco(
   preferencias: PreferenciasFerramenta
 ): AnotacaoTraco {
   return {
-    id: gerarIdAnotacao(),
+    ...propriedadesComuns(preferencias),
     tipo: ferramenta,
-    cor: preferencias.cor,
-    espessura: escalar(imagem, preferencias.espessura),
+    espessura: escalar(imagem, Math.max(1, preferencias.espessura)),
     pontos: [ponto],
   }
 }
@@ -62,16 +84,19 @@ export function criarArraste(
   imagem: ImagemEditor,
   preferencias: PreferenciasFerramenta
 ): AnotacaoArraste {
+  const espessura = isFerramentaForma(ferramenta)
+    ? preferencias.espessura
+    : Math.max(1, preferencias.espessura)
   return {
-    id: gerarIdAnotacao(),
+    ...propriedadesComuns(preferencias),
     tipo: ferramenta,
-    cor: preferencias.cor,
-    espessura: escalar(imagem, preferencias.espessura),
+    espessura: escalar(imagem, espessura),
     inicio: ponto,
     fim: ponto,
     raioCanto: escalar(imagem, preferencias.raioCanto),
     estiloBorda: preferencias.estiloBorda,
     preenchimento: preferencias.preenchimento,
+    corPreenchimento: preferencias.corPreenchimento,
   }
 }
 
@@ -89,14 +114,14 @@ export function criarTexto(
   preferencias: PreferenciasFerramenta
 ): AnotacaoTexto {
   return {
-    id: gerarIdAnotacao(),
+    ...propriedadesComuns(preferencias),
+    ...formatoDoTexto(preferencias),
     tipo: 'texto',
-    cor: preferencias.cor,
     espessura: escalar(imagem, preferencias.espessura),
     posicao,
     texto,
     tamanhoFonte: calcularTamanhoFonte(imagem, preferencias),
-    comFundo: preferencias.comFundo,
+    estiloTexto: preferencias.estiloTexto,
   }
 }
 
@@ -107,9 +132,8 @@ export function criarNumero(
   preferencias: PreferenciasFerramenta
 ): AnotacaoNumero {
   return {
-    id: gerarIdAnotacao(),
+    ...propriedadesComuns(preferencias),
     tipo: 'numero',
-    cor: preferencias.cor,
     espessura: escalar(imagem, preferencias.espessura),
     posicao,
     numero,

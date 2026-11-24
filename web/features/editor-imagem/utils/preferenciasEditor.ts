@@ -1,8 +1,11 @@
 import type {
+  AlinhamentoTexto,
   Anotacao,
   EstiloBorda,
+  EstiloTexto,
   FerramentaComPreferencias,
   FerramentaEditor,
+  FonteTexto,
   ImagemEditor,
   NivelEspessura,
   PreferenciasEditor,
@@ -12,32 +15,41 @@ import type {
 import {
   COR_PADRAO,
   ESPESSURA_POR_NIVEL,
+  FERRAMENTAS_FORMA,
+  FONTE_PADRAO,
   NIVEIS_ESPESSURA,
+  OPACIDADE_PADRAO,
+  OPCOES_FONTE,
   RAIO_CANTO_PADRAO,
   TAMANHO_FONTE_PADRAO,
   TAMANHO_RAIO_NUMERO_PADRAO,
 } from './constantesEditor'
 import { calcularFatorEscala } from './geometria'
-import { propriedadesEditaveis } from './transformacaoAnotacoes'
+import { PROPRIEDADES_ESCALAVEIS, propriedadesEditaveis } from './transformacaoAnotacoes'
 
 const FERRAMENTAS_COM_PREFERENCIAS: FerramentaEditor[] = [
   'pincel',
   'marcaTexto',
   'seta',
   'linha',
-  'retangulo',
-  'elipse',
+  ...FERRAMENTAS_FORMA,
   'texto',
   'numero',
   'desfoque',
 ]
 
-const ESTILOS_BORDA: EstiloBorda[] = ['solida', 'tracejada']
+const ESTILOS_BORDA: EstiloBorda[] = ['solida', 'tracejada', 'pontilhada']
 const TIPOS_PREENCHIMENTO: TipoPreenchimento[] = ['nenhum', 'translucido', 'solido']
+const ESTILOS_TEXTO: EstiloTexto[] = ['simples', 'contorno', 'etiqueta']
+const ALINHAMENTOS: AlinhamentoTexto[] = ['esquerda', 'centro', 'direita']
+const FONTES: FonteTexto[] = OPCOES_FONTE.map((opcao) => opcao.valor)
 const FORMATO_COR_HEXADECIMAL = /^#[0-9a-f]{6}$/i
 const FERRAMENTA_DE_REFERENCIA: FerramentaComPreferencias = 'seta'
 const TOLERANCIA_NIVEL_ESPESSURA = 0.05
 const CASAS_DECIMAIS_PREFERENCIA = 100
+const CAMPOS_NUMERICOS = ['espessura', 'raioCanto', 'tamanhoFonte', 'raio', 'opacidade'] as const
+const CAMPOS_BOOLEANOS = ['negrito', 'italico', 'sombra'] as const
+const CAMPOS_COR = ['cor', 'corPreenchimento'] as const
 
 export const FERRAMENTAS_PERSISTIVEIS: FerramentaEditor[] = [
   'selecionar',
@@ -46,13 +58,20 @@ export const FERRAMENTAS_PERSISTIVEIS: FerramentaEditor[] = [
 
 export const PREFERENCIAS_PADRAO: PreferenciasFerramenta = {
   cor: COR_PADRAO,
+  corPreenchimento: COR_PADRAO,
   espessura: ESPESSURA_POR_NIVEL.media,
   raioCanto: RAIO_CANTO_PADRAO,
   estiloBorda: 'solida',
   preenchimento: 'nenhum',
   tamanhoFonte: TAMANHO_FONTE_PADRAO,
-  comFundo: false,
+  estiloTexto: 'contorno',
+  fonte: FONTE_PADRAO,
+  negrito: true,
+  italico: false,
+  alinhamento: 'esquerda',
   raio: TAMANHO_RAIO_NUMERO_PADRAO,
+  opacidade: OPACIDADE_PADRAO,
+  sombra: false,
 }
 
 export function isFerramentaComPreferencias(
@@ -73,25 +92,28 @@ function numeroPositivo(valor: unknown): number | undefined {
   return typeof valor === 'number' && Number.isFinite(valor) && valor >= 0 ? valor : undefined
 }
 
+function valorDaLista<T>(lista: readonly T[], valor: unknown): T | undefined {
+  return lista.includes(valor as T) ? (valor as T) : undefined
+}
+
 function sanitizarPreferencias(bruto: unknown): Partial<PreferenciasFerramenta> {
   if (!isPreferenciasEditor(bruto)) return {}
   const valores = bruto as Record<string, unknown>
-  const sanitizadas: Partial<PreferenciasFerramenta> = {
-    espessura: numeroPositivo(valores.espessura),
-    raioCanto: numeroPositivo(valores.raioCanto),
-    tamanhoFonte: numeroPositivo(valores.tamanhoFonte),
-    raio: numeroPositivo(valores.raio),
+  const sanitizadas: Record<string, unknown> = {
+    estiloBorda: valorDaLista(ESTILOS_BORDA, valores.estiloBorda),
+    preenchimento: valorDaLista(TIPOS_PREENCHIMENTO, valores.preenchimento),
+    estiloTexto: valorDaLista(ESTILOS_TEXTO, valores.estiloTexto),
+    alinhamento: valorDaLista(ALINHAMENTOS, valores.alinhamento),
+    fonte: valorDaLista(FONTES, valores.fonte),
   }
-  if (typeof valores.cor === 'string' && FORMATO_COR_HEXADECIMAL.test(valores.cor)) {
-    sanitizadas.cor = valores.cor
+  for (const campo of CAMPOS_NUMERICOS) sanitizadas[campo] = numeroPositivo(valores[campo])
+  for (const campo of CAMPOS_BOOLEANOS) {
+    if (typeof valores[campo] === 'boolean') sanitizadas[campo] = valores[campo]
   }
-  if (ESTILOS_BORDA.includes(valores.estiloBorda as EstiloBorda)) {
-    sanitizadas.estiloBorda = valores.estiloBorda as EstiloBorda
+  for (const campo of CAMPOS_COR) {
+    const cor = valores[campo]
+    if (typeof cor === 'string' && FORMATO_COR_HEXADECIMAL.test(cor)) sanitizadas[campo] = cor
   }
-  if (TIPOS_PREENCHIMENTO.includes(valores.preenchimento as TipoPreenchimento)) {
-    sanitizadas.preenchimento = valores.preenchimento as TipoPreenchimento
-  }
-  if (typeof valores.comFundo === 'boolean') sanitizadas.comFundo = valores.comFundo
   return Object.fromEntries(
     Object.entries(sanitizadas).filter(([, valor]) => valor !== undefined)
   ) as Partial<PreferenciasFerramenta>
@@ -114,19 +136,25 @@ export function extrairPreferencias(
   imagem: ImagemEditor
 ): Partial<PreferenciasFerramenta> {
   const fator = calcularFatorEscala(imagem)
-  const extraidas: Partial<PreferenciasFerramenta> = { cor: anotacao.cor }
+  const extraidas: Record<string, unknown> = { cor: anotacao.cor }
 
   for (const propriedade of propriedadesEditaveis(anotacao)) {
-    if (propriedade === 'cor') continue
     const valor = (anotacao as unknown as Record<string, unknown>)[propriedade]
-    if (typeof valor === 'number') {
-      Object.assign(extraidas, { [propriedade]: arredondar(valor / fator) })
-      continue
-    }
-    Object.assign(extraidas, { [propriedade]: valor })
+    if (valor === undefined) continue
+    extraidas[propriedade] =
+      typeof valor === 'number' && PROPRIEDADES_ESCALAVEIS.includes(propriedade)
+        ? arredondar(valor / fator)
+        : valor
   }
 
-  return extraidas
+  return extraidas as Partial<PreferenciasFerramenta>
+}
+
+export function valoresDaAnotacao(
+  anotacao: Anotacao,
+  imagem: ImagemEditor
+): PreferenciasFerramenta {
+  return { ...PREFERENCIAS_PADRAO, ...extrairPreferencias(anotacao, imagem) }
 }
 
 export function mesclarPreferencias(

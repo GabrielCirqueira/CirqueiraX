@@ -238,3 +238,4 @@
 | M215 | Música: Aviso de Bloqueio do Spotify no "Tocando Agora" | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-215--música-aviso-de-bloqueio-do-spotify-no-tocando-agora) |
 | M216 | Música: Relatórios Mais Rápidos (Índices, Cache e Banco) | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-216--música-relatórios-mais-rápidos-índices-cache-e-banco) |
 | M217 | YouTube Music: Vídeos Vinculados pelo Histórico e IA Sem Viés de Categoria | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-217--youtube-music-vídeos-vinculados-pelo-histórico-e-ia-sem-viés-de-categoria) |
+| M218 | Editor de Imagem: Criar do Zero, Mais Formas, Cores e Texto | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-218--editor-de-imagem-criar-do-zero-mais-formas-cores-e-texto) |

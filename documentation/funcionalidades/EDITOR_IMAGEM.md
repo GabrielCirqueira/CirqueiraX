@@ -6,6 +6,7 @@ O **Editor de Imagem** (`/editor-imagem`) anota e ajusta imagens direto no naveg
 
 ## 1. Como abrir uma imagem
 
+- Sem mídia na URL, a página abre uma **tela em branco** (último formato usado, padrão 1920 × 1080, fundo branco). Dá para montar a imagem só com formas e texto. Colar ou abrir uma imagem substitui a tela (M218).
 - Colar com **Ctrl+V**.
 - Arrastar para a tela.
 - Escolher um arquivo.
@@ -23,6 +24,8 @@ Só itens que passam em `MediaItem::isEditavelComoImagem()` podem ser abertos a 
 | `A` | Seta |
 | `R` | Retângulo |
 | `E` | Círculo |
+| `G` | Triângulo |
+| `S` | Estrela |
 | `L` | Linha |
 | `B` | Pincel |
 | `H` | Marca-texto |
@@ -31,7 +34,18 @@ Só itens que passam em `MediaItem::isEditavelComoImagem()` podem ser abertos a 
 | `D` | Pixelar |
 | `C` | Recorte |
 
-Há 8 cores e 3 espessuras. O painel de propriedades ajusta o elemento selecionado, e as preferências de cada ferramenta ficam salvas no `localStorage`.
+Formas (botão com seta na barra): retângulo, círculo, triângulo, losango, estrela, hexágono e balão de fala.
+
+**Cores:** 8 rápidas na barra e um seletor com paleta de 42 cores, recentes (`editor-imagem:cores-recentes`), área deslizante, barra de matiz, hex e conta-gotas (`SeletorCor`, Chakra `ColorPicker`).
+
+**Painel lateral** (M218): mostra o item selecionado ou, sem seleção, as preferências da ferramenta atual (valem para o próximo desenho).
+- Formas: cor da borda, preenchimento (vazio, translúcido, sólido) com cor própria, espessura 0 a 60 (0 = sem borda), traço sólido/tracejado/pontilhado, arredondamento (retângulo e balão).
+- Texto: 9 fontes (`utils/fontesEditor.ts`, via `@fontsource`), tamanho 6 a 400 (deslizante ou digitado), negrito, itálico, alinhamento, estilo simples/contorno/etiqueta, várias linhas (`Shift+Enter`). A alça do canto muda o tamanho.
+- Todos: opacidade e sombra; camadas (frente, trás, subir, descer) e centralizar na tela.
+- **Camadas**: lista de todos os itens, com seleção, ordem e exclusão.
+- **Tela**: 8 formatos prontos, largura e altura livres (16 a 6000 px), girar e fundo de qualquer cor ou transparente. Mudar a tela mantém os itens.
+
+Valores de tamanho ficam relativos a uma imagem de 1200 px (`calcularFatorEscala`). As preferências de cada ferramenta ficam no `localStorage`.
 
 ---
 
@@ -45,6 +59,9 @@ Há 8 cores e 3 espessuras. O painel de propriedades ajusta o elemento seleciona
 | `Ctrl+C` | Copiar |
 | `Ctrl+S` | Salvar |
 | `Ctrl+D` | Duplicar elemento |
+| `[` / `]` | Diminuir / aumentar o item selecionado |
+| `Ctrl+]` / `Ctrl+[` | Subir / descer camada (`Shift` leva ao topo ou ao fundo) |
+| `Shift` ao esticar alça | Mantém a proporção |
 | `Delete` ou `Backspace` | Apagar elemento |
 | Setas | Mover 1 px |
 | `Shift` + setas | Mover 10 px |
@@ -52,7 +69,9 @@ Há 8 cores e 3 espessuras. O painel de propriedades ajusta o elemento seleciona
 
 ---
 
-## 4. Salvar
+## 4. Exportar e salvar
+
+Copiar gera PNG. Baixar oferece PNG (mantém transparência) ou JPG (fundo branco). As fontes são carregadas antes de gerar a imagem.
 
 ```
 POST /api/v1/media-itens/edicoes (arquivo + editado_de_uuid)

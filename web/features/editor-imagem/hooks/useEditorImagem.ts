@@ -4,8 +4,12 @@ import { CHAVES_STORAGE } from '@/shared/utils/localStorageService'
 import { type MouseEvent, type PointerEvent, useMemo, useState } from 'react'
 import type {
   AlteracaoAnotacao,
+  AlvoPainel,
   Anotacao,
   AnotacaoTexto,
+  ConfiguracaoTela,
+  DirecaoCamada,
+  EixoAlinhamento,
   EstiloExibido,
   FerramentaEditor,
   ImagemEditor,
@@ -15,10 +19,17 @@ import type {
   PreferenciasFerramenta,
   TextoEmEdicao,
 } from '../types'
-import { criarImagemEditor, nomeDoArquivoColado } from '../utils/carregamentoImagem'
 import {
+  criarImagemEditor,
+  criarTelaEmBranco,
+  nomeDoArquivoColado,
+} from '../utils/carregamentoImagem'
+import {
+  COR_FUNDO_TELA_PADRAO,
   DESLOCAMENTO_DUPLICADO,
   ESPESSURA_POR_NIVEL,
+  FORMATO_TELA_INICIAL,
+  LIMITES_PROPRIEDADE,
   TAMANHO_ALCA_ACERTO_TELA,
   TOLERANCIA_ACERTO_TELA,
 } from '../utils/constantesEditor'
@@ -28,15 +39,18 @@ import {
   criarNumero,
   criarTexto,
   criarTraco,
+  formatoDoTexto,
   isArrasteSignificativo,
   isFerramentaDeTraco,
 } from '../utils/fabricaAnotacoes'
 import {
   aplicarRestricaoComShift,
   calcularFatorEscala,
+  centroDoRetangulo,
   converterPontoDaTela,
   converterPontoParaTela,
   limitarAoRetangulo,
+  normalizarRetangulo,
 } from '../utils/geometria'
 import { proximoNumeroMarcador } from '../utils/historicoAnotacoes'
 import {
@@ -47,9 +61,11 @@ import {
   mesclarPreferencias,
   nivelDaEspessura,
   resolverPreferencias,
+  valoresDaAnotacao,
 } from '../utils/preferenciasEditor'
 import {
   acertouAnotacao,
+  caixaDaAnotacao,
   cursorDaAlca,
   cursorDaFerramenta,
   encontrarAlcaNoPonto,
@@ -59,6 +75,7 @@ import {
   alterarAnotacao,
   deslocarAnotacao,
   duplicarAnotacao,
+  escalarAlteracao,
   isPropriedadeEditavel,
   redimensionarAnotacao,
 } from '../utils/transformacaoAnotacoes'
@@ -69,15 +86,31 @@ const PREFERENCIAS_INICIAIS: PreferenciasEditor = {}
 const OPCOES_FERRAMENTA_SALVA = { valoresPermitidos: FERRAMENTAS_PERSISTIVEIS }
 const OPCOES_PREFERENCIAS_SALVAS = { validar: isPreferenciasEditor }
 const BOTAO_PRINCIPAL_PONTEIRO = 0
-const TIPOS_SELECIONADOS_APOS_CRIAR: Anotacao['tipo'][] = [
-  'seta',
-  'linha',
-  'retangulo',
-  'elipse',
-  'desfoque',
-  'texto',
-  'numero',
-]
+const TIPOS_NAO_SELECIONADOS_APOS_CRIAR: Anotacao['tipo'][] = ['pincel', 'marcaTexto', 'recorte']
+const PASSO_TAMANHO = 0.1
+const ACAO_POR_DIRECAO = {
+  frente: 'trazerParaFrente',
+  tras: 'enviarParaTras',
+  subir: 'subirCamada',
+  descer: 'descerCamada',
+} as const
+const TELA_INICIAL: ConfiguracaoTela = {
+  largura: FORMATO_TELA_INICIAL.largura,
+  altura: FORMATO_TELA_INICIAL.altura,
+  corFundo: COR_FUNDO_TELA_PADRAO,
+}
+
+function isConfiguracaoTela(valor: unknown): valor is ConfiguracaoTela {
+  if (typeof valor !== 'object' || valor === null) return false
+  const tela = valor as Record<string, unknown>
+  return (
+    typeof tela.largura === 'number' &&
+    typeof tela.altura === 'number' &&
+    (tela.corFundo === null || typeof tela.corFundo === 'string')
+  )
+}
+
+const OPCOES_TELA_SALVA = { validar: isConfiguracaoTela }
 
 export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
   const [imagemLocal, setImagemLocal] = useState<ImagemEditor | null>(null)
@@ -91,12 +124,21 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     PREFERENCIAS_INICIAIS,
     OPCOES_PREFERENCIAS_SALVAS
   )
+  const [ultimaTela, setUltimaTela] = useLocalStorageState<ConfiguracaoTela>(
+    CHAVES_STORAGE.EDITOR_IMAGEM_TELA,
+    TELA_INICIAL,
+    OPCOES_TELA_SALVA
+  )
   const [textoEmEdicao, setTextoEmEdicao] = useState<TextoEmEdicao | null>(null)
   const [carregandoImagem, setCarregandoImagem] = useState(false)
 
   const imagem = imagemLocal ?? imagemDaMidia
   const canvas = useCanvasEditor(imagem)
   const { historico, historicoRef, interacaoRef, recorte } = canvas
+
+  function fator(): number {
+    return imagem ? calcularFatorEscala(imagem) : 1
+  }
 
   function preferenciasDe(alvo: FerramentaEditor): PreferenciasFerramenta {
     return resolverPreferencias(preferencias, alvo)
@@ -127,6 +169,28 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     return { cor: atuais.cor, nivelEspessura: nivelDaEspessura(atuais.espessura) }
   }, [canvas.selecionada, imagem, preferencias, ferramenta])
 
+  const alvoPainel = useMemo<AlvoPainel | null>(() => {
+    const selecionada = canvas.selecionada
+    if (selecionada && imagem) {
+      const fatorImagem = calcularFatorEscala(imagem)
+      const area =
+        'inicio' in selecionada ? normalizarRetangulo(selecionada.inicio, selecionada.fim) : null
+      return {
+        tipo: selecionada.tipo,
+        valores: valoresDaAnotacao(selecionada, imagem),
+        anotacaoId: selecionada.id,
+        limiteRaioCanto: area ? Math.min(area.largura, area.altura) / 2 / fatorImagem : null,
+      }
+    }
+    if (!isFerramentaComPreferencias(ferramenta)) return null
+    return {
+      tipo: ferramenta,
+      valores: resolverPreferencias(preferencias, ferramenta),
+      anotacaoId: null,
+      limiteRaioCanto: null,
+    }
+  }, [canvas.selecionada, imagem, preferencias, ferramenta])
+
   function pontoDaTela(clienteX: number, clienteY: number): Ponto | null {
     const canvasBase = canvas.canvasBaseRef.current
     if (!canvasBase || !recorte) return null
@@ -146,7 +210,7 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
 
   function adicionarESelecionar(anotacao: Anotacao) {
     canvas.aplicarNoHistorico({ tipo: 'adicionar', anotacao })
-    if (TIPOS_SELECIONADOS_APOS_CRIAR.includes(anotacao.tipo)) canvas.selecionar(anotacao.id)
+    if (!TIPOS_NAO_SELECIONADOS_APOS_CRIAR.includes(anotacao.tipo)) canvas.selecionar(anotacao.id)
   }
 
   function confirmarTextoExistente(anotacaoId: string, texto: string) {
@@ -163,7 +227,7 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
 
   function confirmarTexto() {
     if (!textoEmEdicao || !imagem) return
-    const texto = textoEmEdicao.valor.trim()
+    const texto = textoEmEdicao.valor.replace(/\s+$/u, '')
     setTextoEmEdicao(null)
     canvas.ocultarDuranteEdicao(null)
 
@@ -171,7 +235,7 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
       confirmarTextoExistente(textoEmEdicao.anotacaoId, texto)
       return
     }
-    if (!texto) return
+    if (!texto.trim()) return
     const preferenciasTexto = { ...preferenciasDe('texto'), cor: textoEmEdicao.cor }
     adicionarESelecionar(criarTexto(texto, textoEmEdicao.posicao, imagem, preferenciasTexto))
   }
@@ -189,8 +253,25 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
       tamanhoFonte:
         anotacaoExistente?.tamanhoFonte ?? calcularTamanhoFonte(imagem, preferenciasTexto),
       cor: anotacaoExistente?.cor ?? preferenciasTexto.cor,
+      formato: formatoDoTexto(anotacaoExistente ?? preferenciasTexto),
     })
     canvas.ocultarDuranteEdicao(anotacaoExistente?.id ?? null)
+  }
+
+  function sincronizarTextoEmEdicao(alteracao: AlteracaoAnotacao) {
+    setTextoEmEdicao((atual) => {
+      if (!atual) return atual
+      const formato = formatoDoTexto({ ...atual.formato, ...alteracao })
+      return {
+        ...atual,
+        cor: alteracao.cor ?? atual.cor,
+        tamanhoFonte:
+          alteracao.tamanhoFonte !== undefined
+            ? alteracao.tamanhoFonte * fator()
+            : atual.tamanhoFonte,
+        formato,
+      }
+    })
   }
 
   function encontrarAlvoParaMover(ponto: Ponto): Anotacao | null {
@@ -320,7 +401,7 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
             ponto.x - interacao.origem.x,
             ponto.y - interacao.origem.y
           )
-        : redimensionarAnotacao(interacao.original, interacao.alca, ponto)
+        : redimensionarAnotacao(interacao.original, interacao.alca, ponto, evento.shiftKey)
     canvas.previsualizar(interacao.atual)
   }
 
@@ -360,6 +441,12 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     abrirTexto(alvo.posicao, alvo)
   }
 
+  function editarTextoSelecionado() {
+    const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
+    if (selecionadaAtual?.tipo !== 'texto') return
+    abrirTexto(selecionadaAtual.posicao, selecionadaAtual)
+  }
+
   function cancelarAcaoAtual() {
     if (textoEmEdicao) {
       setTextoEmEdicao(null)
@@ -376,14 +463,19 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
 
   function previsualizarAlteracao(alteracao: AlteracaoAnotacao) {
     const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
-    if (selecionadaAtual) canvas.previsualizar(alterarAnotacao(selecionadaAtual, alteracao))
+    if (!selecionadaAtual) return
+    canvas.previsualizar(alterarAnotacao(selecionadaAtual, escalarAlteracao(alteracao, fator())))
   }
 
   function confirmarAlteracao(alteracao: AlteracaoAnotacao) {
     const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
     canvas.previsualizar(null)
-    if (!selecionadaAtual) return
-    const alterada = alterarAnotacao(selecionadaAtual, alteracao)
+    sincronizarTextoEmEdicao(alteracao)
+    if (!selecionadaAtual) {
+      lembrarDaFerramentaAtual(alteracao)
+      return
+    }
+    const alterada = alterarAnotacao(selecionadaAtual, escalarAlteracao(alteracao, fator()))
     canvas.aplicarNoHistorico({ tipo: 'atualizar', anotacao: alterada })
     lembrarPreferencias(alterada)
   }
@@ -406,10 +498,10 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     adicionarESelecionar(copia)
   }
 
-  function trazerSelecionadaParaFrente() {
-    const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
-    if (!selecionadaAtual) return
-    canvas.aplicarNoHistorico({ tipo: 'trazerParaFrente', id: selecionadaAtual.id })
+  function moverCamada(direcao: DirecaoCamada, id?: string) {
+    const alvoId = id ?? canvas.anotacaoSelecionadaAtual()?.id
+    if (!alvoId) return
+    canvas.aplicarNoHistorico({ tipo: ACAO_POR_DIRECAO[direcao], id: alvoId })
   }
 
   function deslocarSelecionada(dx: number, dy: number) {
@@ -421,14 +513,60 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     })
   }
 
+  function alinharSelecionada(eixo: EixoAlinhamento) {
+    const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
+    if (!selecionadaAtual || !recorte) return
+    const centroAlvo = centroDoRetangulo(recorte)
+    const centroAtual = centroDoRetangulo(caixaDaAnotacao(selecionadaAtual))
+    const dx = eixo === 'horizontal' ? centroAlvo.x - centroAtual.x : 0
+    const dy = eixo === 'vertical' ? centroAlvo.y - centroAtual.y : 0
+    if (dx === 0 && dy === 0) return
+    canvas.aplicarNoHistorico({
+      tipo: 'atualizar',
+      anotacao: deslocarAnotacao(selecionadaAtual, dx, dy),
+    })
+  }
+
+  function ajustarTamanhoSelecionada(passo: number) {
+    const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
+    if (!selecionadaAtual || !imagem) return
+    const escala = 1 + PASSO_TAMANHO * passo
+    const fatorImagem = calcularFatorEscala(imagem)
+    if (selecionadaAtual.tipo === 'texto') {
+      const { minimo, maximo } = LIMITES_PROPRIEDADE.tamanhoFonte
+      const tamanho = Math.min(
+        Math.max(selecionadaAtual.tamanhoFonte * escala, minimo * fatorImagem),
+        maximo * fatorImagem
+      )
+      confirmarAlteracao({ tamanhoFonte: tamanho / fatorImagem })
+      return
+    }
+    if (selecionadaAtual.tipo === 'numero') {
+      confirmarAlteracao({ raio: (selecionadaAtual.raio * escala) / fatorImagem })
+      return
+    }
+    if (!isPropriedadeEditavel(selecionadaAtual, 'espessura')) return
+    const { maximo } = LIMITES_PROPRIEDADE.espessura
+    const espessura = Math.min(
+      Math.max(1, selecionadaAtual.espessura / fatorImagem + passo),
+      maximo
+    )
+    confirmarAlteracao({ espessura })
+  }
+
+  function substituirImagem(novaImagem: ImagemEditor, manterAnotacoes: boolean) {
+    imagemLocal?.bitmap.close()
+    if (!manterAnotacoes) {
+      canvas.reiniciar()
+      setTextoEmEdicao(null)
+    }
+    setImagemLocal(novaImagem)
+  }
+
   async function carregarArquivo(arquivo: Blob, nome: string | null) {
     setCarregandoImagem(true)
     try {
-      const novaImagem = await criarImagemEditor(arquivo, nome, null)
-      imagemLocal?.bitmap.close()
-      canvas.reiniciar()
-      setTextoEmEdicao(null)
-      setImagemLocal(novaImagem)
+      substituirImagem(await criarImagemEditor(arquivo, nome, null), false)
     } catch {
       addToast({
         title: 'Não foi possível abrir a imagem',
@@ -438,6 +576,20 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     } finally {
       setCarregandoImagem(false)
     }
+  }
+
+  async function novaTela(configuracao: ConfiguracaoTela = ultimaTela) {
+    confirmarTexto()
+    substituirImagem(await criarTelaEmBranco(configuracao), false)
+    setUltimaTela(configuracao)
+  }
+
+  async function configurarTela(alteracao: Partial<ConfiguracaoTela>) {
+    if (!imagem?.tela) return
+    confirmarTexto()
+    const configuracao = { ...imagem.tela, ...alteracao }
+    substituirImagem(await criarTelaEmBranco(configuracao, imagem.nome), true)
+    setUltimaTela(configuracao)
   }
 
   function obterAnotacoesConfirmadas(): Anotacao[] {
@@ -451,25 +603,22 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     setFerramenta(proxima)
   }
 
+  function selecionarAnotacao(id: string) {
+    confirmarTexto()
+    canvas.selecionar(id)
+  }
+
   function selecionarCor(cor: string) {
-    setTextoEmEdicao((atual) => (atual && !atual.anotacaoId ? { ...atual, cor } : atual))
-    const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
-    if (selecionadaAtual) {
-      confirmarAlteracao({ cor })
-      return
-    }
-    lembrarDaFerramentaAtual({ cor })
+    const valores = alvoPainel?.valores
+    const preenchimentoVinculado = valores && valores.corPreenchimento === valores.cor
+    confirmarAlteracao(preenchimentoVinculado ? { cor, corPreenchimento: cor } : { cor })
   }
 
   function selecionarEspessura(nivelEspessura: NivelEspessura) {
     const espessuraRelativa = ESPESSURA_POR_NIVEL[nivelEspessura]
     const selecionadaAtual = canvas.anotacaoSelecionadaAtual()
-    if (!selecionadaAtual) {
-      lembrarDaFerramentaAtual({ espessura: espessuraRelativa })
-      return
-    }
-    if (!imagem || !isPropriedadeEditavel(selecionadaAtual, 'espessura')) return
-    confirmarAlteracao({ espessura: espessuraRelativa * calcularFatorEscala(imagem) })
+    if (selecionadaAtual && !isPropriedadeEditavel(selecionadaAtual, 'espessura')) return
+    confirmarAlteracao({ espessura: espessuraRelativa })
   }
 
   function atualizarTexto(valor: string) {
@@ -482,8 +631,10 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     recorte,
     ferramenta,
     estilo,
+    alvoPainel,
     textoEmEdicao,
     carregandoImagem,
+    ultimaTela,
     selecionada: canvas.selecionada,
     podeDesfazer: historico.passado.length > 0,
     podeRefazer: historico.futuro.length > 0,
@@ -494,20 +645,28 @@ export function useEditorImagem(imagemDaMidia: ImagemEditor | null) {
     moverDesenho,
     finalizarDesenho,
     editarTextoComDuploClique,
+    editarTextoSelecionado,
     cancelarAcaoAtual,
     confirmarTexto,
     atualizarTexto,
     obterAnotacoesConfirmadas,
     carregarArquivoColado: (arquivo: File) =>
       carregarArquivo(arquivo, nomeDoArquivoColado(arquivo)),
+    novaTela,
+    configurarTela,
     selecionarFerramenta,
+    selecionarAnotacao,
     selecionarCor,
     selecionarEspessura,
     previsualizarAlteracao,
     confirmarAlteracao,
     excluirSelecionada,
+    excluirAnotacao: (id: string) => canvas.aplicarNoHistorico({ tipo: 'remover', id }),
+    cancelarPrevisualizacao: () => canvas.previsualizar(null),
     duplicarSelecionada,
-    trazerSelecionadaParaFrente,
+    moverCamada,
+    alinharSelecionada,
+    ajustarTamanhoSelecionada,
     deslocarSelecionada,
     desfazer: () => canvas.aplicarNoHistorico({ tipo: 'desfazer' }),
     refazer: () => canvas.aplicarNoHistorico({ tipo: 'refazer' }),

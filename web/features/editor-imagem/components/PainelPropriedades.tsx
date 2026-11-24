@@ -1,28 +1,67 @@
-import { Box, HStack, IconButton, Slider, Text } from '@chakra-ui/react'
-import { BringToFront, CopyPlus, Trash2 } from 'lucide-react'
-import { memo, useState } from 'react'
+import {
+  Box,
+  HStack,
+  IconButton,
+  Input,
+  SimpleGrid,
+  Slider,
+  Switch,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import {
+  AlignCenter,
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignLeft,
+  AlignRight,
+  ArrowDownToLine,
+  ArrowUpToLine,
+  Bold,
+  ChevronDown,
+  ChevronUp,
+  CopyPlus,
+  Italic,
+  type LucideIcon,
+  PencilLine,
+  Trash2,
+} from 'lucide-react'
+import { type ReactNode, memo, useState } from 'react'
 import type {
+  AlinhamentoTexto,
   AlteracaoAnotacao,
-  Anotacao,
+  AlvoPainel,
+  DirecaoCamada,
+  EixoAlinhamento,
   EstiloBorda,
-  ImagemEditor,
+  EstiloTexto,
+  PropriedadeEditavel,
   TipoPreenchimento,
 } from '../types'
 import {
-  type ConfiguracaoDeslizante,
+  LIMITES_PROPRIEDADE,
+  type LimitePropriedade,
+  OPCOES_FONTE,
+} from '../utils/constantesEditor'
+import {
   ROTULO_TIPO_ANOTACAO,
-  montarDeslizantes,
+  limiteDaEspessura,
+  limiteDoRaioCanto,
+  rotuloDaCor,
+  temPropriedade,
 } from '../utils/propriedadesPainel'
-import { isPropriedadeEditavel } from '../utils/transformacaoAnotacoes'
+import { SeletorCor } from './SeletorCor'
 
 interface OpcaoSegmento<T extends string> {
   valor: T
   rotulo: string
+  icone?: LucideIcon
 }
 
 const OPCOES_BORDA: OpcaoSegmento<EstiloBorda>[] = [
   { valor: 'solida', rotulo: 'Sólida' },
   { valor: 'tracejada', rotulo: 'Tracejada' },
+  { valor: 'pontilhada', rotulo: 'Pontos' },
 ]
 
 const OPCOES_PREENCHIMENTO: OpcaoSegmento<TipoPreenchimento>[] = [
@@ -31,45 +70,105 @@ const OPCOES_PREENCHIMENTO: OpcaoSegmento<TipoPreenchimento>[] = [
   { valor: 'solido', rotulo: 'Sólido' },
 ]
 
-const OPCOES_FUNDO_TEXTO: OpcaoSegmento<'sem' | 'com'>[] = [
-  { valor: 'sem', rotulo: 'Contorno' },
-  { valor: 'com', rotulo: 'Etiqueta' },
+const OPCOES_ESTILO_TEXTO: OpcaoSegmento<EstiloTexto>[] = [
+  { valor: 'simples', rotulo: 'Simples' },
+  { valor: 'contorno', rotulo: 'Contorno' },
+  { valor: 'etiqueta', rotulo: 'Etiqueta' },
 ]
 
-function Separador() {
-  return <Box w="1px" h={6} bg="border.subtle" display={{ base: 'none', md: 'block' }} />
+const OPCOES_ALINHAMENTO: OpcaoSegmento<AlinhamentoTexto>[] = [
+  { valor: 'esquerda', rotulo: 'Esquerda', icone: AlignLeft },
+  { valor: 'centro', rotulo: 'Centro', icone: AlignCenter },
+  { valor: 'direita', rotulo: 'Direita', icone: AlignRight },
+]
+
+function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
+  return (
+    <VStack gap={2} alignItems="stretch">
+      <Text fontSize="2xs" fontWeight="semibold" color="fg.subtle" textTransform="uppercase">
+        {titulo}
+      </Text>
+      {children}
+    </VStack>
+  )
 }
 
 interface ControleDeslizanteProps {
-  configuracao: ConfiguracaoDeslizante
+  rotulo: string
+  propriedade: PropriedadeEditavel
+  limite: LimitePropriedade
+  valor: number
+  sufixo?: string
   onPrevisualizar: (alteracao: AlteracaoAnotacao) => void
   onConfirmar: (alteracao: AlteracaoAnotacao) => void
 }
 
+function limitar(valor: number, { minimo, maximo }: LimitePropriedade): number {
+  return Math.min(Math.max(valor, minimo), maximo)
+}
+
 function ControleDeslizante({
-  configuracao,
+  rotulo,
+  propriedade,
+  limite,
+  valor: valorInicial,
+  sufixo = '',
   onPrevisualizar,
   onConfirmar,
 }: ControleDeslizanteProps) {
-  const [valor, setValor] = useState(configuracao.valor)
-  const { propriedade, rotulo, minimo, maximo } = configuracao
+  const [valor, setValor] = useState(Math.round(limitar(valorInicial, limite)))
+  const [digitado, setDigitado] = useState(String(Math.round(valorInicial)))
+
+  function confirmarDigitado() {
+    const numero = Number.parseFloat(digitado.replace(',', '.'))
+    if (!Number.isFinite(numero)) {
+      setDigitado(String(valor))
+      return
+    }
+    const final = Math.round(limitar(numero, limite))
+    setValor(final)
+    setDigitado(String(final))
+    onConfirmar({ [propriedade]: final })
+  }
 
   return (
-    <HStack gap={2.5}>
-      <Text fontSize="xs" color="fg.muted" minW="fit-content">
-        {rotulo}
-      </Text>
+    <VStack gap={1} alignItems="stretch">
+      <HStack justify="space-between">
+        <Text fontSize="xs" color="fg.muted">
+          {rotulo}
+        </Text>
+        <HStack gap={1}>
+          <Input
+            size="2xs"
+            w="52px"
+            textAlign="right"
+            inputMode="numeric"
+            value={digitado}
+            aria-label={`${rotulo} (valor exato)`}
+            onChange={(evento) => setDigitado(evento.target.value)}
+            onBlur={confirmarDigitado}
+            onKeyDown={(evento) => {
+              if (evento.key === 'Enter') confirmarDigitado()
+            }}
+          />
+          {sufixo && (
+            <Text fontSize="xs" color="fg.subtle">
+              {sufixo}
+            </Text>
+          )}
+        </HStack>
+      </HStack>
       <Slider.Root
         size="sm"
-        w={{ base: '110px', md: '130px' }}
         colorPalette="brand"
-        min={minimo}
-        max={maximo}
+        min={limite.minimo}
+        max={limite.maximo}
         step={1}
-        defaultValue={[configuracao.valor]}
+        value={[valor]}
         onValueChange={({ value }) => {
           const [proximo = valor] = value
           setValor(proximo)
+          setDigitado(String(proximo))
           onPrevisualizar({ [propriedade]: proximo })
         }}
         onValueChangeEnd={({ value }) => {
@@ -84,180 +183,373 @@ function ControleDeslizante({
           <Slider.Thumbs />
         </Slider.Control>
       </Slider.Root>
-      <Text
-        fontSize="xs"
-        color="fg.subtle"
-        w="3ch"
-        textAlign="right"
-        fontVariantNumeric="tabular-nums"
-      >
-        {valor}
-      </Text>
-    </HStack>
+    </VStack>
   )
 }
 
 interface ControleSegmentadoProps<T extends string> {
-  rotulo: string
   opcoes: OpcaoSegmento<T>[]
   valor: T
   onSelecionar: (valor: T) => void
 }
 
 function ControleSegmentado<T extends string>({
-  rotulo,
   opcoes,
   valor,
   onSelecionar,
 }: ControleSegmentadoProps<T>) {
   return (
-    <HStack gap={2}>
-      <Text fontSize="xs" color="fg.muted">
-        {rotulo}
-      </Text>
-      <HStack gap={0.5} p={0.5} bg="bg.muted" borderRadius="8px">
-        {opcoes.map((opcao) => {
-          const ativa = opcao.valor === valor
-          return (
-            <Box
-              as="button"
-              key={opcao.valor}
-              px={2.5}
-              py={1}
-              fontSize="xs"
-              borderRadius="8px"
-              cursor="pointer"
-              bg={ativa ? 'bg.panel' : 'transparent'}
-              color={ativa ? 'fg' : 'fg.muted'}
-              fontWeight={ativa ? 'semibold' : 'normal'}
-              shadow={ativa ? 'xs' : 'none'}
-              transition="background 0.12s ease"
-              aria-pressed={ativa}
-              onClick={() => onSelecionar(opcao.valor)}
-            >
-              {opcao.rotulo}
-            </Box>
-          )
-        })}
-      </HStack>
+    <HStack gap={0.5} p={0.5} bg="bg.muted" borderRadius="8px">
+      {opcoes.map((opcao) => {
+        const ativa = opcao.valor === valor
+        const Icone = opcao.icone
+        return (
+          <Box
+            as="button"
+            key={opcao.valor}
+            flex="1"
+            display="inline-flex"
+            alignItems="center"
+            justifyContent="center"
+            px={2}
+            py={1}
+            fontSize="xs"
+            borderRadius="8px"
+            cursor="pointer"
+            bg={ativa ? 'bg.panel' : 'transparent'}
+            color={ativa ? 'fg' : 'fg.muted'}
+            fontWeight={ativa ? 'semibold' : 'normal'}
+            shadow={ativa ? 'xs' : 'none'}
+            transition="background 0.12s ease"
+            aria-pressed={ativa}
+            title={opcao.rotulo}
+            onClick={() => onSelecionar(opcao.valor)}
+          >
+            {Icone ? <Icone size={14} /> : opcao.rotulo}
+          </Box>
+        )
+      })}
     </HStack>
   )
 }
 
+interface BotaoAcaoProps {
+  rotulo: string
+  icone: LucideIcon
+  perigo?: boolean
+  ativo?: boolean
+  onClick: () => void
+}
+
+function BotaoAcao({ rotulo, icone: Icone, perigo, ativo, onClick }: BotaoAcaoProps) {
+  return (
+    <IconButton
+      size="xs"
+      variant={ativo ? 'subtle' : 'ghost'}
+      colorPalette={ativo ? 'brand' : 'gray'}
+      borderRadius="full"
+      color={ativo ? undefined : 'fg.muted'}
+      _hover={perigo ? { color: 'cirqueira.red.500' } : undefined}
+      aria-label={rotulo}
+      aria-pressed={ativo}
+      title={rotulo}
+      onClick={onClick}
+    >
+      <Icone size={15} />
+    </IconButton>
+  )
+}
+
 export interface PainelPropriedadesProps {
-  anotacao: Anotacao
-  imagem: ImagemEditor
+  alvo: AlvoPainel
+  coresRecentes: string[]
   onPrevisualizar: (alteracao: AlteracaoAnotacao) => void
+  onCancelarPrevisualizacao: () => void
   onConfirmar: (alteracao: AlteracaoAnotacao) => void
-  onTrazerParaFrente: () => void
+  onEditarTexto: () => void
   onDuplicar: () => void
   onExcluir: () => void
+  onMoverCamada: (direcao: DirecaoCamada) => void
+  onAlinhar: (eixo: EixoAlinhamento) => void
 }
 
 export const PainelPropriedades = memo(function PainelPropriedades({
-  anotacao,
-  imagem,
+  alvo,
+  coresRecentes,
   onPrevisualizar,
+  onCancelarPrevisualizacao,
   onConfirmar,
-  onTrazerParaFrente,
+  onEditarTexto,
   onDuplicar,
   onExcluir,
+  onMoverCamada,
+  onAlinhar,
 }: PainelPropriedadesProps) {
-  const deslizantes = montarDeslizantes(anotacao, imagem)
+  const { tipo, valores, anotacaoId } = alvo
+  const tem = (propriedade: PropriedadeEditavel) => temPropriedade(tipo, propriedade)
+  const chave = (propriedade: string, valor: unknown) =>
+    `${anotacaoId ?? tipo}-${propriedade}-${String(valor)}`
+  const previsualizarCor = anotacaoId
+    ? (propriedade: 'cor' | 'corPreenchimento') => (cor: string) =>
+        onPrevisualizar({ [propriedade]: cor })
+    : null
 
   return (
-    <HStack
+    <VStack
       gap={4}
-      px={3}
-      py={2}
+      alignItems="stretch"
+      p={3}
       bg="bg.panel"
       borderWidth="1px"
       borderColor="border.subtle"
       borderRadius="8px"
       shadow="sm"
-      flexWrap="wrap"
-      justify="center"
-      alignSelf="center"
-      maxW="full"
     >
-      <Text fontSize="xs" fontWeight="semibold" color="fg">
-        {ROTULO_TIPO_ANOTACAO[anotacao.tipo]}
-      </Text>
+      <HStack justify="space-between" gap={2}>
+        <VStack gap={0} alignItems="flex-start" minW={0}>
+          <Text fontSize="sm" fontWeight="semibold" color="fg">
+            {ROTULO_TIPO_ANOTACAO[tipo]}
+          </Text>
+          <Text fontSize="2xs" color="fg.subtle">
+            {anotacaoId ? 'Selecionado' : 'Ajuste antes de desenhar'}
+          </Text>
+        </VStack>
+        {anotacaoId && (
+          <HStack gap={0}>
+            {tipo === 'texto' && (
+              <BotaoAcao
+                rotulo="Editar texto (duplo clique)"
+                icone={PencilLine}
+                onClick={onEditarTexto}
+              />
+            )}
+            <BotaoAcao rotulo="Duplicar (Ctrl + D)" icone={CopyPlus} onClick={onDuplicar} />
+            <BotaoAcao rotulo="Excluir (Delete)" icone={Trash2} perigo onClick={onExcluir} />
+          </HStack>
+        )}
+      </HStack>
 
-      {deslizantes.map((configuracao) => (
+      {tem('cor') && (
+        <HStack justify="space-between">
+          <Text fontSize="xs" color="fg.muted">
+            {rotuloDaCor(tipo)}
+          </Text>
+          <SeletorCor
+            valor={valores.cor}
+            rotulo={rotuloDaCor(tipo)}
+            coresRecentes={coresRecentes}
+            onPrevisualizar={previsualizarCor?.('cor')}
+            onCancelarPrevisualizacao={onCancelarPrevisualizacao}
+            onConfirmar={(cor) => onConfirmar({ cor })}
+          />
+        </HStack>
+      )}
+
+      {tem('preenchimento') && (
+        <Secao titulo="Preenchimento">
+          <ControleSegmentado
+            opcoes={OPCOES_PREENCHIMENTO}
+            valor={valores.preenchimento}
+            onSelecionar={(preenchimento) => onConfirmar({ preenchimento })}
+          />
+          {valores.preenchimento !== 'nenhum' && (
+            <HStack justify="space-between">
+              <Text fontSize="xs" color="fg.muted">
+                Cor do preenchimento
+              </Text>
+              <SeletorCor
+                valor={valores.corPreenchimento}
+                rotulo="Cor do preenchimento"
+                coresRecentes={coresRecentes}
+                onPrevisualizar={previsualizarCor?.('corPreenchimento')}
+                onCancelarPrevisualizacao={onCancelarPrevisualizacao}
+                onConfirmar={(corPreenchimento) => onConfirmar({ corPreenchimento })}
+              />
+            </HStack>
+          )}
+        </Secao>
+      )}
+
+      {tem('espessura') && (
+        <Secao titulo={tem('preenchimento') ? 'Borda' : 'Traço'}>
+          <ControleDeslizante
+            key={chave('espessura', valores.espessura)}
+            rotulo={tem('preenchimento') ? 'Espessura (0 = sem borda)' : 'Espessura'}
+            propriedade="espessura"
+            limite={limiteDaEspessura(tipo)}
+            valor={valores.espessura}
+            onPrevisualizar={onPrevisualizar}
+            onConfirmar={onConfirmar}
+          />
+          {tem('estiloBorda') && (
+            <ControleSegmentado
+              opcoes={OPCOES_BORDA}
+              valor={valores.estiloBorda}
+              onSelecionar={(estiloBorda) => onConfirmar({ estiloBorda })}
+            />
+          )}
+          {tem('raioCanto') && (
+            <ControleDeslizante
+              key={chave('raioCanto', `${valores.raioCanto}-${alvo.limiteRaioCanto}`)}
+              rotulo="Arredondamento"
+              propriedade="raioCanto"
+              limite={limiteDoRaioCanto(alvo.limiteRaioCanto)}
+              valor={valores.raioCanto}
+              onPrevisualizar={onPrevisualizar}
+              onConfirmar={onConfirmar}
+            />
+          )}
+        </Secao>
+      )}
+
+      {tipo === 'texto' && (
+        <Secao titulo="Texto">
+          <ControleDeslizante
+            key={chave('tamanhoFonte', valores.tamanhoFonte)}
+            rotulo="Tamanho"
+            propriedade="tamanhoFonte"
+            limite={LIMITES_PROPRIEDADE.tamanhoFonte}
+            valor={valores.tamanhoFonte}
+            sufixo="px"
+            onPrevisualizar={onPrevisualizar}
+            onConfirmar={onConfirmar}
+          />
+          <SimpleGrid columns={3} gap={1}>
+            {OPCOES_FONTE.map((fonte) => {
+              const ativa = fonte.valor === valores.fonte
+              return (
+                <Box
+                  as="button"
+                  key={fonte.valor}
+                  px={1.5}
+                  py={1.5}
+                  borderRadius="8px"
+                  borderWidth="1px"
+                  borderColor={ativa ? 'cirqueira.brand.500' : 'border.subtle'}
+                  bg={ativa ? 'cirqueira.brand.500/10' : 'transparent'}
+                  color={ativa ? 'fg' : 'fg.muted'}
+                  fontSize="xs"
+                  truncate
+                  cursor="pointer"
+                  title={fonte.rotulo}
+                  aria-pressed={ativa}
+                  style={{ fontFamily: fonte.familia }}
+                  onClick={() => onConfirmar({ fonte: fonte.valor })}
+                >
+                  {fonte.rotulo}
+                </Box>
+              )
+            })}
+          </SimpleGrid>
+          <HStack gap={2}>
+            <HStack gap={0.5} p={0.5} bg="bg.muted" borderRadius="8px">
+              <BotaoAcao
+                rotulo="Negrito"
+                icone={Bold}
+                ativo={valores.negrito}
+                onClick={() => onConfirmar({ negrito: !valores.negrito })}
+              />
+              <BotaoAcao
+                rotulo="Itálico"
+                icone={Italic}
+                ativo={valores.italico}
+                onClick={() => onConfirmar({ italico: !valores.italico })}
+              />
+            </HStack>
+            <Box flex="1">
+              <ControleSegmentado
+                opcoes={OPCOES_ALINHAMENTO}
+                valor={valores.alinhamento}
+                onSelecionar={(alinhamento) => onConfirmar({ alinhamento })}
+              />
+            </Box>
+          </HStack>
+          <ControleSegmentado
+            opcoes={OPCOES_ESTILO_TEXTO}
+            valor={valores.estiloTexto}
+            onSelecionar={(estiloTexto) => onConfirmar({ estiloTexto })}
+          />
+        </Secao>
+      )}
+
+      {tem('raio') && (
         <ControleDeslizante
-          key={`${anotacao.id}-${configuracao.propriedade}-${configuracao.valor}-${configuracao.maximo}`}
-          configuracao={configuracao}
+          key={chave('raio', valores.raio)}
+          rotulo="Tamanho"
+          propriedade="raio"
+          limite={LIMITES_PROPRIEDADE.raio}
+          valor={valores.raio}
           onPrevisualizar={onPrevisualizar}
           onConfirmar={onConfirmar}
         />
-      ))}
-
-      {'estiloBorda' in anotacao && isPropriedadeEditavel(anotacao, 'estiloBorda') && (
-        <ControleSegmentado
-          rotulo="Traço"
-          opcoes={OPCOES_BORDA}
-          valor={anotacao.estiloBorda}
-          onSelecionar={(estiloBorda) => onConfirmar({ estiloBorda })}
-        />
       )}
 
-      {'preenchimento' in anotacao && isPropriedadeEditavel(anotacao, 'preenchimento') && (
-        <ControleSegmentado
-          rotulo="Preenchimento"
-          opcoes={OPCOES_PREENCHIMENTO}
-          valor={anotacao.preenchimento}
-          onSelecionar={(preenchimento) => onConfirmar({ preenchimento })}
-        />
+      {tem('opacidade') && (
+        <Secao titulo="Efeitos">
+          <ControleDeslizante
+            key={chave('opacidade', valores.opacidade)}
+            rotulo="Opacidade"
+            propriedade="opacidade"
+            limite={LIMITES_PROPRIEDADE.opacidade}
+            valor={valores.opacidade}
+            sufixo="%"
+            onPrevisualizar={onPrevisualizar}
+            onConfirmar={onConfirmar}
+          />
+          {tem('sombra') && (
+            <Switch.Root
+              size="sm"
+              colorPalette="brand"
+              checked={valores.sombra}
+              onCheckedChange={({ checked }) => onConfirmar({ sombra: checked })}
+            >
+              <Switch.HiddenInput />
+              <Switch.Control />
+              <Switch.Label fontSize="xs" color="fg.muted">
+                Sombra
+              </Switch.Label>
+            </Switch.Root>
+          )}
+        </Secao>
       )}
 
-      {anotacao.tipo === 'texto' && (
-        <ControleSegmentado
-          rotulo="Estilo"
-          opcoes={OPCOES_FUNDO_TEXTO}
-          valor={anotacao.comFundo ? 'com' : 'sem'}
-          onSelecionar={(fundo) => onConfirmar({ comFundo: fundo === 'com' })}
-        />
+      {anotacaoId && (
+        <Secao titulo="Posição">
+          <HStack gap={0.5} flexWrap="wrap">
+            <BotaoAcao
+              rotulo="Trazer para a frente (Ctrl + Shift + ])"
+              icone={ArrowUpToLine}
+              onClick={() => onMoverCamada('frente')}
+            />
+            <BotaoAcao
+              rotulo="Subir uma camada (Ctrl + ])"
+              icone={ChevronUp}
+              onClick={() => onMoverCamada('subir')}
+            />
+            <BotaoAcao
+              rotulo="Descer uma camada (Ctrl + [)"
+              icone={ChevronDown}
+              onClick={() => onMoverCamada('descer')}
+            />
+            <BotaoAcao
+              rotulo="Enviar para trás (Ctrl + Shift + [)"
+              icone={ArrowDownToLine}
+              onClick={() => onMoverCamada('tras')}
+            />
+            <Box w="1px" h={5} bg="border.subtle" mx={1} />
+            <BotaoAcao
+              rotulo="Centralizar na horizontal"
+              icone={AlignCenterVertical}
+              onClick={() => onAlinhar('horizontal')}
+            />
+            <BotaoAcao
+              rotulo="Centralizar na vertical"
+              icone={AlignCenterHorizontal}
+              onClick={() => onAlinhar('vertical')}
+            />
+          </HStack>
+        </Secao>
       )}
-
-      <Separador />
-
-      <HStack gap={0.5}>
-        <IconButton
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          color="fg.muted"
-          aria-label="Trazer para frente"
-          title="Trazer para frente"
-          onClick={onTrazerParaFrente}
-        >
-          <BringToFront size={15} />
-        </IconButton>
-        <IconButton
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          color="fg.muted"
-          aria-label="Duplicar"
-          title="Duplicar (Ctrl + D)"
-          onClick={onDuplicar}
-        >
-          <CopyPlus size={15} />
-        </IconButton>
-        <IconButton
-          size="xs"
-          variant="ghost"
-          borderRadius="full"
-          color="fg.muted"
-          _hover={{ color: 'cirqueira.red.500' }}
-          aria-label="Excluir"
-          title="Excluir (Delete)"
-          onClick={onExcluir}
-        >
-          <Trash2 size={15} />
-        </IconButton>
-      </HStack>
-    </HStack>
+    </VStack>
   )
 })

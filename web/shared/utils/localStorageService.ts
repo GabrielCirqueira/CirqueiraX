@@ -11,6 +11,8 @@ export const CHAVES_STORAGE = {
   PRINTS_POR_PAGINA: 'prints:por-pagina',
   EDITOR_IMAGEM_FERRAMENTA: 'editor-imagem:ferramenta',
   EDITOR_IMAGEM_PREFERENCIAS: 'editor-imagem:preferencias',
+  EDITOR_IMAGEM_CORES_RECENTES: 'editor-imagem:cores-recentes',
+  EDITOR_IMAGEM_TELA: 'editor-imagem:tela',
 } as const
 
 export interface OpcoesLeituraStorage<T> {
