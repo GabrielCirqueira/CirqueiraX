@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\ArtistaCatalogo;
+use App\Entity\Usuario;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
@@ -62,6 +63,30 @@ final class ArtistaCatalogoRepository extends ServiceEntityRepository
         $artista = $this->find(Uuid::fromString($uuid));
 
         return $artista;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function listarUuidsSemFotoMaisOuvidosDoUsuario(Usuario $usuario, int $limite): array
+    {
+        $linhas = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            sprintf(
+                'SELECT BIN_TO_UUID(ac.uuid)
+                FROM reproducao_musical r
+                INNER JOIN musica_artista_catalogo mac ON mac.musica_uuid = r.musica_uuid
+                INNER JOIN artista_catalogo origem ON origem.uuid = mac.artista_uuid
+                INNER JOIN artista_catalogo ac ON ac.uuid = COALESCE(origem.unido_a_uuid, origem.uuid)
+                WHERE r.usuario_id = :usuarioId AND ac.url_foto IS NULL AND ac.foto_buscada_em IS NULL
+                GROUP BY ac.uuid
+                ORDER BY COUNT(*) DESC
+                LIMIT %d',
+                $limite,
+            ),
+            ['usuarioId' => $usuario->getId()],
+        );
+
+        return array_map(static fn (mixed $uuid): string => (string) $uuid, $linhas);
     }
 
     /**

@@ -31,7 +31,9 @@ final class BuscarFotosArtistasCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'Id do usuário usado para resolver código Spotify (padrão: primeiro usuário)');
+        $this
+            ->addOption('usuario', 'u', InputOption::VALUE_REQUIRED, 'Id do usuário usado para resolver código Spotify (padrão: primeiro usuário)')
+            ->addOption('mais-ouvidos', null, InputOption::VALUE_REQUIRED, 'Só os N artistas sem foto mais ouvidos pelo usuário informado');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -48,7 +50,10 @@ final class BuscarFotosArtistasCommand extends Command
             return Command::SUCCESS;
         }
 
-        $uuids = $this->artistaRepository->listarUuidsSemFotoBuscada();
+        $maisOuvidos = $input->getOption('mais-ouvidos');
+        $uuids = null === $maisOuvidos
+            ? $this->artistaRepository->listarUuidsSemFotoBuscada()
+            : $this->artistaRepository->listarUuidsSemFotoMaisOuvidosDoUsuario($usuario, max(1, (int) $maisOuvidos));
         foreach ($uuids as $uuid) {
             $this->bus->dispatch(new BuscarFotoArtistaMessage((int) $usuario->getId(), $uuid));
         }

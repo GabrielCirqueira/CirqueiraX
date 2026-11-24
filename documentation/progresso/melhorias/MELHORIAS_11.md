@@ -204,6 +204,7 @@
   - Capas e fotos de artista encontradas marcam o cache de análise do usuário para ser recalculado.
   - A capa de faixa é buscada primeiro pelos caminhos públicos (oEmbed do Spotify e Deezer), que não gastam a cota da API do Spotify. A API só é usada se eles falharem. Motivo: um lote grande de capas levou a um bloqueio 429 de cerca de 22 h.
   - Novo comando `app:musica:buscar-capas-faltantes --usuario=N --limite=1000` enfileira a busca de capa das músicas mais ouvidas sem capa.
-- **Arquivos**: `src/Service/Spotify/ResolverImagemSpotifyService.php`, `src/Service/Musica/BuscarFotoArtistaCatalogoService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Command/BuscarCapasFaltantesCommand.php`
+  - `app:musica:buscar-fotos-artistas --usuario=N --mais-ouvidos=500` busca primeiro as fotos dos artistas mais ouvidos daquele usuário (via YouTube Music, fora da cota do Spotify).
+- **Arquivos**: `src/Service/Spotify/ResolverImagemSpotifyService.php`, `src/Service/Musica/BuscarFotoArtistaCatalogoService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Repository/ArtistaCatalogoRepository.php`, `src/Command/BuscarCapasFaltantesCommand.php`, `src/Command/BuscarFotosArtistasCommand.php`
 
 ---
