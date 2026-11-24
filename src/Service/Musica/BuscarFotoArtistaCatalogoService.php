@@ -11,6 +11,7 @@ use App\Interface\YoutubeMusicInterface;
 use App\Repository\AnaliseReproducaoMusicalRepository;
 use App\Repository\ArtistaCatalogoRepository;
 use App\Repository\ImagemSpotifyRepository;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
 
 final readonly class BuscarFotoArtistaCatalogoService
 {
@@ -19,6 +20,7 @@ final readonly class BuscarFotoArtistaCatalogoService
         private ImagemSpotifyRepository $imagemRepository,
         private AnaliseReproducaoMusicalRepository $analiseRepository,
         private YoutubeMusicInterface $youtubeMusic,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {}
 
     public function executar(Usuario $usuario, string $artistaUuid): void
@@ -40,5 +42,8 @@ final readonly class BuscarFotoArtistaCatalogoService
         }
 
         $this->artistaRepository->salvar($artista->registrarBuscaFoto($urlFoto));
+        if (null !== $urlFoto) {
+            $this->cacheAnalise->registrarNovasReproducoes($usuario);
+        }
     }
 }

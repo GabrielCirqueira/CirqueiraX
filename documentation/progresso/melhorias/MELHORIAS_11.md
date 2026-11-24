@@ -192,3 +192,17 @@
 - **Arquivos**: `src/Service/Spotify/DeduplicarEImportarHistoricoSpotifyService.php`, `src/Service/Musica/VincularFaixasSpotifyAoCatalogoService.php`, `src/Repository/VinculoMusicaSpotifyRepository.php`, `src/Exception/Musica/MusicaCatalogoException.php`
 
 ---
+
+### ✅ Melhoria 214 — Música: Capas e Fotos que Faltavam Após Importação
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: algumas imagens de artistas e músicas não apareciam.
+- **Causa**: as músicas novas, que vieram de importação, entram no catálogo sem capa. A capa só era buscada quando a página mostrava a música, e mesmo depois de encontrada ficava apenas em `imagem_spotify`: não ia para `musica_catalogo.url_capa`. Além disso, o resultado da página de Música fica em cache, então a imagem encontrada depois só aparecia no dia seguinte.
+- **Solução**:
+  - Quando uma capa é encontrada (ou já existia), ela é gravada em todas as músicas do catálogo ligadas àquela faixa que ainda não têm capa.
+  - Capas e fotos de artista encontradas marcam o cache de análise do usuário para ser recalculado.
+  - Novo comando `app:musica:buscar-capas-faltantes --usuario=N --limite=1000` enfileira a busca de capa das músicas mais ouvidas sem capa.
+- **Arquivos**: `src/Service/Spotify/ResolverImagemSpotifyService.php`, `src/Service/Musica/BuscarFotoArtistaCatalogoService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Command/BuscarCapasFaltantesCommand.php`
+
+---

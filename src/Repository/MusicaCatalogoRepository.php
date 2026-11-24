@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Entity\MusicaCatalogo;
+use App\Entity\Usuario;
 use App\Enum\TipoMusicaCatalogo;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -195,6 +196,45 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
             ->getResult();
 
         return $musicas;
+    }
+
+    public function preencherCapaVaziaDaFaixaSpotify(string $nomeNormalizado, string $artistaNormalizado, string $urlCapa): int
+    {
+        return (int) $this->getEntityManager()->getConnection()->executeStatement(
+            'UPDATE musica_catalogo SET url_capa = :url
+            WHERE url_capa IS NULL AND uuid IN (
+                SELECT uuid FROM (
+                    SELECT mc.uuid FROM vinculo_musica_spotify v INNER JOIN musica_catalogo mc ON mc.uuid = v.musica_uuid
+                    WHERE v.nome_normalizado = :nome AND v.artista_normalizado = :artista
+                    UNION
+                    SELECT mc.unida_a_uuid FROM vinculo_musica_spotify v INNER JOIN musica_catalogo mc ON mc.uuid = v.musica_uuid
+                    WHERE v.nome_normalizado = :nome AND v.artista_normalizado = :artista AND mc.unida_a_uuid IS NOT NULL
+                ) alvos
+            )',
+            ['url' => $urlCapa, 'nome' => $nomeNormalizado, 'artista' => $artistaNormalizado],
+        );
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function listarMaisOuvidasSemCapa(Usuario $usuario, int $limite): array
+    {
+        $linhas = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            sprintf(
+                "SELECT BIN_TO_UUID(r.musica_uuid)
+                FROM reproducao_musical r
+                INNER JOIN musica_catalogo mc ON mc.uuid = r.musica_uuid
+                WHERE r.usuario_id = :usuarioId AND r.fonte = 'spotify' AND mc.url_capa IS NULL
+                GROUP BY r.musica_uuid
+                ORDER BY COUNT(*) DESC
+                LIMIT %d",
+                $limite,
+            ),
+            ['usuarioId' => $usuario->getId()],
+        );
+
+        return array_map(static fn (mixed $uuid): string => (string) $uuid, $linhas);
     }
 
     public function isUrlCapaConhecida(string $url): bool

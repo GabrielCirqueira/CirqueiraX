@@ -13,7 +13,9 @@ use App\Interface\SpotifyInterface;
 use App\Message\BuscarImagemSpotifyMessage;
 use App\Repository\ContaSpotifyRepository;
 use App\Repository\ImagemSpotifyRepository;
+use App\Repository\MusicaCatalogoRepository;
 use App\Repository\UsuarioRepository;
+use App\Service\Musica\NormalizarTextoMusicaService;
 use GuzzleHttp\ClientInterface;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +35,9 @@ final readonly class ResolverImagemSpotifyService
         private ClientInterface $httpClient,
         private LoggerInterface $logger,
         private ControleLimiteSpotifyService $controleLimite,
+        private MusicaCatalogoRepository $musicaRepository,
+        private NormalizarTextoMusicaService $normalizador,
+        private CacheAnaliseSpotifyService $cacheAnalise,
     ) {
     }
 
@@ -40,6 +45,8 @@ final readonly class ResolverImagemSpotifyService
     {
         $imagem = $this->obterOuCriarImagem($message);
         if ($imagem->isEncontrada() && null !== $imagem->primeiraImagemUrl()) {
+            $this->levarCapaAoCatalogo($imagem, $message);
+
             return;
         }
 
@@ -110,6 +117,28 @@ final readonly class ResolverImagemSpotifyService
         }
 
         $this->imagemRepository->salvar($imagem);
+        $this->levarCapaAoCatalogo($imagem, $message);
+    }
+
+    private function levarCapaAoCatalogo(ImagemSpotify $imagem, BuscarImagemSpotifyMessage $message): void
+    {
+        $url = $imagem->imagemMediaUrl() ?? $imagem->primeiraImagemUrl();
+        if (null === $url) {
+            return;
+        }
+
+        if ($message->tipo->isFaixa()) {
+            $this->musicaRepository->preencherCapaVaziaDaFaixaSpotify(
+                $this->normalizador->normalizar($message->nome),
+                $this->normalizador->normalizar($message->artista ?? ''),
+                $url,
+            );
+        }
+
+        $usuario = $this->usuarioRepository->find($message->usuarioId);
+        if (null !== $usuario) {
+            $this->cacheAnalise->registrarNovasReproducoes($usuario);
+        }
     }
 
     private function registrarBloqueioSeLimite(SpotifyException $excecao): void
