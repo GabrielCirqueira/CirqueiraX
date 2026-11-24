@@ -58,6 +58,14 @@ final readonly class ResolverImagemSpotifyService
             }
         }
 
+        if ($message->tipo->isFaixa() && $this->resolverFaixaViaPublico($imagem, $message)) {
+            $imagem->incrementarTentativas();
+            $this->imagemRepository->salvar($imagem);
+            $this->levarCapaAoCatalogo($imagem, $message);
+
+            return;
+        }
+
         $accessToken = null;
         $spotifyLiberado = !$this->controleLimite->estaBloqueado();
         if ($spotifyLiberado && null !== $message->usuarioId) {

@@ -202,6 +202,7 @@
 - **Solução**:
   - Quando uma capa é encontrada (ou já existia), ela é gravada em todas as músicas do catálogo ligadas àquela faixa que ainda não têm capa.
   - Capas e fotos de artista encontradas marcam o cache de análise do usuário para ser recalculado.
+  - A capa de faixa é buscada primeiro pelos caminhos públicos (oEmbed do Spotify e Deezer), que não gastam a cota da API do Spotify. A API só é usada se eles falharem. Motivo: um lote grande de capas levou a um bloqueio 429 de cerca de 22 h.
   - Novo comando `app:musica:buscar-capas-faltantes --usuario=N --limite=1000` enfileira a busca de capa das músicas mais ouvidas sem capa.
 - **Arquivos**: `src/Service/Spotify/ResolverImagemSpotifyService.php`, `src/Service/Musica/BuscarFotoArtistaCatalogoService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Command/BuscarCapasFaltantesCommand.php`
 
