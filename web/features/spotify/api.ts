@@ -1,8 +1,5 @@
 import { api } from '@/config/api'
-import {
-  type ItemHistoricoRecente,
-  ListaHistoricoRecenteSchema,
-} from '@/features/musica/types'
+import { type ItemHistoricoRecente, ListaHistoricoRecenteSchema } from '@/features/musica/types'
 import type { RespostaApi } from '@/shared/types/api'
 import {
   type ConcluirAutorizacaoSpotifyPayload,

@@ -32,8 +32,13 @@ final readonly class ObterTocandoAgoraSpotifyService
     public function executar(Usuario $usuario): TocandoAgoraSpotifyDTO
     {
         $conta = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
-        if (null === $conta || !$conta->isConectada() || $this->controleLimite->estaBloqueado()) {
+        if (null === $conta || !$conta->isConectada()) {
             return TocandoAgoraSpotifyDTO::nada();
+        }
+
+        $bloqueio = $this->controleLimite->buscarBloqueioAtivo();
+        if (null !== $bloqueio) {
+            return TocandoAgoraSpotifyDTO::bloqueado($bloqueio->liberadoEm());
         }
 
         $this->controleLimite->registrarConsulta(OrigemConsultaSpotify::TocandoAgora);

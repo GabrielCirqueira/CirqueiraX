@@ -82,6 +82,7 @@ export const TocandoAgoraSchema = z.object({
   urlSpotify: z.string().nullable(),
   vezesOuvida: z.number(),
   primeiraVezEm: z.string().nullable(),
+  bloqueadoAte: z.string().nullable().optional(),
 })
 
 export type TocandoAgora = z.infer<typeof TocandoAgoraSchema> & { consultadoEm: number }

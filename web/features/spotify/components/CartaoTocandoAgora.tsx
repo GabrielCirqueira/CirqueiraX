@@ -1,15 +1,16 @@
 import { CapaMusica } from '@/features/musica/components/CapaMusica'
-import { BotaoHistoricoRecente } from '@/features/musica/components/ModalHistoricoRecente'
 import { LinkMusica } from '@/features/musica/components/LinkMusica'
+import { BotaoHistoricoRecente } from '@/features/musica/components/ModalHistoricoRecente'
 import {
   formatarDataExtensa,
+  formatarDataHoraPtBr,
   formatarDuracaoMs,
   gerarRotaArtista,
   gerarRotaMusica,
 } from '@/features/musica/utils'
 import { Box, Button, Flex, HStack, Link, Text, VStack } from '@chakra-ui/react'
 import { keyframes } from '@emotion/react'
-import { ExternalLink, Pause, Radio } from 'lucide-react'
+import { Clock, ExternalLink, Pause, Radio } from 'lucide-react'
 import { memo } from 'react'
 import { listarHistoricoRecenteSpotify } from '../api'
 import {
@@ -40,12 +41,40 @@ export const CartaoTocandoAgora = memo(function CartaoTocandoAgora({
     return null
   }
 
+  if (data.bloqueadoAte) {
+    return <AvisoSpotifyPausado bloqueadoAte={data.bloqueadoAte} />
+  }
+
   if (!data.temItem || !data.nome) {
     return <AvisoNadaTocando tocandoAnuncio={data.emReproducao} />
   }
 
   return <ConteudoTocandoAgora dados={data} />
 })
+
+function AvisoSpotifyPausado({ bloqueadoAte }: { bloqueadoAte: string }) {
+  return (
+    <HStack
+      gap={2.5}
+      px={4}
+      py={3}
+      borderRadius="8px"
+      bg="cirqueira.musica.cartao"
+      border="1px solid"
+      borderColor="cirqueira.musica.cartaoElevado"
+      color="cirqueira.musica.textoSecundario"
+      align="start"
+    >
+      <Box flexShrink={0} pt={0.5}>
+        <Clock size={15} />
+      </Box>
+      <Text fontSize="xs">
+        O Spotify limitou temporariamente o acesso do CirqueiraX, então não dá para ver o que está
+        tocando agora. Volta sozinho em {formatarDataHoraPtBr(bloqueadoAte)}.
+      </Text>
+    </HStack>
+  )
+}
 
 function AvisoNadaTocando({ tocandoAnuncio }: { tocandoAnuncio: boolean }) {
   return (
@@ -228,9 +257,7 @@ function ConteudoTocandoAgora({ dados }: { dados: TocandoAgora }) {
                 corDestaque="cirqueira.musica.verde"
                 rotuloExterno="Abrir no Spotify"
                 excluirCodigo={dados.codigoFaixa}
-                buscar={({ excluirCodigo }) =>
-                  listarHistoricoRecenteSpotify({ excluirCodigo })
-                }
+                buscar={({ excluirCodigo }) => listarHistoricoRecenteSpotify({ excluirCodigo })}
               />
               {dados.urlSpotify && (
                 <Button

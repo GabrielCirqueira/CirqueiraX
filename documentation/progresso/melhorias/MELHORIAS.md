@@ -235,3 +235,4 @@
 | M212 | Usuários: Modal de Atividade por Usuário | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-212--usuários-modal-de-atividade-por-usuário) |
 | M213 | Spotify: Importação Sem Fila de Vínculos Travada | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-213--spotify-importação-sem-fila-de-vínculos-travada) |
 | M214 | Música: Capas e Fotos que Faltavam Após Importação | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-214--música-capas-e-fotos-que-faltavam-após-importação) |
+| M215 | Música: Aviso de Bloqueio do Spotify no "Tocando Agora" | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-215--música-aviso-de-bloqueio-do-spotify-no-tocando-agora) |

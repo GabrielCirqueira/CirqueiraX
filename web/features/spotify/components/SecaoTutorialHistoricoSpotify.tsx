@@ -1,5 +1,5 @@
 import { Box, Button, HStack, Link, Text, VStack } from '@chakra-ui/react'
-import { CheckSquare, ChevronDown, ChevronUp, ExternalLink, BookOpen, Square } from 'lucide-react'
+import { BookOpen, CheckSquare, ChevronDown, ChevronUp, ExternalLink, Square } from 'lucide-react'
 import { memo, useState } from 'react'
 import {
   EXPLICACAO_TUTORIAL_HISTORICO_SPOTIFY,
@@ -82,7 +82,9 @@ export const SecaoTutorialHistoricoSpotify = memo(function SecaoTutorialHistoric
                   }
                 >
                   <Box
-                    color={opcao.marcar ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoDesabilitado'}
+                    color={
+                      opcao.marcar ? 'cirqueira.musica.verde' : 'cirqueira.musica.textoDesabilitado'
+                    }
                     pt="1px"
                     flexShrink={0}
                   >

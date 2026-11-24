@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\DataObject\Spotify;
 
+use DateTimeImmutable;
+use DateTimeInterface;
+
 final readonly class TocandoAgoraSpotifyDTO
 {
     /**
@@ -24,11 +27,17 @@ final readonly class TocandoAgoraSpotifyDTO
         public ?string $urlSpotify = null,
         public int $vezesOuvida = 0,
         public ?string $primeiraVezEm = null,
+        public ?string $bloqueadoAte = null,
     ) {}
 
     public static function nada(): self
     {
         return new self(false, false, 'nada');
+    }
+
+    public static function bloqueado(DateTimeImmutable $liberadoEm): self
+    {
+        return new self(false, false, 'nada', bloqueadoAte: $liberadoEm->format(DateTimeInterface::ATOM));
     }
 
     public function comHistorico(int $vezesOuvida, ?string $primeiraVezEm): self
@@ -48,6 +57,7 @@ final readonly class TocandoAgoraSpotifyDTO
             $this->urlSpotify,
             $vezesOuvida,
             $primeiraVezEm,
+            $this->bloqueadoAte,
         );
     }
 
@@ -76,6 +86,7 @@ final readonly class TocandoAgoraSpotifyDTO
             'urlSpotify' => $this->urlSpotify,
             'vezesOuvida' => $this->vezesOuvida,
             'primeiraVezEm' => $this->primeiraVezEm,
+            'bloqueadoAte' => $this->bloqueadoAte,
         ];
     }
 }

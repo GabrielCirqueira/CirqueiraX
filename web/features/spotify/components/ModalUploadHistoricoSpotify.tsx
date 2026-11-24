@@ -468,8 +468,8 @@ export const ModalUploadHistoricoSpotify = memo(function ModalUploadHistoricoSpo
                 lineHeight="tall"
               >
                 <Text>
-                  1. Acesse{' '}
-                  <strong>spotify.com/account/privacy</strong> → <strong>Baixar seus dados</strong>.
+                  1. Acesse <strong>spotify.com/account/privacy</strong> →{' '}
+                  <strong>Baixar seus dados</strong>.
                 </Text>
                 <Text>
                   2. Marque só <strong>Histórico ampliado de streams</strong> (conta inteira, tempo

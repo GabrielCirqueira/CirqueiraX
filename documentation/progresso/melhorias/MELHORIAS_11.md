@@ -208,3 +208,16 @@
 - **Arquivos**: `src/Service/Spotify/ResolverImagemSpotifyService.php`, `src/Service/Musica/BuscarFotoArtistaCatalogoService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Repository/ArtistaCatalogoRepository.php`, `src/Command/BuscarCapasFaltantesCommand.php`, `src/Command/BuscarFotosArtistasCommand.php`
 
 ---
+
+### ✅ Melhoria 215 — Música: Aviso de Bloqueio do Spotify no "Tocando Agora"
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: com música tocando no Spotify, o painel dizia "Nada tocando no Spotify agora".
+- **Causa**: durante um bloqueio 429 do Spotify, o serviço não consulta a API (para não estender o bloqueio) e devolvia o mesmo resultado de "nada tocando". A tela não tinha como saber a diferença.
+- **Solução**:
+  - `GET /api/v1/spotify/tocando-agora` passa a devolver `bloqueadoAte` (ISO) quando há um bloqueio ativo.
+  - O cartão "Tocando agora" mostra que o Spotify limitou temporariamente o acesso e a data e hora em que volta sozinho, em vez de dizer que nada está tocando.
+- **Arquivos**: `src/DataObject/Spotify/TocandoAgoraSpotifyDTO.php`, `src/Service/Spotify/ObterTocandoAgoraSpotifyService.php`, `web/features/spotify/types.ts`, `web/features/spotify/components/CartaoTocandoAgora.tsx`
+
+---
