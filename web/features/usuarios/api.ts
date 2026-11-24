@@ -4,6 +4,7 @@ import type {
   AtualizarUsuarioInput,
   CadastrarUsuarioInput,
   FuncionalidadeOpcao,
+  ResumoAtividadeUsuario,
   UsuarioSistema,
 } from './types'
 
@@ -37,5 +38,12 @@ export async function atualizarUsuario(
   input: AtualizarUsuarioInput
 ): Promise<UsuarioSistema> {
   const { data } = await api.put<RespostaApi<UsuarioSistema>>(`/api/v1/usuarios/${id}`, input)
+  return data.data
+}
+
+export async function obterResumoAtividadeUsuario(id: number): Promise<ResumoAtividadeUsuario> {
+  const { data } = await api.get<RespostaApi<ResumoAtividadeUsuario>>(
+    `/api/v1/usuarios/${id}/resumo`
+  )
   return data.data
 }

@@ -232,3 +232,4 @@
 | M209 | Música: Imagem da Cápsula Personalizável e Seletor de Mês | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-209--música-imagem-da-cápsula-personalizável-e-seletor-de-mês) |
 | M210 | Música: Novos Modelos de Imagem da Cápsula | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-210--música-novos-modelos-de-imagem-da-cápsula) |
 | M211 | Música: Correções de Layout no Celular | ✅ Concluído | 23/11/2026 | [ver](MELHORIAS_11.md#melhoria-211--música-correções-de-layout-no-celular) |
+| M212 | Usuários: Modal de Atividade por Usuário | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-212--usuários-modal-de-atividade-por-usuário) |

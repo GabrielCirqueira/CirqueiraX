@@ -165,3 +165,16 @@
 - **Arquivos**: `web/features/musica/Musica.tsx` e componentes em `web/features/musica/components/` (AbasMusica, AbaDescobertas, AbaHabitos, AbaHistorico, AbaServicos, AbaVersoes, EsqueletoPaginaMusica, EstadoVazioMusica, ModalMusica, PecasBlocoMusica, SecaoCapsulaSonora, SecaoHojeSemana, SecaoRetrospectiva, TabelaRankingMusica, VisaoGeralAtalhos, VisaoGeralDestaque, VisaoGeralTopos)
 
 ---
+
+### ✅ Melhoria 212 — Usuários: Modal de Atividade por Usuário
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: na página de usuários, um botão em cada usuário que abre um modal com tudo o que ele fez no sistema (músicas, downloads, MP3, transcrições e mais dados de música).
+- **Solução**:
+  - Nova rota `GET /api/v1/usuarios/{id}/resumo` (só admin). Junta contas conectadas, música (todo o período e mês atual, por fonte, top 5 músicas e artistas com capa), downloads de vídeo, MP3, prints, Telegram, upload manual, transcrições, livros em áudio, YouTube, transferências de playlist e custo de IA.
+  - Os números de música reaproveitam as consultas da página de Música (`AnaliseReproducaoMusicalRepository`), então seguem as mesmas regras do Spotify.
+  - Botão de gráfico ao lado de "Editar" na tabela e nos cartões do celular. O modal mostra a atividade em cartões de 2 colunas no celular e 3 no computador.
+- **Arquivos**: `src/Repository/ResumoAtividadeUsuarioRepository.php`, `src/DataObject/Usuario/ResumoAtividadeUsuarioDTO.php`, `src/Service/Usuario/ObterResumoAtividadeUsuarioService.php`, `src/Controller/Usuario/UsuarioController.php`, `web/features/usuarios/` (ModalResumoUsuario, PecasResumoUsuario, ListaUsuarios, Usuarios, api, types, hooks, utils/formatarResumoUsuario)
+
+---

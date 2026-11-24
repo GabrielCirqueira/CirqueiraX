@@ -6,6 +6,7 @@ import {
   cadastrarUsuario,
   listarFuncionalidadesSistema,
   listarUsuarios,
+  obterResumoAtividadeUsuario,
 } from '../api'
 import type { AtualizarUsuarioInput, CadastrarUsuarioInput } from '../types'
 import { CHAVES_QUERY_USUARIOS } from './chavesQueryUsuarios'
@@ -22,6 +23,15 @@ export function useListarUsuarios(habilitado = true) {
     queryFn: listarUsuarios,
     enabled: habilitado,
     staleTime: 30_000,
+  })
+}
+
+export function useResumoAtividadeUsuario(id: number | null) {
+  return useQuery({
+    queryKey: CHAVES_QUERY_USUARIOS.resumo(id ?? 0),
+    queryFn: () => obterResumoAtividadeUsuario(id ?? 0),
+    enabled: id !== null,
+    staleTime: 60_000,
   })
 }
 

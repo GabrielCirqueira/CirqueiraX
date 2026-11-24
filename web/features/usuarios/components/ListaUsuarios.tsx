@@ -1,4 +1,5 @@
 import { ROTULOS_FUNCIONALIDADE } from '@/shared/utils/funcionalidadesSistema'
+import { iniciaisNome } from '@/shared/utils/iniciaisNome'
 import {
   Badge,
   Box,
@@ -10,20 +11,21 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Pencil, Shield, Users } from 'lucide-react'
+import { ChartNoAxesColumn, Pencil, Shield, Users } from 'lucide-react'
 import { memo } from 'react'
 import type { UsuarioSistema } from '../types'
-import { iniciaisNome } from '@/shared/utils/iniciaisNome'
 import { resumoPermissoes } from '../utils/formularioUsuario'
 
 export interface ListaUsuariosProps {
   usuarios: UsuarioSistema[]
   onEditar: (usuario: UsuarioSistema) => void
+  onVerAtividade: (usuario: UsuarioSistema) => void
 }
 
 export const ListaUsuarios = memo(function ListaUsuarios({
   usuarios,
   onEditar,
+  onVerAtividade,
 }: ListaUsuariosProps) {
   if (usuarios.length === 0) {
     return (
@@ -71,7 +73,7 @@ export const ListaUsuarios = memo(function ListaUsuarios({
               <Table.ColumnHeader py={3} px={4}>
                 Acesso
               </Table.ColumnHeader>
-              <Table.ColumnHeader py={3} px={4} textAlign="end" w="100px">
+              <Table.ColumnHeader py={3} px={4} textAlign="end" w="120px">
                 Ações
               </Table.ColumnHeader>
             </Table.Row>
@@ -136,6 +138,15 @@ export const ListaUsuarios = memo(function ListaUsuarios({
                 </Table.Cell>
                 <Table.Cell py={3.5} px={4} textAlign="end">
                   <IconButton
+                    aria-label={`Ver atividade de ${usuario.nomeCompleto}`}
+                    size="sm"
+                    variant="ghost"
+                    borderRadius="lg"
+                    onClick={() => onVerAtividade(usuario)}
+                  >
+                    <ChartNoAxesColumn size={15} />
+                  </IconButton>
+                  <IconButton
                     aria-label={`Editar ${usuario.nomeCompleto}`}
                     size="sm"
                     variant="ghost"
@@ -180,9 +191,25 @@ export const ListaUsuarios = memo(function ListaUsuarios({
                 </Badge>
               </VStack>
             </HStack>
-            <Button size="sm" variant="outline" borderRadius="lg" onClick={() => onEditar(usuario)}>
-              Editar
-            </Button>
+            <HStack gap={1.5} flexShrink={0}>
+              <IconButton
+                aria-label={`Ver atividade de ${usuario.nomeCompleto}`}
+                size="sm"
+                variant="outline"
+                borderRadius="lg"
+                onClick={() => onVerAtividade(usuario)}
+              >
+                <ChartNoAxesColumn size={15} />
+              </IconButton>
+              <Button
+                size="sm"
+                variant="outline"
+                borderRadius="lg"
+                onClick={() => onEditar(usuario)}
+              >
+                Editar
+              </Button>
+            </HStack>
           </HStack>
         ))}
       </VStack>

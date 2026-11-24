@@ -2,7 +2,7 @@ import { useSEO } from '@/shared/hooks'
 import { Box, Button, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { UserPlus } from 'lucide-react'
 import { memo, useState } from 'react'
-import { ListaUsuarios, ModalFormularioUsuario } from './components'
+import { ListaUsuarios, ModalFormularioUsuario, ModalResumoUsuario } from './components'
 import { useAtualizarUsuario, useCadastrarUsuario, useListarUsuarios } from './hooks'
 import type { FormularioUsuarioValores, UsuarioSistema } from './types'
 import { catalogoFuncionalidadesSistema } from './utils'
@@ -22,6 +22,7 @@ const UsuariosView = memo(function UsuariosView() {
 
   const [modalAberto, setModalAberto] = useState(false)
   const [usuarioEdicao, setUsuarioEdicao] = useState<UsuarioSistema | null>(null)
+  const [usuarioResumo, setUsuarioResumo] = useState<UsuarioSistema | null>(null)
 
   const { data: usuarios = [], isLoading, isError, refetch } = useListarUsuarios()
   const funcionalidades = catalogoFuncionalidadesSistema()
@@ -116,12 +117,7 @@ const UsuariosView = memo(function UsuariosView() {
             )}
           </HStack>
 
-          <Button
-            size="sm"
-            colorPalette="brand"
-            borderRadius="full"
-            onClick={abrirCadastro}
-          >
+          <Button size="sm" colorPalette="brand" borderRadius="full" onClick={abrirCadastro}>
             <UserPlus size={15} />
             Novo usuário
           </Button>
@@ -133,24 +129,27 @@ const UsuariosView = memo(function UsuariosView() {
             <Skeleton height="220px" borderRadius="xl" />
           </VStack>
         ) : isError ? (
-          <Box
-            p={6}
-            borderRadius="xl"
-            borderWidth="1px"
-            borderColor="border.subtle"
-            bg="bg.panel"
-          >
+          <Box p={6} borderRadius="xl" borderWidth="1px" borderColor="border.subtle" bg="bg.panel">
             <VStack align="start" gap={3}>
               <Text fontWeight="semibold" color="fg">
                 Não foi possível carregar os usuários
               </Text>
-              <Button size="sm" colorPalette="brand" borderRadius="full" onClick={() => void refetch()}>
+              <Button
+                size="sm"
+                colorPalette="brand"
+                borderRadius="full"
+                onClick={() => void refetch()}
+              >
                 Tentar de novo
               </Button>
             </VStack>
           </Box>
         ) : (
-          <ListaUsuarios usuarios={usuarios} onEditar={abrirEdicao} />
+          <ListaUsuarios
+            usuarios={usuarios}
+            onEditar={abrirEdicao}
+            onVerAtividade={setUsuarioResumo}
+          />
         )}
       </VStack>
 
@@ -162,6 +161,8 @@ const UsuariosView = memo(function UsuariosView() {
         onFechar={fecharModal}
         onSalvar={salvar}
       />
+
+      <ModalResumoUsuario usuario={usuarioResumo} onFechar={() => setUsuarioResumo(null)} />
     </Box>
   )
 })

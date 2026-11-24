@@ -1,7 +1,7 @@
 import {
   FUNCIONALIDADES_SISTEMA,
-  ROTULOS_FUNCIONALIDADE,
   type FuncionalidadeSistema,
+  ROTULOS_FUNCIONALIDADE,
 } from '@/shared/utils/funcionalidadesSistema'
 import type { FuncionalidadeOpcao } from '../types'
 

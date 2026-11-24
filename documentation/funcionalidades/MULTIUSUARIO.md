@@ -40,6 +40,8 @@ Backup feito antes: `/root/backups/cirqueirax/2026-11-10_antes-multiusuario/` e 
 
 Cada usuário comum tem uma lista de funcionalidades em `usuario.permissoes`. Sem a permissão da tela, a rota some da sidebar e a API responde 403. Administradores (`ROLE_ADMIN`) têm acesso total e gerenciam contas em `/usuarios`. Detalhes em [PERMISSOES.md](PERMISSOES.md).
 
+Na tela **Usuários**, o botão de gráfico de cada conta abre o modal de atividade (`GET /api/v1/usuarios/{id}/resumo`): contas conectadas, música (total, mês atual, Spotify × YouTube Music, top 5 músicas e artistas), downloads de vídeo e MP3, prints, Telegram, uploads, transcrições, livros em áudio, YouTube, transferências de playlist e custo de IA.
+
 ## Adicionar uma pessoa
 
 1. Preferencialmente pela tela **Usuários** (`/usuarios`), logado como administrador — define senha e permissões na hora. Alternativa via CLI:

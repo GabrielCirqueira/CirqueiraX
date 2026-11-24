@@ -13,6 +13,7 @@ use App\Service\Usuario\AtualizarUsuarioService;
 use App\Service\Usuario\CadastrarUsuarioService;
 use App\Service\Usuario\ListarFuncionalidadesSistemaService;
 use App\Service\Usuario\ListarUsuariosService;
+use App\Service\Usuario\ObterResumoAtividadeUsuarioService;
 use App\Service\Usuario\ObterUsuarioService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -30,6 +31,7 @@ final class UsuarioController extends DefaultController
         private readonly CadastrarUsuarioService $cadastrarUsuario,
         private readonly AtualizarUsuarioService $atualizarUsuario,
         private readonly ListarFuncionalidadesSistemaService $listarFuncionalidades,
+        private readonly ObterResumoAtividadeUsuarioService $obterResumoAtividade,
         private readonly UsuarioSerializer $serializer,
     ) {}
 
@@ -49,6 +51,12 @@ final class UsuarioController extends DefaultController
     public function obter(int $id): Response
     {
         return $this->success($this->serializer->normalizar($this->obterUsuario->executar($id)));
+    }
+
+    #[Route('/{id<\d+>}/resumo', name: 'api_usuarios_resumo', methods: ['GET'])]
+    public function resumo(int $id): Response
+    {
+        return $this->success($this->obterResumoAtividade->executar($id)->paraArray());
     }
 
     #[Route('', name: 'api_usuarios_cadastrar', methods: ['POST'])]

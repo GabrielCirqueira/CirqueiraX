@@ -80,9 +80,7 @@ function ConteudoFormularioUsuario({
               {usuario ? 'Editar usuário' : 'Novo usuário'}
             </Dialog.Title>
             <Text fontSize="xs" color="fg.muted">
-              {usuario
-                ? `Conta @${usuario.username}`
-                : 'Preencha os dados e defina o acesso'}
+              {usuario ? `Conta @${usuario.username}` : 'Preencha os dados e defina o acesso'}
             </Text>
           </VStack>
         </HStack>
@@ -149,7 +147,9 @@ function ConteudoFormularioUsuario({
                 type="password"
                 value={valores.senha}
                 onChange={(e) => atualizarCampo('senha', e.target.value)}
-                placeholder={modo === 'cadastro' ? 'Mínimo 6 caracteres' : 'Deixe em branco para manter'}
+                placeholder={
+                  modo === 'cadastro' ? 'Mínimo 6 caracteres' : 'Deixe em branco para manter'
+                }
                 autoComplete="new-password"
                 borderRadius="lg"
               />
