@@ -9,10 +9,11 @@ use App\DataObject\Spotify\Analise\RepeticaoDiariaSpotifyDTO;
 use App\DataObject\Spotify\Analise\RetrospectivaAnualSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
-use App\Service\Spotify\CacheAnaliseSpotifyService;
-use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
-use App\Service\Spotify\CalcularSequenciasSpotifyService;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
+use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
+use App\Service\Spotify\CalcularSequenciasSpotifyService;
 
 final readonly class ObterRetrospectivaAnualMusicaService
 {
@@ -28,7 +29,7 @@ final readonly class ObterRetrospectivaAnualMusicaService
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, int $ano): RetrospectivaAnualSpotifyDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, 'retrospectiva|' . $ano, fn (): RetrospectivaAnualSpotifyDTO => $this->calcular($usuario, $fonte, $ano), $fonte);
+        return $this->cacheAnalise->lembrar($usuario, 'retrospectiva|' . $ano, fn (): RetrospectivaAnualSpotifyDTO => $this->calcular($usuario, $fonte, $ano), $fonte, RenovacaoCacheAnalise::Continua);
     }
 
     private function calcular(Usuario $usuario, FiltroFonteMusica $fonte, int $ano): RetrospectivaAnualSpotifyDTO

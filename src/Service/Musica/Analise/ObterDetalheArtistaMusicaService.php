@@ -13,6 +13,7 @@ use App\DataObject\Spotify\Analise\RepeticaoDiariaSpotifyDTO;
 use App\Entity\ArtistaCatalogo;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Exception\Musica\AnaliseMusicaException;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Message\BuscarFotoArtistaMessage;
@@ -55,6 +56,7 @@ final readonly class ObterDetalheArtistaMusicaService
             'artista|'.$artista->uuid()->toRfc4122(),
             fn (): DetalheArtistaSpotifyDTO => $this->calcular($usuario, $fonte, $artista),
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 

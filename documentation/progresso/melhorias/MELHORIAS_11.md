@@ -221,3 +221,22 @@
 - **Arquivos**: `src/DataObject/Spotify/TocandoAgoraSpotifyDTO.php`, `src/Service/Spotify/ObterTocandoAgoraSpotifyService.php`, `web/features/spotify/types.ts`, `web/features/spotify/components/CartaoTocandoAgora.tsx`
 
 ---
+
+### ✅ Melhoria 216 — Música: Relatórios Mais Rápidos (Índices, Cache e Banco)
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: os relatórios gerais demoravam muito para carregar.
+- **Causa** (medida no usuário com 165 mil reproduções):
+  - A Visão Geral em "Desde sempre" levava cerca de 12 s quando calculada do zero.
+  - O cache dos relatórios era apagado a cada deploy (ficava dentro do container) e na virada de cada dia (a data fazia parte da chave).
+  - O MySQL tinha 128 MB de buffer pool para cerca de 600 MB de tabelas de música, então lia do disco.
+  - A busca do código do artista no Spotify usava `LOWER(TRIM(coluna))`, ignorava o índice e levava 7 s.
+  - Extremos do dia e álbuns em sequência buscavam o nome do artista para cada reprodução.
+- **Solução**:
+  - Consultas: busca do código do artista de 6.956 ms para 81 ms; novo índice de cobertura em `reproducao_spotify`; extremos do dia de 5,8 s para 2,3 s e álbuns em sequência de 3,5 s para 1,3 s em "Desde sempre" (resultados conferidos iguais aos de antes, em 2 usuários e 3 períodos).
+  - Cache: renovação por tipo de relatório (contínua, mensal ou diária), recálculo em segundo plano quando há reproduções novas ou a entrada passa de 6 h, validade de 14 dias, volume próprio para sobreviver ao deploy e versão automática pelo código das análises.
+  - Banco: buffer pool de 1 GB, com dump e carga no restart.
+- **Arquivos**: `src/Kernel.php`, `src/Enum/RenovacaoCacheAnalise.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `src/Service/Musica/Analise/*`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Entity/ReproducaoSpotify.php`, `migrations/Version20261124150000.php`, `devops/docker-compose.prod.yaml`, `documentation/funcionalidades/MUSICA.md`
+
+---

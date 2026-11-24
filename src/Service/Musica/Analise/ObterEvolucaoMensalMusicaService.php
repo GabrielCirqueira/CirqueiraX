@@ -8,8 +8,9 @@ use App\DataObject\Spotify\Analise\EvolucaoMensalSpotifyDTO;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
-use App\Service\Spotify\CacheAnaliseSpotifyService;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
 use DateTimeImmutable;
 
 final readonly class ObterEvolucaoMensalMusicaService
@@ -24,7 +25,7 @@ final readonly class ObterEvolucaoMensalMusicaService
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, ?int $meses): EvolucaoMensalSpotifyDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, 'evolucao|' . ($meses ?? 0), fn (): EvolucaoMensalSpotifyDTO => $this->calcular($usuario, $fonte, $meses), $fonte);
+        return $this->cacheAnalise->lembrar($usuario, 'evolucao|' . ($meses ?? 0), fn (): EvolucaoMensalSpotifyDTO => $this->calcular($usuario, $fonte, $meses), $fonte, RenovacaoCacheAnalise::Mensal);
     }
 
     private function calcular(Usuario $usuario, FiltroFonteMusica $fonte, ?int $meses): EvolucaoMensalSpotifyDTO

@@ -10,6 +10,7 @@ use App\DataObject\Spotify\ItemRankingArtistaCapsulaDTO;
 use App\DataObject\Spotify\ItemRankingMusicaCapsulaDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
 use App\Service\Spotify\EnriquecerImagensSpotifyService;
 
@@ -29,6 +30,7 @@ final readonly class ObterDetalheCapsulaService
             sprintf('capsula|%d|%d', $ano, $mes),
             fn (): DetalheCapsulaComImagensDTO => $this->calcular($usuario, $fonte, $ano, $mes),
             $fonte,
+            RenovacaoCacheAnalise::Mensal,
         );
     }
 

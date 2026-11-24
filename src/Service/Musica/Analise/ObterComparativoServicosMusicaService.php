@@ -8,6 +8,7 @@ use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
 use App\Enum\FonteReproducaoMusical;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
 
@@ -26,7 +27,7 @@ final readonly class ObterComparativoServicosMusicaService
      */
     public function executar(Usuario $usuario): array
     {
-        return $this->cacheAnalise->lembrar($usuario, 'comparativo-servicos', fn (): array => $this->calcular($usuario), FiltroFonteMusica::Todas);
+        return $this->cacheAnalise->lembrar($usuario, 'comparativo-servicos', fn (): array => $this->calcular($usuario), FiltroFonteMusica::Todas, RenovacaoCacheAnalise::Continua);
     }
 
     /**

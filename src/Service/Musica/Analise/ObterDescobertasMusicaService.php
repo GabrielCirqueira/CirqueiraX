@@ -8,9 +8,10 @@ use App\DataObject\Spotify\Analise\DescobertasSpotifyDTO;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
-use App\Service\Spotify\CacheAnaliseSpotifyService;
-use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
+use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
 
 final readonly class ObterDescobertasMusicaService
 {
@@ -29,7 +30,7 @@ final readonly class ObterDescobertasMusicaService
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte, PeriodoAnaliseSpotifyDTO $periodo): DescobertasSpotifyDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, 'descobertas|' . $periodo->chaveCache(), fn (): DescobertasSpotifyDTO => $this->calcular($usuario, $fonte, $periodo), $fonte);
+        return $this->cacheAnalise->lembrar($usuario, 'descobertas|' . $periodo->chaveCache(), fn (): DescobertasSpotifyDTO => $this->calcular($usuario, $fonte, $periodo), $fonte, RenovacaoCacheAnalise::Continua);
     }
 
     private function calcular(Usuario $usuario, FiltroFonteMusica $fonte, PeriodoAnaliseSpotifyDTO $periodo): DescobertasSpotifyDTO

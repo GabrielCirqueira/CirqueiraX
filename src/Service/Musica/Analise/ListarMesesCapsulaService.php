@@ -8,6 +8,7 @@ use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\DataObject\Spotify\ResumoMesCapsulaDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
 
@@ -23,7 +24,7 @@ final readonly class ListarMesesCapsulaService
      */
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte): array
     {
-        return $this->cacheAnalise->lembrar($usuario, 'capsula|meses', fn (): array => $this->calcular($usuario, $fonte), $fonte);
+        return $this->cacheAnalise->lembrar($usuario, 'capsula|meses', fn (): array => $this->calcular($usuario, $fonte), $fonte, RenovacaoCacheAnalise::Mensal);
     }
 
     /**

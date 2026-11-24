@@ -22,6 +22,7 @@ services:
       - livros_prod:/var/www/html/var/livros
       - transcricoes_prod:/var/www/html/var/transcricoes
       - thumbnails_prod:/var/www/html/var/cache/thumbnails
+      - cache_app_prod:/var/www/html/var/cache/prod/pools/app
       - ../var/cookies:/var/www/html/var/cookies
       - jwt_prod:/var/www/html/config/jwt
     healthcheck:
@@ -40,6 +41,10 @@ services:
     container_name: cirqueirax_database_prod
     restart: unless-stopped
     env_file: ../.env
+    command:
+      - --innodb-buffer-pool-size=1G
+      - --innodb-buffer-pool-dump-at-shutdown=ON
+      - --innodb-buffer-pool-load-at-startup=ON
     environment:
       TZ: America/Sao_Paulo
     volumes:
@@ -58,6 +63,7 @@ volumes:
   livros_prod:
   transcricoes_prod:
   thumbnails_prod:
+  cache_app_prod:
   jwt_prod:
 
 networks:

@@ -9,10 +9,11 @@ use App\DataObject\Spotify\Analise\RecordesSpotifyDTO;
 use App\DataObject\Spotify\Analise\RepeticaoDiariaSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
-use App\Service\Spotify\CacheAnaliseSpotifyService;
-use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
-use App\Service\Spotify\CalcularSequenciasSpotifyService;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
+use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
+use App\Service\Spotify\CacheAnaliseSpotifyService;
+use App\Service\Spotify\CalcularSequenciasSpotifyService;
 
 final readonly class ObterRecordesMusicaService
 {
@@ -25,7 +26,7 @@ final readonly class ObterRecordesMusicaService
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte): RecordesSpotifyDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, 'recordes', fn (): RecordesSpotifyDTO => $this->calcular($usuario, $fonte), $fonte);
+        return $this->cacheAnalise->lembrar($usuario, 'recordes', fn (): RecordesSpotifyDTO => $this->calcular($usuario, $fonte), $fonte, RenovacaoCacheAnalise::Continua);
     }
 
     private function calcular(Usuario $usuario, FiltroFonteMusica $fonte): RecordesSpotifyDTO

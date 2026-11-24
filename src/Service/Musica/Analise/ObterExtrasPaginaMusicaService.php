@@ -7,6 +7,7 @@ namespace App\Service\Musica\Analise;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Enum\TipoVersaoMusica;
 use App\Repository\AnaliseReproducaoMusicalRepository;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
@@ -44,6 +45,7 @@ final readonly class ObterExtrasPaginaMusicaService
             'rotina|'.$periodo->chaveCache(),
             fn (): array => $this->calcularRotina($usuario, $fonte, $periodo),
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
@@ -65,6 +67,7 @@ final readonly class ObterExtrasPaginaMusicaService
                 ];
             },
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
@@ -103,6 +106,7 @@ final readonly class ObterExtrasPaginaMusicaService
                 ];
             },
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
@@ -116,6 +120,7 @@ final readonly class ObterExtrasPaginaMusicaService
             'versoes-alteradas|'.$periodo->chaveCache(),
             fn (): array => $this->calcularVersoes($usuario, $fonte, $periodo),
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
@@ -140,6 +145,7 @@ final readonly class ObterExtrasPaginaMusicaService
                 ];
             },
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
@@ -192,6 +198,7 @@ final readonly class ObterExtrasPaginaMusicaService
                 ];
             },
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
@@ -210,6 +217,7 @@ final readonly class ObterExtrasPaginaMusicaService
                 return ['itens' => $this->anexarMusica($itens, $musicas)];
             },
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 

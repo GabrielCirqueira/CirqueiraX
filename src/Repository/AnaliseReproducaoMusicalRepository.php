@@ -36,6 +36,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
     private const string URL_YOUTUBE_MUSIC = 'https://music.youtube.com/watch?v=%s';
     private const string DATA_LOCAL = "CONVERT_TZ(r.tocada_em, '+00:00', '-03:00')";
     private const string ORDEM = 'streams DESC, ms DESC';
+    private const string ARTISTA_DESCONHECIDO = 'Desconhecido';
     private const string COLUNAS_POR_FONTE_SOMADAS = 'SUM(m.qtd_spotify) AS qtd_spotify, SUM(m.qtd_youtube_music) AS qtd_youtube_music,
             SUM(m.streams_spotify) AS streams_spotify, SUM(m.ms_spotify) AS ms_spotify,
             SUM(m.streams_youtube_music) AS streams_youtube_music, SUM(m.ms_youtube_music) AS ms_youtube_music,
@@ -1228,28 +1229,31 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $sql = sprintf(
             "WITH ordenadas AS (
-                SELECT r.musica_uuid, m.titulo AS nome,
-                    COALESCE((
-                        SELECT ac.nome FROM musica_artista_catalogo mac
-                        INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
-                        WHERE mac.musica_uuid = r.musica_uuid
-                        ORDER BY mac.posicao ASC LIMIT 1
-                    ), 'Desconhecido') AS artista,
-                    DATE(%1\$s) AS dia,
+                SELECT r.musica_uuid,
                     ROW_NUMBER() OVER (PARTITION BY DATE(%1\$s) ORDER BY r.tocada_em ASC) AS rn_asc,
                     ROW_NUMBER() OVER (PARTITION BY DATE(%1\$s) ORDER BY r.tocada_em DESC) AS rn_desc
                 FROM reproducao_musical r
-                INNER JOIN musica_catalogo m ON m.uuid = r.musica_uuid
                 WHERE r.usuario_id = :usuarioId%2\$s
+            ), extremos AS (
+                SELECT tipo, musica_uuid, COUNT(*) AS dias
+                FROM (
+                    SELECT 'abertura' AS tipo, musica_uuid FROM ordenadas WHERE rn_asc = 1
+                    UNION ALL
+                    SELECT 'fechamento', musica_uuid FROM ordenadas WHERE rn_desc = 1
+                ) marcados
+                GROUP BY tipo, musica_uuid
             )
-            SELECT tipo, nome, artista, BIN_TO_UUID(musica_uuid) AS musica_uuid, COUNT(*) AS dias
-            FROM (
-                SELECT 'abertura' AS tipo, nome, artista, musica_uuid FROM ordenadas WHERE rn_asc = 1
-                UNION ALL
-                SELECT 'fechamento', nome, artista, musica_uuid FROM ordenadas WHERE rn_desc = 1
-            ) extremos
-            GROUP BY tipo, musica_uuid, nome, artista
-            ORDER BY tipo ASC, dias DESC",
+            SELECT e.tipo, m.titulo AS nome,
+                COALESCE((
+                    SELECT ac.nome FROM musica_artista_catalogo mac
+                    INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
+                    WHERE mac.musica_uuid = e.musica_uuid
+                    ORDER BY mac.posicao ASC LIMIT 1
+                ), 'Desconhecido') AS artista,
+                BIN_TO_UUID(e.musica_uuid) AS musica_uuid, e.dias
+            FROM extremos e
+            INNER JOIN musica_catalogo m ON m.uuid = e.musica_uuid
+            ORDER BY e.tipo ASC, e.dias DESC",
             self::DATA_LOCAL,
             $filtros,
         );
@@ -1284,13 +1288,7 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
         [$parametros, $tipos, $filtros] = $this->montarFiltros($usuario, $periodo, $filtro);
 
         $linhas = $this->consultar(sprintf(
-            "SELECT DATE(%1\$s) AS dia, m.album, BIN_TO_UUID(r.musica_uuid) AS musica_uuid, r.tocada_em, r.ms_reproduzidos AS ms,
-                COALESCE((
-                    SELECT ac.nome FROM musica_artista_catalogo mac
-                    INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
-                    WHERE mac.musica_uuid = r.musica_uuid
-                    ORDER BY mac.posicao ASC LIMIT 1
-                ), 'Desconhecido') AS artista
+            "SELECT DATE(%1\$s) AS dia, m.album, BIN_TO_UUID(r.musica_uuid) AS musica_uuid, r.tocada_em, r.ms_reproduzidos AS ms
             FROM reproducao_musical r
             INNER JOIN musica_catalogo m ON m.uuid = r.musica_uuid
             WHERE r.usuario_id = :usuarioId AND m.album IS NOT NULL AND m.album <> ''%2\$s
@@ -1311,7 +1309,6 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
                     'chave' => $chave,
                     'data' => (string) $linha['dia'],
                     'album' => (string) $linha['album'],
-                    'artista' => (string) $linha['artista'],
                     'faixas' => 0,
                     'ms' => 0,
                     'musicaUuid' => (string) $linha['musica_uuid'],
@@ -1332,7 +1329,6 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
             $melhores[$sequencia['chave']] = [
                 'data' => $sequencia['data'],
                 'album' => $sequencia['album'],
-                'artista' => $sequencia['artista'],
                 'faixas' => $sequencia['faixas'],
                 'minutos' => $this->paraMinutos($sequencia['ms']),
                 'musicaUuid' => $sequencia['musicaUuid'],
@@ -1341,8 +1337,45 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
 
         $resultados = array_values($melhores);
         usort($resultados, static fn (array $a, array $b): int => $b['faixas'] <=> $a['faixas'] ?: strcmp($b['data'], $a['data']));
+        $resultados = array_slice($resultados, 0, $limite);
+        $artistas = $this->mapearArtistaPrincipalPorMusica(array_column($resultados, 'musicaUuid'));
 
-        return array_slice($resultados, 0, $limite);
+        return array_map(static fn (array $resultado): array => [
+            'data' => $resultado['data'],
+            'album' => $resultado['album'],
+            'artista' => $artistas[$resultado['musicaUuid']] ?? self::ARTISTA_DESCONHECIDO,
+            'faixas' => $resultado['faixas'],
+            'minutos' => $resultado['minutos'],
+            'musicaUuid' => $resultado['musicaUuid'],
+        ], $resultados);
+    }
+
+    /**
+     * @param list<string> $uuids
+     *
+     * @return array<string, string>
+     */
+    private function mapearArtistaPrincipalPorMusica(array $uuids): array
+    {
+        if ([] === $uuids) {
+            return [];
+        }
+
+        $artistas = [];
+        $linhas = $this->consultar(
+            'SELECT BIN_TO_UUID(mac.musica_uuid) AS musica_uuid, ac.nome
+            FROM musica_artista_catalogo mac
+            INNER JOIN artista_catalogo ac ON ac.uuid = mac.artista_uuid
+            WHERE mac.musica_uuid IN (:uuids)
+            ORDER BY mac.posicao ASC',
+            ['uuids' => array_map(static fn (string $uuid): string => Uuid::fromString($uuid)->toBinary(), array_values(array_unique($uuids)))],
+            ['uuids' => ArrayParameterType::BINARY],
+        );
+        foreach ($linhas as $linha) {
+            $artistas[(string) $linha['musica_uuid']] ??= (string) $linha['nome'];
+        }
+
+        return $artistas;
     }
 
     /**
@@ -1966,9 +1999,9 @@ final class AnaliseReproducaoMusicalRepository extends ServiceEntityRepository
         $codigos = [];
         $consultas = [
             "SELECT LOWER(TRIM(nome_artista)) AS chave, MAX(codigo_artista) AS codigo FROM artista_faixa_spotify
-                WHERE LOWER(TRIM(nome_artista)) IN (:nomes) AND codigo_artista IS NOT NULL AND codigo_artista <> '' GROUP BY chave",
+                WHERE nome_artista IN (:nomes) AND codigo_artista IS NOT NULL AND codigo_artista <> '' GROUP BY chave",
             "SELECT LOWER(TRIM(artista_principal)) AS chave, MAX(codigo_artista_principal) AS codigo FROM reproducao_spotify
-                WHERE usuario_id = :usuarioId AND LOWER(TRIM(artista_principal)) IN (:nomes) AND codigo_artista_principal IS NOT NULL AND codigo_artista_principal <> '' GROUP BY chave",
+                WHERE usuario_id = :usuarioId AND artista_principal IN (:nomes) AND codigo_artista_principal IS NOT NULL AND codigo_artista_principal <> '' GROUP BY chave",
         ];
         foreach ($consultas as $sql) {
             foreach ($this->consultar($sql, ['usuarioId' => $usuario->getId(), 'nomes' => $chaves], ['nomes' => ArrayParameterType::STRING]) as $linha) {

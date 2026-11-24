@@ -15,6 +15,7 @@ use App\Entity\ComponenteMashup;
 use App\Entity\MusicaCatalogo;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Exception\Musica\AnaliseMusicaException;
 use App\Exception\Musica\MusicaCatalogoException;
 use App\Repository\AnaliseReproducaoMusicalRepository;
@@ -49,6 +50,7 @@ final readonly class ObterDetalheMusicaService
             'musica|'.$musica->uuid()->toRfc4122(),
             fn (): DetalheMusicaSpotifyDTO => $this->calcular($usuario, $fonte, $musica),
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 

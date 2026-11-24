@@ -79,6 +79,12 @@ Cada card de bloco (`CartaoBlocoMusica`, M201/M202) mostra um tooltip explicando
 
 Desempenho (M194): o cache de análise não é apagado quando chegam reproduções novas — elas só marcam o cache como desatualizado, a resposta sai com o último cálculo e o recálculo roda depois da resposta. Correções manuais e reimportações apagam o cache. O navegador guarda as consultas de música por até 3 dias (descartadas em versão nova do app e no logout), então a página abre preenchida e atualiza por trás.
 
+Desempenho (M216):
+- **Renovação do cache por tipo de relatório** (`RenovacaoCacheAnalise` no `lembrar`): `Continua` para relatórios com período fixo na chave e para detalhes de música e artista (a chave não muda na virada do dia, e o cálculo velho é servido enquanto o novo roda depois da resposta), `Mensal` para o que depende do mês corrente (linha do tempo, meses e detalhe da Cápsula, evolução) e `Diaria` (padrão) para o que depende de "hoje" (resumo de hoje e semana, Neste dia, intervalos relativos). Uma entrada com mais de 6 h também é recalculada em segundo plano. Validade das entradas: 14 dias.
+- **Cache sobrevive ao deploy:** `var/cache/prod/pools/app` fica no volume `cache_app_prod`. A chave inclui `app.versao_codigo_analise`, um hash calculado no `Kernel` sobre `src/DataObject`, `src/Enum`, `src/Service/Musica/Analise`, o `AnaliseReproducaoMusicalRepository` e os serviços de imagem e cache usados pelas análises. Mudou um desses arquivos, o cache antigo deixa de ser lido sozinho. Código novo usado pelas análises fora dessas pastas deve entrar na lista do `Kernel`.
+- **MySQL:** `innodb_buffer_pool_size` de 1 GB no `docker-compose.prod.yaml` (era 128 MB, menor que as tabelas de reprodução), com dump e carga do buffer pool no restart.
+- **Consultas:** busca do código do artista no Spotify sem `LOWER(TRIM())` na coluna (usa índice; a collation já ignora maiúsculas e espaços à direita) e índice de cobertura `IDX_REPRODUCAO_SPOTIFY_USUARIO_ARTISTA (usuario_id, artista_principal, codigo_artista_principal)`. Extremos do dia e álbuns em sequência buscam o nome do artista só para os resultados finais, não para cada reprodução.
+
 ### Transferência de playlists (Spotify ↔ YouTube Music)
 
 Fluxo no estilo TuneMyMusic, em `/musica/gerenciar`:

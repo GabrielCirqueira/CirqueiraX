@@ -11,6 +11,7 @@ use App\DataObject\Spotify\Analise\MusicaAnaliseSpotifyDTO;
 use App\DataObject\Spotify\PeriodoMesSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
 use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
@@ -29,7 +30,7 @@ final readonly class ObterLinhaDoTempoMusicaService
 
     public function executar(Usuario $usuario, FiltroFonteMusica $fonte): LinhaDoTempoMusicaDTO
     {
-        return $this->cacheAnalise->lembrar($usuario, self::CHAVE_CACHE, fn (): LinhaDoTempoMusicaDTO => $this->calcular($usuario, $fonte), $fonte);
+        return $this->cacheAnalise->lembrar($usuario, self::CHAVE_CACHE, fn (): LinhaDoTempoMusicaDTO => $this->calcular($usuario, $fonte), $fonte, RenovacaoCacheAnalise::Mensal);
     }
 
     private function calcular(Usuario $usuario, FiltroFonteMusica $fonte): LinhaDoTempoMusicaDTO

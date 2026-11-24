@@ -14,7 +14,7 @@ use Symfony\Component\Uid\Uuid;
 #[ORM\Table(name: 'reproducao_spotify')]
 #[ORM\UniqueConstraint(name: 'UNIQ_REPRODUCAO_SPOTIFY_USUARIO_CHAVE', fields: ['usuario', 'chaveDeduplicacao'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_SPOTIFY_USUARIO_TOCADA_EM', fields: ['usuario', 'tocadaEm'])]
-#[ORM\Index(name: 'IDX_REPRODUCAO_SPOTIFY_USUARIO_ARTISTA', fields: ['usuario', 'artistaPrincipal'])]
+#[ORM\Index(name: 'IDX_REPRODUCAO_SPOTIFY_USUARIO_ARTISTA', fields: ['usuario', 'artistaPrincipal', 'codigoArtistaPrincipal'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_SPOTIFY_USUARIO_FAIXA', fields: ['usuario', 'nomeFaixa'])]
 #[ORM\Index(name: 'IDX_REPRODUCAO_SPOTIFY_FONTE', fields: ['fonte'])]
 class ReproducaoSpotify

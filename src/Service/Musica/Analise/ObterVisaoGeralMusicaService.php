@@ -10,6 +10,7 @@ use App\DataObject\Spotify\Analise\MusicaAnaliseSpotifyDTO;
 use App\DataObject\Spotify\Analise\PeriodoAnaliseSpotifyDTO;
 use App\Entity\Usuario;
 use App\Enum\FiltroFonteMusica;
+use App\Enum\RenovacaoCacheAnalise;
 use App\Repository\AnaliseReproducaoMusicalRepository;
 use App\Service\Spotify\AplicarImagensAnaliseSpotifyService;
 use App\Service\Spotify\CacheAnaliseSpotifyService;
@@ -40,6 +41,7 @@ final readonly class ObterVisaoGeralMusicaService
             'visao-geral|'.$periodo->chaveCache(),
             fn (): array => $this->calcular($usuario, $fonte, $periodo),
             $fonte,
+            RenovacaoCacheAnalise::Continua,
         );
     }
 
