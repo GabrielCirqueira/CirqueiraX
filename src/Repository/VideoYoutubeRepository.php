@@ -225,6 +225,32 @@ final class VideoYoutubeRepository extends ServiceEntityRepository
         return $videos;
     }
 
+    /**
+     * @param list<StatusClassificacaoVideo> $status
+     *
+     * @return list<VideoYoutube>
+     */
+    public function listarParaVinculoPeloHistorico(Usuario $usuario, array $status, ?Uuid $depoisDe, int $limite): array
+    {
+        $consulta = $this->createQueryBuilder('e')
+            ->andWhere('e.usuario = :usuario')
+            ->andWhere('e.status IN (:status)')
+            ->andWhere('e.origemClassificacao IS NULL OR e.origemClassificacao NOT IN (:origensProtegidas)')
+            ->setParameter('usuario', $usuario)
+            ->setParameter('status', array_map(static fn (StatusClassificacaoVideo $item): string => $item->value, $status))
+            ->setParameter('origensProtegidas', [OrigemClassificacao::Manual->value, OrigemClassificacao::RegraCanal->value])
+            ->orderBy('e.uuid', 'ASC')
+            ->setMaxResults($limite);
+        if (null !== $depoisDe) {
+            $consulta->andWhere('e.uuid > :depoisDe')->setParameter('depoisDe', $depoisDe, 'uuid');
+        }
+
+        /** @var list<VideoYoutube> $videos */
+        $videos = $consulta->getQuery()->getResult();
+
+        return $videos;
+    }
+
     public function buscarDoUsuario(Usuario $usuario, string $uuid): ?VideoYoutube
     {
         if (!Uuid::isValid($uuid)) {

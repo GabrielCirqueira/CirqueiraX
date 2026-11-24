@@ -24,10 +24,6 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
     private const int MINIMO_COMPONENTES_MASHUP = 2;
     private const int TAMANHO_MINIMO_TITULO_COMPACTO = 4;
     private const string ESPACO = ' ';
-    private const array MARCAS_DE_MUSICA = [
-        'lyrics', 'lyric', 'letra', 'legendado', 'slowed', 'reverb', 'sped up', 'nightcore', 'official video', 'official music video',
-        'official audio', 'audio oficial', 'clipe oficial', 'videoclipe', 'remix', 'cover', 'acoustic', 'acustico', '8d', 'visualizer', 'feat', 'ft',
-    ];
 
     public function __construct(
         private ConfirmarMusicaYoutubeService $confirmarMusica,
@@ -70,14 +66,7 @@ final readonly class AplicarIdentificacaoVideoYoutubeService
             return true;
         }
 
-        $titulo = self::ESPACO.$this->normalizador->normalizar($video->titulo()).self::ESPACO;
-        foreach (self::MARCAS_DE_MUSICA as $marca) {
-            if (str_contains($titulo, self::ESPACO.$marca.self::ESPACO)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->normalizador->temMarcaDeMusica($video->titulo());
     }
 
     /**

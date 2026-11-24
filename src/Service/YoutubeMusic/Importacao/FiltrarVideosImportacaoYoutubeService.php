@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\YoutubeMusic\Importacao;
 
+use App\DataObject\IdentificacaoMusica\HistoricoMusicalDTO;
 use App\Entity\ImportacaoYoutube;
 use App\Entity\Usuario;
 use App\Entity\VideoYoutube;
@@ -14,6 +15,7 @@ use App\Enum\StatusClassificacaoVideo;
 use App\Repository\ImportacaoYoutubeRepository;
 use App\Repository\RegraCanalYoutubeRepository;
 use App\Repository\VideoYoutubeRepository;
+use App\Service\IdentificacaoMusica\VincularVideoPeloHistoricoService;
 use App\Service\Musica\NormalizarTextoMusicaService;
 
 final readonly class FiltrarVideosImportacaoYoutubeService
@@ -28,6 +30,7 @@ final readonly class FiltrarVideosImportacaoYoutubeService
         private ImportacaoYoutubeRepository $importacaoRepository,
         private RegraCanalYoutubeRepository $regraCanalRepository,
         private NormalizarTextoMusicaService $normalizador,
+        private VincularVideoPeloHistoricoService $vincularPeloHistorico,
     ) {
     }
 
@@ -38,12 +41,13 @@ final readonly class FiltrarVideosImportacaoYoutubeService
         $indisponiveis = $this->videoRepository->contarReservadosPorStatus($usuario)[StatusClassificacaoVideo::Indisponivel->value] ?? 0;
         $descartados = 0;
         $ultimo = null;
+        $historico = $this->vincularPeloHistorico->carregarHistorico($usuario);
 
         do {
             $videos = $this->videoRepository->listarReservadosPendentes($usuario, $ultimo, self::TAMANHO_LOTE);
 
             foreach ($videos as $video) {
-                $descartados += $this->aplicarRegras($usuario, $video) ? 1 : 0;
+                $descartados += $this->aplicarRegras($usuario, $video, $historico) ? 1 : 0;
                 $ultimo = $video->uuid();
             }
 
@@ -60,7 +64,7 @@ final readonly class FiltrarVideosImportacaoYoutubeService
         return ResultadoEtapaImportacaoYoutube::Continuar;
     }
 
-    private function aplicarRegras(Usuario $usuario, VideoYoutube $video): bool
+    private function aplicarRegras(Usuario $usuario, VideoYoutube $video, HistoricoMusicalDTO $historico): bool
     {
         if ($video->isClassificadoManualmente()) {
             return false;
@@ -73,7 +77,11 @@ final readonly class FiltrarVideosImportacaoYoutubeService
             return true;
         }
 
-        if (!$this->isNaoMusicaPorDetalhes($video)) {
+        if ($this->vincularPeloHistorico->vincular($video, $historico)) {
+            return false;
+        }
+
+        if (!$this->isNaoMusicaPorDetalhes($video) || $this->normalizador->temMarcaDeMusica($video->titulo())) {
             return false;
         }
 

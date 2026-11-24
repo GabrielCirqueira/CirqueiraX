@@ -20,6 +20,11 @@ final readonly class NormalizarTextoMusicaService
     private const string PADRAO_ARTIGOS_E_PREPOSICOES = '/\b(?:the|os|as|o|a|de|da|do|dos|das)\b/iu';
     private const string PADRAO_SUFIXO_CANAL = '/(?:\s*-\s*topic|\s*vevo|\s*oficial|\s*official|\s*music)$/iu';
     private const int TAMANHO_MINIMO_COMPACTO_SEM_ARTIGOS = 4;
+    private const string ESPACO = ' ';
+    private const array MARCAS_DE_MUSICA = [
+        'lyrics', 'lyric', 'letra', 'legendado', 'slowed', 'reverb', 'sped up', 'nightcore', 'official video', 'official music video',
+        'official audio', 'audio oficial', 'clipe oficial', 'videoclipe', 'remix', 'cover', 'acoustic', 'acustico', '8d', 'visualizer', 'feat', 'ft',
+    ];
 
     public function normalizar(string $texto): string
     {
@@ -38,6 +43,23 @@ final readonly class NormalizarTextoMusicaService
         $compativel = Normalizer::normalize($texto, Normalizer::FORM_KC);
 
         return false === $compativel ? $texto : $compativel;
+    }
+
+    public function temMarcaDeMusica(string $titulo): bool
+    {
+        $normalizado = self::ESPACO.$this->normalizar($titulo).self::ESPACO;
+        foreach (self::MARCAS_DE_MUSICA as $marca) {
+            if (str_contains($normalizado, self::ESPACO.$marca.self::ESPACO)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function compatibilizarTexto(string $texto): string
+    {
+        return $this->compatibilizar($texto);
     }
 
     public function normalizarTitulo(string $titulo): string

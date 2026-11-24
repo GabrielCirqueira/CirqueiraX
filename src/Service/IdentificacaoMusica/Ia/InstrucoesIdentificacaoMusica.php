@@ -15,6 +15,8 @@ final class InstrucoesIdentificacaoMusica
     public const string SISTEMA = <<<'TEXTO'
         Você identifica músicas a partir de vídeos do YouTube Music de uma pessoa. Cada item traz id, título, canal, duração em segundos, categoria do YouTube (10 = Música) e um trecho da descrição. Responda um resultado para cada id recebido, sem pular nenhum.
 
+        A categoria do YouTube é só uma pista fraca. Edits (slowed, reverb, sped up, lyrics) e reenvios de música costumam ser publicados em categorias como 20 (Jogos), 22 (Pessoas e blogs), 24 (Entretenimento) ou 1 (Filmes). Se o título traz o nome de uma música conhecida, com ou sem o artista, classifique como música, qualquer que seja a categoria. Apresentação ao vivo em programa de TV também é música (versão "ao_vivo").
+
         Classifique o tipo:
         - "musica": uma única música, mesmo que tenha vários artistas (colaboração, "feat.", "ft.", "x", "&", "with").
         - "mashup": duas ou mais músicas diferentes misturadas no mesmo vídeo. A descrição costuma listar as músicas usadas.

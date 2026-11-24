@@ -240,3 +240,23 @@
 - **Arquivos**: `src/Kernel.php`, `src/Enum/RenovacaoCacheAnalise.php`, `src/Service/Spotify/CacheAnaliseSpotifyService.php`, `src/Service/Musica/Analise/*`, `src/Repository/AnaliseReproducaoMusicalRepository.php`, `src/Entity/ReproducaoSpotify.php`, `migrations/Version20261124150000.php`, `devops/docker-compose.prod.yaml`, `documentation/funcionalidades/MUSICA.md`
 
 ---
+
+### ✅ Melhoria 217 — YouTube Music: Vídeos Vinculados pelo Histórico e IA Sem Viés de Categoria
+
+- **Status**: Concluído
+- **Data**: 24 de novembro de 2026
+- **Pedido**: depois do Takeout, a revisão ficou com 5.771 itens e músicas óbvias apareceram como "IA: não é música" (ex.: "𝑵𝒆𝒗𝒂𝒅𝒂 𝑽𝒊𝒄𝒆𝒕𝒐𝒏𝒆 (ultra Slowed+Reverb)", "phil collins - another day in paradise (slowed + reverb)"), mesmo já tendo sido ouvidas no Spotify.
+- **Causa**:
+  - A IA recebia a categoria do YouTube ("10 = Música") e tratava outras categorias como não música. Edits slowed/reverb costumam ser postados como Jogos, Pessoas e blogs ou Entretenimento.
+  - Cerca de dois terços dos lotes foram respondidos pelo `ministral-8b`, um modelo pequeno do pool.
+  - Uma regra marcava direto como não música os vídeos das categorias 20, 25, 26, 27 e 28, sem olhar o título (5.208 só em Jogos).
+  - Nada comparava o vídeo com as músicas que a pessoa já ouviu.
+  - Composição da fila: 1.855 em revisão, 3.206 indisponíveis (vídeos apagados, só com o código; a aba já tem ação em lote "Só os sem título"), 429 compilações, além de canais novos e duplicatas.
+- **Solução**:
+  - Novo passo antes da IA e da regra de categoria (`VincularVideoPeloHistoricoService`): se o título do vídeo traz o título de uma música do histórico do usuário e o nome de um dos artistas dela (no título ou no canal), e sobram no máximo 3 palavras além de rótulos (slowed, reverb, lyrics…), o vídeo vira música com origem `historico` e a versão é detectada pelo título. Vídeos de reação, tutorial, karaokê, mashup e "música A x música B" não entram.
+  - A regra de categoria não descarta mais vídeos com marca de música no título (slowed, lyrics, remix…); eles seguem para identificação.
+  - A IA recebe o título sem letras estilizadas e a instrução diz que a categoria é pista fraca e que apresentação na TV é música ao vivo.
+  - Comando `app:youtube:vincular-pelo-historico -u N [--simular]` reprocessa revisão e não música (sem mexer no que foi corrigido à mão ou tem regra de canal) e projeta as reproduções.
+- **Arquivos**: `src/Service/IdentificacaoMusica/VincularVideoPeloHistoricoService.php`, `src/DataObject/IdentificacaoMusica/HistoricoMusicalDTO.php`, `src/Command/VincularVideosPeloHistoricoCommand.php`, `src/Service/IdentificacaoMusica/IdentificarVideosYoutubeService.php`, `src/Service/IdentificacaoMusica/AplicarIdentificacaoVideoYoutubeService.php`, `src/Service/IdentificacaoMusica/Ia/InstrucoesIdentificacaoMusica.php`, `src/Service/YoutubeMusic/Importacao/FiltrarVideosImportacaoYoutubeService.php`, `src/Service/Musica/NormalizarTextoMusicaService.php`, `src/Repository/MusicaCatalogoRepository.php`, `src/Repository/VideoYoutubeRepository.php`, `src/Enum/OrigemClassificacao.php`
+
+---

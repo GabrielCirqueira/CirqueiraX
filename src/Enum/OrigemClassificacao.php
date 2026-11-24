@@ -9,6 +9,7 @@ enum OrigemClassificacao: string
     case Regra = 'regra';
     case RegraCanal = 'regra_canal';
     case Ia = 'ia';
+    case Historico = 'historico';
     case Manual = 'manual';
 
     public function descricao(): string
@@ -17,6 +18,7 @@ enum OrigemClassificacao: string
             self::Regra => 'Regra automática',
             self::RegraCanal => 'Regra do canal',
             self::Ia => 'Inteligência artificial',
+            self::Historico => 'Música do seu histórico',
             self::Manual => 'Correção manual',
         };
     }

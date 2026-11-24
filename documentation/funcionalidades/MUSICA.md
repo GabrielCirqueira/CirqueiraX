@@ -243,6 +243,8 @@ Decisão: `low` como padrão (`OPENAI_ESFORCO_IDENTIFICACAO`). Custa o dobro, ma
 
 ## Identificação dos vídeos (tópico 195)
 
+**Vínculo pelo histórico (M217):** antes da regra de categoria (no filtro da importação) e antes da IA (na identificação), `VincularVideoPeloHistoricoService` compara o título do vídeo com as músicas que o usuário já ouviu: exige o título da música e o nome de um dos artistas (no título ou no canal), aceita no máximo 3 palavras sobrando além de rótulos (slowed, reverb, lyrics…) e recusa reação, tutorial, karaokê, mashup e "A x B". Origem `historico`, confiança 95, versão detectada pelo título. A regra das categorias 20, 25, 26, 27 e 28 não descarta título com marca de música. Reprocessar: `app:youtube:vincular-pelo-historico -u ID [--simular]`.
+
 `IdentificarVideosYoutubeService` recebe vídeos de um usuário e segue esta ordem:
 
 1. **Decisão manual** nunca é sobrescrita: o vídeo é pulado.

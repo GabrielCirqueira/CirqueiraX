@@ -41,6 +41,7 @@ final readonly class IdentificarVideosYoutubeService
         private VideoYoutubeRepository $videoRepository,
         private RegistrarConsumoIaService $registrarConsumo,
         private ProjetarReproducoesYoutubeService $projetarYoutube,
+        private VincularVideoPeloHistoricoService $vincularPeloHistorico,
         private LoggerInterface $logger,
     ) {
     }
@@ -68,6 +69,7 @@ final readonly class IdentificarVideosYoutubeService
             }
             $contagem[$status->value] = ($contagem[$status->value] ?? 0) + 1;
         }
+        $restantes = $this->vincularPeloHistorico($usuario, $restantes, $contagem);
         $this->videoRepository->flush();
 
         $restantes = $this->enriquecer($restantes);
@@ -89,6 +91,32 @@ final readonly class IdentificarVideosYoutubeService
         $this->projetarYoutube->projetarVideos($usuario, array_values(array_filter($videos, static fn (VideoYoutube $video): bool => $video->usuario() === $usuario)));
 
         return $contagem;
+    }
+
+    /**
+     * @param list<VideoYoutube>  $videos
+     * @param array<string, int> $contagem
+     *
+     * @return list<VideoYoutube>
+     */
+    private function vincularPeloHistorico(Usuario $usuario, array $videos, array &$contagem): array
+    {
+        if ([] === $videos) {
+            return [];
+        }
+
+        $historico = $this->vincularPeloHistorico->carregarHistorico($usuario);
+        $restantes = [];
+        foreach ($videos as $video) {
+            if (!$this->vincularPeloHistorico->vincular($video, $historico)) {
+                $restantes[] = $video;
+
+                continue;
+            }
+            $contagem[StatusClassificacaoVideo::Musica->value] = ($contagem[StatusClassificacaoVideo::Musica->value] ?? 0) + 1;
+        }
+
+        return $restantes;
     }
 
     private function aplicarRegrasSemIa(Usuario $usuario, VideoYoutube $video): ?StatusClassificacaoVideo
@@ -137,10 +165,10 @@ final readonly class IdentificarVideosYoutubeService
      */
     private function identificarLote(Usuario $usuario, array $lote): ?array
     {
-        $entradas = array_map(static fn (VideoYoutube $video): EntradaIdentificacaoDTO => new EntradaIdentificacaoDTO(
+        $entradas = array_map(fn (VideoYoutube $video): EntradaIdentificacaoDTO => new EntradaIdentificacaoDTO(
             $video->uuid()->toRfc4122(),
-            $video->titulo(),
-            $video->canal(),
+            $this->normalizador->compatibilizarTexto($video->titulo()),
+            $this->normalizador->compatibilizarTexto($video->canal()),
             $video->duracaoMs(),
             $video->categoriaYoutube(),
             $video->descricaoResumo(),

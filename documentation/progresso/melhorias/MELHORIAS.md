@@ -237,3 +237,4 @@
 | M214 | Música: Capas e Fotos que Faltavam Após Importação | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-214--música-capas-e-fotos-que-faltavam-após-importação) |
 | M215 | Música: Aviso de Bloqueio do Spotify no "Tocando Agora" | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-215--música-aviso-de-bloqueio-do-spotify-no-tocando-agora) |
 | M216 | Música: Relatórios Mais Rápidos (Índices, Cache e Banco) | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-216--música-relatórios-mais-rápidos-índices-cache-e-banco) |
+| M217 | YouTube Music: Vídeos Vinculados pelo Histórico e IA Sem Viés de Categoria | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-217--youtube-music-vídeos-vinculados-pelo-histórico-e-ia-sem-viés-de-categoria) |

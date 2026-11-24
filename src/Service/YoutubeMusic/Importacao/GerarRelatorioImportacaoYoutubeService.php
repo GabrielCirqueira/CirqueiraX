@@ -49,7 +49,7 @@ final readonly class GerarRelatorioImportacaoYoutubeService
             'revisar' => $videos(StatusClassificacaoVideo::Revisar),
             'indisponiveis' => $videos(StatusClassificacaoVideo::Indisponivel),
             'pendentes' => $videos(StatusClassificacaoVideo::Pendente),
-            'identificadasPorRegra' => ($porOrigem[OrigemClassificacao::Regra->value] ?? 0) + ($porOrigem[OrigemClassificacao::RegraCanal->value] ?? 0),
+            'identificadasPorRegra' => ($porOrigem[OrigemClassificacao::Regra->value] ?? 0) + ($porOrigem[OrigemClassificacao::RegraCanal->value] ?? 0) + ($porOrigem[OrigemClassificacao::Historico->value] ?? 0),
             'identificadasPelaIa' => $porOrigem[OrigemClassificacao::Ia->value] ?? 0,
             'identificadasPorVoce' => $porOrigem[OrigemClassificacao::Manual->value] ?? 0,
             'reproducoesDeMusica' => $somarMusica('reproducoes'),

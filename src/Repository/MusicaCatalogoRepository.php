@@ -16,6 +16,8 @@ use Symfony\Component\Uid\Uuid;
  */
 final class MusicaCatalogoRepository extends ServiceEntityRepository
 {
+    private const string SEPARADOR_ARTISTAS_AGRUPADOS = "\u{1F}";
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, MusicaCatalogo::class);
@@ -247,5 +249,37 @@ final class MusicaCatalogoRepository extends ServiceEntityRepository
             LIMIT 1',
             ['url' => $url],
         );
+    }
+
+    /**
+     * @return list<array{uuid: string, titulo: string, artistas: list<string>, reproducoes: int}>
+     */
+    public function listarOuvidasPeloUsuarioComArtistas(Usuario $usuario): array
+    {
+        $linhas = $this->getEntityManager()->getConnection()->fetchAllAssociative(
+            "SELECT BIN_TO_UUID(m.uuid) AS uuid, m.titulo, ouvidas.reproducoes,
+                GROUP_CONCAT(DISTINCT COALESCE(au.nome, a.nome) ORDER BY mac.posicao SEPARATOR :separador) AS artistas
+            FROM (
+                SELECT COALESCE(mc.unida_a_uuid, mc.uuid) AS musica_uuid, COUNT(*) AS reproducoes
+                FROM reproducao_musical r
+                INNER JOIN musica_catalogo mc ON mc.uuid = r.musica_uuid
+                WHERE r.usuario_id = :usuarioId
+                GROUP BY COALESCE(mc.unida_a_uuid, mc.uuid)
+            ) ouvidas
+            INNER JOIN musica_catalogo m ON m.uuid = ouvidas.musica_uuid
+            INNER JOIN musica_artista_catalogo mac ON mac.musica_uuid = m.uuid
+            INNER JOIN artista_catalogo a ON a.uuid = mac.artista_uuid
+            LEFT JOIN artista_catalogo au ON au.uuid = a.unido_a_uuid
+            WHERE m.tipo <> :tipoMashup
+            GROUP BY m.uuid, m.titulo, ouvidas.reproducoes",
+            ['usuarioId' => $usuario->getId(), 'separador' => self::SEPARADOR_ARTISTAS_AGRUPADOS, 'tipoMashup' => TipoMusicaCatalogo::Mashup->value],
+        );
+
+        return array_map(static fn (array $linha): array => [
+            'uuid' => (string) $linha['uuid'],
+            'titulo' => (string) $linha['titulo'],
+            'artistas' => explode(self::SEPARADOR_ARTISTAS_AGRUPADOS, (string) $linha['artistas']),
+            'reproducoes' => (int) $linha['reproducoes'],
+        ], $linhas);
     }
 }
