@@ -22,6 +22,7 @@ import {
   Music2,
   Pause,
   Plus,
+  RefreshCw,
   RotateCcw,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -203,6 +204,8 @@ export const PainelMusicaTocando = memo(function PainelMusicaTocando({
             traduzir.mutate(letra.data.uuid)
           setMostrarTraducao((valor) => !valor)
         }}
+        atualizando={consulta.isFetching}
+        onAtualizar={() => consulta.refetch()}
         onAjustar={(passo) =>
           setAjusteMs((valor) =>
             Math.max(
@@ -315,6 +318,8 @@ interface CartaoMusicaProps {
   sincronizada: boolean
   temLetra: boolean
   traduzindo: boolean
+  atualizando: boolean
+  onAtualizar: () => void
   onMudarModo: (modo: ModoPronuncia) => void
   onAlternarPronuncia: () => void
   onAlternarTraducao: () => void
@@ -330,6 +335,8 @@ const CartaoMusica = memo(function CartaoMusica({
   sincronizada,
   temLetra,
   traduzindo,
+  atualizando,
+  onAtualizar,
   onMudarModo,
   onAlternarPronuncia,
   onAlternarTraducao,
@@ -362,9 +369,23 @@ const CartaoMusica = memo(function CartaoMusica({
         )}
         <VStack align="stretch" gap={0.5} minW={0} flex="1">
           <HStack gap={2}>
-            <Text fontSize="md" fontWeight="bold" color="fg" lineClamp={2}>
+            <Text fontSize="md" fontWeight="bold" color="fg" lineClamp={2} flex="1">
               {tocando.nome}
             </Text>
+            <IconButton
+              size="2xs"
+              variant="ghost"
+              borderRadius="full"
+              aria-label="Atualizar música agora"
+              title="Trocou de música? Atualize agora"
+              disabled={atualizando}
+              onClick={onAtualizar}
+            >
+              <RefreshCw
+                size={13}
+                style={atualizando ? { animation: 'spin 1s linear infinite' } : undefined}
+              />
+            </IconButton>
             {!tocando.emReproducao && (
               <Badge size="xs" variant="subtle" borderRadius="full" flexShrink={0}>
                 <Pause size={10} />

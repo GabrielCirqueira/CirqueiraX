@@ -20,3 +20,17 @@
 - **Arquivos**: `src/Controller/Pronuncia/MusicaPronunciaController.php`, `src/Service/Pronuncia/{ObterTocandoAgoraPronunciaService,ObterLetraMusicaPronunciaService,TraduzirLetraMusicaService,GerarAnalisePronunciaService}.php`, `src/Infra/Lrclib/LrclibClient.php`, `src/Infra/DeepL/DeepLClient.php` (`traduzirLote`), `src/Domain/Pronuncia/{LeitorLetraMusica,NormalizadorTituloMusica}.php`, `src/Entity/LetraMusicaPronuncia.php`, `src/Repository/LetraMusicaPronunciaRepository.php`, `src/Enum/SituacaoLetraMusica.php`, `src/DataObject/Pronuncia/` (letra e tocando agora), `src/Interface/{BuscadorLetraMusicaInterface,TradutorTextoInterface}.php`, `migrations/Version20261125230754.php`, `web/features/pronuncia/` (novos: `components/{PainelMusicaTocando,LetraSincronizada,LinhaLetraItem,BarraTempoMusica}.tsx`, `hooks/useMusicaTocando.ts`)
 
 ---
+
+### ✅ Melhoria 222 — Tocando Agora: Troca de Música Detectada em Segundos
+
+- **Status**: Concluído
+- **Data**: 25 de novembro de 2026
+- **Problema**: ao trocar de música, a aba Tocando agora levava cerca de 20 s para perceber (consulta ao Spotify a cada 15 s). A letra em si chega em ~0,1 s pelo LRCLIB.
+- **Solução**:
+  - Ritmo de 5 s com a música tocando, decidido pelo servidor (`proximaConsultaMs`). Quando o "tocando agora" passa de 360 consultas na última hora (média de 6 por minuto), cai para 12 s, abaixo do ritmo que já causou bloqueio de ~20 h (≈10 por minuto durante uma hora).
+  - Contagem em janela móvel de 60 minutos, minuto a minuto, em cache (`ControleLimiteSpotifyService::consultasNaUltimaHora`), para qualquer origem.
+  - `ObterTocandoAgoraSpotifyService` guarda o resultado por 4 s por usuário: `/musica` e Inglês & Pronúncia abertas juntas dividem a consulta, com o progresso adiantado pelo tempo em cache.
+  - Botão de atualizar no cartão da música e nova consulta ao voltar para a aba.
+- **Arquivos**: `src/Service/Spotify/{ControleLimiteSpotifyService,ObterTocandoAgoraSpotifyService}.php`, `src/DataObject/Spotify/TocandoAgoraSpotifyDTO.php`, `src/Service/Pronuncia/ObterTocandoAgoraPronunciaService.php`, `src/DataObject/Pronuncia/TocandoAgoraPronunciaDTO.php`, `web/features/pronuncia/{types.ts,hooks/useMusicaTocando.ts,components/PainelMusicaTocando.tsx}`
+
+---

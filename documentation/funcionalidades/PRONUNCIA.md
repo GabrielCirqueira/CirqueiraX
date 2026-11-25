@@ -72,7 +72,8 @@ A análise fica salva em JSON na frase com `versaoMotor`. Quando o motor muda de
 - A letra fica salva por faixa do Spotify em `letra_musica_pronuncia`. Se não foi encontrada, é procurada de novo depois de 3 dias.
 - A pronúncia não é salva: `GerarAnalisePronunciaService::executarLinhas` gera todas as linhas com uma consulta ao dicionário, então correções aprovadas valem na hora.
 - A tradução (`TraduzirLetraMusicaService`) só roda quando o usuário pede: as linhas distintas vão em lote ao DeepL (`traduzirLote`, até 50 por chamada) e o resultado fica salvo.
-- O navegador consulta o que está tocando a cada 15 s (30 s parado, e logo após o fim da faixa), só com a aba visível, e conta o tempo entre as consultas. A tela de `/musica` também consulta: as duas somam no limite do Spotify.
+- O navegador consulta o que está tocando no ritmo que o servidor devolve em `proximaConsultaMs`: **5 s**, ou **12 s** quando o "tocando agora" já fez 360 consultas na última hora (janela móvel por minuto, em cache, `ControleLimiteSpotifyService::consultasNaUltimaHora`). Parado: 20 s. Também consulta logo após o fim da faixa, ao voltar para a aba e pelo botão de atualizar no cartão da música. Nada com a aba em segundo plano; entre consultas o tempo é contado no navegador.
+- `ObterTocandoAgoraSpotifyService` guarda o resultado por 4 s por usuário: `/musica` e esta aba abertas juntas dividem a mesma consulta (o progresso é adiantado pelo tempo em cache).
 - Se o resultado tiver mais de 25% de palavras aproximadas, a tela avisa que a letra parece não estar em inglês.
 
 ### Correções

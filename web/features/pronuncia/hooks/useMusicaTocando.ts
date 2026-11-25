@@ -5,19 +5,18 @@ import type { FaixaParaLetra, TocandoAgoraPronuncia } from '../types'
 import { extrairMensagemErroApi } from '../utils'
 import { PRONUNCIA_QUERY_KEYS } from './chavesQueryPronuncia'
 
-const INTERVALO_TOCANDO_MS = 15_000
-const INTERVALO_PARADO_MS = 30_000
-const INTERVALO_MINIMO_MS = 3_000
+const INTERVALO_PARADO_MS = 20_000
+const INTERVALO_MINIMO_MS = 2_000
 const FOLGA_FIM_FAIXA_MS = 1_500
 const LETRA_FRESCA_MS = 30 * 60_000
 
 function calcularProximaConsulta(dados: TocandoAgoraPronuncia | undefined): number {
   if (!dados?.temItem || !dados.emReproducao) return INTERVALO_PARADO_MS
   const restante = dados.duracaoMs - dados.progressoMs + FOLGA_FIM_FAIXA_MS
-  return Math.max(INTERVALO_MINIMO_MS, Math.min(INTERVALO_TOCANDO_MS, restante))
+  return Math.max(INTERVALO_MINIMO_MS, Math.min(dados.proximaConsultaMs, restante))
 }
 
-/** Consulta o Spotify com folga (a cada 15 s tocando, 30 s parado) para não gastar o limite do app; o tempo entre consultas é contado no navegador. */
+/** Consulta no ritmo que o servidor indica (5 s, ou 12 s quando a última hora já teve muitas consultas), 20 s parado e logo após o fim da faixa; entre consultas o tempo é contado no navegador. */
 export function useTocandoAgoraPronuncia(habilitado: boolean) {
   return useQuery({
     queryKey: PRONUNCIA_QUERY_KEYS.tocandoAgora,

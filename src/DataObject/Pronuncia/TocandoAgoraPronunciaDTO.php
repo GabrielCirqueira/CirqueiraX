@@ -11,6 +11,7 @@ final readonly class TocandoAgoraPronunciaDTO
     public function __construct(
         public bool $conectado,
         public TocandoAgoraSpotifyDTO $tocando,
+        public int $proximaConsultaMs,
     ) {
     }
 
@@ -19,6 +20,6 @@ final readonly class TocandoAgoraPronunciaDTO
      */
     public function paraArray(): array
     {
-        return ['conectado' => $this->conectado, ...$this->tocando->paraArray()];
+        return ['conectado' => $this->conectado, 'proximaConsultaMs' => $this->proximaConsultaMs, ...$this->tocando->paraArray()];
     }
 }

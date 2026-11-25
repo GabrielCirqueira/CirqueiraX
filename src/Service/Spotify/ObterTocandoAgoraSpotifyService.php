@@ -12,12 +12,16 @@ use App\Exception\Spotify\SpotifyException;
 use App\Interface\SpotifyInterface;
 use App\Repository\AnaliseReproducaoSpotifyRepository;
 use App\Repository\ContaSpotifyRepository;
+use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
 
 final readonly class ObterTocandoAgoraSpotifyService
 {
     private const int CODIGO_LIMITE_REQUISICOES = 429;
     private const int INTERVALO_CONSULTA_SEGUNDOS = 0;
+    private const string PREFIXO_CACHE = 'spotify_tocando_agora_usuario_';
+    private const int VALIDADE_CACHE_SEGUNDOS = 4;
+    private const int MS_POR_SEGUNDO = 1000;
 
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
@@ -26,10 +30,35 @@ final readonly class ObterTocandoAgoraSpotifyService
         private AnaliseReproducaoSpotifyRepository $analiseRepository,
         private LoggerInterface $logger,
         private ControleLimiteSpotifyService $controleLimite,
+        private CacheItemPoolInterface $cache,
     ) {
     }
 
+    /**
+     * Telas abertas ao mesmo tempo (Música e Inglês & Pronúncia) dividem a mesma consulta por alguns segundos; o progresso é adiantado pelo tempo em cache.
+     */
     public function executar(Usuario $usuario): TocandoAgoraSpotifyDTO
+    {
+        $item = $this->cache->getItem(self::PREFIXO_CACHE.$usuario->getId());
+        $guardado = $item->isHit() ? $item->get() : null;
+        if (is_array($guardado) && ($guardado['tocando'] ?? null) instanceof TocandoAgoraSpotifyDTO && is_int($guardado['em'] ?? null)) {
+            return $guardado['tocando']->avancado($this->agoraMs() - $guardado['em']);
+        }
+
+        $tocando = $this->consultar($usuario);
+        $item->set(['tocando' => $tocando, 'em' => $this->agoraMs()]);
+        $item->expiresAfter(self::VALIDADE_CACHE_SEGUNDOS);
+        $this->cache->save($item);
+
+        return $tocando;
+    }
+
+    private function agoraMs(): int
+    {
+        return (int) floor(microtime(true) * self::MS_POR_SEGUNDO);
+    }
+
+    private function consultar(Usuario $usuario): TocandoAgoraSpotifyDTO
     {
         $conta = $this->contaSpotifyRepository->buscarDoUsuario($usuario);
         if (null === $conta || !$conta->isConectada()) {

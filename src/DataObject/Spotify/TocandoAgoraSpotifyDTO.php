@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\DataObject\Spotify;
 
-use DateTimeImmutable;
-use DateTimeInterface;
-
 final readonly class TocandoAgoraSpotifyDTO
 {
     /**
@@ -28,16 +25,17 @@ final readonly class TocandoAgoraSpotifyDTO
         public int $vezesOuvida = 0,
         public ?string $primeiraVezEm = null,
         public ?string $bloqueadoAte = null,
-    ) {}
+    ) {
+    }
 
     public static function nada(): self
     {
         return new self(false, false, 'nada');
     }
 
-    public static function bloqueado(DateTimeImmutable $liberadoEm): self
+    public static function bloqueado(\DateTimeImmutable $liberadoEm): self
     {
-        return new self(false, false, 'nada', bloqueadoAte: $liberadoEm->format(DateTimeInterface::ATOM));
+        return new self(false, false, 'nada', bloqueadoAte: $liberadoEm->format(\DateTimeInterface::ATOM));
     }
 
     public function comHistorico(int $vezesOuvida, ?string $primeiraVezEm): self
@@ -57,6 +55,31 @@ final readonly class TocandoAgoraSpotifyDTO
             $this->urlSpotify,
             $vezesOuvida,
             $primeiraVezEm,
+            $this->bloqueadoAte,
+        );
+    }
+
+    public function avancado(int $milissegundos): self
+    {
+        if (!$this->emReproducao || $milissegundos <= 0) {
+            return $this;
+        }
+
+        return new self(
+            $this->temItem,
+            $this->emReproducao,
+            $this->tipo,
+            $this->codigoFaixa,
+            $this->nome,
+            $this->artistas,
+            $this->codigoArtista,
+            $this->album,
+            $this->capaUrl,
+            $this->duracaoMs,
+            min($this->duracaoMs, $this->progressoMs + $milissegundos),
+            $this->urlSpotify,
+            $this->vezesOuvida,
+            $this->primeiraVezEm,
             $this->bloqueadoAte,
         );
     }

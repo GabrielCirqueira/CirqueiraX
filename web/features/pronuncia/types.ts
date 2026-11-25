@@ -155,6 +155,7 @@ export interface SalvarExcecaoPayload {
 
 export const TocandoAgoraPronunciaSchema = z.object({
   conectado: z.boolean(),
+  proximaConsultaMs: z.number(),
   temItem: z.boolean(),
   emReproducao: z.boolean(),
   tipo: z.string(),

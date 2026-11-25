@@ -243,3 +243,4 @@
 | M219 | Editor de Imagem: Selecionar de Novo, Copiar/Colar Itens e Novo Layout | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_11.md#melhoria-219--editor-de-imagem-selecionar-de-novo-copiarcolar-itens-e-novo-layout) |
 | M220 | Inglês & Pronúncia: Tradução com Pronúncia em Português | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_11.md#melhoria-220--inglês--pronúncia-tradução-com-pronúncia-em-português) |
 | M221 | Inglês & Pronúncia: Letra da Música Tocando no Spotify com Pronúncia | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_12.md#melhoria-221--inglês--pronúncia-letra-da-música-tocando-no-spotify-com-pronúncia) |
+| M222 | Tocando Agora: Troca de Música Detectada em Segundos | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_12.md#melhoria-222--tocando-agora-troca-de-música-detectada-em-segundos) |
