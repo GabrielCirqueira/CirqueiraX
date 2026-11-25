@@ -204,6 +204,7 @@ services:
             $apiKey: '%env(SYNCTHING_API_KEY)%'
 
     App\Interface\TradutorTextoInterface: '@App\Infra\DeepL\DeepLClient'
+    App\Interface\BuscadorLetraMusicaInterface: '@App\Infra\Lrclib\LrclibClient'
 
     App\Infra\DeepL\DeepLClient:
         arguments:

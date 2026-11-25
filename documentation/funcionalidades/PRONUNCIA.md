@@ -30,6 +30,14 @@ Funciona com palavras, frases e textos de até 3.000 caracteres. O fluxo princip
 | T/D entre vogais antes de sílaba fraca vira `r` | water → `UÓ-rer` |
 | Números e símbolos por extenso | `$20` → `TUÉN-ti DÁ-lerz` |
 
+### Aba Tocando agora (M221)
+
+- Mostra a música que está tocando na conta do Spotify do usuário (conectada na página Música), com capa, tempo e a letra.
+- A letra acompanha a música: a linha atual acende e fica no centro. Embaixo de cada linha vem a pronúncia (Clara ou Fala natural) e, se pedida, a tradução.
+- Clicar numa linha abre **Ouvir linha**, **Devagar** e o palavra por palavra.
+- **Letra fora do tempo?** adianta ou atrasa a letra de meio em meio segundo.
+- Rolar a letra com o mouse ou o dedo pausa o acompanhamento por 5 segundos; o botão **Voltar para a linha atual** retoma.
+
 ---
 
 ## 2. Como funciona
@@ -56,6 +64,17 @@ Depois, `ConversorFonemasPortugues` separa sílabas (maximal onset), acha a tôn
 
 A análise fica salva em JSON na frase com `versaoMotor`. Quando o motor muda de versão, a análise é refeita na próxima consulta.
 
+### Letras de música
+
+- `MusicaPronunciaController` (`/api/v1/pronuncia/musica`) devolve o que está tocando (reaproveita `ObterTocandoAgoraSpotifyService`, com o mesmo controle de limite e bloqueio do Spotify) e a letra da faixa.
+- A letra vem do [LRCLIB](https://lrclib.net) (`LrclibClient`): primeiro `/api/get` com música, artista, álbum e duração; se não achar, `/api/search` com o título sem sufixos e duração parecida (até 4 s de diferença). Prefere letra sincronizada (LRC); senão usa a simples.
+- `LeitorLetraMusica` lê o LRC (várias marcações por linha, metadados ignorados, pausas repetidas removidas, até 400 linhas).
+- A letra fica salva por faixa do Spotify em `letra_musica_pronuncia`. Se não foi encontrada, é procurada de novo depois de 3 dias.
+- A pronúncia não é salva: `GerarAnalisePronunciaService::executarLinhas` gera todas as linhas com uma consulta ao dicionário, então correções aprovadas valem na hora.
+- A tradução (`TraduzirLetraMusicaService`) só roda quando o usuário pede: as linhas distintas vão em lote ao DeepL (`traduzirLote`, até 50 por chamada) e o resultado fica salvo.
+- O navegador consulta o que está tocando a cada 15 s (30 s parado, e logo após o fim da faixa), só com a aba visível, e conta o tempo entre as consultas. A tela de `/musica` também consulta: as duas somam no limite do Spotify.
+- Se o resultado tiver mais de 25% de palavras aproximadas, a tela avisa que a letra parece não estar em inglês.
+
 ### Correções
 
 1. O usuário reporta o erro → `relato_erro_pronuncia` com status **pendente** e a frase vira **reportada**.
@@ -76,6 +95,7 @@ A aba **Dicionário** permite cadastrar, editar e apagar exceções, testar o mo
 | `frase_pronuncia` | Frase traduzida, análise JSON, status e total de consultas (cache global) |
 | `consulta_pronuncia` | Histórico por usuário, favorita e vezes consultada |
 | `relato_erro_pronuncia` | Erros reportados, sugestão da IA e resolução |
+| `letra_musica_pronuncia` | Letras por faixa do Spotify (linhas com tempo, situação e tradução) |
 
 O dicionário fica em `config/pronuncia/cmudict.dict` e é carregado no banco com:
 
@@ -104,6 +124,9 @@ Rotas em `/api/v1/pronuncia`, exigem a permissão `pronuncia`.
 | POST | `/relatos/{uuid}/sugestao` · `/aprovar` · `/rejeitar` | Ciclo de correção (admin) |
 | GET / PUT | `/excecoes` | Listar ou salvar exceção (admin) |
 | DELETE | `/excecoes/{uuid}` | Apagar exceção (admin) |
+| GET | `/musica/tocando-agora` | Música tocando no Spotify (`conectado` + dados da faixa) |
+| GET | `/musica/letra` | Letra com pronúncia (`codigoFaixa`, `titulo`, `artista`, `album`, `duracaoMs`) |
+| POST | `/musica/letra/{uuid}/traducao` | Traduz a letra (uma vez) |
 
 ---
 
@@ -124,5 +147,6 @@ Rotas em `/api/v1/pronuncia`, exigem a permissão `pronuncia`.
 | `src/Feature/Pronuncia/` | Motor de pronúncia e resolvedores |
 | `src/Domain/Pronuncia/` | Tokenizador, números, sílabas, conversor, regras, derivação, dicas |
 | `src/Infra/DeepL/`, `src/Infra/Pronuncia/` | Cliente DeepL e leitor do dicionário |
+| `src/Infra/Lrclib/` | Cliente do LRCLIB (letras) |
 | `src/Command/ImportarDicionarioPronunciaCommand.php` | Importação do dicionário |
-| `web/features/pronuncia/` | Página, componentes, hooks (`useFalaIngles`) e API |
+| `web/features/pronuncia/` | Página, componentes, hooks (`useFalaIngles`, `useMusicaTocando`) e API |

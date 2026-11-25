@@ -4,6 +4,8 @@ import { useAuthStore } from '@/stores'
 import { Box, Grid, Skeleton, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import {
+  ABAS_ADMINISTRADOR,
+  ABAS_PRONUNCIA,
   type AbaPronuncia,
   CabecalhoPronuncia,
   DialogoReportarErro,
@@ -12,6 +14,7 @@ import {
   HistoricoPronuncia,
   PainelCorrecoes,
   PainelDicionario,
+  PainelMusicaTocando,
   ResultadoTraducao,
 } from './components'
 import {
@@ -46,7 +49,10 @@ export function Component() {
 
   const usuario = useAuthStore((estado) => estado.usuario)
   const administrador = usuarioEhAdministrador(usuario)
-  const [aba, setAba] = useState<AbaPronuncia>('tradutor')
+  const [abaSalva, setAba] = useLocalStorageState<AbaPronuncia>('pronuncia:aba', 'tradutor', {
+    valoresPermitidos: [...ABAS_PRONUNCIA],
+  })
+  const aba = ABAS_ADMINISTRADOR.includes(abaSalva) && !administrador ? 'tradutor' : abaSalva
   const [texto, setTexto] = useState('')
   const [direcao, setDirecao] = useLocalStorageState<DirecaoTraducao>('pronuncia:direcao', 'auto', {
     valoresPermitidos: [...DIRECOES_TRADUCAO],
@@ -110,8 +116,9 @@ export function Component() {
           onMudarAba={setAba}
         />
 
-        {aba === 'correcoes' && administrador && <PainelCorrecoes />}
-        {aba === 'dicionario' && administrador && <PainelDicionario />}
+        {aba === 'musica' && <PainelMusicaTocando fala={fala} modo={modo} onMudarModo={setModo} />}
+        {aba === 'correcoes' && <PainelCorrecoes />}
+        {aba === 'dicionario' && <PainelDicionario />}
 
         {aba === 'tradutor' && (
           <Grid

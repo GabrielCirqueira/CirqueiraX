@@ -38,17 +38,46 @@ final readonly class GerarAnalisePronunciaService
             throw PronunciaException::semPalavrasEmIngles();
         }
 
+        return $this->pronunciarTexto->executar($sentencas, $this->montarContexto($palavras));
+    }
+
+    /**
+     * Pronuncia cada linha separadamente (letra de música), consultando o dicionário uma vez só para todas. Linha sem palavra fica null.
+     *
+     * @param list<string> $linhas
+     *
+     * @return list<AnalisePronunciaDTO|null>
+     */
+    public function executarLinhas(array $linhas): array
+    {
+        $sentencasPorLinha = array_map(fn (string $linha): array => $this->tokenizador->tokenizar($linha), $linhas);
+        $palavras = $this->chavesDasPalavras(array_merge(...$sentencasPorLinha));
+        if ([] === $palavras) {
+            return array_map(static fn (): null => null, $linhas);
+        }
+
+        $contexto = $this->montarContexto($palavras);
+
+        return array_map(
+            fn (array $sentencas): ?AnalisePronunciaDTO => [] === $this->chavesDasPalavras($sentencas) ? null : $this->pronunciarTexto->executar($sentencas, $contexto),
+            $sentencasPorLinha,
+        );
+    }
+
+    /**
+     * @param list<string> $palavras
+     */
+    private function montarContexto(array $palavras): ContextoPronunciaDTO
+    {
         $candidatos = $palavras;
         foreach ($palavras as $palavra) {
             array_push($candidatos, ...$this->derivador->candidatos($palavra));
         }
 
-        $contexto = new ContextoPronunciaDTO(
+        return new ContextoPronunciaDTO(
             $this->dicionarioRepository->buscarVariantesPorPalavras($candidatos),
             $this->excecaoRepository->mapaPorPalavras($palavras),
         );
-
-        return $this->pronunciarTexto->executar($sentencas, $contexto);
     }
 
     /**

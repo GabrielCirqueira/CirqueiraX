@@ -28,6 +28,7 @@ final readonly class DeepLClient implements TradutorTextoInterface
     private const int CODIGO_MUITAS_REQUISICOES = 429;
     private const int CODIGO_COTA_ESGOTADA = 456;
     private const bool PRESERVAR_FORMATACAO = true;
+    private const int TEXTOS_POR_REQUISICAO = 50;
 
     public function __construct(
         private ClientInterface $client,
@@ -52,6 +53,28 @@ final readonly class DeepLClient implements TradutorTextoInterface
         $detectado = is_string($traducao['detected_source_language'] ?? null) ? IdiomaFrase::doCodigoDeepL($traducao['detected_source_language']) : null;
 
         return new TraducaoDTO(trim($traducao['text']), $detectado);
+    }
+
+    public function traduzirLote(array $textos, IdiomaFrase $destino, ?IdiomaFrase $origem = null): array
+    {
+        $traducoes = [];
+        foreach (array_chunk($textos, self::TEXTOS_POR_REQUISICAO) as $lote) {
+            $corpo = ['text' => $lote, 'target_lang' => $destino->codigoDestinoDeepL(), 'preserve_formatting' => self::PRESERVAR_FORMATACAO];
+            if (null !== $origem) {
+                $corpo['source_lang'] = strtoupper($origem->value);
+            }
+
+            $itens = $this->requisitar('POST', self::CAMINHO_TRADUCAO, ['json' => $corpo])['translations'] ?? null;
+            if (!is_array($itens) || count($itens) !== count($lote)) {
+                throw TraducaoException::respostaInesperada();
+            }
+
+            foreach ($itens as $item) {
+                $traducoes[] = is_array($item) && is_string($item['text'] ?? null) ? trim($item['text']) : '';
+            }
+        }
+
+        return $traducoes;
     }
 
     public function consultarUso(): UsoTraducaoDTO

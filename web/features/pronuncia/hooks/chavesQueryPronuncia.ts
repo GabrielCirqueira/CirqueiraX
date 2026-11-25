@@ -10,4 +10,6 @@ export const PRONUNCIA_QUERY_KEYS = {
   relatosTodos: ['pronuncia', 'relatos'] as const,
   excecoes: (busca: string) => ['pronuncia', 'excecoes', busca] as const,
   excecoesTodas: ['pronuncia', 'excecoes'] as const,
+  tocandoAgora: ['pronuncia', 'tocando-agora'] as const,
+  letra: (codigoFaixa: string) => ['pronuncia', 'letra', codigoFaixa] as const,
 }

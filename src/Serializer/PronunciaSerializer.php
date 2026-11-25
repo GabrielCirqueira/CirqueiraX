@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Serializer;
 
 use App\DataObject\Pronuncia\AnalisePronunciaDTO;
+use App\DataObject\Pronuncia\LetraMusicaPronunciadaDTO;
+use App\DataObject\Pronuncia\PalavraPronunciadaDTO;
 use App\Entity\ConsultaPronuncia;
 use App\Entity\ExcecaoPronuncia;
 use App\Entity\FrasePronuncia;
@@ -12,6 +14,8 @@ use App\Entity\RelatoErroPronuncia;
 
 final readonly class PronunciaSerializer
 {
+    private const int CEM = 100;
+
     /**
      * @param list<ConsultaPronuncia> $consultas
      *
@@ -36,6 +40,52 @@ final readonly class PronunciaSerializer
     /**
      * @return array<string, mixed>
      */
+    /**
+     * @return array<string, mixed>
+     */
+    public function serializarLetra(LetraMusicaPronunciadaDTO $dto): array
+    {
+        $letra = $dto->letra;
+        $traducoes = $letra->traducoes() ?? [];
+        $linhas = [];
+        foreach ($letra->linhas() as $indice => $linha) {
+            $analise = $dto->analises[$indice] ?? null;
+            $linhas[] = [
+                'inicioMs' => $linha->inicioMs,
+                'texto' => $linha->texto,
+                'traducao' => $traducoes[$indice] ?? null,
+                'analise' => $analise?->paraArray(),
+            ];
+        }
+
+        return [
+            'uuid' => $letra->uuid()->toRfc4122(),
+            'codigoFaixa' => $letra->codigoFaixa(),
+            'titulo' => $letra->titulo(),
+            'artista' => $letra->artista(),
+            'situacao' => $letra->situacao()->value,
+            'situacaoDescricao' => $letra->situacao()->descricao(),
+            'traduzida' => $letra->isTraduzida(),
+            'percentualAproximado' => $this->percentualAproximado($dto->analises),
+            'linhas' => $linhas,
+        ];
+    }
+
+    /**
+     * @param list<AnalisePronunciaDTO|null> $analises
+     */
+    private function percentualAproximado(array $analises): int
+    {
+        $palavras = array_merge(...array_map(static fn (?AnalisePronunciaDTO $analise): array => $analise?->palavras() ?? [], $analises));
+        if ([] === $palavras) {
+            return 0;
+        }
+
+        $aproximadas = count(array_filter($palavras, static fn (PalavraPronunciadaDTO $palavra): bool => $palavra->isAproximada()));
+
+        return (int) round($aproximadas * self::CEM / count($palavras));
+    }
+
     public function serializarAnalise(AnalisePronunciaDTO $analise): array
     {
         return $analise->paraArray();

@@ -1,10 +1,12 @@
 import { Badge, Box, Flex, HStack, Tabs, Text, VStack } from '@chakra-ui/react'
-import { BookA, Flag, Languages, Sparkles } from 'lucide-react'
+import { BookA, Flag, Languages, Music2, Sparkles } from 'lucide-react'
 import { memo } from 'react'
 import type { PainelPronuncia } from '../types'
 import { formatarNumero } from '../utils'
 
-export type AbaPronuncia = 'tradutor' | 'correcoes' | 'dicionario'
+export const ABAS_PRONUNCIA = ['tradutor', 'musica', 'correcoes', 'dicionario'] as const
+export type AbaPronuncia = (typeof ABAS_PRONUNCIA)[number]
+export const ABAS_ADMINISTRADOR: AbaPronuncia[] = ['correcoes', 'dicionario']
 
 export interface CabecalhoPronunciaProps {
   painel: PainelPronuncia | undefined
@@ -86,35 +88,41 @@ export const CabecalhoPronuncia = memo(function CabecalhoPronuncia({
         )}
       </Flex>
 
-      {administrador && (
-        <Tabs.Root
-          value={aba}
-          onValueChange={({ value }) => onMudarAba(value as AbaPronuncia)}
-          variant="line"
-          size="sm"
-          colorPalette="brand"
-        >
-          <Tabs.List>
-            <Tabs.Trigger value="tradutor">
-              <Languages size={14} />
-              Tradutor
-            </Tabs.Trigger>
-            <Tabs.Trigger value="correcoes">
-              <Flag size={14} />
-              Correções
-              {(painel?.relatosEmAberto ?? 0) > 0 && (
-                <Badge size="xs" colorPalette="red" variant="solid" borderRadius="full">
-                  {painel?.relatosEmAberto}
-                </Badge>
-              )}
-            </Tabs.Trigger>
-            <Tabs.Trigger value="dicionario">
-              <BookA size={14} />
-              Dicionário
-            </Tabs.Trigger>
-          </Tabs.List>
-        </Tabs.Root>
-      )}
+      <Tabs.Root
+        value={aba}
+        onValueChange={({ value }) => onMudarAba(value as AbaPronuncia)}
+        variant="line"
+        size="sm"
+        colorPalette="brand"
+      >
+        <Tabs.List>
+          <Tabs.Trigger value="tradutor">
+            <Languages size={14} />
+            Tradutor
+          </Tabs.Trigger>
+          <Tabs.Trigger value="musica">
+            <Music2 size={14} />
+            Tocando agora
+          </Tabs.Trigger>
+          {administrador && (
+            <>
+              <Tabs.Trigger value="correcoes">
+                <Flag size={14} />
+                Correções
+                {(painel?.relatosEmAberto ?? 0) > 0 && (
+                  <Badge size="xs" colorPalette="red" variant="solid" borderRadius="full">
+                    {painel?.relatosEmAberto}
+                  </Badge>
+                )}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="dicionario">
+                <BookA size={14} />
+                Dicionário
+              </Tabs.Trigger>
+            </>
+          )}
+        </Tabs.List>
+      </Tabs.Root>
     </VStack>
   )
 })

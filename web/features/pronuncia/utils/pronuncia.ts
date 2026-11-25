@@ -125,3 +125,33 @@ export function chavesUnicasDaAnalise(consulta: ConsultaDetalhe): string[] {
   )
   return [...new Set(chaves)]
 }
+
+export const PERCENTUAL_LETRA_OUTRO_IDIOMA = 25
+export const PASSO_AJUSTE_SINCRONIA_MS = 500
+export const LIMITE_AJUSTE_SINCRONIA_MS = 10_000
+
+export function indiceLinhaAtiva(
+  linhas: Array<{ inicioMs: number | null }>,
+  posicaoMs: number
+): number {
+  let ativa = -1
+  for (let indice = 0; indice < linhas.length; indice++) {
+    const inicio = linhas[indice]?.inicioMs
+    if (inicio === null || inicio === undefined || inicio > posicaoMs) break
+    ativa = indice
+  }
+  return ativa
+}
+
+export function formatarTempoMusica(ms: number): string {
+  const totalSegundos = Math.floor(ms / 1000)
+  const minutos = Math.floor(totalSegundos / 60)
+  const segundos = totalSegundos % 60
+  return `${minutos}:${String(segundos).padStart(2, '0')}`
+}
+
+export function formatarAjusteSincronia(ms: number): string {
+  if (ms === 0) return 'Sincronia: no tempo'
+  const segundos = (Math.abs(ms) / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+  return ms > 0 ? `Letra adiantada ${segundos}s` : `Letra atrasada ${segundos}s`
+}

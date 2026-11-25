@@ -11,7 +11,10 @@ import {
   type DirecaoTraducao,
   type ExcecaoPronuncia,
   ExcecaoPronunciaSchema,
+  type FaixaParaLetra,
   type FiltrosHistorico,
+  type LetraMusica,
+  LetraMusicaSchema,
   type PaginaHistorico,
   type PainelPronuncia,
   PainelPronunciaSchema,
@@ -19,6 +22,8 @@ import {
   RelatoPronunciaSchema,
   type ReportarErroPayload,
   type SalvarExcecaoPayload,
+  type TocandoAgoraPronuncia,
+  TocandoAgoraPronunciaSchema,
 } from './types'
 
 const URL_PRONUNCIA = '/api/v1/pronuncia'
@@ -133,4 +138,26 @@ export async function salvarExcecaoPronuncia(
 
 export async function apagarExcecaoPronuncia(uuid: string): Promise<void> {
   await api.delete(`${URL_PRONUNCIA}/excecoes/${uuid}`)
+}
+
+export async function obterTocandoAgoraPronuncia(): Promise<TocandoAgoraPronuncia> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_PRONUNCIA}/musica/tocando-agora`)
+  return { ...TocandoAgoraPronunciaSchema.parse(data.data), consultadoEm: Date.now() }
+}
+
+export async function obterLetraMusica(faixa: FaixaParaLetra): Promise<LetraMusica> {
+  const { data } = await api.get<RespostaApi<unknown>>(`${URL_PRONUNCIA}/musica/letra`, {
+    params: { ...faixa, album: faixa.album ?? undefined },
+    timeout: 60000,
+  })
+  return LetraMusicaSchema.parse(data.data)
+}
+
+export async function traduzirLetraMusica(uuid: string): Promise<LetraMusica> {
+  const { data } = await api.post<RespostaApi<unknown>>(
+    `${URL_PRONUNCIA}/musica/letra/${uuid}/traducao`,
+    null,
+    { timeout: 60000 }
+  )
+  return LetraMusicaSchema.parse(data.data)
 }

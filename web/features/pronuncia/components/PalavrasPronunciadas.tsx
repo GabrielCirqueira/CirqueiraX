@@ -16,7 +16,7 @@ const COR_ORIGEM: Record<PalavraPronunciada['origem'], string> = {
 export interface PalavrasPronunciadasProps {
   analise: AnalisePronuncia
   fala: FalaIngles
-  onReportarPalavra: (palavra: string) => void
+  onReportarPalavra?: (palavra: string) => void
 }
 
 export const PalavrasPronunciadas = memo(function PalavrasPronunciadas({
@@ -142,16 +142,18 @@ export const PalavrasPronunciadas = memo(function PalavrasPronunciadas({
                 <Snail size={13} />
                 Devagar
               </Button>
-              <Button
-                size="xs"
-                variant="ghost"
-                borderRadius="full"
-                color="fg.muted"
-                onClick={() => onReportarPalavra(detalhe.chave)}
-              >
-                <Flag size={13} />
-                Está errada
-              </Button>
+              {onReportarPalavra && (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  borderRadius="full"
+                  color="fg.muted"
+                  onClick={() => onReportarPalavra(detalhe.chave)}
+                >
+                  <Flag size={13} />
+                  Está errada
+                </Button>
+              )}
             </HStack>
           </Flex>
 

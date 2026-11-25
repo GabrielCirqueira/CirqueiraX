@@ -152,3 +152,51 @@ export interface SalvarExcecaoPayload {
   pronuncia: string
   observacao: string | null
 }
+
+export const TocandoAgoraPronunciaSchema = z.object({
+  conectado: z.boolean(),
+  temItem: z.boolean(),
+  emReproducao: z.boolean(),
+  tipo: z.string(),
+  codigoFaixa: z.string().nullable(),
+  nome: z.string().nullable(),
+  artistas: z.array(z.string()),
+  album: z.string().nullable(),
+  capaUrl: z.string().nullable(),
+  duracaoMs: z.number(),
+  progressoMs: z.number(),
+  urlSpotify: z.string().nullable(),
+  bloqueadoAte: z.string().nullable().optional(),
+})
+export type TocandoAgoraPronuncia = z.infer<typeof TocandoAgoraPronunciaSchema> & {
+  consultadoEm: number
+}
+
+export const LinhaLetraSchema = z.object({
+  inicioMs: z.number().nullable(),
+  texto: z.string(),
+  traducao: z.string().nullable(),
+  analise: AnalisePronunciaSchema.nullable(),
+})
+export type LinhaLetra = z.infer<typeof LinhaLetraSchema>
+
+export const LetraMusicaSchema = z.object({
+  uuid: z.string(),
+  codigoFaixa: z.string(),
+  titulo: z.string(),
+  artista: z.string(),
+  situacao: z.enum(['sincronizada', 'simples', 'instrumental', 'nao_encontrada']),
+  situacaoDescricao: z.string(),
+  traduzida: z.boolean(),
+  percentualAproximado: z.number(),
+  linhas: z.array(LinhaLetraSchema),
+})
+export type LetraMusica = z.infer<typeof LetraMusicaSchema>
+
+export interface FaixaParaLetra {
+  codigoFaixa: string
+  titulo: string
+  artista: string
+  album: string | null
+  duracaoMs: number
+}

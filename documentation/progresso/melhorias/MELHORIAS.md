@@ -18,6 +18,7 @@
 > - **M161–M180** → [MELHORIAS_9.md](MELHORIAS_9.md)
 > - **M181–M200** → [MELHORIAS_10.md](MELHORIAS_10.md)
 > - **M201–M220** → [MELHORIAS_11.md](MELHORIAS_11.md)
+> - **M221–M240** → [MELHORIAS_12.md](MELHORIAS_12.md)
 
 | ID | Melhoria / Tarefa | Status | Data | Detalhes |
 |---|---|---|---|---|
@@ -241,3 +242,4 @@
 | M218 | Editor de Imagem: Criar do Zero, Mais Formas, Cores e Texto | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-218--editor-de-imagem-criar-do-zero-mais-formas-cores-e-texto) |
 | M219 | Editor de Imagem: Selecionar de Novo, Copiar/Colar Itens e Novo Layout | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_11.md#melhoria-219--editor-de-imagem-selecionar-de-novo-copiarcolar-itens-e-novo-layout) |
 | M220 | Inglês & Pronúncia: Tradução com Pronúncia em Português | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_11.md#melhoria-220--inglês--pronúncia-tradução-com-pronúncia-em-português) |
+| M221 | Inglês & Pronúncia: Letra da Música Tocando no Spotify com Pronúncia | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_12.md#melhoria-221--inglês--pronúncia-letra-da-música-tocando-no-spotify-com-pronúncia) |
