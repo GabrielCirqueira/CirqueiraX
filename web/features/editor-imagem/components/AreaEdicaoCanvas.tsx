@@ -14,6 +14,9 @@ const ALINHAMENTO_CSS: Record<AlinhamentoTexto, 'left' | 'center' | 'right'> = {
 
 export interface AreaEdicaoCanvasProps {
   imagem: ImagemEditor
+  /** Largura da área visível (recorte) em pixels da imagem. */
+  larguraTela: number
+  zoom: number | null
   ferramenta: FerramentaEditor
   textoEmEdicao: TextoEmEdicao | null
   registrarCanvasBase: (canvas: HTMLCanvasElement | null) => void
@@ -29,6 +32,8 @@ export interface AreaEdicaoCanvasProps {
 
 export function AreaEdicaoCanvas({
   imagem,
+  larguraTela,
+  zoom,
   ferramenta,
   textoEmEdicao,
   registrarCanvasBase,
@@ -61,20 +66,19 @@ export function AreaEdicaoCanvas({
     <Box
       position="relative"
       lineHeight={0}
-      shadow="lg"
-      borderRadius="8px"
-      maxW="full"
+      flexShrink={0}
+      m="auto"
+      shadow="0 1px 3px rgba(0,0,0,0.12), 0 8px 28px rgba(0,0,0,0.14)"
+      maxW={zoom === null ? 'full' : undefined}
       style={transparente ? { background: FUNDO_XADREZ } : undefined}
     >
       <chakra.canvas
         key={imagem.id}
         ref={registrarCanvasBase}
         display="block"
-        maxW="full"
-        maxH={{ base: '62dvh', md: 'calc(100dvh - 260px)' }}
-        w="auto"
+        maxW={zoom === null ? 'full' : 'none'}
         h="auto"
-        borderRadius="8px"
+        style={zoom === null ? undefined : { width: `${Math.round(larguraTela * zoom)}px` }}
       />
       <chakra.canvas
         ref={registrarCanvasSobreposicao}

@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import type {
   AcaoHistorico,
   Anotacao,
+  GuiaAlinhamento,
   HistoricoAnotacoes,
   ImagemEditor,
   InteracaoPonteiro,
@@ -27,6 +28,7 @@ export function useCanvasEditor(imagem: ImagemEditor | null) {
   const interacaoRef = useRef<InteracaoPonteiro | null>(null)
   const substitutaRef = useRef<Anotacao | null>(null)
   const idOcultoRef = useRef<string | null>(null)
+  const guiasRef = useRef<GuiaAlinhamento[]>([])
   const quadroPendenteRef = useRef<number | null>(null)
   const baseDesatualizadaRef = useRef(false)
 
@@ -68,6 +70,7 @@ export function useCanvasEditor(imagem: ImagemEditor | null) {
     renderizarSobreposicao(canvasSobreposicao, canvasBase, imagem, recorteAtual, {
       emAndamento: interacao?.tipo === 'desenhando' ? interacao.anotacao : null,
       selecionada: visiveis.find((anotacao) => anotacao.id === selecionadaIdRef.current) ?? null,
+      guias: guiasRef.current,
       escalaTela: escalaDaTela(canvasBase),
     })
   }
@@ -125,6 +128,12 @@ export function useCanvasEditor(imagem: ImagemEditor | null) {
     agendarDesenho(true)
   }
 
+  function definirGuias(guias: GuiaAlinhamento[]) {
+    if (guias.length === 0 && guiasRef.current.length === 0) return
+    guiasRef.current = guias
+    agendarDesenho(false)
+  }
+
   function ocultarDuranteEdicao(id: string | null) {
     idOcultoRef.current = id
     desenharAgora(true)
@@ -138,6 +147,7 @@ export function useCanvasEditor(imagem: ImagemEditor | null) {
     interacaoRef.current = null
     substitutaRef.current = null
     idOcultoRef.current = null
+    guiasRef.current = []
   }
 
   function anotacaoSelecionadaAtual(): Anotacao | null {
@@ -162,6 +172,7 @@ export function useCanvasEditor(imagem: ImagemEditor | null) {
     selecionar,
     aplicarNoHistorico,
     previsualizar,
+    definirGuias,
     ocultarDuranteEdicao,
     reiniciar,
     anotacaoSelecionadaAtual,

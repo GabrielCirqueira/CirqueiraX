@@ -11,10 +11,14 @@ import {
 } from '@chakra-ui/react'
 import {
   AlignCenter,
-  AlignCenterHorizontal,
-  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalJustifyCenter,
   AlignLeft,
   AlignRight,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalJustifyCenter,
   ArrowDownToLine,
   ArrowUpToLine,
   Bold,
@@ -80,6 +84,19 @@ const OPCOES_ALINHAMENTO: OpcaoSegmento<AlinhamentoTexto>[] = [
   { valor: 'esquerda', rotulo: 'Esquerda', icone: AlignLeft },
   { valor: 'centro', rotulo: 'Centro', icone: AlignCenter },
   { valor: 'direita', rotulo: 'Direita', icone: AlignRight },
+]
+
+const OPCOES_ALINHAR_TELA: { eixo: EixoAlinhamento; rotulo: string; icone: LucideIcon }[] = [
+  { eixo: 'esquerda', rotulo: 'Encostar à esquerda', icone: AlignStartVertical },
+  {
+    eixo: 'centroHorizontal',
+    rotulo: 'Centralizar na horizontal',
+    icone: AlignHorizontalJustifyCenter,
+  },
+  { eixo: 'direita', rotulo: 'Encostar à direita', icone: AlignEndVertical },
+  { eixo: 'topo', rotulo: 'Encostar no topo', icone: AlignStartHorizontal },
+  { eixo: 'centroVertical', rotulo: 'Centralizar na vertical', icone: AlignVerticalJustifyCenter },
+  { eixo: 'base', rotulo: 'Encostar embaixo', icone: AlignEndHorizontal },
 ]
 
 function Secao({ titulo, children }: { titulo: string; children: ReactNode }) {
@@ -295,16 +312,7 @@ export const PainelPropriedades = memo(function PainelPropriedades({
     : null
 
   return (
-    <VStack
-      gap={4}
-      alignItems="stretch"
-      p={3}
-      bg="bg.panel"
-      borderWidth="1px"
-      borderColor="border.subtle"
-      borderRadius="8px"
-      shadow="sm"
-    >
+    <VStack gap={4} alignItems="stretch">
       <HStack justify="space-between" gap={2}>
         <VStack gap={0} alignItems="flex-start" minW={0}>
           <Text fontSize="sm" fontWeight="semibold" color="fg">
@@ -536,17 +544,21 @@ export const PainelPropriedades = memo(function PainelPropriedades({
               icone={ArrowDownToLine}
               onClick={() => onMoverCamada('tras')}
             />
-            <Box w="1px" h={5} bg="border.subtle" mx={1} />
-            <BotaoAcao
-              rotulo="Centralizar na horizontal"
-              icone={AlignCenterVertical}
-              onClick={() => onAlinhar('horizontal')}
-            />
-            <BotaoAcao
-              rotulo="Centralizar na vertical"
-              icone={AlignCenterHorizontal}
-              onClick={() => onAlinhar('vertical')}
-            />
+          </HStack>
+        </Secao>
+      )}
+
+      {anotacaoId && (
+        <Secao titulo="Alinhar na tela">
+          <HStack gap={0.5} flexWrap="wrap">
+            {OPCOES_ALINHAR_TELA.map((opcao) => (
+              <BotaoAcao
+                key={opcao.eixo}
+                rotulo={opcao.rotulo}
+                icone={opcao.icone}
+                onClick={() => onAlinhar(opcao.eixo)}
+              />
+            ))}
           </HStack>
         </Secao>
       )}

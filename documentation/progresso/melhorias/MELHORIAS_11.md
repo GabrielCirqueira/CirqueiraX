@@ -276,3 +276,19 @@
 - **Arquivos**: `web/features/editor-imagem/` (novos: `components/SeletorCor.tsx`, `components/PainelTela.tsx`, `components/ListaCamadas.tsx`, `hooks/useCoresRecentes.ts`, `utils/caminhosForma.ts`, `utils/fontesEditor.ts`), `web/shared/utils/localStorageService.ts`, `package.json`
 
 ---
+
+### ✅ Melhoria 219 — Editor de Imagem: Selecionar de Novo, Copiar/Colar Itens e Novo Layout
+
+- **Status**: Concluído
+- **Data**: 25 de novembro de 2026
+- **Problema**: depois de clicar fora, não dava para selecionar a forma de novo com uma ferramenta de desenho ativa (o clique começava outro desenho); não existia copiar/colar de itens; layout poluído.
+- **Solução**:
+  - Depois de desenhar, a ferramenta volta para o cursor (cadeado `Q` mantém a ferramenta). Com ferramenta de desenho, o contorno de qualquer item também seleciona; dentro de forma preenchida continua desenhando por cima.
+  - `Ctrl+C` / `Ctrl+X` / `Ctrl+V` copiam, recortam e colam o item (tipo próprio `application/x-cirqueirax-anotacao` na área de transferência); colagens seguidas descem um pouco. Sem item selecionado, `Ctrl+C` copia a imagem (`Ctrl+Shift+C` sempre copia a imagem). Texto colado vira caixa de texto.
+  - Layout em tela cheia: barra superior (desfazer, refazer, ações), ferramentas na vertical, área com pontilhado, barra flutuante de estilo rápido (cores, espessura, copiar, duplicar, excluir), zoom (botões, `Ctrl` + roda, `Ctrl+0`/`Ctrl+1`), painel com abas Estilo / Camadas / Tela.
+  - Guias magnéticas ao mover (centro e bordas da tela e de outros itens; `Alt` desliga), alinhar à esquerda/centro/direita/topo/meio/base.
+  - Camadas com esconder (não sai na exportação) e bloquear (não move nem recebe clique).
+  - Lista de atalhos no botão de teclado.
+- **Arquivos**: `web/features/editor-imagem/` (novos: `components/BarraEstiloRapido.tsx`, `components/ControleZoom.tsx`, `hooks/useZoomEditor.ts`, `utils/encaixeAlinhamento.ts`, `utils/areaTransferenciaAnotacoes.ts`), `web/shared/utils/localStorageService.ts`
+
+---

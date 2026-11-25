@@ -81,16 +81,7 @@ export const PainelTela = memo(function PainelTela({
   const { tela } = imagem
 
   return (
-    <VStack
-      gap={3}
-      alignItems="stretch"
-      p={3}
-      bg="bg.panel"
-      borderWidth="1px"
-      borderColor="border.subtle"
-      borderRadius="8px"
-      shadow="sm"
-    >
+    <VStack gap={3} alignItems="stretch">
       <HStack justify="space-between">
         <VStack gap={0} alignItems="flex-start">
           <Text fontSize="sm" fontWeight="semibold" color="fg">

@@ -12,7 +12,11 @@ import { contextoParaAcerto, medirCaixaTexto } from './desenhoCanvas'
 import { isFerramentaForma } from './fabricaAnotacoes'
 import { distanciaEntre, normalizarRetangulo } from './geometria'
 
-export type ModoAcerto = 'area' | 'preciso'
+/**
+ * area: a caixa inteira conta; preciso: o desenho real (com preenchimento);
+ * borda: só o contorno das formas, para não roubar o clique de quem quer desenhar por cima.
+ */
+export type ModoAcerto = 'area' | 'preciso' | 'borda'
 
 export interface AlcaPosicionada {
   alca: AlcaTransformacao
@@ -128,10 +132,14 @@ function acertouForma(
   if (anotacao.tipo === 'seta' || anotacao.tipo === 'linha') {
     return distanciaAoSegmento(ponto, anotacao.inicio, anotacao.fim) <= margem
   }
-  if (modo === 'area' || anotacao.tipo === 'desfoque' || anotacao.tipo === 'recorte') {
-    return contem(expandir(normalizarRetangulo(anotacao.inicio, anotacao.fim), margem), ponto)
+  const area = normalizarRetangulo(anotacao.inicio, anotacao.fim)
+  if (anotacao.tipo === 'desfoque' || anotacao.tipo === 'recorte') {
+    if (modo !== 'borda') return contem(expandir(area, margem), ponto)
+    return contem(expandir(area, margem), ponto) && !contem(expandir(area, -margem), ponto)
   }
-  return acertouCaminhoDaForma(anotacao, ponto, margem, anotacao.preenchimento !== 'nenhum')
+  if (modo === 'area') return contem(expandir(area, margem), ponto)
+  const preenchida = modo === 'preciso' && anotacao.preenchimento !== 'nenhum'
+  return acertouCaminhoDaForma(anotacao, ponto, margem, preenchida)
 }
 
 export function acertouAnotacao(
@@ -163,6 +171,10 @@ export function acertouAnotacao(
   }
 }
 
+export function isInteragivel(anotacao: Anotacao): boolean {
+  return !anotacao.oculta && !anotacao.bloqueada
+}
+
 export function encontrarAnotacaoNoPonto(
   anotacoes: Anotacao[],
   ponto: Ponto,
@@ -171,7 +183,8 @@ export function encontrarAnotacaoNoPonto(
 ): Anotacao | null {
   for (let indice = anotacoes.length - 1; indice >= 0; indice--) {
     const anotacao = anotacoes[indice]
-    if (anotacao && acertouAnotacao(anotacao, ponto, tolerancia, modo)) return anotacao
+    if (!anotacao || !isInteragivel(anotacao)) continue
+    if (acertouAnotacao(anotacao, ponto, tolerancia, modo)) return anotacao
   }
   return null
 }
@@ -211,6 +224,7 @@ export function encontrarAlcaNoPonto(
   ponto: Ponto,
   tolerancia: number
 ): AlcaTransformacao | null {
+  if (!isInteragivel(anotacao)) return null
   const encontrada = alcasDaAnotacao(anotacao).find(
     (alca) => distanciaEntre(alca.ponto, ponto) <= tolerancia
   )

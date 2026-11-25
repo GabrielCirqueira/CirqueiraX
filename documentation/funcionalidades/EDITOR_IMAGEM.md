@@ -45,6 +45,13 @@ Formas (botão com seta na barra): retângulo, círculo, triângulo, losango, es
 - **Camadas**: lista de todos os itens, com seleção, ordem e exclusão.
 - **Tela**: 8 formatos prontos, largura e altura livres (16 a 6000 px), girar e fundo de qualquer cor ou transparente. Mudar a tela mantém os itens.
 
+**Seleção e layout** (M219):
+- Depois de desenhar, a ferramenta volta ao cursor; o cadeado na barra (`Q`) mantém a ferramenta ativa. Pincel, marca-texto, marcador e recorte continuam ativos.
+- Com ferramenta de desenho, clicar no contorno de um item o seleciona (`ModoAcerto` `borda`); dentro de forma preenchida continua desenhando.
+- Layout: barra superior, ferramentas na vertical, barra flutuante de estilo rápido, zoom no canto e painel com abas Estilo / Camadas / Tela.
+- Guias magnéticas ao mover (`utils/encaixeAlinhamento.ts`), `Alt` desliga.
+- Camadas podem ser escondidas (`oculta`, não sai na exportação) e bloqueadas (`bloqueada`, sem clique nem movimento).
+
 Valores de tamanho ficam relativos a uma imagem de 1200 px (`calcularFatorEscala`). As preferências de cada ferramenta ficam no `localStorage`.
 
 ---
@@ -56,7 +63,14 @@ Valores de tamanho ficam relativos a uma imagem de 1200 px (`calcularFatorEscala
 | `Shift` | Trava retas e proporção ao desenhar |
 | `Ctrl+Z` | Desfazer |
 | `Ctrl+Y` ou `Ctrl+Shift+Z` | Refazer |
-| `Ctrl+C` | Copiar |
+| `Ctrl+C` | Copiar o item selecionado (sem item: copia a imagem) |
+| `Ctrl+X` | Recortar o item |
+| `Ctrl+V` | Colar item, imagem (substitui a tela) ou texto (vira caixa de texto) |
+| `Ctrl+Shift+C` | Copiar a imagem final |
+| `Ctrl` + `+`/`-`, `Ctrl` + roda | Zoom |
+| `Ctrl+0` / `Ctrl+1` | Ajustar à tela / tamanho real |
+| `Q` | Travar a ferramenta |
+| `Alt` ao mover | Sem encaixe nas guias |
 | `Ctrl+S` | Salvar |
 | `Ctrl+D` | Duplicar elemento |
 | `[` / `]` | Diminuir / aumentar o item selecionado |

@@ -493,6 +493,7 @@ export function renderizarCena(
   const fatorEscala = calcularFatorEscala(imagem)
   contexto.drawImage(imagem.bitmap, 0, 0)
   for (const anotacao of anotacoes) {
+    if (anotacao.oculta) continue
     desenharAnotacao(contexto, anotacao, recorte, fatorEscala, canvas)
   }
 }

@@ -64,6 +64,8 @@ interface AnotacaoBase {
   espessura: number
   opacidade: number
   sombra: boolean
+  oculta?: boolean
+  bloqueada?: boolean
 }
 
 export interface AnotacaoTraco extends AnotacaoBase {
@@ -199,7 +201,20 @@ export interface TextoEmEdicao {
 
 export type DirecaoCamada = 'frente' | 'tras' | 'subir' | 'descer'
 
-export type EixoAlinhamento = 'horizontal' | 'vertical'
+export type EixoAlinhamento =
+  | 'esquerda'
+  | 'centroHorizontal'
+  | 'direita'
+  | 'topo'
+  | 'centroVertical'
+  | 'base'
+
+export interface GuiaAlinhamento {
+  orientacao: 'vertical' | 'horizontal'
+  posicao: number
+}
+
+export type AcaoZoom = 'mais' | 'menos' | 'ajustar' | 'real'
 
 export type ComandoAtalho =
   | { tipo: 'desfazer' }
@@ -213,6 +228,8 @@ export type ComandoAtalho =
   | { tipo: 'ferramenta'; ferramenta: FerramentaEditor }
   | { tipo: 'camada'; direcao: DirecaoCamada }
   | { tipo: 'ajustarTamanho'; passo: number }
+  | { tipo: 'zoom'; acao: AcaoZoom }
+  | { tipo: 'travarFerramenta' }
 
 export interface SalvarEdicaoInput {
   arquivo: Blob

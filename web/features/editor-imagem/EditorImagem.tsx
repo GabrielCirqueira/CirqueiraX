@@ -1,12 +1,14 @@
 import { useCategorias } from '@/features/downloads-video/hooks/useDownloadsVideo'
 import { useMountEffect, useSEO } from '@/shared/hooks'
-import { Box, Button, Grid, HStack, Kbd, Text, VStack } from '@chakra-ui/react'
-import { ImageOff, MousePointerClick } from 'lucide-react'
+import { Box, Button, Flex, Tabs, Text, VStack } from '@chakra-ui/react'
+import { Frame, ImageOff, Layers, MousePointerClick, SlidersHorizontal } from 'lucide-react'
 import { type ChangeEvent, type DragEvent, memo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { AreaEdicaoCanvas } from './components/AreaEdicaoCanvas'
+import { BarraEstiloRapido } from './components/BarraEstiloRapido'
 import { BarraFerramentasEditor } from './components/BarraFerramentasEditor'
 import { CabecalhoEditor } from './components/CabecalhoEditor'
+import { ControleZoom } from './components/ControleZoom'
 import { ListaCamadas } from './components/ListaCamadas'
 import { type DadosSalvarEdicao, ModalSalvarEdicao } from './components/ModalSalvarEdicao'
 import { PainelPropriedades } from './components/PainelPropriedades'
@@ -17,7 +19,8 @@ import { useCoresRecentes } from './hooks/useCoresRecentes'
 import { useEditorImagem } from './hooks/useEditorImagem'
 import { useImagemDaMidia, useSalvarEdicao } from './hooks/useEditorImagemApi'
 import { useExportacaoEdicao } from './hooks/useExportacaoEdicao'
-import type { AlteracaoAnotacao, ComandoAtalho } from './types'
+import { useZoomEditor } from './hooks/useZoomEditor'
+import type { AlteracaoAnotacao, Anotacao, ComandoAtalho } from './types'
 import { extrairImagemDaTransferencia } from './utils/areaTransferencia'
 import { descreverImagem } from './utils/carregamentoImagem'
 import {
@@ -27,24 +30,16 @@ import {
   sugerirNomeArquivo,
 } from './utils/exportacaoImagem'
 import './utils/fontesEditor'
+import { ROTULO_TIPO_ANOTACAO, temPropriedade } from './utils/propriedadesPainel'
 
 const PARAMETRO_MIDIA = 'midia'
 const TIPOS_ACEITOS = 'image/png,image/jpeg,image/webp,image/gif'
 
-interface DicaAtalho {
-  teclas: string[]
-  descricao: string
-}
+type AbaPainel = 'estilo' | 'camadas' | 'tela'
 
-const DICAS_ATALHO: DicaAtalho[] = [
-  { teclas: ['Shift'], descricao: 'reta, quadrado ou proporção' },
-  { teclas: ['Ctrl', 'Z'], descricao: 'desfazer' },
-  { teclas: ['Ctrl', 'D'], descricao: 'duplicar' },
-  { teclas: ['[ ]'], descricao: 'tamanho' },
-  { teclas: ['Ctrl', ']'], descricao: 'camada' },
-  { teclas: ['Ctrl', 'C'], descricao: 'copiar' },
-  { teclas: ['Ctrl', 'V'], descricao: 'colar imagem' },
-]
+const ALTURA_CABECALHO_APP = '56px'
+const FUNDO_AREA_TRABALHO =
+  'radial-gradient(circle, color-mix(in srgb, var(--chakra-colors-fg) 14%, transparent) 1px, transparent 1px) 0 0 / 18px 18px'
 
 export function Component() {
   return <EditorImagemView />
@@ -68,9 +63,25 @@ const EditorImagemView = memo(function EditorImagemView() {
   const salvarEdicao = useSalvarEdicao(categorias)
   const [modalSalvarAberto, setModalSalvarAberto] = useState(false)
   const [arrastandoArquivo, setArrastandoArquivo] = useState(false)
+  const [aba, setAba] = useState<AbaPainel>('estilo')
+  const [ultimaSelecionadaId, setUltimaSelecionadaId] = useState<string | null>(null)
   const seletorArquivoRef = useRef<HTMLInputElement>(null)
 
-  const { imagem } = editor
+  const { imagem, recorte, selecionada } = editor
+  const zoom = useZoomEditor(recorte?.largura ?? 0, recorte?.altura ?? 0)
+
+  // Ao selecionar um item (no canvas ou na lista), o painel mostra o estilo dele.
+  const selecionadaId = selecionada?.id ?? null
+  if (selecionadaId !== ultimaSelecionadaId) {
+    setUltimaSelecionadaId(selecionadaId)
+    if (selecionadaId) setAba('estilo')
+  }
+
+  /** Selecionar pela lista mantém a aba de camadas aberta. */
+  function selecionarPelaLista(id: string) {
+    setUltimaSelecionadaId(id)
+    editor.selecionarAnotacao(id)
+  }
 
   useMountEffect(() => {
     if (!midiaUuid) editor.novaTela()
@@ -139,9 +150,37 @@ const EditorImagemView = memo(function EditorImagemView() {
     if (comando.tipo === 'deslocar') editor.deslocarSelecionada(comando.dx, comando.dy)
     if (comando.tipo === 'camada') editor.moverCamada(comando.direcao)
     if (comando.tipo === 'ajustarTamanho') editor.ajustarTamanhoSelecionada(comando.passo)
+    if (comando.tipo === 'zoom') zoom.aplicar(comando.acao)
+    if (comando.tipo === 'travarFerramenta') editor.alternarTravarFerramenta()
   }
 
-  useAtalhosEditor({ aoColarImagem: abrirImagem, aoExecutarComando: executarComando })
+  function colarAnotacao(anotacao: Anotacao | null): boolean {
+    if (!imagem) return false
+    return editor.colarAnotacao(anotacao)
+  }
+
+  function colarTexto(texto: string) {
+    if (imagem) editor.colarTexto(texto)
+  }
+
+  useAtalhosEditor({
+    aoColarImagem: abrirImagem,
+    aoExecutarComando: executarComando,
+    aoCopiarSelecao: (recortar) =>
+      recortar ? editor.recortarSelecionada() : editor.copiarSelecionada(),
+    aoColarAnotacao: colarAnotacao,
+    aoColarTexto: colarTexto,
+  })
+
+  /** Botão "copiar item": passa pelo evento nativo para o Ctrl + V seguinte colar o item. */
+  function copiarItemPeloBotao() {
+    try {
+      if (document.execCommand('copy')) return
+    } catch {
+      // segue para a cópia interna
+    }
+    editor.copiarSelecionada()
+  }
 
   function aoSoltarArquivo(evento: DragEvent<HTMLDivElement>) {
     evento.preventDefault()
@@ -162,14 +201,33 @@ const EditorImagemView = memo(function EditorImagemView() {
   }
 
   const carregando = editor.carregandoImagem || consultaMidia.isLoading
+  const alvo = editor.alvoPainel
+  const totalCamadas = editor.historico.anotacoes.filter((item) => item.tipo !== 'recorte').length
+
+  const areaVazia = consultaMidia.isError ? (
+    <VStack gap={3} color="fg.subtle" textAlign="center" m="auto">
+      <ImageOff size={32} strokeWidth={1.5} />
+      <Text fontSize="sm">Não foi possível abrir essa mídia. Cole outra imagem.</Text>
+      <Button size="sm" variant="outline" borderRadius="8px" onClick={comecarDoZero}>
+        Começar do zero
+      </Button>
+    </VStack>
+  ) : (
+    <Box m="auto">
+      <ZonaColarImagem
+        carregando={carregando || !imagem}
+        onEscolherArquivo={() => seletorArquivoRef.current?.click()}
+      />
+    </Box>
+  )
 
   return (
-    <Box
+    <Flex
+      direction="column"
       w="full"
-      maxW="full"
-      mx="auto"
-      py={{ base: 4, md: 6 }}
-      px={{ base: 4, md: 8 }}
+      h={{ base: 'auto', lg: `calc(100dvh - ${ALTURA_CABECALHO_APP})` }}
+      minH={{ base: `calc(100dvh - ${ALTURA_CABECALHO_APP})`, lg: 0 }}
+      overflow={{ base: 'visible', lg: 'hidden' }}
       onDragOver={aoArrastarSobre}
       onDragLeave={() => setArrastandoArquivo(false)}
       onDrop={aoSoltarArquivo}
@@ -182,56 +240,59 @@ const EditorImagemView = memo(function EditorImagemView() {
         style={{ display: 'none' }}
       />
 
-      <VStack w="full" gap={4} alignItems="stretch">
-        <CabecalhoEditor
-          descricaoImagem={imagem ? descreverImagem(imagem, editor.recorte) : null}
-          temImagem={Boolean(imagem)}
-          copiando={exportacao.copiando}
-          onAbrirArquivo={() => seletorArquivoRef.current?.click()}
-          onNovaTela={comecarDoZero}
-          onBaixar={baixar}
-          onSalvar={abrirModalSalvar}
-          onCopiar={copiar}
-        />
+      <CabecalhoEditor
+        descricaoImagem={imagem ? descreverImagem(imagem, recorte) : null}
+        temImagem={Boolean(imagem)}
+        copiando={exportacao.copiando}
+        podeDesfazer={editor.podeDesfazer}
+        podeRefazer={editor.podeRefazer}
+        temAnotacoes={editor.temAnotacoes}
+        onDesfazer={editor.desfazer}
+        onRefazer={editor.refazer}
+        onLimpar={editor.limpar}
+        onAbrirArquivo={() => seletorArquivoRef.current?.click()}
+        onNovaTela={comecarDoZero}
+        onBaixar={baixar}
+        onSalvar={abrirModalSalvar}
+        onCopiar={copiar}
+      />
 
+      <Flex direction={{ base: 'column', lg: 'row' }} flex="1" minH={0}>
         {imagem && (
           <BarraFerramentasEditor
             ferramenta={editor.ferramenta}
-            estilo={editor.estilo}
-            coresRecentes={coresRecentes}
-            podeDesfazer={editor.podeDesfazer}
-            podeRefazer={editor.podeRefazer}
-            temAnotacoes={editor.temAnotacoes}
+            travarFerramenta={editor.travarFerramenta}
             onSelecionarFerramenta={editor.selecionarFerramenta}
-            onSelecionarCor={selecionarCor}
-            onSelecionarEspessura={editor.selecionarEspessura}
-            onDesfazer={editor.desfazer}
-            onRefazer={editor.refazer}
-            onLimpar={editor.limpar}
+            onAlternarTravar={editor.alternarTravarFerramenta}
           />
         )}
 
-        <Grid
-          templateColumns={{ base: 'minmax(0, 1fr)', lg: imagem ? 'minmax(0, 1fr) 300px' : '1fr' }}
-          gap={4}
-          alignItems="start"
+        <Box
+          position="relative"
+          flex="1"
+          minW={0}
+          minH={{ base: '60dvh', lg: 0 }}
+          bg={arrastandoArquivo ? 'cirqueira.brand.500/8' : 'bg.subtle'}
+          outline={arrastandoArquivo ? '2px dashed' : 'none'}
+          outlineColor="cirqueira.brand.500"
+          outlineOffset="-8px"
+          transition="background 0.15s ease"
         >
           <Box
+            ref={zoom.registrarArea}
+            position="absolute"
+            inset={0}
             display="flex"
-            alignItems="center"
-            justifyContent="center"
-            minH={{ base: '55dvh', md: 'calc(100dvh - 230px)' }}
-            p={{ base: 3, md: 6 }}
-            borderRadius="8px"
-            borderWidth="1px"
-            borderStyle={imagem ? 'solid' : 'dashed'}
-            borderColor={arrastandoArquivo ? 'cirqueira.brand.500' : 'border.subtle'}
-            bg={arrastandoArquivo ? 'cirqueira.brand.500/5' : 'bg.subtle'}
-            transition="border-color 0.15s ease, background 0.15s ease"
+            overflow="auto"
+            p={{ base: 4, md: 6 }}
+            pt={imagem ? { base: 16, md: 16 } : undefined}
+            style={{ background: FUNDO_AREA_TRABALHO }}
           >
-            {imagem && !editor.carregandoImagem ? (
+            {imagem && !editor.carregandoImagem && recorte ? (
               <AreaEdicaoCanvas
                 imagem={imagem}
+                larguraTela={recorte.largura}
+                zoom={zoom.zoom}
                 ferramenta={editor.ferramenta}
                 textoEmEdicao={editor.textoEmEdicao}
                 registrarCanvasBase={editor.registrarCanvasBase}
@@ -244,89 +305,149 @@ const EditorImagemView = memo(function EditorImagemView() {
                 onConfirmarTexto={editor.confirmarTexto}
                 onCancelarTexto={editor.cancelarAcaoAtual}
               />
-            ) : consultaMidia.isError ? (
-              <VStack gap={3} color="fg.subtle" textAlign="center">
-                <ImageOff size={32} strokeWidth={1.5} />
-                <Text fontSize="sm">Não foi possível abrir essa mídia. Cole outra imagem.</Text>
-                <Button size="sm" variant="outline" borderRadius="full" onClick={comecarDoZero}>
-                  Começar do zero
-                </Button>
-              </VStack>
             ) : (
-              <ZonaColarImagem
-                carregando={carregando || !imagem}
-                onEscolherArquivo={() => seletorArquivoRef.current?.click()}
-              />
+              areaVazia
             )}
           </Box>
 
           {imagem && (
-            <VStack gap={3} alignItems="stretch">
-              {editor.alvoPainel ? (
-                <PainelPropriedades
-                  alvo={editor.alvoPainel}
+            <Flex
+              position="absolute"
+              top={3}
+              left={3}
+              right={3}
+              justify="center"
+              pointerEvents="none"
+              zIndex={2}
+            >
+              <Box pointerEvents="auto" maxW="full">
+                <BarraEstiloRapido
+                  estilo={editor.estilo}
                   coresRecentes={coresRecentes}
-                  onPrevisualizar={editor.previsualizarAlteracao}
-                  onCancelarPrevisualizacao={editor.cancelarPrevisualizacao}
-                  onConfirmar={confirmarAlteracao}
-                  onEditarTexto={editor.editarTextoSelecionado}
+                  rotuloAlvo={selecionada ? ROTULO_TIPO_ANOTACAO[selecionada.tipo] : null}
+                  semAlvo={!alvo}
+                  temSelecao={Boolean(selecionada)}
+                  bloqueada={Boolean(selecionada?.bloqueada)}
+                  mostrarEspessura={Boolean(alvo && temPropriedade(alvo.tipo, 'espessura'))}
+                  onSelecionarCor={selecionarCor}
+                  onSelecionarEspessura={editor.selecionarEspessura}
+                  onCopiar={copiarItemPeloBotao}
                   onDuplicar={editor.duplicarSelecionada}
                   onExcluir={editor.excluirSelecionada}
-                  onMoverCamada={editor.moverCamada}
-                  onAlinhar={editor.alinharSelecionada}
                 />
-              ) : (
-                <HStack
-                  gap={2.5}
-                  p={3}
-                  bg="bg.panel"
-                  borderWidth="1px"
-                  borderColor="border.subtle"
-                  borderRadius="8px"
-                  color="fg.subtle"
-                >
-                  <MousePointerClick size={18} />
-                  <Text fontSize="xs">
-                    Clique num item para mover, esticar pelas alças e mudar cor, tamanho e
-                    preenchimento. Duplo clique edita um texto.
-                  </Text>
-                </HStack>
-              )}
-
-              <ListaCamadas
-                anotacoes={editor.historico.anotacoes}
-                selecionadaId={editor.selecionada?.id ?? null}
-                onSelecionar={editor.selecionarAnotacao}
-                onMover={editor.moverCamada}
-                onExcluir={editor.excluirAnotacao}
-              />
-
-              <PainelTela
-                imagem={imagem}
-                coresRecentes={coresRecentes}
-                onConfigurar={editor.configurarTela}
-                onNovaTela={comecarDoZero}
-              />
-            </VStack>
+              </Box>
+            </Flex>
           )}
-        </Grid>
+
+          {imagem && (
+            <Box position="absolute" right={3} bottom={3} zIndex={2}>
+              <ControleZoom zoom={zoom.zoom} ajustado={zoom.ajustado} onAplicar={zoom.aplicar} />
+            </Box>
+          )}
+        </Box>
 
         {imagem && (
-          <HStack gap={4} fontSize="xs" color="fg.subtle" justify="center" flexWrap="wrap">
-            {DICAS_ATALHO.map((dica) => (
-              <Text as="span" key={dica.descricao}>
-                {dica.teclas.map((tecla, indice) => (
-                  <Box as="span" key={tecla}>
-                    {indice > 0 && ' + '}
-                    <Kbd size="sm">{tecla}</Kbd>
-                  </Box>
-                ))}{' '}
-                {dica.descricao}
-              </Text>
-            ))}
-          </HStack>
+          <Flex
+            as="aside"
+            direction="column"
+            w={{ base: 'full', lg: '320px' }}
+            flexShrink={0}
+            bg="bg.panel"
+            borderColor="border.subtle"
+            borderTopWidth={{ base: '1px', lg: 0 }}
+            borderLeftWidth={{ base: 0, lg: '1px' }}
+            minH={0}
+          >
+            <Tabs.Root
+              value={aba}
+              onValueChange={({ value }) => setAba(value as AbaPainel)}
+              variant="line"
+              size="sm"
+              colorPalette="brand"
+              display="flex"
+              flexDirection="column"
+              flex="1"
+              minH={0}
+            >
+              <Tabs.List px={2} flexShrink={0}>
+                <Tabs.Trigger value="estilo" flex="1" justifyContent="center">
+                  <SlidersHorizontal size={14} />
+                  Estilo
+                </Tabs.Trigger>
+                <Tabs.Trigger value="camadas" flex="1" justifyContent="center">
+                  <Layers size={14} />
+                  Camadas
+                  {totalCamadas > 0 && (
+                    <Box
+                      as="span"
+                      px={1.5}
+                      borderRadius="full"
+                      bg="bg.muted"
+                      fontSize="2xs"
+                      color="fg.muted"
+                    >
+                      {totalCamadas}
+                    </Box>
+                  )}
+                </Tabs.Trigger>
+                <Tabs.Trigger value="tela" flex="1" justifyContent="center">
+                  <Frame size={14} />
+                  {imagem.tela ? 'Tela' : 'Imagem'}
+                </Tabs.Trigger>
+              </Tabs.List>
+
+              <Box flex="1" minH={0} overflowY="auto">
+                <Tabs.Content value="estilo" p={4}>
+                  {alvo ? (
+                    <PainelPropriedades
+                      alvo={alvo}
+                      coresRecentes={coresRecentes}
+                      onPrevisualizar={editor.previsualizarAlteracao}
+                      onCancelarPrevisualizacao={editor.cancelarPrevisualizacao}
+                      onConfirmar={confirmarAlteracao}
+                      onEditarTexto={editor.editarTextoSelecionado}
+                      onDuplicar={editor.duplicarSelecionada}
+                      onExcluir={editor.excluirSelecionada}
+                      onMoverCamada={editor.moverCamada}
+                      onAlinhar={editor.alinharSelecionada}
+                    />
+                  ) : (
+                    <VStack gap={3} py={8} color="fg.subtle" textAlign="center">
+                      <MousePointerClick size={26} strokeWidth={1.5} />
+                      <Text fontSize="sm" color="fg.muted" fontWeight="medium">
+                        Nada selecionado
+                      </Text>
+                      <Text fontSize="xs" maxW="240px">
+                        Clique num item para mover, esticar pelas alças e trocar cor, tamanho e
+                        preenchimento. Ou escolha uma ferramenta à esquerda para desenhar.
+                      </Text>
+                    </VStack>
+                  )}
+                </Tabs.Content>
+                <Tabs.Content value="camadas" p={3}>
+                  <ListaCamadas
+                    anotacoes={editor.historico.anotacoes}
+                    selecionadaId={selecionadaId}
+                    onSelecionar={selecionarPelaLista}
+                    onMover={editor.moverCamada}
+                    onExcluir={editor.excluirAnotacao}
+                    onAlternarVisibilidade={editor.alternarVisibilidade}
+                    onAlternarBloqueio={editor.alternarBloqueio}
+                  />
+                </Tabs.Content>
+                <Tabs.Content value="tela" p={4}>
+                  <PainelTela
+                    imagem={imagem}
+                    coresRecentes={coresRecentes}
+                    onConfigurar={editor.configurarTela}
+                    onNovaTela={comecarDoZero}
+                  />
+                </Tabs.Content>
+              </Box>
+            </Tabs.Root>
+          </Flex>
         )}
-      </VStack>
+      </Flex>
 
       {imagem && (
         <ModalSalvarEdicao
@@ -339,7 +460,7 @@ const EditorImagemView = memo(function EditorImagemView() {
           onSalvar={salvar}
         />
       )}
-    </Box>
+    </Flex>
   )
 })
 

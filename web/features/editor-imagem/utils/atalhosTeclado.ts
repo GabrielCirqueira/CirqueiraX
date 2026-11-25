@@ -26,7 +26,12 @@ function interpretarAtalhoComModificador(evento: KeyboardEvent): ComandoAtalho |
   if (tecla === 'y') return { tipo: 'refazer' }
   if (tecla === 's') return { tipo: 'salvar' }
   if (tecla === 'd') return { tipo: 'duplicar' }
-  if (tecla === 'c' && !isTextoSelecionadoNaPagina()) return { tipo: 'copiar' }
+  // Ctrl + C, X e V ficam com os eventos nativos de copiar/recortar/colar (copiam o item selecionado).
+  if (tecla === 'c' && evento.shiftKey && !isTextoSelecionadoNaPagina()) return { tipo: 'copiar' }
+  if (tecla === '0') return { tipo: 'zoom', acao: 'ajustar' }
+  if (tecla === '1') return { tipo: 'zoom', acao: 'real' }
+  if (evento.key === '=' || evento.key === '+') return { tipo: 'zoom', acao: 'mais' }
+  if (evento.key === '-') return { tipo: 'zoom', acao: 'menos' }
   if (evento.key === ']') return { tipo: 'camada', direcao: evento.shiftKey ? 'frente' : 'subir' }
   if (evento.key === '[') return { tipo: 'camada', direcao: evento.shiftKey ? 'tras' : 'descer' }
   if (evento.code === 'BracketRight') return { tipo: 'camada', direcao: 'frente' }
@@ -40,6 +45,7 @@ export function interpretarAtalho(evento: KeyboardEvent): ComandoAtalho | null {
   if (evento.altKey) return null
   if (evento.key === TECLA_ESCAPE) return { tipo: 'cancelar' }
   if (TECLAS_EXCLUSAO.includes(evento.key)) return { tipo: 'excluir' }
+  if (evento.key.toLowerCase() === 'q') return { tipo: 'travarFerramenta' }
   if (evento.key === ']' || evento.key === '+') return { tipo: 'ajustarTamanho', passo: 1 }
   if (evento.key === '[' || evento.key === '-') return { tipo: 'ajustarTamanho', passo: -1 }
 

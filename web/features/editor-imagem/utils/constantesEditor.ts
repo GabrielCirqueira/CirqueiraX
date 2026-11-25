@@ -171,6 +171,7 @@ export const DESLOCAMENTO_SETAS_TECLADO = 1
 export const DESLOCAMENTO_SETAS_TECLADO_RAPIDO = 10
 export const TOLERANCIA_ACERTO_TELA = 8
 export const TAMANHO_ALCA_ACERTO_TELA = 12
+export const TOLERANCIA_ENCAIXE_TELA = 6
 export const OPACIDADE_PADRAO = 100
 
 export interface LimitePropriedade {

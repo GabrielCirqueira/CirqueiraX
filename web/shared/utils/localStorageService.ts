@@ -13,6 +13,7 @@ export const CHAVES_STORAGE = {
   EDITOR_IMAGEM_PREFERENCIAS: 'editor-imagem:preferencias',
   EDITOR_IMAGEM_CORES_RECENTES: 'editor-imagem:cores-recentes',
   EDITOR_IMAGEM_TELA: 'editor-imagem:tela',
+  EDITOR_IMAGEM_TRAVAR_FERRAMENTA: 'editor-imagem:travar-ferramenta',
 } as const
 
 export interface OpcoesLeituraStorage<T> {

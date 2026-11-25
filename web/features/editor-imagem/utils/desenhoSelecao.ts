@@ -1,10 +1,12 @@
-import type { Anotacao, AnotacaoArraste, ImagemEditor, Retangulo } from '../types'
+import type { Anotacao, AnotacaoArraste, GuiaAlinhamento, ImagemEditor, Retangulo } from '../types'
 import { ajustarTamanhoCanvas, desenharAnotacao, prepararContexto } from './desenhoCanvas'
 import { calcularFatorEscala, normalizarRetangulo } from './geometria'
 import { alcasDaAnotacao, caixaDaAnotacao, isAnotacaoComPontas } from './selecaoAnotacoes'
 
 const COR_SELECAO = '#00977D'
 const COR_ALCA = '#FFFFFF'
+const COR_GUIA = '#E5368A'
+const COR_BLOQUEADA = '#9CA3AF'
 const COR_MASCARA_RECORTE = 'rgba(0, 0, 0, 0.55)'
 const TAMANHO_ALCA_TELA = 10
 const ESPESSURA_SELECAO_TELA = 1.5
@@ -14,7 +16,32 @@ const TRACO_SELECAO_TELA = 5
 export interface ConteudoSobreposicao {
   emAndamento: Anotacao | null
   selecionada: Anotacao | null
+  guias: GuiaAlinhamento[]
   escalaTela: number
+}
+
+function desenharGuias(
+  contexto: CanvasRenderingContext2D,
+  guias: GuiaAlinhamento[],
+  recorte: Retangulo,
+  escalaTela: number
+) {
+  if (guias.length === 0) return
+  contexto.save()
+  contexto.strokeStyle = COR_GUIA
+  contexto.lineWidth = 1 / escalaTela
+  contexto.beginPath()
+  for (const guia of guias) {
+    if (guia.orientacao === 'vertical') {
+      contexto.moveTo(guia.posicao, recorte.y)
+      contexto.lineTo(guia.posicao, recorte.y + recorte.altura)
+    } else {
+      contexto.moveTo(recorte.x, guia.posicao)
+      contexto.lineTo(recorte.x + recorte.largura, guia.posicao)
+    }
+  }
+  contexto.stroke()
+  contexto.restore()
 }
 
 function desenharMascaraRecorte(
@@ -42,11 +69,11 @@ function desenharMolduraSelecao(
   anotacao: Anotacao,
   escalaTela: number
 ) {
-  if (isAnotacaoComPontas(anotacao)) return
+  if (isAnotacaoComPontas(anotacao) && !anotacao.bloqueada) return
   const margem = MARGEM_SELECAO_TELA / escalaTela
   const caixa = caixaDaAnotacao(anotacao)
   contexto.save()
-  contexto.strokeStyle = COR_SELECAO
+  contexto.strokeStyle = anotacao.bloqueada ? COR_BLOQUEADA : COR_SELECAO
   contexto.lineWidth = ESPESSURA_SELECAO_TELA / escalaTela
   contexto.setLineDash([TRACO_SELECAO_TELA / escalaTela, (TRACO_SELECAO_TELA * 0.7) / escalaTela])
   contexto.strokeRect(
@@ -88,7 +115,7 @@ export function renderizarSobreposicao(
   canvasBase: HTMLCanvasElement,
   imagem: ImagemEditor,
   recorte: Retangulo,
-  { emAndamento, selecionada, escalaTela }: ConteudoSobreposicao
+  { emAndamento, selecionada, guias, escalaTela }: ConteudoSobreposicao
 ) {
   ajustarTamanhoCanvas(canvasSobreposicao, recorte)
   const contexto = prepararContexto(canvasSobreposicao, recorte)
@@ -100,7 +127,8 @@ export function renderizarSobreposicao(
     desenharAnotacao(contexto, emAndamento, recorte, calcularFatorEscala(imagem), canvasBase)
   }
 
-  if (!selecionada) return
+  desenharGuias(contexto, guias, recorte, escalaTela)
+  if (!selecionada || selecionada.oculta) return
   desenharMolduraSelecao(contexto, selecionada, escalaTela)
-  desenharAlcas(contexto, selecionada, escalaTela)
+  if (!selecionada.bloqueada) desenharAlcas(contexto, selecionada, escalaTela)
 }
