@@ -260,7 +260,7 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `StatusEnvioGoogleFotos` | `enviado`, `reaproveitado`, `falha` |
 | `OrigemEnvioGoogleFotos` | `automatico`, `retentativa`, `reenvio_manual`, `forcado` |
 | `TipoCliente` | `usuario`, `agente` |
-| `FuncionalidadeSistema` | `dashboard`, `musica`, `central_midias`, `downloads_video`, `downloads_audio`, `livros_audio`, `transcricoes`, `prints`, `editor_imagem`, `extrair_texto`, `upload_manual`, `google_fotos`, `gerenciar_usuarios` |
+| `FuncionalidadeSistema` | `dashboard`, `musica`, `central_midias`, `downloads_video`, `downloads_audio`, `livros_audio`, `transcricoes`, `prints`, `editor_imagem`, `extrair_texto`, `pronuncia`, `upload_manual`, `google_fotos`, `gerenciar_usuarios` |
 
 `PlataformaVideo` identifica as plataformas de vídeo.
 

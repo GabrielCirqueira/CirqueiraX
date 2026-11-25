@@ -29,6 +29,7 @@
 | [funcionalidades/DOWNLOADS_AUDIO.md](funcionalidades/DOWNLOADS_AUDIO.md) | Download de MP3, player, estados e retenção de 7 dias |
 | [funcionalidades/PRINTS.md](funcionalidades/PRINTS.md) | Ingestão de screenshots e galeria de prints |
 | [funcionalidades/EDITOR_IMAGEM.md](funcionalidades/EDITOR_IMAGEM.md) | Editor de imagem, ferramentas, atalhos e salvamento como nova mídia |
+| [funcionalidades/PRONUNCIA.md](funcionalidades/PRONUNCIA.md) | Tradução PT/EN com DeepL, motor de pronúncia em português, histórico e ciclo de correção |
 | [funcionalidades/UPLOAD_MANUAL.md](funcionalidades/UPLOAD_MANUAL.md) | Upload pela web, formatos, limites e duplicados |
 | [funcionalidades/AGENTE.md](funcionalidades/AGENTE.md) | Agente de prints em Python, instalação por sistema e comandos |
 | [funcionalidades/GOOGLE_FOTOS.md](funcionalidades/GOOGLE_FOTOS.md) | OAuth, envio, álbuns, duplicados e histórico de envios |

@@ -79,6 +79,7 @@ Detalhes em [BACKEND.md](../stack/BACKEND.md), [FRONTEND.md](../stack/FRONTEND.m
 | `/prints` | Prints & Capturas | [PRINTS.md](PRINTS.md) |
 | `/editor-imagem` | Editor de Imagem | [EDITOR_IMAGEM.md](EDITOR_IMAGEM.md) |
 | `/extrair-texto` | Extrair Texto | [EXTRAIR_TEXTO.md](EXTRAIR_TEXTO.md) |
+| `/pronuncia` | Inglês & Pronúncia | [PRONUNCIA.md](PRONUNCIA.md) |
 | `/upload-manual` | Upload Manual | [UPLOAD_MANUAL.md](UPLOAD_MANUAL.md) |
 | `/google-fotos` | Google Fotos | [GOOGLE_FOTOS.md](GOOGLE_FOTOS.md) |
 | `/usuarios` | Gerenciar usuários e permissões | [PERMISSOES.md](PERMISSOES.md) |

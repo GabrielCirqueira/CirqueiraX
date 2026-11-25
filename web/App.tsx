@@ -71,6 +71,10 @@ const router = createBrowserRouter(
               lazy={() => lazyWithRetry(() => import('@/features/extrair-texto/ExtrairTexto'))}
             />
             <Route
+              path="pronuncia"
+              lazy={() => lazyWithRetry(() => import('@/features/pronuncia/Pronuncia'))}
+            />
+            <Route
               path="upload-manual"
               lazy={() => lazyWithRetry(() => import('@/features/upload-manual/UploadManual'))}
             />

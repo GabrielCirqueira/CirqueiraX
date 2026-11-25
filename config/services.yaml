@@ -22,6 +22,7 @@ parameters:
     env(YOUTUBE_OAUTH_REDIRECT_URI): 'http://127.0.0.1:4012/musica/youtube/callback'
     env(OPENAI_API_KEY): ''
     env(YOUTUBE_API_KEY): ''
+    env(DEEPL_API_KEY): ''
     env(OPENAI_ESFORCO_RACIOCINIO): 'low'
     env(OPENAI_PRECO_ENTRADA_POR_MILHAO): '0.75'
     env(OPENAI_PRECO_SAIDA_POR_MILHAO): '4.5'
@@ -201,6 +202,19 @@ services:
             $client: '@guzzle.default'
             $apiUrl: '%env(SYNCTHING_API_URL)%'
             $apiKey: '%env(SYNCTHING_API_KEY)%'
+
+    App\Interface\TradutorTextoInterface: '@App\Infra\DeepL\DeepLClient'
+
+    App\Infra\DeepL\DeepLClient:
+        arguments:
+            $client: '@guzzle.default'
+            $chaveApi: '%env(DEEPL_API_KEY)%'
+
+    App\Interface\LeitorDicionarioPronunciaInterface: '@App\Infra\Pronuncia\LeitorDicionarioCmuClient'
+
+    App\Infra\Pronuncia\LeitorDicionarioCmuClient:
+        arguments:
+            $caminhoDicionario: '%kernel.project_dir%/config/pronuncia/cmudict.dict'
 
     App\Interface\SpotifyInterface: '@App\Infra\Spotify\SpotifyClient'
     App\Interface\TranscritorAudioInterface: '@App\Infra\Transcricao\WhisperCppClient'

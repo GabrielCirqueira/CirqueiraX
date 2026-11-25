@@ -24,6 +24,7 @@ final class ResolverPermissaoPorRotaService
         ['prefixo' => '/api/v1/audios', 'funcionalidades' => [FuncionalidadeSistema::DownloadsAudio]],
         ['prefixo' => '/api/v1/livros-audio', 'funcionalidades' => [FuncionalidadeSistema::LivrosAudio]],
         ['prefixo' => '/api/v1/transcricoes', 'funcionalidades' => [FuncionalidadeSistema::Transcricoes]],
+        ['prefixo' => '/api/v1/pronuncia', 'funcionalidades' => [FuncionalidadeSistema::Pronuncia]],
         ['prefixo' => '/api/v1/prints', 'funcionalidades' => [FuncionalidadeSistema::Prints]],
         ['prefixo' => '/api/v1/editor-imagem', 'funcionalidades' => [FuncionalidadeSistema::EditorImagem]],
         ['prefixo' => '/api/v1/extrair-texto', 'funcionalidades' => [FuncionalidadeSistema::ExtrairTexto]],

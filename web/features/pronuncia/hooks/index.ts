@@ -1,0 +1,5 @@
+export * from './chavesQueryPronuncia'
+export * from './useCorrecoesPronuncia'
+export * from './useFalaIngles'
+export * from './usePronuncia'
+export * from './useCopiarTexto'

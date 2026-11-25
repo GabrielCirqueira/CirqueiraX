@@ -81,6 +81,7 @@ web/
 | `/prints` | Prints & Capturas | Autenticada + permissão |
 | `/editor-imagem` | Editor de Imagem | Autenticada + permissão |
 | `/extrair-texto` | Extrair Texto | Autenticada + permissão |
+| `/pronuncia` | Inglês & Pronúncia | Autenticada + permissão |
 | `/upload-manual` | Upload Manual | Autenticada + permissão |
 | `/google-fotos` | Google Fotos | Autenticada + `google_fotos` |
 | `/livros-audio` | Livros em Áudio | Autenticada + permissão |
@@ -113,6 +114,7 @@ A Sidebar mostra só as telas liberadas (admin vê todas, inclusive Usuários), 
 | `transcricoes` | [TRANSCRICOES.md](../funcionalidades/TRANSCRICOES.md) |
 | `prints` | [PRINTS.md](../funcionalidades/PRINTS.md) |
 | `editor-imagem` | [EDITOR_IMAGEM.md](../funcionalidades/EDITOR_IMAGEM.md) |
+| `pronuncia` | [PRONUNCIA.md](../funcionalidades/PRONUNCIA.md) |
 | `upload-manual` | [UPLOAD_MANUAL.md](../funcionalidades/UPLOAD_MANUAL.md) |
 | `google-fotos` | [GOOGLE_FOTOS.md](../funcionalidades/GOOGLE_FOTOS.md) |
 | `musica`, `revisao-musica` | [MUSICA.md](../funcionalidades/MUSICA.md) |

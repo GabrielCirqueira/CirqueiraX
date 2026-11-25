@@ -292,3 +292,18 @@
 - **Arquivos**: `web/features/editor-imagem/` (novos: `components/BarraEstiloRapido.tsx`, `components/ControleZoom.tsx`, `hooks/useZoomEditor.ts`, `utils/encaixeAlinhamento.ts`, `utils/areaTransferenciaAnotacoes.ts`), `web/shared/utils/localStorageService.ts`
 
 ---
+
+### ✅ Melhoria 220 — Inglês & Pronúncia: Tradução com Pronúncia em Português
+
+- **Status**: Concluído
+- **Data**: 25 de novembro de 2026
+- **Pedido**: digitar em português (ou inglês) e receber o português, o inglês e a pronúncia escrita em português (ex.: *Good night* → `GÚD NÁIT`), para palavras, frases e textos; sem IA no fluxo principal (DeepL para traduzir, motor próprio com o dicionário CMU para pronunciar); tudo salvo no banco; botão para reportar erro, com a IA sugerindo a correção, o administrador aprovando e as frases afetadas sendo recalculadas.
+- **Solução**:
+  - Nova página `/pronuncia` (permissão `pronuncia`): direção Automático / PT→EN / EN→PT, `Ctrl+Enter`, frases rápidas, resultado com Português, Inglês e Como se fala, modos **Clara** e **Fala natural**, copiar, ouvir normal e devagar com a palavra falada destacada, palavra por palavra com sílabas, tônica, origem e dicas, histórico com busca e favoritas.
+  - Motor de pronúncia: dicionário CMU (135 mil palavras) no banco, cascata exceção → homógrafo → dicionário → derivação → letra-som (marcada como aproximada), sílabas, tônica em maiúsculas, T/D flap, formas fracas, ligação entre palavras, números e símbolos por extenso, dicas para brasileiros.
+  - Tradução pelo DeepL (plano gratuito), com cache global por frase: texto repetido não gasta cota.
+  - Ciclo de correção: relato (`relato_erro_pronuncia`, status pendente → sugerido → aprovado/rejeitado), sugestão pelo pool de IA, aprovação vira exceção da palavra e recalcula as frases que a contêm. Abas de administrador **Correções** e **Dicionário** (exceções, teste do motor, cota do DeepL).
+  - Comando `app:pronuncia:importar-dicionario` para carregar o dicionário.
+- **Arquivos**: `src/{Controller,Service,Domain,Feature,DataObject,Exception}/Pronuncia/`, `src/Infra/DeepL/`, `src/Infra/Pronuncia/`, `src/Entity/*Pronuncia.php`, `src/Repository/*Pronuncia*Repository.php`, `src/Enum/` (novos e `FuncionalidadeSistema`, `FinalidadeConsumoIa`), `src/Command/ImportarDicionarioPronunciaCommand.php`, `config/pronuncia/cmudict.dict`, `config/services.yaml`, `migrations/Version20261125222756.php`, `web/features/pronuncia/`, `web/App.tsx`, `web/layouts/{Sidebar,Header}.tsx`, `web/shared/utils/funcionalidadesSistema.ts`, `web/features/usuarios/utils/navegacaoUsuarios.ts`, `documentation/funcionalidades/PRONUNCIA.md`
+
+---

@@ -240,3 +240,4 @@
 | M217 | YouTube Music: Vídeos Vinculados pelo Histórico e IA Sem Viés de Categoria | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-217--youtube-music-vídeos-vinculados-pelo-histórico-e-ia-sem-viés-de-categoria) |
 | M218 | Editor de Imagem: Criar do Zero, Mais Formas, Cores e Texto | ✅ Concluído | 24/11/2026 | [ver](MELHORIAS_11.md#melhoria-218--editor-de-imagem-criar-do-zero-mais-formas-cores-e-texto) |
 | M219 | Editor de Imagem: Selecionar de Novo, Copiar/Colar Itens e Novo Layout | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_11.md#melhoria-219--editor-de-imagem-selecionar-de-novo-copiarcolar-itens-e-novo-layout) |
+| M220 | Inglês & Pronúncia: Tradução com Pronúncia em Português | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_11.md#melhoria-220--inglês--pronúncia-tradução-com-pronúncia-em-português) |

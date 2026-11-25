@@ -9,6 +9,7 @@ export const FUNCIONALIDADES_SISTEMA = [
   'prints',
   'editor_imagem',
   'extrair_texto',
+  'pronuncia',
   'upload_manual',
   'google_fotos',
   'gerenciar_usuarios',
@@ -27,6 +28,7 @@ export const ROTULOS_FUNCIONALIDADE: Record<FuncionalidadeSistema, string> = {
   prints: 'Prints & Capturas',
   editor_imagem: 'Editor de Imagem',
   extrair_texto: 'Extrair Texto',
+  pronuncia: 'Inglês & Pronúncia',
   upload_manual: 'Upload Manual',
   google_fotos: 'Google Fotos',
   gerenciar_usuarios: 'Gerenciar Usuários',
@@ -43,6 +45,7 @@ export const ROTA_INICIAL_POR_FUNCIONALIDADE: Record<FuncionalidadeSistema, stri
   prints: '/prints',
   editor_imagem: '/editor-imagem',
   extrair_texto: '/extrair-texto',
+  pronuncia: '/pronuncia',
   upload_manual: '/upload-manual',
   google_fotos: '/google-fotos',
   gerenciar_usuarios: '/usuarios',
@@ -61,6 +64,7 @@ const PREFIXOS_ROTA: Array<{ prefixo: string; funcionalidade: FuncionalidadeSist
   { prefixo: '/prints', funcionalidade: 'prints' },
   { prefixo: '/editor-imagem', funcionalidade: 'editor_imagem' },
   { prefixo: '/extrair-texto', funcionalidade: 'extrair_texto' },
+  { prefixo: '/pronuncia', funcionalidade: 'pronuncia' },
   { prefixo: '/upload-manual', funcionalidade: 'upload_manual' },
   { prefixo: '/google-fotos', funcionalidade: 'google_fotos' },
   { prefixo: '/dashboard', funcionalidade: 'dashboard' },
@@ -77,11 +81,14 @@ export function funcionalidadeDaRota(pathname: string): FuncionalidadeSistema | 
   return null
 }
 
-type UsuarioPermissao = {
-  administrador?: boolean
-  roles?: string[]
-  permissoes?: string[]
-} | null | undefined
+type UsuarioPermissao =
+  | {
+      administrador?: boolean
+      roles?: string[]
+      permissoes?: string[]
+    }
+  | null
+  | undefined
 
 export function usuarioEhAdministrador(usuario: UsuarioPermissao): boolean {
   if (!usuario) return false
@@ -110,11 +117,13 @@ export function primeiraRotaPermitida(usuario: UsuarioPermissao): string {
   return '/dashboard'
 }
 
-export function normalizarUsuarioAuth<T extends {
-  roles?: string[]
-  administrador?: boolean
-  permissoes?: string[] | null
-}>(usuario: T): T & { administrador: boolean; permissoes: string[] } {
+export function normalizarUsuarioAuth<
+  T extends {
+    roles?: string[]
+    administrador?: boolean
+    permissoes?: string[] | null
+  },
+>(usuario: T): T & { administrador: boolean; permissoes: string[] } {
   const permissoes = Array.isArray(usuario.permissoes) ? usuario.permissoes : []
   return {
     ...usuario,

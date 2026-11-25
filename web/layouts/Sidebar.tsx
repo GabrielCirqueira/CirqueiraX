@@ -1,11 +1,11 @@
 import { useTheme } from '@/contexts'
 import { useSair } from '@/features/auth/hooks'
-import { useAuthStore } from '@/stores/useAuthStore'
 import {
   funcionalidadeDaRota,
   usuarioEhAdministrador,
   usuarioPossuiPermissao,
 } from '@/shared/utils/funcionalidadesSistema'
+import { useAuthStore } from '@/stores/useAuthStore'
 import { Badge, Box, Center, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import {
   AudioLines,
@@ -14,6 +14,7 @@ import {
   Code2,
   DownloadCloud,
   Images,
+  Languages,
   Layers,
   LayoutDashboard,
   LogOut,
@@ -47,6 +48,7 @@ const navItems = [
   { href: '/prints', label: 'Prints & Capturas', icon: Camera, cor: 'cirqueira.yellow.300' },
   { href: '/editor-imagem', label: 'Editor de Imagem', icon: PenLine, cor: 'cirqueira.rose.400' },
   { href: '/extrair-texto', label: 'Extrair Texto', icon: ScanText, cor: 'cirqueira.purple.400' },
+  { href: '/pronuncia', label: 'Inglês & Pronúncia', icon: Languages, cor: 'cirqueira.cyan.400' },
   {
     href: '/upload-manual',
     label: 'Upload Manual',

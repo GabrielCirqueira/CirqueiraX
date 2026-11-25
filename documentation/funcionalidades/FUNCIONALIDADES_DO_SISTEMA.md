@@ -184,6 +184,10 @@ Você escolhe entre 8 cores e 3 espessuras, e o editor lembra suas preferências
 
 Cole uma imagem com Ctrl+V e o texto dela é lido na hora, já indo para a área de transferência. Funciona só no navegador, em português e inglês, sem salvar nada. Detalhes em [EXTRAIR_TEXTO.md](EXTRAIR_TEXTO.md).
 
+### Inglês & Pronúncia
+
+Escreva em português ou inglês e veja a tradução e como se fala, escrito em português (ex.: *I don't know* → **ai DÔUNT NÔU**). Tem modo de fala natural, áudio normal e devagar, sílabas com a tônica, dicas para brasileiros, histórico com favoritas e botão para reportar erro. Detalhes em [PRONUNCIA.md](PRONUNCIA.md).
+
 ### Upload Manual
 
 Serve para enviar arquivos que já estão no seu dispositivo.

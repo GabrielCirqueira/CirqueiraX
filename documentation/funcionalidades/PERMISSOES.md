@@ -27,6 +27,7 @@ Administrador ignora a lista JSON: o backend e o frontend tratam como acesso tot
 | `prints` | `/prints` |
 | `editor_imagem` | `/editor-imagem` |
 | `extrair_texto` | `/extrair-texto` |
+| `pronuncia` | `/pronuncia` (correções e dicionário exigem `ROLE_ADMIN`) |
 | `upload_manual` | `/upload-manual` |
 | `google_fotos` | `/google-fotos` |
 | `gerenciar_usuarios` | `/usuarios` (API exige `ROLE_ADMIN`) |

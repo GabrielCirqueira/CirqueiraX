@@ -12,6 +12,7 @@ export const HREF_POR_FUNCIONALIDADE: Record<FuncionalidadeSistema, string> = {
   prints: '/prints',
   editor_imagem: '/editor-imagem',
   extrair_texto: '/extrair-texto',
+  pronuncia: '/pronuncia',
   upload_manual: '/upload-manual',
   google_fotos: '/google-fotos',
   gerenciar_usuarios: '/usuarios',

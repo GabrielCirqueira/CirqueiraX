@@ -13,6 +13,7 @@ enum FuncionalidadeSistema: string
     case DownloadsAudio = 'downloads_audio';
     case LivrosAudio = 'livros_audio';
     case Transcricoes = 'transcricoes';
+    case Pronuncia = 'pronuncia';
     case Prints = 'prints';
     case EditorImagem = 'editor_imagem';
     case ExtrairTexto = 'extrair_texto';
@@ -30,6 +31,7 @@ enum FuncionalidadeSistema: string
             self::DownloadsAudio => 'Downloads MP3',
             self::LivrosAudio => 'Livros em Áudio',
             self::Transcricoes => 'Transcrições',
+            self::Pronuncia => 'Inglês & Pronúncia',
             self::Prints => 'Prints & Capturas',
             self::EditorImagem => 'Editor de Imagem',
             self::ExtrairTexto => 'Extrair Texto',
