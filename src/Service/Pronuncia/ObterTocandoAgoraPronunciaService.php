@@ -14,8 +14,9 @@ use App\Service\Spotify\ObterTocandoAgoraSpotifyService;
 final readonly class ObterTocandoAgoraPronunciaService
 {
     private const int INTERVALO_RAPIDO_MS = 5000;
-    private const int INTERVALO_ECONOMICO_MS = 12000;
+    private const int INTERVALO_ECONOMICO_MS = 15000;
     private const int LIMITE_CONSULTAS_RAPIDAS_POR_HORA = 360;
+    private const int LIMITE_CONSULTAS_APP_EM_24H = 900;
 
     public function __construct(
         private ContaSpotifyRepository $contaSpotifyRepository,
@@ -33,12 +34,13 @@ final readonly class ObterTocandoAgoraPronunciaService
     }
 
     /**
-     * Ritmo de 5 s para pegar a troca de música rápido; passa para 12 s quando o "tocando agora" já fez 360 consultas na última hora (média de 6 por minuto), abaixo do ritmo que já causou bloqueio do Spotify.
+     * Ritmo de 5 s para pegar a troca de música rápido, só enquanto houver folga: menos de 360 consultas do "tocando agora" na última hora e menos de 900 consultas do app inteiro em 24 h (o bloqueio de 26/11 veio com ~1.366). Sem folga, 15 s.
      */
     private function proximaConsultaMs(): int
     {
-        $consultas = $this->controleLimite->consultasNaUltimaHora(OrigemConsultaSpotify::TocandoAgora);
+        $folgaNaHora = $this->controleLimite->consultasNaUltimaHora(OrigemConsultaSpotify::TocandoAgora) < self::LIMITE_CONSULTAS_RAPIDAS_POR_HORA;
+        $temFolga = $folgaNaHora && $this->controleLimite->consultasTotaisUltimas24h() < self::LIMITE_CONSULTAS_APP_EM_24H;
 
-        return $consultas < self::LIMITE_CONSULTAS_RAPIDAS_POR_HORA ? self::INTERVALO_RAPIDO_MS : self::INTERVALO_ECONOMICO_MS;
+        return $temFolga ? self::INTERVALO_RAPIDO_MS : self::INTERVALO_ECONOMICO_MS;
     }
 }

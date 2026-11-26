@@ -245,3 +245,4 @@
 | M221 | Inglês & Pronúncia: Letra da Música Tocando no Spotify com Pronúncia | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_12.md#melhoria-221--inglês--pronúncia-letra-da-música-tocando-no-spotify-com-pronúncia) |
 | M222 | Tocando Agora: Troca de Música Detectada em Segundos | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_12.md#melhoria-222--tocando-agora-troca-de-música-detectada-em-segundos) |
 | M223 | Pronúncia Simples, do Jeito que a Gente Lê | ✅ Concluído | 25/11/2026 | [ver](MELHORIAS_12.md#melhoria-223--pronúncia-simples-do-jeito-que-a-gente-lê) |
+| M224 | Spotify: Menos Consultas por Dia para Evitar Bloqueio | ✅ Concluído | 26/11/2026 | [ver](MELHORIAS_12.md#melhoria-224--spotify-menos-consultas-por-dia-para-evitar-bloqueio) |

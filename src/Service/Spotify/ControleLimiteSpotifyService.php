@@ -39,6 +39,11 @@ final readonly class ControleLimiteSpotifyService
         $this->somarNaJanelaRecente($origem);
     }
 
+    public function consultasTotaisUltimas24h(): int
+    {
+        return array_sum($this->consultaHoraRepository->somarPorOrigemDesde((new DateTimeImmutable())->modify(self::JANELA_MEDICAO)));
+    }
+
     /**
      * Consultas da origem nos últimos 60 minutos (janela móvel, minuto a minuto), para regular o ritmo de quem consulta com frequência.
      */

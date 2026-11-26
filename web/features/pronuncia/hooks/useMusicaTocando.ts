@@ -16,7 +16,7 @@ function calcularProximaConsulta(dados: TocandoAgoraPronuncia | undefined): numb
   return Math.max(INTERVALO_MINIMO_MS, Math.min(dados.proximaConsultaMs, restante))
 }
 
-/** Consulta no ritmo que o servidor indica (5 s, ou 12 s quando a última hora já teve muitas consultas), 20 s parado e logo após o fim da faixa; entre consultas o tempo é contado no navegador. */
+/** Consulta no ritmo que o servidor indica (5 s com folga no limite do Spotify, senão 15 s), 20 s parado e logo após o fim da faixa; entre consultas o tempo é contado no navegador. */
 export function useTocandoAgoraPronuncia(habilitado: boolean) {
   return useQuery({
     queryKey: PRONUNCIA_QUERY_KEYS.tocandoAgora,

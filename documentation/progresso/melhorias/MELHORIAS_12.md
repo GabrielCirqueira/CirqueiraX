@@ -48,3 +48,15 @@
 - **Arquivos**: `src/Domain/Pronuncia/{ConversorFonemasSimples,MontadorSentencaPronunciada}.php`, `src/Feature/Pronuncia/PronunciarTextoFeature.php`, `src/DataObject/Pronuncia/{PalavraPronunciadaDTO,SentencaPronunciadaDTO,AnalisePronunciaDTO}.php`, `src/Service/Pronuncia/{RecalcularFrasesPronunciaService,TraduzirTextoService,GerenciarHistoricoPronunciaService}.php`, `src/Entity/FrasePronuncia.php`, `src/Serializer/PronunciaSerializer.php`, `web/features/pronuncia/` (tipos, utils, `Pronuncia.tsx`, `ResultadoTraducao`, `PalavrasPronunciadas`, `HistoricoPronuncia`, `LinhaLetraItem`, `LetraSincronizada`, `PainelDicionario`, `EstadoInicialPronuncia`)
 
 ---
+
+### ✅ Melhoria 224 — Spotify: Menos Consultas por Dia para Evitar Bloqueio
+
+- **Status**: Concluído
+- **Data**: 26 de novembro de 2026
+- **Problema**: o Spotify bloqueou o app por 2 h às 06:40 de 26/11, durante a coleta automática do histórico. Nas 24 h anteriores foram ~1.366 consultas (coleta 838, busca de artistas 306, tocando agora 98, renovação de login 75, capas 49). A cota do modo de desenvolvimento vale para o app inteiro e as 3 contas conectadas dividem o mesmo limite.
+- **Solução**:
+  - Coleta do histórico recente a cada **10 minutos** (eram 5): de ~860 para ~430 consultas por dia. O Spotify guarda as últimas 50 músicas (2 a 3 horas), então nada se perde.
+  - Aba Tocando agora: ritmo de 5 s só com folga também no dia (menos de 900 consultas do app inteiro em 24 h), além do limite por hora; sem folga, 15 s (eram 12 s).
+- **Arquivos**: `src/Schedule.php`, `src/Service/Spotify/{ColetarHistoricoRecenteSpotifyService,ControleLimiteSpotifyService}.php`, `src/Service/Pronuncia/ObterTocandoAgoraPronunciaService.php`, `web/features/pronuncia/hooks/useMusicaTocando.ts`
+
+---

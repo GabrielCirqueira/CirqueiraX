@@ -5,8 +5,8 @@ namespace App;
 use App\Message\AtualizarDetalhesVideosYoutubeMessage;
 use App\Message\ColetarHistoricoYoutubeMusicMessage;
 use App\Message\ExpirarAudiosAntigosMessage;
-use App\Message\IdentificarVideosYoutubeMessage;
 use App\Message\ExpirarAudiosTranscricaoMessage;
+use App\Message\IdentificarVideosYoutubeMessage;
 use App\Message\LimparVideosAntigosMessage;
 use App\Message\SincronizarArtistasFaixasSpotifyMessage;
 use App\Message\SincronizarHistoricoSpotifyMessage;
@@ -22,7 +22,8 @@ class Schedule implements ScheduleProviderInterface
 {
     public function __construct(
         private CacheInterface $cache,
-    ) {}
+    ) {
+    }
 
     public function getSchedule(): SymfonySchedule
     {
@@ -30,7 +31,7 @@ class Schedule implements ScheduleProviderInterface
             ->stateful($this->cache)
             ->processOnlyLastMissedRun(true)
             ->add(
-                RecurringMessage::every('5 minutes', new SincronizarHistoricoSpotifyMessage()),
+                RecurringMessage::every('10 minutes', new SincronizarHistoricoSpotifyMessage()),
                 RecurringMessage::every('1 minute', new SincronizarArtistasFaixasSpotifyMessage()),
                 RecurringMessage::every('30 seconds', new RedispatchMessage(new ColetarHistoricoYoutubeMusicMessage(), 'youtube_coleta')),
                 RecurringMessage::every('1 minute', new RedispatchMessage(new IdentificarVideosYoutubeMessage(), 'youtube_identificacao')),
