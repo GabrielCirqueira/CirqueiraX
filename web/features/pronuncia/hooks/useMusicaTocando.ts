@@ -46,7 +46,11 @@ export function faixaDoTocando(tocando: TocandoAgoraPronuncia | undefined): Faix
 
 export function useLetraMusica(faixa: FaixaParaLetra | null) {
   return useQuery({
-    queryKey: PRONUNCIA_QUERY_KEYS.letra(faixa?.codigoFaixa ?? ''),
+    queryKey: PRONUNCIA_QUERY_KEYS.letra(
+      faixa?.codigoFaixa ?? '',
+      faixa?.titulo ?? '',
+      faixa?.artista ?? ''
+    ),
     queryFn: () => obterLetraMusica(faixa as FaixaParaLetra),
     enabled: faixa !== null,
     staleTime: LETRA_FRESCA_MS,
@@ -59,7 +63,10 @@ export function useTraduzirLetra() {
   return useMutation({
     mutationFn: traduzirLetraMusica,
     onSuccess: (letra) => {
-      queryClient.setQueryData(PRONUNCIA_QUERY_KEYS.letra(letra.codigoFaixa), letra)
+      queryClient.setQueriesData(
+        { queryKey: PRONUNCIA_QUERY_KEYS.letraDaFaixa(letra.codigoFaixa) },
+        letra
+      )
       queryClient.invalidateQueries({ queryKey: PRONUNCIA_QUERY_KEYS.painel })
     },
     onError: (erro) => {
@@ -78,5 +85,6 @@ export function posicaoAtualMs(
 ): number {
   if (!tocando?.temItem) return 0
   const decorrido = tocando.emReproducao ? Date.now() - tocando.consultadoEm : 0
-  return Math.max(0, Math.min(tocando.duracaoMs, tocando.progressoMs + decorrido + ajusteMs))
+  const limite = tocando.duracaoMs > 0 ? tocando.duracaoMs : Number.POSITIVE_INFINITY
+  return Math.max(0, Math.min(limite, tocando.progressoMs + decorrido + ajusteMs))
 }

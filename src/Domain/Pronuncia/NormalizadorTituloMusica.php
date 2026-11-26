@@ -8,11 +8,11 @@ final readonly class NormalizadorTituloMusica
 {
     private const array PADROES_SUFIXO = [
         '/\s+-\s+.*$/u',
-        '/\s*[(\[][^)\]]*\b(feat|ft|with|remaster|remastered|live|version|edit|mix|mono|stereo|deluxe|acoustic|radio)\b[^)\]]*[)\]]/iu',
+        '/\s*[(\[][^)\]]*\b(feat|ft|with|remaster|remastered|live|version|edit|mix|mono|stereo|deluxe|acoustic|radio|official|oficial|video|vídeo|clipe|lyrics?|letra|audio|áudio|visualizer|visualiser|hd|4k)\b[^)\]]*[)\]]/iu',
     ];
 
     /**
-     * Tira do título o que o Spotify acrescenta e os sites de letra não usam, como " - Remastered 2011" e "(feat. Fulano)".
+     * Tira do título o que o Spotify e o YouTube acrescentam e os sites de letra não usam, como " - Remastered 2011", "(feat. Fulano)" e "(Official Video)".
      */
     public function semSufixos(string $titulo): string
     {

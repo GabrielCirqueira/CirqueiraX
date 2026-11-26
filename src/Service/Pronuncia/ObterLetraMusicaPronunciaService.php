@@ -27,8 +27,8 @@ final readonly class ObterLetraMusicaPronunciaService
         $letra = $this->letraRepository->buscarPorCodigoFaixa($dto->codigoFaixa)
             ?? $this->buscarNova($dto);
 
-        if ($letra->isHoraDeBuscarDeNovo()) {
-            $letra->atualizarLetra($this->buscadorLetra->buscar($dto->titulo, $dto->artista, $dto->album(), $dto->duracaoMs));
+        if ($letra->isHoraDeBuscarDeNovo() || $letra->isOutraBuscaSemLetra($dto->titulo, $dto->artista)) {
+            $letra->trocarBusca($dto->titulo, $dto->artista, $dto->album(), $dto->duracaoMs, $this->buscadorLetra->buscar($dto->titulo, $dto->artista, $dto->album(), $dto->duracaoMs));
             $this->letraRepository->salvar($letra);
         }
 

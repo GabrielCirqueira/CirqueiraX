@@ -173,8 +173,12 @@ export const TocandoAgoraPronunciaSchema = z.object({
   urlSpotify: z.string().nullable(),
   bloqueadoAte: z.string().nullable().optional(),
 })
+export type FonteMusicaTocando = 'spotify' | 'youtube'
+
 export type TocandoAgoraPronuncia = z.infer<typeof TocandoAgoraPronunciaSchema> & {
   consultadoEm: number
+  fonte: FonteMusicaTocando
+  urlExterna?: string | null
 }
 
 export const LinhaLetraSchema = z.object({

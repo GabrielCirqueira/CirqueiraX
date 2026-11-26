@@ -11,5 +11,7 @@ export const PRONUNCIA_QUERY_KEYS = {
   excecoes: (busca: string) => ['pronuncia', 'excecoes', busca] as const,
   excecoesTodas: ['pronuncia', 'excecoes'] as const,
   tocandoAgora: ['pronuncia', 'tocando-agora'] as const,
-  letra: (codigoFaixa: string) => ['pronuncia', 'letra', codigoFaixa] as const,
+  letraDaFaixa: (codigoFaixa: string) => ['pronuncia', 'letra', codigoFaixa] as const,
+  letra: (codigoFaixa: string, titulo = '', artista = '') =>
+    ['pronuncia', 'letra', codigoFaixa, titulo, artista] as const,
 }

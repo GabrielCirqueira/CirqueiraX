@@ -1,3 +1,10 @@
+import { useRelogioSpotify } from '@/features/spotify/hooks/useTocandoAgoraSpotify'
+import {
+  mesclarTocandoAgora,
+  tempoRealRecente,
+  useStatusYoutubeMusic,
+  useTocandoAgoraTempoReal,
+} from '@/features/youtube-music'
 import { useLocalStorageState } from '@/shared/hooks'
 import {
   Badge,
@@ -42,6 +49,7 @@ import {
   PASSO_AJUSTE_SINCRONIA_MS,
   PERCENTUAL_LETRA_OUTRO_IDIOMA,
   formatarAjusteSincronia,
+  tocandoDoYoutube,
 } from '../utils'
 import { BarraTempoMusica } from './BarraTempoMusica'
 import { LetraSincronizada } from './LetraSincronizada'
@@ -109,25 +117,46 @@ export interface PainelMusicaTocandoProps {
   onMudarModo: (modo: ModoPronuncia) => void
 }
 
-export const PainelMusicaTocando = memo(function PainelMusicaTocando({
+/** Com a extensão do YouTube Music mandando a música, ela tem prioridade e o Spotify nem é consultado (poupa a cota). */
+export const PainelMusicaTocando = memo(function PainelMusicaTocando(
+  props: PainelMusicaTocandoProps
+) {
+  const tempoReal = useTocandoAgoraTempoReal()
+  const agora = useRelogioSpotify()
+  const youtubeAtivo = tempoRealRecente(tempoReal, agora) && tempoReal.estado !== null
+
+  if (youtubeAtivo) return <MusicaDoYoutube {...props} />
+  return <MusicaDoSpotify {...props} />
+})
+
+const MusicaDoYoutube = memo(function MusicaDoYoutube({
+  fala,
+  modo,
+  onMudarModo,
+}: PainelMusicaTocandoProps) {
+  const tempoReal = useTocandoAgoraTempoReal()
+  const status = useStatusYoutubeMusic()
+  const mesclado = mesclarTocandoAgora(status.data?.extensao?.tocandoAgora, tempoReal, Date.now())
+
+  if (!mesclado) return <Skeleton h="420px" borderRadius="12px" />
+
+  return (
+    <LetraDaMusica
+      tocando={tocandoDoYoutube(mesclado)}
+      fala={fala}
+      modo={modo}
+      onMudarModo={onMudarModo}
+    />
+  )
+})
+
+const MusicaDoSpotify = memo(function MusicaDoSpotify({
   fala,
   modo,
   onMudarModo,
 }: PainelMusicaTocandoProps) {
   const consulta = useTocandoAgoraPronuncia(true)
   const tocando = consulta.data
-  const faixa = faixaDoTocando(tocando)
-  const letra = useLetraMusica(faixa)
-  const traduzir = useTraduzirLetra()
-  const [mostrarPronuncia, setMostrarPronuncia] = useLocalStorageState(
-    'pronuncia:musica:pronuncia',
-    true
-  )
-  const [mostrarTraducao, setMostrarTraducao] = useLocalStorageState(
-    'pronuncia:musica:traducao',
-    false
-  )
-  const [ajusteMs, setAjusteMs] = useLocalStorageState('pronuncia:musica:ajuste', 0)
 
   if (consulta.isLoading) return <Skeleton h="420px" borderRadius="12px" />
 
@@ -155,8 +184,8 @@ export const PainelMusicaTocando = memo(function PainelMusicaTocando({
     return (
       <AvisoMusica
         icone={<Music2 size={28} />}
-        titulo="Conecte seu Spotify"
-        texto="A aba usa a música que está tocando na sua conta do Spotify. Conecte a conta na página Música."
+        titulo="Conecte seu Spotify ou use o YouTube Music"
+        texto="A aba usa a música que está tocando no Spotify (conecte a conta na página Música) ou no YouTube Music aberto neste computador com a extensão do CirqueiraX."
         acao={
           <Button asChild size="sm" colorPalette="brand" borderRadius="full">
             <RouterLink to="/musica">Ir para Música</RouterLink>
@@ -171,7 +200,7 @@ export const PainelMusicaTocando = memo(function PainelMusicaTocando({
       <AvisoMusica
         icone={<AlertTriangle size={28} />}
         titulo="O Spotify pausou as consultas do app"
-        texto={`O Spotify bloqueou o app por excesso de consultas até ${horaBrasilia(tocando.bloqueadoAte)} (horário de Brasília). Depois disso a letra volta a aparecer sozinha.`}
+        texto={`O Spotify bloqueou o app por excesso de consultas até ${horaBrasilia(tocando.bloqueadoAte)} (horário de Brasília). Depois disso a letra volta a aparecer sozinha. No computador, o YouTube Music com a extensão continua funcionando.`}
       />
     )
   }
@@ -180,11 +209,50 @@ export const PainelMusicaTocando = memo(function PainelMusicaTocando({
     return (
       <AvisoMusica
         icone={<Music2 size={28} />}
-        titulo="Nada tocando no Spotify agora"
-        texto="Dê play em uma música e ela aparece aqui em alguns segundos, com a letra e a pronúncia."
+        titulo="Nada tocando agora"
+        texto="Dê play em uma música no Spotify, ou no YouTube Music com a extensão do CirqueiraX neste computador, e ela aparece aqui com a letra e a pronúncia."
       />
     )
   }
+
+  return (
+    <LetraDaMusica
+      tocando={tocando}
+      fala={fala}
+      modo={modo}
+      onMudarModo={onMudarModo}
+      atualizando={consulta.isFetching}
+      onAtualizar={() => consulta.refetch()}
+    />
+  )
+})
+
+interface LetraDaMusicaProps extends PainelMusicaTocandoProps {
+  tocando: TocandoAgoraPronuncia
+  atualizando?: boolean
+  onAtualizar?: () => void
+}
+
+const LetraDaMusica = memo(function LetraDaMusica({
+  tocando,
+  fala,
+  modo,
+  onMudarModo,
+  atualizando = false,
+  onAtualizar,
+}: LetraDaMusicaProps) {
+  const faixa = faixaDoTocando(tocando)
+  const letra = useLetraMusica(faixa)
+  const traduzir = useTraduzirLetra()
+  const [mostrarPronuncia, setMostrarPronuncia] = useLocalStorageState(
+    'pronuncia:musica:pronuncia',
+    true
+  )
+  const [mostrarTraducao, setMostrarTraducao] = useLocalStorageState(
+    'pronuncia:musica:traducao',
+    false
+  )
+  const [ajusteMs, setAjusteMs] = useLocalStorageState('pronuncia:musica:ajuste', 0)
 
   return (
     <Grid templateColumns={{ base: '1fr', lg: '300px minmax(0, 1fr)' }} gap={5} alignItems="start">
@@ -204,8 +272,8 @@ export const PainelMusicaTocando = memo(function PainelMusicaTocando({
             traduzir.mutate(letra.data.uuid)
           setMostrarTraducao((valor) => !valor)
         }}
-        atualizando={consulta.isFetching}
-        onAtualizar={() => consulta.refetch()}
+        atualizando={atualizando}
+        onAtualizar={onAtualizar}
         onAjustar={(passo) =>
           setAjusteMs((valor) =>
             Math.max(
@@ -319,7 +387,7 @@ interface CartaoMusicaProps {
   temLetra: boolean
   traduzindo: boolean
   atualizando: boolean
-  onAtualizar: () => void
+  onAtualizar?: () => void
   onMudarModo: (modo: ModoPronuncia) => void
   onAlternarPronuncia: () => void
   onAlternarTraducao: () => void
@@ -372,20 +440,22 @@ const CartaoMusica = memo(function CartaoMusica({
             <Text fontSize="md" fontWeight="bold" color="fg" lineClamp={2} flex="1">
               {tocando.nome}
             </Text>
-            <IconButton
-              size="2xs"
-              variant="ghost"
-              borderRadius="full"
-              aria-label="Atualizar música agora"
-              title="Trocou de música? Atualize agora"
-              disabled={atualizando}
-              onClick={onAtualizar}
-            >
-              <RefreshCw
-                size={13}
-                style={atualizando ? { animation: 'spin 1s linear infinite' } : undefined}
-              />
-            </IconButton>
+            {onAtualizar && (
+              <IconButton
+                size="2xs"
+                variant="ghost"
+                borderRadius="full"
+                aria-label="Atualizar música agora"
+                title="Trocou de música? Atualize agora"
+                disabled={atualizando}
+                onClick={onAtualizar}
+              >
+                <RefreshCw
+                  size={13}
+                  style={atualizando ? { animation: 'spin 1s linear infinite' } : undefined}
+                />
+              </IconButton>
+            )}
             {!tocando.emReproducao && (
               <Badge size="xs" variant="subtle" borderRadius="full" flexShrink={0}>
                 <Pause size={10} />
@@ -393,9 +463,20 @@ const CartaoMusica = memo(function CartaoMusica({
               </Badge>
             )}
           </HStack>
-          <Text fontSize="sm" color="fg.muted" lineClamp={1}>
-            {tocando.artistas.join(', ')}
-          </Text>
+          <HStack gap={1.5} minW={0}>
+            <Text fontSize="sm" color="fg.muted" lineClamp={1} flex="1">
+              {tocando.artistas.join(', ')}
+            </Text>
+            <Badge
+              size="xs"
+              variant="subtle"
+              borderRadius="full"
+              flexShrink={0}
+              colorPalette={tocando.fonte === 'youtube' ? 'red' : 'green'}
+            >
+              {tocando.fonte === 'youtube' ? 'YouTube Music' : 'Spotify'}
+            </Badge>
+          </HStack>
           <Box mt={2}>
             <BarraTempoMusica tocando={tocando} />
           </Box>
@@ -529,6 +610,22 @@ const CartaoMusica = memo(function CartaoMusica({
           >
             <ExternalLink size={12} />
             Abrir no Spotify
+          </Link>
+        )}
+        {tocando.urlExterna && (
+          <Link
+            href={tocando.urlExterna}
+            target="_blank"
+            rel="noopener noreferrer"
+            fontSize="xs"
+            color="fg.subtle"
+            display="inline-flex"
+            alignItems="center"
+            gap={1}
+            _hover={{ color: 'cirqueira.red.400' }}
+          >
+            <ExternalLink size={12} />
+            Abrir no YouTube Music
           </Link>
         )}
       </VStack>

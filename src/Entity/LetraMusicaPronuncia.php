@@ -79,6 +79,23 @@ class LetraMusicaPronuncia
         $this->buscadaEm = new \DateTimeImmutable();
     }
 
+    /**
+     * Uma letra não achada vale ser procurada de novo quando o nome chega diferente, como no YouTube Music, que primeiro manda o título do vídeo e depois o da música identificada.
+     */
+    public function isOutraBuscaSemLetra(string $titulo, string $artista): bool
+    {
+        return $this->situacao->isNaoEncontrada() && ($titulo !== $this->titulo || $artista !== $this->artista);
+    }
+
+    public function trocarBusca(string $titulo, string $artista, ?string $album, int $duracaoMs, LetraEncontradaDTO $letra): void
+    {
+        $this->titulo = $titulo;
+        $this->artista = $artista;
+        $this->album = $album;
+        $this->duracaoMs = $duracaoMs;
+        $this->atualizarLetra($letra);
+    }
+
     public function isHoraDeBuscarDeNovo(): bool
     {
         return $this->situacao->isNaoEncontrada() && $this->buscadaEm < new \DateTimeImmutable(self::NOVA_BUSCA_SEM_LETRA);

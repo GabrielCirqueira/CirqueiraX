@@ -142,7 +142,11 @@ export async function apagarExcecaoPronuncia(uuid: string): Promise<void> {
 
 export async function obterTocandoAgoraPronuncia(): Promise<TocandoAgoraPronuncia> {
   const { data } = await api.get<RespostaApi<unknown>>(`${URL_PRONUNCIA}/musica/tocando-agora`)
-  return { ...TocandoAgoraPronunciaSchema.parse(data.data), consultadoEm: Date.now() }
+  return {
+    ...TocandoAgoraPronunciaSchema.parse(data.data),
+    consultadoEm: Date.now(),
+    fonte: 'spotify',
+  }
 }
 
 export async function obterLetraMusica(faixa: FaixaParaLetra): Promise<LetraMusica> {
