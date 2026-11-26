@@ -2,7 +2,7 @@
 
 Rodízio de provedores de IA para pedidos de texto. O sistema tenta os provedores gratuitos em ordem de prioridade; quando um atinge o limite, recusa o acesso ou falha seguidas vezes, ele fica pausado e o pedido segue para o próximo. A OpenAI (paga) só entra com `IA_POOL_PERMITIR_PAGOS=1`.
 
-Hoje é usado pela identificação de músicas do YouTube Music (importação do Takeout e identificação de pendentes), mas não depende dela: qualquer funcionalidade nova pode pedir uma resposta ao pool.
+Hoje é usado pela identificação de músicas do YouTube Music (importação do Takeout e identificação de pendentes) e pela sugestão de correção da página Inglês & Pronúncia (`SugerirCorrecaoPronunciaService`, finalidade `CorrecaoPronuncia`; ver [PRONUNCIA.md](PRONUNCIA.md#correções)), mas não depende dela: qualquer funcionalidade nova pode pedir uma resposta ao pool.
 
 ## Como usar em uma funcionalidade nova
 

@@ -79,6 +79,7 @@ Prefixo: `/api/v1`. Salvo indicação, as rotas exigem JWT.
 | `POST` | `/usuarios` | Cria usuário (`ROLE_ADMIN`) |
 | `GET`/`PUT` | `/usuarios/{id}` | Detalhe/atualiza (`ROLE_ADMIN`) |
 | `GET` | `/usuarios/funcionalidades` | Catálogo de funcionalidades (`ROLE_ADMIN`) |
+| `GET` | `/usuarios/{id}/resumo` | Atividade do usuário (modal de atividade, `ROLE_ADMIN`) |
 
 Permissões de módulo: `ResolverPermissaoPorRotaService` + listeners; ações pontuais com `#[RequerPermissao]`. Ver [PERMISSOES.md](../funcionalidades/PERMISSOES.md) e [AUTH.md](AUTH.md).
 
@@ -178,8 +179,51 @@ As análises saíram de `/spotify` para `/api/v1/musica` (tópico 200) e aceitam
 | `POST` | `/musica/revisao/videos/{uuid}/musica`, `/musica/revisao/videos/lote` | Corrige vídeos |
 | `GET` | `/musica/catalogo/musicas?busca=`, `/musica/catalogo/artistas?busca=` | Busca no catálogo |
 | `POST` | `/musica/catalogo/unir`, `/musica/catalogo/unir-varias`, `/musica/catalogo/duplicatas/descartar`, `/musica/catalogo/separar`, `/musica/artistas/unir`, `/musica/canais/classificar` | Correções do catálogo |
-| `GET` | `/spotify/tocando-agora` | Faixa atual do Spotify (sem cache) |
 | `GET` | `/musica/capa?url=` | **Público.** Serve capas e fotos do Google/YouTube, Spotify e Deezer já gravadas no banco, com cache em disco e `Cache-Control` de 30 dias |
+
+### Spotify
+
+Conta, coleta e importação do Spotify. Funcionamento em [SPOTIFY.md](../funcionalidades/SPOTIFY.md); controle de cota em [LIMITE_SPOTIFY.md](../funcionalidades/LIMITE_SPOTIFY.md).
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/spotify/oauth/url` | Link de autorização (PKCE, `state` assinado) |
+| `POST` | `/spotify/oauth/concluir` | Troca o código pelo token |
+| `GET` | `/spotify/status` | Conexão, última coleta e `bloqueadoAte` |
+| `POST` | `/spotify/sincronizar` | Roda a coleta das músicas recentes só para o usuário |
+| `POST` | `/spotify/desconectar` | Desconecta a conta |
+| `POST` | `/spotify/importacoes`, `GET` `/spotify/importacoes/{uuid}` | Importa o histórico estendido (ZIP/JSON) e acompanha |
+| `POST` | `/spotify/imagens/consultar` | Capas e fotos já guardadas (pede a busca das que faltam) |
+| `GET` | `/spotify/tocando-agora` | Faixa atual. Resultado guardado por 4 s por usuário, dividido com a página de pronúncia |
+| `GET` | `/spotify/recente` | Últimas faixas tocadas |
+| `POST` | `/spotify/tocar` | Manda o aparelho ativo tocar uma faixa (`codigoFaixa`) |
+
+### Transferência de playlists
+
+Spotify ↔ YouTube Music. Funcionamento em [MUSICA.md](../funcionalidades/MUSICA.md#transferência-de-playlists-spotify--youtube-music).
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET`, `POST` | `/transferencia-playlists` | Lista ou inicia transferências |
+| `GET` | `/transferencia-playlists/servicos/{servico}/playlists` | Playlists de um serviço |
+| `GET` | `/transferencia-playlists/pares`, `/vinculos` | Pares detectados e playlists vinculadas |
+| `POST` | `/transferencia-playlists/vinculos/{uuid}/sincronizar` | Sincroniza um vínculo |
+| `GET` | `/transferencia-playlists/{uuid}` | Andamento e faixas |
+| `POST` | `/transferencia-playlists/{uuid}/confirmar-previa`, `/executar` | Confirma a prévia e grava a playlist |
+| `GET` | `/youtube-oauth/oauth/url`, `/status` | OAuth das playlists do YouTube |
+| `POST` | `/youtube-oauth/oauth/concluir`, `/desconectar` | Conclui ou desfaz o OAuth |
+
+### Inglês & Pronúncia
+
+Tradução, motor de pronúncia, correções e letras de música. Rotas completas em [PRONUNCIA.md](../funcionalidades/PRONUNCIA.md#4-api).
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/pronuncia/traducoes`, `/pronuncia/previa` | Traduz e pronuncia; pronuncia sem traduzir |
+| `GET` | `/pronuncia/historico`, `/pronuncia/historico/{uuid}` | Histórico (refaz a análise de versão antiga do motor) |
+| `GET`, `POST` | `/pronuncia/relatos…`, `/pronuncia/excecoes…` | Ciclo de correção e dicionário (admin) |
+| `GET` | `/pronuncia/musica/tocando-agora`, `/pronuncia/musica/letra` | Música do Spotify e letra com pronúncia |
+| `POST` | `/pronuncia/musica/letra/{uuid}/traducao` | Traduz a letra (uma vez) |
 
 ### YouTube Music
 
@@ -290,6 +334,14 @@ Entidades: `Audio`, `Categoria`, `ContaGoogleFotos`, `LivroAudio`, `LivroAudioBl
 | `app:musica:buscar-fotos-artistas` | Busca fotos de artistas sem Spotify pelo YouTube Music (`-u`) |
 | `app:youtube:identificar` | Identifica vídeos do YouTube (`--pendentes`, `--todos --usuario`, `--limite`) |
 | `app:youtube:continuar-importacao` | Roda as etapas de uma importação do Takeout |
+| `app:youtube:recalcular-tempo-ouvido` | Recalcula os minutos estimados do YouTube com a regra atual (`--usuario`; sem ele, todos) |
+| `app:youtube:vincular-pelo-historico` | Liga vídeos em revisão ou "não música" às músicas que o usuário já ouviu, quando o título traz música e artista |
+| `app:musica:buscar-capas-faltantes` | Enfileira a capa das músicas do Spotify mais ouvidas sem capa (`-u`, `-l`, padrão 1000) |
+| `app:transferencia-playlist:reprocessar-casamento` | Volta uma transferência para o casamento e enfileira as faixas pendentes (`uuid`) |
+| `app:transferencia-playlist:debug` | Mostra status e contagem de uma transferência (`uuid`, `--reprocessar`) |
+| `app:livro-audio:corrigir-voz` | Detecta o idioma dos livros e refaz as partes geradas com a voz errada |
+| `app:ia:provedores` | Situação do pool de IA (ordem, bloqueios, totais) e desbloqueio |
+| `app:pronuncia:importar-dicionario` | Carrega o dicionário CMU no banco (pode rodar de novo sem duplicar) |
 
 ## Regras de ouro
 

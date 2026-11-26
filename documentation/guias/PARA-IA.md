@@ -323,7 +323,7 @@ Toda integração com APIs, sistemas externos, processos CLI (`yt-dlp`) ou armaz
 5. **Exceções Personalizadas por Contexto (`src/Exception/`)**:
    - **PROIBIDO**: Lançar exceções genéricas nativas do PHP (`throw new \DomainException(...)`, `throw new \RuntimeException(...)`, `throw new \Exception(...)`) diretamente no corpo dos métodos.
    - **PROIBIDO**: Usar identificadores curtos com snake_case (ex: `'erro_salvar_arquivo'`) como mensagem de exceção. **A mensagem da exceção (primeiro argumento) deve ser uma frase completa, clara e altamente descritiva em português**.
-   - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: [`App\Exception\YtDlpException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/YtDlpException.php), [`App\Exception\ArmazenamentoLocalException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/ArmazenamentoLocalException.php), [`App\Exception\MediaItemException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/MediaItemException.php), [`App\Exception\UploadManualException`](file:///home/gabriel/dev/CirqueiraX/src/Exception/UploadManualException.php)).
+   - **SEMPRE**: Criar uma classe de exceção personalizada em `src/Exception/` estendendo `\DomainException` para cada contexto de domínio ou infraestrutura (ex: [`App\Exception\YtDlpException`](../../src/Exception/Video/YtDlpException.php), [`App\Exception\ArmazenamentoLocalException`](../../src/Exception/Storage/ArmazenamentoLocalException.php), [`App\Exception\MediaItemException`](../../src/Exception/MediaItem/MediaItemException.php), [`App\Exception\UploadManualException`](../../src/Exception/MediaItem/UploadManualException.php)).
    - **Métodos Construtores Estáticos Descritivos**: O código lança a exceção exclusivamente chamando seus métodos estáticos em camelCase com mensagens em linguagem natural descritivas (ex: `throw YtDlpException::falhaAoExtrairMetadataDoVideo();`, `throw UploadManualException::falhaAoSalvarArquivoDeUpload();`, `throw ArmazenamentoLocalException::falhaAoCriarDiretorioDeArmazenamento();`).
 
 ```php
@@ -349,7 +349,7 @@ class YtDlpException extends \DomainException
 
 1. **Configurações e Comportamentos**: Timeouts (`TIMEOUT_EXTRACAO_SEGUNDOS = 60.0`), permissões de diretório (`PERMISSAO_DIRETORIO_PADRAO = 0755`), algoritmos (`ALGORITMO_HASH_SHA256 = 'sha256'`), formatos de data/arquivo e subdiretórios temporários **devem obrigatoriamente** ser declarados como `private const` ou `public const` no topo da classe.
 2. **Exceções via Métodos Estáticos**: Códigos de erro HTTP e mensagens estáveis ficam encapsulados dentro das exceções personalizadas em `src/Exception/` (ver § 4.9.5).
-3. **Chaves de Metadados Compartilhadas**: Chaves de array usadas para leitura/gravação de metadados (`url_original`, `nome_original`, `timestamp_captura`) devem utilizar constantes centrais (ex: [`App\Support\MetadataKeys`](file:///home/gabriel/dev/CirqueiraX/src/Support/MetadataKeys.php)).
+3. **Chaves de Metadados Compartilhadas**: Chaves de array usadas para leitura/gravação de metadados (`url_original`, `nome_original`, `timestamp_captura`) devem utilizar constantes centrais (ex: [`App\Support\MetadataKeys`](../../src/Support/MetadataKeys.php)).
 
 ### 4.11 Object Calisthenics Aplicado ao Projeto
 
@@ -452,42 +452,41 @@ Código de referência: backend → `src/Controller/` e `src/Repository/`. Front
 
 | Arquivo | Linhas | Pular |
 | :--- | :--- | :--- |
-| [Estruturação.md](Estruturação.md) | 448–673 (§ 13) | §§ 3–12 (front) |
-| [BACKEND.md](../stack/BACKEND.md) | 1–105 (arquivo curto) | — |
-| [GUIA-GERAL.md](GUIA-GERAL.md) | 135–835 (§ 5) | § 6 front, § 7 UI |
-| [DOCUMENTACAO_TECNICA.md](../referencia/DOCUMENTACAO_TECNICA.md) | 259–462 (§ 5) | § 6 front |
-| [NOVA-FUNCIONALIDADE.md](NOVA-FUNCIONALIDADE.md) | 42–154 (§ 3) | § 4 front |
+| [Estruturação.md](Estruturação.md) | 433–758 (§ 13) | §§ 3–12 (front) |
+| [BACKEND.md](../stack/BACKEND.md) | 1–63 (estrutura); 290–368 (entidades, comandos, regras) | API (64–289): só a seção do módulo da tarefa |
+| [GUIA-GERAL.md](GUIA-GERAL.md) | 115–810 (§ 5) | § 6 front, § 7 UI |
+| [DOCUMENTACAO_TECNICA.md](../stack/DOCUMENTACAO_TECNICA.md) | 246–445 (§ 5) | § 6 front |
+| [NOVA-FUNCIONALIDADE.md](NOVA-FUNCIONALIDADE.md) | 49–162 (§ 3) | § 4 front |
 
-Auth JWT API: [AUTH.md](../stack/AUTH.md) linhas **1–26**. Pular 28–52.
+Auth JWT API: [AUTH.md](../stack/AUTH.md) linhas **1–74**. Pular 75–88 (renovação no front).
 Fila: [MESSENGER.md](../stack/MESSENGER.md) inteiro (curto).
 
 ### Frontend (página, layout, `Box`/`Text`, hook, rota)
 
 | Arquivo | Linhas | Pular |
 | :--- | :--- | :--- |
-| [Estruturação.md](Estruturação.md) | 59–446 (§§ 3–12) | § 13 back |
-| [FRONTEND.md](../stack/FRONTEND.md) | 1–182 (arquivo curto) | — |
-| [DESIGN.md](DESIGN.md) | 1–720 se for visual/UI | — |
-| [GUIA-GERAL.md](GUIA-GERAL.md) | 837–1570 (§§ 6–7) | § 5 back |
-| [DOCUMENTACAO_TECNICA.md](../referencia/DOCUMENTACAO_TECNICA.md) | 464–718 (§ 6) | § 5 back |
-| [NOVA-FUNCIONALIDADE.md](NOVA-FUNCIONALIDADE.md) | 156–293 (§ 4) | § 3 back |
+| [Estruturação.md](Estruturação.md) | 59–432 (§§ 3–12) | § 13 back |
+| [FRONTEND.md](../stack/FRONTEND.md) | 1–179 (arquivo curto) | — |
+| [DESIGN.md](DESIGN.md) | 1–713 se for visual/UI | — |
+| [GUIA-GERAL.md](GUIA-GERAL.md) | 811–1544 (§§ 6–7) | § 5 back |
+| [DOCUMENTACAO_TECNICA.md](../stack/DOCUMENTACAO_TECNICA.md) | 446–704 (§ 6) | § 5 back |
+| [NOVA-FUNCIONALIDADE.md](NOVA-FUNCIONALIDADE.md) | 163–301 (§ 4) | § 3 back |
 
-Auth tela / store / interceptors: [AUTH.md](../stack/AUTH.md) linhas **28–52**. Pular 1–26.
+Auth tela / store / interceptors: [AUTH.md](../stack/AUTH.md) linhas **37–88**. Pular o resto.
 
 ### DevOps, Docker, portas
 
 | Arquivo | Linhas | Pular |
 | :--- | :--- | :--- |
-| [DOCKER.md](../ops/DOCKER.md) | 1–55 (arquivo curto) | — |
-| [DOCUMENTACAO_TECNICA.md](../referencia/DOCUMENTACAO_TECNICA.md) | 190–257 (env/portas); 1100–1248 (§§ 11–12) | §§ 5–6 app |
-| [STRUCTURE.md](../referencia/STRUCTURE.md) | 7–82 (raiz, tooling) | — |
+| [DOCKER.md](../ops/DOCKER.md) | 1–56 (arquivo curto) | — |
+| [DOCUMENTACAO_TECNICA.md](../stack/DOCUMENTACAO_TECNICA.md) | 138–245 (env/portas); 936–1058 (§§ 11–12) | §§ 5–6 app |
 
 ### Deploy / produção
 
 | Arquivo | Linhas |
 | :--- | :--- |
-| [DEPLOY.md](../ops/DEPLOY.md) | 1–770 |
-| [MAKEFILE.md](../ops/MAKEFILE.md) | 39–48 |
+| [DEPLOY.md](../ops/DEPLOY.md) | 1–791 |
+| [MAKEFILE.md](../ops/MAKEFILE.md) | 40–44 |
 
 ### Lint / Makefile / CLI
 
@@ -495,8 +494,8 @@ Auth tela / store / interceptors: [AUTH.md](../stack/AUTH.md) linhas **28–52**
 | :--- | :--- |
 | [FORMATTING.md](../ops/FORMATTING.md) | 1–44 |
 | [MAKEFILE.md](../ops/MAKEFILE.md) | 1–38 |
-| [CLI.md](../ops/CLI.md) | 1–28 |
+| [CLI.md](../ops/CLI.md) | 1–25 (scripts `cli/`); comandos `bin/console` em [BACKEND.md](../stack/BACKEND.md#comandos-de-console) |
 
 ### Árvore de pastas
 
-[STRUCTURE.md](../referencia/STRUCTURE.md): **84–106** (`src/`) · **108–126** (`web/`). O resto, pular.
+[DOCUMENTACAO_TECNICA.md](../stack/DOCUMENTACAO_TECNICA.md) § 2, linhas **80–137**. O resto, pular.

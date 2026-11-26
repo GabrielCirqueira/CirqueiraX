@@ -186,7 +186,13 @@ Cole uma imagem com Ctrl+V e o texto dela é lido na hora, já indo para a área
 
 ### Inglês & Pronúncia
 
-Escreva em português ou inglês e veja a tradução e como se fala, escrito em português (ex.: *I don't know* → **ai DÔUNT NÔU**). Tem modo de fala natural, áudio normal e devagar, sílabas com a tônica, dicas para brasileiros, histórico com favoritas e botão para reportar erro. Detalhes em [PRONUNCIA.md](PRONUNCIA.md).
+Escreva em português ou inglês e veja a tradução e como se fala, escrito do jeito que a gente lê (ex.: *I don't know* → **ai dounti nou**).
+
+- Três jeitos de ver a pronúncia: **Simples** (o padrão, lido como português), **Clara** (sílabas com a mais forte em maiúsculas: **ai DÔUNT NÔU**) e **Fala natural** (como o nativo fala rápido).
+- Áudio normal e devagar, palavra por palavra com dicas para brasileiros, histórico com favoritas e botão para reportar erro.
+- **Tocando agora**: a letra da música que você está ouvindo, acompanhando o tempo, com a pronúncia embaixo de cada linha e tradução se quiser. Funciona com o Spotify e, no computador com a extensão do CirqueiraX, com o YouTube Music.
+
+Detalhes em [PRONUNCIA.md](PRONUNCIA.md), [MOTOR_PRONUNCIA.md](MOTOR_PRONUNCIA.md) e [LETRAS_MUSICA.md](LETRAS_MUSICA.md).
 
 ### Upload Manual
 

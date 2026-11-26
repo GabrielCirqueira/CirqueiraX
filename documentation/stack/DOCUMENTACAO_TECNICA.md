@@ -13,8 +13,8 @@ Referência técnica do **CirqueiraX**, hub pessoal de mídias construído com *
 3. [Variáveis de Ambiente](#3-variáveis-de-ambiente)
 4. [Gestão de Portas](#4-gestão-de-portas)
 5. [Arquitetura Backend](#5-arquitetura-backend)
-   - [`DefaultController`](#5-2-defaultcontroller)
-   - [Regras de Ouro do Backend](#5-9-regras-de-ouro-do-backend)
+   - [`DefaultController`](#52-defaultcontroller)
+   - [Regras de Ouro do Backend](#59-regras-de-ouro-do-backend)
 6. [Arquitetura Frontend](#6-arquitetura-frontend)
 7. [Banco de Dados e Migrations](#7-banco-de-dados-e-migrations)
 8. [Mensageria Assíncrona](#8-mensageria-assíncrona)
@@ -141,6 +141,8 @@ O arquivo `.env` na raiz contém os valores padrão para desenvolvimento. Em pro
 
 ### Aplicação
 
+`APP_DEBUG` e `MAILER_DSN` seguem o padrão do Symfony.
+
 | Variável | Exemplo | Descrição |
 | :--- | :--- | :--- |
 | `APP_ENV` | `dev` / `prod` | Ambiente da aplicação. `prod` ativa OPcache e desativa debug. |
@@ -201,6 +203,17 @@ Variáveis prefixadas com `VITE_` são expostas ao bundle via `import.meta.env`.
 | `SPOTIFY_CLIENT_SECRET` | `<segredo>` | Client Secret do aplicativo Spotify. |
 | `SPOTIFY_REDIRECT_URI` | `https://x.cirqueira.com/spotify/callback` | URI de redirecionamento autorizada para OAuth 2.0 PKCE. |
 | `YOUTUBE_API_KEY` | `<chave>` | Chave da YouTube Data API v3 (detalhes dos vídeos do YouTube Music), restrita a essa API. |
+| `YOUTUBE_OAUTH_CLIENT_ID` | `...apps.googleusercontent.com` | Cliente OAuth Web dedicado às playlists do YouTube (transferência de playlists). |
+| `YOUTUBE_OAUTH_CLIENT_SECRET` | `<segredo>` | Segredo desse cliente OAuth. |
+| `YOUTUBE_OAUTH_REDIRECT_URI` | `https://x.cirqueira.com/musica/youtube/callback` | Retorno do OAuth das playlists do YouTube. |
+| `DEEPL_API_KEY` | `<chave>:fx` | Tradução da página Inglês & Pronúncia. Final `:fx` usa o plano gratuito. Vazia = tradução indisponível. Ver [PRONUNCIA.md](../funcionalidades/PRONUNCIA.md). |
+| `OPENAI_API_KEY` | `<chave>` | Chave da OpenAI (identificação de músicas e último recurso do pool de IA). |
+| `OPENAI_ESFORCO_RACIOCINIO` | `low` | Esforço de raciocínio dos modelos da OpenAI. |
+| `IA_POOL_PERMITIR_PAGOS` | `0` | `1` libera a OpenAI como último recurso do pool de IA. |
+| `GROQ_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY`, `NVIDIA_API_KEY`, `ZAI_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | `<chave>` | Provedores gratuitos do pool de IA, cada um com o seu `*_MODELO`. Ordem e regras em [POOL_IA.md](../funcionalidades/POOL_IA.md). |
+| `WHISPER_EXECUTAVEL`, `WHISPER_MODELO`, `WHISPER_THREADS` | `/opt/whisper/whisper-cli`, `.../ggml-small-q5_1.bin`, `4` | Transcrição local com Whisper. |
+| `PIPER_MODELOS_DIR` | `/opt/piper/vozes` | Vozes neurais dos livros em áudio. |
+| `YTDLP_COOKIES_PATH` | vazio | Cookies opcionais para o yt-dlp. |
 | `OPENAI_MODELO_TEXTO` | `gpt-5.4-mini` | Modelo da identificação de músicas. |
 | `OPENAI_PRECO_ENTRADA_POR_MILHAO` | `0.75` | Preço em US$ por milhão de tokens de entrada, usado na estimativa e no consumo. |
 | `OPENAI_PRECO_SAIDA_POR_MILHAO` | `4.5` | Preço em US$ por milhão de tokens de saída. |

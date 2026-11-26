@@ -94,6 +94,8 @@ web/
 | `/spotify`, `/spotify/artista`, `/spotify/musica` | Redirecionam para as rotas de Música | Autenticada + `musica` |
 | `/transcricoes` | Transcrições de Áudio | Autenticada + permissão |
 | `/spotify/callback` | Retorno OAuth do Spotify | Autenticada |
+| `/musica/youtube/callback` | Retorno OAuth das playlists do YouTube (transferência) | Autenticada |
+| `/youtube/player-teste` | Teste do player oficial do YouTube | Autenticada |
 | `/usuarios` | Gerenciar usuários | Autenticada + admin / `gerenciar_usuarios` |
 | `/perfil` | Perfil e senha | Autenticada (sem permissão de módulo) |
 | `*` | NotFound | Pública |
@@ -114,11 +116,15 @@ A Sidebar mostra só as telas liberadas (admin vê todas, inclusive Usuários), 
 | `transcricoes` | [TRANSCRICOES.md](../funcionalidades/TRANSCRICOES.md) |
 | `prints` | [PRINTS.md](../funcionalidades/PRINTS.md) |
 | `editor-imagem` | [EDITOR_IMAGEM.md](../funcionalidades/EDITOR_IMAGEM.md) |
-| `pronuncia` | [PRONUNCIA.md](../funcionalidades/PRONUNCIA.md) |
+| `pronuncia` | [PRONUNCIA.md](../funcionalidades/PRONUNCIA.md), [MOTOR_PRONUNCIA.md](../funcionalidades/MOTOR_PRONUNCIA.md), [LETRAS_MUSICA.md](../funcionalidades/LETRAS_MUSICA.md) |
 | `upload-manual` | [UPLOAD_MANUAL.md](../funcionalidades/UPLOAD_MANUAL.md) |
 | `google-fotos` | [GOOGLE_FOTOS.md](../funcionalidades/GOOGLE_FOTOS.md) |
 | `musica`, `revisao-musica` | [MUSICA.md](../funcionalidades/MUSICA.md) |
-| `spotify` | [SPOTIFY.md](../funcionalidades/SPOTIFY.md) |
+| `spotify` | [SPOTIFY.md](../funcionalidades/SPOTIFY.md), [LIMITE_SPOTIFY.md](../funcionalidades/LIMITE_SPOTIFY.md) |
+| `transferencia-playlist` | [MUSICA.md](../funcionalidades/MUSICA.md#transferência-de-playlists-spotify--youtube-music) |
+| `extrair-texto` | [EXTRAIR_TEXTO.md](../funcionalidades/EXTRAIR_TEXTO.md) |
+| `youtube` | [YOUTUBE_PLAYER.md](../funcionalidades/YOUTUBE_PLAYER.md) |
+| `auth`, `home`, `not-found` | Login, entrada e página 404 (sem documento próprio) |
 | `youtube-music` | [YOUTUBE_MUSIC.md](../funcionalidades/YOUTUBE_MUSIC.md) |
 | `usuarios` | [PERMISSOES.md](../funcionalidades/PERMISSOES.md) |
 | `perfil` | [PERMISSOES.md](../funcionalidades/PERMISSOES.md) |

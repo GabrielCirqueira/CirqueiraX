@@ -75,3 +75,23 @@
 - **Arquivos**: `src/Entity/LetraMusicaPronuncia.php`, `src/Service/Pronuncia/ObterLetraMusicaPronunciaService.php`, `src/Domain/Pronuncia/NormalizadorTituloMusica.php`, `web/features/pronuncia/` (`components/PainelMusicaTocando.tsx`, `utils/musicaYoutube.ts`, `hooks/useMusicaTocando.ts`, `hooks/chavesQueryPronuncia.ts`, `types.ts`, `api.ts`)
 
 ---
+
+### ✅ Melhoria 226 — Documentação Revisada e Novos Documentos de Fluxo
+
+- **Status**: Concluído
+- **Data**: 26 de novembro de 2026
+- **Pedido**: atualizar todas as documentações e criar documentos novos para as funcionalidades e fluxos novos.
+- **Novos documentos**:
+  - `funcionalidades/MOTOR_PRONUNCIA.md`: caminho de uma frase pelo motor, cascata de resolvedores, regras dos modos Simples, Clara e Fala natural, versão do motor.
+  - `funcionalidades/LETRAS_MUSICA.md`: aba Tocando agora de ponta a ponta (Spotify, YouTube Music pela extensão, LRCLIB, nova busca, sincronia, tradução, avisos).
+  - `funcionalidades/LIMITE_SPOTIFY.md`: quem consulta o Spotify, ritmos, contagem, proteções, o que acontece num 429, histórico dos 5 bloqueios e consultas SQL para investigar.
+- **Atualizados**:
+  - `README.md`: índice com todos os documentos (faltavam Spotify, YouTube Music, Livros em Áudio, Extrair Texto, Notificações e Pool de IA).
+  - `PRONUNCIA.md` enxuto, apontando para os novos; `FUNCIONALIDADES_DO_SISTEMA.md` com modo Simples e Tocando agora; `SPOTIFY.md`, `YOUTUBE_MUSIC.md`, `MUSICA.md` (coleta a cada 10 min) e `POOL_IA.md` (correção de pronúncia).
+  - `stack/BACKEND.md`: seções de API do Spotify, transferência de playlists e pronúncia; atividade do usuário; cache de 4 s no tocando agora; 8 comandos de console que faltavam.
+  - `stack/MESSENGER.md`: as 9 filas e os 9 workers reais, 7 mensagens que faltavam, agenda igual ao `src/Schedule.php` (coleta do Spotify estava como 30 min).
+  - `stack/FRONTEND.md`: rotas e features que faltavam; `stack/DOCUMENTACAO_TECNICA.md`: variáveis de ambiente que faltavam (DeepL, OAuth do YouTube, pool de IA, Whisper, Piper, yt-dlp) e âncoras do índice.
+  - `guias/PARA-IA.md`: caminhos `file:///` de outra máquina, pasta `referencia/` que não existe mais e faixas de linhas desatualizadas.
+- **Verificação**: todos os links e âncoras entre documentos conferidos por script (0 quebrados).
+
+---

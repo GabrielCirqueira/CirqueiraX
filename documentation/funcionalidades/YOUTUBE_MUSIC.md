@@ -382,3 +382,4 @@ Ambiente isolado (MySQL e app temporários): geração e limite de 5 tokens, nom
 
 - `conteudo.js` publica `{ tipo: 'agora', estado }` (vídeo, título, posição, tocando, lido em) na troca de música/pausa/avanço e a cada 2 s tocando; `fundo.js` guarda em `chrome.storage.session` e repassa às abas do sistema; `ponte.js` entrega à página como `tocando-agora` e responde `estado-agora` ao abrir.
 - O painel usa esse estado por até 15 s (`utils/tempoRealExtensao.ts`) e mescla com `tocandoAgora` do servidor; sem extensão na aba, continua só com o servidor.
+- A aba **Tocando agora** de Inglês & Pronúncia usa o mesmo estado para mostrar a letra acompanhando o tempo, com prioridade sobre o Spotify (M225). Ver [LETRAS_MUSICA.md](LETRAS_MUSICA.md).

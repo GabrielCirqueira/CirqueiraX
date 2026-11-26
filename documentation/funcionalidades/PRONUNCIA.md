@@ -1,10 +1,18 @@
 # Funcionalidade: Inglês & Pronúncia
 
-A página **Inglês & Pronúncia** (`/pronuncia`) traduz entre português e inglês e mostra como se fala o inglês, escrito do jeito que um brasileiro lê. Foi criada na melhoria M220.
+A página **Inglês & Pronúncia** (`/pronuncia`) traduz entre português e inglês e mostra como se fala o inglês, escrito do jeito que um brasileiro lê. Foi criada na melhoria M220; modo Simples em M223; letras de música em M221/M225.
 
 ```
-eu não sei  →  I don't know  →  ai DÔUNT NÔU
+eu não sei  →  I don't know  →  ai dounti nou      (Simples, padrão)
+                              ai DÔUNT NÔU       (Clara)
 ```
+
+| Documento | Assunto |
+| :--- | :--- |
+| Este | Uso, tradução, histórico, correções, banco, API |
+| [MOTOR_PRONUNCIA.md](MOTOR_PRONUNCIA.md) | Como o texto vira pronúncia: resolvedores, os três modos e a versão do motor |
+| [LETRAS_MUSICA.md](LETRAS_MUSICA.md) | Aba **Tocando agora**: Spotify e YouTube Music, letra, sincronia e tradução |
+| [LIMITE_SPOTIFY.md](LIMITE_SPOTIFY.md) | Cota do Spotify e ritmo das consultas |
 
 Funciona com palavras, frases e textos de até 3.000 caracteres. O fluxo principal **não usa IA**: a tradução vem do DeepL e a pronúncia vem de um motor próprio em cima do dicionário CMU. A IA só entra quando o administrador pede uma sugestão de correção.
 
@@ -14,52 +22,26 @@ Funciona com palavras, frases e textos de até 3.000 caracteres. O fluxo princip
 
 - Escreva o texto e clique em **Traduzir** (ou `Ctrl+Enter`). A direção pode ser **Automático** (detecta o idioma), **PT → EN** ou **EN → PT**.
 - O resultado mostra três blocos: **Português**, **Inglês** e **Como se fala**.
-- **Simples** (padrão) escreve do jeito que a gente lê em português, sem maiúsculas nem hífen: *What's your name?* → **uatis ior neimi?**, *How much is this?* → **rau mati iz dis?**.
-- **Clara** mostra cada palavra pronunciada por inteiro, com sílabas e a tônica em maiúsculas. **Fala natural** mostra como o nativo fala rápido: palavras curtas reduzidas (`to` → `tâ`) e emendadas (`get it out` → `GUÉ-ri-RÁUT`).
+- **Como se fala** tem três modos (tabela abaixo); a escolha vale para a página toda e fica salva no navegador.
 - **Ouvir** e **Devagar** leem o inglês com a voz do navegador; a palavra falada acende enquanto o áudio toca.
 - **Palavra por palavra** mostra as sílabas com a tônica destacada, de onde veio a pronúncia (dicionário, derivada, corrigida ou aproximada) e dicas para brasileiros (TH, R americano, "i" curto, T que vira R etc.).
 - **Histórico** guarda cada frase do usuário, com busca e favoritas. Clicar num item reabre o resultado sem gastar cota.
 - **Reportar erro** manda a frase (ou uma palavra específica) para a fila de correções.
+- A página tem as abas **Tradutor**, **Tocando agora** e, para o administrador, **Correções** e **Dicionário**. A aba aberta fica salva no navegador (`pronuncia:aba`).
 
-### Escrita da pronúncia (modo Simples)
+### Modos de pronúncia
 
-Gerada por `ConversorFonemasSimples` a partir dos mesmos fonemas do dicionário:
+| Modo | Exemplo (*What's your name?*) | Para quê |
+| :--- | :--- | :--- |
+| **Simples** (padrão) | uatis ior neimi? | Ler como se fosse português |
+| **Clara** | UÂTS iór NÊIM? | Ver sílabas e a tônica |
+| **Fala natural** | `to` → `tâ`, *get it out* → `GUÉ-ri-RÁUT` | Ver como o nativo fala rápido |
 
-| Regra | Exemplo |
-| :--- | :--- |
-| "i" de apoio no fim da palavra que termina em consoante (não em r, n, z, s, l) | good → gudi, night → naiti, help → relpi |
-| "m" final ganha "i" só em sílaba forte | name → neimi, welcome → uelcam |
-| "ch" vira "ti" quando vem "i" depois (lido "tchi") | much → mati |
-| "h" vira "r" ("rr" entre vogais) | how → rau, behind → birraind |
-| "s" + consoante no começo ganha "i" | speak → ispiqui, slowly → islouli |
-| "l" no fim vira "u" | bill → biu |
-| "t" entre vogais antes de sílaba fraca vira "r" | water → uórer, later → leirer |
-| "c"/"qu" e "g"/"gu" como no português | like → laiqui, club → clabi, get → gueti |
-| "th" vira "t" (surdo) ou "d" (sonoro) | thank → tenqui, this → dis |
-| Só o "ó" aberto tônico leva acento | sorry → sóri, morning → mórnin |
-| Palavras curtas comuns com forma pronta | the → de, you → iu, your → ior, of → ofi, and → end |
+Regras de cada modo em [MOTOR_PRONUNCIA.md](MOTOR_PRONUNCIA.md#3-os-três-modos).
 
-Palavras corrigidas pelo administrador usam a correção sem hífens e em minúsculas (NÊIM → nêim).
+### Aba Tocando agora
 
-### Escrita da pronúncia (modo Clara)
-
-| Regra | Exemplo |
-| :--- | :--- |
-| Sílabas separadas por hífen | `UÓ-rer` |
-| Sílaba tônica em MAIÚSCULAS | `BÉ-rer` |
-| Palavras funcionais (to, the, a, of…) em minúsculas | `dâ`, `âv` |
-| T/D entre vogais antes de sílaba fraca vira `r` | water → `UÓ-rer` |
-| Números e símbolos por extenso | `$20` → `TUÉN-ti DÁ-lerz` |
-
-### Aba Tocando agora (M221)
-
-**Fontes (M225):** Spotify e YouTube Music. No computador com a extensão do YouTube Music (1.6+), o estado em tempo real que a extensão entrega à página (`utils/tempoRealExtensao.ts`) tem prioridade: enquanto ele for recente (15 s), o Spotify nem é consultado. A música vem de `mesclarTocandoAgora` (título e artistas do catálogo quando o vídeo já foi identificado; senão, título do vídeo e canal, sem " - Topic"/"VEVO" e sem o "Artista - " do começo) e vira o mesmo formato do Spotify em `tocandoDoYoutube`, com `codigoFaixa = yt:{videoId}`. No celular ou sem a extensão, só o Spotify. Letra não achada é procurada de novo na hora quando o título ou o artista chegam diferentes (o YouTube manda primeiro o nome do vídeo e depois o da música identificada), e a busca aproximada ignora marcações como "(Official Video)" e "[Lyric Video]".
-
-- Mostra a música que está tocando na conta do Spotify do usuário (conectada na página Música), com capa, tempo e a letra.
-- A letra acompanha a música: a linha atual acende e fica no centro. Embaixo de cada linha vem a pronúncia (Clara ou Fala natural) e, se pedida, a tradução.
-- Clicar numa linha abre **Ouvir linha**, **Devagar** e o palavra por palavra.
-- **Letra fora do tempo?** adianta ou atrasa a letra de meio em meio segundo.
-- Rolar a letra com o mouse ou o dedo pausa o acompanhamento por 5 segundos; o botão **Voltar para a linha atual** retoma.
+Letra da música que está tocando no Spotify ou no YouTube Music (com a extensão, no computador), acompanhando o tempo, com a pronúncia embaixo de cada linha e tradução opcional. Fluxo completo em [LETRAS_MUSICA.md](LETRAS_MUSICA.md).
 
 ---
 
@@ -71,33 +53,13 @@ Palavras corrigidas pelo administrador usam a correção sem hífens e em minús
 - Em **Automático**, o DeepL detecta o idioma. Se o texto já estava em inglês, uma segunda chamada traz o português.
 - Cada texto vira uma `FrasePronuncia` única por hash (texto minúsculo, sem espaços extras). Frases repetidas, mesmo de outros usuários, não chamam o DeepL de novo.
 
-### Pronúncia (motor próprio)
+### Pronúncia
 
-`PronunciarTextoFeature` resolve cada palavra por uma cascata de resolvedores (tag `app.resolvedor_pronuncia_palavra`), do mais confiável ao menos:
-
-| Prioridade | Resolvedor | O que faz |
-| :--- | :--- | :--- |
-| 400 | Exceção | Pronúncia corrigida à mão ou aprovada da IA (`excecao_pronuncia`) |
-| 350 | Homógrafo | Escolhe a variante pelo contexto (`read`, `live`, `lead`, `wind`, `tear`) |
-| 300 | Dicionário | CMU Pronouncing Dictionary (135 mil palavras, fonemas ARPAbet) |
-| 200 | Derivação | Sufixos, prefixos e palavras compostas a partir do dicionário |
-| 100 | Letra-som | Regras de ortografia; marca a palavra como **aproximada** |
-
-Depois, `ConversorFonemasPortugues` separa sílabas (maximal onset), acha a tônica e escreve em português. `MontadorSentencaPronunciada` aplica formas fracas e ligação entre palavras para a **fala natural**. `GeradorDicasPronuncia` cria as dicas.
-
-A análise fica salva em JSON na frase com `versaoMotor` (hoje 2, com o campo `simples`). Quando o motor muda de versão, a análise é refeita na próxima tradução ou ao abrir a frase pelo histórico (`RecalcularFrasesPronunciaService::atualizarSeDesatualizada`); a lista do histórico mostra a pronúncia Clara até lá.
+Motor próprio sobre o dicionário CMU, com cascata de resolvedores (exceção, homógrafo, dicionário, derivação, letra-som) e três escritas (Simples, Clara, Fala natural). A análise fica salva na frase com `versaoMotor` e é refeita quando o motor muda. Detalhes em [MOTOR_PRONUNCIA.md](MOTOR_PRONUNCIA.md).
 
 ### Letras de música
 
-- `MusicaPronunciaController` (`/api/v1/pronuncia/musica`) devolve o que está tocando (reaproveita `ObterTocandoAgoraSpotifyService`, com o mesmo controle de limite e bloqueio do Spotify) e a letra da faixa.
-- A letra vem do [LRCLIB](https://lrclib.net) (`LrclibClient`): primeiro `/api/get` com música, artista, álbum e duração; se não achar, `/api/search` com o título sem sufixos e duração parecida (até 4 s de diferença). Prefere letra sincronizada (LRC); senão usa a simples.
-- `LeitorLetraMusica` lê o LRC (várias marcações por linha, metadados ignorados, pausas repetidas removidas, até 400 linhas).
-- A letra fica salva por faixa do Spotify em `letra_musica_pronuncia`. Se não foi encontrada, é procurada de novo depois de 3 dias.
-- A pronúncia não é salva: `GerarAnalisePronunciaService::executarLinhas` gera todas as linhas com uma consulta ao dicionário, então correções aprovadas valem na hora.
-- A tradução (`TraduzirLetraMusicaService`) só roda quando o usuário pede: as linhas distintas vão em lote ao DeepL (`traduzirLote`, até 50 por chamada) e o resultado fica salvo.
-- O navegador consulta o que está tocando no ritmo que o servidor devolve em `proximaConsultaMs`: **5 s** enquanto houver folga — menos de 360 consultas do "tocando agora" na última hora (janela móvel por minuto, em cache, `ControleLimiteSpotifyService::consultasNaUltimaHora`) **e** menos de 900 consultas do app inteiro em 24 h (`consultasTotaisUltimas24h`) —, senão **15 s**. Parado: 20 s. Também consulta logo após o fim da faixa, ao voltar para a aba e pelo botão de atualizar no cartão da música. Nada com a aba em segundo plano; entre consultas o tempo é contado no navegador.
-- `ObterTocandoAgoraSpotifyService` guarda o resultado por 4 s por usuário: `/musica` e esta aba abertas juntas dividem a mesma consulta (o progresso é adiantado pelo tempo em cache).
-- Se o resultado tiver mais de 25% de palavras aproximadas, a tela avisa que a letra parece não estar em inglês.
+LRCLIB para a letra, pronúncia gerada a cada pedido, tradução em lote pelo DeepL só quando pedida, e o ritmo de consulta ao Spotify controlado pelo servidor. Detalhes em [LETRAS_MUSICA.md](LETRAS_MUSICA.md).
 
 ### Correções
 
@@ -119,7 +81,7 @@ A aba **Dicionário** permite cadastrar, editar e apagar exceções, testar o mo
 | `frase_pronuncia` | Frase traduzida, análise JSON, status e total de consultas (cache global) |
 | `consulta_pronuncia` | Histórico por usuário, favorita e vezes consultada |
 | `relato_erro_pronuncia` | Erros reportados, sugestão da IA e resolução |
-| `letra_musica_pronuncia` | Letras por faixa do Spotify (linhas com tempo, situação e tradução) |
+| `letra_musica_pronuncia` | Letras por faixa do Spotify ou vídeo do YouTube (`yt:{videoId}`), com linhas, situação e tradução |
 
 O dicionário fica em `config/pronuncia/cmudict.dict` e é carregado no banco com:
 
@@ -140,15 +102,15 @@ Rotas em `/api/v1/pronuncia`, exigem a permissão `pronuncia`.
 | POST | `/traducoes` | Traduz e pronuncia (`texto`, `direcao`) |
 | POST | `/previa` | Pronuncia texto em inglês sem traduzir nem salvar |
 | GET | `/painel` | Números do dicionário e cota do DeepL |
-| GET | `/historico` | Histórico (`busca`, `favoritas`, `limite`) |
-| GET / DELETE | `/historico/{uuid}` | Abrir ou tirar do histórico |
+| GET | `/historico` | Histórico (`busca`, `favoritas`, `limite`); cada item traz `pronuncia` e `pronunciaSimples` |
+| GET / DELETE | `/historico/{uuid}` | Abrir (refaz a análise se for de versão antiga do motor) ou tirar do histórico |
 | PUT | `/historico/{uuid}/favorita` | Favoritar |
 | POST | `/historico/{uuid}/relatos` | Reportar erro |
 | GET | `/relatos` | Fila de correções (admin; `todos`) |
 | POST | `/relatos/{uuid}/sugestao` · `/aprovar` · `/rejeitar` | Ciclo de correção (admin) |
 | GET / PUT | `/excecoes` | Listar ou salvar exceção (admin) |
 | DELETE | `/excecoes/{uuid}` | Apagar exceção (admin) |
-| GET | `/musica/tocando-agora` | Música tocando no Spotify (`conectado` + dados da faixa) |
+| GET | `/musica/tocando-agora` | Música tocando no Spotify (`conectado`, dados da faixa, `proximaConsultaMs`, `bloqueadoAte`) |
 | GET | `/musica/letra` | Letra com pronúncia (`codigoFaixa`, `titulo`, `artista`, `album`, `duracaoMs`) |
 | POST | `/musica/letra/{uuid}/traducao` | Traduz a letra (uma vez) |
 
@@ -173,4 +135,4 @@ Rotas em `/api/v1/pronuncia`, exigem a permissão `pronuncia`.
 | `src/Infra/DeepL/`, `src/Infra/Pronuncia/` | Cliente DeepL e leitor do dicionário |
 | `src/Infra/Lrclib/` | Cliente do LRCLIB (letras) |
 | `src/Command/ImportarDicionarioPronunciaCommand.php` | Importação do dicionário |
-| `web/features/pronuncia/` | Página, componentes, hooks (`useFalaIngles`, `useMusicaTocando`) e API |
+| `web/features/pronuncia/` | Página, componentes, hooks (`useFalaIngles`, `useMusicaTocando`), utils (`pronuncia.ts`, `musicaYoutube.ts`) e API |

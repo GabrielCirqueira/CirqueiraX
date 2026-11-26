@@ -49,7 +49,7 @@ A música passa por cinco camadas. Cada fonte tem a própria entrada e as própr
 
 | Camada | O que faz | Spotify | YouTube Music |
 |---|---|---|---|
-| 1. Entrada | Traz o que foi ouvido | API oficial com OAuth, coleta das últimas 50 a cada 30 min, importação do arquivo do Spotify ([SPOTIFY.md](SPOTIFY.md)) | Sessão do navegador (cookie) lida pelo servidor a cada 30 s, Google Takeout para o passado ([YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md)) |
+| 1. Entrada | Traz o que foi ouvido | API oficial com OAuth, coleta das últimas 50 a cada 10 min ([LIMITE_SPOTIFY.md](LIMITE_SPOTIFY.md)), importação do arquivo do Spotify ([SPOTIFY.md](SPOTIFY.md)) | Sessão do navegador (cookie) lida pelo servidor a cada 30 s, Google Takeout para o passado ([YOUTUBE_MUSIC.md](YOUTUBE_MUSIC.md)) |
 | 2. Dados da fonte | Guarda como veio, sem perder nada | `reproducao_spotify` (tempo exato, pulos, aleatório), `artista_faixa_spotify`, `imagem_spotify` | `video_youtube` (título e canal originais), `reproducao_youtube` (horário e tempo estimados) |
 | 3. Ligação | Diz qual música é | Vínculo por nome + artista principal normalizados (`VincularFaixasSpotifyAoCatalogoService`) | Faixa oficial direto, IA + confirmação na busca, regras de canal e a tela de Revisão (`IdentificarVideosYoutubeService`) |
 | 4. Catálogo único | A música e o artista, iguais entre serviços | `musica_catalogo`, `artista_catalogo` (com apelidos e uniões), `musica_artista_catalogo`, `componente_mashup` | (o mesmo) |
