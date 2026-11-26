@@ -1,7 +1,8 @@
 import { Box, Button, Flex, HStack, Input, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { History, Search, Star } from 'lucide-react'
 import { memo } from 'react'
-import type { ConsultaResumo, PaginaHistorico } from '../types'
+import type { ConsultaResumo, ModoPronuncia, PaginaHistorico } from '../types'
+import { pronunciaResumoNoModo } from '../utils'
 
 export interface HistoricoPronunciaProps {
   pagina: PaginaHistorico | undefined
@@ -9,6 +10,7 @@ export interface HistoricoPronunciaProps {
   busca: string
   somenteFavoritas: boolean
   selecionadaUuid: string | null
+  modo: ModoPronuncia
   onMudarBusca: (busca: string) => void
   onAlternarFavoritas: () => void
   onSelecionar: (consulta: ConsultaResumo) => void
@@ -20,6 +22,7 @@ export const HistoricoPronuncia = memo(function HistoricoPronuncia({
   busca,
   somenteFavoritas,
   selecionadaUuid,
+  modo,
   onMudarBusca,
   onAlternarFavoritas,
   onSelecionar,
@@ -143,7 +146,7 @@ export const HistoricoPronuncia = memo(function HistoricoPronuncia({
                   lineClamp={1}
                   mt={0.5}
                 >
-                  {consulta.frase.pronuncia}
+                  {pronunciaResumoNoModo(consulta.frase, modo)}
                 </Text>
               </Box>
             )

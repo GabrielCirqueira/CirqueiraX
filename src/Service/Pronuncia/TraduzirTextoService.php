@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service\Pronuncia;
 
-use App\DataObject\Pronuncia\AnalisePronunciaDTO;
 use App\DataObject\Pronuncia\TextosTraduzidosDTO;
 use App\DataObject\Pronuncia\TraduzirTextoDTO;
 use App\Entity\ConsultaPronuncia;
@@ -21,13 +20,13 @@ use App\Repository\FrasePronunciaRepository;
 final readonly class TraduzirTextoService
 {
     private const string ALGORITMO_HASH = 'sha256';
-    private const string CHAVE_VERSAO_MOTOR = 'versaoMotor';
 
     public function __construct(
         private FrasePronunciaRepository $fraseRepository,
         private ConsultaPronunciaRepository $consultaRepository,
         private TradutorTextoInterface $tradutor,
         private GerarAnalisePronunciaService $gerarAnalise,
+        private RecalcularFrasesPronunciaService $recalcularFrases,
     ) {
     }
 
@@ -59,7 +58,7 @@ final readonly class TraduzirTextoService
 
         if (null !== $frase && $direcao->isCompativelCom($frase->idiomaOrigem())) {
             $frase->registrarConsulta();
-            $this->atualizarAnaliseDesatualizada($frase);
+            $this->recalcularFrases->atualizarSeDesatualizada($frase);
 
             return $frase;
         }
@@ -76,16 +75,6 @@ final readonly class TraduzirTextoService
         }
 
         return new FrasePronuncia($hash, $textos->idiomaOrigem, $textos->portugues, $textos->ingles, $analise->paraArray(), $analise->palavrasIndexadas());
-    }
-
-    private function atualizarAnaliseDesatualizada(FrasePronuncia $frase): void
-    {
-        if (AnalisePronunciaDTO::VERSAO_MOTOR === ($frase->analise()[self::CHAVE_VERSAO_MOTOR] ?? null)) {
-            return;
-        }
-
-        $analise = $this->gerarAnalise->executar($frase->textoIngles());
-        $frase->atualizarAnalise($analise->paraArray(), $analise->palavrasIndexadas());
     }
 
     private function traduzir(string $texto, DirecaoTraducao $direcao): TextosTraduzidosDTO

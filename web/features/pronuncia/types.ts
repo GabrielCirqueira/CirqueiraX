@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const DIRECOES_TRADUCAO = ['auto', 'pt_en', 'en_pt'] as const
 export type DirecaoTraducao = (typeof DIRECOES_TRADUCAO)[number]
 
-export const ModoPronunciaSchema = z.enum(['clara', 'natural'])
+export const ModoPronunciaSchema = z.enum(['simples', 'clara', 'natural'])
 export type ModoPronuncia = z.infer<typeof ModoPronunciaSchema>
 
 export const TipoErroPronunciaSchema = z.enum(['traducao', 'pronuncia'])
@@ -16,6 +16,7 @@ export const PalavraPronunciadaSchema = z.object({
   silabas: z.array(z.string()),
   tonica: z.number().nullable(),
   figurada: z.string(),
+  simples: z.string().default(''),
   fonemas: z.array(z.string()),
   origem: z.enum(['excecao', 'dicionario', 'derivada', 'aproximada']),
   origemDescricao: z.string(),
@@ -37,6 +38,7 @@ export const SentencaPronunciadaSchema = z.object({
   texto: z.string(),
   pronuncia: z.string(),
   falaNatural: z.string(),
+  simples: z.string().default(''),
   itens: z.array(ItemSentencaSchema),
 })
 export type SentencaPronunciada = z.infer<typeof SentencaPronunciadaSchema>
@@ -45,6 +47,7 @@ export const AnalisePronunciaSchema = z.object({
   versaoMotor: z.number(),
   pronuncia: z.string(),
   falaNatural: z.string(),
+  simples: z.string().default(''),
   palavrasAproximadas: z.array(z.string()),
   sentencas: z.array(SentencaPronunciadaSchema),
 })
@@ -56,6 +59,7 @@ export const FraseResumoSchema = z.object({
   textoPortugues: z.string(),
   textoIngles: z.string(),
   pronuncia: z.string(),
+  pronunciaSimples: z.string().default(''),
   status: z.enum(['ok', 'reportada', 'corrigida']),
   statusDescricao: z.string(),
 })

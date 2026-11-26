@@ -22,6 +22,11 @@ export const OPCOES_DIRECAO: Array<{ valor: DirecaoTraducao; rotulo: string; des
   ]
 
 export const OPCOES_MODO: Array<{ valor: ModoPronuncia; rotulo: string; descricao: string }> = [
+  {
+    valor: 'simples',
+    rotulo: 'Simples',
+    descricao: 'Do jeito que a gente lê em português: "gudi bai", "rau mati iz dis"',
+  },
   { valor: 'clara', rotulo: 'Clara', descricao: 'Cada palavra pronunciada por inteiro' },
   {
     valor: 'natural',
@@ -64,7 +69,29 @@ export function palavrasDaSentenca(sentenca: SentencaPronunciada): PalavraPronun
 }
 
 export function pronunciaNoModo(consulta: ConsultaDetalhe, modo: ModoPronuncia): string {
-  return modo === 'natural' ? consulta.analise.falaNatural : consulta.analise.pronuncia
+  return pronunciaDaAnalise(consulta.analise, modo)
+}
+
+export function pronunciaDaAnalise(
+  analise: { pronuncia: string; falaNatural: string; simples: string },
+  modo: ModoPronuncia
+): string {
+  if (modo === 'natural') return analise.falaNatural
+  if (modo === 'simples') return analise.simples || analise.pronuncia
+  return analise.pronuncia
+}
+
+export function pronunciaResumoNoModo(
+  frase: { pronuncia: string; pronunciaSimples: string },
+  modo: ModoPronuncia
+): string {
+  return modo === 'simples' && frase.pronunciaSimples ? frase.pronunciaSimples : frase.pronuncia
+}
+
+export const LEGENDA_MODO: Record<ModoPronuncia, string> = {
+  simples: 'Leia como se fosse português. O "i" no fim é bem fraquinho, quase mudo.',
+  clara: 'Em MAIÚSCULAS fica a sílaba mais forte de cada palavra.',
+  natural: 'Palavras curtas ficam reduzidas e emendadas, como o nativo fala rápido.',
 }
 
 export function contarCaracteres(texto: string): number {

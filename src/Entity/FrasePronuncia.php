@@ -169,6 +169,13 @@ class FrasePronuncia
         return is_string($pronuncia) ? $pronuncia : '';
     }
 
+    public function pronunciaSimples(): string
+    {
+        $simples = $this->analise['simples'] ?? null;
+
+        return is_string($simples) ? $simples : $this->pronunciaResumida();
+    }
+
     public function status(): StatusFrasePronuncia
     {
         return $this->status;

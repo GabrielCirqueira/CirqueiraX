@@ -6,7 +6,7 @@ namespace App\DataObject\Pronuncia;
 
 final readonly class AnalisePronunciaDTO
 {
-    public const int VERSAO_MOTOR = 1;
+    public const int VERSAO_MOTOR = 2;
     private const string SEPARADOR_SENTENCAS = ' ';
 
     /**
@@ -25,6 +25,11 @@ final readonly class AnalisePronunciaDTO
     public function falaNatural(): string
     {
         return implode(self::SEPARADOR_SENTENCAS, array_map(static fn (SentencaPronunciadaDTO $sentenca): string => $sentenca->falaNatural, $this->sentencas));
+    }
+
+    public function simples(): string
+    {
+        return implode(self::SEPARADOR_SENTENCAS, array_map(static fn (SentencaPronunciadaDTO $sentenca): string => $sentenca->simples, $this->sentencas));
     }
 
     /**
@@ -67,6 +72,7 @@ final readonly class AnalisePronunciaDTO
             'versaoMotor' => self::VERSAO_MOTOR,
             'pronuncia' => $this->pronuncia(),
             'falaNatural' => $this->falaNatural(),
+            'simples' => $this->simples(),
             'palavrasAproximadas' => $this->palavrasAproximadas(),
             'sentencas' => array_map(static fn (SentencaPronunciadaDTO $sentenca): array => $sentenca->paraArray(), $this->sentencas),
         ];

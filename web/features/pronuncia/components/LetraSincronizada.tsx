@@ -194,7 +194,7 @@ export const LetraSincronizada = memo(function LetraSincronizada({
                     <X size={14} />
                   </IconButton>
                 </HStack>
-                <PalavrasPronunciadas analise={linhaSelecionada.analise} fala={fala} />
+                <PalavrasPronunciadas analise={linhaSelecionada.analise} fala={fala} modo={modo} />
               </Box>
             )}
           </Fragment>

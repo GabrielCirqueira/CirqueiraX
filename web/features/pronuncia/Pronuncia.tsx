@@ -32,7 +32,7 @@ import { DIRECOES_TRADUCAO, type DirecaoTraducao, type ModoPronuncia } from './t
 import { chavesUnicasDaAnalise } from './utils'
 
 const ATRASO_BUSCA_MS = 300
-const MODOS_PRONUNCIA: ModoPronuncia[] = ['clara', 'natural']
+const MODOS_PRONUNCIA: ModoPronuncia[] = ['simples', 'clara', 'natural']
 
 interface EstadoRelato {
   aberto: boolean
@@ -57,7 +57,7 @@ export function Component() {
   const [direcao, setDirecao] = useLocalStorageState<DirecaoTraducao>('pronuncia:direcao', 'auto', {
     valoresPermitidos: [...DIRECOES_TRADUCAO],
   })
-  const [modo, setModo] = useLocalStorageState<ModoPronuncia>('pronuncia:modo', 'clara', {
+  const [modo, setModo] = useLocalStorageState<ModoPronuncia>('pronuncia:modo-v2', 'simples', {
     valoresPermitidos: MODOS_PRONUNCIA,
   })
   const [consultaUuid, setConsultaUuid] = useState<string | null>(null)
@@ -161,6 +161,7 @@ export function Component() {
               busca={busca}
               somenteFavoritas={somenteFavoritas}
               selecionadaUuid={consultaUuid}
+              modo={modo}
               onMudarBusca={setBusca}
               onAlternarFavoritas={() => setSomenteFavoritas((valor) => !valor)}
               onSelecionar={(item) => {

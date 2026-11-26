@@ -1,6 +1,7 @@
 import { Box, Text } from '@chakra-ui/react'
 import { memo } from 'react'
 import type { LinhaLetra, ModoPronuncia } from '../types'
+import { pronunciaDaAnalise } from '../utils'
 
 export type EstadoLinhaLetra = 'passada' | 'ativa' | 'futura'
 
@@ -28,7 +29,7 @@ export const LinhaLetraItem = memo(function LinhaLetraItem({
   registrarElemento,
 }: LinhaLetraItemProps) {
   const ativa = estado === 'ativa'
-  const pronuncia = modo === 'natural' ? linha.analise?.falaNatural : linha.analise?.pronuncia
+  const pronuncia = linha.analise ? pronunciaDaAnalise(linha.analise, modo) : null
 
   if (linha.texto === '') {
     return (

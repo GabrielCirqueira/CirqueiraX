@@ -2,7 +2,7 @@ import { Badge, Box, Button, Flex, HStack, Text, VStack } from '@chakra-ui/react
 import { Flag, Lightbulb, Snail, Volume2 } from 'lucide-react'
 import { memo, useState } from 'react'
 import type { FalaIngles } from '../hooks'
-import type { AnalisePronuncia, PalavraPronunciada } from '../types'
+import type { AnalisePronuncia, ModoPronuncia, PalavraPronunciada } from '../types'
 import { VELOCIDADE_LENTA, VELOCIDADE_NORMAL, palavrasDaSentenca } from '../utils'
 import { SilabasDestacadas } from './SilabasDestacadas'
 
@@ -16,14 +16,17 @@ const COR_ORIGEM: Record<PalavraPronunciada['origem'], string> = {
 export interface PalavrasPronunciadasProps {
   analise: AnalisePronuncia
   fala: FalaIngles
+  modo?: ModoPronuncia
   onReportarPalavra?: (palavra: string) => void
 }
 
 export const PalavrasPronunciadas = memo(function PalavrasPronunciadas({
   analise,
   fala,
+  modo = 'clara',
   onReportarPalavra,
 }: PalavrasPronunciadasProps) {
+  const simples = modo === 'simples'
   const palavras = analise.sentencas.flatMap(palavrasDaSentenca)
   const [selecionada, setSelecionada] = useState<number | null>(null)
   const detalhe = selecionada === null ? null : (palavras[selecionada] ?? null)
@@ -73,7 +76,13 @@ export const PalavrasPronunciadas = memo(function PalavrasPronunciadas({
               <Text fontSize="2xs" color="fg.subtle" lineHeight="1.2">
                 {palavra.texto}
               </Text>
-              <SilabasDestacadas silabas={palavra.silabas} tonica={palavra.tonica} />
+              {simples ? (
+                <Text fontSize="sm" fontWeight="semibold" color="fg">
+                  {palavra.simples || palavra.figurada}
+                </Text>
+              ) : (
+                <SilabasDestacadas silabas={palavra.silabas} tonica={palavra.tonica} />
+              )}
             </Box>
           )
         })}
@@ -103,7 +112,16 @@ export const PalavrasPronunciadas = memo(function PalavrasPronunciadas({
                   {detalhe.origemDescricao}
                 </Badge>
               </HStack>
-              <SilabasDestacadas silabas={detalhe.silabas} tonica={detalhe.tonica} tamanho="2xl" />
+              {simples && (
+                <Text fontSize="2xl" fontWeight="bold" color="cirqueira.brand.300">
+                  {detalhe.simples || detalhe.figurada}
+                </Text>
+              )}
+              <SilabasDestacadas
+                silabas={detalhe.silabas}
+                tonica={detalhe.tonica}
+                tamanho={simples ? 'sm' : '2xl'}
+              />
               {detalhe.tonica !== null && detalhe.silabas.length > 1 && (
                 <Text fontSize="xs" color="fg.subtle">
                   Força na {detalhe.tonica + 1}ª sílaba: {detalhe.silabas[detalhe.tonica]}

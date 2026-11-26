@@ -3,7 +3,13 @@ import { AlertTriangle, Copy, Flag, Snail, Square, Star, Trash2, Volume2 } from 
 import { memo } from 'react'
 import type { FalaIngles } from '../hooks'
 import type { ConsultaDetalhe, ModoPronuncia } from '../types'
-import { OPCOES_MODO, VELOCIDADE_LENTA, VELOCIDADE_NORMAL, pronunciaNoModo } from '../utils'
+import {
+  LEGENDA_MODO,
+  OPCOES_MODO,
+  VELOCIDADE_LENTA,
+  VELOCIDADE_NORMAL,
+  pronunciaNoModo,
+} from '../utils'
 import { PalavrasPronunciadas } from './PalavrasPronunciadas'
 import { TextoComDestaqueFala } from './TextoComDestaqueFala'
 
@@ -183,9 +189,7 @@ export const ResultadoTraducao = memo(function ResultadoTraducao({
             {pronuncia}
           </Text>
           <Text fontSize="xs" color="fg.subtle" mt={2}>
-            {modo === 'natural'
-              ? 'Palavras curtas ficam reduzidas e emendadas, como o nativo fala rápido.'
-              : 'Em MAIÚSCULAS fica a sílaba mais forte de cada palavra.'}
+            {LEGENDA_MODO[modo]}
           </Text>
           {analise.palavrasAproximadas.length > 0 && (
             <HStack mt={3} gap={2} align="flex-start" fontSize="xs" color="cirqueira.orange.300">
@@ -205,6 +209,7 @@ export const ResultadoTraducao = memo(function ResultadoTraducao({
             key={consulta.uuid}
             analise={analise}
             fala={fala}
+            modo={modo}
             onReportarPalavra={onReportar}
           />
         </Box>

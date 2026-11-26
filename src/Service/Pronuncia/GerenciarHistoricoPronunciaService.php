@@ -15,6 +15,7 @@ final readonly class GerenciarHistoricoPronunciaService
 {
     public function __construct(
         private ConsultaPronunciaRepository $consultaRepository,
+        private RecalcularFrasesPronunciaService $recalcularFrases,
     ) {
     }
 
@@ -31,7 +32,12 @@ final readonly class GerenciarHistoricoPronunciaService
      */
     public function obter(Usuario $usuario, string $uuid): ConsultaPronuncia
     {
-        return $this->consultaRepository->buscarDoUsuario($usuario, $uuid) ?? throw PronunciaException::consultaNaoEncontrada();
+        $consulta = $this->consultaRepository->buscarDoUsuario($usuario, $uuid) ?? throw PronunciaException::consultaNaoEncontrada();
+        if ($this->recalcularFrases->atualizarSeDesatualizada($consulta->frase())) {
+            $this->consultaRepository->salvar($consulta);
+        }
+
+        return $consulta;
     }
 
     /**

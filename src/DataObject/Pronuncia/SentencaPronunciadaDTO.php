@@ -14,6 +14,7 @@ final readonly class SentencaPronunciadaDTO
         public array $itens,
         public string $pronuncia,
         public string $falaNatural,
+        public string $simples,
     ) {
     }
 
@@ -34,6 +35,7 @@ final readonly class SentencaPronunciadaDTO
             'texto' => $this->texto,
             'pronuncia' => $this->pronuncia,
             'falaNatural' => $this->falaNatural,
+            'simples' => $this->simples,
             'itens' => array_map(
                 static fn (PalavraPronunciadaDTO|TokenTextoDTO $item): array => $item instanceof PalavraPronunciadaDTO
                     ? ['tipo' => 'palavra', ...$item->paraArray()]

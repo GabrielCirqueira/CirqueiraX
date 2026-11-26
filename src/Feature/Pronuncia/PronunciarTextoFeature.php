@@ -10,6 +10,7 @@ use App\DataObject\Pronuncia\FonemasResolvidosDTO;
 use App\DataObject\Pronuncia\PalavraPronunciadaDTO;
 use App\DataObject\Pronuncia\TokenTextoDTO;
 use App\Domain\Pronuncia\ConversorFonemasPortugues;
+use App\Domain\Pronuncia\ConversorFonemasSimples;
 use App\Domain\Pronuncia\GeradorDicasPronuncia;
 use App\Domain\Pronuncia\MontadorSentencaPronunciada;
 use App\Domain\Pronuncia\PalavrasFuncionaisIngles;
@@ -31,6 +32,7 @@ final readonly class PronunciarTextoFeature
         private GeradorDicasPronuncia $geradorDicas,
         private PalavrasFuncionaisIngles $palavrasFuncionais,
         private MontadorSentencaPronunciada $montador,
+        private ConversorFonemasSimples $conversorSimples,
     ) {
     }
 
@@ -93,6 +95,7 @@ final readonly class PronunciarTextoFeature
             $resolvido->origem,
             $this->geradorDicas->gerar($resolvido->fonemas, $conversao['flap']),
             $funcional,
+            $this->conversorSimples->converter($resolvido->fonemas, $chave),
         );
     }
 
@@ -127,6 +130,7 @@ final readonly class PronunciarTextoFeature
             $resolvido->origem,
             $this->geradorDicas->gerar($resolvido->fonemas, false),
             $funcional,
+            $this->conversorSimples->deFigurada((string) $resolvido->pronunciaFigurada),
         );
     }
 }

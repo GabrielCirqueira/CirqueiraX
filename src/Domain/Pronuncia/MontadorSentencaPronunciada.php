@@ -36,6 +36,10 @@ final readonly class MontadorSentencaPronunciada
             $itens,
             $this->juntar($itens, $clara),
             $this->juntar($itens, $this->falaNatural($itens)),
+            $this->juntar($itens, array_map(
+                static fn (PalavraPronunciadaDTO|TokenTextoDTO $item): string => $item instanceof PalavraPronunciadaDTO ? $item->simples : $item->texto,
+                $itens,
+            )),
         );
     }
 

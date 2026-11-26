@@ -180,6 +180,7 @@ final readonly class PronunciaSerializer
             'textoPortugues' => $frase->textoPortugues(),
             'textoIngles' => $frase->textoIngles(),
             'pronuncia' => $frase->pronunciaResumida(),
+            'pronunciaSimples' => $frase->pronunciaSimples(),
             'status' => $frase->status()->value,
             'statusDescricao' => $frase->status()->descricao(),
         ];

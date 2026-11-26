@@ -14,13 +14,34 @@ Funciona com palavras, frases e textos de até 3.000 caracteres. O fluxo princip
 
 - Escreva o texto e clique em **Traduzir** (ou `Ctrl+Enter`). A direção pode ser **Automático** (detecta o idioma), **PT → EN** ou **EN → PT**.
 - O resultado mostra três blocos: **Português**, **Inglês** e **Como se fala**.
-- **Clara** mostra cada palavra pronunciada por inteiro. **Fala natural** mostra como o nativo fala rápido: palavras curtas reduzidas (`to` → `tâ`) e emendadas (`get it out` → `GUÉ-ri-RÁUT`).
+- **Simples** (padrão) escreve do jeito que a gente lê em português, sem maiúsculas nem hífen: *What's your name?* → **uatis ior neimi?**, *How much is this?* → **rau mati iz dis?**.
+- **Clara** mostra cada palavra pronunciada por inteiro, com sílabas e a tônica em maiúsculas. **Fala natural** mostra como o nativo fala rápido: palavras curtas reduzidas (`to` → `tâ`) e emendadas (`get it out` → `GUÉ-ri-RÁUT`).
 - **Ouvir** e **Devagar** leem o inglês com a voz do navegador; a palavra falada acende enquanto o áudio toca.
 - **Palavra por palavra** mostra as sílabas com a tônica destacada, de onde veio a pronúncia (dicionário, derivada, corrigida ou aproximada) e dicas para brasileiros (TH, R americano, "i" curto, T que vira R etc.).
 - **Histórico** guarda cada frase do usuário, com busca e favoritas. Clicar num item reabre o resultado sem gastar cota.
 - **Reportar erro** manda a frase (ou uma palavra específica) para a fila de correções.
 
-### Escrita da pronúncia
+### Escrita da pronúncia (modo Simples)
+
+Gerada por `ConversorFonemasSimples` a partir dos mesmos fonemas do dicionário:
+
+| Regra | Exemplo |
+| :--- | :--- |
+| "i" de apoio no fim da palavra que termina em consoante (não em r, n, z, s, l) | good → gudi, night → naiti, help → relpi |
+| "m" final ganha "i" só em sílaba forte | name → neimi, welcome → uelcam |
+| "ch" vira "ti" quando vem "i" depois (lido "tchi") | much → mati |
+| "h" vira "r" ("rr" entre vogais) | how → rau, behind → birraind |
+| "s" + consoante no começo ganha "i" | speak → ispiqui, slowly → islouli |
+| "l" no fim vira "u" | bill → biu |
+| "t" entre vogais antes de sílaba fraca vira "r" | water → uórer, later → leirer |
+| "c"/"qu" e "g"/"gu" como no português | like → laiqui, club → clabi, get → gueti |
+| "th" vira "t" (surdo) ou "d" (sonoro) | thank → tenqui, this → dis |
+| Só o "ó" aberto tônico leva acento | sorry → sóri, morning → mórnin |
+| Palavras curtas comuns com forma pronta | the → de, you → iu, your → ior, of → ofi, and → end |
+
+Palavras corrigidas pelo administrador usam a correção sem hífens e em minúsculas (NÊIM → nêim).
+
+### Escrita da pronúncia (modo Clara)
 
 | Regra | Exemplo |
 | :--- | :--- |
@@ -62,7 +83,7 @@ Funciona com palavras, frases e textos de até 3.000 caracteres. O fluxo princip
 
 Depois, `ConversorFonemasPortugues` separa sílabas (maximal onset), acha a tônica e escreve em português. `MontadorSentencaPronunciada` aplica formas fracas e ligação entre palavras para a **fala natural**. `GeradorDicasPronuncia` cria as dicas.
 
-A análise fica salva em JSON na frase com `versaoMotor`. Quando o motor muda de versão, a análise é refeita na próxima consulta.
+A análise fica salva em JSON na frase com `versaoMotor` (hoje 2, com o campo `simples`). Quando o motor muda de versão, a análise é refeita na próxima tradução ou ao abrir a frase pelo histórico (`RecalcularFrasesPronunciaService::atualizarSeDesatualizada`); a lista do histórico mostra a pronúncia Clara até lá.
 
 ### Letras de música
 

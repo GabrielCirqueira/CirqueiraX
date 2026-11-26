@@ -47,7 +47,7 @@ export const EstadoInicialPronuncia = memo(function EstadoInicialPronuncia() {
             </Text>
           </Text>
           <Text fontSize="2xl" fontWeight="black" color="cirqueira.brand.300">
-            ai DÔUNT NÔU
+            ai dounti nou
           </Text>
         </VStack>
         <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>

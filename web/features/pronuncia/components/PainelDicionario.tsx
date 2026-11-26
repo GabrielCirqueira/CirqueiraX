@@ -212,6 +212,9 @@ export const PainelDicionario = memo(function PainelDicionario() {
                 {previa.data.pronuncia}
               </Text>
               <Text fontSize="sm" color="fg.muted">
+                Simples: {previa.data.simples}
+              </Text>
+              <Text fontSize="sm" color="fg.muted">
                 Fala natural: {previa.data.falaNatural}
               </Text>
               {previa.data.palavrasAproximadas.length > 0 && (

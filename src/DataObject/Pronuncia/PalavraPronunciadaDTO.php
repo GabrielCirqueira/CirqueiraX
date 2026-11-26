@@ -24,6 +24,7 @@ final readonly class PalavraPronunciadaDTO
         public OrigemPronunciaPalavra $origem,
         public array $dicas,
         public bool $funcional,
+        public string $simples,
     ) {
     }
 
@@ -42,7 +43,7 @@ final readonly class PalavraPronunciadaDTO
      */
     public function comSilabas(array $silabas): self
     {
-        return new self($this->texto, $this->chave, $silabas, $this->tonica, $this->fonemas, $this->origem, $this->dicas, $this->funcional);
+        return new self($this->texto, $this->chave, $silabas, $this->tonica, $this->fonemas, $this->origem, $this->dicas, $this->funcional, $this->simples);
     }
 
     /**
@@ -56,6 +57,7 @@ final readonly class PalavraPronunciadaDTO
             'silabas' => $this->silabas,
             'tonica' => $this->tonica,
             'figurada' => $this->figurada(),
+            'simples' => $this->simples,
             'fonemas' => $this->fonemas,
             'origem' => $this->origem->value,
             'origemDescricao' => $this->origem->descricao(),

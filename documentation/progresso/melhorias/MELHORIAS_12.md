@@ -34,3 +34,17 @@
 - **Arquivos**: `src/Service/Spotify/{ControleLimiteSpotifyService,ObterTocandoAgoraSpotifyService}.php`, `src/DataObject/Spotify/TocandoAgoraSpotifyDTO.php`, `src/Service/Pronuncia/ObterTocandoAgoraPronunciaService.php`, `src/DataObject/Pronuncia/TocandoAgoraPronunciaDTO.php`, `web/features/pronuncia/{types.ts,hooks/useMusicaTocando.ts,components/PainelMusicaTocando.tsx}`
 
 ---
+
+### ✅ Melhoria 223 — Pronúncia Simples, do Jeito que a Gente Lê
+
+- **Status**: Concluído
+- **Data**: 25 de novembro de 2026
+- **Pedido**: a pronúncia com maiúsculas, hífens e "â" ficou difícil de ler; queria algo silábico como "uotis ior neimi", "si iu leirer", "gudi bai", "rau mati iz dis", como opção ao lado da que já existia.
+- **Solução**:
+  - Novo modo **Simples** (padrão) ao lado de **Clara** e **Fala natural**, no tradutor, na palavra por palavra, no histórico, nas letras de música e no teste do motor.
+  - `ConversorFonemasSimples` gera a escrita a partir dos fonemas do CMU: "i" de apoio no fim, "ch" → "ti", "h" → "r", "is" antes de s + consoante, "l" final → "u", T entre vogais → "r", c/qu e g/gu, só "ó" acentuado, formas prontas para palavras curtas (the → de, you → iu, of → ofi). Correções do administrador também valem no Simples.
+  - Motor na versão 2: frases salvas ganham o campo `simples` na próxima tradução ou ao abrir pelo histórico.
+  - Exemplos: Good morning → gudi mórnin · What's your name? → uatis ior neimi? · Speak slowly, please → ispiqui islouli, pliz · Water, please → uórer, pliz.
+- **Arquivos**: `src/Domain/Pronuncia/{ConversorFonemasSimples,MontadorSentencaPronunciada}.php`, `src/Feature/Pronuncia/PronunciarTextoFeature.php`, `src/DataObject/Pronuncia/{PalavraPronunciadaDTO,SentencaPronunciadaDTO,AnalisePronunciaDTO}.php`, `src/Service/Pronuncia/{RecalcularFrasesPronunciaService,TraduzirTextoService,GerenciarHistoricoPronunciaService}.php`, `src/Entity/FrasePronuncia.php`, `src/Serializer/PronunciaSerializer.php`, `web/features/pronuncia/` (tipos, utils, `Pronuncia.tsx`, `ResultadoTraducao`, `PalavrasPronunciadas`, `HistoricoPronuncia`, `LinhaLetraItem`, `LetraSincronizada`, `PainelDicionario`, `EstadoInicialPronuncia`)
+
+---
