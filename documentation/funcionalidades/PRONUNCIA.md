@@ -53,6 +53,8 @@ Palavras corrigidas pelo administrador usam a correção sem hífens e em minús
 
 ### Aba Tocando agora (M221)
 
+**Fontes (M225):** Spotify e YouTube Music. No computador com a extensão do YouTube Music (1.6+), o estado em tempo real que a extensão entrega à página (`utils/tempoRealExtensao.ts`) tem prioridade: enquanto ele for recente (15 s), o Spotify nem é consultado. A música vem de `mesclarTocandoAgora` (título e artistas do catálogo quando o vídeo já foi identificado; senão, título do vídeo e canal, sem " - Topic"/"VEVO" e sem o "Artista - " do começo) e vira o mesmo formato do Spotify em `tocandoDoYoutube`, com `codigoFaixa = yt:{videoId}`. No celular ou sem a extensão, só o Spotify. Letra não achada é procurada de novo na hora quando o título ou o artista chegam diferentes (o YouTube manda primeiro o nome do vídeo e depois o da música identificada), e a busca aproximada ignora marcações como "(Official Video)" e "[Lyric Video]".
+
 - Mostra a música que está tocando na conta do Spotify do usuário (conectada na página Música), com capa, tempo e a letra.
 - A letra acompanha a música: a linha atual acende e fica no centro. Embaixo de cada linha vem a pronúncia (Clara ou Fala natural) e, se pedida, a tradução.
 - Clicar numa linha abre **Ouvir linha**, **Devagar** e o palavra por palavra.

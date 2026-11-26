@@ -60,3 +60,18 @@
 - **Arquivos**: `src/Schedule.php`, `src/Service/Spotify/{ColetarHistoricoRecenteSpotifyService,ControleLimiteSpotifyService}.php`, `src/Service/Pronuncia/ObterTocandoAgoraPronunciaService.php`, `web/features/pronuncia/hooks/useMusicaTocando.ts`
 
 ---
+
+### ✅ Melhoria 225 — Letra e Pronúncia também com o YouTube Music
+
+- **Status**: Concluído
+- **Data**: 26 de novembro de 2026
+- **Pedido**: a aba Tocando agora da pronúncia funcionar com o YouTube Music, não só com o Spotify.
+- **Solução**:
+  - No computador com a extensão do YouTube Music, a aba usa a música e a posição exata que a extensão entrega à página a cada 2 s. Não passa pelo Spotify, então não gasta cota. Enquanto a extensão estiver mandando, o Spotify não é consultado.
+  - Nome da música: do catálogo quando o vídeo já foi identificado; senão, título do vídeo limpo (sem "Artista - ", " - Topic", "VEVO"). A busca aproximada do LRCLIB ignora "(Official Video)", "[Lyric Video]" etc.
+  - Letra não achada é procurada de novo na hora quando o nome chega diferente (vídeo → música identificada).
+  - O cartão mostra de onde veio a música (Spotify ou YouTube Music) e o link para abrir nele. Música sem duração conhecida segue a letra normalmente.
+  - Celular, TV ou sem a extensão: continua só o Spotify (o histórico do YouTube Music não informa a posição).
+- **Arquivos**: `src/Entity/LetraMusicaPronuncia.php`, `src/Service/Pronuncia/ObterLetraMusicaPronunciaService.php`, `src/Domain/Pronuncia/NormalizadorTituloMusica.php`, `web/features/pronuncia/` (`components/PainelMusicaTocando.tsx`, `utils/musicaYoutube.ts`, `hooks/useMusicaTocando.ts`, `hooks/chavesQueryPronuncia.ts`, `types.ts`, `api.ts`)
+
+---
