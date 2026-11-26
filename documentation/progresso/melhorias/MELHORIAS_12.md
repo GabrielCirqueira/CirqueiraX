@@ -95,3 +95,24 @@
 - **Verificação**: todos os links e âncoras entre documentos conferidos por script (0 quebrados).
 
 ---
+
+### ✅ Melhoria 227 — Letra Sem Atraso para Trocar de Linha
+
+- **Status**: Concluído
+- **Data**: 26 de novembro de 2026
+- **Pedido**: no Spotify e no YouTube Music, a música já passava para a próxima linha e o painel demorava cerca de 1 s para acompanhar.
+- **Causa**: soma de quatro atrasos: a posição do Spotify era marcada na chegada da resposta (atraso da rede, ~0,3–0,8 s); a linha era conferida a cada 200 ms; a animação do destaque levava 0,25 s; e a linha só acendia no instante exato em que a voz começa.
+- **Solução**: posição do Spotify marcada no meio da requisição; conferência a cada 100 ms; a linha acende 400 ms antes (`ANTECIPACAO_LINHA_MS`); destaque em 0,12 s. O ajuste manual continua valendo por cima.
+- **Arquivos**: `web/features/pronuncia/api.ts`, `components/LetraSincronizada.tsx`, `components/LinhaLetraItem.tsx`, `utils/pronuncia.ts`
+
+---
+
+### ✅ Melhoria 228 — Erro 500 no Tocando Agora da Pronúncia
+
+- **Status**: Concluído
+- **Data**: 26 de novembro de 2026
+- **Problema**: `GET /api/v1/pronuncia/musica/tocando-agora` respondia 500 desde o deploy da M224. O log mostrava `Class "App\Service\Spotify\DateTimeImmutable" not found` em `ControleLimiteSpotifyService::consultasTotaisUltimas24h`: faltava a barra inicial (`\DateTimeImmutable`). Só o caminho do Spotify quebrava; o YouTube Music pela extensão não passa por ali.
+- **Solução**: barra corrigida. Os 104 arquivos PHP alterados na semana foram varridos atrás de classes globais do PHP usadas sem barra e sem `use` (a varredura acusa o erro original e não achou outro caso).
+- **Arquivos**: `src/Service/Spotify/ControleLimiteSpotifyService.php`
+
+---

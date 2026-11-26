@@ -157,6 +157,9 @@ export const PERCENTUAL_LETRA_OUTRO_IDIOMA = 25
 export const PASSO_AJUSTE_SINCRONIA_MS = 500
 export const LIMITE_AJUSTE_SINCRONIA_MS = 10_000
 
+/** A linha acende um pouco antes de a voz começar, para dar tempo de ler (como nos apps de letra). */
+export const ANTECIPACAO_LINHA_MS = 400
+
 export function indiceLinhaAtiva(
   linhas: Array<{ inicioMs: number | null }>,
   posicaoMs: number

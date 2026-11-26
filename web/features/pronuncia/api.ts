@@ -140,11 +140,13 @@ export async function apagarExcecaoPronuncia(uuid: string): Promise<void> {
   await api.delete(`${URL_PRONUNCIA}/excecoes/${uuid}`)
 }
 
+/** A posição vale para o momento em que o servidor consultou o Spotify, no meio da requisição, e não para quando a resposta chegou. */
 export async function obterTocandoAgoraPronuncia(): Promise<TocandoAgoraPronuncia> {
+  const enviadoEm = Date.now()
   const { data } = await api.get<RespostaApi<unknown>>(`${URL_PRONUNCIA}/musica/tocando-agora`)
   return {
     ...TocandoAgoraPronunciaSchema.parse(data.data),
-    consultadoEm: Date.now(),
+    consultadoEm: Math.round((enviadoEm + Date.now()) / 2),
     fonte: 'spotify',
   }
 }

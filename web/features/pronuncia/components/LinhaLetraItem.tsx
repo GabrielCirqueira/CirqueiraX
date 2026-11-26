@@ -64,7 +64,7 @@ export const LinhaLetraItem = memo(function LinhaLetraItem({
         ativa ? 'cirqueira.musica.verde/8' : selecionada ? 'cirqueira.brand.500/8' : 'transparent'
       }
       opacity={estado === 'passada' && !selecionada ? 0.5 : 1}
-      transition="all 0.25s ease"
+      transition="all 0.12s ease-out"
       _hover={{ bg: ativa ? 'cirqueira.musica.verde/10' : 'bg.subtle', opacity: 1 }}
     >
       <Text
@@ -72,7 +72,7 @@ export const LinhaLetraItem = memo(function LinhaLetraItem({
         fontWeight={ativa ? 'bold' : 'semibold'}
         color="fg"
         lineHeight="1.35"
-        transition="font-size 0.25s ease"
+        transition="font-size 0.12s ease-out"
       >
         {linha.texto}
       </Text>

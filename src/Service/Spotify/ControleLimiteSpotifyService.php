@@ -41,7 +41,7 @@ final readonly class ControleLimiteSpotifyService
 
     public function consultasTotaisUltimas24h(): int
     {
-        return array_sum($this->consultaHoraRepository->somarPorOrigemDesde((new DateTimeImmutable())->modify(self::JANELA_MEDICAO)));
+        return array_sum($this->consultaHoraRepository->somarPorOrigemDesde((new \DateTimeImmutable())->modify(self::JANELA_MEDICAO)));
     }
 
     /**

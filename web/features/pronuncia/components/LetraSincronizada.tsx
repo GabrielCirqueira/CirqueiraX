@@ -4,11 +4,16 @@ import { LocateFixed, Snail, Square, Volume2, X } from 'lucide-react'
 import { Fragment, memo, useRef, useState } from 'react'
 import { type FalaIngles, posicaoAtualMs } from '../hooks'
 import type { LetraMusica, ModoPronuncia, TocandoAgoraPronuncia } from '../types'
-import { VELOCIDADE_LENTA, VELOCIDADE_NORMAL, indiceLinhaAtiva } from '../utils'
+import {
+  ANTECIPACAO_LINHA_MS,
+  VELOCIDADE_LENTA,
+  VELOCIDADE_NORMAL,
+  indiceLinhaAtiva,
+} from '../utils'
 import { type EstadoLinhaLetra, LinhaLetraItem } from './LinhaLetraItem'
 import { PalavrasPronunciadas } from './PalavrasPronunciadas'
 
-const INTERVALO_SINCRONIA_MS = 200
+const INTERVALO_SINCRONIA_MS = 100
 const PAUSA_ROLAGEM_MANUAL_MS = 5_000
 const SEM_LINHA = -1
 
@@ -60,7 +65,7 @@ export const LetraSincronizada = memo(function LetraSincronizada({
       if (!dados.sincronizada) return
       const indice = indiceLinhaAtiva(
         dados.letra.linhas,
-        posicaoAtualMs(dados.tocando, dados.ajusteMs)
+        posicaoAtualMs(dados.tocando, dados.ajusteMs) + ANTECIPACAO_LINHA_MS
       )
       if (indice === ativaRef.current) return
       ativaRef.current = indice

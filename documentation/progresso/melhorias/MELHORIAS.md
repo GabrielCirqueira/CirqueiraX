@@ -248,3 +248,5 @@
 | M224 | Spotify: Menos Consultas por Dia para Evitar Bloqueio | ✅ Concluído | 26/11/2026 | [ver](MELHORIAS_12.md#melhoria-224--spotify-menos-consultas-por-dia-para-evitar-bloqueio) |
 | M225 | Letra e Pronúncia também com o YouTube Music | ✅ Concluído | 26/11/2026 | [ver](MELHORIAS_12.md#melhoria-225--letra-e-pronúncia-também-com-o-youtube-music) |
 | M226 | Documentação Revisada e Novos Documentos de Fluxo | ✅ Concluído | 26/11/2026 | [ver](MELHORIAS_12.md#melhoria-226--documentação-revisada-e-novos-documentos-de-fluxo) |
+| M227 | Letra Sem Atraso para Trocar de Linha | ✅ Concluído | 26/11/2026 | [ver](MELHORIAS_12.md#melhoria-227--letra-sem-atraso-para-trocar-de-linha) |
+| M228 | Erro 500 no Tocando Agora da Pronúncia | ✅ Concluído | 26/11/2026 | [ver](MELHORIAS_12.md#melhoria-228--erro-500-no-tocando-agora-da-pronúncia) |

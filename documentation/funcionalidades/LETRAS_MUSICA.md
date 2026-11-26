@@ -54,7 +54,13 @@ Pausado por mais de 15 s, a extensão para de publicar e a aba volta para o Spot
 1. O navegador chama `GET /api/v1/pronuncia/musica/tocando-agora`.
 2. `ObterTocandoAgoraPronunciaService` reaproveita `ObterTocandoAgoraSpotifyService`, que guarda o resultado por 4 s por usuário (dividido com o painel de `/musica`) e respeita o bloqueio do Spotify.
 3. A resposta traz `proximaConsultaMs`: 5 s com folga, 15 s sem folga (regras em [LIMITE_SPOTIFY.md](LIMITE_SPOTIFY.md)). Parado, 20 s. Também consulta logo após o fim da faixa, ao voltar para a aba e pelo botão de atualizar. Nada em segundo plano.
-4. Entre consultas, o tempo é contado no navegador (`posicaoAtualMs`).
+4. Entre consultas, o tempo é contado no navegador (`posicaoAtualMs`). A posição devolvida vale para o meio da requisição (quando o servidor falou com o Spotify), não para a chegada da resposta, para não começar atrasada pelo tempo de rede.
+
+### Acompanhamento da linha
+
+- A linha ativa é recalculada a cada 100 ms (`LetraSincronizada`).
+- Ela acende `ANTECIPACAO_LINHA_MS = 400` ms antes do tempo da letra, para dar tempo de ler antes de a voz começar, como nos apps de letra. O ajuste manual (**Letra fora do tempo?**) soma em cima disso.
+- O destaque da linha nova leva 0,12 s.
 
 ---
 
